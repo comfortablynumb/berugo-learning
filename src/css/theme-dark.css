@@ -1,0 +1,65 @@
+/*
+ * Dark theme: re-declares the same token names as base.css.
+ *
+ * The hues are lightened rather than reused. A single hue cannot pass WCAG AA
+ * against both a white and a slate-900 background, which is why the tokens
+ * exist at all.
+ */
+
+[data-theme="dark"] {
+  --surface-page: #0f172a;
+  --surface-card: #1e293b;
+  --surface-sunken: #172033;
+  --surface-raised: #253449;
+  --border-color: #334155;
+  --border-strong: #475569;
+
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-inverse: #0f172a;
+
+  --accent: #60a5fa;
+  --accent-hover: #93c5fd;
+  --on-accent: #0f172a;
+  --accent-soft: #1e3a5f;
+
+  --hue-red: #fca5a5;
+  --hue-orange: #fdba74;
+  --hue-amber: #fcd34d;
+  --hue-green: #86efac;
+  --hue-teal: #5eead4;
+  --hue-blue: #93c5fd;
+  --hue-indigo: #a5b4fc;
+  --hue-purple: #d8b4fe;
+  --hue-pink: #f9a8d4;
+  --hue-gray: #cbd5e1;
+
+  --hue-red-soft: #450a0a;
+  --hue-orange-soft: #431407;
+  --hue-amber-soft: #451a03;
+  --hue-green-soft: #052e16;
+  --hue-teal-soft: #042f2e;
+  --hue-blue-soft: #172554;
+  --hue-indigo-soft: #1e1b4b;
+  --hue-purple-soft: #3b0764;
+  --hue-pink-soft: #500724;
+  --hue-gray-soft: #1e293b;
+
+  --status-ok: #86efac;
+  --status-warn: #fcd34d;
+  --status-error: #fca5a5;
+}
+
+/* Tailwind utilities used in templates resolve to fixed greys, so the few that
+   appear on themed surfaces are remapped here rather than removed from the
+   markup - the class names stay readable and the theme still wins. */
+[data-theme="dark"] .bg-white { background-color: var(--surface-card) !important; }
+[data-theme="dark"] .bg-gray-50 { background-color: var(--surface-sunken) !important; }
+[data-theme="dark"] .bg-gray-100 { background-color: var(--surface-sunken) !important; }
+[data-theme="dark"] .text-gray-900 { color: var(--text-primary) !important; }
+[data-theme="dark"] .text-gray-700 { color: var(--text-secondary) !important; }
+[data-theme="dark"] .text-gray-600 { color: var(--text-secondary) !important; }
+[data-theme="dark"] .text-gray-500 { color: var(--text-muted) !important; }
+[data-theme="dark"] .border-gray-200 { border-color: var(--border-color) !important; }
+[data-theme="dark"] .border-gray-300 { border-color: var(--border-strong) !important; }

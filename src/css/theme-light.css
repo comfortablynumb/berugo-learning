@@ -1,0 +1,53 @@
+/*
+ * Light theme.
+ *
+ * base.css already declares the light values, so this file only carries the
+ * explicit [data-theme="light"] selector. It exists so that an explicit light
+ * choice beats a system dark preference, and so the two themes are edited in
+ * the same shape.
+ */
+
+[data-theme="light"] {
+  --surface-page: #f8fafc;
+  --surface-card: #ffffff;
+  --surface-sunken: #f1f5f9;
+  --surface-raised: #ffffff;
+  --border-color: #e2e8f0;
+  --border-strong: #cbd5e1;
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-inverse: #f8fafc;
+
+  --accent: #1d4ed8;
+  --accent-hover: #1e40af;
+  --on-accent: #ffffff;
+  --accent-soft: #dbeafe;
+
+  --hue-red: #b91c1c;
+  --hue-orange: #c2410c;
+  --hue-amber: #a16207;
+  --hue-green: #15803d;
+  --hue-teal: #0f766e;
+  --hue-blue: #1d4ed8;
+  --hue-indigo: #4338ca;
+  --hue-purple: #7e22ce;
+  --hue-pink: #be185d;
+  --hue-gray: #475569;
+
+  --hue-red-soft: #fee2e2;
+  --hue-orange-soft: #ffedd5;
+  --hue-amber-soft: #fef3c7;
+  --hue-green-soft: #dcfce7;
+  --hue-teal-soft: #ccfbf1;
+  --hue-blue-soft: #dbeafe;
+  --hue-indigo-soft: #e0e7ff;
+  --hue-purple-soft: #f3e8ff;
+  --hue-pink-soft: #fce7f3;
+  --hue-gray-soft: #e2e8f0;
+
+  --status-ok: #15803d;
+  --status-warn: #a16207;
+  --status-error: #b91c1c;
+}

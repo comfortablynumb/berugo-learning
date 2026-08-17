@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Berugo Learning</title>
+  <meta name="description" content="Interactive platform for senior engineers: algorithms, data structures, automata and language theory, compilers, computer architecture, operating systems and systems engineering, with runnable JavaScript in every section.">
+
+  <!-- Installable: manifest, icons and a service worker (sw.js). -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
+  <meta name="theme-color" content="#0f172a">
+
+  <!-- Prebuilt Tailwind (npm run build:css). No CDN: the app runs offline. -->
+  <link rel="stylesheet" href="lib/tailwind.css">
+  <link rel="stylesheet" href="src/css/main.css">
+</head>
+<body>
+
+  <div class="sidebar-overlay"></div>
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <h1>Berugo Learning</h1>
+      <p>Computer science, runnable</p>
+    </div>
+    <nav class="sidebar-nav" id="sidebar-nav" aria-label="Curriculum"></nav>
+    <div class="sidebar-footer">
+      <a class="btn btn-sm" href="#home">Curriculum map</a>
+      <a class="btn btn-sm" href="#settings">Settings</a>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <header class="app-header">
+      <button type="button" class="btn btn-sm lg:hidden" id="sidebar-toggle" aria-label="Toggle navigation">☰</button>
+
+      <div class="header-heading">
+        <span class="header-crumb" id="header-crumb"></span>
+        <h2 id="header-title">Berugo Learning</h2>
+      </div>
+
+      <div class="header-search">
+        <input type="search" id="global-search" autocomplete="off" spellcheck="false"
+               placeholder="Search concepts, examples, reference (Ctrl+K)"
+               aria-label="Search everything the platform teaches">
+        <div class="search-results" id="search-results" role="listbox" hidden></div>
+      </div>
+
+      <div class="header-tools">
+        <div class="text-scale" role="group" aria-label="Text size">
+          <button type="button" class="btn btn-icon" id="text-smaller" title="Smaller text" aria-label="Decrease text size">A−</button>
+          <span class="text-scale-value" id="text-scale-value" aria-live="polite">100%</span>
+          <button type="button" class="btn btn-icon" id="text-larger" title="Larger text" aria-label="Increase text size">A+</button>
+        </div>
+        <button type="button" class="btn btn-sm" id="theme-toggle" title="Toggle light and dark">Theme</button>
+        <button type="button" class="btn btn-sm" id="install-app" title="Install this app" hidden>Install</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- One container per curriculum section. The wiring audit fails on a
+           container with no curriculum entry, and on a curriculum entry with
+           no container. -->
+      <section data-section="home" hidden><div class="section-body"><div id="home-content"></div></div></section>
+      <section data-section="code-engine" hidden><div class="section-body"><div id="code-engine-content"></div></div></section>
+      <section data-section="js-systems" hidden><div class="section-body"><div id="js-systems-content"></div></div></section>
+      <section data-section="settings" hidden><div class="section-body"><div id="settings-content"></div></div></section>
+      <section data-section="asymptotic-notation" hidden><div class="section-body"><div id="asymptotic-notation-content"></div></div></section>
+      <section data-section="recurrences" hidden><div class="section-body"><div id="recurrences-content"></div></div></section>
+      <section data-section="amortised-analysis" hidden><div class="section-body"><div id="amortised-analysis-content"></div></div></section>
+      <section data-section="average-case" hidden><div class="section-body"><div id="average-case-content"></div></div></section>
+      <section data-section="lower-bounds" hidden><div class="section-body"><div id="lower-bounds-content"></div></div></section>
+      <section data-section="constants-and-cache" hidden><div class="section-body"><div id="constants-and-cache-content"></div></div></section>
+      <section data-section="space-complexity" hidden><div class="section-body"><div id="space-complexity-content"></div></div></section>
+      <section data-section="empirical-complexity" hidden><div class="section-body"><div id="empirical-complexity-content"></div></div></section>
+      <section data-section="benchmarking" hidden><div class="section-body"><div id="benchmarking-content"></div></div></section>
+      <section data-section="memory-layout" hidden><div class="section-body"><div id="memory-layout-content"></div></div></section>
+      <section data-section="dynamic-arrays" hidden><div class="section-body"><div id="dynamic-arrays-content"></div></div></section>
+      <section data-section="linked-lists" hidden><div class="section-body"><div id="linked-lists-content"></div></div></section>
+      <section data-section="stacks-and-frames" hidden><div class="section-body"><div id="stacks-and-frames-content"></div></div></section>
+      <section data-section="queues-and-rings" hidden><div class="section-body"><div id="queues-and-rings-content"></div></div></section>
+      <section data-section="batching-pipelines" hidden><div class="section-body"><div id="batching-pipelines-content"></div></div></section>
+      <section data-section="pools-and-arenas" hidden><div class="section-body"><div id="pools-and-arenas-content"></div></div></section>
+      <section data-section="text-buffers" hidden><div class="section-body"><div id="text-buffers-content"></div></div></section>
+      <section data-section="cache-layouts" hidden><div class="section-body"><div id="cache-layouts-content"></div></div></section>
+      <section data-section="hash-functions" hidden><div class="section-body"><div id="hash-functions-content"></div></div></section>
+      <section data-section="universal-hashing" hidden><div class="section-body"><div id="universal-hashing-content"></div></div></section>
+      <section data-section="separate-chaining" hidden><div class="section-body"><div id="separate-chaining-content"></div></div></section>
+      <section data-section="open-addressing" hidden><div class="section-body"><div id="open-addressing-content"></div></div></section>
+      <section data-section="robin-hood" hidden><div class="section-body"><div id="robin-hood-content"></div></div></section>
+      <section data-section="swiss-tables" hidden><div class="section-body"><div id="swiss-tables-content"></div></div></section>
+      <section data-section="rehashing" hidden><div class="section-body"><div id="rehashing-content"></div></div></section>
+      <section data-section="perfect-hashing" hidden><div class="section-body"><div id="perfect-hashing-content"></div></div></section>
+      <section data-section="hash-in-practice" hidden><div class="section-body"><div id="hash-in-practice-content"></div></div></section>
+      <section data-section="bst-rotations" hidden><div class="section-body"><div id="bst-rotations-content"></div></div></section>
+      <section data-section="avl-trees" hidden><div class="section-body"><div id="avl-trees-content"></div></div></section>
+      <section data-section="red-black-trees" hidden><div class="section-body"><div id="red-black-trees-content"></div></div></section>
+      <section data-section="treaps" hidden><div class="section-body"><div id="treaps-content"></div></div></section>
+      <section data-section="splay-trees" hidden><div class="section-body"><div id="splay-trees-content"></div></div></section>
+      <section data-section="scapegoat-trees" hidden><div class="section-body"><div id="scapegoat-trees-content"></div></div></section>
+      <section data-section="b-trees" hidden><div class="section-body"><div id="b-trees-content"></div></div></section>
+      <section data-section="augmented-trees" hidden><div class="section-body"><div id="augmented-trees-content"></div></div></section>
+      <section data-section="skip-lists" hidden><div class="section-body"><div id="skip-lists-content"></div></div></section>
+      <section data-section="disjoint-sets" hidden><div class="section-body"><div id="disjoint-sets-content"></div></div></section>
+      <section data-section="binary-heaps" hidden><div class="section-body"><div id="binary-heaps-content"></div></div></section>
+      <section data-section="d-ary-heaps" hidden><div class="section-body"><div id="d-ary-heaps-content"></div></div></section>
+      <section data-section="heapsort" hidden><div class="section-body"><div id="heapsort-content"></div></div></section>
+      <section data-section="mergeable-heaps" hidden><div class="section-body"><div id="mergeable-heaps-content"></div></div></section>
+      <section data-section="fibonacci-heaps" hidden><div class="section-body"><div id="fibonacci-heaps-content"></div></div></section>
+      <section data-section="pairing-heaps" hidden><div class="section-body"><div id="pairing-heaps-content"></div></div></section>
+      <section data-section="indexed-priority-queues" hidden><div class="section-body"><div id="indexed-priority-queues-content"></div></div></section>
+      <section data-section="timers-and-events" hidden><div class="section-body"><div id="timers-and-events-content"></div></div></section>
+      <section data-section="tries" hidden><div class="section-body"><div id="tries-content"></div></div></section>
+      <section data-section="compressed-tries" hidden><div class="section-body"><div id="compressed-tries-content"></div></div></section>
+      <section data-section="dictionary-automata" hidden><div class="section-body"><div id="dictionary-automata-content"></div></div></section>
+      <section data-section="suffix-trees" hidden><div class="section-body"><div id="suffix-trees-content"></div></div></section>
+      <section data-section="suffix-arrays" hidden><div class="section-body"><div id="suffix-arrays-content"></div></div></section>
+      <section data-section="suffix-automata" hidden><div class="section-body"><div id="suffix-automata-content"></div></div></section>
+      <section data-section="burrows-wheeler" hidden><div class="section-body"><div id="burrows-wheeler-content"></div></div></section>
+      <section data-section="inverted-indexes" hidden><div class="section-body"><div id="inverted-indexes-content"></div></div></section>
+      <section data-section="autocomplete-and-fuzzy" hidden><div class="section-body"><div id="autocomplete-and-fuzzy-content"></div></div></section>
+    </main>
+  </div>
+
+  <!-- Vendored libraries. mermaid and d3 are NOT here: lazy-lib.js loads them
+       on the first diagram and the first chart respectively. -->
+  <script src="lib/jquery-3.7.1.min.js"></script>
+
+  <!-- Utilities -->
+  <script src="src/js/utils/helpers.js"></script>
+  <script src="src/js/utils/palette.js"></script>
+  <script src="src/js/utils/format.js"></script>
+  <script src="src/js/utils/random.js"></script>
+  <script src="src/js/utils/assert.js"></script>
+  <script src="src/js/utils/ops-counter.js"></script>
+  <script src="src/js/utils/js-highlight.js"></script>
+
+  <!-- Core -->
+  <script src="src/js/core/curriculum.js"></script>
+  <script src="src/js/core/state.js"></script>
+  <script src="src/js/core/section-registry.js"></script>
+  <script src="src/js/core/storage-adapter.js"></script>
+  <script src="src/js/core/progress.js"></script>
+  <script src="src/js/core/theme.js"></script>
+  <script src="src/js/core/lazy-lib.js"></script>
+  <script src="src/js/core/mermaid-renderer.js"></script>
+  <script src="src/js/core/sandbox.js"></script>
+  <script src="src/js/core/runner.js"></script>
+  <script src="src/js/core/navigation.js"></script>
+  <script src="src/js/core/text-scale.js"></script>
+  <script src="src/js/core/search-index.js"></script>
+  <script src="src/js/core/installer.js"></script>
+
+  <!-- Visualisation -->
+  <!-- Algorithms and machines -->
+  <script src="src/js/algorithms/asymptotics.js"></script>
+  <script src="src/js/algorithms/recurrence.js"></script>
+  <script src="src/js/algorithms/amortised.js"></script>
+  <script src="src/js/algorithms/probabilistic.js"></script>
+  <script src="src/js/algorithms/lower-bounds.js"></script>
+  <script src="src/js/algorithms/curve-fit.js"></script>
+  <script src="src/js/algorithms/crossover-lab.js"></script>
+  <script src="src/js/algorithms/space-profile.js"></script>
+  <script src="src/js/machines/bench-harness.js"></script>
+  <script src="src/js/algorithms/linear-structures.js"></script>
+  <script src="src/js/algorithms/text-buffers.js"></script>
+  <script src="src/js/algorithms/allocators-basic.js"></script>
+  <script src="src/js/algorithms/cache-layouts.js"></script>
+  <script src="src/js/algorithms/call-stack.js"></script>
+  <script src="src/js/machines/memory-model.js"></script>
+  <script src="src/js/machines/cache-sim.js"></script>
+  <script src="src/js/algorithms/hash-functions.js"></script>
+  <script src="src/js/algorithms/hash-table-chained.js"></script>
+  <script src="src/js/algorithms/hash-table-open.js"></script>
+  <script src="src/js/algorithms/hash-table-robinhood.js"></script>
+  <script src="src/js/algorithms/swiss-table.js"></script>
+  <script src="src/js/algorithms/hash-rehash.js"></script>
+  <script src="src/js/algorithms/perfect-hash.js"></script>
+  <script src="src/js/algorithms/ordered-map.js"></script>
+  <script src="src/js/machines/hash-lab.js"></script>
+  <script src="src/js/algorithms/bst.js"></script>
+  <script src="src/js/algorithms/avl.js"></script>
+  <script src="src/js/algorithms/red-black.js"></script>
+  <script src="src/js/algorithms/treap.js"></script>
+  <script src="src/js/algorithms/splay.js"></script>
+  <script src="src/js/algorithms/scapegoat.js"></script>
+  <script src="src/js/algorithms/btree.js"></script>
+  <script src="src/js/algorithms/augmented-tree.js"></script>
+  <script src="src/js/algorithms/skip-list.js"></script>
+  <script src="src/js/algorithms/dsu.js"></script>
+  <script src="src/js/machines/tree-lab.js"></script>
+  <script src="src/js/algorithms/binary-heap.js"></script>
+  <script src="src/js/algorithms/leftist-heap.js"></script>
+  <script src="src/js/algorithms/binomial-heap.js"></script>
+  <script src="src/js/algorithms/pairing-heap.js"></script>
+  <script src="src/js/algorithms/fibonacci-heap.js"></script>
+  <script src="src/js/algorithms/timer-wheel.js"></script>
+  <script src="src/js/machines/pq-lab.js"></script>
+  <script src="src/js/machines/event-sim.js"></script>
+  <script src="src/js/algorithms/trie.js"></script>
+  <script src="src/js/algorithms/radix-trie.js"></script>
+  <script src="src/js/algorithms/ternary-trie.js"></script>
+  <script src="src/js/algorithms/dawg.js"></script>
+  <script src="src/js/algorithms/suffix-tree.js"></script>
+  <script src="src/js/algorithms/suffix-array.js"></script>
+  <script src="src/js/algorithms/suffix-automaton.js"></script>
+  <script src="src/js/algorithms/bwt.js"></script>
+  <script src="src/js/algorithms/inverted-index.js"></script>
+  <script src="src/js/algorithms/fuzzy-search.js"></script>
+  <script src="src/js/machines/text-corpus.js"></script>
+  <script src="src/js/machines/text-lab.js"></script>
+
+  <script src="src/js/viz/chart-base.js"></script>
+  <script src="src/js/viz/canvas.js"></script>
+  <script src="src/js/viz/legend.js"></script>
+  <script src="src/js/viz/tooltip.js"></script>
+  <script src="src/js/viz/growth-plot.js"></script>
+  <script src="src/js/viz/avalanche-view.js"></script>
+  <script src="src/js/viz/bucket-view.js"></script>
+  <script src="src/js/viz/tree-view.js"></script>
+  <script src="src/js/viz/forest-view.js"></script>
+  <script src="src/js/viz/heap-view.js"></script>
+  <script src="src/js/viz/trie-view.js"></script>
+  <script src="src/js/viz/matrix-view.js"></script>
+
+  <!-- Components -->
+  <script src="src/js/components/tab-controller.js"></script>
+  <script src="src/js/components/control-panel.js"></script>
+  <script src="src/js/components/metric-grid.js"></script>
+  <script src="src/js/components/code-lab.js"></script>
+  <script src="src/js/components/section-concepts.js"></script>
+  <script src="src/js/components/section-examples.js"></script>
+  <script src="src/js/components/section-reference.js"></script>
+  <script src="src/js/components/section-shell.js"></script>
+
+  <!-- Content -->
+  <script src="src/js/content/registries.js"></script>
+  <script src="src/js/content/concepts-platform.js"></script>
+  <script src="src/js/content/examples-platform.js"></script>
+  <script src="src/js/content/reference-platform.js"></script>
+  <script src="src/js/content/exercises-platform.js"></script>
+  <script src="src/js/content/concepts-analysis.js"></script>
+  <script src="src/js/content/concepts-analysis-practice.js"></script>
+  <script src="src/js/content/examples-analysis.js"></script>
+  <script src="src/js/content/reference-analysis.js"></script>
+  <script src="src/js/content/exercises-analysis.js"></script>
+  <script src="src/js/content/concepts-linear.js"></script>
+  <script src="src/js/content/concepts-linear-buffers.js"></script>
+  <script src="src/js/content/examples-linear.js"></script>
+  <script src="src/js/content/reference-linear.js"></script>
+  <script src="src/js/content/exercises-linear.js"></script>
+  <script src="src/js/content/concepts-hashing.js"></script>
+  <script src="src/js/content/concepts-hashing-schemes.js"></script>
+  <script src="src/js/content/examples-hashing.js"></script>
+  <script src="src/js/content/reference-hashing.js"></script>
+  <script src="src/js/content/exercises-hashing.js"></script>
+  <script src="src/js/content/exercises-hashing-schemes.js"></script>
+  <script src="src/js/content/concepts-trees.js"></script>
+  <script src="src/js/content/examples-trees.js"></script>
+  <script src="src/js/content/reference-trees.js"></script>
+  <script src="src/js/content/exercises-trees.js"></script>
+  <script src="src/js/content/concepts-trees-balanced.js"></script>
+  <script src="src/js/content/examples-trees-balanced.js"></script>
+  <script src="src/js/content/reference-trees-balanced.js"></script>
+  <script src="src/js/content/exercises-trees-balanced.js"></script>
+  <script src="src/js/content/concepts-trees-random.js"></script>
+  <script src="src/js/content/examples-trees-random.js"></script>
+  <script src="src/js/content/reference-trees-random.js"></script>
+  <script src="src/js/content/exercises-trees-random.js"></script>
+  <script src="src/js/content/concepts-trees-indexes.js"></script>
+  <script src="src/js/content/examples-trees-indexes.js"></script>
+  <script src="src/js/content/reference-trees-indexes.js"></script>
+  <script src="src/js/content/exercises-trees-indexes.js"></script>
+  <script src="src/js/content/concepts-trees-sets.js"></script>
+  <script src="src/js/content/examples-trees-sets.js"></script>
+  <script src="src/js/content/reference-trees-sets.js"></script>
+  <script src="src/js/content/exercises-trees-sets.js"></script>
+  <script src="src/js/content/concepts-heaps.js"></script>
+  <script src="src/js/content/examples-heaps.js"></script>
+  <script src="src/js/content/reference-heaps.js"></script>
+  <script src="src/js/content/exercises-heaps.js"></script>
+  <script src="src/js/content/concepts-heaps-advanced.js"></script>
+  <script src="src/js/content/examples-heaps-advanced.js"></script>
+  <script src="src/js/content/reference-heaps-advanced.js"></script>
+  <script src="src/js/content/exercises-heaps-advanced.js"></script>
+  <script src="src/js/content/concepts-text.js"></script>
+  <script src="src/js/content/examples-text.js"></script>
+  <script src="src/js/content/reference-text.js"></script>
+  <script src="src/js/content/exercises-text.js"></script>
+  <script src="src/js/content/concepts-text-suffix.js"></script>
+  <script src="src/js/content/examples-text-suffix.js"></script>
+  <script src="src/js/content/reference-text-suffix.js"></script>
+  <script src="src/js/content/exercises-text-suffix.js"></script>
+  <script src="src/js/content/concepts-text-search.js"></script>
+  <script src="src/js/content/examples-text-search.js"></script>
+  <script src="src/js/content/reference-text-search.js"></script>
+  <script src="src/js/content/exercises-text-search.js"></script>
+
+  <!-- Views -->
+  <script src="src/js/views/sidebar-view.js"></script>
+  <script src="src/js/views/search-view.js"></script>
+  <script src="src/js/views/home-view.js"></script>
+  <script src="src/js/views/settings-view.js"></script>
+
+  <!-- Sections -->
+  <script src="src/js/sections/home-section.js"></script>
+  <script src="src/js/sections/code-engine-template.js"></script>
+  <script src="src/js/sections/code-engine-section.js"></script>
+  <script src="src/js/sections/js-systems-template.js"></script>
+  <script src="src/js/sections/js-systems-section.js"></script>
+  <script src="src/js/sections/settings-section.js"></script>
+  <script src="src/js/sections/asymptotic-notation-template.js"></script>
+  <script src="src/js/sections/asymptotic-notation-section.js"></script>
+  <script src="src/js/sections/recurrences-template.js"></script>
+  <script src="src/js/sections/recurrences-section.js"></script>
+  <script src="src/js/sections/amortised-analysis-template.js"></script>
+  <script src="src/js/sections/amortised-analysis-section.js"></script>
+  <script src="src/js/sections/average-case-template.js"></script>
+  <script src="src/js/sections/average-case-section.js"></script>
+  <script src="src/js/sections/lower-bounds-template.js"></script>
+  <script src="src/js/sections/lower-bounds-section.js"></script>
+  <script src="src/js/sections/constants-and-cache-template.js"></script>
+  <script src="src/js/sections/constants-and-cache-section.js"></script>
+  <script src="src/js/sections/space-complexity-template.js"></script>
+  <script src="src/js/sections/space-complexity-section.js"></script>
+  <script src="src/js/sections/empirical-complexity-template.js"></script>
+  <script src="src/js/sections/empirical-complexity-section.js"></script>
+  <script src="src/js/sections/benchmarking-template.js"></script>
+  <script src="src/js/sections/benchmarking-section.js"></script>
+  <script src="src/js/sections/memory-layout-template.js"></script>
+  <script src="src/js/sections/memory-layout-section.js"></script>
+  <script src="src/js/sections/dynamic-arrays-template.js"></script>
+  <script src="src/js/sections/dynamic-arrays-section.js"></script>
+  <script src="src/js/sections/linked-lists-template.js"></script>
+  <script src="src/js/sections/linked-lists-section.js"></script>
+  <script src="src/js/sections/stacks-and-frames-template.js"></script>
+  <script src="src/js/sections/stacks-and-frames-section.js"></script>
+  <script src="src/js/sections/queues-and-rings-template.js"></script>
+  <script src="src/js/sections/queues-and-rings-section.js"></script>
+  <script src="src/js/sections/batching-pipelines-template.js"></script>
+  <script src="src/js/sections/batching-pipelines-section.js"></script>
+  <script src="src/js/sections/pools-and-arenas-template.js"></script>
+  <script src="src/js/sections/pools-and-arenas-section.js"></script>
+  <script src="src/js/sections/text-buffers-template.js"></script>
+  <script src="src/js/sections/text-buffers-section.js"></script>
+  <script src="src/js/sections/cache-layouts-template.js"></script>
+  <script src="src/js/sections/cache-layouts-section.js"></script>
+  <script src="src/js/sections/hash-functions-template.js"></script>
+  <script src="src/js/sections/hash-functions-section.js"></script>
+  <script src="src/js/sections/universal-hashing-template.js"></script>
+  <script src="src/js/sections/universal-hashing-section.js"></script>
+  <script src="src/js/sections/separate-chaining-template.js"></script>
+  <script src="src/js/sections/separate-chaining-section.js"></script>
+  <script src="src/js/sections/open-addressing-template.js"></script>
+  <script src="src/js/sections/open-addressing-section.js"></script>
+  <script src="src/js/sections/robin-hood-template.js"></script>
+  <script src="src/js/sections/robin-hood-section.js"></script>
+  <script src="src/js/sections/swiss-tables-template.js"></script>
+  <script src="src/js/sections/swiss-tables-section.js"></script>
+  <script src="src/js/sections/rehashing-template.js"></script>
+  <script src="src/js/sections/rehashing-section.js"></script>
+  <script src="src/js/sections/perfect-hashing-template.js"></script>
+  <script src="src/js/sections/perfect-hashing-section.js"></script>
+  <script src="src/js/sections/hash-in-practice-template.js"></script>
+  <script src="src/js/sections/hash-in-practice-section.js"></script>
+  <script src="src/js/sections/bst-rotations-template.js"></script>
+  <script src="src/js/sections/bst-rotations-section.js"></script>
+  <script src="src/js/sections/avl-trees-template.js"></script>
+  <script src="src/js/sections/avl-trees-section.js"></script>
+  <script src="src/js/sections/red-black-trees-template.js"></script>
+  <script src="src/js/sections/red-black-trees-section.js"></script>
+  <script src="src/js/sections/treaps-template.js"></script>
+  <script src="src/js/sections/treaps-section.js"></script>
+  <script src="src/js/sections/splay-trees-template.js"></script>
+  <script src="src/js/sections/splay-trees-section.js"></script>
+  <script src="src/js/sections/scapegoat-trees-template.js"></script>
+  <script src="src/js/sections/scapegoat-trees-section.js"></script>
+  <script src="src/js/sections/b-trees-template.js"></script>
+  <script src="src/js/sections/b-trees-section.js"></script>
+  <script src="src/js/sections/augmented-trees-template.js"></script>
+  <script src="src/js/sections/augmented-trees-section.js"></script>
+  <script src="src/js/sections/skip-lists-template.js"></script>
+  <script src="src/js/sections/skip-lists-section.js"></script>
+  <script src="src/js/sections/disjoint-sets-template.js"></script>
+  <script src="src/js/sections/disjoint-sets-section.js"></script>
+  <script src="src/js/sections/binary-heaps-template.js"></script>
+  <script src="src/js/sections/binary-heaps-section.js"></script>
+  <script src="src/js/sections/d-ary-heaps-template.js"></script>
+  <script src="src/js/sections/d-ary-heaps-section.js"></script>
+  <script src="src/js/sections/heapsort-template.js"></script>
+  <script src="src/js/sections/heapsort-section.js"></script>
+  <script src="src/js/sections/mergeable-heaps-template.js"></script>
+  <script src="src/js/sections/mergeable-heaps-section.js"></script>
+  <script src="src/js/sections/fibonacci-heaps-template.js"></script>
+  <script src="src/js/sections/fibonacci-heaps-section.js"></script>
+  <script src="src/js/sections/pairing-heaps-template.js"></script>
+  <script src="src/js/sections/pairing-heaps-section.js"></script>
+  <script src="src/js/sections/indexed-priority-queues-template.js"></script>
+  <script src="src/js/sections/indexed-priority-queues-section.js"></script>
+  <script src="src/js/sections/timers-and-events-template.js"></script>
+  <script src="src/js/sections/timers-and-events-section.js"></script>
+  <script src="src/js/sections/tries-template.js"></script>
+  <script src="src/js/sections/tries-section.js"></script>
+  <script src="src/js/sections/compressed-tries-template.js"></script>
+  <script src="src/js/sections/compressed-tries-section.js"></script>
+  <script src="src/js/sections/dictionary-automata-template.js"></script>
+  <script src="src/js/sections/dictionary-automata-section.js"></script>
+  <script src="src/js/sections/suffix-trees-template.js"></script>
+  <script src="src/js/sections/suffix-trees-section.js"></script>
+  <script src="src/js/sections/suffix-arrays-template.js"></script>
+  <script src="src/js/sections/suffix-arrays-section.js"></script>
+  <script src="src/js/sections/suffix-automata-template.js"></script>
+  <script src="src/js/sections/suffix-automata-section.js"></script>
+  <script src="src/js/sections/burrows-wheeler-template.js"></script>
+  <script src="src/js/sections/burrows-wheeler-section.js"></script>
+  <script src="src/js/sections/inverted-indexes-template.js"></script>
+  <script src="src/js/sections/inverted-indexes-section.js"></script>
+  <script src="src/js/sections/autocomplete-and-fuzzy-template.js"></script>
+  <script src="src/js/sections/autocomplete-and-fuzzy-section.js"></script>
+
+  <script src="src/js/app.js"></script>
+</body>
+</html>

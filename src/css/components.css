@@ -1,0 +1,294 @@
+/* Cards, buttons, chips, tabs and the three-tab section frame. */
+
+.card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  background: var(--surface-sunken);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.card-body {
+  padding: 0.75rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.3125rem 0.75rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-strong);
+  background: var(--surface-card);
+  color: var(--text-primary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--surface-sunken);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.btn-sm {
+  padding: 0.1875rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+.field-label {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.field-row {
+  margin-bottom: 0.75rem;
+}
+
+select, input[type="text"], input[type="number"] {
+  width: 100%;
+  padding: 0.3125rem 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+  background: var(--surface-card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.0625rem 0.4375rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  background: var(--hue-gray-soft);
+  color: var(--hue-gray);
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding: 0.5rem 0.625rem;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+}
+
+.metric .metric-label {
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.metric .metric-value {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.metric .metric-note {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+.tab-strip {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 0.875rem;
+  overflow-x: auto;
+}
+
+.tab-btn {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  border-bottom: 2px solid transparent;
+  background: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tab-btn:hover {
+  color: var(--text-primary);
+}
+
+.tab-btn.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* Section frame tabs: Description / Examples / References. Bigger than the
+   in-card strip, and sticky, because the panels are long enough that the strip
+   scrolls away exactly when the learner wants to switch.
+
+   `top` is the header height, not 0: the app header is sticky in the same
+   scroll context with a higher z-index, so a strip stuck at 0 slides underneath
+   it and disappears. */
+.section-tabs {
+  position: sticky;
+  top: var(--header-height);
+  z-index: 5;
+  margin: 0 0 1.25rem;
+  padding-top: 0.5rem;
+  background: var(--surface-page);
+  border-bottom: 1px solid var(--border-color);
+  gap: 0.5rem;
+}
+
+.section-tabs .tab-btn {
+  padding: 0.5rem 0.875rem;
+  font-size: 0.875rem;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.section-tabs .tab-btn:hover {
+  background: var(--surface-sunken);
+}
+
+.section-tabpanel[hidden] {
+  display: none;
+}
+
+/* Description is prose, so it gets a reading measure. Examples and References
+   keep the full width: charts, tables and code labs want it. */
+.panel-prose {
+  max-width: 68rem;
+}
+
+/* Section frame ------------------------------------------------------- */
+
+.section-orientation {
+  background: var(--accent-soft);
+  border: 1px solid var(--border-color);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 0.875rem 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.section-orientation p {
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.section-orientation p:last-child {
+  margin-bottom: 0;
+}
+
+.section-block {
+  margin-bottom: 1.75rem;
+}
+
+.section-block > h3 {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 0.625rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-block > h3::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-color);
+}
+
+.insight {
+  border-left: 3px solid var(--hue-amber);
+  background: var(--hue-amber-soft);
+  padding: 0.625rem 0.875rem;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  margin-top: 0.875rem;
+}
+
+.insight strong {
+  color: var(--text-primary);
+}
+
+.note {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.mermaid-host {
+  overflow-x: auto;
+  padding: 0.5rem 0;
+}
+
+.mermaid-host svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.mermaid-error {
+  color: var(--status-error);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  white-space: pre-wrap;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: minmax(220px, 300px) 1fr;
+  gap: 0.875rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}

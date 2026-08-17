@@ -1,0 +1,307 @@
+/* Concepts, worked examples and the reference block. */
+
+.concept-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.75rem;
+}
+
+.concept {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 0.625rem 0.75rem;
+  background: var(--surface-card);
+}
+
+.concept .term {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.concept .plain {
+  color: var(--text-secondary);
+  margin-bottom: 0.375rem;
+}
+
+.concept .formal {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  background: var(--surface-sunken);
+  border-radius: 4px;
+  padding: 0.1875rem 0.375rem;
+  display: inline-block;
+  margin-bottom: 0.25rem;
+  color: var(--text-primary);
+}
+
+.concept .example {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* The Description tab: one column, because a concept now carries a real
+   explanation and a two-column card grid turns that into a wall. */
+.concept-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.concept-list .concept {
+  padding: 0.875rem 1rem;
+}
+
+.concept-list .term {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.9375rem;
+  margin-bottom: 0.375rem;
+}
+
+.concept-list .term-n {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.375rem;
+  height: 1.375rem;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  flex: none;
+}
+
+.concept-list .plain {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.concept-list .detail p {
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin-top: 0.5rem;
+}
+
+.concept-list .example {
+  margin-top: 0.625rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--border-color);
+  font-size: 0.8125rem;
+}
+
+.concept-list .example strong {
+  color: var(--text-secondary);
+}
+
+.worked-example {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 0.875rem;
+  background: var(--surface-card);
+}
+
+.worked-example > header {
+  padding: 0.5rem 0.75rem;
+  background: var(--surface-sunken);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.worked-example .we-title {
+  font-weight: 600;
+}
+
+.worked-example .we-goal,
+.worked-example .we-setup {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 1.75rem 1fr;
+  gap: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.step:last-child {
+  border-bottom: 0;
+}
+
+.step .step-n {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.step .step-do {
+  font-weight: 600;
+}
+
+.step .step-why {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  margin-bottom: 0.375rem;
+}
+
+.step .step-work {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  white-space: pre-wrap;
+  background: var(--surface-sunken);
+  border-radius: 4px;
+  padding: 0.5rem 0.625rem;
+  color: var(--text-primary);
+  overflow-x: auto;
+}
+
+.step .step-result {
+  font-size: 0.8125rem;
+  margin-top: 0.375rem;
+  color: var(--hue-green);
+  font-weight: 600;
+}
+
+.worked-example .we-answer {
+  padding: 0.625rem 0.75rem;
+  background: var(--hue-green-soft);
+  border-top: 1px solid var(--border-color);
+  font-size: 0.8125rem;
+}
+
+.reference-block {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  background: var(--surface-card);
+  overflow: hidden;
+}
+
+.reference-part {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.reference-part:last-child {
+  border-bottom: 0;
+}
+
+.reference-part > h4 {
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 0.375rem;
+}
+
+.equation {
+  font-family: var(--font-mono);
+  background: var(--surface-sunken);
+  border-radius: 4px;
+  padding: 0.375rem 0.5rem;
+  margin-bottom: 0.375rem;
+  overflow-x: auto;
+}
+
+.equation .eq-label {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.125rem;
+}
+
+.term-list {
+  list-style: none;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.term-list li {
+  padding-left: 0.75rem;
+  position: relative;
+}
+
+.term-list li::before {
+  content: '·';
+  position: absolute;
+  left: 0.25rem;
+  color: var(--text-muted);
+}
+
+.term-list .sym {
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+table.ref-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+table.ref-table th,
+table.ref-table td {
+  text-align: left;
+  padding: 0.3125rem 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: top;
+}
+
+table.ref-table th {
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+table.ref-table td.mono {
+  font-family: var(--font-mono);
+}
+
+.fail-mode {
+  margin-bottom: 0.5rem;
+}
+
+.fail-mode .symptom {
+  font-weight: 600;
+}
+
+.fail-mode .cause,
+.fail-mode .fix {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.source-list {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  list-style: none;
+}
+
+.source-list li {
+  padding: 0.125rem 0;
+}
+
+.source-list .where {
+  color: var(--text-muted);
+}
+
+/* Curriculum map: a heading per track, so the map reads as categories. */
+.map-track {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  margin: 1.5rem 0 0.25rem;
+  color: var(--text-primary);
+}
+
+.map-track:first-of-type {
+  margin-top: 0.5rem;
+}
+
+.map-track-note {
+  margin-bottom: 0.75rem;
+}

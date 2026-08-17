@@ -1,0 +1,30 @@
+{
+  "name": "berugo-learning",
+  "version": "0.1.0",
+  "description": "Interactive browser platform for senior engineers to learn and practise computer science and systems engineering",
+  "private": true,
+  "scripts": {
+    "start": "serve -p 3002",
+    "dev": "serve -p 3002 --cors",
+    "test": "npm run test:wiring && npm run test:unit",
+    "test:wiring": "node tests/wiring-audit.js",
+    "test:unit": "node --test \"tests/unit/*.test.js\"",
+    "lint:size": "node tests/file-size-check.js",
+    "build:css": "tailwindcss -i src/css/tailwind-source.css -o lib/tailwind.css --minify"
+  },
+  "devDependencies": {
+    "serve": "^14.2.4",
+    "tailwindcss": "^3.4.17"
+  },
+  "keywords": [
+    "computer-science",
+    "algorithms",
+    "data-structures",
+    "operating-systems",
+    "computer-architecture",
+    "compilers",
+    "distributed-systems",
+    "education"
+  ],
+  "license": "MIT"
+}

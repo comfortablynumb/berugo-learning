@@ -1,0 +1,558 @@
+/**
+ * Concepts for the analysis sections (M01.1-M01.5): notation, recurrences,
+ * amortised analysis, average case and lower bounds.
+ *
+ * The four measurement sections (M01.6-M01.9) live in
+ * concepts-analysis-practice.js, because one file for the whole milestone runs
+ * past the 1 000-line limit once every concept carries its explanation.
+ */
+(function (root) {
+  'use strict';
+
+  const registry = root ? root.ConceptRegistry : require('./registries.js').ConceptRegistry;
+
+  registry.register({
+    'asymptotic-notation': [
+      {
+        term: 'Witness pair',
+        plain: 'The constant and threshold that make a big-O claim true. Without one, the claim is not yet a claim.',
+        formal: 'f = O(g) ⟺ ∃c > 0, n₀ : ∀n ≥ n₀, f(n) ≤ c·g(n)',
+        detail: 'The definition is an existential statement, so proving it means exhibiting the two ' +
+          'numbers: a multiplier c and a size n₀ past which the inequality never fails again. Until ' +
+          'you can name them you have an impression rather than a bound. Neither number is unique — ' +
+          'if (c, n₀) works then so does (2c, n₀) and any larger threshold — which is why nobody ' +
+          'quotes them and why the smallest pair is not what you are asked for. What the pair buys ' +
+          'you is a decision procedure: to refute a claimed bound, show that for every candidate c ' +
+          'the inequality fails infinitely often.',
+        example: 'n log n = O(n²) with c = 1, n₀ = 1.'
+      },
+      {
+        term: 'Big-O, Ω and Θ',
+        plain: 'Upper bound, lower bound, and both at once. O is an upper bound, not a tight one.',
+        formal: 'Θ(g) = O(g) ∩ Ω(g)',
+        detail: 'Three relations, and only one of them says what people usually mean. O(g) caps a ' +
+          'function from above, Ω(g) floors it from below, and Θ(g) asserts both at once, so the ' +
+          'function grows exactly like g up to constants. Almost every sentence that reaches for O ' +
+          'is trying to say Θ: "merge sort is O(n log n)" is true, but so is "merge sort is O(n⁵)", ' +
+          'and the reader cannot tell which you meant. Θ is a strictly stronger claim and needs two ' +
+          'witness pairs rather than one, which is exactly why it is the one worth proving.',
+        example: 'Every algorithm that is Θ(n) is also, truthfully, O(n²).'
+      },
+      {
+        term: 'Abuse of notation',
+        plain: 'O(g) is a set of functions, but everyone writes = instead of ∈. The equality does not run backwards.',
+        formal: 'f = O(g) means f ∈ O(g)',
+        detail: 'O(g) denotes the set of all functions bounded above by a constant multiple of g, so ' +
+          'the honest symbol is ∈. The convention of writing = is sixty years old and is not going ' +
+          'to change, but it misleads in one specific way: equality is symmetric and this is not. ' +
+          'n = O(n²) is true and O(n²) = n is meaningless, and a chain like T(n) = O(n) + O(n²) is ' +
+          'read as "there exist functions in those sets whose sum is T", left to right only. Treat ' +
+          'the = as a one-way arrow and the notation stops generating false steps.',
+        example: 'n = O(n²) and n² = O(n²), but n ≠ n².'
+      },
+      {
+        term: 'Little-o',
+        plain: 'Strictly smaller: f is negligible compared with g, for every constant, not just some constant.',
+        formal: 'f = o(g) ⟺ lim f(n)/g(n) = 0',
+        detail: 'Big-O allows f to keep pace with g — n² = O(n²) — while little-o insists f is ' +
+          'eventually beaten by every constant multiple of g, however small. That quantifier swap is ' +
+          'the whole difference: O asks for some c that works, o demands that all of them do. So o(g) ' +
+          'is a strict subset of O(g), and the functions in the difference are exactly those that ' +
+          'grow at the same rate as g. In practice little-o is how lower-order terms get dismissed ' +
+          'cleanly: writing T(n) = n² + o(n²) says the rest genuinely vanishes relative to the main ' +
+          'term rather than merely staying under it.',
+        example: 'n log n = o(n²), and n² ≠ o(n²).'
+      },
+      {
+        term: 'Tightness',
+        plain: 'A bound can be true and useless. Saying an algorithm is O(2ⁿ) when it is Θ(n) is not a lie.',
+        formal: 'O gives an upper bound only',
+        detail: 'Because O is one-sided, inflating it never makes it false: every linear algorithm is ' +
+          'honestly O(n²), O(n³) and O(2ⁿ). This matters when reading someone else\'s claim, since a ' +
+          'documented O(n log n) may be a proven tight bound or the first thing that occurred to the ' +
+          'author. It matters more when writing one, because an untight bound cannot be used to ' +
+          'compare two implementations — if both are O(n²) you have learned nothing about which is ' +
+          'faster, or even whether either is quadratic. Ask what makes the bound tight, and if ' +
+          'nothing does, say Θ or say the case.',
+        example: '"This sort is O(n²)" is true of merge sort.'
+      },
+      {
+        term: 'Asymptotic ≠ practical',
+        plain: 'The definition only promises behaviour past n₀, and n₀ can be larger than any input you have.',
+        formal: 'the guarantee begins at n₀',
+        detail: 'Nothing in the definition constrains the constant or the threshold, so an algorithm ' +
+          'can be asymptotically superior and useless: if the crossover sits at 10⁴⁰ items, the ' +
+          'better complexity class is a statement about a machine nobody will build. Fast matrix ' +
+          'multiplication is the standard case — the exponent keeps falling and the practical ' +
+          'implementations still use Strassen at best. The reverse trap is more common in ordinary ' +
+          'code: at the sizes you actually run, a Θ(n²) routine with tiny constants and perfect ' +
+          'locality routinely beats a Θ(n log n) one that allocates. Asymptotics rank algorithms; ' +
+          'measurement ranks implementations.',
+        example: 'Galactic algorithms beat everything, past inputs nobody will ever run.'
+      },
+      {
+        term: 'A case, not an algorithm',
+        plain: 'O, Ω and Θ bound a stated case. A sentence that names no case is not yet a claim.',
+        formal: 'worst-case T(n) = Θ(n²), not "the algorithm is Θ(n²)"',
+        detail: 'An algorithm does not have one running time, it has a different one for every input, ' +
+          'so a bound has to say which of those it is talking about: the worst input of size n, the ' +
+          'best, or the expectation over some distribution. The notation and the case are ' +
+          'independent choices, and all nine combinations are meaningful — the worst case has a ' +
+          'lower bound too. Dropping the case is what produces confident nonsense like "insertion ' +
+          'sort is Ω(n²)", which is false, because on already-sorted input insertion sort finishes in ' +
+          'Θ(n). What is true is that its worst case is Θ(n²).',
+        example: 'Insertion sort is Θ(n²) in the worst case and Θ(n) in the best; "insertion sort is Ω(n²)" is simply false.'
+      },
+      {
+        term: 'More than one variable',
+        plain: 'When the input has two sizes, both belong in the bound — collapsing them hides the case that hurts.',
+        formal: 'O(V + E), not O(V) or O(E)',
+        detail: 'Some inputs have two independent dimensions, and squeezing them into one loses the ' +
+          'thing you needed to know. A graph traversal costs O(V + E), and neither term dominates in ' +
+          'general: a sparse graph has E ≈ V so the bound behaves linearly in V, while a dense one ' +
+          'has E ≈ V² so the same algorithm behaves quadratically. Substituting the worst case for E ' +
+          'up front gives O(V²) and slanders the algorithm on every sparse input it will actually ' +
+          'see. The same applies to string matching in O(n + m), to joins over two table sizes, and ' +
+          'to anything parameterised by an alphabet or a key length.',
+        example: 'A graph scan is O(V + E): dense graphs make E the term that matters, sparse ones make it V.'
+      }
+    ],
+
+    recurrences: [
+      {
+        term: 'Recursion tree',
+        plain: 'Each level of recursion drawn out, with the work it costs. Summing the levels solves the recurrence.',
+        formal: 'level i has a^i subproblems of size n/b^i',
+        detail: 'The tree turns a recurrence into an arithmetic problem you can see. Level i holds a^i ' +
+          'calls, each on an input of size n/b^i, so the work on that level is a^i · f(n/b^i) and the ' +
+          'total is the sum down to the leaves. Drawing it answers the question the closed form hides ' +
+          '— where the cost lives. Merge sort spends the same n at every level and so pays for its ' +
+          'depth; a recurrence with a growing top level pays for its root and stops caring about the ' +
+          'depth entirely. Because the tree is a direct calculation rather than a lookup, it also ' +
+          'works for the recurrences no theorem covers.',
+        example: 'Merge sort: every level costs n, and there are log₂ n of them.'
+      },
+      {
+        term: 'Critical exponent',
+        plain: 'The exponent at which the leaves and the root cost the same. Comparing f(n) against it picks the case.',
+        formal: 'log_b(a)',
+        detail: 'The number of leaves in the recursion tree is a^(log_b n) = n^(log_b a), and each ' +
+          'leaf costs a constant, so the leaf row alone costs Θ(n^log_b a). That expression is the ' +
+          'pivot the whole analysis turns on: if f(n) grows more slowly, the leaves dominate and the ' +
+          'answer is the leaf count; if it grows faster, the root dominates and the answer is f(n); ' +
+          'if they match, every level costs about the same and the answer picks up a log n factor ' +
+          'for the depth. Computing log_b a first and then comparing is the whole method, and it is ' +
+          'why halving into two subproblems (log₂ 2 = 1) makes linear merge work the balanced case.',
+        example: 'a = 2, b = 2 gives 1, so f(n) = n is the balanced case.'
+      },
+      {
+        term: 'Master theorem',
+        plain: 'A lookup table for T(n) = a·T(n/b) + f(n). Three cases: leaves win, tie, root wins.',
+        formal: 'compare f(n) with n^log_b(a)',
+        detail: 'The theorem packages the recursion-tree argument for the shape that covers most ' +
+          'divide-and-conquer algorithms: a subproblems, each a factor b smaller, plus f(n) to split ' +
+          'and combine. Case 1 has f polynomially smaller than n^log_b a and answers Θ(n^log_b a); ' +
+          'case 2 has them equal and answers Θ(n^log_b a · log n); case 3 has f polynomially larger, ' +
+          'passes the regularity check and answers Θ(f(n)). The word polynomially is the catch — the ' +
+          'comparison must be by a factor of n^ε for some ε > 0, not merely by a logarithm, which is ' +
+          'why perfectly ordinary recurrences fall into the gaps between the cases.',
+        example: 'a=8, b=2, f=n² gives log₂8 = 3 > 2, so Θ(n³).'
+      },
+      {
+        term: 'Regularity condition',
+        plain: 'Case 3 needs f to shrink fast enough as the problem shrinks, or the theorem does not apply.',
+        formal: 'a·f(n/b) ≤ c·f(n) for some c < 1',
+        detail: 'Case 3 concludes that the root dominates, which is only sound if the next level down ' +
+          'really is cheaper by a constant factor — otherwise the levels could stay comparable and ' +
+          'the sum would not collapse onto the root. The regularity condition states exactly that: ' +
+          'the whole of level one costs at most c < 1 times level zero, so the total is a geometric ' +
+          'series summing to Θ(f(n)). Every polynomial f satisfies it, which is why it is usually ' +
+          'waved through. It fails for functions that oscillate or that dip on the divided argument, ' +
+          'and when it fails the answer genuinely differs from Θ(f(n)) — the check is not a formality.',
+        example: 'It fails for oscillating f, which is why the panel checks it.'
+      },
+      {
+        term: 'Gap cases',
+        plain: 'Recurrences that fall between the cases. The theorem stays silent; the tree still answers.',
+        formal: 'f between n^log_b(a) and n^log_b(a)·log n',
+        detail: 'Because cases 1 and 3 require a polynomial separation, there is room between them ' +
+          'that no case reaches: an f that beats n^log_b a by only a logarithmic factor is neither ' +
+          'polynomially smaller, nor equal, nor polynomially larger. T(n) = 2T(n/2) + n/log n sits ' +
+          'squarely in that gap. The theorem does not give a wrong answer here, it gives none, and ' +
+          'the mistake is to round the recurrence to the nearest case and quote the result. Summing ' +
+          'the recursion tree still works: the levels form a harmonic-style series, and the answer ' +
+          'comes out Θ(n log log n) — a class the three cases cannot even express.',
+        example: 'T(n)=2T(n/2)+n/log n needs a tree, not the theorem.'
+      },
+      {
+        term: 'Akra–Bazzi',
+        plain: 'The generalisation for uneven splits, where subproblems are different sizes.',
+        formal: 'T(n) = Σ aᵢT(n/bᵢ) + f(n)',
+        detail: 'The master theorem assumes every subproblem is the same size, and plenty of real ' +
+          'algorithms do not oblige. Akra–Bazzi handles a sum of differently shaped recursive calls ' +
+          'by solving Σ aᵢ·bᵢ^(−p) = 1 for the exponent p, then integrating f against it; the ' +
+          'master theorem is the special case where all the bᵢ agree. It also tolerates the floors, ' +
+          'ceilings and small perturbations that a careful implementation forces on you and that the ' +
+          'simpler theorem quietly ignores. The cost is that you solve an equation and evaluate an ' +
+          'integral rather than reading a case off a table.',
+        example: 'Median-of-medians splits into 1/5 and 7/10.'
+      },
+      {
+        term: 'Substitution',
+        plain: 'Guess the answer, then prove it by induction. The only method that works when nothing else applies.',
+        formal: 'assume T(k) ≤ c·g(k) for k < n, prove it for n',
+        detail: 'Substitution is the fallback with no preconditions: assume the bound for all smaller ' +
+          'inputs, substitute it into the recurrence, and show the same bound comes out for n. It is ' +
+          'also the only method that verifies rather than derives, so the recursion tree usually ' +
+          'supplies the guess and substitution confirms it. The characteristic difficulty is that the ' +
+          'induction fails by a lower-order term — you need to prove ≤ cn and end up with cn + 1 — ' +
+          'and the fix is counter-intuitive: strengthen the hypothesis to cn − d, which gives the ' +
+          'induction more to work with and makes the extra term cancel.',
+        example: 'The induction often fails until you strengthen the guess by subtracting a lower-order term.'
+      },
+      {
+        term: 'What the base case changes',
+        plain: 'The base case moves the constant, never the class — but the constant is what you pay.',
+        formal: 'T(1) = 0 against T(1) = 1 shifts the total by the leaf count',
+        detail: 'Changing what a leaf costs adds a fixed multiple of the leaf count to the total, and ' +
+          'since the leaf count is n^log_b a it cannot change the asymptotic class when the class is ' +
+          'already at least that large. What it does change is the number you measure. Merge sort at ' +
+          'n = 1024 costs 10 240 counting only the merges and 11 264 once each of the 1 024 leaves is ' +
+          'charged one unit — a tenth of the total, from a decision the recurrence usually writes as ' +
+          'T(1) = Θ(1) and forgets. This is also why cutting over to insertion sort at a small size ' +
+          'is worth real time: it replaces the most numerous rows of the tree.',
+        example: 'Merge sort at n = 1024 costs 10 240 with T(1) = 0 and 11 264 counting the leaf row.'
+      }
+    ],
+
+    'amortised-analysis': [
+      {
+        term: 'Amortised cost',
+        plain: 'The average cost per operation over a worst-case sequence. No probability is involved.',
+        formal: 'total cost of the sequence ÷ operations',
+        detail: 'An amortised bound is a statement about a whole sequence: whatever operations you ' +
+          'choose, in whatever order, the total divided by the count stays under the stated figure. ' +
+          'That makes it a worst-case guarantee, not an expectation — there is no distribution and no ' +
+          'coin anywhere in the argument, and an adversary who knows your implementation cannot ' +
+          'break it. What it deliberately does not promise is anything about a single operation: the ' +
+          'occasional push that copies a million elements is fully consistent with an O(1) amortised ' +
+          'bound, because the cheap pushes before it have already paid for it.',
+        example: 'Push into a dynamic array: O(1) amortised, O(n) occasionally.'
+      },
+      {
+        term: 'Aggregate method',
+        plain: 'Total the whole sequence, then divide. Simplest, and often enough.',
+        formal: 'T(n)/n',
+        detail: 'The aggregate method skips the bookkeeping and bounds the sum directly. For a ' +
+          'doubling array the copies form a geometric series — 1 + 2 + 4 + … + n < 2n — so n pushes ' +
+          'cost under 3n in total and under 3 each on average. It works whenever you can see the ' +
+          'total, and it gives one bound for every operation in the sequence, which is its main ' +
+          'limitation: a structure whose operations differ in cost (a stack that supports push, pop ' +
+          'and a multi-pop) gets a single blunt figure. When you need to charge different operations ' +
+          'differently, move to accounting or potential.',
+        example: 'n pushes cost under 3n, so under 3 per push.'
+      },
+      {
+        term: 'Accounting method',
+        plain: 'Overcharge cheap operations and bank the credit to pay for expensive ones.',
+        formal: 'banked credit must never go negative',
+        detail: 'Assign each operation an invented price, spend the real cost from it, and save the ' +
+          'difference on the data structure itself. If the bank never runs dry, the invented prices ' +
+          'are a valid amortised bound, because the actual total can never exceed the charged total. ' +
+          'For a doubling array, charging 3 per push works out as 1 to store the element and 2 saved ' +
+          'against the eventual copy — one for the new element, one for an old element that has ' +
+          'already spent its credit. The art is in choosing where the credit is stored, and the ' +
+          'proof obligation is to show the invariant holds after every operation, not on average.',
+        example: 'Charge 3 per push: 1 to insert, 2 saved towards the next copy.'
+      },
+      {
+        term: 'Potential method',
+        plain: 'Define Φ over the data structure so a drop in Φ pays for an expensive step. The one that generalises.',
+        formal: 'â = actual + Φ(after) − Φ(before)',
+        detail: 'The potential method replaces the scattered credits of the accounting method with a ' +
+          'single function of the structure\'s state. Amortised cost is defined as the actual cost ' +
+          'plus the change in Φ, so a cheap operation that builds up potential is charged extra and ' +
+          'an expensive one that discharges it is charged little. Summing telescopes: the total ' +
+          'amortised cost equals the total actual cost plus Φ(end) − Φ(start), so as long as Φ starts ' +
+          'at zero and never goes negative, the amortised total bounds the real one. It generalises ' +
+          'the other two methods and is what scales to splay trees and Fibonacci heaps, where no ' +
+          'per-operation credit story is available.',
+        example: 'Φ = 2·size − capacity is zero after a grow and rises as the array fills.'
+      },
+      {
+        term: 'Amortised ≠ average case',
+        plain: 'Amortised is a worst-case guarantee over a sequence; average case is an expectation over inputs.',
+        formal: 'no distribution appears in an amortised bound',
+        detail: 'The two are often used interchangeably and they are not the same kind of statement. ' +
+          'An average-case bound assumes something about the inputs and reports an expectation, so an ' +
+          'adversary who supplies bad inputs can defeat it. An amortised bound assumes nothing and ' +
+          'holds for every sequence, so there is nothing to defeat — the guarantee is deterministic. ' +
+          'A dynamic array demonstrates this cleanly: its input is a fixed list of pushes with no ' +
+          'randomness available anywhere, and it still has an O(1) amortised bound. Confusing them ' +
+          'leads to reasoning about probability where none exists, and to trusting an average-case ' +
+          'bound against an adversarial workload.',
+        example: 'A dynamic array has no random inputs, and still has an amortised bound.'
+      },
+      {
+        term: 'When amortised is not enough',
+        plain: 'A latency-sensitive path cares about the worst single operation, not the average.',
+        formal: 'worst-case per-operation ≠ amortised',
+        detail: 'Amortised analysis answers "what does this cost over time", which is the right ' +
+          'question for throughput and the wrong one for a deadline. A control loop with a 1 ms ' +
+          'budget is failed by the single push that copies a million elements, no matter how cheap ' +
+          'the surrounding thousand pushes were. The same critique applies to a stop-the-world ' +
+          'garbage collector and to a hash table that rehashes in one go: excellent amortised ' +
+          'numbers, and a tail that shows up directly as p99 latency. The fixes all trade total work ' +
+          'for predictability — incremental resizing, preallocation, or a structure with a real ' +
+          'worst-case per-operation bound.',
+        example: 'A real-time system rejects the one push that copies a million elements.'
+      },
+      {
+        term: 'Hysteresis band',
+        plain: 'The gap between the grow threshold and the shrink threshold. Without a gap, one alternation can resize on every operation.',
+        formal: 'grow at size = capacity, shrink at size = capacity/4',
+        detail: 'If a container grows when it is full and shrinks the moment it is half empty, the ' +
+          'two thresholds meet, and a workload that alternates push and pop across the boundary ' +
+          'triggers a full copy on every single operation — the amortised bound is destroyed by an ' +
+          'input of length two, repeated. Leaving a band between the thresholds fixes it: shrink only ' +
+          'at a quarter full, so that after either resize the structure sits at half capacity and ' +
+          'needs a linear number of operations before it can trigger the next one. That distance is ' +
+          'what the potential function is measuring, and it is why the standard rule is grow at ' +
+          'full, halve at a quarter.',
+        example: 'Shrinking at half instead costs 512 copies per operation on a pop/push alternation.'
+      },
+      {
+        term: 'Credit invariant',
+        plain: 'The bank must be non-negative after every prefix of the sequence, not merely at the end.',
+        formal: 'Σ(charged − actual) ≥ 0 for every prefix',
+        detail: 'The whole force of an amortised argument comes from the claim that charged work ' +
+          'covers real work at all times, so the obligation is a prefix property: after every ' +
+          'operation, the credit banked so far is at least the real cost incurred so far. A scheme ' +
+          'that dips negative in the middle and recovers by the end has proved nothing — it has ' +
+          'assumed the sequence continues, which the adversary is free to refuse by stopping there. ' +
+          'This is the step people skip, and it is the one that catches invalid schemes: an argument ' +
+          'that pays for a copy out of pushes that have not happened yet is a hope, not a bound.',
+        example: 'A scheme that borrows against a future copy is not an amortised bound, it is a hope.'
+      }
+    ],
+
+    'average-case': [
+      {
+        term: 'Indicator variable',
+        plain: 'A 0/1 variable for "did this event happen". Summing them turns counting into probability.',
+        formal: 'X = ΣXᵢⱼ, E[Xᵢⱼ] = P(event)',
+        detail: 'An indicator is 1 when its event happens and 0 otherwise, which makes its ' +
+          'expectation exactly the probability of the event — the bridge that turns a counting ' +
+          'problem into a probability problem. The technique is to write the quantity you care about ' +
+          'as a sum of indicators, one per possible occurrence, then take expectations term by term. ' +
+          'For quicksort you define Xᵢⱼ = 1 when the i-th and j-th smallest elements are ever ' +
+          'compared, and the total comparison count becomes a double sum. The hard part of the ' +
+          'analysis then reduces to one local question: what is the probability of a single event?',
+        example: 'Xᵢⱼ = 1 when quicksort ever compares the i-th and j-th smallest.'
+      },
+      {
+        term: 'Linearity of expectation',
+        plain: 'Expectations add even when the events depend on each other. The most useful fact in the subject.',
+        formal: 'E[X + Y] = E[X] + E[Y], always',
+        detail: 'E[X + Y] = E[X] + E[Y] holds with no independence assumption whatsoever, which is ' +
+          'what makes the indicator technique work on problems that are hopelessly tangled. In ' +
+          'quicksort, whether elements 3 and 7 get compared is strongly dependent on which pivots ' +
+          'were chosen earlier and therefore on nearly every other indicator — and none of that ' +
+          'matters, because the expectations still add exactly. Compare the situation for variance ' +
+          'or for E[XY], which need independence and fail loudly without it. When an analysis looks ' +
+          'intractable because everything depends on everything, linearity is usually the way in.',
+        example: 'Quicksort pairs are highly dependent; the sum is still exact.'
+      },
+      {
+        term: 'Expected comparisons',
+        plain: 'Randomised quicksort compares two elements only if one is chosen as pivot before everything between them.',
+        formal: 'E[X] = Σ_{i<j} 2/(j−i+1) ≈ 2n ln n',
+        detail: 'Consider the j − i + 1 elements ranked between i and j inclusive. The first of them ' +
+          'chosen as a pivot decides everything: if it is i or j the two are compared, and if it is ' +
+          'any of the ones between, they are split apart and never compared at all. Every one of ' +
+          'those elements is equally likely to be picked first, so the probability is exactly ' +
+          '2/(j − i + 1) — no conditioning on the rest of the run required. Summing over all pairs ' +
+          'gives a harmonic series and the classic ≈ 2n ln n ≈ 1.39 n log₂ n, which is about 39% more ' +
+          'comparisons than the information-theoretic floor.',
+        example: 'At n = 200 that is about 2 000 comparisons.'
+      },
+      {
+        term: 'Average case versus randomised',
+        plain: 'One assumes the input is random; the other makes its own randomness and works for every input.',
+        formal: 'input distribution vs algorithmic coin',
+        detail: 'An average-case bound is conditional on the inputs behaving, and real inputs are ' +
+          'notoriously already sorted, reverse sorted or full of duplicates — so quicksort with a ' +
+          'fixed pivot has a perfectly good average case and degrades to Θ(n²) on the file you were ' +
+          'handed. A randomised algorithm moves the randomness inside: the pivot is chosen by a coin ' +
+          'the input cannot see, so the expectation holds for every input, and the only way to get a ' +
+          'bad run is to be unlucky rather than to be attacked. The distinction is a security ' +
+          'property as much as a performance one, which is the same argument that motivates ' +
+          'universal hashing.',
+        example: 'Sorted input is worst case for a fixed pivot and ordinary for a random one.'
+      },
+      {
+        term: 'Concentration',
+        plain: 'How rarely a run strays far from the expectation. Without it, an expectation says little about one run.',
+        formal: 'Markov, Chebyshev, Chernoff',
+        detail: 'An expectation is one number summarising a distribution, and on its own it does not ' +
+          'promise that any particular run lands near it — a variable that is 0 almost always and ' +
+          'enormous occasionally can have a comfortable mean. Concentration results supply the ' +
+          'missing half by bounding how much probability mass sits far from the mean. This is why ' +
+          'randomised quicksort is trusted in practice: not merely because its expected cost is ' +
+          '2n ln n, but because the probability of exceeding twice that falls off so sharply that ' +
+          'the bad case never appears at realistic n. An expectation with no concentration behind it ' +
+          'is a planning figure, not a guarantee.',
+        example: 'Quicksort exceeds twice its expected cost vanishingly rarely.'
+      },
+      {
+        term: 'Tail bound',
+        plain: 'A ceiling on how often a run exceeds a threshold. What it costs is what you have to know about the variable.',
+        formal: 'Markov needs the mean; Chebyshev needs the variance; Chernoff needs independence',
+        detail: 'The three standard tail bounds are priced by how much you know. Markov needs only a ' +
+          'non-negative mean and gives the weakest answer; Chebyshev needs the variance and squares ' +
+          'the improvement; Chernoff needs independent summands and gives an exponential decay, ' +
+          'which is what turns "unlikely" into "will not happen". Applying the strongest one you can ' +
+          'justify is the whole skill, and applying one you cannot — Chernoff on dependent variables ' +
+          '— produces confident, wrong numbers. On the coupon collector at n = 100 the same threshold ' +
+          'is bounded at 68% by Markov, 28% by Chebyshev and 5% by a union bound.',
+        example: 'On the coupon collector at n = 100, Markov gives 68%, Chebyshev 28% and a union bound 5% — for the same threshold.'
+      },
+      {
+        term: 'Union bound',
+        plain: 'The probability that any of several bad events happens is at most the sum of their probabilities. Crude, and usually enough.',
+        formal: 'P(∪Aᵢ) ≤ ΣP(Aᵢ)',
+        detail: 'The union bound throws away all information about how the bad events overlap and ' +
+          'simply adds their probabilities, which is why it needs no independence and never fails. ' +
+          'It is loose exactly when the events overlap heavily, and tight when they are nearly ' +
+          'disjoint — which describes most failure analyses, where each bad event is individually ' +
+          'rare. The standard move is to make each of n bad events improbable enough that n times ' +
+          'that probability is still small: for the coupon collector, running n·(ln n + c) draws ' +
+          'leaves each coupon unseen with probability at most e^(−c)/n, so the chance that any is ' +
+          'missing is at most e^(−c).',
+        example: 'n coupons each unseen with probability 1/(n·e^c) gives P(not done) ≤ e^(−c).'
+      },
+      {
+        term: 'The mean is not the typical run',
+        plain: 'For a skewed distribution the expectation can sit where almost no run lands.',
+        formal: 'E[X] ≠ median(X) whenever the distribution is skewed',
+        detail: 'Reporting an expectation invites the reader to picture runs clustered around it, ' +
+          'which is only true for a symmetric, tightly concentrated variable. Coupon collection at ' +
+          'n = 100 has a mean of 518.7 draws and a standard deviation of 128.3 — a quarter of the ' +
+          'mean — with a long right tail, so "about 519" describes the centre of gravity rather than ' +
+          'a typical outcome. The practical consequence is that capacity planned on a mean is ' +
+          'planned to be wrong roughly half the time, and the more skewed the distribution the worse ' +
+          'the error. Quote a percentile alongside the mean, or quote the spread, and the shape ' +
+          'stops being invisible.',
+        example: 'Coupon collection has mean 518.7 and a standard deviation of 128.3 — a quarter of the mean.'
+      }
+    ],
+
+    'lower-bounds': [
+      {
+        term: 'Comparison model',
+        plain: 'The algorithm learns only from yes/no comparisons. That restriction is what makes a bound provable.',
+        formal: 'each comparison yields one bit',
+        detail: 'You cannot prove that no algorithm does better without saying what an algorithm is ' +
+          'allowed to do — otherwise the claim quantifies over an unbounded space of tricks. The ' +
+          'comparison model fixes that by allowing exactly one primitive: ask whether a ≤ b and ' +
+          'receive one bit. Every ordering decision must be justified by those bits, which is what ' +
+          'makes the counting argument airtight. The restriction is also the escape hatch, and it is ' +
+          'not a loophole: an algorithm that reads the digits of a key is doing something the model ' +
+          'genuinely does not describe, so it is not a counterexample to the bound.',
+        example: 'Radix sort escapes the bound by reading digits instead.'
+      },
+      {
+        term: 'Decision tree',
+        plain: 'Every execution is a root-to-leaf path; each leaf is one possible answer.',
+        formal: 'height ≥ ⌈log₂(leaves)⌉',
+        detail: 'Model the algorithm as a binary tree: internal nodes are comparisons, the two edges ' +
+          'are the two answers, and a leaf is the point at which the algorithm commits to an output. ' +
+          'A run is a path, so the number of comparisons in the worst case is the height. Since the ' +
+          'algorithm must be able to produce every distinct answer, the tree needs at least that many ' +
+          'leaves, and a binary tree of height h has at most 2^h — so h ≥ log₂(leaves). Sorting has ' +
+          'n! possible answers, and that single inequality gives the whole Ω(n log n) result without ' +
+          'reference to any particular algorithm.',
+        example: 'Sorting n items has n! leaves, so height ≥ ⌈log₂ n!⌉.'
+      },
+      {
+        term: 'Information-theoretic bound',
+        plain: 'k yes/no answers distinguish at most 2^k outcomes. Counting outcomes gives the floor.',
+        formal: 'k ≥ log₂ n! ≈ n log₂ n − 1.44n',
+        detail: 'Each comparison returns one bit, so k of them can distinguish at most 2^k cases; if ' +
+          'the answer must select among N possibilities then 2^k ≥ N and k ≥ log₂ N. For sorting, ' +
+          'N = n! and Stirling gives log₂ n! ≈ n log₂ n − n log₂ e = n log₂ n − 1.4427n, which is ' +
+          'where the familiar n log n comes from and also where the −1.44n correction that people ' +
+          'forget comes from. The argument is entirely about counting outcomes, so it applies to any ' +
+          'problem you can count the answers of — searching among n items needs log₂ n, and finding ' +
+          'a duplicate needs its own count.',
+        example: 'n = 4: 24 orders, so at least 5 comparisons.'
+      },
+      {
+        term: 'Adversary argument',
+        plain: 'An opponent answers each query to keep as many answers alive as possible, without ever committing to an input.',
+        formal: 'answers stay consistent with ≥ half the candidates',
+        detail: 'Instead of fixing an input, imagine an adversary that decides each answer on the ' +
+          'spot, choosing whichever reply leaves the largest set of inputs still consistent with ' +
+          'everything said so far. It never lies, because at the end at least one real input matches ' +
+          'the entire transcript. The algorithm cannot stop until only one candidate remains, so the ' +
+          'number of questions needed is however long the adversary can keep the set from collapsing. ' +
+          'This gives bounds that pure counting misses, because it can encode structure — for finding ' +
+          'a maximum, the adversary keeps every element that has never lost a comparison alive, ' +
+          'forcing n − 1 comparisons.',
+        example: 'Finding the maximum needs n − 1 comparisons.'
+      },
+      {
+        term: 'Beating a lower bound',
+        plain: 'You never beat it inside the model. You change the model.',
+        formal: 'different model, different floor',
+        detail: 'A proved lower bound is not a difficulty to be overcome by cleverness — inside its ' +
+          'model it is final. Every apparent counterexample is an algorithm operating outside the ' +
+          'model: counting sort and radix sort use keys as indices rather than comparing them, and ' +
+          'run in Θ(n + k) with no contradiction whatsoever. So the productive reading of a lower ' +
+          'bound is as a question about assumptions: which restriction is doing the work, and can my ' +
+          'data pay to escape it? Bounded integer keys, a known distribution, precomputation, extra ' +
+          'space and approximate answers are all model changes, and each has its own floor.',
+        example: 'Counting sort is Θ(n + k) because it never compares.'
+      },
+      {
+        term: 'Model of computation',
+        plain: 'A lower bound is a statement about a model. Naming the model is half the theorem.',
+        formal: 'comparison model, algebraic decision tree, cell-probe, …',
+        detail: 'Different models measure different resources and produce different floors for the ' +
+          'same problem, so a bound quoted without its model is unusable. The comparison model counts ' +
+          'comparisons; the algebraic decision tree model counts arithmetic tests and is what gives ' +
+          'lower bounds for geometric problems; the cell-probe model counts memory accesses and is ' +
+          'where data-structure lower bounds live, since it charges nothing for computation. ' +
+          'Ω(n log n) for sorting is a comparison-model result, full stop. Quoting it as "sorting ' +
+          'requires n log n" is the error that makes radix sort look impossible.',
+        example: 'Ω(n log n) is a comparison-model bound; radix sort is not a counterexample, it is a different model.'
+      },
+      {
+        term: 'Adversary invariant',
+        plain: 'The quantity the adversary keeps large. The bound is however many questions it takes to drive it to one.',
+        formal: 'answer so as to maximise the surviving candidates',
+        detail: 'Every adversary argument rests on a measure of remaining uncertainty and a bound on ' +
+          'how fast one question can reduce it. Pick the measure — surviving permutations, elements ' +
+          'that have never lost, connected components — show it starts high, show a single comparison ' +
+          'can only shrink it by a fixed factor or amount, and the number of questions follows by ' +
+          'division. For sorting, the adversary always answers so that at least half the live ' +
+          'permutations survive, so the count falls from n! to 1 no faster than by halving, giving ' +
+          '⌈log₂ n!⌉. Choosing the right invariant is the entire creative step.',
+        example: 'Sorting: the live permutations halve at best per comparison, so ⌈log₂ n!⌉ questions are needed.'
+      },
+      {
+        term: 'Facts, not comparisons',
+        plain: 'Count what the answer requires the algorithm to know, then how much one operation can supply.',
+        formal: '2n − 2 facts, ≤ 2 per comparison of two untouched elements',
+        detail: 'The sharpest bounds come from accounting for information rather than operations. To ' +
+          'certify both a minimum and a maximum, every one of the other n − 2 elements must be known ' +
+          'to have lost at least once and won at least once: that is 2n − 2 facts. A comparison ' +
+          'between two elements neither of which has been touched yields two new facts, but any ' +
+          'other comparison yields at most one — so the algorithm must open with ⌊n/2⌋ pairings and ' +
+          'then spend single-fact comparisons, giving ⌈3n/2⌉ − 2. At n = 100 that is 148 against the ' +
+          '198 two independent scans would cost, and the bound proves no algorithm does better.',
+        example: 'Min and max together need ⌈3n/2⌉ − 2 comparisons — 148 for 100 elements, against 198 for two scans.'
+      }
+    ]
+  });
+}(typeof window !== 'undefined' ? window : null));
