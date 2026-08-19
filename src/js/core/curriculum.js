@@ -131,10 +131,76 @@
               tags: ['benchmark', 'warm-up', 'median', 'variance', 'jit']
             }
           ]
+        },
+        {
+          id: 'M10',
+          title: 'Sorting, selection and searching',
+          summary: 'Sorting as an engineering subject: stability, adaptivity, pivots and the searches that follow.',
+          sections: [
+            {
+              id: 'sorting-contract',
+              title: 'The sorting contract',
+              summary: 'Stability, adaptivity, in-place - and the comparator whose violation JavaScript will not report.',
+              tags: ['stability', 'adaptive', 'in place', 'comparator', 'strict weak ordering', 'insertion sort']
+            },
+            {
+              id: 'merge-sort',
+              title: 'Merge sort and its variants',
+              summary: 'One merge, four schedules, and the run detection that makes sorted input linear.',
+              tags: ['merge sort', 'bottom-up', 'natural runs', 'in-place merge', 'k-way merge', 'stability']
+            },
+            {
+              id: 'quicksort',
+              title: 'Quicksort: partitions, pivots and the quiet quadratic',
+              summary: 'Lomuto against Hoare against three-way, an adversarial input, and the depth limit that escapes it.',
+              tags: ['quicksort', 'lomuto', 'hoare', 'dutch national flag', 'introsort', 'adversarial input']
+            },
+            {
+              id: 'library-sorts',
+              title: 'Library sorts: Timsort and pattern-defeating quicksort',
+              summary: 'Run detection, the merge-stack invariants, the 2015 result, and pdqsort mechanisms.',
+              tags: ['timsort', 'pdqsort', 'minrun', 'galloping', 'merge stack', 'formal verification']
+            },
+            {
+              id: 'non-comparison-sorts',
+              title: 'Non-comparison sorting: counting, radix and buckets',
+              summary: 'Escaping the comparison bound by reading the key, and the stability every digit pass needs.',
+              tags: ['counting sort', 'radix sort', 'lsd', 'msd', 'bucket sort', 'american flag', 'stability']
+            },
+            {
+              id: 'selection-and-order',
+              title: 'Selection and order statistics',
+              summary: 'Quickselect, median of medians and top-k: three constants in front of n.',
+              tags: ['quickselect', 'median of medians', 'introselect', 'top-k', 'partial sort', 'order statistic']
+            },
+            {
+              id: 'binary-search',
+              title: 'Binary search, correctly',
+              summary: 'The half-open invariant, seven mutations, and how few inputs notice each one.',
+              tags: ['binary search', 'lower bound', 'upper bound', 'invariant', 'off-by-one', 'interpolation search']
+            },
+            {
+              id: 'searching-the-answer',
+              title: 'Searching on the answer',
+              summary: 'Binary search over a monotone predicate, and the monotonicity check that licenses it.',
+              tags: ['predicate search', 'monotonicity', 'minimise the maximum', 'feasibility', 'ternary search']
+            },
+            {
+              id: 'external-sorting',
+              title: 'External, parallel and network sorting',
+              summary: 'Merge passes as the unit of cost, replacement selection, and comparator networks verified exhaustively.',
+              tags: ['external sort', 'replacement selection', 'k-way merge', 'bitonic', 'sorting network', 'zero-one principle']
+            },
+            {
+              id: 'sorting-in-practice',
+              title: 'Sorting in practice',
+              summary: 'The chooser, the stability guarantee, and the default that sorts numbers as strings.',
+              tags: ['array sort', 'schwartzian transform', 'collation', 'tie-breaking', 'es2019', 'chooser']
+            }
+          ]
         }
       ],
       planned: [
-        { id: 'M10', title: 'Sorting, selection and searching', sections: 10 },
         { id: 'M11', title: 'Algorithm design paradigms', sections: 9 },
         { id: 'M12', title: 'Dynamic programming', sections: 11 },
         { id: 'M13', title: 'Graph algorithms I — traversal, order, shortest paths, MST', sections: 10 },

@@ -3,7 +3,7 @@
 Where the implementation stands, and exactly what the next session should pick up.
 Update this file at the end of any session that leaves work unfinished.
 
-**Last updated:** 2026-08-19
+**Last updated:** 2026-08-19 (M10 in progress)
 
 ---
 
@@ -21,11 +21,13 @@ Update this file at the end of any session that leaves work unfinished.
 | M07 — probabilistic and streaming sketches | 9 | ✅ built, tested, verified in Chrome |
 | M08 — spatial and multidimensional indexes | 9 | ✅ built, tested, verified in Chrome |
 | M09 — persistent, immutable and succinct structures | 9 | ✅ built, tested, verified in Chrome |
+| M10 — sorting, selection and searching | 10 | 🚧 **in progress** — see the M10 section below |
 
-As of the current stopping point the tree is fully green: `npm test` = wiring audit
-(85 sections, 407 modules) + **1 657 unit tests, 0 failing, 1 skipped**, `npm run lint:size`
-reports no offenders across 456 files, and `npm run build:css` has been re-run since the last
-template change. 85 sections carry 667 concepts, 166 worked examples and 87 graded exercises.
+As of the current stopping point **the tree is red**: `npm run test:wiring` fails on five M10
+content files that are referenced from `index.html` and not yet written, so the unit tests do not
+run. `npm run lint:size` passes across 500 files. The last fully green point was the end of M09:
+85 sections, 1 657 tests, 456 files clean. See the M10 section at the end of this file for exactly
+which five files are missing and what is already done.
 
 All nine M07 sections were opened in Chrome on `npm start`: the three tabs render, every demo
 figure matches the prose *exactly* (see "aligning the demo with the prose" below), the references
@@ -826,16 +828,294 @@ SuccinctLab.intersectionPaths({})
 
 ---
 
+## M10 — IN PROGRESS (stopped mid-session; the tree is RED — five wired files do not exist yet)
+
+**Everything through the worked examples is written and on disk. Five content files are wired in
+`index.html` and not yet created, which is why `npm test` fails. Do not re-derive anything below.**
+
+### Where it stops
+
+`npm run test:wiring` reports exactly five missing files and nothing else:
+
+```
+src/js/content/reference-sorting-library.js
+src/js/content/reference-searching.js
+src/js/content/exercises-sorting.js
+src/js/content/exercises-sorting-library.js
+src/js/content/exercises-searching.js
+```
+
+`npm run lint:size` passes (500 files). The unit tests cannot run until those five exist.
+
+| Step | State |
+|---|---|
+| 1. algorithms | ✅ 12 modules + `sort-ops.js` |
+| 2. machines | ✅ `sort-lab.js` — 7 generators × 15 algorithms, oracle + stability verdict |
+| 3. viz | ✅ `array-view.js` (bars / runs / compare), `network-view.js` (lattice / depths) |
+| 4. sections | ✅ 10 template + section pairs |
+| 5a. concepts | ✅ 3 files, 80 concepts (8 per section), all past the 240-char detail floor |
+| 5b. examples | ✅ 3 files, 20 worked examples, every figure measured (see below) |
+| 5c. reference | 🚧 1 of 3 — `reference-sorting.js` done, two missing |
+| 5d. exercises | ❌ 0 of 3 |
+| 6. wiring | ✅ `curriculum.js` M10 group added (95 sections); `index.html` containers + all script tags |
+| 7a. module tests | ✅ `sorting-modules.test.js` (11), `searching-modules.test.js` (35) — all passing |
+| 7b. worked-example tests | ❌ not written |
+| 8. `npm test` | ❌ blocked on the five missing files |
+| 8. `build:css` | ❌ not run |
+| 9. browser pass | ❌ not started |
+
+### Section ids and prefixes
+
+Prefixes were checked against every existing template; none collide.
+
+| Section id | prefix | module(s) |
+|---|---|---|
+| `sorting-contract` | `soc-` | `sorts-elementary.js`, `sort-ops.js` |
+| `merge-sort` | `mgs-` | `merge-sort.js` |
+| `quicksort` | `qks-` | `quick-sort.js` |
+| `library-sorts` | `lib-` | `timsort.js`, `pdqsort.js` |
+| `non-comparison-sorts` | `ncs-` | `radix-sort.js` |
+| `selection-and-order` | `sel-` | `selection.js` |
+| `binary-search` | `bin-` | `binary-search.js` |
+| `searching-the-answer` | `ans-` | `answer-search.js` |
+| `external-sorting` | `ext-` | `external-sort.js`, `sorting-networks.js` |
+| `sorting-in-practice` | `sip-` | `sort-lab.js` (the chooser) |
+
+### What to do next, in order
+
+1. Write `reference-sorting-library.js` (`library-sorts`, `non-comparison-sorts`,
+   `selection-and-order`) and `reference-searching.js` (`binary-search`, `searching-the-answer`,
+   `external-sorting`, `sorting-in-practice`). Copy the shape of `reference-sorting.js`, which is
+   done: `summary`, `intuition`, `formulation.equations[]`, `invariants[] (>= 2)`,
+   `complexity[]`, `failureModes[] (>= 3)`, `inTheWild[] (array of {system, how} — a string
+   throws in `core/search-index.js`)`, `sources[] (>= 3)`.
+2. Write the three `exercises-*.js` files. One graded exercise per section, `>= 2` tests each;
+   the project convention is 4. Remember `api.rng`, never `api.random`. Run both the solution
+   and the starter through the sandbox — `tests/unit/exercises.test.js` discovers them
+   automatically and asserts the solution passes and the starter fails.
+3. Write `worked-examples-sorting.test.js`, `-sorting-library`, `-searching` using
+   `tests/support/worked-example-prose.js`. Every figure quoted in the examples is listed below
+   with the exact call that produced it.
+4. `npm test && npm run lint:size && npm run build:css`.
+5. Chrome pass over all ten sections, three tabs each, every demo figure against the prose, and
+   every exercise through the real Worker.
+6. Update the README status block, `CLAUDE.md` and the tables at the top of this file.
+
+### Two measurement decisions already made — do not undo them
+
+- **Selection figures are the mean of seven pivot seeds** (`PIVOT_SEEDS` in
+  `selection-and-order-section.js`). A single quickselect run is one sample of an expectation and
+  reported 7.09n at n = 80 000 where the mean is 3.92n; the flat-constant claim the section makes
+  is only true of the mean. The run count travels with the figure in the metric note.
+- **`binary-search-section.js` builds its skewed keys geometrically** (`Math.pow(1.001, i)`).
+  An arithmetic skew gave interpolation search 5 probes, which is not a demonstration of
+  anything; the geometric one gives 13 against binary search's 13, which is the real result —
+  interpolation's whole advantage is a property of the distribution.
+
+### Measured figures quoted in the M10 examples
+
+All measured from the code on disk. `L` = `SortLab`, and `L.compare({kind, size, seed: 3})`
+unless another seed is named.
+
+#### 10.1 `sorting-contract` (n = 2 000, seed 3)
+
+```
+random:   shell 29 853 | insertion 993 838 | bubble 1 994 247 | selection 1 999 000
+moves:    selection 3 984 (1 992 swaps) | shell 23 509 | insertion 993 828 | bubble 1 983 686
+sorted:   insertion 1 999 cmp / 0 moves | bubble 1 999 | shell 15 194 / 0 | selection 1 999 000
+selection sort is exactly n(n-1)/2 = 1 999 000 on ALL SEVEN shapes
+Array.prototype.sort: [1,2,10].sort() -> [1,10,2]; [5,40,300].sort() -> [300,40,5]; [1,2,3] unchanged
+```
+
+#### 10.2 `merge-sort` (n = 2 000, seed 3)
+
+```
+random:  top-down 19 407 cmp / 43 904 moves / 1 alloc
+         bottom-up 19 420 / 24 000 / 1
+         natural 21 281 / 40 382 / 444 swaps
+         in-place 26 763 / 102 734 / 51 367 swaps / 0 alloc
+natural on sorted:     0 passes, 2 000 cmp, 1 run
+natural on reversed:   0 passes, 2 000 cmp, 1 000 swaps, 1 run
+natural on organ-pipe: 1 pass, 4 000 cmp, 2 runs
+```
+
+#### 10.3 `quicksort`
+
+```
+2 000 identical values:
+  lomuto/median-of-three   2 004 997 cmp, depth 2 000, 1 999 partitions
+  hoare/median-of-three       31 723 cmp, depth 12
+  three-way/ninther            2 012 cmp, depth 2, 1 partition
+few-unique n = 2 000: lomuto 676 647 | hoare 32 506 | three-way 3 389
+QuickSort.adversarialInput(n, {partition:'lomuto', pivot:'median-of-three'}):
+  n =   512    66 304 cmp, depth  257   (n²/4 =    65 536) | introsort  4 970, depth 10
+  n = 1 024   263 680 cmp, depth  513   (n²/4 =   262 144) | introsort 10 999, depth 11
+  n = 2 048 1 051 648 cmp, depth 1 025  (n²/4 = 1 048 576) | introsort 24 526, depth 13
+adversarialInput against three-way/ninther, n = 2 048:
+  no depth limit 361 451 cmp, depth 344 | introsort 78 223, depth 22, 1 heapsort escape
+every configuration reports 0 elements out of place — the failure is purely a slowdown
+```
+
+#### 10.4 `library-sorts`
+
+```
+Timsort nearly-sorted n = 2 000: 3 099 cmp (1.55/element); bottom-up merge 15 410
+Timsort random n = 2 000: 19 399
+minRunLength: 10->10, 63->32, 64->16, 65->17, 1000->32, 2048->16, 20000->20   (range [16,32])
+de Gouw et al. run lengths [120, 80, 25, 20, 30], n = 275, minRun: 1
+  fixed rule: settled stacks [120] [120,80] [120,80,25] [120,80,25,20] [275], 0 violations
+  buggy rule: settles at [120, 80, 45, 30] -> 1 violation (120 <= 80 + 45 = 125)
+  BOTH SORT CORRECTLY — 0 out of place either way
+pdqsort n = 20 000, seed 3:
+  sorted    40 010 cmp, depth  1, 1 partial-insertion win
+  equal     40 024 cmp, depth  2, 1 equal block
+  few       60 008 cmp, depth  3, 3 equal blocks
+  random   319 511 cmp, depth 17, 91 pattern breaks
+  organ    428 593 cmp, depth 23, 394 pattern breaks, 0 heapsort fallbacks
+```
+
+#### 10.5 `non-comparison-sorts`
+
+```
+LSD radix: 0 comparisons at every digit width, every shape
+countingCost(range, n = 1000): 2^8 -> 1 024 bytes / 1 256 ops / wins
+                               2^16 -> 262 144 bytes / 66 536 ops / loses
+                               2^32 -> 17 179 869 184 bytes / loses      (n log2 n ~ 9 966)
+digit widths: 4 bits 16 buckets 64 B 8 passes | 8 bits 256 / 1 024 B / 4 | 16 bits 65 536 / 262 144 B / 2
+stability, 2 000 tagged elements, 8-bit digits:
+  keys 0..19   stable -> sorted+ties kept; unstable -> SORTED, ties reversed  (damage invisible)
+  keys 0..10^6 stable -> sorted+ties kept; unstable -> NOT SORTED             (first pair already wrong)
+signed LSD: [-2147483648, -100, -1, 0, 1, 100, 2147483647]
+signed:false: [0, 1, 100, 2147483647, -2147483648, -100, -1]
+```
+
+#### 10.6 `selection-and-order` — MEAN OF SEVEN PIVOT SEEDS [3,11,17,29,41,53,67]
+
+```
+L.input('random', n, 7), k = 50th percentile:
+  n =  5 000  quick 16 221 (3.24n) | mom  40 921 (8.18n) | sort   54 966 (10.99n)
+  n = 20 000  quick 59 772 (2.99n) | mom 161 904 (8.10n) | sort  259 880 (12.99n)  <- demo default
+  n = 80 000  quick 313 625 (3.92n) | mom 661 550 (8.27n) | sort 1 199 064 (14.99n)
+introselect at 20 000 = 59 772 (2.99n) — identical to quickselect on this input
+k sweep at 20 000: k=0% 2.31n | 25% 2.84n | 50% 2.99n | 100% 1.81n
+```
+
+#### 10.7 `binary-search`
+
+```
+mutationReport(), 13 probe checks:
+  correct             0/13   <- the control; must stay 0
+  closed-interval     3/13   wrong answer
+  lte-probe           5/13   wrong answer
+  high-mid-minus-one  1/13   wrong answer   <- caught by ONE case
+  low-mid             6/13   did not terminate
+  inclusive-loop      4/13   READ PAST THE END — never a wrong answer
+  rounded-mid        11/13   did not terminate
+10 000 keys, uniform (i*3) and geometric (1.001^i):
+  lowerBound   13 probes on both   (the bound ceil(log2 10 000) is 14)
+  branchless   15 on both — no early exit, so ⌈log₂ n⌉ + 1 always
+  interpolation 1 uniform / 13 geometric
+  exponential search for index 3: bound 4, searches [2, 5)
+midpointComparison(2 000 000 000, 2 100 000 000): safe 2 050 000 000, bits32 -97 483 648, overflows
+```
+
+#### 10.8 `searching-the-answer`
+
+```
+shipCapacity([1..10], 5): answer 15, 5 checks, range 10..55, span 46, predicate flips exactly 1
+aggressiveCows([1,2,4,8,9], 3): answer 3, 3 checks   (a LAST-true search)
+non-monotone x===3 || x>=7 over [0,10]: 3 flips; binary search returns 7, truth is 3
+searchCost(1e9): 30 checks against a sweep of 1e9
+ternary integer: peak of -(x-37)^2+500 over [0,1000] found at 37 in 30 probes
+ternary real: peak of -(x-3.5)^2+9 over [0,10] -> 3.499999970, width 4.44e-16 after 200 rounds
+```
+
+#### 10.9 `external-sorting`
+
+```
+L.input('random', 10 000, 5), memory 100, order 4:
+  sort-and-flush        100 runs, mean 100.0, 4 passes, 100 000 transfers
+  replacement selection  51 runs, mean 196.1, 3 passes,  80 000 transfers   <- 2M, Knuth's snowplough
+  sorted input + replacement selection: 1 run, 0 merge passes
+merge order 2/4/8/16 -> 7/4/3/2 passes; 160 000 / 100 000 / 80 000 / 60 000 transfers
+ioCost(1e9, 1e7, 1e5, 99): 10 000 blocks, 100 runs, 2 passes, 60 000 block transfers
+networks — ALL pass exhaustive zero-one verification, 0 failures:
+  n= 4 bitonic  6/depth 3 | odd-even  5/3  | insertion   6/5   (16 inputs)
+  n= 8 bitonic 24/depth 6 | odd-even 19/6  | insertion  28/13  (256 inputs)
+  n=16 bitonic 80/depth 10| odd-even 63/10 | insertion 120/29  (65 536 inputs)
+  n=1024 bitonic 28 160/55 | odd-even 24 063/55
+  n=1025 pads to 2048: bitonic 67 584/66 — 1 023 sentinels for one extra element
+bitonic(8) single-comparator deletion is caught by between 1 and 225 of the 256 zero-one inputs
+bitonic depth == log2(n)(log2(n)+1)/2 exactly at 8, 16, 64, 1024
+```
+
+#### 10.10 `sorting-in-practice` (n = 2 000, seed 3, comparisons)
+
+```
+shape          winner                     | lomuto med-3 | selection | radix
+random         Timsort        19 399      |     25 011   | 1 999 000 | 0 cmp / 8 000 moves
+sorted         insertion       1 999      |     21 033   | 1 999 000 | 0 / 4 000
+nearly-sorted  Timsort         3 099      |    104 120   | 1 999 000 | 0 / 4 000
+few-unique     three-way       3 389      |    676 647   | 1 999 000 | 0 / 4 000
+reversed       natural merge   2 000      |     34 331   | 1 999 000 | 0 / 4 000
+organ-pipe     natural merge   4 000      |    323 989   | 1 999 000 | 0 / 4 000
+adversarial    Timsort         8 708      |  1 003 000   | 1 999 000 | 0 / 4 000
+Lomuto ranges 21 033 -> 1 003 000 across the shapes: a factor of 48
+```
+
+### Eleven module bugs the M10 work found (all fixed — keep them fixed)
+
+1. `merge-sort`: the stability flag was passed **inverted** at all three `merge()` call sites
+   (`!stable` for `takeLeftOnTie`), so every "stable" schedule was unstable and the
+   `unstableMerge` option made them stable.
+2. `merge-sort`: symmetric in-place merge (`inPlaceSort`) **is** stable — the lower-bound /
+   upper-bound cut asymmetry is what preserves tie order. It was declared `stable: false`.
+3. `quick-sort`: Hoare's scheme **hangs** if the pivot sits at `to - 1`. Fixed by swapping the
+   chosen pivot to `from` first. It does not return a wrong answer; it does not return.
+4. `pdqsort`: `breakPatterns` swapped across the pivot boundary, which silently undoes the
+   partition just computed. It must swap strictly inside one side. 9 of 2 128 shape/size
+   combinations came back unsorted.
+5. `sorting-networks`: `j /= 2` in the bitonic loop walks into 0.5, 0.25, … and never reaches 0,
+   so the round counter (and therefore the depth) was meaningless — 3 228 instead of 6 — while
+   the comparator list stayed correct. Use `j >>= 1`.
+6. `radix-sort`: `countingSort` computed min/max off the **values** rather than through the key
+   function, so sorting objects by a field threw `Invalid array length`.
+7. `radix-sort`: `lsdRadixSort` read `source[0]` on an empty array. Guarded with an early return.
+8. `answer-search`: `lastTrue` implemented as `firstTrue` on the negated predicate is **one too
+   small** whenever the entire range is feasible — the exact off-by-one the module's own doc
+   comment warns about. It needs its own invariant and a midpoint that rounds **up**.
+9. `answer-search`: `ternarySearchInteger` had its two branches inverted and returned the range
+   endpoint instead of the peak.
+10. `external-sort`: `predictedPasses` used `Math.max(1, …)` and so reported 1 pass when run
+    generation had already produced a single run. Extracted as `passesFor(runs, order)`.
+11. `binary-search`: the `inclusive-loop` mutation is caught by **no** output check in
+    JavaScript. `mutationReport` now runs each mutation against a `Proxy` that records reads past
+    the end, which is the only way that defect is observable here.
+
+### Things that will bite if forgotten
+
+- **Heredocs collapse backslashes in this environment.** Two content files were corrupted by
+  `python - <<'PY'` — once turning `\'` into `'` and once turning `\n` into a literal newline
+  inside a string. Use the Write/Edit tools for anything containing escapes.
+- `root.SortsElementary` is the global for `sorts-elementary.js` (not `Elementary`).
+- `Helpers.memoise` takes a **single string key**; a multi-argument compute function silently
+  memoises on the first argument only.
+- `Format.bytes` exists — do not hand-roll a byte formatter.
+- A section `config()` over 50 own lines is the usual size-lint failure; the fix used here (and
+  in `bloom-filters-section.js`) is to extract `diagram()` as its own function.
+- Elementary sorts are excluded from the `sorting-in-practice` chooser above 3 000 rows, because
+  timing a quadratic sort at 30 000 measures patience. `candidatesFor(size)` does it.
+
+---
+
 ## Next
 
-**M10 — sorting, selection and searching**, then onward through `doc/milestones/` in the order
-`doc/ROADMAP.md` gives. Nothing from M09 is outstanding: the tree is green, the CSS is rebuilt,
-the browser pass is done and `tmp-dbg/` has been deleted. Its `check09-exercises.js` is not worth
-re-creating — `tests/unit/exercises.test.js` discovers every registered exercise on its own and
-runs both the solution and the starter through the sandbox, so an exercise is covered the moment
-its content file lands.
+**Finish M10** — the five missing content files, the worked-example tests, then `build:css` and
+the Chrome pass. The M10 section immediately above lists them in order and carries every measured
+figure the prose quotes, so nothing needs re-deriving. After that, **M11 — algorithm design
+paradigms**, and onward through `doc/milestones/` in the order `doc/ROADMAP.md` gives.
 
-A shared helper now exists for the figure tests: `tests/support/worked-example-prose.js` exports
+A shared helper exists for the figure tests: `tests/support/worked-example-prose.js` exports
 `proseFor`, `quotes`, `fixed` and `grouped`. New `worked-examples-*.test.js` files should require
 it rather than redeclaring the four functions (the M03-M08 files still carry their own copies).
 
