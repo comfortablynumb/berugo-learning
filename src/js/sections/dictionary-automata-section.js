@@ -85,13 +85,13 @@
   }
 
   function wordsFor(values) {
-    const words = root.TextCorpus.words().slice(0, values['da-count']);
-    if (values['da-order'] !== 'shuffled') return words;
-    return root.Random.seeded(values['da-seed']).shuffle(words.slice());
+    const words = root.TextCorpus.words().slice(0, values['dic-count']);
+    if (values['dic-order'] !== 'shuffled') return words;
+    return root.Random.seeded(values['dic-seed']).shuffle(words.slice());
   }
 
   function ternaryFor(values, words) {
-    if (values['da-order'] === 'balanced') return root.TernaryTrie.create({ keys: words, balanced: true });
+    if (values['dic-order'] === 'balanced') return root.TernaryTrie.create({ keys: words, balanced: true });
     return root.TernaryTrie.create({ keys: words });
   }
 
@@ -105,28 +105,28 @@
     sorted.forEach(trie.insert);
     const ternary = ternaryFor(values, words);
 
-    const query = String(values['da-neighbour'] || '').toLowerCase().replace(/[^a-z]/g, '');
+    const query = String(values['dic-neighbour'] || '').toLowerCase().replace(/[^a-z]/g, '');
     ternary.resetStats();
-    const neighbours = query ? ternary.withinDistance(query, values['da-budget']) : [];
+    const neighbours = query ? ternary.withinDistance(query, values['dic-budget']) : [];
     const visits = ternary.stats().nodeVisits;
 
     root.MetricGrid.update({
-      'da-nodes': {
+      'dic-nodes': {
         value: root.Format.exact(dawg.nodes()),
         note: 'the trie needs ' + root.Format.exact(trie.nodes()) + ' — ' +
           root.Format.fixed(trie.nodes() / Math.max(1, dawg.nodes()), 2) + '× as many'
       },
-      'da-merged': {
+      'dic-merged': {
         value: root.Format.exact(dawg.stats().statesMerged),
         note: root.Format.exact(dawg.registerSize()) + ' distinct signatures in the register'
       },
-      'da-height': {
+      'dic-height': {
         value: root.Format.exact(ternary.height()),
-        note: values['da-order'] === 'sorted'
+        note: values['dic-order'] === 'sorted'
           ? 'sorted input: a spine at every level'
           : 'against ' + root.Format.exact(root.TernaryTrie.create({ keys: sorted }).height()) + ' for sorted input'
       },
-      'da-neighbours': {
+      'dic-neighbours': {
         value: root.Format.exact(neighbours.length),
         note: root.Format.exact(visits) + ' node visits, out of ' + root.Format.exact(ternary.nodes())
       }
@@ -148,26 +148,26 @@
         '<td class="mono">' + (row.ok ? 'yes' : 'NO — ' + row.errors.join('; ')) + '</td></tr>';
     }).join('');
 
-    root.jQuery('#da-table tbody').html(rows);
-    root.jQuery('#da-table-note').text('The DAWG is the smallest and its lookup is the same one step ' +
+    root.jQuery('#dic-table tbody').html(rows);
+    root.jQuery('#dic-table-note').text('The DAWG is the smallest and its lookup is the same one step ' +
       'per character as the trie, because sharing suffixes changes the graph and not the walk. The ' +
       'ternary tree is the largest here — three pointers per node is a good trade on a 256-symbol ' +
       'alphabet and a bad one on 26, which is exactly the kind of claim that has to be measured ' +
       'against your alphabet rather than repeated. Words used: ' + root.Format.exact(words.length) +
-      ', order: ' + values['da-order'] + '.');
+      ', order: ' + values['dic-order'] + '.');
   }
 
   function paintNeighbours(query, values, neighbours, visits, ternary) {
     if (!query) {
-      root.jQuery('#da-neighbour-out').text('(type a query above)');
-      root.jQuery('#da-neighbour-note').text('');
+      root.jQuery('#dic-neighbour-out').text('(type a query above)');
+      root.jQuery('#dic-neighbour-note').text('');
       return;
     }
 
     const shown = neighbours.slice(0, 40);
     const lines = [
       'query:            ' + query,
-      'substitutions:    ' + values['da-budget'] + ' (same length only)',
+      'substitutions:    ' + values['dic-budget'] + ' (same length only)',
       'matches (' + neighbours.length + '): ' + (shown.length ? shown.join(', ') : '(none)'),
       '',
       'nodes visited:    ' + visits,
@@ -175,8 +175,8 @@
       'fraction walked:  ' + (visits / Math.max(1, ternary.nodes())).toFixed(3)
     ];
 
-    root.jQuery('#da-neighbour-out').text(lines.join('\n'));
-    root.jQuery('#da-neighbour-note').text('The query never scans the dictionary. At each node the ' +
+    root.jQuery('#dic-neighbour-out').text(lines.join('\n'));
+    root.jQuery('#dic-neighbour-note').text('The query never scans the dictionary. At each node the ' +
       'remaining budget decides which of the three children can still lead somewhere, and the other ' +
       'subtrees are skipped without a comparison. That is the query a hash table cannot answer at ' +
       'all and a plain trie can only answer by walking every branch.');
@@ -201,7 +201,7 @@
     });
     graph.finish();
 
-    chart = root.GrowthPlot.render(root.jQuery('#da-chart')[0], {
+    chart = root.GrowthPlot.render(root.jQuery('#dic-chart')[0], {
       lazyLib: app.lazyLib,
       height: 240,
       series: [
@@ -210,9 +210,9 @@
       ],
       xLabel: 'words inserted',
       yLabel: 'nodes / states',
-      legendHost: root.jQuery('#da-legend')[0],
+      legendHost: root.jQuery('#dic-legend')[0],
       summary: function () {
-        return 'Trie nodes against DAWG states over ' + values['da-count'] +
+        return 'Trie nodes against DAWG states over ' + values['dic-count'] +
           ' words: the gap is the shared suffixes.';
       }
     });

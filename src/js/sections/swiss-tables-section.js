@@ -92,11 +92,11 @@
 
   function update(app) {
     const values = panel.values();
-    const capacity = values['st-capacity'];
-    const count = Math.floor(capacity * (values['st-load'] / 100));
+    const capacity = values['swt-capacity'];
+    const count = Math.floor(capacity * (values['swt-load'] / 100));
     const keys = root.HashLab.keys({ kind: 'random', count: count, rng: root.Random.seeded(29) });
 
-    const built = build({ capacity: capacity, keys: keys, deleteFraction: values['st-deletes'] / 100 });
+    const built = build({ capacity: capacity, keys: keys, deleteFraction: values['swt-deletes'] / 100 });
     const before = built.table.stats();
     built.live.forEach(function (key) { built.table.get(key); });
     const after = built.table.stats();
@@ -106,13 +106,13 @@
     const comparisons = (after.lookupProbes - before.lookupProbes) / lookups;
 
     root.MetricGrid.update({
-      'st-groups': { value: groups.toFixed(3),
+      'swt-groups': { value: groups.toFixed(3),
         note: '16 control bytes each; ' + root.Format.exact(built.table.groups()) + ' groups in the table' },
-      'st-keycmp': { value: comparisons.toFixed(3),
+      'swt-keycmp': { value: comparisons.toFixed(3),
         note: 'one per lookup is the floor — the key itself has to be checked' },
-      'st-plain': { value: plain({ capacity: capacity, keys: keys }).toFixed(2),
+      'swt-plain': { value: plain({ capacity: capacity, keys: keys }).toFixed(2),
         note: 'linear probing, same keys, same slot count' },
-      'st-false': { value: Math.max(0, comparisons - 1).toFixed(3),
+      'swt-false': { value: Math.max(0, comparisons - 1).toFixed(3),
         note: 'extra comparisons from 7-bit tag collisions; 1/128 = 0.008 expected' }
     });
 
@@ -128,7 +128,7 @@
     });
     const mask = root.SwissTable.matchTag(control, 0, tag === undefined ? 1 : tag);
 
-    root.jQuery('#st-group').html(
+    root.jQuery('#swt-group').html(
       '<div>control: ' + control.map(describeByte).join(' ') + '</div>' +
       '<div>tag:     ' + (tag === undefined ? '—' : '0x' + tag.toString(16).padStart(2, '0')) + '</div>' +
       '<div>mask:    0b' + (mask >>> 0).toString(2).padStart(16, '0') + '</div>' +
@@ -151,7 +151,7 @@
 
   function paintSplit() {
     const samples = ['user:1042', 'session-token', 'order/99'];
-    root.jQuery('#st-split').html(samples.map(function (key) {
+    root.jQuery('#swt-split').html(samples.map(function (key) {
       const h = root.HashFunctions.murmur3(key, 0);
       const split = root.SwissTable.splitHash(h);
       return '<div>' + root.Helpers.escapeHtml(key) + ' → 0x' + h.toString(16).padStart(8, '0') +
@@ -160,7 +160,7 @@
   }
 
   function draw(app, values) {
-    const capacity = values['st-capacity'];
+    const capacity = values['swt-capacity'];
     const swiss = [];
     const linear = [];
 
@@ -178,7 +178,7 @@
       linear.push({ x: percent / 100, y: plain({ capacity: capacity, keys: keys }) });
     }
 
-    chart = root.GrowthPlot.render(root.jQuery('#st-chart')[0], {
+    chart = root.GrowthPlot.render(root.jQuery('#swt-chart')[0], {
       lazyLib: app.lazyLib,
       height: 240,
       series: [
@@ -188,7 +188,7 @@
       xLabel: 'load factor',
       yLabel: 'probes per lookup',
       yMin: 0,
-      legendHost: root.jQuery('#st-legend')[0],
+      legendHost: root.jQuery('#swt-legend')[0],
       summary: function () {
         return 'Group probes for a Swiss table against slot probes for linear probing, same keys and slots.';
       }

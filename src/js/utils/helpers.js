@@ -27,6 +27,27 @@
     return out;
   }
 
+  /**
+   * One-slot memoisation keyed on a caller-supplied string.
+   *
+   * The demos recompute a whole sweep on every control change, and most
+   * controls do not affect most sweeps: a section that measures six filters
+   * because the learner moved an unrelated slider spends two seconds doing it.
+   * One slot is enough - the key is almost always the same twice in a row -
+   * and it keeps the memory bounded without an eviction policy.
+   */
+  function memoise(compute) {
+    let lastKey = null;
+    let lastValue = null;
+
+    return function memoised(key) {
+      if (lastKey === key) return lastValue;
+      lastValue = compute(key);
+      lastKey = key;
+      return lastValue;
+    };
+  }
+
   function debounce(fn, wait) {
     let timer = null;
     return function debounced() {
@@ -94,6 +115,7 @@
     escapeHtml: escapeHtml,
     clamp: clamp,
     range: range,
+    memoise: memoise,
     debounce: debounce,
     throttle: throttle,
     yieldToLoop: yieldToLoop,

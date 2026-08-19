@@ -43,7 +43,7 @@
       '<p class="note" id="bt-pages-note"></p></div></div>' +
       '<div class="card" style="margin-top:.875rem">' +
       '<div class="card-header">The range scan: one descent, then the leaf chain</div>' +
-      '<div class="card-body"><table class="ref-table" id="bt-scan"><thead><tr>' +
+      '<div class="card-body"><table class="ref-table" id="bt-scan-table"><thead><tr>' +
       '<th>Keys scanned</th><th>Page reads</th><th>Reads per 1 000 keys</th><th>What it is</th>' +
       '</tr></thead><tbody></tbody></table>' +
       '<p class="note" id="bt-scan-note"></p></div></div>';

@@ -164,7 +164,7 @@
         '</td></tr>';
     }).join('');
 
-    root.jQuery('#bt-scan tbody').html(rows);
+    root.jQuery('#bt-scan-table tbody').html(rows);
     root.jQuery('#bt-scan-note').text('A scan pays the descent once. After that it is one page per ' +
       'leaf-full of keys, and no internal page is touched again — which is why an index scan is ' +
       'cheap and an index lookup per row is not.');

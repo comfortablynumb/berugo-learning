@@ -22,6 +22,10 @@
 }(typeof window !== 'undefined' ? window : null, function (scope) {
   'use strict';
 
+  /* One SVG circle per point stops being reasonable somewhere around here;
+     past it the scatter is subsampled rather than drawn in full. */
+  const DOT_LIMIT = 3000;
+
   function chartFor(host, config) {
     return scope.ChartBase.create({
       host: host,
@@ -128,6 +132,29 @@
     scope.Legend.render(config.legendHost, entries);
   }
 
+  /**
+   * A deterministic subsample for a scatter with more points than SVG can
+   * carry. One circle per element stops being sensible past a few thousand,
+   * and a count-min scatter over a real stream is twenty thousand keys.
+   *
+   * The heaviest quarter of the budget is spent on the largest values, because
+   * those are the points a reader is looking for; the rest is a fixed stride
+   * through the tail, so the shape of the cloud survives and the sample does
+   * not move between redraws.
+   */
+  function sampleFor(points, limit) {
+    const cap = limit || DOT_LIMIT;
+    if (points.length <= cap) return points;
+
+    const sorted = points.slice().sort(function (a, b) { return b.truth - a.truth; });
+    const head = sorted.slice(0, Math.floor(cap / 4));
+    const rest = sorted.slice(head.length);
+    const stride = Math.max(1, Math.ceil(rest.length / (cap - head.length)));
+    const tail = [];
+    for (let i = 0; i < rest.length; i += stride) tail.push(rest[i]);
+    return head.concat(tail);
+  }
+
   function drawDots(ctx, points, x, y) {
     ctx.plot.selectAll('circle.estimate')
       .data(points)
@@ -197,7 +224,7 @@
       });
 
       drawGuides(ctx, config, x, y, [Math.max(low, span[0]), span[1]]);
-      drawDots(ctx, points, x, y);
+      drawDots(ctx, sampleFor(points, config.maxPoints), x, y);
     });
 
     legendFor(config, (config.legend || []).concat([
@@ -276,7 +303,14 @@
 
       const x = ctx.d3.scaleBand().domain(values.map(function (entry) { return entry.label; }))
         .range([0, ctx.width]).padding(0.15);
-      const y = scaleFor(ctx, { domain: [0, extentOf(values, [function (p) { return p.value; }])[1]], range: [ctx.height, 0] });
+      /* A log scale is offered because some of these comparisons span three
+         orders of magnitude - a prefix-sum update against a Fenwick one - and
+         a linear axis there is one bar and four slivers. */
+      const y = scaleFor(ctx, {
+        log: config.logY,
+        domain: [0, extentOf(values, [function (p) { return p.value; }])[1]],
+        range: [ctx.height, 0]
+      });
 
       scope.ChartBase.grid(ctx, y, { ticks: 4 });
       scope.ChartBase.axes(ctx, { x: x, y: y, xLabel: config.xLabel, yLabel: config.yLabel });
@@ -293,5 +327,5 @@
     return chart;
   }
 
-  return { render: render, scatter: scatter, curve: curve, bars: bars };
+  return { render: render, scatter: scatter, curve: curve, bars: bars, sampleFor: sampleFor, DOT_LIMIT: DOT_LIMIT };
 }));

@@ -3,7 +3,7 @@
 Where the implementation stands, and exactly what the next session should pick up.
 Update this file at the end of any session that leaves work unfinished.
 
-**Last updated:** 2026-08-17
+**Last updated:** 2026-08-19
 
 ---
 
@@ -18,15 +18,20 @@ Update this file at the end of any session that leaves work unfinished.
 | M04 — search trees and disjoint sets | 10 | ✅ built, tested, verified in Chrome |
 | M05 — heaps and priority queues | 8 | ✅ built, tested, verified in Chrome |
 | M06 — tries, suffix structures and text indexes | 9 | ✅ built, tested, verified in Chrome |
+| M07 — probabilistic and streaming sketches | 9 | ✅ built, tested, verified in Chrome |
+| M08 — spatial and multidimensional indexes | 9 | ✅ built, tested, verified in Chrome |
+| M09 — persistent, immutable and succinct structures | 9 | ✅ built, tested, verified in Chrome |
 
-At the last green point: `npm test` = wiring audit (58 sections, 278 modules) +
-**1 040 unit tests, 0 failing, 1 skipped**, `npm run lint:size` = 310 files, no offenders.
+As of the current stopping point the tree is fully green: `npm test` = wiring audit
+(85 sections, 407 modules) + **1 657 unit tests, 0 failing, 1 skipped**, `npm run lint:size`
+reports no offenders across 456 files, and `npm run build:css` has been re-run since the last
+template change. 85 sections carry 667 concepts, 166 worked examples and 87 graded exercises.
 
-All nine M06 sections were opened in Chrome on `npm start`: the three tabs render, every demo
-figure matches the prose, the references tab carries a full entry, and all nine graded exercises
-were run through the **real Worker sandbox** — every solution passes (4/4 ×7, 5/5 ×1, 4/4), and
-`exercises.test.js` holds every starter to failing at least one. Two bugs were found *only* by
-that browser pass; see the M06 notes.
+All nine M07 sections were opened in Chrome on `npm start`: the three tabs render, every demo
+figure matches the prose *exactly* (see "aligning the demo with the prose" below), the references
+tab carries a full entry, and all nine graded exercises were run through the **real Worker
+sandbox** — every solution passes (4/4 ×7, 5/5 ×1, 4/4) and every starter fails. Four bugs were
+found *only* by the browser pass or by the new template-id test; see the M07 notes.
 
 ### M02 notes worth keeping
 
@@ -452,29 +457,406 @@ the three trie layouts cost 81 968, 573 888 and 64 041 bytes; DNA 2 000 costs 42
 90 566 / 1 749 / 245 comparisons at 10-against-100 000 and 124 751 / 182 123 / 157 906 at
 50 000-against-100 000; "cat" within one edit is 7 answers with the n-gram index returning 2.
 
+## M07 notes worth keeping
+
+Spec: `doc/milestones/M07-probabilistic-structures.md`. Nine sections under the `data-structures`
+track. Four harnesses rather than one, because the milestone covers four different questions:
+`machines/stream-lab.js` (generators, exact references, `errorSeries`, the adversarial key search),
+`machines/filter-lab.js` (membership), `machines/sketch-lab.js` (cardinality, frequency, quantiles,
+similarity, windows) and `machines/sketch-chooser.js` (the ranking and the two attacks).
+
+### Modules
+
+`algorithms/`: `bloom-filter.js` (standard, counting, blocked, scalable, plus `optimalParams`),
+`cuckoo-filter.js` (partial-key cuckoo hashing with a victim slot), `quotient-filter.js`
+(three metadata bits, the sorted read-out and the merge), `hyperloglog.js` (sparse and dense,
+linear counting, exact merge), `count-min.js` (count-min, conservative update, count-sketch,
+heavy-hitter heap), `quantile-sketches.js` (exact, reservoir, weighted reservoir, t-digest, KLL,
+DDSketch), `minhash-lsh.js` (shingles, signatures, banding, SimHash, random projection),
+`window-counters.js` (DGIM/exponential histogram, an exact ring, space-saving over a Stream-Summary
+bucket list, lossy counting, decayed counters). `viz/error-band-view.js` (`render`, `scatter`,
+`curve`, `bars`).
+
+Content is split per third of the milestone — `-sketches`, `-sketches-counting`, `-sketches-streams`.
+
+### Six bugs and wrong claims the M07 work found
+
+1. **The blocked Bloom filter's in-block offsets were stepped by a stride**, so every key's k
+   offsets were the same pattern translated by one hash: only `blockBits` distinct patterns exist
+   and the measured error was **28×** the prediction (0.281 against 0.010). Re-mixing each offset
+   through the finaliser restores the model, and the residual 1.21× at 512-bit blocks is the real
+   occupancy-variance penalty the section teaches.
+2. **Double hashing breaks the count-min guarantee.** `h1 + i·h2` is fine for a Bloom filter, whose
+   analysis needs no independence between probes, and wrong here: two keys whose h1 *and* h2 agree
+   modulo w collide in every row at once. Measured on a Zipf stream at w = 2 719, d = 5, that put
+   count-sketch's worst error at 6 939 against a stated bound of 2 808. Avalanching each row's
+   combined value before the modulo brought it to 879.
+3. **A cuckoo filter that drops the orphan of a failed eviction chain acquires a false negative**
+   at the exact moment it fills — one key lost at 97.1% load. The orphan is now held in a victim
+   slot that `has` and `remove` consult, and `add` reports the filter full.
+4. **Count-sketch with an even depth averages the two middle rows** instead of choosing between
+   them, mixing a good row with a bad one. Forcing an odd depth took the worst measured error from
+   6 465 to 1 019 at the same width.
+5. **`bt-scan` was both a slider and a table in `b-trees-template.js`**, so `$('#bt-scan tbody')`
+   resolved to the range input and the range-scan table was never written. Five more sections had a
+   metric id whose `-note` span collided with a hand-written paragraph, and `d-ary-heaps` shared
+   *six* ids with `dictionary-automata` (`da-count`, `da-seed`, `da-height`, `da-chart`,
+   `da-legend`, `da-table`) — every one of them broken whenever both sections were visited.
+   `tests/unit/template-ids.test.js` is the permanent check.
+6. **A count-min scatter is 21 619 SVG circles.** `ErrorBandView.sampleFor` now draws at most
+   3 000 — the heaviest quarter of the budget plus a fixed stride through the tail — and the note
+   says how many of how many were drawn.
+
+### Aligning the demo with the prose
+
+The browser pass found four sections whose demo defaults did not reproduce the figures their own
+orientation quoted: different probe counts, a different key universe, a shorter stream. A learner
+opening the section saw 1.28× where the text said 1.21×. The demos now use the worked example's
+parameters, and the recomputation cost that made those parameters tempting to shrink is paid for
+by `Helpers.memoise` — one-slot memoisation keyed on the controls a measurement actually depends
+on. Switching the count-min estimator went from 414 ms to 7 ms; the uncached paths are 190–620 ms.
+
+### Design decisions that are easy to undo by accident
+
+- **Every filter's `predictedFpr` is load-aware.** A cuckoo table rounded up to a power of two is
+  half empty, and the full-table formula overstates its error by exactly that factor. `spaceAtError`
+  therefore reports two memory columns: as built, and at the design load the papers assume.
+- **The quotient filter has no `remove`.** Deletion is an unshift of the cluster tail and a
+  partially correct one corrupts run boundaries into false negatives. Shipping a filter that cannot
+  delete, next to a cuckoo filter that can, is the honest pairing.
+- **HLL++'s empirical bias tables are not implemented and the section says so.** Between n = 2.5m
+  and 4m both the raw estimator and linear counting read 2.5–5.0% high — more than 3σ — and the
+  correction panel shows that band rather than hiding it.
+- **The shards in `shardQuantiles` are deliberately not identical.** Over statistically identical
+  shards, averaging per-shard p99s happens to land within 0.1% of the truth and the mistake looks
+  correct. One degraded shard is the only interesting case, and there the average reads 17.4% low.
+- **`stream-lab.searchKeys` reports `examined` and `exhausted`.** An attack that needs four million
+  candidates is a different threat from one that needs four hundred, and a search that runs out of
+  budget must say so rather than return a shorter list — the same rule M03's `collidingKeys` learned.
+
+### Measured figures quoted in the M07 examples
+
+`worked-examples-sketches.test.js`, `-sketches-counting` and `-sketches-streams` recompute every
+one *and* assert the example still quotes it, so moving a number without moving the prose fails the
+build. Landmarks: 9.59 bits per key and k = 7 at 1%, measured 1.010% against a predicted 1.004% and
+16.05% at twice the sized n; blocked filters at 1.00 cache lines against 6.95 for 1.21× the error;
+a cuckoo filter stopping at 7 957 of 8 192 slots with 86.4% of inserts evicting nothing and a
+longest chain of 408; HyperLogLog at p = 12 estimating 21 665 against 21 619 while the four shard
+estimates sum to 36 702; count-min's 1 062-count bound reading as 3.8% of the heaviest key and
+7 584% of the thousandth; DDSketch 0.53% out at p99.9 where a 1 000-item reservoir is 38.8% out;
+128 min-hashes split 16×8 finding 27.3% of the duplicate pairs and 32×4 finding all of them at 50%
+precision; DGIM at 600 bits and 26.14% against an exact 20 000; and 50 manufactured false positives
+from 5 179 probes, none of which survive a different seed.
+
+## M08 notes worth keeping
+
+Spec: `doc/milestones/M08-spatial-indexes.md`. Nine sections under the `data-structures` track.
+Every index is validated against a brute-force oracle on uniform, clustered, collinear, coincident
+and lattice inputs, and the oracle disagreement count is a *reported field* rather than an
+exception — a spatial index fails by returning a plausible subset, and nothing else notices.
+
+### Modules
+
+`algorithms/`: `spatial-hash.js` (direct-addressed grid and hashed grid on one interface),
+`quadtree.js` (point, loose and octree), `kd-tree.js` (median build, three pruning bounds including
+the broken one), `r-tree.js` (four splits, forced reinsertion, STR bulk load), `bvh.js` (median and
+binned SAH, slab traversal, refit), `space-filling.js` (Morton, Hilbert, geohash, range
+decomposition and coalescing), `range-structures.js` (prefix sums, Fenwick, segment tree, lazy,
+sparse table, sqrt blocks, merge-sort tree), `ann-index.js` (brute force, VP-tree, IVF, product
+quantisation, k-means), `hnsw.js`, `broad-phase.js` (sweep and prune, moving hash, swept test).
+`machines/`: `spatial-lab.js` (generators, oracles, query runner, cell and dimension sweeps),
+`range-lab.js`, `vector-lab.js` (recall scoring and the re-ranking wrapper).
+`viz/spatial-view.js` (canvas: partitions, curves, proximity graphs).
+
+**Three harnesses and two ANN files rather than the spec's one each.** `spatial-lab` + `range-lab` +
+`vector-lab` answer three unrelated questions, and `ann-index` + `hnsw` in one file passes 1 000
+lines. The size limit wins over the spec's table.
+
+Content is split per third of the milestone — `-spatial`, `-spatial-volumes`, `-spatial-search`.
+
+### Five bugs the M08 oracles found
+
+1. **The k-d tree read the splitting plane off the far *child* instead of the parent.** A leaf has
+   no split value, so the subtraction produced NaN, every comparison against NaN is false, and the
+   backtrack pruned exactly the leaves holding the answer. It was wrong on 50–160 of 250 queries per
+   configuration and looked completely normal. `boundFor` now takes the parent node, and the
+   signature carries the reason.
+2. **R* forced reinsertion re-entered the tree from the root mid-descent**, so a split could replace
+   a node the outer recursion was still holding and everything under it was lost — 1 227 rectangles
+   missing across 60 window queries, with `checkInvariants` passing. Reinsertion is now queued and
+   drained after the insertion unwinds, and restricted to leaves.
+3. **The direct-addressed grid clamped out-of-range cells onto the edge row**, which is a collision
+   in the one mode that is supposed to have none: it reported phantom candidates the concepts say
+   only the hashed mode can produce. Out-of-bounds items now live in their own list.
+4. **`missed` over-counted tunnelling by an order of magnitude.** A contact that begins mid-step and
+   is still a contact at the next sample is one frame of latency, not a missed contact. Counting it
+   gave 1 187 "missed" at a speed that actually misses 1. The next frame's exact contact set is now
+   consulted before anything is called missed.
+5. **"The SAH's other half is the decision not to split"** was an overclaim, caught by the demo's own
+   counter on the first page load: at leaf size 4 that branch fires **zero** times on this scene,
+   because four primitives are already cheaper than any split of them. It fires 69 times at leaf
+   size 1. The win at leaf size 4 comes from uneven split positions instead, and the prose, the
+   concept, the reference entry and a test now say so.
+
+### The measurement that corrects a folk claim
+
+"Hilbert has better locality than Z-order" is **false** under the metric people picture and **true**
+under the one a query planner contains. At order 6 the mean index gap between two spatially adjacent
+cells is 39.05 for Hilbert and 32.50 for Morton, and the worst is 3 413 against 1 366 — Z-order wins
+both. The number a query actually pays is contiguous runs per window, and a 16 × 16 window costs
+15.68 Hilbert ranges against 29.49 Morton ones. `windowRanges()` exists to measure the second, and
+the tests assert both directions so the prose cannot drift back to the convenient half.
+
+### Design decisions that are easy to undo by accident
+
+- **`kd-tree` ships the broken variant on purpose.** `pruneWith: 'descent'` is the tree with the
+  backtrack deleted; it costs 4.87 distance computations against 69.28 and is wrong on 60.2% of
+  queries while reporting a plausible mean distance of 60.272 against a true 42.701. The section's
+  whole claim is that this is undetectable without an oracle, so the learner has to be able to
+  select it and watch the counter move.
+- **The k-d demo's oracle is chained, not brute force.** Verifying 500 nearest queries against
+  20 000 points costs more than everything else in the section; the box-bound run is checked against
+  brute force on the first 200 and, being exact, is then the oracle for the other two over all 500.
+  That is what makes the demo's "301 of 500" the same number the prose quotes — the first browser
+  pass showed "115 of 200" beside a prose figure of 60.2%.
+- **`checkInvariants` on an R-tree takes a `minFill` flag.** STR leaves the last page of each slice
+  short *by construction*; asserting Guttman's minimum against a bulk-loaded tree is checking the
+  wrong structure's invariant.
+- **A quantiser's recall is never reported without its re-ranking row.** Eight bytes a vector recalls
+  39.5% and returns the true nearest first one time in ten; the same codes with an exact rescoring
+  stage recall 95.0%. The memory column rises when re-ranking is on, because the exact vectors have
+  to be somewhere — the saving is in fast memory, not in total bytes.
+- **`SpatialView` has a `boxTone` dial.** A thousand quadtree nodes want the faintest stroke that
+  still reads as a subdivision; a dozen R-tree MBRs over the same points want the strongest, or they
+  vanish into the data they exist to explain. Both were wrong on the first browser pass, along with
+  the curve shading, which now goes *over* the curve at half alpha instead of under it.
+
+### Measured figures quoted in the M08 examples
+
+`worked-examples-spatial.test.js`, `-spatial-volumes` and `-spatial-search` recompute every one *and*
+assert the example still quotes it. Landmarks: a grid's predicted 112.50 candidates against a
+measured 109.98 on uniform points and 148.19 on clustered ones, with the work minimum at a cell of 15
+rather than the folklore c = r; 20 000 coincident points on three sites building 137 nodes and a
+6 667-point leaf at any depth cap; a k-d tree's 8 191 nodes from 720 512 comparisons, and 0.3% of the
+data touched at two dimensions against 100% at thirty-two; four R-tree splits at 113.69%, 57.67%,
+59.58% and 24.49% overlap giving 356.04, 78.90, 85.32 and 36.69 node visits at the same height 6,
+with STR at 98.6% fill and 28.43; a SAH BVH at 49.44 modelled cost and 25.71 nodes per ray against a
+median split's 65.81 and 40.70, and the same tree at 258.29 after scattered motion; 306 cells
+decomposing into 45 Morton or 22 Hilbert ranges; Fenwick's 7.49/13.01 slots against a segment tree's
+14.00/44.90 at four times the memory; HNSW from 58.8% recall at 20.4× to 99.0% at 5.4×; and 79 800,
+2 370.47 and 109.97 pair tests per frame for the identical 70.78 pairs.
+
+Two results contradict the textbook and are worth carrying forward. **Guttman's linear split beats
+his quadratic split** on this rectangle set, on both overlap and query cost, while doing
+asymptotically less work. And on this scene **a rebuilt grid beats sweep and prune by 21.6×**,
+because sweep and prune prunes one axis and a grid prunes two — SAP earns its place on varied object
+sizes, unbounded worlds and zero-allocation frames, not by default.
+
+### The browser pass, again
+
+All nine sections were opened in Chrome on `npm start`: three tabs each, a rendered mermaid diagram
+in every Description, a full reference block in every References, and every demo figure compared
+against the section's own prose. All nine graded exercises were run through the **real Worker
+sandbox** — every reference solution passes every test and every starter fails at least one.
+
+Four of the things fixed in this milestone were invisible to the whole test suite and obvious on the
+first page load: the SAH overclaim, the k-d demo verifying a prefix while the prose quoted the whole
+set, the R-tree MBRs drawn in a tone that made them disappear into the data, and the curve shading
+drawn underneath a curve dense enough to swallow it. Step 9 is not optional.
+
+
+---
+
+## M09 notes worth keeping
+
+Shipped: 9 algorithm modules, 2 machines (`version-lab.js` for 9.1-9.6, `succinct-lab.js` for
+9.7-9.9), `viz/dag-view.js` (canvas: `tree` shared/copied colouring, `dag` per-version bars),
+9 template + section pairs, 12 content files, and the `curriculum.js` M09 group with its
+`planned` entry emptied.
+
+### Modules
+
+| Section id | prefix | module | exercise |
+|---|---|---|---|
+| `persistence-basics` | `pb-` | `persistent-bst.js` | path-copying insert; old versions must still answer |
+| `persistent-sequences` | `psq-` | `persistent-queue.js` | banker's queue with an explicit memoised suspension |
+| `versioned-queries` | `vq-` | `persistent-segment-tree.js` | persistent segment tree, 11 nodes per update |
+| `bit-partitioned-tries` | `bpt-` | `hamt.js` | popcount-indexed sparse nodes |
+| `finger-trees` | `ftr-` | `finger-tree.js` | split by measure, counted through a `measure` getter |
+| `zippers` | `zip-` | `zipper.js` | tree zipper, graded on reference identity of untouched subtrees |
+| `rank-and-select` | `rk-` | `bit-vector.js` | two-level index: rank inside a block, select without a scan |
+| `succinct-trees` | `sct-` | `succinct-tree.js` | LOUDS navigation (the starter omits the super-root) |
+| `compressed-bitmaps` | `cbm-` | `roaring.js` | Roaring container selection and the two intersection paths |
+
+### Four `create` factories that had to be shrunk, and the three moves that do it
+
+`bit-vector.js`, `finger-tree.js`, `persistent-queue.js` and `roaring.js` all had a `create(options)`
+over the 50-own-line limit. Copy these three moves rather than inventing a fourth:
+
+- **Hoist the argument normalisation** to module scope — `bit-vector.js` grew a
+  `packBits(bits, options)` returning `{ words, length }`, `finger-tree.js` a `monoidFor(choice)`.
+- **Move every doc comment that sits *between* two nested functions to the first line *inside*
+  the body it documents.** Own lines become child lines and the comment survives verbatim. That
+  move plus the compaction below took `persistent-queue.js` from 65 own lines to 46 and
+  `roaring.js` from 58 to 43.
+- **Compact the public `return { … }`**: plain `name: name` pairs several to a line, only the
+  inline closures on their own lines.
+
+Remember how the lint counts: **own lines = span minus the spans of nested functions**, and a
+one-line `foo: function () { … }` counts as a nested function. Blank lines and comments sitting
+directly inside `create` are the expensive ones, not the code.
+
+### The browser pass
+
+All nine sections were opened in Chrome on `npm start`. The three tabs render, each Description
+carries its mermaid diagram (6-9 nodes, no syntax errors) and 8 concepts, each References tab
+carries a full entry, and **zero JavaScript errors** were raised across the whole pass. Every
+metric readout matches the prose: `pb-` 3 918 / 13.12 / 156 720 / 8.61, `vq-` 11.00 / 241 504 /
+135.9× / 0, `bpt-` 3 930 / 19 624 / 6 / 4.72×, `ftr-` 1 000 / 7 / 14 / 20, `zip-` 12 / 600 / 50× /
+24, `rk-` 7.9% / 3.0 / 8.0 / 14.7×, `sct-` 2.0002 / 1 358 / 5.8× / 1.67, `cbm-` 41 232 / 16.49 /
+15.30× / 3.44×. All nine exercises were run through the **real Worker sandbox** in the page:
+every solution passes 4/4 and every starter fails.
+
+One reading needs its context recorded, because it looks wrong and is not: `psq-build` (worst
+operation while building) is **0** for the banker's queue. A pure build is all pushes, and the
+banker's queue defers every rotation, so nothing is forced. The 1 014-step spike the prose quotes
+comes from `queueTimeline` — push everything, *then* pop everything — and it is on the chart
+legend directly above the metric ("banker's — worst 1014, mean 1.49"). Two different experiments,
+both labelled.
+
+### Measured figures quoted in the M09 examples
+
+Recomputed in `worked-examples-persistent.test.js`, `-persistent-tries` and `-succinct`, which
+also assert the prose still quotes each one. The exact calls that produce them:
+
+#### 9.1–9.3 (`examples-persistent.js`)
+
+```
+VersionLab.persistenceCompare({ count: 400, seed: 1 })   // universe defaults to 3x = 1 200
+  400 versions, 344 live keys, depth 18, 0 wrong versions for all three
+  path-copying  3 918 distinct, 13.12/update, 156 720 bytes
+  fat-node        344 distinct,  0.86/update,  76 448 bytes, 3 574 field appends
+  node-copying  2 057 distinct,  5.14/update, 126 944 bytes, 1 861 boxes, 1 713 cascades
+VersionLab.copyingCost(400, 344) = 5 504 000
+VersionLab.readProbes({})   // 2 000 queries, probeSeed 99, version drawn BEFORE the key
+  path-copying 8.61 | fat-node 8.61 + 8.05 = 16.66 | node-copying 8.61
+VersionLab.queueReuse({ size: 512, reuses: 1000 })
+  strict 510.00 steps/reuse (worst 510) | banker 1.50 (worst 503, 8 suspensions forced)
+  realtime 1.00 (worst 1) | worst while building: 511 / 0 / 1
+VersionLab.queueTimeline({ size: 512 })
+  worst 511 / 1 014 / 2, mean 1.49 / 1.49 / 1.00
+VersionLab.versionedQueries({ size: 1024, updates: 500 })
+  11 nodes/update = the ceil(log2 n) + 1 bound, 241 504 bytes vs 32 817 504 copied (135.9x),
+  0 wrong of 2 004 checks
+VersionLab.rangeQuantiles({ size: 512, domain: 1000, probes: 300 })
+  10.98 nodes/value, 9.97 -> quoted as "10.0" descents/query, 179 904 bytes, 0 wrong
+```
+
+#### 9.4–9.6 (`examples-persistent-tries.js`)
+
+```
+VersionLab.mapCompare({ count: 20000, seed: 5 })
+  15 695 distinct keys, 3 930 nodes, 19 624 slots, mean fan-out 4.99, depth 6 (bound 7),
+  219 872 sparse vs 1 037 520 dense = 4.72x, 0 empty slots, 0 wrong
+VersionLab.vectorAllocations({ count: 20000 })
+  1 840 allocations persistent vs 645 with a transient = 2.85x, 1 195 mutated in place,
+  levels 3, tail 32, 0 wrong
+VersionLab.monoidCompare({ count: 1000, seed: 7 })   // pushBack one at a time, NOT fromArray
+  size 1 000 | sum 49 956 | priority 999 | intervalEnd 499
+  identical widths on all four: 1/3, 1/4, 1/3, 1/4, 1/3, 1/1 — spine 6, 24 digit elements
+VersionLab.sequenceOps({ count: 3000, at: 1500 })
+  spine 7, 26 digit elements, split visits 14 nodes, concat allocates 20, rejoins to 3 000
+VersionLab.zipperCost({ depth: 12, edits: 50 })
+  zipper 12 rebuilt / 24 moves / 1 rebuild; from the root 600 / 1 200 / 50; ratio 50x
+```
+
+#### 9.7–9.9 (`examples-succinct.js`)
+
+```
+SuccinctLab.bitVectorRun({ bits: 65536, density: 0.5 })
+  32 583 ones, 8 192 data + 646 index = 7.9% overhead,
+  rank 3.0 lookups + 3.5 word popcounts, select 8.0 binary steps,
+  positions array 130 332 = 14.7x
+  at density 0.02: positions array 4 984 against 8 838 stored — the ARRAY wins
+  at 1 048 576 bits: select 12.0 steps, overhead 7.8%
+SuccinctLab.eliasFanoRun({})        // 5 000 values, gap 400, seed 17
+  9.5686 bits/value against a 9.6496 bound, 3.34x against 32-bit, 0 wrong
+SuccinctLab.treeEncodings({ nodes: 5000 })     // seed 23
+  LOUDS 10 001 bits = 2.0002/node, 1 252 + 106 = 1 358 bytes; BP exactly 2.0000 bits/node
+  pointer tree 240 000 bytes (48/node) -> 177x for the shape, and 5.8x once 40 000 bytes of
+  8-byte payload is added to the LOUDS side. 0 scan steps in 14 999 navigation calls.
+SuccinctLab.waveletRun({})          // 4 000 symbols, alphabet 256, seed 31
+  8 levels, 255 vectors, exactly 8 bits/symbol = the bound, 16.0 rank calls/quantile, 0 wrong
+SuccinctLab.bitmapKinds({ count: 20000, seed: 37 })
+  sparse 77 array containers, 41 232 bytes | WAH 141 972 | raw 630 784 | sorted 80 000
+  dense  1 bitmap, 8 208 | WAH 5 164 | raw 8 192   <- Roaring LOSES here, and the prose says so
+  runs   8 208 -> 808 after runOptimize | WAH 1 920
+SuccinctLab.intersectionPaths({})
+  array x bitmap: 3 elements touched, 3 probes, 0 words | bitmap x bitmap: 2 048 words
+```
+
+### Things that will bite if forgotten
+
+- `api.rng`, never `api.random`, inside a graded exercise test.
+- `inTheWild` in a reference entry must be an **array of `{ system, how }`**; a string throws in
+  `core/search-index.js` on first render.
+- Every `work` string of every worked-example step must contain a digit — seven M09 sections
+  failed that check and were fixed by putting the real measured number into the step.
+- A template element id may not equal a control id. `rk-density` was both; the table is now
+  `rk-crossover`.
+- `versionDag` scores every version as it builds, so it is quadratic in the version count. The
+  `persistence-basics` section caps the drawn DAG at `DAG_VERSIONS = 240` (about 110 ms); 800
+  versions took 3 s.
+- `Format.exact` on a fractional value prints the fraction, so `nodesPerUpdate` goes through
+  `Format.fixed`.
+
+### Five module bugs the M09 oracles found (all fixed, keep them fixed)
+
+1. `persistent-bst.shape()` under-counted fat nodes — 14 distinct for 333 keys, because one
+   global visited set stopped the walk at version 1. It needs a **per-version** set as well.
+2. `hamt.vector` root overflow built one level too few (`newPath(vec.shift - BITS, …)` should be
+   `newPath(vec.shift, …)`); every index past the first overflow read `undefined`.
+3. `finger-tree.append`'s left-empty case used `reduce` where it needed `reduceRight`, reversing
+   the middle run — 163 of 600 split/concat checks failed.
+4. `bit-vector.rank1(length)` double-counted at exact block multiples (6 144 for 4 096 ones);
+   fixed with an `if (at === length) return ones;` fast path.
+5. `persistent-bst.resetStats` **rebound** the stats object while the strategy engine held the
+   original by parameter, so every engine-side counter read 0 afterwards. It must be
+   `Object.assign(stats, emptyStats())`.
+
 ---
 
 ## Next
 
-Roadmap build order (`doc/ROADMAP.md`): **M07 probabilistic and streaming sketches** → M08
-spatial indexes → M09 persistent structures → onward through `doc/milestones/`.
+**M10 — sorting, selection and searching**, then onward through `doc/milestones/` in the order
+`doc/ROADMAP.md` gives. Nothing from M09 is outstanding: the tree is green, the CSS is rebuilt,
+the browser pass is done and `tmp-dbg/` has been deleted. Its `check09-exercises.js` is not worth
+re-creating — `tests/unit/exercises.test.js` discovers every registered exercise on its own and
+runs both the solution and the starter through the sandbox, so an exercise is covered the moment
+its content file lands.
 
-The M07 spec is `doc/milestones/M07-probabilistic-structures.md`. The shape to copy, unchanged
-through M06:
+A shared helper now exists for the figure tests: `tests/support/worked-example-prose.js` exports
+`proseFor`, `quotes`, `fixed` and `grouped`. New `worked-examples-*.test.js` files should require
+it rather than redeclaring the four functions (the M03-M08 files still carry their own copies).
+
+The shape to copy, unchanged through M08:
 
 1. pure modules in `algorithms/` first, behind one shared interface;
-2. a `machines/` harness that drives every implementation through that interface;
-3. `viz/` renderers, and the CSS classes they need — M06 shipped `trie-view` and `matrix-view`
-   with no styles until the browser pass;
-4. `sections/<id>-template.js` + `<id>-section.js`, checking that **no metric id collides with an
-   element id** in the same template;
+2. a `machines/` harness that drives every implementation through that interface, carrying a
+   brute-force oracle whose disagreement count is a reported field rather than an exception;
+3. `viz/` renderers, and the CSS classes they need;
+4. `sections/<id>-template.js` + `<id>-section.js` — `tests/unit/template-ids.test.js` checks the
+   id collisions automatically, within a template and across all of them;
 5. the four content files, split per third of the milestone to stay under 1 000 lines;
 6. wire `core/curriculum.js` (moving the milestone out of `planned`) and `index.html`;
 7. `<topic>-modules.test.js` (property tests against a brute-force reference) and
-   `worked-examples-<topic>.test.js` (recompute every quoted figure);
+   `worked-examples-<topic>.test.js` (recompute every quoted figure *and* assert the prose still
+   quotes it);
 8. `npm test && npm run lint:size && npm run build:css`;
 9. Chrome: every section, every tab, every demo figure against the prose, and every exercise
    through the real Worker sandbox.
 
-Measure the figures *before* writing the prose that quotes them, and do not skip step 9 — the two
-worst bugs in M06 were invisible to the whole test suite and obvious on the first page load.
+Measure the figures *before* writing the prose that quotes them, and do not skip step 9. Two of
+M06's bugs, four of M07's and four of M08's were invisible to the whole test suite and obvious on
+the first page load — including, in M08, a sentence about the surface-area heuristic that the
+demo's own counter contradicted the moment it rendered.

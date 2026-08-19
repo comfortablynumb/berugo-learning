@@ -9,7 +9,7 @@ explained in full, diagram, insight), **Examples** (runnable demo with charts, w
 graded code lab) and **References** (the structured reference block).
 
 ## Status
-**M00–M06 are built and verified in a browser** (58 sections, tree green), each carrying 8+ concepts
+**M00–M09 are built and verified in a browser** (85 sections, tree green), each carrying 8+ concepts
 with full explanations, two worked examples, a reference entry and a graded exercise. `doc/BUILD-STATE.md`
 records what shipped and what the next session picks up. The rest of the curriculum follows the
 order in `doc/ROADMAP.md` (65 milestones in `doc/milestones/`). Keep `npm test` and
@@ -81,6 +81,8 @@ berugo-learning/
   Tailwind class names are written in full (composed names get purged).
 - **Mermaid renders through `core/mermaid-renderer.js`**, which re-renders on theme change.
 - **Seeded randomness comes from `utils/random.js`** so a learner can compare two runs.
+- **A demo shows the figures its own prose quotes.** Give the demo the worked example's parameters
+  and memoise the measurement; do not shrink the measurement until the numbers disagree.
 - **`SectionShell.render(config)` then `SectionShell.mount({ sectionId, app })`.** The shell keeps
   the config from render; never pass it twice.
 - **The section frame is three tabs and the shell owns them.** Description (orientation, concepts,
@@ -107,6 +109,9 @@ npm run build:css   # after any markup or template change
 ## Adding a section
 1. `algorithms/<name>.js` or `machines/<name>.js` for the logic (pure, unit-tested).
 2. `sections/<id>-template.js` + `sections/<id>-section.js` (calls `SectionRegistry.register`).
+   Control ids, metric ids and element ids must be disjoint within the template *and* across every
+   other template — every section is in the DOM at once. `tests/unit/template-ids.test.js` enforces
+   it. Wrap any measurement a demo repeats in `Helpers.memoise` keyed on the controls it depends on.
 3. Add the entry to `core/curriculum.js` in the right group - the sidebar follows automatically.
 4. Add `concepts` (>= 6, each with `term`, `plain`, `formal`, `detail`, `example`), `examples`
    (>= 2), `reference` (>= 3 sources, >= 3 failure modes) and `exercises` entries in

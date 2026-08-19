@@ -14,6 +14,8 @@
   'use strict';
 
   const SECTION_ID = 'fingerprint-filters';
+  /* The probe count the worked example quotes, so the demo shows those figures. */
+  const PROBES = 50000;
   let panel = null;
   let chart = null;
 
@@ -84,28 +86,49 @@
     update(app);
   }
 
-  function update(app) {
-    const values = panel.values();
+  /** Everything the panels need, measured once from the current control values. */
+  function measure(values) {
     const capacity = Number(values['fpf-capacity']);
     const bucketSize = Number(values['fpf-bucket']);
     const bits = values['fpf-bits'];
 
-    const profile = root.FilterLab.chainProfile({
-      capacity: capacity, bucketSize: bucketSize, fingerprintBits: bits,
-      maxKicks: values['fpf-kicks'], seed: 5
-    });
-    const sweep = root.FilterLab.cuckooSweep({
-      capacity: capacity, bucketSize: bucketSize, seed: 5, probes: 20000,
-      fingerprintBits: [4, 6, 8, 10, 12, 14, 16]
-    });
-    const buckets = root.FilterLab.bucketSweep({ capacity: capacity, fingerprintBits: bits, seed: 5 });
-    const phantom = root.FilterLab.phantomDeletes({
-      n: Math.floor(capacity / 3), capacity: capacity, fingerprintBits: bits, seed: 3
-    });
-    const space = root.FilterLab.spaceAtError({
-      n: 8000, p: Number(values['fpf-target']), seed: 9, probes: 20000
-    });
-    const merge = root.FilterLab.quotientMerge({ n: 2000 });
+    return {
+      capacity: capacity,
+      bits: bits,
+      profile: root.FilterLab.chainProfile({
+        capacity: capacity, bucketSize: bucketSize, fingerprintBits: bits,
+        maxKicks: values['fpf-kicks'], seed: 5
+      }),
+      sweep: root.FilterLab.cuckooSweep({
+        capacity: capacity, bucketSize: bucketSize, seed: 5, probes: PROBES,
+        fingerprintBits: [4, 6, 8, 10, 12, 14, 16]
+      }),
+      buckets: root.FilterLab.bucketSweep({ capacity: capacity, fingerprintBits: bits, seed: 5 }),
+      phantom: root.FilterLab.phantomDeletes({
+        n: Math.floor(capacity / 3), capacity: capacity, fingerprintBits: bits, seed: 3
+      }),
+      space: root.FilterLab.spaceAtError({
+        n: 8000, p: Number(values['fpf-target']), seed: 9, probes: PROBES
+      }),
+      merge: root.FilterLab.quotientMerge({ n: 2000 })
+    };
+  }
+
+  const measured = root.Helpers.memoise(function (key) {
+    return measure(JSON.parse(key));
+  });
+
+  function update(app) {
+    const values = panel.values();
+    const state = measured(JSON.stringify(values));
+    const capacity = state.capacity;
+    const bits = state.bits;
+    const profile = state.profile;
+    const sweep = state.sweep;
+    const buckets = state.buckets;
+    const phantom = state.phantom;
+    const space = state.space;
+    const merge = state.merge;
     const current = sweep.filter(function (row) { return row.fingerprintBits === bits; })[0] || sweep[0];
 
     root.MetricGrid.update({

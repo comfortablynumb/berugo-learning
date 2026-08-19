@@ -155,7 +155,7 @@
     }).join('');
 
     root.jQuery('#hs-topk-table tbody').html(rows);
-    root.jQuery('#hs-topk-note').text('Almost all of the top-k cost is the gate: one comparison per ' +
+    root.jQuery('#hs-topk-table-note').text('Almost all of the top-k cost is the gate: one comparison per ' +
       'element against the current k-th best, and only ' + root.Format.exact(top.admitted) +
       ' of ' + root.Format.exact(n) + ' elements ever entered the heap. The memory is the real ' +
       'saving — ' + root.Format.exact(values['hs-k']) + ' slots against ' + root.Format.exact(n) + '.');

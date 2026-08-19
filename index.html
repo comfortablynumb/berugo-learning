@@ -121,6 +121,33 @@
       <section data-section="burrows-wheeler" hidden><div class="section-body"><div id="burrows-wheeler-content"></div></div></section>
       <section data-section="inverted-indexes" hidden><div class="section-body"><div id="inverted-indexes-content"></div></div></section>
       <section data-section="autocomplete-and-fuzzy" hidden><div class="section-body"><div id="autocomplete-and-fuzzy-content"></div></div></section>
+      <section data-section="bloom-filters" hidden><div class="section-body"><div id="bloom-filters-content"></div></div></section>
+      <section data-section="bloom-variants" hidden><div class="section-body"><div id="bloom-variants-content"></div></div></section>
+      <section data-section="fingerprint-filters" hidden><div class="section-body"><div id="fingerprint-filters-content"></div></div></section>
+      <section data-section="hyperloglog" hidden><div class="section-body"><div id="hyperloglog-content"></div></div></section>
+      <section data-section="count-min-sketch" hidden><div class="section-body"><div id="count-min-sketch-content"></div></div></section>
+      <section data-section="quantile-sketches" hidden><div class="section-body"><div id="quantile-sketches-content"></div></div></section>
+      <section data-section="minhash-and-lsh" hidden><div class="section-body"><div id="minhash-and-lsh-content"></div></div></section>
+      <section data-section="windowed-counting" hidden><div class="section-body"><div id="windowed-counting-content"></div></div></section>
+      <section data-section="choosing-sketches" hidden><div class="section-body"><div id="choosing-sketches-content"></div></div></section>
+      <section data-section="uniform-grids" hidden><div class="section-body"><div id="uniform-grids-content"></div></div></section>
+      <section data-section="quadtrees" hidden><div class="section-body"><div id="quadtrees-content"></div></div></section>
+      <section data-section="kd-trees" hidden><div class="section-body"><div id="kd-trees-content"></div></div></section>
+      <section data-section="r-trees" hidden><div class="section-body"><div id="r-trees-content"></div></div></section>
+      <section data-section="bounding-volumes" hidden><div class="section-body"><div id="bounding-volumes-content"></div></div></section>
+      <section data-section="space-filling-curves" hidden><div class="section-body"><div id="space-filling-curves-content"></div></div></section>
+      <section data-section="range-structures" hidden><div class="section-body"><div id="range-structures-content"></div></div></section>
+      <section data-section="vector-search" hidden><div class="section-body"><div id="vector-search-content"></div></div></section>
+      <section data-section="broad-phase" hidden><div class="section-body"><div id="broad-phase-content"></div></div></section>
+      <section data-section="persistence-basics" hidden><div class="section-body"><div id="persistence-basics-content"></div></div></section>
+      <section data-section="persistent-sequences" hidden><div class="section-body"><div id="persistent-sequences-content"></div></div></section>
+      <section data-section="versioned-queries" hidden><div class="section-body"><div id="versioned-queries-content"></div></div></section>
+      <section data-section="bit-partitioned-tries" hidden><div class="section-body"><div id="bit-partitioned-tries-content"></div></div></section>
+      <section data-section="finger-trees" hidden><div class="section-body"><div id="finger-trees-content"></div></div></section>
+      <section data-section="zippers" hidden><div class="section-body"><div id="zippers-content"></div></div></section>
+      <section data-section="rank-and-select" hidden><div class="section-body"><div id="rank-and-select-content"></div></div></section>
+      <section data-section="succinct-trees" hidden><div class="section-body"><div id="succinct-trees-content"></div></div></section>
+      <section data-section="compressed-bitmaps" hidden><div class="section-body"><div id="compressed-bitmaps-content"></div></div></section>
     </main>
   </div>
 
@@ -212,6 +239,45 @@
   <script src="src/js/machines/text-corpus.js"></script>
   <script src="src/js/machines/text-lab.js"></script>
 
+  <script src="src/js/algorithms/bloom-filter.js"></script>
+  <script src="src/js/algorithms/cuckoo-filter.js"></script>
+  <script src="src/js/algorithms/quotient-filter.js"></script>
+  <script src="src/js/algorithms/hyperloglog.js"></script>
+  <script src="src/js/algorithms/count-min.js"></script>
+  <script src="src/js/algorithms/quantile-sketches.js"></script>
+  <script src="src/js/algorithms/minhash-lsh.js"></script>
+  <script src="src/js/algorithms/window-counters.js"></script>
+  <script src="src/js/machines/stream-lab.js"></script>
+  <script src="src/js/machines/filter-lab.js"></script>
+  <script src="src/js/machines/sketch-lab.js"></script>
+  <script src="src/js/machines/sketch-chooser.js"></script>
+
+  <script src="src/js/algorithms/spatial-hash.js"></script>
+  <script src="src/js/algorithms/quadtree.js"></script>
+  <script src="src/js/algorithms/kd-tree.js"></script>
+  <script src="src/js/algorithms/r-tree.js"></script>
+  <script src="src/js/algorithms/bvh.js"></script>
+  <script src="src/js/algorithms/space-filling.js"></script>
+  <script src="src/js/algorithms/range-structures.js"></script>
+  <script src="src/js/algorithms/ann-index.js"></script>
+  <script src="src/js/algorithms/hnsw.js"></script>
+  <script src="src/js/algorithms/broad-phase.js"></script>
+  <script src="src/js/machines/spatial-lab.js"></script>
+  <script src="src/js/machines/range-lab.js"></script>
+  <script src="src/js/machines/vector-lab.js"></script>
+
+  <script src="src/js/algorithms/persistent-bst.js"></script>
+  <script src="src/js/algorithms/persistent-queue.js"></script>
+  <script src="src/js/algorithms/persistent-segment-tree.js"></script>
+  <script src="src/js/algorithms/hamt.js"></script>
+  <script src="src/js/algorithms/finger-tree.js"></script>
+  <script src="src/js/algorithms/zipper.js"></script>
+  <script src="src/js/algorithms/bit-vector.js"></script>
+  <script src="src/js/algorithms/succinct-tree.js"></script>
+  <script src="src/js/algorithms/roaring.js"></script>
+  <script src="src/js/machines/version-lab.js"></script>
+  <script src="src/js/machines/succinct-lab.js"></script>
+
   <script src="src/js/viz/chart-base.js"></script>
   <script src="src/js/viz/canvas.js"></script>
   <script src="src/js/viz/legend.js"></script>
@@ -224,6 +290,9 @@
   <script src="src/js/viz/heap-view.js"></script>
   <script src="src/js/viz/trie-view.js"></script>
   <script src="src/js/viz/matrix-view.js"></script>
+  <script src="src/js/viz/error-band-view.js"></script>
+  <script src="src/js/viz/spatial-view.js"></script>
+  <script src="src/js/viz/dag-view.js"></script>
 
   <!-- Components -->
   <script src="src/js/components/tab-controller.js"></script>
@@ -297,6 +366,42 @@
   <script src="src/js/content/examples-text-search.js"></script>
   <script src="src/js/content/reference-text-search.js"></script>
   <script src="src/js/content/exercises-text-search.js"></script>
+  <script src="src/js/content/concepts-sketches.js"></script>
+  <script src="src/js/content/examples-sketches.js"></script>
+  <script src="src/js/content/reference-sketches.js"></script>
+  <script src="src/js/content/exercises-sketches.js"></script>
+  <script src="src/js/content/concepts-sketches-counting.js"></script>
+  <script src="src/js/content/examples-sketches-counting.js"></script>
+  <script src="src/js/content/reference-sketches-counting.js"></script>
+  <script src="src/js/content/exercises-sketches-counting.js"></script>
+  <script src="src/js/content/concepts-sketches-streams.js"></script>
+  <script src="src/js/content/examples-sketches-streams.js"></script>
+  <script src="src/js/content/reference-sketches-streams.js"></script>
+  <script src="src/js/content/exercises-sketches-streams.js"></script>
+  <script src="src/js/content/concepts-spatial.js"></script>
+  <script src="src/js/content/examples-spatial.js"></script>
+  <script src="src/js/content/reference-spatial.js"></script>
+  <script src="src/js/content/exercises-spatial.js"></script>
+  <script src="src/js/content/concepts-spatial-volumes.js"></script>
+  <script src="src/js/content/examples-spatial-volumes.js"></script>
+  <script src="src/js/content/reference-spatial-volumes.js"></script>
+  <script src="src/js/content/exercises-spatial-volumes.js"></script>
+  <script src="src/js/content/concepts-spatial-search.js"></script>
+  <script src="src/js/content/examples-spatial-search.js"></script>
+  <script src="src/js/content/reference-spatial-search.js"></script>
+  <script src="src/js/content/exercises-spatial-search.js"></script>
+  <script src="src/js/content/concepts-persistent.js"></script>
+  <script src="src/js/content/examples-persistent.js"></script>
+  <script src="src/js/content/reference-persistent.js"></script>
+  <script src="src/js/content/exercises-persistent.js"></script>
+  <script src="src/js/content/concepts-persistent-tries.js"></script>
+  <script src="src/js/content/examples-persistent-tries.js"></script>
+  <script src="src/js/content/reference-persistent-tries.js"></script>
+  <script src="src/js/content/exercises-persistent-tries.js"></script>
+  <script src="src/js/content/concepts-succinct.js"></script>
+  <script src="src/js/content/examples-succinct.js"></script>
+  <script src="src/js/content/reference-succinct.js"></script>
+  <script src="src/js/content/exercises-succinct.js"></script>
 
   <!-- Views -->
   <script src="src/js/views/sidebar-view.js"></script>
@@ -419,6 +524,60 @@
   <script src="src/js/sections/inverted-indexes-section.js"></script>
   <script src="src/js/sections/autocomplete-and-fuzzy-template.js"></script>
   <script src="src/js/sections/autocomplete-and-fuzzy-section.js"></script>
+  <script src="src/js/sections/bloom-filters-template.js"></script>
+  <script src="src/js/sections/bloom-filters-section.js"></script>
+  <script src="src/js/sections/bloom-variants-template.js"></script>
+  <script src="src/js/sections/bloom-variants-section.js"></script>
+  <script src="src/js/sections/fingerprint-filters-template.js"></script>
+  <script src="src/js/sections/fingerprint-filters-section.js"></script>
+  <script src="src/js/sections/hyperloglog-template.js"></script>
+  <script src="src/js/sections/hyperloglog-section.js"></script>
+  <script src="src/js/sections/count-min-sketch-template.js"></script>
+  <script src="src/js/sections/count-min-sketch-section.js"></script>
+  <script src="src/js/sections/quantile-sketches-template.js"></script>
+  <script src="src/js/sections/quantile-sketches-section.js"></script>
+  <script src="src/js/sections/minhash-and-lsh-template.js"></script>
+  <script src="src/js/sections/minhash-and-lsh-section.js"></script>
+  <script src="src/js/sections/windowed-counting-template.js"></script>
+  <script src="src/js/sections/windowed-counting-section.js"></script>
+  <script src="src/js/sections/choosing-sketches-template.js"></script>
+  <script src="src/js/sections/choosing-sketches-section.js"></script>
+  <script src="src/js/sections/uniform-grids-template.js"></script>
+  <script src="src/js/sections/uniform-grids-section.js"></script>
+  <script src="src/js/sections/quadtrees-template.js"></script>
+  <script src="src/js/sections/quadtrees-section.js"></script>
+  <script src="src/js/sections/kd-trees-template.js"></script>
+  <script src="src/js/sections/kd-trees-section.js"></script>
+  <script src="src/js/sections/r-trees-template.js"></script>
+  <script src="src/js/sections/r-trees-section.js"></script>
+  <script src="src/js/sections/bounding-volumes-template.js"></script>
+  <script src="src/js/sections/bounding-volumes-section.js"></script>
+  <script src="src/js/sections/space-filling-curves-template.js"></script>
+  <script src="src/js/sections/space-filling-curves-section.js"></script>
+  <script src="src/js/sections/range-structures-template.js"></script>
+  <script src="src/js/sections/range-structures-section.js"></script>
+  <script src="src/js/sections/vector-search-template.js"></script>
+  <script src="src/js/sections/vector-search-section.js"></script>
+  <script src="src/js/sections/broad-phase-template.js"></script>
+  <script src="src/js/sections/broad-phase-section.js"></script>
+  <script src="src/js/sections/persistence-basics-template.js"></script>
+  <script src="src/js/sections/persistence-basics-section.js"></script>
+  <script src="src/js/sections/persistent-sequences-template.js"></script>
+  <script src="src/js/sections/persistent-sequences-section.js"></script>
+  <script src="src/js/sections/versioned-queries-template.js"></script>
+  <script src="src/js/sections/versioned-queries-section.js"></script>
+  <script src="src/js/sections/bit-partitioned-tries-template.js"></script>
+  <script src="src/js/sections/bit-partitioned-tries-section.js"></script>
+  <script src="src/js/sections/finger-trees-template.js"></script>
+  <script src="src/js/sections/finger-trees-section.js"></script>
+  <script src="src/js/sections/zippers-template.js"></script>
+  <script src="src/js/sections/zippers-section.js"></script>
+  <script src="src/js/sections/rank-and-select-template.js"></script>
+  <script src="src/js/sections/rank-and-select-section.js"></script>
+  <script src="src/js/sections/succinct-trees-template.js"></script>
+  <script src="src/js/sections/succinct-trees-section.js"></script>
+  <script src="src/js/sections/compressed-bitmaps-template.js"></script>
+  <script src="src/js/sections/compressed-bitmaps-section.js"></script>
 
   <script src="src/js/app.js"></script>
 </body>

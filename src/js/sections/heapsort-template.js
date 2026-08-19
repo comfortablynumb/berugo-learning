@@ -40,7 +40,7 @@
       '<div class="card-body"><table class="ref-table" id="hs-topk-table"><thead><tr>' +
       '<th>Approach</th><th>Comparisons</th><th>Peak memory</th><th>Elements ever admitted</th>' +
       '</tr></thead><tbody></tbody></table>' +
-      '<p class="note" id="hs-topk-note"></p></div></div>';
+      '<p class="note" id="hs-topk-table-note"></p></div></div>';
   }
 
   return { render: render, controls: CONTROLS, metrics: METRICS };

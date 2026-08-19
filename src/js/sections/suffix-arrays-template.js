@@ -39,7 +39,7 @@
       '<div class="card" style="margin-top:.875rem">' +
       '<div class="card-header">Prefix doubling: the rank table after each round</div>' +
       '<div class="card-body"><div id="sa-rounds-table"></div>' +
-      '<p class="note" id="sa-rounds-note"></p></div></div>' +
+      '<p class="note" id="sa-rounds-table-note"></p></div></div>' +
       '<div class="card" style="margin-top:.875rem">' +
       '<div class="card-header">The three constructions on a real input</div>' +
       '<div class="card-body"><table class="ref-table" id="sa-methods"><thead><tr>' +

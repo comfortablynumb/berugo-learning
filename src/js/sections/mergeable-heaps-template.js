@@ -34,7 +34,7 @@
       '<div class="card-body"><table class="ref-table" id="mh-meld-table"><thead><tr>' +
       '<th>Family</th><th>Comparisons</th><th>Per element</th><th>Meld cost</th><th>What the meld is</th>' +
       '</tr></thead><tbody></tbody></table>' +
-      '<p class="note" id="mh-meld-note"></p></div></div>' +
+      '<p class="note" id="mh-meld-table-note"></p></div></div>' +
       '<div class="card" style="margin-top:.875rem">' +
       '<div class="card-header">Leftist against skew: the field, and what dropping it costs</div>' +
       '<div class="card-body"><table class="ref-table" id="mh-leftist"><thead><tr>' +

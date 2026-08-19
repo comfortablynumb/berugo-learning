@@ -14,6 +14,8 @@
   'use strict';
 
   const SECTION_ID = 'bloom-variants';
+  /* The probe count the worked example quotes, so the demo shows those figures. */
+  const PROBES = 50000;
   let panel = null;
   let chart = null;
 
@@ -83,14 +85,28 @@
     update(app);
   }
 
+  /* The two sweeps depend only on n, p and the layer count, and they cost two
+     seconds. Recomputing them because the learner moved the counter-width
+     slider is the difference between a demo and a stall. */
+  const sweeps = root.Helpers.memoise(function (key) {
+    const parts = key.split('|');
+    const n = Number(parts[0]);
+    const target = Number(parts[1]);
+    return {
+      comparison: root.FilterLab.compareVariants({
+        n: n, p: target, seed: 7, probes: PROBES, layers: Number(parts[2])
+      }),
+      blocks: root.FilterLab.blockSweep({ n: n, p: target, seed: 7, probes: PROBES })
+    };
+  });
+
   function update(app) {
     const values = panel.values();
     const n = values['bvr-n'];
     const target = Number(values['bvr-p']);
-    const comparison = root.FilterLab.compareVariants({
-      n: n, p: target, seed: 7, probes: 20000, layers: values['bvr-layers']
-    });
-    const blocks = root.FilterLab.blockSweep({ n: n, p: target, seed: 7, probes: 20000 });
+    const measured = sweeps(n + '|' + target + '|' + values['bvr-layers']);
+    const comparison = measured.comparison;
+    const blocks = measured.blocks;
     const churn = root.FilterLab.countingChurn({
       n: n, p: target, seed: 7,
       counterBits: Number(values['bvr-counter']), repeats: values['bvr-repeats']

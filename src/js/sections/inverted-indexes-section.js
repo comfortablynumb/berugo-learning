@@ -213,7 +213,7 @@
     ];
 
     root.jQuery('#ii-query-out').text(lines.join('\n'));
-    root.jQuery('#ii-query-note').text('The phrase query is the boolean query plus a position check, ' +
+    root.jQuery('#ii-query-out-note').text('The phrase query is the boolean query plus a position check, ' +
       'so it can never return more documents and it always costs more. Without a positional index ' +
       'it is not answerable at all — the boolean result is the closest you can get, and it is a ' +
       'different answer rather than an approximate one.');

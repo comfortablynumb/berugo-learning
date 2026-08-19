@@ -14,7 +14,7 @@ faithfully in a browser, the section models it, says so plainly, and states what
 
 ## Status
 
-**M00–M06 shipped (58 sections). Building the curriculum, milestone by milestone.**
+**M00–M09 shipped (85 sections). Building the curriculum, milestone by milestone.**
 
 - ✅ Curriculum designed: 65 milestones, 634 sections, 11 tracks — one file per milestone in
   [`doc/milestones/`](doc/milestones/)
@@ -58,13 +58,39 @@ faithfully in a browser, the section models it, says so plainly, and states what
   the suffix-automaton clone case beside the factor oracle that skips it, the BWT inverted without
   its matrix, posting-list intersection at every skew, and three fuzzy back-ends ranked by recall
   rather than latency. 9 sections live.
-- ✅ **Three tabs per section, Description first**: every one of the 451 concepts across the built
+- ✅ **M07 — probabilistic and streaming sketches**: Bloom sizing and the error that keeps climbing
+  past the n you sized for with no signal, counting/blocked/scalable variants each buying one
+  property in a different currency, cuckoo and quotient filters with their load ceiling and the
+  delete that silently corrupts, HyperLogLog's exact merge against the shard sum that over-counts
+  by 70%, count-min's one-sided error beside count-sketch's unbiased one, four quantile sketches
+  scored on value *and* rank, MinHash banding as an explicit precision/recall dial, DGIM and
+  space-saving against an exact reference, and a chooser that measures its candidates rather than
+  looking them up — with two working attacks on an unkeyed sketch. 9 sections live.
+- ✅ **Three tabs per section, Description first**: every one of the 667 concepts across the built
   sections carries a full explanation — the mechanism, why it is built that way, and what breaks
   when it is ignored — and the coverage test rejects a concept that carries only a one-line gloss.
   Examples holds the demo, its charts and the code lab; References holds the reference block.
-- ⬜ M07 onward
+- ✅ **M08 — spatial and multidimensional indexes**: a uniform grid whose predicted cost is compared
+  with its measured one on every query, the quadtree depth cap as a correctness requirement rather
+  than a knob, a k-d tree with the backtrack deleted so the 60% wrong-answer rate is visible, four
+  R-tree splits ordered by overlap rather than height, the surface-area heuristic evaluated as a
+  cost model and then checked against the rays, Morton against Hilbert under two metrics that
+  disagree, six one-dimensional range structures with the constant O(log n) hides, HNSW and product
+  quantisation scored on recall rather than latency, and sweep and prune beside the tunnelling
+  failure no broad phase can fix. 9 sections live.
+- ✅ **M09 — persistent, immutable and succinct structures**: path copying, fat nodes and node
+  copying priced on both axes so the cheapest write turns out to be the most expensive read, an
+  amortised bound broken on purpose by reusing one version a thousand times and repaired by a
+  memoised suspension, persistent segment trees whose 11 nodes per update are exactly the bound,
+  bit-partitioned tries where the depth claim and the sparse-node claim are shown to be separate,
+  one finger tree answering four unrelated queries by changing only the monoid, a zipper whose
+  saving is the edit count rather than the depth, a two-level rank/select index that reports its
+  own 7.9% overhead and the density at which the obvious array beats it, LOUDS at 2.0002 bits a
+  node with the 177× headline corrected to 5.8× once the payload is added, and Roaring shown
+  losing to WAH on the one input it is usually assumed to win. 9 sections live.
+- ⬜ M10 onward
 
-`npm test` is green (wiring audit + 1 040 unit tests, 1 skipped) and `npm run lint:size` reports no
+`npm test` is green (wiring audit + 1 657 unit tests, 1 skipped) and `npm run lint:size` reports no
 offenders.
 
 ### The shell
@@ -75,7 +101,7 @@ offenders.
   opens to milestones, then sections. Tracks that are planned and not built are listed with their
   milestones and section counts, marked as planned, so the map shows what the platform teaches
   rather than only what happens to be finished. One track and one milestone stay open at a time, so
-  the nav is the same height at 58 sections and at 634.
+  the nav is the same height at 85 sections and at 634.
 - **Search across everything.** The header search indexes concepts, worked examples, reference
   entries and exercises as well as section titles, so "tombstone", "Little's law" or "round half to
   even" lands on the section that explains it. Ctrl/Cmd+K focuses it; arrows and Enter drive it.
@@ -135,8 +161,8 @@ Every section is the same three tabs, and **Description** is the one that opens:
 | **Examples** | The interactive demo with its charts and live metrics, the worked examples that show the arithmetic with real numbers, and the editable code lab with its graded exercises. |
 | **References** | Formulation, invariants, complexity, failure modes, real-world uses, sources. |
 
-The concept explanations are the substance of the Description tab: 315 of them across the built
-sections, averaging about 560 characters each, and the coverage test rejects a concept that carries
+The concept explanations are the substance of the Description tab: 523 of them across the built
+sections, averaging about 530 characters each, and the coverage test rejects a concept that carries
 only a one-line gloss.
 
 For example, section **3.4 Open addressing** (milestone M03) opens on Description with why open

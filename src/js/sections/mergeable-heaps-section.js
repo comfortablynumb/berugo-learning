@@ -160,7 +160,7 @@
     }).join('');
 
     root.jQuery('#mh-meld-table tbody').html(markup);
-    root.jQuery('#mh-meld-note').text('Every row folds ' + values['mh-pieces'] + ' heaps of ' +
+    root.jQuery('#mh-meld-table-note').text('Every row folds ' + values['mh-pieces'] + ' heaps of ' +
       values['mh-each'] + ' elements into one and then drains it, so the totals include the drain. ' +
       'The array heap is the outlier: its meld is a rebuild, and the cost shows.');
   }

@@ -210,7 +210,7 @@
     }).join('');
 
     root.jQuery('#ct-route-table tbody').html(rows);
-    root.jQuery('#ct-route-note').text(bits
+    root.jQuery('#ct-route-table-note').text(bits
       ? address + ' is ' + bits + ' in binary. Several prefixes match; the router takes the longest, ' +
         'which is one walk down the bit trie rather than a scan of the table.'
       : 'That is not a dotted-quad address, so there is nothing to route.');

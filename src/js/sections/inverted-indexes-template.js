@@ -49,7 +49,7 @@
       '<div class="card" style="margin-top:.875rem">' +
       '<div class="card-header">A boolean query and a phrase query over the same index</div>' +
       '<div class="card-body"><pre class="step-work" id="ii-query-out"></pre>' +
-      '<p class="note" id="ii-query-note"></p></div></div>';
+      '<p class="note" id="ii-query-out-note"></p></div></div>';
   }
 
   return { render: render, controls: CONTROLS, metrics: METRICS };

@@ -153,7 +153,7 @@
   function paintRounds(values, text) {
     if (values['sa-method'] !== 'doubling') {
       root.jQuery('#sa-rounds-table').html('');
-      root.jQuery('#sa-rounds-note').text('The rank table is what prefix doubling *is*, so it is only ' +
+      root.jQuery('#sa-rounds-table-note').text('The rank table is what prefix doubling *is*, so it is only ' +
         'shown for that construction. SA-IS has no rounds — it recurses on a reduced string — and ' +
         'the naive sort has no intermediate state at all.');
       return;
@@ -174,7 +174,7 @@
       maxRows: 14
     });
 
-    root.jQuery('#sa-rounds-note').text('Each row is the suffix order after sorting by that many ' +
+    root.jQuery('#sa-rounds-table-note').text('Each row is the suffix order after sorting by that many ' +
       'leading characters. The order stops changing once every rank is distinct, which is why the ' +
       'loop can exit early rather than always running log n times — it took ' +
       built.trace.length + ' round' + (built.trace.length === 1 ? '' : 's') + ' here.');

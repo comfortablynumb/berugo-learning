@@ -45,7 +45,7 @@
       '<div class="card-body"><table class="ref-table" id="ct-route-table"><thead><tr>' +
       '<th>Prefix</th><th>Bits</th><th>Length</th><th>Next hop</th><th>Matches this address</th>' +
       '</tr></thead><tbody></tbody></table>' +
-      '<p class="note" id="ct-route-note"></p></div></div>' +
+      '<p class="note" id="ct-route-table-note"></p></div></div>' +
       '<div class="card" style="margin-top:.875rem">' +
       '<div class="card-header">Where the adaptive node sizes go</div>' +
       '<div class="card-body"><pre class="step-work" id="ct-classes"></pre>' +

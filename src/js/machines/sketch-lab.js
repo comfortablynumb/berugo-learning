@@ -27,6 +27,7 @@
   const MinHashLsh = load('../algorithms/minhash-lsh.js', 'MinHashLsh');
   const WindowCounters = load('../algorithms/window-counters.js', 'WindowCounters');
   const StreamLab = load('./stream-lab.js', 'StreamLab');
+  const Random = load('../utils/random.js', 'Random');
 
   /* ---------------------------------------------------------- cardinality */
 
@@ -335,6 +336,67 @@
     };
   }
 
+  /**
+   * Per-shard quantiles, averaged, against the true global quantile - and the
+   * same shards as DDSketches, merged.
+   *
+   * The shards are deliberately *not* identical: one of them is degraded, which
+   * is the only interesting case and the one every fleet eventually has. Over
+   * statistically identical shards the average of the p99s happens to be close
+   * to the global p99 and the dashboard looks fine; the moment one node is slow
+   * the average understates the number the users are feeling, because a
+   * quantile of a mixture is not a mixture of quantiles.
+   *
+   * Merging the sketches is a different operation and gets the right answer.
+   */
+  function shardQuantiles(options) {
+    const settings = options || {};
+    const shardCount = Math.max(2, Math.floor(settings.shards || 8));
+    const perShardLength = Math.max(1000, Math.floor(settings.perShardLength || 25000));
+    const p = settings.p === undefined ? 0.99 : settings.p;
+    const alpha = settings.alpha || 0.01;
+    const healthyShare = settings.healthyShare === undefined ? 0.05 : settings.healthyShare;
+    const degradedShare = settings.degradedShare === undefined ? 0.6 : settings.degradedShare;
+
+    const global = QuantileSketches.exact({});
+    const merged = QuantileSketches.ddSketch({ alpha: alpha });
+    const perShard = [];
+
+    for (let shard = 0; shard < shardCount; shard += 1) {
+      const share = shard === shardCount - 1 ? degradedShare : healthyShare;
+      const values = StreamLab.latency({
+        length: perShardLength, seed: (settings.seed || 1) + shard * 17, slowShare: share
+      });
+      const exact = QuantileSketches.exact({});
+      const sketch = QuantileSketches.ddSketch({ alpha: alpha });
+
+      for (let i = 0; i < values.length; i += 1) {
+        exact.add(values[i]);
+        sketch.add(values[i]);
+        global.add(values[i]);
+      }
+      merged.mergeFrom(sketch);
+      perShard.push({ shard: shard, slowShare: share, quantile: exact.quantile(p) });
+    }
+
+    const truth = global.quantile(p);
+    const averaged = perShard.reduce(function (sum, row) { return sum + row.quantile; }, 0) / shardCount;
+
+    return {
+      p: p,
+      shards: shardCount,
+      perShard: perShard,
+      averaged: averaged,
+      averagedError: (averaged - truth) / truth,
+      merged: merged.quantile(p),
+      mergedError: (merged.quantile(p) - truth) / truth,
+      truth: truth,
+      alpha: alpha,
+      degradedShare: degradedShare,
+      healthyShare: healthyShare
+    };
+  }
+
   /* ------------------------------------------------------------ similarity */
 
   /**
@@ -399,6 +461,108 @@
     return out;
   }
 
+  /**
+   * SimHash over the same corpus: Hamming distance against the cosine
+   * similarity of the underlying token multisets. The point of putting it next
+   * to MinHash is that it answers a *different* question - angle rather than
+   * overlap - and the two rank a corpus differently.
+   */
+  function simhashCompare(options) {
+    const settings = options || {};
+    const documents = settings.documents;
+    const bits = settings.bits || 64;
+    const sets = documents.map(function (doc) {
+      return MinHashLsh.shingles(doc.text, settings.shingle || 5);
+    });
+    const hashes = sets.map(function (set) {
+      return MinHashLsh.simHash({ tokens: Array.from(set), bits: bits, seed: settings.seed || 1 });
+    });
+
+    const pairs = [];
+    for (let i = 0; i < documents.length; i += 1) {
+      for (let j = i + 1; j < documents.length; j += 1) {
+        const distance = MinHashLsh.hamming(hashes[i], hashes[j]);
+        pairs.push({
+          a: documents[i].id,
+          b: documents[j].id,
+          distance: distance,
+          cosineEstimate: MinHashLsh.cosineFromHamming(distance, bits),
+          jaccard: MinHashLsh.jaccard(sets[i], sets[j])
+        });
+      }
+    }
+
+    return {
+      bits: bits,
+      pairs: pairs,
+      bytesPerDocument: bits / 8,
+      /* The distance below which a pair is called a duplicate, and what that
+         costs in recall against the exact Jaccard threshold. */
+      sweep: (settings.cutoffs || [4, 8, 12, 14, 16, 20, 24]).map(function (cutoff) {
+        const flagged = pairs.filter(function (pair) { return pair.distance <= cutoff; });
+        const truth = pairs.filter(function (pair) { return pair.jaccard >= (settings.threshold || 0.5); });
+        const hits = flagged.filter(function (pair) { return pair.jaccard >= (settings.threshold || 0.5); });
+        return {
+          cutoff: cutoff,
+          flagged: flagged.length,
+          recall: truth.length ? hits.length / truth.length : 1,
+          precision: flagged.length ? hits.length / flagged.length : 1
+        };
+      })
+    };
+  }
+
+  /**
+   * Random projection, and the distortion it actually produced against the
+   * distortion Johnson-Lindenstrauss promised for that target dimension.
+   * The lemma is a worst-case bound over all pairs and the measured worst is
+   * usually well inside it, which is the useful thing to know before paying
+   * for the dimensions the formula asks for.
+   */
+  function projectionCheck(options) {
+    const settings = options || {};
+    const points = Math.max(4, Math.floor(settings.points || 60));
+    const dimensions = Math.max(2, Math.floor(settings.dimensions || 200));
+    const epsilon = settings.epsilon || 0.3;
+    const target = settings.target || MinHashLsh.jlDimension({ points: points, epsilon: epsilon });
+    const rng = Random.seeded(settings.seed || 1);
+
+    const vectors = [];
+    for (let i = 0; i < points; i += 1) {
+      const vector = new Float64Array(dimensions);
+      for (let j = 0; j < dimensions; j += 1) vector[j] = rng.gaussian(0, 1);
+      vectors.push(vector);
+    }
+
+    const projector = MinHashLsh.projection({ dimensions: dimensions, target: target, seed: settings.seed || 1 });
+    const projected = vectors.map(projector.project);
+    let worst = 0;
+    let sum = 0;
+    let pairs = 0;
+
+    for (let i = 0; i < points; i += 1) {
+      for (let j = i + 1; j < points; j += 1) {
+        const before = MinHashLsh.distance(vectors[i], vectors[j]);
+        const after = MinHashLsh.distance(projected[i], projected[j]);
+        const distortion = Math.abs(after / before - 1);
+        worst = Math.max(worst, distortion);
+        sum += distortion;
+        pairs += 1;
+      }
+    }
+
+    return {
+      points: points,
+      dimensions: dimensions,
+      target: target,
+      epsilon: epsilon,
+      worstDistortion: worst,
+      meanDistortion: sum / pairs,
+      pairs: pairs,
+      compression: dimensions / target
+    };
+  }
+
   /* --------------------------------------------------------------- windows */
 
   /**
@@ -449,6 +613,83 @@
     };
   }
 
+  /**
+   * Space-saving, lossy counting and a decayed counter over one keyed stream,
+   * against the exact top-k.
+   *
+   * The three answer subtly different questions and the table is arranged so
+   * that is visible: space-saving over-estimates and knows by how much, lossy
+   * counting under-estimates and knows by how much, and the decayed counter is
+   * not answering "most frequent" at all - it is answering "most frequent
+   * lately", which is usually what was wanted and never what was asked for.
+   */
+  function streamTopK(options) {
+    const settings = options || {};
+    const stream = settings.stream;
+    const k = Math.max(1, Math.floor(settings.k || 10));
+    const saving = WindowCounters.spaceSaving({ counters: settings.counters || 200 });
+    const lossy = WindowCounters.lossyCounting({ epsilon: settings.epsilon || 0.0005 });
+    const decayed = WindowCounters.decayedCounters({ halfLife: settings.halfLife || 20000 });
+
+    stream.items.forEach(function (key, index) {
+      saving.add(key);
+      lossy.add(key);
+      decayed.add(key);
+      if (index % 100 === 99) decayed.tick(100);
+    });
+
+    const truth = exactTopK(stream.counts, k);
+    const truthKeys = new Set(truth.map(function (row) { return row.key; }));
+    const savingTop = saving.top(k);
+    const lossyTop = lossy.top(settings.support || 0.001).slice(0, k);
+
+    return {
+      truth: truth,
+      spaceSaving: {
+        rows: savingTop,
+        recall: overlap(savingTop, truthKeys) / Math.max(1, truth.length),
+        worstOver: worstGap(savingTop, stream.counts, 1),
+        monitored: saving.size(),
+        bytes: saving.bytes(),
+        guaranteedThreshold: saving.guaranteedThreshold(),
+        replacements: saving.stats().replacements
+      },
+      lossy: {
+        rows: lossyTop,
+        recall: overlap(lossyTop, truthKeys) / Math.max(1, truth.length),
+        worstUnder: worstGap(lossyTop, stream.counts, -1),
+        monitored: lossy.size(),
+        bytes: lossy.bytes(),
+        errorBound: lossy.errorBound(),
+        width: lossy.width()
+      },
+      decayed: {
+        rows: decayed.top(k),
+        halfLife: decayed.halfLife(),
+        keys: decayed.size(),
+        bytes: decayed.bytes()
+      }
+    };
+  }
+
+  function exactTopK(counts, k) {
+    return Array.from(counts.entries())
+      .sort(function (a, b) { return b[1] - a[1]; })
+      .slice(0, k)
+      .map(function (pair) { return { key: pair[0], count: pair[1] }; });
+  }
+
+  function overlap(rows, truthKeys) {
+    return rows.reduce(function (total, row) { return total + (truthKeys.has(row.key) ? 1 : 0); }, 0);
+  }
+
+  function worstGap(rows, counts, sign) {
+    return rows.reduce(function (worst, row) {
+      const gap = sign * (row.count - (counts.get(row.key) || 0));
+      return Math.max(worst, gap);
+    }, 0);
+  }
+
   return {
     cardinalityTrack: cardinalityTrack,
     precisionSweep: precisionSweep,
@@ -457,8 +698,12 @@
     frequencyScatter: frequencyScatter,
     heavyHitterCompare: heavyHitterCompare,
     quantileCompare: quantileCompare,
+    shardQuantiles: shardQuantiles,
     deduplicate: deduplicate,
+    simhashCompare: simhashCompare,
+    projectionCheck: projectionCheck,
     windowCompare: windowCompare,
+    streamTopK: streamTopK,
     QUANTILE_FAMILIES: QUANTILE_FAMILIES
   };
 }));

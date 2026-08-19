@@ -10,7 +10,7 @@
     { id: 'hll-precision', kind: 'range', label: 'precision p (m = 2^p registers)', value: 12, min: 6, max: 16, step: 1,
       note: 'Standard error is 1.04/√m and does not depend on the cardinality at all.' },
     { id: 'hll-length', kind: 'range', label: 'stream length', value: 200000, min: 20000, max: 400000, step: 20000 },
-    { id: 'hll-keys', kind: 'range', label: 'distinct keys in the universe', value: 60000, min: 2000, max: 200000, step: 2000 },
+    { id: 'hll-keys', kind: 'range', label: 'distinct keys in the universe', value: 50000, min: 2000, max: 200000, step: 2000 },
     { id: 'hll-kind', kind: 'select', label: 'stream shape', value: 'zipf',
       options: [{ value: 'uniform', label: 'uniform — every key equally likely' },
         { value: 'zipf', label: 'Zipf — a few keys dominate' },

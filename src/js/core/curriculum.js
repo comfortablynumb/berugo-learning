@@ -520,12 +520,131 @@
               tags: ['trade-off', 'mergeability', 'adversarial', 'keyed hashing', 'sketch selection']
             }
           ]
+        },
+        {
+          id: 'M08',
+          title: 'Spatial and multidimensional indexes',
+          summary: 'Everything that answers "what is near this" or "what overlaps this", with the pruning measured.',
+          sections: [
+            {
+              id: 'uniform-grids',
+              title: 'Uniform grids and spatial hashing',
+              summary: 'Cell size from density and radius, an unbounded domain by hashing, and the phantom candidates it costs.',
+              tags: ['grid', 'spatial hash', 'cell size', 'density', 'broad phase', 'bucketing']
+            },
+            {
+              id: 'quadtrees',
+              title: 'Quadtrees, octrees and loose quadtrees',
+              summary: 'Subdivision of space, the depth cap that is a correctness requirement, and objects with extent.',
+              tags: ['quadtree', 'octree', 'loose quadtree', 'subdivision', 'coincident points', 'depth cap']
+            },
+            {
+              id: 'kd-trees',
+              title: 'k-d trees and nearest neighbours',
+              summary: 'The backtrack that makes the answer right, and the dimension where pruning stops working.',
+              tags: ['kd tree', 'nearest neighbour', 'backtrack', 'median split', 'curse of dimensionality']
+            },
+            {
+              id: 'r-trees',
+              title: 'R-trees and rectangle indexes',
+              summary: 'Overlapping bounding rectangles, four split heuristics, and why databases bulk load.',
+              tags: ['r-tree', 'mbr', 'split heuristic', 'r*-tree', 'str', 'bulk load', 'postgis']
+            },
+            {
+              id: 'bounding-volumes',
+              title: 'Bounding volume hierarchies and the SAH',
+              summary: 'A cost model rather than a rule of thumb, the slab test, and refitting an animated scene.',
+              tags: ['bvh', 'surface area heuristic', 'ray tracing', 'slab method', 'refit', 'traversal']
+            },
+            {
+              id: 'space-filling-curves',
+              title: 'Space-filling curves: Morton, Hilbert and geohash',
+              summary: 'One number for two coordinates, a rectangle as key ranges, and which locality claim is true.',
+              tags: ['morton', 'z-order', 'hilbert', 'geohash', 's2', 'range decomposition', 'locality']
+            },
+            {
+              id: 'range-structures',
+              title: 'One-dimensional range structures',
+              summary: 'Fenwick, segment trees, lazy propagation, sparse tables and the constant that O(log n) hides.',
+              tags: ['fenwick', 'binary indexed tree', 'segment tree', 'lazy propagation', 'sparse table', 'sqrt decomposition']
+            },
+            {
+              id: 'vector-search',
+              title: 'Nearest neighbours in high dimensions',
+              summary: 'Recall as the quantity, HNSW as a skip list in metric space, and the re-ranking stage.',
+              tags: ['hnsw', 'ann', 'vector search', 'recall', 'product quantisation', 'ivf', 'vp-tree']
+            },
+            {
+              id: 'broad-phase',
+              title: 'Broad-phase collision detection',
+              summary: 'Sweep and prune, temporal coherence, and the tunnelling failure no index can fix.',
+              tags: ['broad phase', 'sweep and prune', 'collision', 'temporal coherence', 'tunnelling', 'substepping']
+            }
+          ]
+        },
+        {
+          id: 'M09',
+          title: 'Persistent, immutable and succinct structures',
+          summary: 'Keeping every version for the price of the path, and encoding a structure in the bits it needs.',
+          sections: [
+            {
+              id: 'persistence-basics',
+              title: 'Persistence: path copying, fat nodes and node copying',
+              summary: 'Three ways to keep every version, and the read cost the space comparison leaves out.',
+              tags: ['persistence', 'path copying', 'fat node', 'node copying', 'structural sharing', 'snapshot']
+            },
+            {
+              id: 'persistent-sequences',
+              title: 'Persistent queues: amortisation, laziness and real time',
+              summary: 'Reusing one version breaks an amortised bound; a memoised suspension repairs it.',
+              tags: ['okasaki', 'bankers queue', 'lazy evaluation', 'amortised', 'real-time queue', 'memoisation']
+            },
+            {
+              id: 'versioned-queries',
+              title: 'Versioned range queries and order statistics',
+              summary: 'A persistent segment tree, and the prefix-version index that answers the k-th smallest in a range.',
+              tags: ['persistent segment tree', 'range sum', 'order statistics', 'quantile', 'snapshot query']
+            },
+            {
+              id: 'bit-partitioned-tries',
+              title: 'Bit-partitioned tries: HAMTs, vectors and transients',
+              summary: 'A bitmap and a popcount instead of 32 slots, and the transient that pays for the build.',
+              tags: ['hamt', 'popcount', 'persistent vector', 'transient', 'clojure', 'bit partitioning']
+            },
+            {
+              id: 'finger-trees',
+              title: '2-3 finger trees and monoid annotations',
+              summary: 'One structure, four data structures: the measure decides what the split finds.',
+              tags: ['finger tree', 'monoid', 'annotation', 'split', 'concatenation', 'deque']
+            },
+            {
+              id: 'zippers',
+              title: 'Zippers: a cursor into an immutable structure',
+              summary: 'Focus plus context, and the batching that makes local edits cost the path once.',
+              tags: ['zipper', 'cursor', 'focus', 'context', 'locality', 'immutable edit']
+            },
+            {
+              id: 'rank-and-select',
+              title: 'Bit vectors with rank and select',
+              summary: 'The two-level index, its 7.9% overhead, and the density where a positions array wins.',
+              tags: ['rank', 'select', 'bit vector', 'popcount', 'elias-fano', 'succinct']
+            },
+            {
+              id: 'succinct-trees',
+              title: 'Succinct trees: LOUDS, parentheses and wavelet trees',
+              summary: '2n bits for the shape, what that figure excludes, and the same trick on a sequence.',
+              tags: ['louds', 'balanced parentheses', 'wavelet tree', 'succinct', '2n bits', 'navigation']
+            },
+            {
+              id: 'compressed-bitmaps',
+              title: 'Compressed bitmaps: Roaring and word-aligned runs',
+              summary: 'A representation chosen per chunk, and the intersection path chosen per container pair.',
+              tags: ['roaring', 'wah', 'bitmap', 'container', 'run-length', 'intersection']
+            }
+          ]
         }
       ],
-      planned: [
-        { id: 'M08', title: 'Spatial and multidimensional indexes', sections: 9 },
-        { id: 'M09', title: 'Persistent, immutable and succinct structures', sections: 9 }
-      ]
+      planned: []
     },
     {
       id: 'architecture',
