@@ -198,10 +198,70 @@
               tags: ['array sort', 'schwartzian transform', 'collation', 'tie-breaking', 'es2019', 'chooser']
             }
           ]
+        },
+        {
+          id: 'M11',
+          title: 'Algorithm design paradigms',
+          summary: 'Recognising which shape a problem has, and the proof technique that certifies each one.',
+          sections: [
+            {
+              id: 'exhaustive-search',
+              title: 'Exhaustive search and the art of pruning',
+              summary: 'The state space as a tree, and the checks that refuse to build most of it.',
+              tags: ['state space', 'pruning', 'symmetry breaking', 'n-queens', 'search tree', 'node count']
+            },
+            {
+              id: 'divide-and-conquer',
+              title: 'Divide and conquer',
+              summary: 'Karatsuba, Strassen and closest pair: the combine step is the algorithm.',
+              tags: ['karatsuba', 'strassen', 'closest pair', 'inversions', 'recurrence', 'crossover']
+            },
+            {
+              id: 'greedy-algorithms',
+              title: 'Greedy algorithms and exchange arguments',
+              summary: 'Four criteria, one optimal, and the counter-examples found by search.',
+              tags: ['greedy', 'interval scheduling', 'exchange argument', 'staying ahead', 'coin systems']
+            },
+            {
+              id: 'matroids',
+              title: 'Matroids: when greedy is provably right',
+              summary: 'The exchange property, the Rado-Edmonds theorem, and a checker that returns a witness.',
+              tags: ['matroid', 'independence oracle', 'exchange property', 'kruskal', 'rado-edmonds']
+            },
+            {
+              id: 'backtracking',
+              title: 'Backtracking',
+              summary: 'Choose, explore, unchoose - and the heuristics that decide whether it finishes.',
+              tags: ['backtracking', 'sudoku', 'mrv', 'forward checking', 'constraint propagation', 'undo']
+            },
+            {
+              id: 'branch-and-bound',
+              title: 'Branch and bound',
+              summary: 'The bound is the algorithm, and an inadmissible one is a confident wrong answer.',
+              tags: ['branch and bound', 'knapsack', 'relaxation', 'incumbent', 'admissible bound', 'tsp']
+            },
+            {
+              id: 'two-pointers',
+              title: 'Two pointers, sliding windows and monotonic structures',
+              summary: 'One amortisation argument in four disguises, measured as a total rather than a rate.',
+              tags: ['two pointers', 'sliding window', 'monotonic deque', 'monotonic stack', 'amortised']
+            },
+            {
+              id: 'meet-in-the-middle',
+              title: 'Meet in the middle and bidirectional search',
+              summary: 'Halving the exponent, and the memory that pays for it.',
+              tags: ['meet in the middle', 'subset sum', 'bidirectional search', 'horowitz-sahni', 'memory']
+            },
+            {
+              id: 'offline-processing',
+              title: 'Offline and batch processing',
+              summary: 'Seeing every query first changes the achievable complexity class.',
+              tags: ['offline', 'mo\'s algorithm', 'sqrt decomposition', 'batch', 'query reordering']
+            }
+          ]
         }
       ],
       planned: [
-        { id: 'M11', title: 'Algorithm design paradigms', sections: 9 },
         { id: 'M12', title: 'Dynamic programming', sections: 11 },
         { id: 'M13', title: 'Graph algorithms I — traversal, order, shortest paths, MST', sections: 10 },
         { id: 'M14', title: 'Graph algorithms II — flow, matching, connectivity, spectral', sections: 10 },

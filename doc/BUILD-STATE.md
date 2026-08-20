@@ -3,7 +3,7 @@
 Where the implementation stands, and exactly what the next session should pick up.
 Update this file at the end of any session that leaves work unfinished.
 
-**Last updated:** 2026-08-19 (M10 shipped)
+**Last updated:** 2026-08-20 (M10 shipped; M11 content complete, tests pending)
 
 ---
 
@@ -22,9 +22,13 @@ Update this file at the end of any session that leaves work unfinished.
 | M08 — spatial and multidimensional indexes | 9 | ✅ built, tested, verified in Chrome |
 | M09 — persistent, immutable and succinct structures | 9 | ✅ built, tested, verified in Chrome |
 | M10 — sorting, selection and searching | 10 | ✅ built, tested, verified in Chrome |
+| M11 — algorithm design paradigms | 9 | 🚧 **in progress** — see the M11 section below |
 
-The tree is green: 95 sections, `npm test` passes the wiring audit and 1 841 unit tests (1
-skipped), and `npm run lint:size` reports no offender across 508 files.
+As of the current stopping point the tree is **not red**, but the full suite has not been run
+since M11 landed: the wiring audit passes at 104 sections and 496 modules, `npm run lint:size`
+passes across 550 files, and `content-coverage` + `template-ids` pass with 617 assertions. The last
+fully green `npm test` was the end of M10: 95 sections, 1 841 tests, 508 files clean. See the M11
+section near the end of this file for exactly what remains.
 
 All nine M07 sections were opened in Chrome on `npm start`: the three tabs render, every demo
 figure matches the prose *exactly* (see "aligning the demo with the prose" below), the references
@@ -1113,10 +1117,214 @@ Lomuto ranges 21 033 -> 1 003 000 across the shapes: a factor of 48
 
 ---
 
+## M11 — IN PROGRESS (content complete; the module and figure tests are not written)
+
+Spec: `doc/milestones/M11-design-paradigms.md`. Nine sections under the `algorithms` track.
+**Everything through the content files is written, wired and verified in node. What is missing is
+step 7 (the two test files) and step 9 (the Chrome pass).** The tree is *not* red: the wiring audit
+passes at 104 sections and 496 modules, `npm run lint:size` passes across 550 files, and
+`content-coverage` + `template-ids` pass (617 assertions). The full `npm test` has not been run
+end to end since M11 landed — do that first.
+
+### Where it stops
+
+| Step | State |
+|---|---|
+| 1. algorithms | ✅ 10 modules |
+| 2. machines | ✅ `search-tree-lab.js` — generic explorer, queens and knapsack specs |
+| 3. viz | ✅ `search-tree-view.js` (`tree` open/infeasible/bounded, `levels`) |
+| 4. sections | ✅ 9 template + section pairs |
+| 5a. concepts | ✅ 3 files, 72 concepts (8 per section), shortest detail 393 characters |
+| 5b. examples | ✅ 3 files, 18 worked examples, every figure measured (see below) |
+| 5c. reference | ✅ 3 files, 9 entries |
+| 5d. exercises | ✅ 3 files, 9 exercises — all 9 solutions pass 4/4 and all 9 starters fail in the sandbox |
+| 6. wiring | ✅ `curriculum.js` M11 group added (104 sections); `index.html` containers + all script tags |
+| 7a. module tests | ❌ `paradigm-modules.test.js` not written |
+| 7b. worked-example tests | ❌ `worked-examples-paradigms{,-search,-sweeps}.test.js` not written |
+| 8. `npm test` | ❌ not run end to end since M11 landed |
+| 8. `build:css` | ❌ not run |
+| 9. browser pass | ❌ not started |
+
+### Section ids and prefixes
+
+Checked against every existing template; none collide.
+
+| Section id | prefix | module(s) |
+|---|---|---|
+| `exhaustive-search` | `xs-` | `backtracking.js`, `search-tree-lab.js` |
+| `divide-and-conquer` | `dnc-` | `karatsuba.js`, `strassen.js`, `closest-pair.js` |
+| `greedy-algorithms` | `grd-` | `greedy.js` |
+| `matroids` | `mtr-` | `matroid.js` |
+| `backtracking` | `bkt-` | `backtracking.js` |
+| `branch-and-bound` | `bnb-` | `branch-and-bound.js`, `search-tree-lab.js` |
+| `two-pointers` | `tpw-` | `two-pointers.js` |
+| `meet-in-the-middle` | `mim-` | `meet-in-middle.js` |
+| `offline-processing` | `ofl-` | `mo-algorithm.js` |
+
+Content files are `concepts|examples|reference|exercises-paradigms{,-search,-sweeps}.js`, split
+1-3 / 4-6 / 7-9.
+
+### Measured figures quoted in the M11 examples
+
+All measured from the code on disk, with the seeds the sections use. Nothing here needs
+re-deriving; the missing figure tests should assert exactly these.
+
+#### 11.1 `exhaustive-search` — n-queens
+
+```
+                    control(leaf)   early    sym+leaf   both    solutions
+n =  6                    1 957       153        979      77            4
+n =  8                  109 601     2 057     54 801   1 029           92
+n = 10                9 864 101    35 539  4 932 051  17 770          724
+fractions at n = 8: early 1.88% | symmetry 50.00% | both 0.94% (= the product)
+first solution only, n = 8: 114 nodes natural order, 9 with most-constrained-first
+```
+
+#### 11.2 `divide-and-conquer`
+
+```
+Karatsuba.crossover({ threshold: 1, seed: 3 }) — schoolbook / karatsuba / ratio / n^1.585
+  n =    4        16 /     17 / 0.94 /      9      (Karatsuba LOSES)
+  n =    8        64 /     45 / 1.42 /     27
+  n =   16       256 /    128 / 2.00 /     81
+  n =  128    16 384 /  3 715 / 4.41 /  2 187      (1.70x the model)
+  n =  512   262 144 / 33 498 / 7.83 / 19 683      (1.70x)
+  n = 1024 1 048 576 /100 273 /10.46 / 59 049      (1.70x)
+  all 9 sizes agree with BigInt exactly
+closest pair, 2 000 uniform points (LCG seed 11): 2 314 checks against 1 999 000, worst strip run 2
+inversions over 2 000 values (seed 17): 984 529 inversions from 19 447 comparisons
+Strassen (seed 23), cubic / strassen / ratio / relative error:
+  side  16    4 096 /   2 401 / 1.71 / 2.80e-15
+  side  64  262 144 / 117 649 / 2.23 / 1.20e-14
+  side 128 2 097 152 / 823 543 / 2.55 / 3.40e-14
+```
+
+#### 11.3 `greedy-algorithms`
+
+```
+counterExample(criterion, { seed: 5 }) — climbs the ladder [[4,10],[6,12],[9,14],[11,18],[14,22]]
+  earliest-finish    none in 200 000 instances
+  earliest-start     loses 1/2 at 4 intervals after 5 instances
+  shortest           loses 1/2 at 4 intervals after 554
+  fewest-conflicts   loses 3/4 at 9 intervals after 94 996
+isCanonical: 1,5,10,25 canonical (limit 35) | 1,2,5,10,20,50 canonical (limit 70)
+             1,3,4 fails at 6 (3 vs 2) | 1,7,10 fails at 14 (5 vs 2) | 1,15,25 fails at 30 (6 vs 2)
+             1,5,11 fails at 15 — above the largest coin, which is the exercise's point
+fractional knapsack 240 against a 0/1 optimum of 220 on (60,10),(100,20),(120,30) at capacity 50
+stayingAheadTrace on the section default (12 intervals, span 20, seed 3):
+  greedy ends 5, 10, 11, 15, 18 against the mirror-rule rival's 5, 10, 11, 15, 20
+```
+
+#### 11.4 `matroids`
+
+```
+matching on the 3-edge path, weights 2, 3, 2: not a matroid, 5 independent sets,
+  exchange witness {1-2} cannot be extended from {0-1, 2-3}, greedy 3 against a best of 4
+graphic, 8 edges over 4 vertices (Random.seeded(5)): matroid, 62 independent of 256 subsets,
+  greedy 46 = best 46; negated weights give a minimum forest of 16
+```
+
+#### 11.5 `backtracking` — Sudoku, node budget 500 000
+
+```
+                 none      MRV    +forward   +propagation
+easy            4 209       52         52              1
+escargot        8 970      218        210             15
+inkala         49 559   10 102      9 180            929
+antibrute     500 000+  45 268     39 223          6 050
+platinum       419 195  500 000+   500 000+       500 000+     <- the ranking INVERTS here
+inkala backtracks: 49 498 / 10 041 / 10 041 / 1 837; propagations 0 / 0 / 0 / 9 089
+```
+
+#### 11.6 `branch-and-bound` — 22 items, Random.seeded(13), capacity 164, optimum 658
+
+```
+fractional relaxation   70 nodes,  23 pruned, value 658
+best remaining density 282 nodes, 129 pruned, value 658
+90% of the relaxation   40 nodes,  13 pruned, value 640   <- inadmissible, and silently wrong
+exhaustive           4 194 304 subsets
+TSP, 9 cities (Random.seeded(13)): 2 502 nodes with the bound, 109 601 without, both 226.019
+```
+
+#### 11.7 `two-pointers` — n = 5 000, k = 50, Random.seeded(7)
+
+```
+shape        pushes   pops   total   per element   peak deque
+random        5 000  4 994   9 994      1.999          11
+ascending     5 000  4 999   9 999      2.000           1
+descending    5 000  4 950   9 950      1.990          50
+sawtooth      5 000  4 999   9 999      2.000           2
+rescanning each window: (5 000 - 50 + 1) x 50 = 247 550 comparisons
+largest rectangle, 2 000 bars (Random.seeded(11)): area 793, 4 000 stack ops against 2 001 000
+[2, 1, 5, 6, 2, 3] -> 10
+```
+
+#### 11.8 `meet-in-the-middle` — Random.seeded(5), target = half the total
+
+```
+n     mid states   probes    best sum    brute states    ratio
+12          128      384      17 043           4 096       32
+16          512    2 040      20 646          65 536      128
+20        2 048   10 240      27 306       1 048 576      512
+22        4 096   22 440      27 988       4 194 304    1 024
+40    2 097 152 20 969 549    50 719      1.10e12 (projected)
+bidirectional: b=3 d=8 -> 3 281 forwards / 22 both ways | b=4 d=8 -> 21 846 / 32; both distance 8
+```
+
+#### 11.9 `offline-processing` — n = 4 000, q = 600, universe 200, seed 9
+
+```
+block size    moves    predicted q.b + n²/b
+16 (√n/4)   357 720          1 009 600
+63 (√n)     210 636            291 768
+163 (n/√q)  121 956            195 960     <- the minimiser
+253 (4√n)   109 260            215 041
+arrival order: 1 420 156 moves (11.6x), 600/600 answers match brute force
+bound (n + q)·√n = 290 930; the measurement is 42% of it
+```
+
+### Decisions that are easy to undo by accident
+
+- **`backtracking.js`'s Sudoku keeps a candidate mask per cell, maintained incrementally.**
+  Recomputing masks from the peers made the section's matrix take 42 s; bitmasks took it to 5.1 s
+  and incremental maintenance to 2.16 s, with identical node counts at every cell. The matrix is
+  also memoised on the budget alone, because it does not depend on the selected puzzle.
+- **`nQueens` collects boards whenever `symmetry` is on, even under `countOnly`**, because the
+  count is produced by mirroring them and de-duplicating — doubling is wrong for odd n.
+- **`greedy.stayingAheadTrace` builds its rival with the mirror rule** (latest start first). The
+  obvious reconstruction from the DP re-derives earliest-finish, so every row ties and the table
+  demonstrates nothing.
+- **`SearchTreeLab.explore` draws at most `treeLimit` nodes and reports `treeTruncated`.** The
+  unpruned configurations reach millions of nodes; the counters keep counting after the drawing
+  stops.
+- **The counter-example search in `greedy.js` climbs a size ladder** and reports how many instances
+  it tried. That number is the teaching point: 5 for earliest-start, 94 996 for fewest-conflicts.
+
+### What to do next, in order
+
+1. `tests/unit/paradigm-modules.test.js` — property tests against brute-force references:
+   n-queens counts against the published sequence, Karatsuba against BigInt, closest pair and
+   inversions against their quadratic oracles, Strassen against the triple loop, greedy against
+   the DP oracle, the matroid checker on known matroids and non-matroids, knapsack against
+   exhaustive enumeration, the sweeps against rescans, meet-in-the-middle against brute force,
+   and Mo's answers against a scan.
+2. `worked-examples-paradigms.test.js`, `-paradigms-search`, `-paradigms-sweeps` using
+   `tests/support/worked-example-prose.js`, asserting every figure in the table above *and* that
+   the prose still quotes it.
+3. `npm test && npm run lint:size && npm run build:css`.
+4. Chrome pass over all nine sections, three tabs each, every demo figure against the prose, and
+   every exercise through the real Worker sandbox. The nine exercises already pass 4/4 and their
+   starters fail under the inline sandbox.
+5. Update the README status block, `CLAUDE.md` and the tables at the top of this file.
+
+---
+
 ## Next
 
-**M11 — algorithm design paradigms**, and onward through `doc/milestones/` in the order
-`doc/ROADMAP.md` gives.
+**Finish M11** — the two test files, then `build:css` and the Chrome pass. The M11 section
+immediately above lists them in order and carries every measured figure the prose quotes, so
+nothing needs re-deriving. After that, **M12 — dynamic programming**, and onward through
+`doc/milestones/` in the order `doc/ROADMAP.md` gives.
 
 A shared helper exists for the figure tests: `tests/support/worked-example-prose.js` exports
 `proseFor`, `quotes`, `fixed` and `grouped`. New `worked-examples-*.test.js` files should require
