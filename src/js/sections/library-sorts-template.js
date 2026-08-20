@@ -15,7 +15,7 @@
         { value: 'few-unique', label: 'few unique' },
         { value: 'organ-pipe', label: 'organ pipe' },
         { value: 'adversarial', label: 'adversarial' }] },
-    { id: 'lib-size', kind: 'range', label: 'elements', value: 4000, min: 1000, max: 20000, step: 1000 },
+    { id: 'lib-size', kind: 'range', label: 'elements', value: 2000, min: 1000, max: 20000, step: 1000 },
     { id: 'lib-collapse', kind: 'select', label: 'Timsort merge-stack rule', value: 'fixed',
       options: [{ value: 'fixed', label: 'the 2015 fix — checks four runs deep' },
         { value: 'buggy', label: 'the original — checks only the top three' }] }
@@ -33,7 +33,7 @@
       scope.ControlPanel.markup({ title: 'The input, the size and the collapse rule', controls: CONTROLS }) +
       '<div class="card"><div class="card-header">The runs Timsort found before it merged anything</div>' +
       '<div class="card-body"><div id="lib-runs-view"></div>' +
-      '<p class="note" id="lib-runs-note"></p></div></div>' +
+      '<p class="note" id="lib-runs-caption"></p></div></div>' +
       '</div>' +
       scope.MetricGrid.markup(METRICS) +
       '<div class="card" style="margin-top:.875rem">' +
@@ -41,7 +41,7 @@
       '<div class="card-body"><table class="ref-table" id="lib-stack-table"><thead><tr>' +
       '<th>#</th><th>Stack (run lengths, deepest first)</th><th>Z &gt; Y + X</th><th>Y &gt; X</th>' +
       '</tr></thead><tbody></tbody></table>' +
-      '<p class="note" id="lib-stack-note"></p></div></div>' +
+      '<p class="note" id="lib-stack-table-note"></p></div></div>' +
       '<div class="card" style="margin-top:.875rem">' +
       '<div class="card-header">Timsort against pdqsort against introsort, on the same input</div>' +
       '<div class="card-body"><table class="ref-table" id="lib-compare"><thead><tr>' +

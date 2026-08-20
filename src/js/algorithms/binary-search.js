@@ -286,6 +286,14 @@
     return { verdict: outcome, reads: reads };
   }
 
+  /* A mutation that spins or throws is not a "wrong answer": the verdict
+     already says which it was, and calling a hang a wrong answer hides the
+     one failure mode that is loud enough to be safe. */
+  function reasonFor(outcome, wrongAnswer) {
+    if (typeof outcome.verdict === 'string') return outcome.verdict;
+    return wrongAnswer ? 'wrong answer' : 'read past the end';
+  }
+
   /**
    * Run every mutation against every probe case and report which cases catch
    * it. A mutation that no case catches would mean the case list is too
@@ -308,7 +316,7 @@
           failures.push({
             probe: probe.label, target: target, expected: expected,
             actual: wrongAnswer ? outcome.verdict : expected,
-            reason: wrongAnswer ? 'wrong answer' : 'read past the end',
+            reason: reasonFor(outcome, wrongAnswer),
             outOfBounds: outcome.reads.past
           });
         });

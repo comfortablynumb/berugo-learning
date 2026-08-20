@@ -14,7 +14,8 @@
         { value: 'divisor', label: 'smallest divisor under a threshold' }] },
     { id: 'ans-items', kind: 'range', label: 'items', value: 10, min: 4, max: 24, step: 1 },
     { id: 'ans-parts', kind: 'range', label: 'days / readers / cows', value: 5, min: 2, max: 12, step: 1 },
-    { id: 'ans-seed', kind: 'range', label: 'instance seed', value: 3, min: 1, max: 40, step: 1 }
+    { id: 'ans-seed', kind: 'range', label: 'instance seed (0 = the worked example)', value: 0,
+      min: 0, max: 40, step: 1 }
   ];
 
   const METRICS = [
@@ -47,10 +48,10 @@
       '<p class="note" id="ans-problems-note"></p></div></div>' +
       '<div class="card" style="margin-top:.875rem">' +
       '<div class="card-header">What monotonicity buys, and what a non-monotone predicate costs</div>' +
-      '<div class="card-body"><table class="ref-table" id="ans-monotone"><thead><tr>' +
+      '<div class="card-body"><table class="ref-table" id="ans-monotone-table"><thead><tr>' +
       '<th>Predicate</th><th>Flips</th><th>Monotone</th><th>Binary search answer</th><th>True answer</th>' +
       '</tr></thead><tbody></tbody></table>' +
-      '<p class="note" id="ans-monotone-note"></p></div></div>';
+      '<p class="note" id="ans-monotone-table-note"></p></div></div>';
   }
 
   return { render: render, controls: CONTROLS, metrics: METRICS };

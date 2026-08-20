@@ -18,7 +18,7 @@
         { value: 'sorted', label: 'already sorted' },
         { value: 'reversed', label: 'reversed' },
         { value: 'organ-pipe', label: 'organ pipe' }] },
-    { id: 'mgs-size', kind: 'range', label: 'elements', value: 2048, min: 256, max: 8192, step: 256 },
+    { id: 'mgs-size', kind: 'range', label: 'elements', value: 2000, min: 500, max: 8000, step: 500 },
     { id: 'mgs-order', kind: 'range', label: 'k-way merge order', value: 4, min: 2, max: 16, step: 1 }
   ];
 
@@ -34,7 +34,7 @@
       scope.ControlPanel.markup({ title: 'The schedule, the shape and the merge order', controls: CONTROLS }) +
       '<div class="card"><div class="card-header">The runs already present in this input</div>' +
       '<div class="card-body"><div id="mgs-runs-view"></div>' +
-      '<p class="note" id="mgs-runs-note"></p></div></div>' +
+      '<p class="note" id="mgs-runs-caption"></p></div></div>' +
       '</div>' +
       scope.MetricGrid.markup(METRICS) +
       '<div class="card" style="margin-top:.875rem">' +

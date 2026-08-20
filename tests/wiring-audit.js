@@ -19,6 +19,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const vm = require('vm');
 
 const ROOT = path.join(__dirname, '..');
 const KNOWN_EVENTS = ['navigation', 'theme', 'progress'];
@@ -128,11 +129,34 @@ function checkRegistrations(files, curriculum) {
   return ids;
 }
 
+/**
+ * A script the page loads must at least parse.
+ *
+ * Section controllers and templates are browser-only - `node --test` never
+ * requires them - so a syntax error in one of them passes every unit test and
+ * silently deletes the whole section in the browser. That is exactly what an
+ * unescaped apostrophe in `selection-and-order-section.js` did, and only the
+ * page load found it. `new vm.Script` compiles without running, which is all
+ * this needs.
+ */
+function checkParses(src) {
+  try {
+    /* eslint-disable-next-line no-new */
+    new vm.Script(read(src), { filename: src });
+  } catch (error) {
+    fail('script-does-not-parse', src + ' — ' + error.message);
+  }
+}
+
 function checkScriptTags(html, files) {
   const loaded = matchAll(html, /<script src="([^"]+)"><\/script>/g).map(function (m) { return m[1]; });
 
   loaded.forEach(function (src) {
-    if (!fs.existsSync(path.join(ROOT, src))) fail('missing-script-file', src);
+    if (!fs.existsSync(path.join(ROOT, src))) {
+      fail('missing-script-file', src);
+      return;
+    }
+    checkParses(src);
   });
 
   files.forEach(function (file) {

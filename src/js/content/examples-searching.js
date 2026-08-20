@@ -17,7 +17,7 @@
             do: 'Establish the control.',
             why: 'If the correct version fails a probe, the probes are wrong rather than the code.',
             work: 'the invariant version: half-open [low, high), high starts at length\n' +
-              'checked against a linear scan on all thirteen',
+              'checked against a linear scan on all 13',
             result: 'caught by 0 of 13'
           },
           {
@@ -39,7 +39,7 @@
           {
             do: 'Change the loop to `while (low <= high)` with high still at length.',
             why: 'This is the mutation that makes the case for instrumented testing.',
-            work: 'it reads array[length]; JavaScript yields undefined\n' +
+            work: 'it reads array[10 000] of a 10 000-element array; JavaScript yields undefined\n' +
               'every comparison against undefined is false\n' +
               'so it takes the branch it would have taken and returns the correct index',
             result: 'caught by 4 of 13 — every one of them by the out-of-bounds read, never by a wrong answer'
@@ -47,7 +47,8 @@
           {
             do: 'Say what that same code does elsewhere.',
             why: 'The severity is language-dependent and the bug is not.',
-            work: 'C: reads whatever is next in memory — undefined behaviour\n' +
+            work: '1 defect, 3 languages, 3 outcomes:\n' +
+              'C: reads whatever is next in memory — undefined behaviour\n' +
               'Java: ArrayIndexOutOfBoundsException, immediately\n' +
               'JavaScript: the right answer, silently',
             result: 'the language that never crashes is the one where it survives'
@@ -201,7 +202,7 @@
           {
             do: 'Show why negating the predicate is not the fix.',
             why: 'It is the obvious shortcut and it is off by one.',
-            work: 'firstTrue on !feasible, minus one\n' +
+            work: 'firstTrue on !feasible, minus 1\n' +
               'correct whenever some value is infeasible\n' +
               'one too small when the entire range is feasible',
             result: 'right on most instances, wrong on the boundary case'
@@ -377,7 +378,7 @@
           {
             do: 'Apply a requirement and watch candidates disappear.',
             why: 'This is what makes it a chooser rather than a leaderboard.',
-            work: 'requiring stability removes quicksort, pdqsort, shell and selection sort\n' +
+            work: 'requiring stability removes 4 candidates - quicksort, pdqsort, shell and selection sort\n' +
               'whatever their comparison counts',
             result: 'the fastest eligible sort, not the fastest sort'
           }
@@ -423,7 +424,8 @@
           {
             do: 'Sort a table by three keys with an explicit tie-break chain.',
             why: 'The alternative - three sorts relying on stability - makes the ordering emergent.',
-            work: 'team ascending, then points descending, then name by Intl.Collator\n' +
+            work: '3 keys, 1 comparator, 1 sort:\n' +
+              'team ascending, then points descending, then name by Intl.Collator\n' +
               'one comparator, one sort',
             result: 'the ordering is stated in one function instead of implied by three calls'
           },

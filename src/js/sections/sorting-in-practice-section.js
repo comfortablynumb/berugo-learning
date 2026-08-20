@@ -133,6 +133,24 @@
     drawChart(ranked);
   }
 
+  /* A radix sort makes no comparisons at all, so a ratio against it is not a
+     margin - it is a division by the thing that is zero. The column says so
+     rather than reporting the runner-up's own count as a multiple. */
+  function comparable(winner) {
+    return !!winner && winner.comparisons > 0;
+  }
+
+  function winnerNote(winner) {
+    if (comparable(winner)) return root.Format.exact(winner.comparisons) + ' comparisons';
+    return '0 comparisons and ' + root.Format.exact(winner.moves) + ' moves — it reads the key';
+  }
+
+  function marginNote(winner, runnerUp) {
+    if (!runnerUp) return 'no runner-up';
+    if (!comparable(winner)) return 'the winner makes no comparisons, so this column cannot rank it';
+    return 'against ' + runnerUp.label;
+  }
+
   function paintMetrics(rows, ranked, requiresStability) {
     const winner = ranked[0];
     const runnerUp = ranked[1];
@@ -142,13 +160,13 @@
     root.MetricGrid.update({
       'sip-winner': {
         value: winner ? winner.label : '—',
-        note: winner ? root.Format.exact(winner.comparisons) + ' comparisons' : 'nothing qualifies'
+        note: winner ? winnerNote(winner) : 'nothing qualifies'
       },
       'sip-margin': {
-        value: winner && runnerUp
-          ? root.Format.fixed(runnerUp.comparisons / Math.max(1, winner.comparisons), 2) + '×'
+        value: comparable(winner) && runnerUp
+          ? root.Format.fixed(runnerUp.comparisons / winner.comparisons, 2) + '×'
           : '—',
-        note: runnerUp ? 'against ' + runnerUp.label : 'no runner-up'
+        note: marginNote(winner, runnerUp)
       },
       'sip-default': {
         value: platform ? root.Format.exact(platform.comparisons) : '—',
@@ -217,8 +235,8 @@
         '<td>' + (ok ? 'yes' : 'no') + '</td></tr>';
     }).join('');
 
-    root.jQuery('#sip-default tbody').html(html);
-    root.jQuery('#sip-default-note').text('These are real calls, evaluated in this page. The default ' +
+    root.jQuery('#sip-default-table tbody').html(html);
+    root.jQuery('#sip-default-table-note').text('These are real calls, evaluated in this page. The default ' +
       'comparator converts each element to a string and compares UTF-16 code units, so 10 sorts before 2 and ' +
       '300 sorts before 40. The third row is the other common form: `a > b` returns a boolean, `false` ' +
       'becomes 0, and the sort is told that most pairs are equal. None of these throw.');

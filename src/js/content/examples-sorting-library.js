@@ -16,7 +16,7 @@
           {
             do: 'State the invariants the stack is supposed to satisfy.',
             why: 'They are what bounds the stack depth, and Java sized a fixed array from that bound.',
-            work: 'for the top three runs X (newest), Y, Z:\n' +
+            work: 'for the top 3 runs X (newest), Y, Z:\n' +
               '  Z > Y + X\n' +
               '  Y > X',
             result: 'run lengths grow at least as fast as the Fibonacci numbers, so the depth is O(log n)'
@@ -189,7 +189,8 @@
           {
             do: 'Locate the line.',
             why: 'It is one loop direction, and both directions look reasonable.',
-            work: 'stable:   walk the input backwards, decrementing the bucket cursor\n' +
+            work: '4 passes over 8-bit digits, and 1 loop direction is the whole difference:\n' +
+              'stable:   walk the input backwards, decrementing the bucket cursor\n' +
               'unstable: walk it forwards\n' +
               'the prefix sums and the counting pass are identical',
             result: 'one character of difference between correct and not'
@@ -213,8 +214,8 @@
           {
             do: 'Draw the conclusion about testing.',
             why: 'The failure is graded, which is what makes it survive.',
-            work: 'a test suite with small keys passes\n' +
-              'production data with wide keys fails\n' +
+            work: 'a test suite with keys 0..19 passes\n' +
+              'production data with keys 0..10^6 fails\n' +
               'the code did not change between them',
             result: 'the test that catches it must use keys wider than one digit'
           }
@@ -293,7 +294,7 @@
           {
             do: 'Confirm all three produce the same answer.',
             why: 'Otherwise the comparison is between different operations.',
-            work: 'bounded max-heap of size k\n' +
+            work: 'bounded max-heap of size k = 100\n' +
               'quickselect followed by a sort of the first k\n' +
               'a full sort, sliced',
             result: 'identical output at every k'
@@ -317,7 +318,7 @@
           {
             do: 'Now change the constraint from comparisons to memory.',
             why: 'This is the axis that usually decides, and it is not in either bound.',
-            work: 'heap: holds k elements, sees each input once, never needs the array\n' +
+            work: 'heap: holds 100 elements, sees each input once, never needs the array\n' +
               'quickselect: needs all n elements resident, and permutes them',
             result: 'the heap works on a stream of a billion records; the select does not'
           },

@@ -228,7 +228,7 @@
     const longest = detected.runs.reduce(function (best, run) {
       return Math.max(best, run.length);
     }, 0);
-    root.jQuery('#mgs-runs-note').text('The alternating bands are the ascending runs already present in the ' +
+    root.jQuery('#mgs-runs-caption').text('The alternating bands are the ascending runs already present in the ' +
       'first ' + detected.values.length + ' elements: ' + detected.runs.length + ' of them, the longest ' +
       longest + ' elements. Natural merge sort starts from these instead of from runs of one, which is why ' +
       'the "' + values['mgs-shape'] + '" shape costs it what it does. Random data has runs of about two, and ' +

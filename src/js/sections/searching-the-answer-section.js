@@ -105,9 +105,13 @@
 
   const instanceFor = root.Helpers.memoise(function (key) {
     const parts = key.split('|');
-    const random = root.Random.seeded(Number(parts[3]));
+    /* Seed 0 is the worked example's own instance - weights 1, 2, ... n -
+       so the section opens on the numbers its prose quotes rather than on a
+       random package list that happens to have a different answer. */
+    const seed = Number(parts[3]);
+    const random = root.Random.seeded(Math.max(1, seed));
     const items = [];
-    for (let i = 0; i < Number(parts[1]); i += 1) items.push(1 + random.int(20));
+    for (let i = 0; i < Number(parts[1]); i += 1) items.push(seed === 0 ? i + 1 : 1 + random.int(20));
     return solve(parts[0], items, Number(parts[2]));
   });
 
@@ -232,8 +236,8 @@
         '<td class="mono">' + truth + '</td></tr>';
     }).join('');
 
-    root.jQuery('#ans-monotone tbody').html(rows);
-    root.jQuery('#ans-monotone-note').text('A monotone predicate flips exactly once across its range; the ' +
+    root.jQuery('#ans-monotone-table tbody').html(rows);
+    root.jQuery('#ans-monotone-table-note').text('A monotone predicate flips exactly once across its range; the ' +
       'middle row flips three times and is not searchable. Note what happens: the binary search still returns ' +
       'a number, and it is not the smallest true value. Nothing raised, nothing logged — which is why the ' +
       'monotonicity check belongs in the code that uses the technique and not only in the reasoning behind it.');

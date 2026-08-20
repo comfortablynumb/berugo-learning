@@ -106,7 +106,8 @@
           {
             do: 'Compare that with what other languages do.',
             why: 'The same mistake has three different consequences, and only one of them is silent.',
-            work: 'C++: undefined behaviour — std::sort may read out of bounds\n' +
+            work: '1 comparator, 3 languages, 3 outcomes:\n' +
+              'C++: undefined behaviour — std::sort may read out of bounds\n' +
               'Java: IllegalArgumentException, "Comparison method violates its general contract"\n' +
               'JavaScript: returns a wrong order',
             result: 'the language that never crashes is the one where the bug survives longest'
@@ -203,7 +204,8 @@
           {
             do: 'Say why the descent test has to be strict.',
             why: 'Using `<=` would find longer runs and quietly break stability.',
-            work: 'a strictly descending run contains no equal elements\n' +
+            work: 'the reversed 2 000-element input is 1 run after 1 000 swaps\n' +
+              'a strictly descending run contains no equal elements\n' +
               'so reversing it cannot put two equals in the wrong order\n' +
               'with `<=` the run may contain equals, and the reversal inverts them',
             result: 'the strictness is what makes the reversal free rather than wrong'
@@ -300,7 +302,8 @@
           {
             do: 'Describe how the adversary works.',
             why: 'It proves the failure is systematic rather than unlucky.',
-            work: 'sort a permutation with a comparator that has not decided the values\n' +
+            work: 'sort a permutation of 2 048 elements against a comparator that has decided nothing\n' +
+              'no value is fixed until it is compared\n' +
               'when two undecided elements are compared, commit the non-pivot to the next smallest value\n' +
               'every pivot the algorithm picks therefore turns out to be extreme',
             result: 'a permutation of 0..n−1 built specifically against that pivot rule'
@@ -323,10 +326,10 @@
           {
             do: 'Run introsort on the identical input.',
             why: 'The depth limit should remove the tail and nothing else.',
-            work: 'n =   512:  4 970 comparisons, depth 10\n' +
-              'n = 1 024: 10 999 comparisons, depth 11\n' +
-              'n = 2 048: 24 526 comparisons, depth 13',
-            result: '43× fewer comparisons on the input built to defeat the pivot rule'
+            work: 'n =   512: 15 373 comparisons, depth 18, 1 heapsort escape\n' +
+              'n = 1 024: 35 374 comparisons, depth 20, 1 heapsort escape\n' +
+              'n = 2 048: 79 717 comparisons, depth 22, 1 heapsort escape',
+            result: '13× fewer comparisons, and the depth capped at exactly 2·ceil(log2 n)'
           },
           {
             do: 'Now build an adversary against introsort\'s own configuration and watch the escape fire.',
@@ -339,7 +342,8 @@
         ],
         answer: 'The adversary drives median-of-three quicksort to 1 051 648 comparisons on 2 048 elements - ' +
           'above n²/4 - at recursion depth 1 025, while returning perfectly sorted output. Introsort on the ' +
-          'same input does 24 526 at depth 13. Build a second adversary against introsort\'s own ninther rule ' +
+          'same input does 79 717 at depth 22 - the limit fires once and heapsort finishes that branch. ' +
+        'Build a second adversary against introsort\'s own ninther rule ' +
           'and the depth limit fires: 344 levels become 22, with one heapsort escape. The lesson is that no ' +
           'deterministic pivot rule is safe - the demo constructs a killer for whichever one you pick - and ' +
           'the engineering answer is a depth counter rather than a cleverer pivot.'

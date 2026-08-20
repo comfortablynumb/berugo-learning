@@ -14,7 +14,7 @@
         { value: 'nearly-sorted', label: 'nearly sorted (1 in 64 disturbed)' },
         { value: 'few-unique', label: 'few unique (3 distinct values)' },
         { value: 'organ-pipe', label: 'organ pipe (up then down)' }] },
-    { id: 'soc-size', kind: 'range', label: 'elements', value: 1200, min: 200, max: 3000, step: 200 },
+    { id: 'soc-size', kind: 'range', label: 'elements', value: 2000, min: 200, max: 3000, step: 200 },
     { id: 'soc-comparator', kind: 'select', label: 'comparator handed to the platform sort', value: 'correct',
       options: [{ value: 'correct', label: 'a - b — the contract, satisfied' },
         { value: 'boolean-return', label: 'a > b — returns a boolean' },
@@ -47,11 +47,11 @@
       '<p class="note" id="soc-elementary-note"></p></div></div>' +
       '<div class="card" style="margin-top:.875rem">' +
       '<div class="card-header">The broken comparator, run through the platform\'s own sort</div>' +
-      '<div class="card-body"><table class="ref-table" id="soc-comparator"><thead><tr>' +
+      '<div class="card-body"><table class="ref-table" id="soc-comparator-table"><thead><tr>' +
       '<th>Comparator</th><th>Threw</th><th>Sorted</th><th>Out-of-order pairs</th>' +
       '<th>Axiom violations</th><th>First twelve values</th>' +
       '</tr></thead><tbody></tbody></table>' +
-      '<p class="note" id="soc-comparator-note"></p></div></div>';
+      '<p class="note" id="soc-comparator-table-note"></p></div></div>';
   }
 
   return { render: render, controls: CONTROLS, metrics: METRICS };

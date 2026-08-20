@@ -114,7 +114,7 @@
     const parts = key.split('|');
     const values = parts[0] === 'paper'
       ? paperInput()
-      : root.SortLab.input(parts[0], Number(parts[1]), 5);
+      : root.SortLab.input(parts[0], Number(parts[1]), 3);
     const list = values.slice();
     const ops = root.SortOps.create({});
     const report = root.Timsort.sort(list, ops, {
@@ -131,7 +131,7 @@
 
   const runsFor = root.Helpers.memoise(function (key) {
     const parts = key.split('|');
-    const values = root.SortLab.input(parts[0], Number(parts[1]), 5);
+    const values = root.SortLab.input(parts[0], Number(parts[1]), 3);
     return {
       values: values,
       runs: root.MergeSort.detectRuns(values.slice(), root.SortOps.create({}), { reverseDescending: false })
@@ -141,18 +141,28 @@
   const compareFor = root.Helpers.memoise(function (key) {
     const parts = key.split('|');
     return root.SortLab.compare({
-      kind: parts[0], size: Number(parts[1]), seed: 5,
+      kind: parts[0], size: Number(parts[1]), seed: 3,
       algorithms: ['timsort', 'pdqsort', 'introsort', 'merge-bottom-up']
     });
   });
 
+  /* Pinned at the size the worked example measures, not at the slider: the
+     pdqsort mechanisms are a claim about 20 000 elements, and the all-equal
+     column is not one of SortLab's generated shapes. */
+  const PDQ_SIZE = 20000;
+
   const pdqFor = root.Helpers.memoise(function (key) {
     const size = Number(key);
-    return root.SortLab.kinds.map(function (kind) {
-      const values = root.SortLab.input(kind, size, 3);
+    const identical = [];
+    for (let i = 0; i < size; i += 1) identical.push(7);
+    const shapes = root.SortLab.kinds.map(function (kind) {
+      return { kind: kind, values: root.SortLab.input(kind, size, 3) };
+    }).concat([{ kind: 'all-equal', values: identical }]);
+
+    return shapes.map(function (shape) {
       const ops = root.SortOps.create({});
-      const report = root.Pdqsort.sort(values.slice(), ops, {});
-      return { kind: kind, report: report, comparisons: ops.stats().comparisons };
+      const report = root.Pdqsort.sort(shape.values.slice(), ops, {});
+      return { kind: shape.kind, report: report, comparisons: ops.stats().comparisons };
     });
   });
 
@@ -165,7 +175,7 @@
     paintMetrics(timsort, paper, collapse);
     paintStack(paper, collapse);
     paintCompare(values);
-    paintPdq(values);
+    paintPdq();
     drawRuns(values);
   }
 
@@ -206,7 +216,7 @@
     }).join('');
 
     root.jQuery('#lib-stack-table tbody').html(html);
-    root.jQuery('#lib-stack-note').text('The merge stack after each of the five runs from the 2015 paper — ' +
+    root.jQuery('#lib-stack-table-note').text('The merge stack after each of the five runs from the 2015 paper — ' +
       'lengths 120, 80, 25, 20, 30 — settled, meaning after the collapse has finished. With the fix the final ' +
       'state is a single run of 275 and no invariant is ever broken. With the original rule the stack settles ' +
       'at 120, 80, 45, 30, and 120 is not greater than 80 + 45 = 125. The sorted output is identical either ' +
@@ -234,8 +244,8 @@
       'unstable one.');
   }
 
-  function paintPdq(values) {
-    const rows = pdqFor(String(values['lib-size']));
+  function paintPdq() {
+    const rows = pdqFor(String(PDQ_SIZE));
     const html = rows.map(function (row) {
       return '<tr><td>' + row.kind + '</td>' +
         '<td class="mono">' + root.Format.exact(row.comparisons) + '</td>' +
@@ -252,7 +262,9 @@
       'the shape it exists for. Sorted input wins with the bounded insertion sort and costs two comparisons ' +
       'per element at depth 1. Duplicate-heavy input uses the equal-block guard. Organ-pipe input unbalances ' +
       'the pivot repeatedly and gets the pattern broken hundreds of times. Random input triggers almost ' +
-      'nothing — which is correct, because there is no pattern there to defeat.');
+      'nothing — which is correct, because there is no pattern there to defeat. This table is fixed at ' +
+      root.Format.exact(PDQ_SIZE) + ' elements, the size the worked example quotes, and does not follow ' +
+      'the slider.');
   }
 
   function drawRuns(values) {
@@ -266,7 +278,7 @@
       summary: detected.runs.length + ' natural runs in the first ' + detected.values.length + ' elements.'
     });
 
-    root.jQuery('#lib-runs-note').text('The natural runs in the first ' + detected.values.length +
+    root.jQuery('#lib-runs-caption').text('The natural runs in the first ' + detected.values.length +
       ' elements: ' + detected.runs.length + ' of them. Over the whole ' + timsort.size +
       '-element input Timsort found ' + root.Format.exact(timsort.report.naturalRuns) +
       ' and pushed ' + root.Format.exact(timsort.report.runs) + ' after padding short ones up to minrun of ' +

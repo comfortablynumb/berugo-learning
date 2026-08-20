@@ -3,7 +3,7 @@
 Where the implementation stands, and exactly what the next session should pick up.
 Update this file at the end of any session that leaves work unfinished.
 
-**Last updated:** 2026-08-19 (M10 in progress)
+**Last updated:** 2026-08-19 (M10 shipped)
 
 ---
 
@@ -21,13 +21,10 @@ Update this file at the end of any session that leaves work unfinished.
 | M07 — probabilistic and streaming sketches | 9 | ✅ built, tested, verified in Chrome |
 | M08 — spatial and multidimensional indexes | 9 | ✅ built, tested, verified in Chrome |
 | M09 — persistent, immutable and succinct structures | 9 | ✅ built, tested, verified in Chrome |
-| M10 — sorting, selection and searching | 10 | 🚧 **in progress** — see the M10 section below |
+| M10 — sorting, selection and searching | 10 | ✅ built, tested, verified in Chrome |
 
-As of the current stopping point **the tree is red**: `npm run test:wiring` fails on five M10
-content files that are referenced from `index.html` and not yet written, so the unit tests do not
-run. `npm run lint:size` passes across 500 files. The last fully green point was the end of M09:
-85 sections, 1 657 tests, 456 files clean. See the M10 section at the end of this file for exactly
-which five files are missing and what is already done.
+The tree is green: 95 sections, `npm test` passes the wiring audit and 1 841 unit tests (1
+skipped), and `npm run lint:size` reports no offender across 508 files.
 
 All nine M07 sections were opened in Chrome on `npm start`: the three tabs render, every demo
 figure matches the prose *exactly* (see "aligning the demo with the prose" below), the references
@@ -828,45 +825,26 @@ SuccinctLab.intersectionPaths({})
 
 ---
 
-## M10 — IN PROGRESS (stopped mid-session; the tree is RED — five wired files do not exist yet)
+## M10 notes worth keeping
 
-**Everything through the worked examples is written and on disk. Five content files are wired in
-`index.html` and not yet created, which is why `npm test` fails. Do not re-derive anything below.**
+Spec: `doc/milestones/M10-sorting-and-selection.md`. Ten sections under the `algorithms` track,
+all driven through one instrumented primitive set (`algorithms/sort-ops.js`) so comparisons,
+moves, swaps and allocations are four separate budgets rather than one "operations" figure.
 
-### Where it stops
+### Modules
 
-`npm run test:wiring` reports exactly five missing files and nothing else:
+`algorithms/`: `sorts-elementary.js` (the global is `root.SortsElementary`), `merge-sort.js`
+(four schedules on one merge), `quick-sort.js` (three partitions × four pivot rules, introsort,
+`adversarialInput`), `timsort.js`, `pdqsort.js`, `radix-sort.js`, `selection.js`,
+`binary-search.js` (seven mutations and the probe-case list), `answer-search.js`,
+`external-sort.js`, `sorting-networks.js`, plus `sort-ops.js`.
+`machines/sort-lab.js` — 7 generators × 15 algorithms, with a reference sort as the oracle and a
+stability verdict per run. `viz/array-view.js` (bars / runs / compare) and `viz/network-view.js`
+(lattice / depths).
 
-```
-src/js/content/reference-sorting-library.js
-src/js/content/reference-searching.js
-src/js/content/exercises-sorting.js
-src/js/content/exercises-sorting-library.js
-src/js/content/exercises-searching.js
-```
-
-`npm run lint:size` passes (500 files). The unit tests cannot run until those five exist.
-
-| Step | State |
-|---|---|
-| 1. algorithms | ✅ 12 modules + `sort-ops.js` |
-| 2. machines | ✅ `sort-lab.js` — 7 generators × 15 algorithms, oracle + stability verdict |
-| 3. viz | ✅ `array-view.js` (bars / runs / compare), `network-view.js` (lattice / depths) |
-| 4. sections | ✅ 10 template + section pairs |
-| 5a. concepts | ✅ 3 files, 80 concepts (8 per section), all past the 240-char detail floor |
-| 5b. examples | ✅ 3 files, 20 worked examples, every figure measured (see below) |
-| 5c. reference | 🚧 1 of 3 — `reference-sorting.js` done, two missing |
-| 5d. exercises | ❌ 0 of 3 |
-| 6. wiring | ✅ `curriculum.js` M10 group added (95 sections); `index.html` containers + all script tags |
-| 7a. module tests | ✅ `sorting-modules.test.js` (11), `searching-modules.test.js` (35) — all passing |
-| 7b. worked-example tests | ❌ not written |
-| 8. `npm test` | ❌ blocked on the five missing files |
-| 8. `build:css` | ❌ not run |
-| 9. browser pass | ❌ not started |
+Content is split per third of the milestone — `-sorting`, `-sorting-library`, `-searching`.
 
 ### Section ids and prefixes
-
-Prefixes were checked against every existing template; none collide.
 
 | Section id | prefix | module(s) |
 |---|---|---|
@@ -881,41 +859,68 @@ Prefixes were checked against every existing template; none collide.
 | `external-sorting` | `ext-` | `external-sort.js`, `sorting-networks.js` |
 | `sorting-in-practice` | `sip-` | `sort-lab.js` (the chooser) |
 
-### What to do next, in order
+### The browser pass, and the one bug that only it could find
 
-1. Write `reference-sorting-library.js` (`library-sorts`, `non-comparison-sorts`,
-   `selection-and-order`) and `reference-searching.js` (`binary-search`, `searching-the-answer`,
-   `external-sorting`, `sorting-in-practice`). Copy the shape of `reference-sorting.js`, which is
-   done: `summary`, `intuition`, `formulation.equations[]`, `invariants[] (>= 2)`,
-   `complexity[]`, `failureModes[] (>= 3)`, `inTheWild[] (array of {system, how} — a string
-   throws in `core/search-index.js`)`, `sources[] (>= 3)`.
-2. Write the three `exercises-*.js` files. One graded exercise per section, `>= 2` tests each;
-   the project convention is 4. Remember `api.rng`, never `api.random`. Run both the solution
-   and the starter through the sandbox — `tests/unit/exercises.test.js` discovers them
-   automatically and asserts the solution passes and the starter fails.
-3. Write `worked-examples-sorting.test.js`, `-sorting-library`, `-searching` using
-   `tests/support/worked-example-prose.js`. Every figure quoted in the examples is listed below
-   with the exact call that produced it.
-4. `npm test && npm run lint:size && npm run build:css`.
-5. Chrome pass over all ten sections, three tabs each, every demo figure against the prose, and
-   every exercise through the real Worker.
-6. Update the README status block, `CLAUDE.md` and the tables at the top of this file.
+All ten sections were opened in Chrome on `npm start`: three tabs each, a rendered mermaid diagram
+in every Description, a full reference block in every References, **zero JavaScript errors**, no
+empty table body anywhere, and every metric compared against the section's own prose. All ten
+graded exercises were run through the **real Worker sandbox** in the page — every solution passes
+4/4 and every starter fails.
 
-### Two measurement decisions already made — do not undo them
+**`selection-and-order-section.js` did not parse.** An unescaped apostrophe in
+`quickselect's cost is an expectation` — the backslash-collapsing corruption this file warns about
+below — made the whole file a syntax error, so the section rendered *nothing at all*. Every unit
+test passed, because `node --test` never loads a section controller, and the wiring audit only
+checked that the file existed. **The wiring audit now compiles every script `index.html` loads**
+(`new vm.Script`, `script-does-not-parse`), which is the permanent version of that check.
+
+### Four figures the demos were not showing
+
+The M07 lesson repeated itself: four sections opened on parameters their own prose does not use.
+
+- `soc-size` was 1 200 where the example measures 2 000; `mgs-size` was 2 048 (and the slider could
+  not reach 2 000 at a step of 256); `sip-size` was 5 000.
+- `library-sorts` ran seed 5 at 4 000 elements, so the page showed 3 152 and 15 767 beside a
+  paragraph claiming 3 099 and 15 410. The three memoised runs now use seed 3, and the pdqsort
+  table is **pinned at 20 000** — the size its worked example measures — with an `all-equal` row
+  added, because that column is not one of `SortLab`'s generated shapes.
+- `searching-the-answer` generated a random package list, so it could not show the worked example's
+  answer. Seed **0** now means the example's own instance (weights 1, 2, … n), and it is the
+  default.
+
+### Three reporting defects the figure tests and the page found
+
+1. **The introsort figures on the anti-quicksort input were written from a run this code does not
+   perform.** The prose claimed 4 970 / 10 999 / 24 526 comparisons at depth 10 / 11 / 13. Measured:
+   15 373 / 35 374 / 79 717 at depth **18 / 20 / 22** — the depth limit fires, once, and caps the
+   recursion at exactly 2·ceil(log2 n), which is a better fact than the one that was there. The
+   ratio at n = 2 048 is 13×, not 43×.
+2. **`mutationReport` called a hang a wrong answer.** A mutation that spins returns the verdict
+   `'did not terminate'`, and the reason column reported `'wrong answer'` for it. `reasonFor` now
+   passes the verdict through, so `low-mid` reads 6 non-terminating and `rounded-mid` 11 — which is
+   the section's actual claim: the loudest failures are the safest.
+3. **The chooser divided by zero and reported the quotient.** LSD radix wins on comparisons with 0
+   of them, and `sip-margin` computed `runnerUp / max(1, winner)` — printing 3 099.00× as if it
+   were a margin. The margin is now `—` with the note that the winner makes no comparisons, and the
+   winner's note reports its moves instead.
+
+### Two measurement decisions — do not undo them
 
 - **Selection figures are the mean of seven pivot seeds** (`PIVOT_SEEDS` in
-  `selection-and-order-section.js`). A single quickselect run is one sample of an expectation and
-  reported 7.09n at n = 80 000 where the mean is 3.92n; the flat-constant claim the section makes
-  is only true of the mean. The run count travels with the figure in the metric note.
-- **`binary-search-section.js` builds its skewed keys geometrically** (`Math.pow(1.001, i)`).
-  An arithmetic skew gave interpolation search 5 probes, which is not a demonstration of
-  anything; the geometric one gives 13 against binary search's 13, which is the real result —
+  `selection-and-order-section.js`, mirrored in `worked-examples-sorting-library.test.js`). A single
+  quickselect run is one sample of an expectation and reported 7.09n at n = 80 000 where the mean is
+  3.92n; the flat-constant claim the section makes is only true of the mean. The run count travels
+  with the figure in the metric note.
+- **`binary-search-section.js` builds its skewed keys geometrically** (`Math.floor(Math.pow(1.001, i))`,
+  probed at index 9 000). An arithmetic skew gave interpolation search 5 probes, which demonstrates
+  nothing; the geometric one gives 13 against binary search's 13, which is the real result —
   interpolation's whole advantage is a property of the distribution.
 
 ### Measured figures quoted in the M10 examples
 
-All measured from the code on disk. `L` = `SortLab`, and `L.compare({kind, size, seed: 3})`
-unless another seed is named.
+Every one is recomputed by `worked-examples-sorting.test.js`, `-sorting-library` and `-searching`,
+which also assert the prose still quotes it, so moving a number without moving the sentence fails
+the build. `L` = `SortLab`, and `L.compare({kind, size, seed: 3})` unless another seed is named.
 
 #### 10.1 `sorting-contract` (n = 2 000, seed 3)
 
@@ -948,9 +953,9 @@ natural on organ-pipe: 1 pass, 4 000 cmp, 2 runs
   three-way/ninther            2 012 cmp, depth 2, 1 partition
 few-unique n = 2 000: lomuto 676 647 | hoare 32 506 | three-way 3 389
 QuickSort.adversarialInput(n, {partition:'lomuto', pivot:'median-of-three'}):
-  n =   512    66 304 cmp, depth  257   (n²/4 =    65 536) | introsort  4 970, depth 10
-  n = 1 024   263 680 cmp, depth  513   (n²/4 =   262 144) | introsort 10 999, depth 11
-  n = 2 048 1 051 648 cmp, depth 1 025  (n²/4 = 1 048 576) | introsort 24 526, depth 13
+  n =   512    66 304 cmp, depth  257   (n²/4 =    65 536) | introsort 15 373, depth 18
+  n = 1 024   263 680 cmp, depth  513   (n²/4 =   262 144) | introsort 35 374, depth 20
+  n = 2 048 1 051 648 cmp, depth 1 025  (n²/4 = 1 048 576) | introsort 79 717, depth 22
 adversarialInput against three-way/ninther, n = 2 048:
   no depth limit 361 451 cmp, depth 344 | introsort 78 223, depth 22, 1 heapsort escape
 every configuration reports 0 elements out of place — the failure is purely a slowdown
@@ -1110,16 +1115,14 @@ Lomuto ranges 21 033 -> 1 003 000 across the shapes: a factor of 48
 
 ## Next
 
-**Finish M10** — the five missing content files, the worked-example tests, then `build:css` and
-the Chrome pass. The M10 section immediately above lists them in order and carries every measured
-figure the prose quotes, so nothing needs re-deriving. After that, **M11 — algorithm design
-paradigms**, and onward through `doc/milestones/` in the order `doc/ROADMAP.md` gives.
+**M11 — algorithm design paradigms**, and onward through `doc/milestones/` in the order
+`doc/ROADMAP.md` gives.
 
 A shared helper exists for the figure tests: `tests/support/worked-example-prose.js` exports
 `proseFor`, `quotes`, `fixed` and `grouped`. New `worked-examples-*.test.js` files should require
 it rather than redeclaring the four functions (the M03-M08 files still carry their own copies).
 
-The shape to copy, unchanged through M08:
+The shape to copy, unchanged through M10:
 
 1. pure modules in `algorithms/` first, behind one shared interface;
 2. a `machines/` harness that drives every implementation through that interface, carrying a
@@ -1134,7 +1137,9 @@ The shape to copy, unchanged through M08:
    quotes it);
 8. `npm test && npm run lint:size && npm run build:css`;
 9. Chrome: every section, every tab, every demo figure against the prose, and every exercise
-   through the real Worker sandbox.
+   through the real Worker sandbox. The wiring audit now compiles every loaded script, so a
+   browser-only syntax error fails `npm test` rather than silently deleting a section - but a
+   section that renders and quietly disagrees with its own prose still needs the page load.
 
 Measure the figures *before* writing the prose that quotes them, and do not skip step 9. Two of
 M06's bugs, four of M07's and four of M08's were invisible to the whole test suite and obvious on

@@ -15,7 +15,7 @@
         { value: 'few-unique', label: 'few unique — a status column' },
         { value: 'organ-pipe', label: 'organ pipe' },
         { value: 'adversarial', label: 'adversarial' }] },
-    { id: 'sip-size', kind: 'range', label: 'rows', value: 5000, min: 500, max: 30000, step: 500 },
+    { id: 'sip-size', kind: 'range', label: 'rows', value: 2000, min: 500, max: 30000, step: 500 },
     { id: 'sip-stability', kind: 'select', label: 'must equal rows keep their order?', value: 'required',
       options: [{ value: 'required', label: 'yes — required' },
         { value: 'optional', label: 'no — do not care' }] },
@@ -49,10 +49,10 @@
       '<p class="note" id="sip-chooser-note"></p></div></div>' +
       '<div class="card" style="margin-top:.875rem">' +
       '<div class="card-header">The default sort, and the bug that survives review</div>' +
-      '<div class="card-body"><table class="ref-table" id="sip-default"><thead><tr>' +
+      '<div class="card-body"><table class="ref-table" id="sip-default-table"><thead><tr>' +
       '<th>Call</th><th>Input</th><th>Result</th><th>Correct?</th>' +
       '</tr></thead><tbody></tbody></table>' +
-      '<p class="note" id="sip-default-note"></p></div></div>' +
+      '<p class="note" id="sip-default-table-note"></p></div></div>' +
       '<div class="card" style="margin-top:.875rem">' +
       '<div class="card-header">Sorting a table by three keys, with the tie-breaking written down</div>' +
       '<div class="card-body"><table class="ref-table" id="sip-table"><thead><tr>' +

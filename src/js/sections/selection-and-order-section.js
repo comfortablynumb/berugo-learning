@@ -190,7 +190,7 @@
     root.jQuery('#sel-methods tbody').html(html);
     root.jQuery('#sel-methods-note').text('Every row answers the same question about the same array and gets ' +
       'the same answer — the wrong column is the check that says so. Each figure is the mean of seven runs ' +
-      'with different pivot seeds, because quickselect's cost is an expectation and one run is one sample ' +
+      'with different pivot seeds, because quickselect\'s cost is an expectation and one run is one sample ' +
       'from a wide distribution. What differs is the constant in front of n, and that is the entire content ' +
       'of the comparison. Move the k slider to 0 or 100 and watch quickselect get cheaper: selecting the ' +
       'minimum discards almost everything at the first partition, while selecting the median discards half.');

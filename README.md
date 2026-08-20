@@ -14,7 +14,7 @@ faithfully in a browser, the section models it, says so plainly, and states what
 
 ## Status
 
-**M00–M09 shipped (85 sections). Building the curriculum, milestone by milestone.**
+**M00–M10 shipped (95 sections). Building the curriculum, milestone by milestone.**
 
 - ✅ Curriculum designed: 65 milestones, 634 sections, 11 tracks — one file per milestone in
   [`doc/milestones/`](doc/milestones/)
@@ -88,9 +88,22 @@ faithfully in a browser, the section models it, says so plainly, and states what
   own 7.9% overhead and the density at which the obvious array beats it, LOUDS at 2.0002 bits a
   node with the 177× headline corrected to 5.8× once the payload is added, and Roaring shown
   losing to WAH on the one input it is usually assumed to win. 9 sections live.
-- ⬜ M10 onward
+- ✅ **M10 — sorting, selection and searching**: four elementary sorts whose ranking inverts between
+  the comparison column and the move column, four merge schedules doing identical merges and differing
+  by a factor of two in movement, three partition loops on 2 000 identical values costing 2 004 997,
+  31 723 and 2 012, the anti-quicksort input that drives median-of-three above n²/4 while returning
+  perfectly sorted output, Timsort's merge-stack invariant broken by the de Gouw run lengths with both
+  versions sorting correctly, radix sort made silently wrong by one loop direction and the key range
+  that decides whether anyone notices, selection reported as the mean of seven pivot seeds because one
+  run is one sample, seven binary-search mutations against thirteen probe cases where one defect is
+  caught by a single case and another by no output check at all, binary search over an answer axis
+  nobody stored, replacement selection removing a whole merge pass, sorting networks proved by
+  exhaustion over every zero-one input, and a chooser that takes the workload as its input. 10
+  sections live.
 
-`npm test` is green (wiring audit + 1 657 unit tests, 1 skipped) and `npm run lint:size` reports no
+- ⬜ M11 onward
+
+`npm test` is green (wiring audit + 1 842 unit tests, 1 skipped) and `npm run lint:size` reports no
 offenders.
 
 ### The shell
@@ -101,7 +114,7 @@ offenders.
   opens to milestones, then sections. Tracks that are planned and not built are listed with their
   milestones and section counts, marked as planned, so the map shows what the platform teaches
   rather than only what happens to be finished. One track and one milestone stay open at a time, so
-  the nav is the same height at 85 sections and at 634.
+  the nav is the same height at 95 sections and at 634.
 - **Search across everything.** The header search indexes concepts, worked examples, reference
   entries and exercises as well as section titles, so "tombstone", "Little's law" or "round half to
   even" lands on the section that explains it. Ctrl/Cmd+K focuses it; arrows and Enter drive it.

@@ -178,9 +178,9 @@
         '<td class="mono">' + row.sample.join(', ') + '</td></tr>';
     }).join('');
 
-    root.jQuery('#soc-comparator tbody').html(html);
+    root.jQuery('#soc-comparator-table tbody').html(html);
     const selected = rows.filter(function (row) { return row.name === chosen; })[0];
-    root.jQuery('#soc-comparator-note').text('Every row is a real call to Array.prototype.sort with that ' +
+    root.jQuery('#soc-comparator-table-note').text('Every row is a real call to Array.prototype.sort with that ' +
       'comparator, on the same 40 numbers. Not one of them throws. The selected row - ' + selected.label +
       ' - left ' + selected.outOfOrderPairs + ' adjacent pairs out of order and broke ' +
       selected.axiomViolations + ' of the ordering axioms over a sample of pairs and triples. ' + selected.note);

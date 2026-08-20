@@ -236,7 +236,7 @@
             label: 'Introsort',
             expr: 'depth limit 2*log2(n), then heapsort on that subarray',
             terms: [
-              { sym: 'measured', meaning: 'anti-quicksort at n = 2 048: 1 051 648 comparisons plain, 24 526 with the limit' },
+              { sym: 'measured', meaning: 'anti-quicksort at n = 2 048: 1 051 648 comparisons plain, 79 717 with the limit' },
               { sym: 'n²/4', meaning: '1 048 576 - the line the plain run crosses' }
             ]
           }
