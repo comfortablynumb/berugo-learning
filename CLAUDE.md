@@ -9,7 +9,7 @@ explained in full, diagram, insight), **Examples** (runnable demo with charts, w
 graded code lab) and **References** (the structured reference block).
 
 ## Status
-**M00–M10 are built and verified in a browser** (95 sections, tree green), each carrying 8+ concepts
+**M00–M11 are built** (104 sections, tree green; M00–M10 also verified in a browser), each carrying 8+ concepts
 with full explanations, two worked examples, a reference entry and a graded exercise. `doc/BUILD-STATE.md`
 records what shipped and what the next session picks up. The rest of the curriculum follows the
 order in `doc/ROADMAP.md` (65 milestones in `doc/milestones/`). Keep `npm test` and
@@ -118,7 +118,10 @@ npm run build:css   # after any markup or template change
    `src/js/content/`. The coverage test enforces those floors. Concepts are split per half-milestone
    (`concepts-linear.js` / `concepts-linear-buffers.js`) to stay under 1 000 lines.
 5. Add the script tags to `index.html` (the wiring audit fails on an unloaded module, and the
-   content coverage and exercise tests discover the new content files on their own).
+   content coverage, exercise and render tests discover the new content and sections on their own).
 6. Add module property tests in `tests/unit/<topic>-modules.test.js`, and recompute every figure
    the worked examples quote in `tests/unit/worked-examples-<topic>.test.js`.
 7. `npm test && npm run build:css`, then open the section in Chrome and run its exercise.
+   `npm test` already renders every section headlessly (`tests/render-audit.js`), so anything that
+   throws on render or leaves a table empty fails the build; the browser pass is for what jsdom
+   has no layout to judge — chart widths, colour separation, mermaid diagrams.

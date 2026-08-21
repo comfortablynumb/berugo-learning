@@ -84,9 +84,14 @@
             result: 'the boards not visited were exactly the mirrors of the ones that were'
           }
         ],
-        answer: 'Two independent prunings leave 1.88% and 50.00% of the control\'s nodes and together leave ' +
-          '0.94% — the product, exactly — which is why a second constraint that only removes half is still ' +
-          'worth having. The ordering heuristic is a different kind of thing: it changes the node count from ' +
+        answer: 'Two nearly independent prunings leave 1.88% and 50.00% of the control\'s nodes and together ' +
+          'leave 0.94% — which is what their product predicts, and is why a second constraint that only ' +
+          'removes half is still worth having. Nearly, not exactly: the measured 0.9389% sits just above the ' +
+          '0.9384% the product gives, because the two prunings overlap a little — some of the mirrored ' +
+          'boards would have been cut by the diagonal check anyway, so symmetry breaking is not removing a ' +
+          'clean half of what the early check left. At two decimal places the difference vanishes, which is ' +
+          'exactly why the independence assumption is worth stating rather than assuming. ' +
+          'The ordering heuristic is a different kind of thing: it changes the node count from ' +
           '2 057 to 2 057 when every solution is wanted and from 114 to 9 when only the first is. Reporting ' +
           'one number for both goals would make it look either useless or magical, and it is neither.'
       }

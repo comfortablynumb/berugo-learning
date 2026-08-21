@@ -6,13 +6,15 @@
   "scripts": {
     "start": "serve -p 3002",
     "dev": "serve -p 3002 --cors",
-    "test": "npm run test:wiring && npm run test:unit",
+    "test": "npm run test:wiring && npm run test:unit && npm run test:render",
     "test:wiring": "node tests/wiring-audit.js",
     "test:unit": "node --test \"tests/unit/*.test.js\"",
+    "test:render": "node tests/render-audit.js",
     "lint:size": "node tests/file-size-check.js",
     "build:css": "tailwindcss -i src/css/tailwind-source.css -o lib/tailwind.css --minify"
   },
   "devDependencies": {
+    "jsdom": "^29.1.1",
     "serve": "^14.2.4",
     "tailwindcss": "^3.4.17"
   },

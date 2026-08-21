@@ -3,7 +3,7 @@
 Where the implementation stands, and exactly what the next session should pick up.
 Update this file at the end of any session that leaves work unfinished.
 
-**Last updated:** 2026-08-20 (M10 shipped; M11 content complete, tests pending)
+**Last updated:** 2026-08-20 (M11 shipped; render audit added; M12 is next)
 
 ---
 
@@ -22,13 +22,11 @@ Update this file at the end of any session that leaves work unfinished.
 | M08 — spatial and multidimensional indexes | 9 | ✅ built, tested, verified in Chrome |
 | M09 — persistent, immutable and succinct structures | 9 | ✅ built, tested, verified in Chrome |
 | M10 — sorting, selection and searching | 10 | ✅ built, tested, verified in Chrome |
-| M11 — algorithm design paradigms | 9 | 🚧 **in progress** — see the M11 section below |
+| M11 — algorithm design paradigms | 9 | ✅ built, tested, render-audited |
 
-As of the current stopping point the tree is **not red**, but the full suite has not been run
-since M11 landed: the wiring audit passes at 104 sections and 496 modules, `npm run lint:size`
-passes across 550 files, and `content-coverage` + `template-ids` pass with 617 assertions. The last
-fully green `npm test` was the end of M10: 95 sections, 1 841 tests, 508 files clean. See the M11
-section near the end of this file for exactly what remains.
+The tree is green: `npm test` runs the wiring audit (104 sections, 496 modules), **2 006 unit
+tests** (2 skipped) and the **render audit** (all 104 sections booted and activated headlessly);
+`npm run lint:size` passes across 555 files.
 
 All nine M07 sections were opened in Chrome on `npm start`: the three tabs render, every demo
 figure matches the prose *exactly* (see "aligning the demo with the prose" below), the references
@@ -1117,33 +1115,16 @@ Lomuto ranges 21 033 -> 1 003 000 across the shapes: a factor of 48
 
 ---
 
-## M11 — IN PROGRESS (content complete; the module and figure tests are not written)
+## M11 notes worth keeping
 
-Spec: `doc/milestones/M11-design-paradigms.md`. Nine sections under the `algorithms` track.
-**Everything through the content files is written, wired and verified in node. What is missing is
-step 7 (the two test files) and step 9 (the Chrome pass).** The tree is *not* red: the wiring audit
-passes at 104 sections and 496 modules, `npm run lint:size` passes across 550 files, and
-`content-coverage` + `template-ids` pass (617 assertions). The full `npm test` has not been run
-end to end since M11 landed — do that first.
+Spec: `doc/milestones/M11-design-paradigms.md`. Nine sections under the `algorithms` track, built
+on ten pure modules plus `machines/search-tree-lab.js` — one generic explorer that drives the
+n-queens and knapsack searches through the same `spec` interface, so the drawn tree and the
+counters come from the same walk the solver performs.
 
-### Where it stops
-
-| Step | State |
-|---|---|
-| 1. algorithms | ✅ 10 modules |
-| 2. machines | ✅ `search-tree-lab.js` — generic explorer, queens and knapsack specs |
-| 3. viz | ✅ `search-tree-view.js` (`tree` open/infeasible/bounded, `levels`) |
-| 4. sections | ✅ 9 template + section pairs |
-| 5a. concepts | ✅ 3 files, 72 concepts (8 per section), shortest detail 393 characters |
-| 5b. examples | ✅ 3 files, 18 worked examples, every figure measured (see below) |
-| 5c. reference | ✅ 3 files, 9 entries |
-| 5d. exercises | ✅ 3 files, 9 exercises — all 9 solutions pass 4/4 and all 9 starters fail in the sandbox |
-| 6. wiring | ✅ `curriculum.js` M11 group added (104 sections); `index.html` containers + all script tags |
-| 7a. module tests | ❌ `paradigm-modules.test.js` not written |
-| 7b. worked-example tests | ❌ `worked-examples-paradigms{,-search,-sweeps}.test.js` not written |
-| 8. `npm test` | ❌ not run end to end since M11 landed |
-| 8. `build:css` | ❌ not run |
-| 9. browser pass | ❌ not started |
+Shipped: 10 algorithm modules, 1 machine, `viz/search-tree-view.js`, 9 template + section pairs,
+12 content files, 3 test files (52 module property tests + 31 figure tests), and the
+`curriculum.js` M11 group with its `planned` entry emptied.
 
 ### Section ids and prefixes
 
@@ -1300,31 +1281,66 @@ bound (n + q)·√n = 290 930; the measurement is 42% of it
 - **The counter-example search in `greedy.js` climbs a size ladder** and reports how many instances
   it tried. That number is the teaching point: 5 for earliest-start, 94 996 for fewest-conflicts.
 
-### What to do next, in order
+### The verification pass, and why it is not the Chrome pass
 
-1. `tests/unit/paradigm-modules.test.js` — property tests against brute-force references:
-   n-queens counts against the published sequence, Karatsuba against BigInt, closest pair and
-   inversions against their quadratic oracles, Strassen against the triple loop, greedy against
-   the DP oracle, the matroid checker on known matroids and non-matroids, knapsack against
-   exhaustive enumeration, the sweeps against rescans, meet-in-the-middle against brute force,
-   and Mo's answers against a scan.
-2. `worked-examples-paradigms.test.js`, `-paradigms-search`, `-paradigms-sweeps` using
-   `tests/support/worked-example-prose.js`, asserting every figure in the table above *and* that
-   the prose still quotes it.
-3. `npm test && npm run lint:size && npm run build:css`.
-4. Chrome pass over all nine sections, three tabs each, every demo figure against the prose, and
-   every exercise through the real Worker sandbox. The nine exercises already pass 4/4 and their
-   starters fail under the inline sandbox.
-5. Update the README status block, `CLAUDE.md` and the tables at the top of this file.
+M11's module tests and figure tests are written, and the figure tests assert both halves: every
+number recomputed from the module, and the prose asserted to still quote it. One overclaim died
+that way — the exhaustive-search example said the two prunings' surviving fractions multiply
+"exactly", and they do not: the measured 0.9389% sits above the 0.9384% the product gives, because
+some mirrored boards would have been cut by the diagonal check anyway. The prose now states the
+overlap, and the test asserts **both** directions (they agree at two decimal places, and they are
+not equal) so it cannot drift back to either overclaim.
+
+**The Chrome extension was not connected in this session, so step 9 was not performed for M11.**
+What replaced it is `tests/render-audit.js` — see the section below. That audit catches the two
+failure classes that produced almost every browser-only bug in M06, M07 and M10 (something that
+throws on render, and a DOM target a section declares and never writes), and it found none in M11.
+It cannot catch the third class: anything about *layout and colour* — a chart at its fallback
+width, an MBR stroke that vanishes into the data, a mermaid diagram that fails to lay out. Those
+still want a human at a browser, and M11 has not had one.
 
 ---
 
+## The render audit (new in this session)
+
+`tests/render-audit.js`, wired into `npm test` as `test:render`. It boots the real `index.html` in
+jsdom, executes all 496 scripts in document order, calls `BerugoStart()`, and activates every
+section in the curriculum. It fails on:
+
+- an exception while a section renders or updates;
+- a `console.error` raised during a section's activation;
+- a content container that stays under 500 characters;
+- a table with a `<thead>` and an empty `<tbody>`;
+- a metric tile reading the em-dash placeholder **whose tile carries no note**.
+
+Three things about it that are easy to get wrong when extending it:
+
+- **`navigation.go` is asynchronous.** It sets `location.hash` and waits for `hashchange`, which
+  jsdom delivers on a later turn — so the audit would check an unrendered container. `activate()`
+  sets the hash first, which makes `go` take the "already there" branch and render synchronously.
+- **jQuery's ready callback never fires** for scripts appended after the document is parsed, so
+  `window.BerugoApp` does not exist and the audit calls `window.BerugoStart()` itself.
+- **The placeholder rule is about the note, not the dash.** Ten tiles legitimately report an
+  em-dash — the chooser's margin column cannot rank a winner that makes no comparisons, the
+  counter-example tile has no counter-example in range, the code engine has not run yet — and every
+  one of them carries a note saying so. Asserting "no dashes" would be wrong; asserting "no
+  *unexplained* dashes" is the rule the content already follows.
+
+jsdom has no layout, so `getBBox`, `ResizeObserver`, `matchMedia` and the 2D canvas context are
+stubbed and `Worker` is left undefined (the runner falls back to its inline backend). Nothing the
+audit reports is about pixels, and it is **not** a substitute for opening the page.
+
+It runs in about 50 seconds, because activating a section runs its demo — including the Sudoku
+matrix and the 2^21-state meet-in-the-middle run.
+
 ## Next
 
-**Finish M11** — the two test files, then `build:css` and the Chrome pass. The M11 section
-immediately above lists them in order and carries every measured figure the prose quotes, so
-nothing needs re-deriving. After that, **M12 — dynamic programming**, and onward through
-`doc/milestones/` in the order `doc/ROADMAP.md` gives.
+**M12 — dynamic programming** (`doc/milestones/M12-dynamic-programming.md`, 11 sections), then
+onward through `doc/milestones/` in the order `doc/ROADMAP.md` gives.
+
+M11 is complete apart from a human browser pass, which needs the Chrome extension connected. When
+one is available, open the nine M11 sections and check what the render audit structurally cannot:
+chart widths, colour separation, and the mermaid diagrams.
 
 A shared helper exists for the figure tests: `tests/support/worked-example-prose.js` exports
 `proseFor`, `quotes`, `fixed` and `grouped`. New `worked-examples-*.test.js` files should require
