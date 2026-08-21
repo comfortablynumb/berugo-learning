@@ -280,12 +280,51 @@
               title: 'Probability and expectation DP',
               summary: 'A cyclic expectation is a linear system, not a recursion.',
               tags: ['expected value', 'absorbing markov chain', 'gaussian elimination', 'monte carlo', 'secretary problem', 'optimal stopping']
+            },
+            {
+              id: 'graph-representations',
+              title: 'Representations and traversal',
+              summary: 'Adjacency list, matrix and CSR in bytes, and the two kinds of edge an undirected walk has.',
+              tags: ['adjacency list', 'csr', 'adjacency matrix', 'bfs', 'dfs', 'edge classification', 'components', 'bipartite']
+            },
+            {
+              id: 'topological-order',
+              title: 'Topological order and DAGs',
+              summary: 'Returning the cycle rather than null, and the critical path no worker count beats.',
+              tags: ['topological order', 'kahn', 'cycle extraction', 'critical path', 'dag shortest paths', 'scheduling']
+            },
+            {
+              id: 'strongly-connected',
+              title: 'Strongly connected components',
+              summary: 'Tarjan and Kosaraju checking each other, and the condensation that is always a DAG.',
+              tags: ['scc', 'tarjan', 'kosaraju', 'lowlink', 'condensation', '2-sat', 'deadlock']
+            },
+            {
+              id: 'bridges-and-cuts',
+              title: 'Bridges, articulation points and biconnectivity',
+              summary: 'The lowlink criterion, the block-cut tree, and the parallel edge that breaks the naive test.',
+              tags: ['bridge', 'articulation point', 'lowlink', 'biconnected', 'block-cut tree', 'parallel edges', 'resilience']
+            },
+            {
+              id: 'shortest-paths-basics',
+              title: 'Shortest paths I: BFS, 0-1 BFS and Dijkstra',
+              summary: 'The greedy invariant, and the negative edge that breaks it without raising anything.',
+              tags: ['bfs', '0-1 bfs', 'dijkstra', 'relaxation', 'lazy heap', 'path reconstruction']
+            },
+            {
+              id: 'negative-weights',
+              title: 'Shortest paths II: negative weights and all pairs',
+              summary: 'Extracting the negative cycle, and the Floyd-Warshall loop order that is not a style choice.',
+              tags: ['bellman-ford', 'negative cycle', 'spfa', 'floyd-warshall', 'johnson', 'arbitrage']
             }
           ]
         }
       ],
       planned: [
-        { id: 'M13', title: 'Graph algorithms I — traversal, order, shortest paths, MST', sections: 10 },
+        /* M13 is half built: six sections are in the group above and four are still to
+           come, so the remainder is declared here to keep the published total honest.
+           Delete this entry when 13.7 to 13.10 land. */
+        { id: 'M13-rest', title: 'Graph algorithms I — the remaining four sections', sections: 4 },
         { id: 'M14', title: 'Graph algorithms II — flow, matching, connectivity, spectral', sections: 10 },
         { id: 'M15', title: 'String algorithms and pattern matching', sections: 11 },
         { id: 'M16', title: 'Computational geometry', sections: 10 },

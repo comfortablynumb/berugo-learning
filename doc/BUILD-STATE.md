@@ -3,7 +3,7 @@
 Where the implementation stands, and exactly what the next session should pick up.
 Update this file at the end of any session that leaves work unfinished.
 
-**Last updated:** 2026-08-21 (M12 shipped; M13 is next)
+**Last updated:** 2026-08-21 (M13 half built — START HERE, see the M13 section at the end)
 
 ---
 
@@ -24,10 +24,16 @@ Update this file at the end of any session that leaves work unfinished.
 | M10 — sorting, selection and searching | 10 | ✅ built, tested, verified in Chrome |
 | M11 — algorithm design paradigms | 9 | ✅ built, tested, render-audited |
 | M12 — dynamic programming | 11 | ✅ built, tested, render-audited |
+| M13 — graph algorithms I | 10 | 🚧 **6 of 10 sections built; no content yet** |
 
-The tree is green: `npm test` runs the wiring audit (115 sections, 545 modules), **2 218 unit
-tests** (6 skipped) and the **render audit** (all 115 sections booted and activated headlessly);
-`npm run lint:size` passes across 608 files.
+**The tree is RED, deliberately and in exactly one place.** `npm test` reports 2 254 tests with
+**24 failures, and all 24 are `content-coverage` on the six M13 sections** (6 sections x 4 checks:
+concepts, worked examples, reference entry, graded exercise). Nothing else fails. The wiring audit
+passes at 121 sections and 569 modules, the render audit activates all 121 with no exception and no
+empty table, `npm run lint:size` passes across 632 files, and `npm run build:css` is up to date.
+
+If any failure appears that is NOT `content-coverage` on an M13 section, something regressed —
+that is the signal to stop and look rather than to keep building.
 
 All nine M07 sections were opened in Chrome on `npm start`: the three tabs render, every demo
 figure matches the prose *exactly* (see "aligning the demo with the prose" below), the references
@@ -1443,14 +1449,146 @@ in this session, so step 9 has not been performed for M11 or M12.** The render a
 throws and what is left unwritten; it cannot see chart widths, colour separation or mermaid
 layout.
 
+---
+
+## M13 — IN PROGRESS. Read this first.
+
+Spec: `doc/milestones/M13-graphs-i.md`. Ten sections under the `algorithms` track.
+
+### Exactly where it stops
+
+| Step | State |
+|---|---|
+| 1. algorithms | ✅ 10 modules, all cross-checked against independent oracles |
+| 2. machines | ✅ `graph-lab.js` — build / describe / traversalRun / compareShortestPaths / compareHeuristics / compareMst / connectivityRun / compareRouting / compareLca |
+| 3. viz | ✅ `graph-view.js` — canvas, three layouts (fixed / circular / grouped), no force layout on purpose |
+| 4. sections | 🚧 **6 of 10.** Built and wired: 13.1 13.2 13.3 13.4 13.5 13.6. **Missing: 13.7 13.8 13.9 13.10** |
+| 5. content | ❌ **nothing written** — no concepts, examples, reference or exercises for any M13 section |
+| 6. wiring | ✅ for the six that exist; `curriculum-algorithms.js` has an M13 group and a `M13-rest` planned entry of 4 |
+| 7. tests | ❌ `graph-modules.test.js` and `worked-examples-graphs*.test.js` not written |
+| 8. build:css | ✅ run |
+| 9. browser pass | ❌ not started (and not possible without the Chrome extension) |
+
+### The next four sections, in order
+
+Each one is a `sections/<id>-template.js` + `sections/<id>-section.js` pair, then
+`python <scratchpad>/wire13.py <id>`, then `node tests/render-audit.js <id>`.
+**The wiring helper is `wire13.py` and it lives in the session scratchpad, so it is gone —
+rewrite it or wire by hand.** What it does: appends the curriculum entry to the M13 group in
+`curriculum-algorithms.js`, adds the `<section data-section=...>` container before `</main>` in
+`index.html`, and adds the two script tags before `src/js/app.js`. It also asserts there is no
+apostrophe in any curriculum string, because one in "each other's oracle" broke
+`curriculum-algorithms.js` and took the whole app down with it.
+
+| id | prefix | title | modules |
+|---|---|---|---|
+| `heuristic-search` | `heu-` | Heuristic search: A* and friends | `astar.js` |
+| `route-planning` | `rte-` | Route planning at scale | `contraction-hierarchies.js` |
+| `minimum-spanning-trees` | `mst-` | Minimum spanning trees | `mst.js` |
+| `tree-path-queries` | `tpq-` | Trees, LCA and path queries | `tree-queries.js` |
+
+All four prefixes are confirmed free. **When the last one lands, delete the `M13-rest` planned
+entry from `curriculum-algorithms.js`** or the published total goes to 638.
+
+### Already-measured figures for those four sections
+
+Measured from the code on disk. Nothing here needs re-deriving.
+
+```
+13.7 heuristic-search — weighted grid 40x40, Random.seeded(7), weightRange 9, corner to corner
+  optimal 249, Dijkstra settles 1 600 of 1 600
+  Manhattan x1 (admissible)   249, 2 095 expanded   <- MORE than Dijkstra: a weak heuristic plus reopening
+  Manhattan x5 (inadmissible) 295,   144 expanded, gap 18.47%
+  Manhattan x9 (inadmissible) 361,    83 expanded, gap 44.98%
+  weighted A* on an admissible base: w=1,1.5,2,3 all stay at 249; w=5 gives 295 (18.47%)
+  unweighted 30x30 grid: optimal 58; none 900 expanded, manhattan 116, euclidean 845, chebyshev 846
+    -- on a UNIFORM grid every monotone path ties, so no heuristic can be suboptimal there.
+       Use the weighted grid for the optimality-gap claim.
+  bidirectional on an 80x80 grid: corner-to-corner 1.01x (6 320 vs 6 400), centre-to-nearby 2.49x,
+    centre-to-edge 2.80x, adjacent rows 3.50x. Corner to corner is bidirectional search's WORST case
+    because both balls cover the grid; say so rather than picking a flattering pair silently.
+
+13.8 route-planning — CH matches Dijkstra on every pair of every fixture (8 870 pairs)
+  grid 5x5            600 pairs, 0 shortcuts, growth 1.00x, 32 witnesses
+  weighted grid 6x6 1 260 pairs, 46 shortcuts, growth 1.77x, 116 witnesses
+  random 30/80        870 pairs, 35 shortcuts, growth 1.44x, 267 witnesses
+  road-like 6x6     1 260 pairs, 28 shortcuts, growth 1.45x, 82 witnesses
+  path 20 and barbell 5: 0 shortcuts — nothing to contract around
+  road-like 8x8 query: Dijkstra settles 64, bidirectional 52, CH 46
+
+13.9 minimum-spanning-trees
+  60 random graphs (a third with heavy duplicate weights): Kruskal = Prim = Boruvka on weight, every
+    result a spanning forest
+  random 60/180 seed 3: all three weigh 270; work 1 666 (Kruskal) / 2 280 (Prim) / 1 170 (Boruvka)
+  the MST path IS the minimax path: 200 queries against a binary-search-the-threshold oracle, 0 wrong
+  12 nodes / 30 edges seed 9: MST 108, second best 109 — one edge different
+  NOTE: with a CONSISTENT tie-break by edge id the three algorithms return the SAME tree even on
+    duplicate weights. Do not claim they differ; the invariant that matters is equal WEIGHT.
+
+13.10 tree-path-queries
+  2 400 LCA queries over five shapes (random/path/star/caterpillar/binary, n=120):
+    binary lifting, sparse table, k-th ancestor and HLD all agree with the naive climb, 0 wrong
+  HLD segments on a path query, 400 queries each:
+    path n=1000        1 chain,  worst 1 segment,  mean 1.00
+    star n=1000      999 chains, worst 3,          mean 3.00
+    caterpillar n=1000 500 chains, worst 14,       mean 7.64
+    binary n=1023    512 chains, worst 16,         mean 7.86   <- log2(1023) = 10, and the bound is
+                                                                  2 log2 n = 20 because a path goes up
+                                                                  AND down through the LCA
+    random n=1000    505 chains, worst 8,          mean 5.17
+  200-node random tree, 200 queries: naive 1 729 steps, lifting 1 947 jumps, sparse 200 steps.
+    Binary lifting costs MORE than the naive climb on a shallow tree — say so; it pays on deep ones.
+```
+
+### Four findings from the module work, all already fixed
+
+1. **Contraction hierarchies were WRONG, and only the all-pairs check found it.** The witness search
+   was routing through already-contracted nodes, so it found witnesses that no longer existed and
+   skipped necessary shortcuts — 32 wrong pairs of 600 on a 5x5 grid, some reported unreachable.
+   `hasWitness` now takes `contracted` and skips those nodes. Keep it that way.
+2. **The Dijkstra negative-edge counter-example took three attempts.** A lazy heap updates the
+   distance array even for a settled vertex, so the error has to *propagate*: in
+   `ShortestPaths.negativeExample()` d[1] comes out CORRECT and d[3] does not. A smaller instance
+   silently gets the right answer and demonstrates nothing.
+3. **Undirected DFS classification.** Every non-tree edge is seen twice and would be classified back
+   from one end and forward from the other. `traversal.js` drops the second sighting **by edge id**,
+   giving the textbook 19 tree + 12 back on a 4x5 grid — and keeping a parallel edge as the genuine
+   back edge it is. Dropping by parent VERTEX is the M13.4 bug.
+4. **Prefix/suffix rerooting loses on low-degree trees** (this was M12.6, and the same shape recurs):
+   measure before claiming a uniform win.
+
+### Things that will bite
+
+- **No apostrophes in curriculum strings.** `curriculum-algorithms.js` uses single quotes and one
+  apostrophe in a `summary` broke the file, which took `Curriculum` down, which took the sidebar
+  down, which crashed the render audit with a confusing `Cannot read properties of undefined
+  (reading 'tracks')`.
+- **A template file with no matching section controller fails the wiring audit** as
+  `unloaded-module`. Write the pair together.
+- **Metric ids and element ids must be disjoint.** `neg-apsp` was a metric and `neg-apsp-note` was
+  both its note span and a hand-written paragraph; the table is now `neg-allpairs`.
+- **`GraphLab.compareShortestPaths` reports disagreements as a field**, not an exception — on the
+  negative-edge graph the disagreement IS the demo.
+- Every traversal in every M13 module is iterative. A 200 000-node path runs in under 70 ms; a
+  recursive version is a stack overflow.
+
+### After the four sections
+
+Content (12 files, split per third: `-graphs`, `-graphs-paths`, `-graphs-trees`), then
+`graph-modules.test.js` and three `worked-examples-graphs*.test.js`, then `npm test`,
+`npm run build:css`, then the doc updates (README status block, the table at the top of this file,
+`CLAUDE.md`). The M12 commits are the template to copy for all of it.
+
 ## Next
 
-**M13 — graph algorithms I** (`doc/milestones/M13-graphs-i.md`, 10 sections), then onward through
-`doc/milestones/` in the order `doc/ROADMAP.md` gives.
+**Finish M13** — four sections, then the content, then the tests. The "M13 — IN PROGRESS"
+section immediately above is the resume point and carries every measured figure those four
+sections need, so nothing has to be re-derived. After that, **M14 — graph algorithms II**
+and onward through `doc/milestones/` in the order `doc/ROADMAP.md` gives.
 
-M11 and M12 are complete apart from a human browser pass, which needs the Chrome extension
-connected. When one is available, open those twenty sections and check what the render audit
-structurally cannot: chart widths, colour separation, and the mermaid diagrams.
+M11, M12 and the built part of M13 are complete apart from a human browser pass, which needs
+the Chrome extension connected. When one is available, open those sections and check what the
+render audit structurally cannot: chart widths, colour separation, and the mermaid diagrams.
 
 A shared helper exists for the figure tests: `tests/support/worked-example-prose.js` exports
 `proseFor`, `quotes`, `fixed` and `grouped`. New `worked-examples-*.test.js` files should require
