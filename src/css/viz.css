@@ -214,3 +214,78 @@ canvas.viz-canvas {
 .matrix-row-lit td {
   background: color-mix(in srgb, var(--hue-blue) 14%, transparent);
 }
+
+/* DpTableView. Like MatrixView, an HTML table - but a DP table carries four
+   independent marks at once (settled, active, its dependencies, and the
+   traceback), so the colours have to stay distinguishable when two land on
+   one cell. They are ordered by specificity below: the traceback wins, because
+   it is the answer, and `settled` is the faintest, because it is the
+   background against which the other three are read. */
+.dp-scroll {
+  overflow-x: auto;
+  max-height: 24rem;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.dp-table {
+  border-collapse: collapse;
+  width: max-content;
+  min-width: 100%;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.dp-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--surface-sunken);
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-align: right;
+  padding: 0.2rem 0.45rem;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border-strong);
+}
+
+.dp-corner {
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  background: var(--surface-sunken);
+  border-bottom: 1px solid var(--border-strong);
+}
+
+.dp-cell {
+  padding: 0.2rem 0.45rem;
+  text-align: right;
+  white-space: nowrap;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+}
+
+.dp-cell-settled {
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--hue-gray) 10%, transparent);
+}
+
+.dp-cell-depends {
+  background: color-mix(in srgb, var(--hue-amber) 26%, transparent);
+  color: var(--text-primary);
+}
+
+.dp-cell-active {
+  outline: 2px solid var(--hue-blue);
+  outline-offset: -2px;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.dp-cell-path {
+  background: color-mix(in srgb, var(--hue-green) 30%, transparent);
+  color: var(--text-primary);
+  font-weight: 600;
+}
