@@ -24,11 +24,11 @@
     return '<div class="grid-2">' +
       scope.ControlPanel.markup({ title: 'Sequence and coin-change instance', controls: CONTROLS }) +
       '<div class="card"><div class="card-header">Longest increasing subsequence, two ways</div>' +
-      '<div class="card-body"><table class="ref-table" id="odp-lis-table"><thead><tr>' +
+      '<div class="card-body"><table class="ref-table" id="odp-lis-methods"><thead><tr>' +
       '<th>Method</th><th>Length</th><th>States</th><th>Transitions</th><th>Reconstructed?</th>' +
       '<th>Genuine subsequence?</th>' +
       '</tr></thead><tbody></tbody></table>' +
-      '<p class="note" id="odp-lis-note"></p></div></div>' +
+      '<p class="note" id="odp-lis-methods-note"></p></div></div>' +
       '</div>' +
       scope.MetricGrid.markup(METRICS) +
       '<div class="card" style="margin-top:.875rem">' +

@@ -34,7 +34,7 @@
             terms: [
               { sym: 'early diagonal', meaning: '1.88% of the control at n = 8' },
               { sym: 'symmetry breaking', meaning: '50.00%' },
-              { sym: 'both', meaning: '0.94% — the product, to four decimal places' }
+              { sym: 'both', meaning: '0.9389% measured against a predicted 0.9384% — equal at two decimal places, not exactly' }
             ]
           },
           {

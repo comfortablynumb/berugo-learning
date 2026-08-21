@@ -229,9 +229,12 @@
 
     root.jQuery('#trd-shapes tbody').html(html);
     root.jQuery('#trd-shapes-note').text('The rerooting column is flat across all four shapes — that is '
-      + 'the linearity claim, and it is a measurement. The naive column is not: on a path and a caterpillar '
-      + 'the two are within a small factor, and on a star the loop version is quadratic in n while the '
-      + 'prefix/suffix version does not notice. A test suite of random trees would never show this row.');
+      + 'the linearity claim, and it is a measurement. The naive column is not, and the ratios are worth '
+      + 'reading in both directions: on a path and a caterpillar the loop is actually CHEAPER, because '
+      + 'prefix and suffix arrays cost a constant per child that a degree-2 node does not need. On a star '
+      + 'the same loop is quadratic in n. Prefix/suffix is insurance — it costs a small factor on the '
+      + 'shapes a random test suite generates, and it is the only thing standing between you and O(n²) on '
+      + 'the shape it does not.');
   }
 
   function paintFamily(family) {

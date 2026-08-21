@@ -274,8 +274,8 @@
         '<td class="mono">' + growth + '</td></tr>';
     }).join('');
 
-    root.jQuery('#knp-bits tbody').html(html);
-    root.jQuery('#knp-bits-note').text('One extra digit on the capacity multiplies the table by ten and '
+    root.jQuery('#knp-bitcost tbody').html(html);
+    root.jQuery('#knp-bitcost-note').text('One extra digit on the capacity multiplies the table by ten and '
       + 'lengthens the input by one character — about 3.3 bits. A running time that multiplies by ten when '
       + 'the input grows by 3.3 bits is exponential in the input size, which is exactly what '
       + '"pseudo-polynomial" is a polite name for.');

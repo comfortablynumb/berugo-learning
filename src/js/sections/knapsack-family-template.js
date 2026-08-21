@@ -42,10 +42,10 @@
       '<p class="note" id="knp-bounded-note"></p></div></div>' +
       '<div class="card" style="margin-top:.875rem">' +
       '<div class="card-header">Pseudo-polynomial: what happens when the capacity gains a digit</div>' +
-      '<div class="card-body"><table class="ref-table" id="knp-bits"><thead><tr>' +
+      '<div class="card-body"><table class="ref-table" id="knp-bitcost"><thead><tr>' +
       '<th>Capacity</th><th>Digits</th><th>Bits</th><th>Table cells</th><th>Growth per added digit</th>' +
       '</tr></thead><tbody></tbody></table>' +
-      '<p class="note" id="knp-bits-note"></p></div></div>' +
+      '<p class="note" id="knp-bitcost-note"></p></div></div>' +
       '<div class="card" style="margin-top:.875rem">' +
       '<div class="card-header">Subset sum and equal partition on the same weights</div>' +
       '<div class="card-body"><table class="ref-table" id="knp-subset"><thead><tr>' +

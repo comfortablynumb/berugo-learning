@@ -54,7 +54,8 @@
           'branches - but never worse than either alone, so the direction of the inequality is always in your ' +
           'favour. It also explains why removing a pruning to "simplify" a solver is so often catastrophic.',
         example: 'At n = 8: the early diagonal check leaves 1.88% of the control, symmetry breaking leaves ' +
-          '50.00%, and both together leave 0.94% — the product to four decimal places.'
+          '50.00%, and both together leave 0.9389% against the 0.9384% their product predicts — near enough to '+
+          'agree at two decimal places, and not equal, because the two prunings overlap slightly.'
       },
       {
         term: 'Symmetry breaking, and putting the solutions back',

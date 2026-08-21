@@ -186,8 +186,8 @@
         '<td>' + (genuine ? 'yes' : 'NO') + '</td></tr>';
     }).join('');
 
-    root.jQuery('#odp-lis-table tbody').html(html);
-    root.jQuery('#odp-lis-note').text('Both return the same length and both reconstruct a genuine '
+    root.jQuery('#odp-lis-methods tbody').html(html);
+    root.jQuery('#odp-lis-methods-note').text('Both return the same length and both reconstruct a genuine '
       + 'subsequence of the input. The transition counts are the whole difference, and they are the reason '
       + 'the second one exists.');
   }
