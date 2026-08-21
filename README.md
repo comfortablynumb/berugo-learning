@@ -14,7 +14,7 @@ faithfully in a browser, the section models it, says so plainly, and states what
 
 ## Status
 
-**M00–M11 shipped (104 sections). Building the curriculum, milestone by milestone.**
+**M00–M12 shipped (115 sections). Building the curriculum, milestone by milestone.**
 
 - ✅ Curriculum designed: 65 milestones, 634 sections, 11 tracks — one file per milestone in
   [`doc/milestones/`](doc/milestones/)
@@ -113,10 +113,25 @@ faithfully in a browser, the section models it, says so plainly, and states what
   turning 2^40 into 2^21, and Mo's algorithm whose tuned block size minimises the model while a
   larger one minimises the measurement. 9 sections live.
 
-- ⬜ M12 onward
+- ✅ **M12 — dynamic programming**: three evaluations of one recurrence measured through a single
+  instrument (242 785 naive calls against 26 memoised states at n = 25), a tabulation run in the wrong
+  order returning 0 from 48 cells read before they were written, patience sorting's pile tops shown to
+  be increasing, exactly the right length and *not a subsequence*, coin change answering two different
+  questions one loop-swap apart (4 against 9), a knapsack table whose capacity gains a digit and grows
+  tenfold while the input grows 3.3 bits, Hirschberg recovering the alignment at 16 peak cells against
+  56, Knuth's optimisation taking 156 split tests to 72 — and refusing when the quadrangle inequality
+  fails, which it does by 1.11 × 10⁻¹⁶ of pure floating-point noise unless the check carries a
+  tolerance, rerooting answering all 2 000 roots in 1 999 combines while the prefix/suffix trick is
+  measured *losing* on a path and winning by 333× on a star, Held-Karp replacing 39 916 800 tours with
+  49 152 cells against a 6.7 GB wall at n = 25, digit DP counting to 10¹⁸ in 190 states, four DP
+  optimisations each refusing when its precondition fails, alpha-beta spanning 7 275 to 42 094 nodes
+  for the same value while *reversing* the move list changes nothing at all, and a board game that is
+  cyclic before any snake is placed. 11 sections live.
 
-`npm test` is green — wiring audit, 2 006 unit tests, and a **render audit** that boots the whole
-app headlessly and activates all 104 sections, failing on anything that throws while rendering, any
+- ⬜ M13 onward
+
+`npm test` is green — wiring audit, 2 218 unit tests, and a **render audit** that boots the whole
+app headlessly and activates all 115 sections, failing on anything that throws while rendering, any
 table left with an empty body, and any metric tile still showing a placeholder without a note
 explaining it. `npm run lint:size` reports no offenders.
 
@@ -128,7 +143,7 @@ explaining it. `npm run lint:size` reports no offenders.
   opens to milestones, then sections. Tracks that are planned and not built are listed with their
   milestones and section counts, marked as planned, so the map shows what the platform teaches
   rather than only what happens to be finished. One track and one milestone stay open at a time, so
-  the nav is the same height at 104 sections and at 634.
+  the nav is the same height at 115 sections and at 634.
 - **Search across everything.** The header search indexes concepts, worked examples, reference
   entries and exercises as well as section titles, so "tombstone", "Little's law" or "round half to
   even" lands on the section that explains it. Ctrl/Cmd+K focuses it; arrows and Enter drive it.

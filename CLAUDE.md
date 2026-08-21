@@ -9,7 +9,7 @@ explained in full, diagram, insight), **Examples** (runnable demo with charts, w
 graded code lab) and **References** (the structured reference block).
 
 ## Status
-**M00–M11 are built** (104 sections, tree green; M00–M10 also verified in a browser), each carrying 8+ concepts
+**M00–M12 are built** (115 sections, tree green; M00–M10 also verified in a browser), each carrying 8+ concepts
 with full explanations, two worked examples, a reference entry and a graded exercise. `doc/BUILD-STATE.md`
 records what shipped and what the next session picks up. The rest of the curriculum follows the
 order in `doc/ROADMAP.md` (65 milestones in `doc/milestones/`). Keep `npm test` and

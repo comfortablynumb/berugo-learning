@@ -3,7 +3,7 @@
 Where the implementation stands, and exactly what the next session should pick up.
 Update this file at the end of any session that leaves work unfinished.
 
-**Last updated:** 2026-08-20 (M11 shipped; render audit added; M12 is next)
+**Last updated:** 2026-08-21 (M12 shipped; M13 is next)
 
 ---
 
@@ -23,10 +23,11 @@ Update this file at the end of any session that leaves work unfinished.
 | M09 — persistent, immutable and succinct structures | 9 | ✅ built, tested, verified in Chrome |
 | M10 — sorting, selection and searching | 10 | ✅ built, tested, verified in Chrome |
 | M11 — algorithm design paradigms | 9 | ✅ built, tested, render-audited |
+| M12 — dynamic programming | 11 | ✅ built, tested, render-audited |
 
-The tree is green: `npm test` runs the wiring audit (104 sections, 496 modules), **2 006 unit
-tests** (2 skipped) and the **render audit** (all 104 sections booted and activated headlessly);
-`npm run lint:size` passes across 555 files.
+The tree is green: `npm test` runs the wiring audit (115 sections, 545 modules), **2 218 unit
+tests** (6 skipped) and the **render audit** (all 115 sections booted and activated headlessly);
+`npm run lint:size` passes across 608 files.
 
 All nine M07 sections were opened in Chrome on `npm start`: the three tabs render, every demo
 figure matches the prose *exactly* (see "aligning the demo with the prose" below), the references
@@ -1333,14 +1334,123 @@ audit reports is about pixels, and it is **not** a substitute for opening the pa
 It runs in about 50 seconds, because activating a section runs its demo — including the Sudoku
 matrix and the 2^21-state meet-in-the-middle run.
 
+---
+
+## M12 notes worth keeping
+
+Spec: `doc/milestones/M12-dynamic-programming.md`. Eleven sections under the `algorithms` track.
+
+### Modules
+
+`algorithms/`: `dp-classic.js` (1-D family, coin change, LIS), `dp-knapsack.js` (0/1, unbounded,
+three bounded expansions, subset sum, `bitCost`), `dp-sequence.js` (edit distance, Hirschberg,
+LCS, scored and affine alignment, `checkAlignment`), `dp-interval.js` (matrix chain, optimal BST,
+Knuth, `checkQuadrangle`), `dp-tree.js` (rooted DPs, `reroot`, `prefixSuffix`, `shapedTree`),
+`dp-bitmask.js` (Held-Karp, assignment, submasks, SOS, broken profile, `memoryFor`),
+`dp-digit.js` (digit DP, DAG DP, automaton DP), `dp-optimizations.js` (CHT, Li Chao, D&C
+optimisation, monotonic queue, aliens), `game-theory.js`, `expectation-dp.js`.
+`machines/dp-lab.js` (naive / memoised / tabulated through one instrument, plus the subproblem
+DAG). `viz/dp-table-view.js` (HTML table with settled / active / depends / traceback marks).
+
+`dp-classic.js` and `dp-knapsack.js` are two files where the spec's table said one, for the usual
+size reason.
+
+### Section ids and prefixes
+
+| Section id | prefix | module(s) |
+|---|---|---|
+| `what-dp-is` | `wdp-` | `dp-lab.js` |
+| `one-dimensional-dp` | `odp-` | `dp-classic.js` |
+| `knapsack-family` | `knp-` | `dp-knapsack.js` |
+| `sequence-alignment` | `seq-` | `dp-sequence.js` |
+| `interval-dp` | `ivl-` | `dp-interval.js` |
+| `tree-dp` | `trd-` | `dp-tree.js` |
+| `bitmask-dp` | `bmk-` | `dp-bitmask.js` |
+| `digit-dp` | `dgt-` | `dp-digit.js` |
+| `dp-optimisations` | `dop-` | `dp-optimizations.js` |
+| `game-dp` | `gdp-` | `game-theory.js` |
+| `expectation-dp` | `exp-` | `expectation-dp.js` |
+
+### Five findings worth keeping
+
+1. **`checkQuadrangle` needed a tolerance.** Interval weights are differences of prefix sums, so
+   the textbook nine two-decimal probabilities violate the quadrangle inequality by
+   1.11e-16 and an exact `<=` rejects exactly the instance Knuth's optimisation was written for.
+   The tolerance scales with the total weight. `worked-examples-dp-structured.test.js` asserts
+   **both** directions - that it passes with the tolerance and fails without - so the tolerance
+   cannot be removed as decoration.
+2. **`countUpTo` dropped the number zero.** The natural `started && accepting` termination never
+   counts it, so every prefix count came out one short on every property that accepts zero while
+   every *range* stayed correct, because the error cancels in the subtraction. Range tests cannot
+   find this; only counting one at a time from zero can.
+3. **Reversing a move list is not a worse alpha-beta ordering.** On a symmetric board it prunes
+   identically (18 297 nodes either way). A genuinely bad ordering has to be bad about the *game*,
+   so `edgesFirst` replaced `worstOrder` and gives 42 094 against centre-first's 7 275. Both the
+   identity and the spread are asserted.
+4. **Prefix/suffix rerooting LOSES on low-degree trees.** At n = 2 000 the naive "all but one"
+   loop costs 7 994 combines on a path and 9 990 on a caterpillar against rerooting's flat 11 994;
+   it wins by 333x only on a star. The section says "insurance with a premium" rather than
+   claiming a uniform win, and the test asserts the path case is cheaper so the framing cannot
+   silently become false.
+5. **A tabulation run in the wrong order must return a NUMBER.** `DpLab.tabulated` substitutes 0
+   for a cell that has not been written - not `undefined`, which would poison the arithmetic to
+   NaN and give the game away. That is what makes `unresolved` the only evidence, which is the
+   whole point of 12.1's last table.
+
+### Decisions that are easy to undo by accident
+
+- **`knapsack01Rolling` returns `chosen: null`, not a list.** The rows a traceback would walk do
+  not exist; returning a plausible item list is the bug the section is about.
+- **`editDistanceRows` returns no `alignment` field at all**, for the same reason, and the test
+  asserts `undefined` rather than asserting a value.
+- **The optimised solvers refuse rather than answering.** `knuthOptimalBst`, `groupingHull` and
+  `groupingDivideConquer` all return `refused: true` with a witness when their precondition fails;
+  `force: true` exists so the demo can show what running it anyway produces.
+- **The naive `DpLab` run is capped and says so**, and the row renders "stopped" rather than a
+  smaller number.
+- **The drawn knapsack table is pinned at 10 items x 24 capacity.** A 400-column table is
+  unreadable and the point of drawing it is the two incoming edges.
+- **`dominoTilings` puts the NARROW side in the mask.** 2 x 12 is 4 profiles; 12 x 2 is 4 096.
+
+### External oracles used
+
+Nothing in this repository produced these, which is why they are worth having: C(24, 12) =
+2 704 156, the 8 x 8 domino tiling count 12 988 816, the 2 x k Fibonacci tilings, Nim's Grundy
+value being the heap size, the period-7 sequence of the subtraction game {1, 3, 4}, and 1/e for
+the secretary problem.
+
+### Measured figures quoted in the M12 examples
+
+`worked-examples-dp.test.js`, `-dp-structured` and `-dp-advanced` recompute every one at the
+sections' own default control values *and* assert the prose still quotes it. Landmarks: 242 785
+naive calls against 26 memoised states and 23 shared; a reversed tabulation returning 0 from 48
+unwritten reads; LIS at 1 999 000 against 11 411 transitions for length 85; coin change 4 against
+9 at an amount of 5 and 29 against 26 547 at 20; a 793-cell knapsack table giving 571 with a
+chosen set weighing 59; bounded expansions of 240 / 36 / 6 items at 11 800 / 621 / 366
+transitions; Hirschberg at 16 peak cells against 56 with five splits; 15 intervals and 35 split
+tests for 18 984 multiplications; 156 against 72 split tests at cost 2.590000; 1 999 combines for
+2 000 roots; 49 152 Held-Karp cells against 39 916 800 tours; 3^n exact at 81 / 6 561 / 531 441;
+SOS at 5 120 against 59 049; 3 155 numbers in 137..4 321 from 45 states; the hull at 783
+transitions against 80 200 for 80 131; alpha-beta at 7 275 / 18 297 / 42 094 for the same value;
+and a board solving to 10.476469 rolls that is cyclic before any snake is placed.
+
+### The verification pass
+
+Steps 1-8 are complete: 64 module property tests, 49 figure tests, 88 concepts, 22 worked
+examples, 11 reference entries and 11 graded exercises (every solution 4/4, every starter
+failing), plus the render audit over all 115 sections. **The Chrome extension was not connected
+in this session, so step 9 has not been performed for M11 or M12.** The render audit covers what
+throws and what is left unwritten; it cannot see chart widths, colour separation or mermaid
+layout.
+
 ## Next
 
-**M12 — dynamic programming** (`doc/milestones/M12-dynamic-programming.md`, 11 sections), then
-onward through `doc/milestones/` in the order `doc/ROADMAP.md` gives.
+**M13 — graph algorithms I** (`doc/milestones/M13-graphs-i.md`, 10 sections), then onward through
+`doc/milestones/` in the order `doc/ROADMAP.md` gives.
 
-M11 is complete apart from a human browser pass, which needs the Chrome extension connected. When
-one is available, open the nine M11 sections and check what the render audit structurally cannot:
-chart widths, colour separation, and the mermaid diagrams.
+M11 and M12 are complete apart from a human browser pass, which needs the Chrome extension
+connected. When one is available, open those twenty sections and check what the render audit
+structurally cannot: chart widths, colour separation, and the mermaid diagrams.
 
 A shared helper exists for the figure tests: `tests/support/worked-example-prose.js` exports
 `proseFor`, `quotes`, `fixed` and `grouped`. New `worked-examples-*.test.js` files should require
