@@ -321,3 +321,100 @@ canvas.viz-canvas {
   outline: 2px solid var(--hue-amber);
   outline-offset: -2px;
 }
+
+/* An alignment is text over text, one character per cell. The grid has to be
+   monospaced and horizontally scrollable rather than wrapping: a pattern that
+   wraps mid-alignment stops being an alignment. */
+.align-scroll {
+  overflow-x: auto;
+  padding: 0.35rem 0;
+}
+
+.align-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  margin-bottom: 0.2rem;
+}
+
+.align-label {
+  flex: 0 0 5.5rem;
+  text-align: right;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.align-cells {
+  display: flex;
+  gap: 1px;
+}
+
+.align-cell {
+  display: inline-block;
+  width: 1.05rem;
+  min-width: 1.05rem;
+  text-align: center;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.8rem;
+  line-height: 1.4rem;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--hue-gray) 10%, transparent);
+  color: var(--text-primary);
+}
+
+.align-pad {
+  background: transparent;
+}
+
+.align-window {
+  background: color-mix(in srgb, var(--hue-blue) 18%, transparent);
+}
+
+.align-match {
+  background: color-mix(in srgb, var(--hue-green) 45%, transparent);
+}
+
+.align-mismatch {
+  background: color-mix(in srgb, var(--hue-red) 45%, transparent);
+}
+
+.align-skip {
+  background: color-mix(in srgb, var(--hue-gray) 22%, transparent);
+  color: var(--text-muted);
+}
+
+.align-caption {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.35rem;
+}
+
+/* A diff is two columns and a gutter. The empty cell on one side is what makes
+   an insertion visibly an insertion rather than a changed line. */
+.diff-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.diff-line {
+  padding: 0.05rem 0.4rem;
+  white-space: pre;
+  vertical-align: top;
+  width: 48%;
+}
+
+.diff-mark {
+  width: 1.2rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.diff-insert .diff-line:last-child {
+  background: color-mix(in srgb, var(--hue-green) 18%, transparent);
+}
+
+.diff-delete .diff-line:first-child {
+  background: color-mix(in srgb, var(--hue-red) 18%, transparent);
+}
