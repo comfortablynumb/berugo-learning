@@ -139,6 +139,10 @@ function applyOverrides(window, overrides) {
 
     if (node.type === 'checkbox') node.checked = parts[1] === 'true';
     else node.value = parts[1];
+    /* A range or number control listens for `input`, a select for `change`, so
+       firing only one of the two silently dumps the DEFAULT settings under a
+       command line that asked for something else. */
+    window.jQuery(node).trigger('input');
     window.jQuery(node).trigger('change');
   });
 }
