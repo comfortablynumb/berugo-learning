@@ -117,13 +117,13 @@
 
   /** The bytes each representation costs, so the comparison is a number. */
   function memoryOf(graph) {
-    const directedEdges = graph.directed ? graph.edges.length : graph.edges.length * 2;
+    const arcs = graph.directed ? graph.edges.length : graph.edges.length * 2;
     return {
       n: graph.n,
       edges: graph.edges.length,
-      adjacencyList: directedEdges * BYTES_PER_ENTRY * 3 + graph.n * BYTES_PER_ENTRY,
+      adjacencyList: arcs * BYTES_PER_ENTRY * 3 + graph.n * BYTES_PER_ENTRY,
       adjacencyMatrix: graph.n * graph.n * BYTES_PER_ENTRY,
-      csr: (graph.n + 1) * BYTES_PER_INDEX + directedEdges * (BYTES_PER_INDEX * 2 + BYTES_PER_ENTRY),
+      csr: (graph.n + 1) * BYTES_PER_INDEX + arcs * (BYTES_PER_INDEX * 2 + BYTES_PER_ENTRY),
       density: graph.n <= 1 ? 0 : graph.edges.length / (graph.n * (graph.n - 1) / 2)
     };
   }
@@ -348,6 +348,51 @@
 
   /** Add k parallel copies of an existing edge - the input that separates a
    *  correct bridge finder from one that tracks the parent vertex. */
+  /**
+   * The edge list a relaxation loop wants: one entry per *direction*.
+   *
+   * `graph.edges` holds an undirected edge once, so any algorithm that loops
+   * over that list - Bellman-Ford, Johnson's potentials, a negative-cycle
+   * check - walks a directed subgraph instead of the graph. The result is a
+   * set of distances that are too large on some vertices and indistinguishable
+   * from a correct answer without a second implementation to compare against.
+   * `adjacencyList` already expands both directions, which is why the mistake
+   * only bites the edge-list algorithms.
+   */
+  function directedEdges(graph) {
+    if (graph.directed) return graph.edges;
+    const out = [];
+
+    graph.edges.forEach(function (edge) {
+      out.push({ from: edge.from, to: edge.to, weight: edge.weight });
+      out.push({ from: edge.to, to: edge.from, weight: edge.weight });
+    });
+    return out;
+  }
+
+  /**
+   * Duplicate specific edges by id, which is what "add a redundant link across
+   * exactly this link" means.
+   *
+   * `withParallelEdges` below duplicates the *first* n edges, which is the
+   * right generator for a multigraph fixture and the wrong one for a
+   * redundancy experiment: on a barbell the first n edges are all inside one
+   * clique, so the bridge count does not move and a table built on it shows a
+   * flat column under a caption claiming the counts must fall.
+   */
+  function duplicateEdges(graph, ids) {
+    const edges = graph.edges.slice();
+
+    ids.forEach(function (id) {
+      const edge = graph.edges[id];
+
+      if (!edge) return;
+      edges.push({ from: edge.from, to: edge.to, weight: edge.weight });
+    });
+    return createGraph(graph.n, edges,
+      { directed: graph.directed, name: graph.name + ' + parallel' });
+  }
+
   function withParallelEdges(graph, count) {
     const edges = graph.edges.slice();
 
@@ -363,6 +408,7 @@
     memoryOf: memoryOf, degreeStats: degreeStats,
     grid: grid, randomGraph: randomGraph, scaleFree: scaleFree, roadLike: roadLike,
     randomDag: randomDag, path: path, star: star, barbell: barbell, chainedCycles: chainedCycles,
-    checkWellFormed: checkWellFormed, reverse: reverse, withParallelEdges: withParallelEdges
+    checkWellFormed: checkWellFormed, reverse: reverse, withParallelEdges: withParallelEdges,
+    duplicateEdges: duplicateEdges, directedEdges: directedEdges
   };
 }));

@@ -134,7 +134,7 @@
     const settings = options || {};
     const adjacency = M.Core.adjacencyList(graph);
     const rows = [];
-    const truth = M.ShortestPaths.bellmanFord(graph.edges, graph.n, source, {});
+    const truth = M.ShortestPaths.bellmanFord(M.Core.directedEdges(graph), graph.n, source, {});
 
     rows.push(row('Bellman-Ford', truth.distance, truth.report, truth.distance));
     const dijkstra = M.ShortestPaths.dijkstra(adjacency, source, {});
@@ -266,6 +266,36 @@
     };
   }
 
+  /**
+   * Every pair, against Dijkstra. A contraction hierarchy fails by returning a
+   * plausible too-long distance on a handful of pairs, so the only check worth
+   * having is exhaustive - and the disagreement count is a field, because on a
+   * deliberately broken witness search the disagreement *is* the demo.
+   */
+  function routingAllPairs(graph, hierarchy) {
+    const M = modules();
+    const adjacency = M.Core.adjacencyList(graph);
+    let pairs = 0;
+    let wrong = 0;
+    let unreachable = 0;
+
+    for (let source = 0; source < graph.n; source += 1) {
+      const truth = M.ShortestPaths.dijkstra(adjacency, source, {}).distance;
+
+      for (let target = 0; target < graph.n; target += 1) {
+        if (source === target) continue;
+        pairs += 1;
+        const got = M.Ch.query(hierarchy, source, target, {}).distance;
+
+        if (got === truth[target] || Math.abs(got - truth[target]) < 1e-9) continue;
+        wrong += 1;
+
+        if (got === Infinity) unreachable += 1;
+      }
+    }
+    return { pairs: pairs, wrong: wrong, unreachable: unreachable };
+  }
+
   /* -------------------------------------------------------- tree queries */
 
   /** The three LCA implementations on one tree, checked against the naive
@@ -303,6 +333,6 @@
     build: build, describe: describe, traversalRun: traversalRun,
     compareShortestPaths: compareShortestPaths, compareHeuristics: compareHeuristics,
     compareMst: compareMst, connectivityRun: connectivityRun,
-    compareRouting: compareRouting, compareLca: compareLca
+    compareRouting: compareRouting, routingAllPairs: routingAllPairs, compareLca: compareLca
   };
 }));

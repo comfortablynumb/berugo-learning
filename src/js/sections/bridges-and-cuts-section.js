@@ -104,20 +104,32 @@
       seed: seed, m: Math.floor(size * 1.4) });
   }
 
+  /**
+   * Add `extra` redundant links, each one duplicating a link that is currently
+   * a single point of failure. Duplicating arbitrary edges is a different
+   * experiment and a much less interesting one: on a barbell the first few
+   * edges all sit inside one clique, the bridge count does not move, and the
+   * slider appears to do nothing.
+   */
+  function withRedundancy(graph, extra) {
+    if (extra <= 0) return graph;
+    const analysis = root.Biconnectivity.analyse(root.GraphCore.adjacencyList(graph), {});
+    const ids = analysis.bridges.slice(0, extra).map(function (bridge) { return bridge.id; });
+
+    return root.GraphCore.duplicateEdges(graph, ids);
+  }
+
   const runFor = root.Helpers.memoise(function (key) {
     const parts = key.split('|');
-    let graph = baseGraph(parts[0], Number(parts[1]), Number(parts[2]));
-
-    if (Number(parts[3]) > 0) graph = root.GraphCore.withParallelEdges(graph, Number(parts[3]));
+    const graph = withRedundancy(baseGraph(parts[0], Number(parts[1]), Number(parts[2])),
+      Number(parts[3]));
     return { graph: graph, run: root.GraphLab.connectivityRun(graph, { withOracle: true }) };
   });
 
   const redundancyFor = root.Helpers.memoise(function (key) {
     const parts = key.split('|');
     return REDUNDANCY_STEPS.map(function (extra) {
-      let graph = baseGraph(parts[0], Number(parts[1]), Number(parts[2]));
-
-      if (extra > 0) graph = root.GraphCore.withParallelEdges(graph, extra);
+      const graph = withRedundancy(baseGraph(parts[0], Number(parts[1]), Number(parts[2])), extra);
       return { extra: extra, graph: graph,
         run: root.GraphLab.connectivityRun(graph, { withOracle: true }) };
     });
@@ -198,10 +210,11 @@
     }).join('');
 
     root.jQuery('#brg-redundancy tbody').html(html);
-    root.jQuery('#brg-redundancy-note').text('Each added link is a second, independent connection ' +
-      'duplicating an existing one — which is what a redundant fibre run or a second uplink is. Every ' +
-      'row is checked against the removal oracle, and the counts must fall: a parallel edge cannot create '
-      + 'a bridge, only remove one.');
+    root.jQuery('#brg-redundancy-note').text('Each added link duplicates a link that is currently a ' +
+      'single point of failure — which is what a redundant fibre run or a second uplink is, and is the ' +
+      'only place adding one is worth the money. Every row is checked against the removal oracle, and ' +
+      'the counts must fall: a parallel edge cannot create a bridge, only remove one. The rows stop ' +
+      'changing once every bridge has a twin.');
   }
 
   /* The bug, on the smallest instance that exhibits it, with the oracle

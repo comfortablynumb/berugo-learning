@@ -316,15 +316,35 @@
               title: 'Shortest paths II: negative weights and all pairs',
               summary: 'Extracting the negative cycle, and the Floyd-Warshall loop order that is not a style choice.',
               tags: ['bellman-ford', 'negative cycle', 'spfa', 'floyd-warshall', 'johnson', 'arbitrage']
+            },
+            {
+              id: 'heuristic-search',
+              title: 'Heuristic search: A* and friends',
+              summary: 'Admissible is not the same as useful, and consistent is not the same as admissible.',
+              tags: ['a-star', 'admissible', 'consistent', 'weighted a-star', 'ida-star', 'bidirectional', 'alt landmarks', 'heuristic']
+            },
+            {
+              id: 'route-planning',
+              title: 'Route planning at scale',
+              summary: 'Contraction hierarchies, and the witness search that decides whether they are correct.',
+              tags: ['contraction hierarchies', 'witness search', 'shortcut', 'bidirectional dijkstra', 'preprocessing', 'hub labelling', 'arc flags']
+            },
+            {
+              id: 'minimum-spanning-trees',
+              title: 'Minimum spanning trees',
+              summary: 'Three algorithms that agree on weight and not on the tree, and the minimax path you get free.',
+              tags: ['minimum spanning tree', 'kruskal', 'prim', 'boruvka', 'cut property', 'cycle property', 'minimax path', 'second best mst']
+            },
+            {
+              id: 'tree-path-queries',
+              title: 'Trees, LCA and path queries',
+              summary: 'Binary lifting, sparse tables and heavy-light decomposition, ranked by tree shape rather than by theory.',
+              tags: ['lowest common ancestor', 'binary lifting', 'euler tour', 'sparse table', 'heavy-light decomposition', 'path query', 'kth ancestor']
             }
           ]
         }
       ],
       planned: [
-        /* M13 is half built: six sections are in the group above and four are still to
-           come, so the remainder is declared here to keep the published total honest.
-           Delete this entry when 13.7 to 13.10 land. */
-        { id: 'M13-rest', title: 'Graph algorithms I — the remaining four sections', sections: 4 },
         { id: 'M14', title: 'Graph algorithms II — flow, matching, connectivity, spectral', sections: 10 },
         { id: 'M15', title: 'String algorithms and pattern matching', sections: 11 },
         { id: 'M16', title: 'Computational geometry', sections: 10 },

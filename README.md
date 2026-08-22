@@ -14,7 +14,7 @@ faithfully in a browser, the section models it, says so plainly, and states what
 
 ## Status
 
-**M00–M12 shipped (115 sections). Building the curriculum, milestone by milestone.**
+**M00–M13 shipped (125 sections). Building the curriculum, milestone by milestone.**
 
 - ✅ Curriculum designed: 65 milestones, 634 sections, 11 tracks — one file per milestone in
   [`doc/milestones/`](doc/milestones/)
@@ -128,10 +128,25 @@ faithfully in a browser, the section models it, says so plainly, and states what
   for the same value while *reversing* the move list changes nothing at all, and a board game that is
   cyclic before any snake is placed. 11 sections live.
 
-- ⬜ M13 onward
+- ✅ **M13 — graph algorithms I**: three representations of one graph costing 25.3 KB, 38.8 KB and
+  1.2 MB with the crossover measured at exactly half density, BFS and DFS doing identical work and
+  differing 20 against 400 in peak memory, a build whose 4.72× speedup ceiling is reached at eight
+  workers and never moves again, one extra import turning 40 ordered packages into 37 and a named
+  cycle, Tarjan and Kosaraju agreeing on a partition that condenses 74 edges into 14, one redundant
+  cable taking a barbell from one bridge to none while leaving both cut vertices exactly where they
+  were, a four-vertex graph on which Dijkstra is confidently wrong one hop downstream of the negative
+  edge, a Floyd-Warshall loop order that does the same 64 000 relaxations and is wrong on 554 of
+  1 600 cells, an admissible and consistent Manhattan estimate that prunes nothing at all against ALT
+  landmarks at 16.33×, a witness search that skips two shortcuts and answers 42 of 1 260 pairs
+  incorrectly — twenty of them claiming no route exists — three spanning-tree algorithms agreeing on
+  270 and disagreeing on which 59 edges make it, the minimax path the MST answers for free on 136 of
+  198 pairs where the cheapest route does not, and binary lifting measured *losing* to the naive climb
+  on a 200-node tree of depth 13 and winning by 19× on a path. 10 sections live.
 
-`npm test` is green — wiring audit, 2 218 unit tests, and a **render audit** that boots the whole
-app headlessly and activates all 115 sections, failing on anything that throws while rendering, any
+- ⬜ M14 onward
+
+`npm test` is green — wiring audit, 2 386 unit tests, and a **render audit** that boots the whole
+app headlessly and activates all 125 sections, failing on anything that throws while rendering, any
 table left with an empty body, and any metric tile still showing a placeholder without a note
 explaining it. `npm run lint:size` reports no offenders.
 
@@ -143,7 +158,7 @@ explaining it. `npm run lint:size` reports no offenders.
   opens to milestones, then sections. Tracks that are planned and not built are listed with their
   milestones and section counts, marked as planned, so the map shows what the platform teaches
   rather than only what happens to be finished. One track and one milestone stay open at a time, so
-  the nav is the same height at 115 sections and at 634.
+  the nav is the same height at 125 sections and at 634.
 - **Search across everything.** The header search indexes concepts, worked examples, reference
   entries and exercises as well as section titles, so "tombstone", "Little's law" or "round half to
   even" lands on the section that explains it. Ctrl/Cmd+K focuses it; arrows and Enter drive it.

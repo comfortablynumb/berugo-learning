@@ -114,6 +114,30 @@
     return false;
   }
 
+  /**
+   * The witness search with its two failure modes available on purpose,
+   * because "the witness search is where CH correctness lives" is a claim a
+   * learner should be able to falsify by clicking rather than take on trust.
+   *
+   *   bounded            - correct: search the remaining graph only.
+   *   none               - never search, so every pair gets a shortcut. Slower
+   *                        queries and a bigger graph, but never wrong.
+   *   ignore-contracted  - search through nodes that have already been
+   *                        contracted. Finds witnesses that no longer exist,
+   *                        skips necessary shortcuts, and is wrong on a small
+   *                        fraction of pairs while looking entirely healthy.
+   */
+  function witnessFound(working, pair, contracted, context) {
+    const mode = context.mode || 'bounded';
+
+    if (mode === 'none') return false;
+    return hasWitness(working, pair.from, pair.to, pair.banned, pair.limit, {
+      hopLimit: context.hopLimit,
+      contracted: mode === 'ignore-contracted' ? [] : contracted,
+      report: context.report
+    });
+  }
+
   /* ----------------------------------------------------------- contraction */
 
   /**
@@ -125,6 +149,7 @@
   function edgeDifferenceOf(working, node, contracted, options) {
     const settings = options || {};
     const neighbours = liveNeighbours(working, node, contracted);
+    const context = { hopLimit: settings.hopLimit, report: settings.report, mode: settings.witness };
     let needed = 0;
 
     neighbours.incoming.forEach(function (u) {
@@ -132,8 +157,8 @@
         if (u === w) return;
         const through = working.incoming[node].get(u) + working.out[node].get(w);
 
-        if (hasWitness(working, u, w, node, through,
-          { hopLimit: settings.hopLimit, contracted: contracted, report: settings.report })) return;
+        if (witnessFound(working, { from: u, to: w, banned: node, limit: through },
+          contracted, context)) return;
         needed += 1;
       });
     });
@@ -190,7 +215,8 @@
     for (let v = 0; v < working.n; v += 1) {
       if (contracted[v]) continue;
       const score = settings.order === 'index' ? v
-        : edgeDifferenceOf(working, v, contracted, { hopLimit: settings.hopLimit, report: report });
+        : edgeDifferenceOf(working, v, contracted,
+          { hopLimit: settings.hopLimit, report: report, witness: settings.witness });
 
       if (score >= bestScore) continue;
       bestScore = score;
@@ -203,15 +229,16 @@
   /** Remove the node and add whatever shortcuts the witness search demands. */
   function contractNode(working, node, contracted, shortcuts, context) {
     const neighbours = liveNeighbours(working, node, contracted);
+    const search = { hopLimit: context.settings.hopLimit, report: context.report,
+      mode: context.settings.witness };
 
     neighbours.incoming.forEach(function (u) {
       neighbours.outgoing.forEach(function (w) {
         if (u === w) return;
         const through = working.incoming[node].get(u) + working.out[node].get(w);
 
-        if (hasWitness(working, u, w, node, through,
-          { hopLimit: context.settings.hopLimit, contracted: contracted,
-            report: context.report })) {
+        if (witnessFound(working, { from: u, to: w, banned: node, limit: through },
+          contracted, search)) {
           context.report.witnessesFound += 1;
           return;
         }
@@ -307,6 +334,7 @@
 
   return {
     emptyReport: emptyReport, createWorking: createWorking, hasWitness: hasWitness,
-    edgeDifferenceOf: edgeDifferenceOf, build: build, query: query, sizeOf: sizeOf
+    witnessFound: witnessFound, edgeDifferenceOf: edgeDifferenceOf,
+    build: build, query: query, sizeOf: sizeOf
   };
 }));

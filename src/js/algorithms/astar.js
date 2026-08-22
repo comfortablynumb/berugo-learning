@@ -32,7 +32,7 @@
 
   function emptyReport() {
     return { expanded: 0, generated: 0, relaxations: 0, reopened: 0, pushes: 0,
-      staleSkipped: 0, meetingPoint: -1, iterations: 0 };
+      staleSkipped: 0, reopensSuppressed: 0, meetingPoint: -1, iterations: 0 };
   }
 
   function createHeap() {
@@ -108,7 +108,19 @@
       const top = heap.pop();
       const node = top.value;
 
-      if (closed[node] && !reopen) { report.staleSkipped += 1; continue; }
+      /* Three different things can pop a closed node, and conflating them
+         makes a consistent heuristic look like it reopens. A *stale* entry is
+         a duplicate left behind by a later, cheaper push: its key is above the
+         node's current f, and it is pure lazy-heap bookkeeping. A *genuine*
+         reopening is an entry whose key matches the current f, which only
+         happens when g fell after the node was closed - and that needs an
+         inconsistent heuristic. */
+      if (closed[node] && top.key > g[node] + weight * heuristic(node) + 1e-9) {
+        report.staleSkipped += 1;
+        continue;
+      }
+
+      if (closed[node] && !reopen) { report.reopensSuppressed += 1; continue; }
 
       if (closed[node]) report.reopened += 1;
       closed[node] = true;

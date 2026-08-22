@@ -81,6 +81,34 @@
     });
   }
 
+  /**
+   * A rooted tree: depth down the page, discovery order across it. A ring is
+   * the wrong picture here because it hides the only thing a tree section is
+   * about - a path of 1 000 nodes and a star of 1 000 nodes draw identically
+   * on a circle and could not behave more differently.
+   *
+   * `rooted` is what `TreeQueries.rootTree` returns; its `order` is a DFS
+   * pre-order, so every subtree occupies a contiguous run of columns.
+   */
+  function treeLayout(rooted, width, height) {
+    const n = rooted.parent.length;
+    const positions = new Array(n).fill(null);
+    const column = new Array(n).fill(0);
+    let maxDepth = 0;
+
+    rooted.order.forEach(function (node, index) {
+      column[node] = index;
+      maxDepth = Math.max(maxDepth, rooted.depth[node]);
+    });
+    const spanX = (width - 2 * PADDING) / Math.max(1, n - 1);
+    const spanY = (height - 2 * PADDING) / Math.max(1, maxDepth);
+
+    for (let v = 0; v < n; v += 1) {
+      positions[v] = { x: PADDING + column[v] * spanX, y: PADDING + rooted.depth[v] * spanY };
+    }
+    return positions;
+  }
+
   /** A ring. Says nothing about distance and everything about structure. */
   function circularLayout(n, width, height) {
     const radius = Math.min(width, height) / 2 - PADDING;
@@ -275,6 +303,7 @@
   return {
     MAX_EDGES: MAX_EDGES, MAX_NODES: MAX_NODES,
     fixedLayout: fixedLayout, circularLayout: circularLayout, groupedLayout: groupedLayout,
+    treeLayout: treeLayout,
     draw: draw, classByGroup: classByGroup, classBySet: classBySet, colours: colours,
     paletteOf: paletteOf
   };

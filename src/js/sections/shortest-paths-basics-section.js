@@ -124,7 +124,7 @@
     return { graph: graph,
       deque: root.ShortestPaths.zeroOneBfs(adjacency, 0, {}),
       heap: root.ShortestPaths.dijkstra(adjacency, 0, {}),
-      truth: root.ShortestPaths.bellmanFord(graph.edges, graph.n, 0, {}) };
+      truth: root.ShortestPaths.bellmanFord(root.GraphCore.directedEdges(graph), graph.n, 0, {}) };
   });
 
   function keyFor(values) {
@@ -210,7 +210,7 @@
     const graph = root.ShortestPaths.negativeExample();
     const adjacency = root.GraphCore.adjacencyList(graph);
     const dijkstra = root.ShortestPaths.dijkstra(adjacency, 0, {});
-    const truth = root.ShortestPaths.bellmanFord(graph.edges, graph.n, 0, {});
+    const truth = root.ShortestPaths.bellmanFord(root.GraphCore.directedEdges(graph), graph.n, 0, {});
     const rows = [0, 1, 2, 3].map(function (v) {
       return { cells: ['distance to ' + v, root.Format.exact(dijkstra.distance[v]),
         root.Format.exact(truth.distance[v]),

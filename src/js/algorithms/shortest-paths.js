@@ -419,10 +419,25 @@
    * non-negative and every path's cost shifts by the same h(source) − h(target),
    * so Dijkstra from each vertex now gives the right answer.
    */
+  /** Each undirected edge as the two arcs it actually is. */
+  function bothDirections(edges) {
+    const out = [];
+
+    edges.forEach(function (edge) {
+      out.push({ from: edge.from, to: edge.to, weight: edge.weight });
+      out.push({ from: edge.to, to: edge.from, weight: edge.weight });
+    });
+    return out;
+  }
+
   function johnson(graph, options) {
     const report = (options || {}).report || emptyReport();
     const n = graph.n;
-    const augmented = graph.edges.slice();
+    /* One entry per direction. An undirected graph stores each edge once, and
+       relaxing only from -> to walks a directed subgraph, which produces
+       potentials that are wrong in a way nothing downstream can detect. */
+    const arcs = graph.directed ? graph.edges : bothDirections(graph.edges);
+    const augmented = arcs.slice();
 
     for (let v = 0; v < n; v += 1) augmented.push({ from: n, to: v, weight: 0 });
     const potentials = bellmanFord(augmented, n + 1, n, { report: report });
@@ -434,7 +449,7 @@
     const reweighted = [];
 
     for (let v = 0; v < n; v += 1) reweighted.push([]);
-    graph.edges.forEach(function (edge, id) {
+    arcs.forEach(function (edge, id) {
       const weight = edge.weight + h[edge.from] - h[edge.to];
 
       if (weight < 0) throw new Error('johnson: reweighting produced a negative edge');

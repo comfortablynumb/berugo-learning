@@ -170,6 +170,40 @@
     return lifting.up[0][x];
   }
 
+  /**
+   * The same walk as `liftingLca`, recording every jump. A counter cannot show
+   * what makes binary lifting work: that levelling the two nodes is the binary
+   * representation of the depth difference, and that the descent deliberately
+   * stops one step short so the answer is the parent of where it stopped.
+   */
+  function liftingTrace(lifting, a, b) {
+    const steps = [];
+    let x = a;
+    let y = b;
+
+    if (lifting.depth[x] < lifting.depth[y]) { const t = x; x = y; y = t; }
+    let gap = lifting.depth[x] - lifting.depth[y];
+
+    for (let bit = 0; gap > 0; bit += 1) {
+      if ((gap & 1) === 1) {
+        steps.push({ phase: 'level', jump: 1 << bit, from: x, to: lifting.up[bit][x] });
+        x = lifting.up[bit][x];
+      }
+      gap >>= 1;
+    }
+
+    if (x === y) return { steps: steps, lca: x, deep: a, shallow: b };
+
+    for (let k = lifting.levels - 1; k >= 0; k -= 1) {
+      if (lifting.up[k][x] === -1 || lifting.up[k][x] === lifting.up[k][y]) continue;
+      steps.push({ phase: 'together', jump: 1 << k, from: x, to: lifting.up[k][x], other: y });
+      x = lifting.up[k][x];
+      y = lifting.up[k][y];
+    }
+    steps.push({ phase: 'final', jump: 1, from: x, to: lifting.up[0][x] });
+    return { steps: steps, lca: lifting.up[0][x], deep: a, shallow: b };
+  }
+
   /* --------------------------------------------------- Euler tour + sparse */
 
   /**
@@ -388,6 +422,7 @@
     emptyReport: emptyReport, rootTree: rootTree,
     naiveLca: naiveLca, naiveAncestor: naiveAncestor,
     buildLifting: buildLifting, kthAncestor: kthAncestor, liftingLca: liftingLca,
+    liftingTrace: liftingTrace,
     eulerTour: eulerTour, buildSparse: buildSparse, sparseLca: sparseLca, distance: distance,
     heavyLight: heavyLight, chainsOnPath: chainsOnPath, verifySegments: verifySegments,
     shapedTree: shapedTree

@@ -3,7 +3,7 @@
 Where the implementation stands, and exactly what the next session should pick up.
 Update this file at the end of any session that leaves work unfinished.
 
-**Last updated:** 2026-08-21 (M13 half built — START HERE, see the M13 section at the end)
+**Last updated:** 2026-08-21 (M13 shipped; the tree is green. Next milestone: M14)
 
 ---
 
@@ -24,16 +24,11 @@ Update this file at the end of any session that leaves work unfinished.
 | M10 — sorting, selection and searching | 10 | ✅ built, tested, verified in Chrome |
 | M11 — algorithm design paradigms | 9 | ✅ built, tested, render-audited |
 | M12 — dynamic programming | 11 | ✅ built, tested, render-audited |
-| M13 — graph algorithms I | 10 | 🚧 **6 of 10 sections built; no content yet** |
+| M13 — graph algorithms I | 10 | ✅ built, tested, render-audited |
 
-**The tree is RED, deliberately and in exactly one place.** `npm test` reports 2 254 tests with
-**24 failures, and all 24 are `content-coverage` on the six M13 sections** (6 sections x 4 checks:
-concepts, worked examples, reference entry, graded exercise). Nothing else fails. The wiring audit
-passes at 121 sections and 569 modules, the render audit activates all 121 with no exception and no
-empty table, `npm run lint:size` passes across 632 files, and `npm run build:css` is up to date.
-
-If any failure appears that is NOT `content-coverage` on an M13 section, something regressed —
-that is the signal to stop and look rather than to keep building.
+**The tree is GREEN.** `npm test` reports 2 386 unit tests with 0 failures, the wiring audit passes
+at 125 sections and 577 modules, the render audit activates all 125 with no exception and no empty
+table, `npm run lint:size` passes across 661 files, and `npm run build:css` is up to date.
 
 All nine M07 sections were opened in Chrome on `npm start`: the three tabs render, every demo
 figure matches the prose *exactly* (see "aligning the demo with the prose" below), the references
@@ -1451,150 +1446,132 @@ layout.
 
 ---
 
-## M13 — IN PROGRESS. Read this first.
+## M13 notes worth keeping
 
-Spec: `doc/milestones/M13-graphs-i.md`. Ten sections under the `algorithms` track.
+Spec: `doc/milestones/M13-graphs-i.md`. Ten sections under the `algorithms` track, all driven
+through `machines/graph-lab.js`, which carries a brute-force oracle for every claim: mutual
+reachability for SCCs, remove-and-recount for bridges, Bellman-Ford for Dijkstra, a threshold
+binary search for the minimax path, the naive climb for LCA, and `routingAllPairs` for contraction
+hierarchies.
 
-### Exactly where it stops
+### Modules
 
-| Step | State |
-|---|---|
-| 1. algorithms | ✅ 10 modules, all cross-checked against independent oracles |
-| 2. machines | ✅ `graph-lab.js` — build / describe / traversalRun / compareShortestPaths / compareHeuristics / compareMst / connectivityRun / compareRouting / compareLca |
-| 3. viz | ✅ `graph-view.js` — canvas, three layouts (fixed / circular / grouped), no force layout on purpose |
-| 4. sections | 🚧 **6 of 10.** Built and wired: 13.1 13.2 13.3 13.4 13.5 13.6. **Missing: 13.7 13.8 13.9 13.10** |
-| 5. content | ❌ **nothing written** — no concepts, examples, reference or exercises for any M13 section |
-| 6. wiring | ✅ for the six that exist; `curriculum-algorithms.js` has an M13 group and a `M13-rest` planned entry of 4 |
-| 7. tests | ❌ `graph-modules.test.js` and `worked-examples-graphs*.test.js` not written |
-| 8. build:css | ✅ run |
-| 9. browser pass | ❌ not started (and not possible without the Chrome extension) |
+`algorithms/`: `graph-core.js`, `traversal.js`, `topological.js`, `scc.js`, `biconnectivity.js`,
+`shortest-paths.js`, `astar.js`, `contraction-hierarchies.js`, `mst.js`, `tree-queries.js`.
+`machines/graph-lab.js`, `viz/graph-view.js` (canvas; fixed / circular / grouped / **tree** layouts,
+no force layout on purpose).
 
-### The next four sections, in order
+Content is split per quarter of the milestone — `-graphs` (13.1-13.3), `-graphs-paths` (13.4-13.6),
+`-graphs-routes` (13.7-13.8), `-graphs-trees` (13.9-13.10) — rather than per third, because the
+exercise files are the size constraint and four sections of them pass 1 000 lines.
 
-Each one is a `sections/<id>-template.js` + `sections/<id>-section.js` pair, then
-`python <scratchpad>/wire13.py <id>`, then `node tests/render-audit.js <id>`.
-**The wiring helper is `wire13.py` and it lives in the session scratchpad, so it is gone —
-rewrite it or wire by hand.** What it does: appends the curriculum entry to the M13 group in
-`curriculum-algorithms.js`, adds the `<section data-section=...>` container before `</main>` in
-`index.html`, and adds the two script tags before `src/js/app.js`. It also asserts there is no
-apostrophe in any curriculum string, because one in "each other's oracle" broke
-`curriculum-algorithms.js` and took the whole app down with it.
+### Six bugs the M13 work found, all fixed
 
-| id | prefix | title | modules |
-|---|---|---|---|
-| `heuristic-search` | `heu-` | Heuristic search: A* and friends | `astar.js` |
-| `route-planning` | `rte-` | Route planning at scale | `contraction-hierarchies.js` |
-| `minimum-spanning-trees` | `mst-` | Minimum spanning trees | `mst.js` |
-| `tree-path-queries` | `tpq-` | Trees, LCA and path queries | `tree-queries.js` |
+1. **An edge-list Bellman-Ford walked a directed subgraph of an undirected graph.** `graph.edges`
+   holds an undirected edge once, so relaxing only `from → to` is a different graph. On the 13.5
+   demo the "reference implementation" reported 185 against Dijkstra's 181 and 392 disagreements —
+   on a graph with no negative edge — directly under a note saying the disagreement column is zero.
+   `GraphCore.directedEdges(graph)` now expands each edge into its two arcs, and `johnson` does the
+   same internally. **Only the section dump found this**; no unit test called `bellmanFord` on an
+   undirected graph.
+2. **`astar` counted stale lazy-heap pops as reopenings.** A consistent heuristic appeared to reopen
+   495 nodes and to expand 31% more than Dijkstra, which made "a consistent heuristic never reopens"
+   untestable. A pop is *stale* when its key exceeds the node's current f — pure bookkeeping — and a
+   *genuine* reopening when the key matches it. With the two separated, the consistent run reports
+   0 reopenings and 1 600 expansions (exactly Dijkstra's) and the inconsistent one reports 508.
+3. **The 13.4 redundancy slider duplicated the wrong edges.** `withParallelEdges` duplicates the
+   *first* n edges, which on a barbell are all inside one clique, so the bridge count never moved
+   under a caption saying the counts must fall. `GraphCore.duplicateEdges(graph, ids)` was added and
+   the section now duplicates the current *bridges*. The panel then teaches something better than
+   intended: one redundant cable takes the barbell from 1 bridge to 0 and leaves both articulation
+   points exactly where they were — edge redundancy and vertex redundancy are different purchases.
+4. **The 13.6 Johnson panel was vacuous.** The all-pairs graph had only positive weights, so every
+   potential was 0 and no edge was reweighted, under prose about the triangle inequality. The graph
+   is now built by *undoing* a reweighting — `w = base − p[u] + p[v]` — which guarantees negative
+   edges and no negative cycle, and the panel shows the ten most negative edges rather than the
+   first ten.
+5. **The 13.6 orientation quoted a 2.96% arbitrage the demo does not find.** The measured loop is
+   JPY → GBP → JPY at a multiplier of 1.007000 — 0.70% — and the prose now says so.
+6. **A uniform grid cannot demonstrate an inadmissible heuristic.** Every monotone path ties, so
+   Manhattan ×5 still returns the optimum, and an A* exercise asserting "a stronger heuristic
+   expands fewer nodes" fails on a corner-to-corner query because *every* cell lies on a shortest
+   path. Both the section and the exercise use a weighted grid, or same-row endpoints, for that
+   reason.
 
-All four prefixes are confirmed free. **When the last one lands, delete the `M13-rest` planned
-entry from `curriculum-algorithms.js`** or the published total goes to 638.
+### Two tools that now live in `tools/`
 
-### Already-measured figures for those four sections
+- **`tools/section-dump.js <section-id> [control=value ...]`** boots the app exactly as the render
+  audit does and prints every metric tile, table and note. This is the instrument for "measure
+  first, then write the sentence that quotes the measurement", and it found bugs 1, 3, 4 and 5
+  above in the first five minutes of using it. Control overrides go through the section's own
+  control panel, so a dump at non-default settings uses the same code path a click would.
+- **`tools/wire-section.js <curriculum-file> <after-id> <spec.json>`** replaces the lost `wire13.py`:
+  it appends curriculum entries, adds the `<section>` containers and adds the two script tags, and
+  refuses on an apostrophe in a curriculum string or a template with no matching controller.
 
-Measured from the code on disk. Nothing here needs re-deriving.
+### Design decisions that are easy to undo by accident
 
-```
-13.7 heuristic-search — weighted grid 40x40, Random.seeded(7), weightRange 9, corner to corner
-  optimal 249, Dijkstra settles 1 600 of 1 600
-  Manhattan x1 (admissible)   249, 2 095 expanded   <- MORE than Dijkstra: a weak heuristic plus reopening
-  Manhattan x5 (inadmissible) 295,   144 expanded, gap 18.47%
-  Manhattan x9 (inadmissible) 361,    83 expanded, gap 44.98%
-  weighted A* on an admissible base: w=1,1.5,2,3 all stay at 249; w=5 gives 295 (18.47%)
-  unweighted 30x30 grid: optimal 58; none 900 expanded, manhattan 116, euclidean 845, chebyshev 846
-    -- on a UNIFORM grid every monotone path ties, so no heuristic can be suboptimal there.
-       Use the weighted grid for the optimality-gap claim.
-  bidirectional on an 80x80 grid: corner-to-corner 1.01x (6 320 vs 6 400), centre-to-nearby 2.49x,
-    centre-to-edge 2.80x, adjacent rows 3.50x. Corner to corner is bidirectional search's WORST case
-    because both balls cover the grid; say so rather than picking a flattering pair silently.
+- **`contraction-hierarchies` ships two broken witness searches on purpose.** `witness: 'none'`
+  never searches (492 shortcuts instead of 18, 8.94× edge growth, 0 wrong) and
+  `witness: 'ignore-contracted'` searches through vertices that are already gone (20 shortcuts, a
+  1.32× growth that looks right, and 42 of 1 260 pairs wrong with 20 reported unreachable). The
+  section's whole claim is that the second failure is invisible without an exhaustive check, so the
+  learner has to be able to select it and watch the counter move.
+- **The witness search may be approximate towards "add the shortcut" and never towards "skip it".**
+  Hop limits 2, 3, 5 and 8 give 176, 118, 84 and 84 shortcuts and 0 wrong of 4 032 at every depth.
+- **`GraphView.treeLayout` exists because a ring hides depth.** A path of 1 000 and a star of 1 000
+  draw identically on a circle and could not behave more differently.
+- **The 13.10 traced query skips pairs where one node is the other's ancestor.** About a third of
+  random pairs finish inside the levelling loop and show none of the interesting half.
+- **`GraphLab.routingAllPairs` reports the disagreement count as a field.** On a deliberately broken
+  hierarchy the disagreement *is* the demo.
+- **Every traversal in every M13 module is iterative**, and two exercises assert it by running a
+  chain of 60 000 and 100 000 vertices.
 
-13.8 route-planning — CH matches Dijkstra on every pair of every fixture (8 870 pairs)
-  grid 5x5            600 pairs, 0 shortcuts, growth 1.00x, 32 witnesses
-  weighted grid 6x6 1 260 pairs, 46 shortcuts, growth 1.77x, 116 witnesses
-  random 30/80        870 pairs, 35 shortcuts, growth 1.44x, 267 witnesses
-  road-like 6x6     1 260 pairs, 28 shortcuts, growth 1.45x, 82 witnesses
-  path 20 and barbell 5: 0 shortcuts — nothing to contract around
-  road-like 8x8 query: Dijkstra settles 64, bidirectional 52, CH 46
+### Measured figures quoted in the M13 examples
 
-13.9 minimum-spanning-trees
-  60 random graphs (a third with heavy duplicate weights): Kruskal = Prim = Boruvka on weight, every
-    result a spanning forest
-  random 60/180 seed 3: all three weigh 270; work 1 666 (Kruskal) / 2 280 (Prim) / 1 170 (Boruvka)
-  the MST path IS the minimax path: 200 queries against a binary-search-the-threshold oracle, 0 wrong
-  12 nodes / 30 edges seed 9: MST 108, second best 109 — one edge different
-  NOTE: with a CONSISTENT tie-break by edge id the three algorithms return the SAME tree even on
-    duplicate weights. Do not claim they differ; the invariant that matters is equal WEIGHT.
+`worked-examples-graphs.test.js`, `-graphs-paths`, `-graphs-routes` and `-graphs-trees` recompute
+every one *and* assert the prose still quotes it. Landmarks: a 400-node grid at 25.3 KB / 38.8 KB /
+1.2 MB with the matrix-CSR crossover at exactly n²/4; BFS and DFS at 400 nodes and 1 520 edges with
+peaks of 20 and 400; 399 tree + 361 back = 760 edges; a 118-unit build with a critical path of 25
+over 7 packages, makespans 118/59/36/25/25/25 and never more than 11 workers busy; one back edge
+leaving 37 of 40 placed and the cycle 34 → 19 → 34; 15 SCCs from 74 edges condensing to 14, against
+18 components with a 71.7% giant and 17 singletons on a random digraph; a barbell at 1 bridge and 2
+cut vertices of 381 edges, and a path at 39 and 38; 181 agreed by three algorithms at 20 880 / 3 480
+/ 6 516 relaxations with 253 stale pops of 1 153; d[1] correct and d[3] = 3 against 2; an arbitrage
+loop of two currencies at 1.007000; 554 of 1 600 Floyd-Warshall cells wrong at identical work;
+Johnson at 5 124 relaxations against 26 520 and 64 000; Manhattan and Euclidean expanding all 1 600
+cells against ALT's 98; 295 at 18.47% and 361 at 44.98% for 11× and 19× fewer expansions; 128 with
+reopening and 155 without, a 21.09% gap; IDA* at 1 068, 34 164 and a budget exhausted; 18 shortcuts
+for 28 876 witness steps and a query at 37 against 64; 4 460 pairs and 0 wrong across six fixtures;
+295× the preprocessing for 9× the nodes; three MSTs at 270 costing 1 666 / 2 280 / 1 170 with
+non-identical edge sets and a runner-up that ties; 136 of 198 shortest paths with a worse worst hop;
+and 1 630 naive steps against 1 916 lifting jumps on a shallow tree, inverting to 11 783 against 621
+on a path.
 
-13.10 tree-path-queries
-  2 400 LCA queries over five shapes (random/path/star/caterpillar/binary, n=120):
-    binary lifting, sparse table, k-th ancestor and HLD all agree with the naive climb, 0 wrong
-  HLD segments on a path query, 400 queries each:
-    path n=1000        1 chain,  worst 1 segment,  mean 1.00
-    star n=1000      999 chains, worst 3,          mean 3.00
-    caterpillar n=1000 500 chains, worst 14,       mean 7.64
-    binary n=1023    512 chains, worst 16,         mean 7.86   <- log2(1023) = 10, and the bound is
-                                                                  2 log2 n = 20 because a path goes up
-                                                                  AND down through the LCA
-    random n=1000    505 chains, worst 8,          mean 5.17
-  200-node random tree, 200 queries: naive 1 729 steps, lifting 1 947 jumps, sparse 200 steps.
-    Binary lifting costs MORE than the naive climb on a shallow tree — say so; it pays on deep ones.
-```
-
-### Four findings from the module work, all already fixed
-
-1. **Contraction hierarchies were WRONG, and only the all-pairs check found it.** The witness search
-   was routing through already-contracted nodes, so it found witnesses that no longer existed and
-   skipped necessary shortcuts — 32 wrong pairs of 600 on a 5x5 grid, some reported unreachable.
-   `hasWitness` now takes `contracted` and skips those nodes. Keep it that way.
-2. **The Dijkstra negative-edge counter-example took three attempts.** A lazy heap updates the
-   distance array even for a settled vertex, so the error has to *propagate*: in
-   `ShortestPaths.negativeExample()` d[1] comes out CORRECT and d[3] does not. A smaller instance
-   silently gets the right answer and demonstrates nothing.
-3. **Undirected DFS classification.** Every non-tree edge is seen twice and would be classified back
-   from one end and forward from the other. `traversal.js` drops the second sighting **by edge id**,
-   giving the textbook 19 tree + 12 back on a 4x5 grid — and keeping a parallel edge as the genuine
-   back edge it is. Dropping by parent VERTEX is the M13.4 bug.
-4. **Prefix/suffix rerooting loses on low-degree trees** (this was M12.6, and the same shape recurs):
-   measure before claiming a uniform win.
-
-### Things that will bite
-
-- **No apostrophes in curriculum strings.** `curriculum-algorithms.js` uses single quotes and one
-  apostrophe in a `summary` broke the file, which took `Curriculum` down, which took the sidebar
-  down, which crashed the render audit with a confusing `Cannot read properties of undefined
-  (reading 'tracks')`.
-- **A template file with no matching section controller fails the wiring audit** as
-  `unloaded-module`. Write the pair together.
-- **Metric ids and element ids must be disjoint.** `neg-apsp` was a metric and `neg-apsp-note` was
-  both its note span and a hand-written paragraph; the table is now `neg-allpairs`.
-- **`GraphLab.compareShortestPaths` reports disagreements as a field**, not an exception — on the
-  negative-edge graph the disagreement IS the demo.
-- Every traversal in every M13 module is iterative. A 200 000-node path runs in under 70 ms; a
-  recursive version is a stack overflow.
-
-### After the four sections
-
-Content (12 files, split per third: `-graphs`, `-graphs-paths`, `-graphs-trees`), then
-`graph-modules.test.js` and three `worked-examples-graphs*.test.js`, then `npm test`,
-`npm run build:css`, then the doc updates (README status block, the table at the top of this file,
-`CLAUDE.md`). The M12 commits are the template to copy for all of it.
+Two results are worth carrying forward. **An admissible, consistent, geometric heuristic can prune
+exactly nothing** — on terrain whose steps cost 1 to 9, a unit-step Manhattan bound expands all
+1 600 cells, which is Dijkstra, and only a heuristic in the same units as the edges (ALT, at 98)
+closes the gap. And **binary lifting loses to the naive climb on shallow trees**: 1 916 jumps
+against 1 630 steps plus 1 800 cells of preprocessing on a 200-node tree of depth 13, inverting by
+19× on a path. Shape is the variable the complexity table hides.
 
 ## Next
 
-**Finish M13** — four sections, then the content, then the tests. The "M13 — IN PROGRESS"
-section immediately above is the resume point and carries every measured figure those four
-sections need, so nothing has to be re-derived. After that, **M14 — graph algorithms II**
-and onward through `doc/milestones/` in the order `doc/ROADMAP.md` gives.
+**M14 — graph algorithms II: flow, matching, connectivity, spectral**, then onward through
+`doc/milestones/` in the order `doc/ROADMAP.md` gives.
 
-M11, M12 and the built part of M13 are complete apart from a human browser pass, which needs
-the Chrome extension connected. When one is available, open those sections and check what the
-render audit structurally cannot: chart widths, colour separation, and the mermaid diagrams.
+M11, M12 and M13 are complete apart from a human browser pass, which needs the Chrome extension
+connected. When one is available, open those sections and check what the render audit structurally
+cannot: chart widths, colour separation, and the mermaid diagrams. `tools/section-dump.js` covers
+everything else the browser used to be needed for — it prints every metric, table and note a
+section renders, at any control setting.
 
 A shared helper exists for the figure tests: `tests/support/worked-example-prose.js` exports
 `proseFor`, `quotes`, `fixed` and `grouped`. New `worked-examples-*.test.js` files should require
 it rather than redeclaring the four functions (the M03-M08 files still carry their own copies).
 
-The shape to copy, unchanged through M10:
+The shape to copy, unchanged through M13:
 
 1. pure modules in `algorithms/` first, behind one shared interface;
 2. a `machines/` harness that drives every implementation through that interface, carrying a
@@ -1602,18 +1579,13 @@ The shape to copy, unchanged through M10:
 3. `viz/` renderers, and the CSS classes they need;
 4. `sections/<id>-template.js` + `<id>-section.js` — `tests/unit/template-ids.test.js` checks the
    id collisions automatically, within a template and across all of them;
-5. the four content files, split per third of the milestone to stay under 1 000 lines;
-6. wire `core/curriculum.js` (moving the milestone out of `planned`) and `index.html`;
-7. `<topic>-modules.test.js` (property tests against a brute-force reference) and
-   `worked-examples-<topic>.test.js` (recompute every quoted figure *and* assert the prose still
+5. wire with `node tools/wire-section.js src/js/core/curriculum-<track>.js <after-id> <spec.json>`,
+   then `node tests/render-audit.js <id>` on each new section;
+6. **dump every section with `node tools/section-dump.js <id>` and write the content from what it
+   prints.** Measure first, then write the sentence that quotes the measurement — this is where
+   four of M13's six bugs were found;
+7. the four content files, split per quarter of the milestone to stay under 1 000 lines;
+8. `<topic>-modules.test.js` (property tests against a brute-force reference) and
+   `worked-examples-<topic>*.test.js` (recompute every quoted figure *and* assert the prose still
    quotes it);
-8. `npm test && npm run lint:size && npm run build:css`;
-9. Chrome: every section, every tab, every demo figure against the prose, and every exercise
-   through the real Worker sandbox. The wiring audit now compiles every loaded script, so a
-   browser-only syntax error fails `npm test` rather than silently deleting a section - but a
-   section that renders and quietly disagrees with its own prose still needs the page load.
-
-Measure the figures *before* writing the prose that quotes them, and do not skip step 9. Two of
-M06's bugs, four of M07's and four of M08's were invisible to the whole test suite and obvious on
-the first page load — including, in M08, a sentence about the surface-area heuristic that the
-demo's own counter contradicted the moment it rendered.
+9. `npm test && npm run lint:size && npm run build:css`, then the doc updates.

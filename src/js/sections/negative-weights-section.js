@@ -78,8 +78,9 @@
         '**Detecting the cycle is the easy half; extracting it is the useful one.** Walking the parent ' +
           'pointers back n times lands inside the cycle — the vertex that improved on the last round may ' +
           'be downstream of it rather than on it — and walking once more closes the loop. That costs a few ' +
-          'lines and turns "this table admits arbitrage" into "buy USD, sell for EUR, sell for GBP, buy ' +
-          'back USD, and you hold 2.96% more than you started with".',
+          'lines and turns "this table admits arbitrage" into "sell JPY for GBP, sell the GBP back for ' +
+          'JPY, and you hold 0.70% more than you started with" — a two-currency loop the demo finds, ' +
+          'verifies edge by edge and then prices at a multiplier of 1.007000.',
         '**A rate table becomes a shortest-path problem under −log.** Multiplying rates around a loop ' +
           'becomes adding their negative logarithms, so a product above 1 becomes a total below 0 — a ' +
           'negative cycle. That transform is the whole trick, and the demo prices the cycle back in the ' +
@@ -149,10 +150,32 @@
       profit: cycle ? root.ShortestPaths.cycleProfit(table.rates, cycle) : null };
   });
 
+  /**
+   * Give the graph genuinely negative edges and no negative cycle, by
+   * *undoing* a reweighting: pick a value per vertex and set
+   * w(u, v) = base − p[u] + p[v]. Every cycle then totals the sum of its
+   * bases, which is positive, while individual edges go well below zero.
+   *
+   * Building it this way rather than sprinkling negative weights at random is
+   * the difference between a Johnson panel that teaches something and one
+   * where every potential is zero and no edge is reweighted at all.
+   */
+  function withPotentials(graph, seed) {
+    const random = root.Random.seeded(seed + 500);
+    const potential = [];
+
+    for (let v = 0; v < graph.n; v += 1) potential.push(random.int(16));
+    graph.edges.forEach(function (edge) {
+      edge.weight = edge.weight - potential[edge.from] + potential[edge.to];
+    });
+    graph.potentialUsed = potential;
+    return graph;
+  }
+
   const allPairsFor = root.Helpers.memoise(function (key) {
     const parts = key.split('|').map(Number);
-    const graph = root.GraphCore.randomGraph(parts[0], parts[0] * parts[1],
-      root.Random.seeded(parts[2]), { directed: true, weightRange: 20 });
+    const graph = withPotentials(root.GraphCore.randomGraph(parts[0], parts[0] * parts[1],
+      root.Random.seeded(parts[2]), { directed: true, weightRange: 20 }), parts[2]);
     const matrix = root.GraphCore.adjacencyMatrix(graph);
     const right = root.ShortestPaths.floydWarshall(matrix, {});
     const wrong = root.ShortestPaths.floydWarshall(matrix, { wrongOrder: true });
@@ -323,7 +346,12 @@
 
   function paintJohnson(apsp) {
     const potentials = apsp.johnson.potentials || [];
-    const rows = apsp.graph.edges.slice(0, 10).map(function (edge) {
+    /* The ten most negative edges rather than the first ten: a sample that
+       happens to hold no negative edge illustrates nothing, and the first ten
+       of a random edge list usually do not. */
+    const sample = apsp.graph.edges.slice()
+      .sort(function (a, b) { return a.weight - b.weight; }).slice(0, 10);
+    const rows = sample.map(function (edge) {
       const reweighted = edge.weight + potentials[edge.from] - potentials[edge.to];
       return '<tr><td class="mono">' + edge.from + ' → ' + edge.to + '</td>' +
         '<td class="mono">' + root.Format.exact(edge.weight) + '</td>' +
@@ -333,8 +361,11 @@
     }).join('');
 
     root.jQuery('#neg-johnson tbody').html(rows);
-    root.jQuery('#neg-johnson-note').text('Ten of ' + root.Format.exact(apsp.graph.edges.length) +
-      ' edges. Every reweighted value is non-negative — that is the triangle inequality on h, and it is '
+    const negatives = apsp.graph.edges.filter(function (edge) { return edge.weight < 0; }).length;
+
+    root.jQuery('#neg-johnson-note').text('The ten most negative of ' +
+      root.Format.exact(apsp.graph.edges.length) + ' edges, ' + root.Format.exact(negatives) +
+      ' of which are below zero. Every reweighted value is non-negative — that is the triangle inequality on h, and it is '
       + 'what makes Dijkstra legal on a graph it was not legal on before. Each path from s to t shifts by '
       + 'the same h(s) − h(t), so the shortest path is unchanged and the shift is subtracted back off at '
       + 'the end.');
