@@ -452,6 +452,12 @@
               title: 'Aho-Corasick multi-pattern matching',
               summary: 'Failure links are KMP generalised; output links exist for one case, and dropping them under-reports in silence.',
               tags: ['aho-corasick', 'multi-pattern matching', 'failure links', 'output links', 'goto trie', 'nested patterns', 'intrusion detection', 'keyword sets']
+            },
+            {
+              id: 'palindromes',
+              title: 'Palindromes: Manacher and the palindromic tree',
+              summary: 'The mirror is the Z-window again, and how many differs from how many different by a factor of n.',
+              tags: ['manacher', 'palindrome', 'mirror argument', 'interleaving separator', 'eertree', 'palindromic tree', 'amortisation', 'distinct substrings']
             }]
         }
       ],
@@ -459,7 +465,7 @@
         /* M15 is part built: the sections in the group above are live and the
            rest are declared here so the published total stays honest. Reduce
            this count as each one lands, and delete the entry when the last does. */
-        { id: 'M15-rest', title: 'String algorithms — the remaining sections', sections: 5 },
+        { id: 'M15-rest', title: 'String algorithms — the remaining sections', sections: 4 },
         { id: 'M16', title: 'Computational geometry', sections: 10 },
         { id: 'M17', title: 'Numbers, bits and floating point', sections: 10 },
         { id: 'M18', title: 'Numerical methods, transforms and optimisation', sections: 10 },
