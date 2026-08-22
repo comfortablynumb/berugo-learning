@@ -32,7 +32,10 @@ function fail(message) {
 /** Single quotes are the file's string delimiter, so an apostrophe in any
  *  field breaks the module rather than the sentence. */
 function checkQuotes(entry) {
-  ['id', 'title', 'summary'].concat(entry.tags).forEach(function (value) {
+  /* These have to be the VALUES, not the field names. Checking the names
+     means the guard never fires on a title or a summary - which is how an
+     apostrophe reached curriculum-algorithms.js and took the sidebar down. */
+  [entry.id, entry.title, entry.summary].concat(entry.tags).forEach(function (value) {
     if (String(value).indexOf("'") === -1) return;
     fail('apostrophe in a curriculum string: ' + value);
   });

@@ -476,14 +476,16 @@
               title: 'Regular expression engines',
               summary: 'One curve is exponential and one is linear, on the same pattern and the same input.',
               tags: ['regex', 'backtracking', 'thompson nfa', 'state set simulation', 'catastrophic backtracking', 'redos', 're2', 'capture groups']
+            },
+            {
+              id: 'text-processing',
+              title: 'Text processing in production',
+              summary: 'The selectivity of the prefilter decides the throughput, and no similarity metric is right about every pair.',
+              tags: ['tokenisation', 'byte-pair encoding', 'normalisation', 'jaro-winkler', 'jaccard', 'log template extraction', 'drain', 'prefilter selectivity', 'precision and recall']
             }]
         }
       ],
       planned: [
-        /* M15 is part built: the sections in the group above are live and the
-           rest are declared here so the published total stays honest. Reduce
-           this count as each one lands, and delete the entry when the last does. */
-        { id: 'M15-rest', title: 'String algorithms — the remaining section', sections: 1 },
         { id: 'M16', title: 'Computational geometry', sections: 10 },
         { id: 'M17', title: 'Numbers, bits and floating point', sections: 10 },
         { id: 'M18', title: 'Numerical methods, transforms and optimisation', sections: 10 },
