@@ -14,7 +14,7 @@ faithfully in a browser, the section models it, says so plainly, and states what
 
 ## Status
 
-**M00–M14 shipped (135 sections). Building the curriculum, milestone by milestone.**
+**M00–M15 shipped (146 sections). Building the curriculum, milestone by milestone.**
 
 - ✅ Curriculum designed: 65 milestones, 634 sections, 11 tracks — one file per milestone in
   [`doc/milestones/`](doc/milestones/)
@@ -66,7 +66,7 @@ faithfully in a browser, the section models it, says so plainly, and states what
   scored on value *and* rank, MinHash banding as an explicit precision/recall dial, DGIM and
   space-saving against an exact reference, and a chooser that measures its candidates rather than
   looking them up — with two working attacks on an unkeyed sketch. 9 sections live.
-- ✅ **Three tabs per section, Description first**: every one of the 667 concepts across the built
+- ✅ **Three tabs per section, Description first**: every one of the 1 161 concepts across the built
   sections carries a full explanation — the mechanism, why it is built that way, and what breaks
   when it is ignored — and the coverage test rejects a concept that carries only a one-line gloss.
   Examples holds the demo, its charts and the code lab; References holds the reference block.
@@ -160,8 +160,31 @@ faithfully in a browser, the section models it, says so plainly, and states what
   leaks 57% of its probability while inverting nothing at all across 4 589 link graphs. 10 sections
   live.
 
-`npm test` is green — wiring audit, 2 550 unit tests, and a **render audit** that boots the whole
-app headlessly and activates all 135 sections, failing on anything that throws while rendering, any
+- ✅ **M15 — string algorithms and pattern matching**: the naive scan measured at 1.05 comparisons
+  per text character on English against 11.97 on adversarial input, with the first-character filter
+  saving *no comparison at all*; KMP measured *losing* to it on English (1.08 against 1.07) and
+  winning 6.0× on the adversarial corpus, its automaton costing 40 cells on DNA and 260 on English
+  for the same ten states; Boyer-Moore falling 0.611 → 0.106 characters examined per text character
+  as the pattern grows from 2 to 32 while KMP stays flat at 1.05, the bad-character rule deciding
+  1 195 of 1 374 contested shifts and the best of Boyer-Moore / Horspool / Sunday changing hands
+  four times across seven corpora; Rabin-Karp taking 19 spurious hits at modulus 101 and none at a
+  million for the same 12 occurrences — 200 under an attack that 20 random bases defeat 20 times out
+  of 20; Aho-Corasick finding 11 matches with its output chain and 9 without, the two lost being
+  exactly `he` inside `she`, at 4 000 comparisons for 1 pattern and for 32 against 135 036 for
+  separate scans; Manacher reusing 11 of 31 centres and beating expansion by 1.5× on random binary
+  but 200.5× on a repeated character; Wu-Manber agreeing with a DP reference at every k and refusing
+  at length 40, and a q-gram filter whose threshold goes negative at q = 4 so candidates per result
+  jump 2.0 → 6.6 → 44.3 for the same 27 results; Myers doing 6 operations in 3 hunks against
+  patience's 8 in 2, with work tracking D and not N — 13 diagonals at 1% changed, 29 041 at 60%;
+  backtracking taking 1 048 576 steps against the state-set simulation's 142 at 18 characters and
+  exhausting a 2 000 000-step budget at 20, while the state-set peak stays at 4 of 5 states and
+  three of six patterns are catastrophic — all three nesting a quantifier over the same characters;
+  and a Drain-style extractor reducing 300 log lines to 4 templates, one covering 182, where
+  Jaro-Winkler scores two *different* accounts at 0.956 and Levenshtein scores one name against
+  itself reordered at 0.059. 11 sections live.
+
+`npm test` is green — wiring audit, 2 740 unit tests, and a **render audit** that boots the whole
+app headlessly and activates all 146 sections, failing on anything that throws while rendering, any
 table left with an empty body, and any metric tile still showing a placeholder without a note
 explaining it. `npm run lint:size` reports no offenders.
 
@@ -173,7 +196,7 @@ explaining it. `npm run lint:size` reports no offenders.
   opens to milestones, then sections. Tracks that are planned and not built are listed with their
   milestones and section counts, marked as planned, so the map shows what the platform teaches
   rather than only what happens to be finished. One track and one milestone stay open at a time, so
-  the nav is the same height at 135 sections and at 634.
+  the nav is the same height at 146 sections and at 634.
 - **Search across everything.** The header search indexes concepts, worked examples, reference
   entries and exercises as well as section titles, so "tombstone", "Little's law" or "round half to
   even" lands on the section that explains it. Ctrl/Cmd+K focuses it; arrows and Enter drive it.
@@ -233,8 +256,8 @@ Every section is the same three tabs, and **Description** is the one that opens:
 | **Examples** | The interactive demo with its charts and live metrics, the worked examples that show the arithmetic with real numbers, and the editable code lab with its graded exercises. |
 | **References** | Formulation, invariants, complexity, failure modes, real-world uses, sources. |
 
-The concept explanations are the substance of the Description tab: 523 of them across the built
-sections, averaging about 530 characters each, and the coverage test rejects a concept that carries
+The concept explanations are the substance of the Description tab: 1 161 of them across the built
+sections, averaging about 490 characters each, and the coverage test rejects a concept that carries
 only a one-line gloss.
 
 For example, section **3.4 Open addressing** (milestone M03) opens on Description with why open

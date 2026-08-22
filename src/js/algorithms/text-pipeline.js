@@ -50,7 +50,9 @@
 
     pieces.forEach(function (word) { word.forEach(function (c) { vocabulary.add(c); }); });
 
-    for (let round = 0; round < (settings.merges || 40); round += 1) {
+    const rounds = settings.merges === undefined ? 40 : settings.merges;
+
+    for (let round = 0; round < rounds; round += 1) {
       const best = bestPair(pieces);
 
       if (!best) break;

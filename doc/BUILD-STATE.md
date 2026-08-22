@@ -3,7 +3,7 @@
 Where the implementation stands, and exactly what the next session should pick up.
 Update this file at the end of any session that leaves work unfinished.
 
-**Last updated:** 2026-08-22 (M14 complete; the tree is green — next is M15, string algorithms)
+**Last updated:** 2026-08-22 (M15 complete; the tree is green — next is M16, computational geometry)
 
 ---
 
@@ -26,10 +26,12 @@ Update this file at the end of any session that leaves work unfinished.
 | M12 — dynamic programming | 11 | ✅ built, tested, render-audited |
 | M13 — graph algorithms I | 10 | ✅ built, tested, render-audited |
 | M14 — graph algorithms II | 10 | ✅ built, tested, render-audited |
+| M15 — string algorithms and pattern matching | 11 | ✅ built, tested, render-audited |
 
-**The tree is GREEN.** `npm test` reports 2 550 unit tests with 0 failures; the wiring audit passes
-at 135 sections and 645 modules, the render audit activates all 135 with no exception and no empty
-table, `npm run lint:size` passes across 718 files, and `npm run build:css` is up to date.
+**The tree is GREEN.** `npm test` reports 2 740 unit tests with 0 failures (6 skipped — the
+wall-clock-budget starters the inline sandbox cannot fail); the wiring audit passes at 146 sections
+and 696 modules, the render audit activates all 146 with no exception and no empty table,
+`npm run lint:size` passes across 775 files, and `npm run build:css` is up to date.
 
 All nine M07 sections were opened in Chrome on `npm start`: the three tabs render, every demo
 figure matches the prose *exactly* (see "aligning the demo with the prose" below), the references
@@ -1687,12 +1689,80 @@ and 45, 268 and 96 on a scale-free graph; PageRank converging in 20 to 48 iterat
 predicted 34 to 2 292; and Louvain recovering four planted communities exactly at modularity 0.6773
 while returning nine at 0.2476 from noise.
 
+## M15 — string algorithms and pattern matching (complete)
+
+All eleven sections are wired, rendering, dumped and content-complete; the module and figure tests
+are written and the whole tree is green. Only the human browser pass is outstanding, as it is for
+M11–M14.
+
+**What landed:**
+
+- content, the fuzzy quarter (15.7–15.9): `concepts-strings-fuzzy.js`, `examples-strings-fuzzy.js`,
+  `reference-strings-fuzzy.js`, `exercises-strings-fuzzy.js`;
+- content, the text quarter (15.10–15.11): `concepts-strings-text.js`, `examples-strings-text.js`,
+  `reference-strings-text.js`, `exercises-strings-text.js`;
+- all eight wired into `index.html`;
+- `tests/unit/string-modules.test.js` (23 tests, 15.1–15.6) and
+  `tests/unit/string-modules-text.test.js` (23 tests, 15.7–15.11);
+- `tests/unit/worked-examples-strings.test.js` (12), `-skip.test.js` (12), `-fuzzy.test.js` (11),
+  `-text.test.js` (10).
+
+`npm test` is green at 2 740 tests / 0 failures, `npm run lint:size` passes and `lib/tailwind.css`
+is rebuilt. The size lint caught one offender on the wrap-up run: the three-way-merge exercise's
+"four independent fixtures merge clean and the fifth conflicts" assertion was 52 lines because it
+re-merged three of the four fixtures after the loop to check their output. Each fixture already
+carries its expected `lines`, so the loop now asserts conflicts *and* lines — 46 lines, and the
+trailing-insertion fixture's output is checked for the first time.
+
+### Two real defects found and fixed while writing the tests
+
+- `text-pipeline.js` used `settings.merges || 40`, so asking for **zero** byte-pair merges silently
+  gave forty. The section's slider has `min: 0`, so a learner moving it to zero saw the default and
+  the note claiming "move the merge slider to zero and it is a character tokeniser" was false. Now
+  `settings.merges === undefined ? 40 : settings.merges`; at 0 merges the demo reports 1.00
+  characters per token on a vocabulary of 24, and the default 60-merge figures are unchanged.
+- The diff worked example claimed "4 of the 11 lines are a lone brace or a blank". The fixture has
+  three `}` and two blanks — **five**. Corrected in `examples-strings-fuzzy.js`, and the test now
+  counts it rather than trusting it.
+
+### Figures worth keeping (all recomputed in the figure tests)
+
+Naive matching 1.05 comparisons per character on English against 11.97 on the adversarial corpus,
+with 191 of 3 998 alignments entering the inner loop and the first-character filter saving *no*
+comparison at all; KMP slightly slower than naive on English (1.08 against 1.07) and 6.0× faster on
+the adversarial corpus, with an automaton costing 40 cells on DNA and 260 on English for the same
+ten states; the Z-window answering 11 of 18 positions with 14 extensions, and Fine–Wilf tight to the
+character (5/8 → bound 12, one free symbol at the bound and two below; 6/9 → three classes and four).
+Boyer-Moore falling 0.611 → 0.106 characters examined per character while KMP stays flat at 1.05,
+with the bad-character rule deciding 1 195 of 1 374 contested shifts, and the best of Boyer-Moore /
+Horspool / Sunday changing hands four times across seven corpora; Rabin-Karp 19 spurious hits at
+modulus 101 and 0 at a million with the same 12 occurrences, a colliding pair in 1 536 tries against
+a √M estimate of 1 000, 200 spurious hits under attack and 0 across 20 random bases; Aho-Corasick 11
+matches with the output chain and 9 without — the two lost are exactly `he` inside `she` — and 4 000
+comparisons at every set size from 1 to 32 patterns against 135 036 for separate scans.
+Manacher 11 of 31 positions reused and 26 characters compared on "abacabadabacaba", 32 palindromic
+substrings against 15 distinct, and a ratio against expansion of 1.5× on random binary but 200.5× on
+a repeated character (doubling with the length); Wu-Manber agreeing with a DP reference at every k
+(102/306/510/864/1 468 positions) with a flat 2.00 words per character to length 32 and a refusal at
+40, a band computing 71 cells against 314 with 5 of 6 pairs refusing, and a q-gram filter whose
+threshold goes negative at q = 4 so candidates per result jump 2.0 → 6.6 → 44.3 for the same 27
+results; Myers 6 operations in 3 hunks against patience's 8 in 2, work tracking D not N (13
+diagonals at 1% changed, 29 041 at 60%), and 1 of 5 merge fixtures conflicting.
+Backtracking 1 048 576 steps against 142 for the state-set simulation at 18 characters — a ratio
+growing 5.6× → 7384.3× and exhausting a 2 000 000-step budget at 20 — with the state-set peak stuck
+at 4 out of 5 states, three of six patterns catastrophic (all of them nesting a quantifier over the
+same characters) and 0 of 12 verdict fixtures disagreeing; Drain-style extraction giving 4 templates
+from 300 lines with `GET <*> <*> <*>` covering 182, a threshold sweep of 3/4/4/4/7/7/8/8, Jaro-Winkler
+scoring two different services and two different accounts at 0.956 while Levenshtein scores one name
+against itself reordered at 0.059, and blocking cutting 267 records to 12 candidates without moving
+precision off 50% or recall off 100%.
+
 ## Next
 
-**M15 — string algorithms and pattern matching**, then onward through `doc/milestones/` in the
-order `doc/ROADMAP.md` gives.
+**M16 — computational geometry**, then onward through `doc/milestones/` in the order
+`doc/ROADMAP.md` gives.
 
-M11 through M14 are complete apart from a human browser pass, which needs the Chrome extension
+M11 through M15 are complete apart from a human browser pass, which needs the Chrome extension
 connected. `tools/section-dump.js` covers everything else the browser used to be needed for — it
 prints every metric, table and note a section renders, at any control setting, and since the
 `input`-event fix above that is finally true of slider settings too.
