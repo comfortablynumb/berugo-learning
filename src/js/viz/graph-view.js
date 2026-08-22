@@ -124,6 +124,28 @@
   }
 
   /**
+   * Two columns, left side and right side. A matching drawn on a ring is
+   * unreadable - the whole point of the picture is that every chosen edge
+   * crosses the gap exactly once and no vertex is used twice, and only a
+   * two-column arrangement shows that at a glance.
+   */
+  function bipartiteLayout(left, right, width, height) {
+    const positions = [];
+    const x = [PADDING * 1.5, width - PADDING * 1.5];
+
+    function column(count, side) {
+      const step = (height - PADDING * 2) / Math.max(1, count - 1);
+
+      for (let i = 0; i < count; i += 1) {
+        positions.push({ x: x[side], y: count === 1 ? height / 2 : PADDING + i * step });
+      }
+    }
+    column(left, 0);
+    column(right, 1);
+    return positions;
+  }
+
+  /**
    * Grouped rings: one ring per group, arranged on an outer ring. This is how
    * strongly connected components and biconnected blocks are drawn, because
    * the grouping is the answer and a single ring hides it.
@@ -303,6 +325,7 @@
   return {
     MAX_EDGES: MAX_EDGES, MAX_NODES: MAX_NODES,
     fixedLayout: fixedLayout, circularLayout: circularLayout, groupedLayout: groupedLayout,
+    bipartiteLayout: bipartiteLayout,
     treeLayout: treeLayout,
     draw: draw, classByGroup: classByGroup, classBySet: classBySet, colours: colours,
     paletteOf: paletteOf

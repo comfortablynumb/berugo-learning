@@ -372,15 +372,47 @@
               title: 'Minimum-cost flow and assignment',
               summary: 'The potential is Johnson reweighting again, and after that it is Dijkstra in a loop.',
               tags: ['min-cost flow', 'successive shortest paths', 'potentials', 'cycle cancelling', 'assignment problem', 'hungarian algorithm', 'reduced cost']
+            },
+            {
+              id: 'bipartite-matching',
+              title: 'Bipartite matching',
+              summary: 'Three derivations of one number, and stable matching solving a different problem entirely.',
+              tags: ['bipartite matching', 'augmenting path', 'kuhn', 'hopcroft-karp', 'konig theorem', 'vertex cover', 'hall condition', 'gale-shapley', 'stable matching']
+            },
+            {
+              id: 'general-matching',
+              title: 'General and weighted matching',
+              summary: 'An odd cycle turns the bipartite argument from slow into wrong, and the neighbour order decides.',
+              tags: ['general matching', 'blossom', 'edmonds algorithm', 'odd cycle', 'hungarian algorithm', 'assignment problem', 'dual certificate', 'weighted matching']
+            },
+            {
+              id: 'two-sat',
+              title: '2-SAT and implication graphs',
+              summary: 'Two literals make an implication and three do not, and that one literal is the whole boundary.',
+              tags: ['2-sat', 'implication graph', 'strongly connected components', 'satisfiability', 'condensation order', 'at-most-one', '3-sat', 'np-complete']
+            },
+            {
+              id: 'graph-coloring',
+              title: 'Colouring, cliques and independent sets',
+              summary: 'Greedy colouring is a family of heuristics indexed by an ordering, and spilling is what makes it work.',
+              tags: ['graph colouring', 'chromatic number', 'degeneracy ordering', 'welsh-powell', 'bron-kerbosch', 'maximum clique', 'independent set', 'vertex cover', 'register allocation']
+            },
+            {
+              id: 'graph-layout',
+              title: 'Planarity, layout and drawing',
+              summary: 'The crossing count turns an argument about taste into a measurement, and two textbook claims into false ones.',
+              tags: ['planarity', 'euler formula', 'kuratowski', 'force-directed layout', 'fruchterman-reingold', 'sugiyama', 'layered layout', 'edge crossings', 'barycentre']
+            },
+            {
+              id: 'spectral-methods',
+              title: 'Spectral methods, centrality and communities',
+              summary: 'Four measures of importance that disagree, and a PageRank bug the ranking never reveals.',
+              tags: ['laplacian', 'fiedler vector', 'spectral bisection', 'pagerank', 'power iteration', 'damping', 'dangling nodes', 'brandes', 'betweenness', 'closeness', 'louvain', 'modularity']
             }
           ]
         }
       ],
       planned: [
-        /* M14 is part built: the sections in the group above are live and the rest are
-           declared here so the published total stays honest. Reduce this count as each
-           one lands, and delete the entry when the last does. */
-        { id: 'M14-rest', title: 'Graph algorithms II — the remaining six sections', sections: 6 },
         { id: 'M15', title: 'String algorithms and pattern matching', sections: 11 },
         { id: 'M16', title: 'Computational geometry', sections: 10 },
         { id: 'M17', title: 'Numbers, bits and floating point', sections: 10 },
