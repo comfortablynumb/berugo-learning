@@ -3,7 +3,7 @@
 Where the implementation stands, and exactly what the next session should pick up.
 Update this file at the end of any session that leaves work unfinished.
 
-**Last updated:** 2026-08-22 (M14 half built — START HERE, see the M14 section at the end)
+**Last updated:** 2026-08-22 (M14 complete; the tree is green — next is M15, string algorithms)
 
 ---
 
@@ -25,16 +25,11 @@ Update this file at the end of any session that leaves work unfinished.
 | M11 — algorithm design paradigms | 9 | ✅ built, tested, render-audited |
 | M12 — dynamic programming | 11 | ✅ built, tested, render-audited |
 | M13 — graph algorithms I | 10 | ✅ built, tested, render-audited |
-| M14 — graph algorithms II | 10 | 🚧 **all modules done; 4 of 10 sections; no content yet** |
+| M14 — graph algorithms II | 10 | ✅ built, tested, render-audited |
 
-**The tree is RED, deliberately and in exactly one place.** `npm test` reports 2 410 unit tests with
-**16 failures, and all 16 are `content-coverage` on the four M14 sections** (4 sections × 4 checks:
-concepts, worked examples, reference entry, graded exercise). Nothing else fails. The wiring audit
-passes at 129 sections and 614 modules, the render audit activates all 129 with no exception and no
-empty table, `npm run lint:size` passes across 682 files, and `npm run build:css` is up to date.
-
-If any failure appears that is NOT `content-coverage` on an M14 section, something regressed —
-that is the signal to stop and look rather than to keep building.
+**The tree is GREEN.** `npm test` reports 2 550 unit tests with 0 failures; the wiring audit passes
+at 135 sections and 645 modules, the render audit activates all 135 with no exception and no empty
+table, `npm run lint:size` passes across 718 files, and `npm run build:css` is up to date.
 
 All nine M07 sections were opened in Chrome on `npm start`: the three tabs render, every demo
 figure matches the prose *exactly* (see "aligning the demo with the prose" below), the references
@@ -1562,101 +1557,35 @@ closes the gap. And **binary lifting loses to the naive climb on shallow trees**
 against 1 630 steps plus 1 800 cells of preprocessing on a 200-node tree of depth 13, inverting by
 19× on a path. Shape is the variable the complexity table hides.
 
-## M14 — IN PROGRESS. Read this first.
+## M14 notes worth keeping
 
 Spec: `doc/milestones/M14-graphs-ii.md`. Ten sections under the `algorithms` track.
 
-### Exactly where it stops
+### Modules
 
-| Step | State |
-|---|---|
-| 1. algorithms | ✅ 10 modules, every one cross-checked against an independent oracle |
-| 2. machines | ✅ `flow-lab.js` (7 network shapes, `compareFlows` / `singleRun` / `heuristicSweep`) and `reduction-lab.js` (5 reductions that round-trip) |
-| 3. viz | ✅ `flow-view.js` — layered canvas, flow/capacity labels, cut highlighting, `residualEdges` |
-| 4. sections | 🚧 **4 of 10.** Built and wired: 14.1 `maximum-flow`, 14.2 `minimum-cut`, 14.3 `push-relabel`, 14.4 `min-cost-flow`. **Missing: 14.5 to 14.10** |
-| 5. content | ❌ **nothing written** — no concepts, examples, reference or exercises for any M14 section |
-| 6. wiring | ✅ for the four that exist; `curriculum-algorithms.js` has an M14 group and an `M14-rest` planned entry of 6 |
-| 7. tests | ❌ `flow-modules.test.js` and the `worked-examples-flow*.test.js` files are not written |
-| 8. build:css | ✅ run (a `.pixel-grid` block was added to `src/css/viz.css` for the segmentation demo) |
-| 9. browser pass | ❌ not started |
+`algorithms/`: `max-flow.js`, `push-relabel.js`, `min-cost-flow.js`, `matching.js`,
+`weighted-matching.js`, `two-sat.js`, `coloring.js`, `layout.js`, `spectral.js`, `centrality.js`.
+`machines/`: `flow-lab.js` (7 network shapes), `reduction-lab.js` (5 reductions that round-trip),
+`matching-lab.js` (bipartite shapes, stable runs, general graphs, cost matrices),
+`sat-lab.js` (four instance families, the threshold sweep, the three-literal relaxation),
+`graph-analysis-lab.js` (colouring, cliques, Chaitin allocation, layouts, planarity checks,
+PageRank, communities). `viz/flow-view.js`, and `GraphView.bipartiteLayout`, which was added
+because a matching drawn on a ring is unreadable.
 
-### The next six sections, in order
+Content is split per **quarter** of the milestone — `-flow` (14.1-14.3), `-flow-cost` (14.4-14.5),
+`-matching` (14.6-14.7), `-graph-analysis` (14.8-14.10).
 
-Each is a `sections/<id>-template.js` + `<id>-section.js` pair, then
-`node tools/wire-section.js src/js/core/curriculum-algorithms.js <previous-id> <spec.json>`,
-then `node tests/render-audit.js <id>`, then `node tools/section-dump.js <id>`.
+Tests: `flow-modules.test.js` (30 property tests, every family against an independent oracle) and
+`worked-examples-flow.test.js`, `-flow-cost`, `-matching`, `-graph-analysis` (44 figure tests).
 
-| id | prefix | title | modules |
-|---|---|---|---|
-| `bipartite-matching` | `bmt-` | Bipartite matching | `matching.js` |
-| `general-matching` | `gmt-` | General and weighted matching | `weighted-matching.js` |
-| `two-sat` | `tsat-` | 2-SAT and implication graphs | `two-sat.js` |
-| `graph-coloring` | `clr-` | Colouring, cliques and independent sets | `coloring.js` |
-| `graph-layout` | `lay-` | Planarity, layout and drawing | `layout.js` |
-| `spectral-methods` | `spc-` | Spectral methods, centrality and communities | `spectral.js`, `centrality.js` |
-
-All six prefixes are confirmed free. **Reduce the `M14-rest` planned count as each section lands
-and delete the entry when the last one does**, or the published total drifts from 634 and
-`sidebar-view.test.js` fails. That test is the only thing that catches it.
-
-### Already-measured figures for the four built sections
-
-Read from `node tools/section-dump.js <id>` at the default controls. Nothing here needs re-deriving.
-
-```
-14.1 maximum-flow — layered network, width 4, layers 4, capacity 12, seed 1 (18 nodes, 39 arcs)
-  value 22; the cut crosses 8 arcs and its capacity is 22; the flow is valid
-  Ford-Fulkerson 13 paths / 576 arc visits | Edmonds-Karp 10 / 647 | Dinic 10 paths, 1 phase / 247
-  capacity scaling 8 paths / 832 | push-relabel FIFO 41 relabels, 79 pushes / 760
-  push-relabel highest 35 relabels, 70 pushes / 627
-  residual: 54 arcs, of which 28 are backward arcs that exist in no input
-  back-edge counter-example: greedy without a residual 1 999 in 3 paths against 2 000 in 2
-    and on random layered networks greedy falls short on 2 of 20, worst shortfall 9.5%
-  capacity sweep 1/4/16/64/256: value 4/10/29/103/403, Ford-Fulkerson paths 4/9/14/16/14,
-    Edmonds-Karp 4/9/9/13/13, Dinic phases 1 throughout (every path has the same length on a
-    layered network, so one blocking flow saturates a cut), scaling rounds 1/3/5/7/8
-
-14.2 minimum-cut — 8x8 image, 20% noise, smoothness 3, seed 1
-  cut 159 = the maximum flow; 4 of 64 pixels misclassified (6.3%)
-  smoothness sweep 0/1/2/3/5/8/12: cut 92/123/145/159/182/210/242,
-    misclassified 10/8/5/4/2/0/0 — 15.6% down to 0.0%
-    NOTE: the cut capacity RISES the whole way while the answer improves. The objective is a model,
-    not the truth, and saying so is the point of the panel.
-  project selection, 8 projects, seeds 1-5: positive profit 43/27/20/25/31, cut 3/5/8/7/4,
-    realised 40/22/12/18/27, projects taken 5/7/4/4/7, brute force agrees on all five
-  Koenig, seeds 1-4: 13/14/14/15 edges, matching 5/7/6/6 = cover 5/7/6/6, every cover valid
-  max-flow min-cut across layered/grid/unit/bottleneck/bipartite at seed 2:
-    23/10/4/7/6, cut capacity identical, 5/5/4/1/6 arcs crossing, all saturated
-
-14.3 push-relabel — layered, width 5, layers 5, seed 1 (27 nodes)
-  value 20, Dinic agrees; 50 relabels (23 gap lifts, 2 global passes); 87 pushes (39 saturating,
-    48 not); heights valid and nothing still active
-  heuristic sweep (FIFO): gap+global 50 relabels / 87 pushes / 1 030 arc visits;
-    gap only 83 / 142 / 989; global only 44 / 108 / 1 011; neither 369 / 719 / 4 433
-    => 7.38x, 4.45x, 8.39x against neither. NOTE global-only beats both here: they are not
-       additive, and the section says so rather than smoothing it over.
-  against the augmenting family on the same network: Ford-Fulkerson 607 arc visits,
-    Edmonds-Karp 1 116, Dinic 409, scaling 1 164, push-relabel 1 030 / 1 048
-
-14.4 min-cost-flow — 6 workers, costs 1..20, seed 1
-  cost 28, brute force over all 720 permutations agrees, 7 Dijkstra runs, 0 Bellman-Ford passes
-    (costs are non-negative so no potential is needed), no negative residual cycle
-  three routes: successive shortest paths 28 (7 Dijkstra runs, 582 relaxations);
-    cycle cancelling 28 (4 cycles, 5 Bellman-Ford passes); Hungarian 28 (6 phases, 45 comparisons)
-    with a valid dual certificate
-  cost against flow 1..6: 1/2/4/9/18/28, marginal 1/1/2/5/9/10 — never falls, which is the
-    convexity that makes one-unit-at-a-time correct
-  general network at 14 nodes with negative costs: 5 negative arcs, both methods 3 units at cost 81
-```
-
-### Nine bugs the M14 work found, all fixed
+### Nine bugs the module work found, all fixed
 
 1. **The push-relabel global relabel was unsound.** It set every vertex unreachable from the sink
    to height 2n, which the main loop treated as "stuck", so excess that has to drain *back to the
    source* was abandoned — the run finished with vertices still holding excess and the height
    invariant violated, while the reported value came out right anyway. It now relabels in three
    groups: distance to the sink, n plus distance to the source, and one common height for anything
-   in neither. Verified across 20 seeds x 2 rules x 4 heuristic combinations.
+   in neither. Verified across 20 seeds × 2 rules × 4 heuristic combinations.
 2. **`checkHeights` must skip arcs out of the source.** `h(s) = n` is a boundary condition, not a
    constraint, and the standard formulation excludes those arcs.
 3. **Cycle cancelling sliced the wrong side of the parent walk.** `closeCycle` returned the tail
@@ -1672,7 +1601,7 @@ Read from `node tools/section-dump.js <id>` at the default controls. Nothing her
    returns `{ refused }`. `cycleCancelling` grew a `cancelLimit` backstop.
 6. **The segmentation generator had no noise**, so the smoothness slider changed nothing at all
    under a caption about robustness. It now flips `noise` per cent of pixels and carries a `truth`
-   array, and the misclassified count falls 10 -> 0 as smoothness rises.
+   array, and the misclassified count falls 10 → 0 as smoothness rises.
 7. **`randomNetwork` and the min-cost-flow general network left the sink unreachable**, so the
    panels read "value 0" and "0 units at cost 0". Both now wire a spine or a fan first.
 8. **`greedyNoResidual` marked vertices on push**, which makes the middle arc of the classic
@@ -1682,54 +1611,108 @@ Read from `node tools/section-dump.js <id>` at the default controls. Nothing her
    failure in the second left the first applied. It now refuses on an id already present, and
    accepts `group:<milestone>` to seed an empty milestone group.
 
-### Things that will bite
+### The tool bug that would have poisoned the content
 
-- **The `M14-rest` planned count.** Built + planned must equal the 634 the roadmap promises.
-- **A template file with no matching section controller** fails the wiring audit as
-  `unloaded-module`. Write the pair together.
-- **New modules must be added to `index.html`** or the wiring audit fails the same way. All twelve
-  M14 modules are already wired.
-- `MinCostFlow.assignmentNetwork` returns `{ n, edges, source, sink, size }` — pass the whole thing
-  as the graph.
-- `Scc.agree` and `Scc.verifyAcyclic` return **objects** (`{ agree, witness }`,
-  `{ acyclic, placed }`), not booleans. Two M13 tests were written against the wrong shape.
-- Content files are split per **quarter** of a milestone, not per third: the exercise files are the
-  size constraint and four sections of them pass 1 000 lines.
+**`tools/section-dump.js` only fired `change`.** A `range` or `number` control listens for `input`,
+so every control override on a slider silently dumped the *default* settings under a command line
+that asked for something else. It now fires both. This was found while checking the claim that one
+more scheduling conflict makes the 14.7 instance unsatisfiable — the dump kept reporting the
+satisfiable default at every setting. Any figure written from a slider override before this fix is
+suspect; the M14 figures were all re-derived after it.
 
-### After the six sections
+### Four claims that turned out to be false, and are now taught as false
 
-Content (16 files, split per quarter: `-flow`, `-flow-cost`, `-matching`, `-graphs-analysis` or
-similar), then `flow-modules.test.js` and the `worked-examples-*` figure tests, then `npm test`,
-`npm run build:css`, then the doc updates (README status block, the table at the top of this file,
-`CLAUDE.md`). The M13 commits are the template to copy for all of it.
+- **"Dropping the dangling mass makes the PageRank ranking drift"** — the milestone spec's own
+  senior insight — is wrong. Over **4 589** small link graphs with dangling pages there are **0**
+  strictly inverted pairs, while the worst mass leak is **85.0%**. The order survives; the numbers
+  do not, which makes the bug *more* dangerous than the folk description, because the output people
+  eyeball is perfect. `leakSearch` runs the search and the section reports it.
+- **Fruchterman-Reingold's energy does not fall monotonically.** It rises on 68 of 200 iterations
+  on the grid and 82 of 200 on a scale-free graph — about a third. A finite step capped by the
+  temperature can overshoot the minimum it aimed at; the cooling schedule shrinks the overshoots
+  rather than preventing them. The spec's lab asked for a monotonicity test; the exercise asserts
+  determinism and a falling endpoint instead, which are true.
+- **The two push-relabel heuristics are not additive.** Global relabelling alone does 44 relabels
+  against 50 for the pair, because a gap lift raises vertices to heights the next global pass then
+  corrects. Reporting only the combined 7.38× would have hidden one component doing negative work.
+- **Euler's bound is not a planarity test.** It catches K5 at 10 edges against 9 and misses K3,3
+  entirely at 9 against 12; only the bipartite refinement `E ≤ 2V − 4` catches the second, at 9
+  against 8. Two non-planar graphs, two different arguments, and neither ever proves planarity.
+
+### Design decisions that are easy to undo by accident
+
+- **`contraction-hierarchies`-style deliberate breakage appears twice here.** `greedyNoResidual` is
+  shipped so the 1 999 can be rendered, and `MatchingLab.naiveMatching` is bipartite-style
+  augmentation on a general graph. Both are wrong on purpose and both are *rarely* wrong, which is
+  the teaching: the naive matcher is short on 5 of 300 random graphs — 1.7%.
+- **`oddCycleFixture` ships two orderings of one graph.** The same eight edges give 2 as found and
+  3 sorted ascending. That is the section's best sentence and it is one array away from being lost:
+  do not "tidy" `ODD_CYCLE_FAILING` into sorted order.
+- **`AnalysisLab.build` connects the graph unless asked not to.** Three of the four spectral
+  questions have a degenerate answer on a disconnected graph — Fiedler value 0, a bisection that
+  cuts nothing, betweenness undefined across components — so an accidental isolated vertex silently
+  replaces the demonstration with a trivial one. `connect: false` is how the disconnected case is
+  still testable.
+- **The exact chromatic number is capped at 18 vertices.** The search costs roughly 4× per two
+  vertices — 47 ms at 18, 180 ms at 20, 754 ms at 22 — and an interactive demo cannot pay 3 s on a
+  slider move. Above the cap the metric reads "not run" and says why, which is itself the point.
+- **`checkAllocated` excludes spilled vertices from the colouring check.** A spilled vertex holds no
+  register, so feeding it in as one more colour makes every pair of spilled neighbours look like a
+  conflict — the opposite of what happened.
+- **A metric id `x` owns the element id `x-note`.** Three collisions were introduced and caught by
+  `tests/unit/template-ids.test.js` while building this milestone (`clr-clique-note`,
+  `lay-planar-note`, `lay-energy-note`), plus two control/element collisions (`tsat-clauses`,
+  `tsat-relax`). Run that test before the render audit; it is faster and the message is clearer.
+
+### Measured figures quoted in the M14 examples
+
+Every one is recomputed by `worked-examples-flow.test.js`, `-flow-cost`, `-matching` and
+`-graph-analysis`, which also assert the prose still quotes it. Landmarks: a maximum flow of 22 on
+18 vertices and 39 arcs whose residual has 54 arcs of which 28 are backward, with Ford-Fulkerson at
+13 paths / 576 arc visits against Dinic's 10 in one phase / 247; 1 999 against 2 000 and 2 of 20
+random networks short by up to 9.5%; a segmentation cut of 159 with 4 of 64 pixels wrong, rising to
+242 while the errors fall to 0; five project instances at 40, 22, 12, 18 and 27 realised profit
+against all 256 subsets; push-relabel at 50 relabels tuned, 369 untuned and 44 with global
+relabelling alone; a min-cost curve of 1, 2, 4, 9, 18, 28 with marginals 1, 1, 2, 5, 9, 10, reached
+by three methods and 720 permutations; a bipartite matching of 9 at 45, 57 and 280 units of work
+with a Koenig cover of 9; Hopcroft-Karp phases 2, 2, 2, 3, 4, 4 against √V of 2.83 to 16.00 and
+edge counts crossing over between 16 and 32 a side; a stable matching moving the left side's rank
+from 10 to 20 with 5 better off and 0 worse; 2 against 3 on six vertices and 3 against 3 on the
+same edges sorted; a 2-SAT satisfiable rate falling 100% → 5% across a ratio of 0.4 to 2.0, and a
+three-literal relaxation wrongly negative on 0, 11, 46, 77, 93 and 85 of 100; greedy colourings at
+5, 3 and 4 against an exact 3, with 2, 4 and 2 on a two-colourable graph; a clique of 3, an
+independent set of 8 and a cover of 10 from one search, with the pivot saving 1.56× on the same 24
+maximal cliques; spills of 5, 3, 0, 0 and 0 at 2 to 6 registers; crossings of 0, 70 and 0 on a grid
+and 45, 268 and 96 on a scale-free graph; PageRank converging in 20 to 48 iterations against a
+predicted 34 to 2 292; and Louvain recovering four planted communities exactly at modularity 0.6773
+while returning nine at 0.2476 from noise.
 
 ## Next
 
-**Finish M14** — six sections, then the content, then the tests. The "M14 — IN PROGRESS" section
-immediately above is the resume point and carries every measured figure the four built sections
-need, so nothing has to be re-derived. After that, **M15 — string algorithms** and onward through
-`doc/milestones/` in the order `doc/ROADMAP.md` gives.
+**M15 — string algorithms and pattern matching**, then onward through `doc/milestones/` in the
+order `doc/ROADMAP.md` gives.
 
-M11, M12, M13 and the built part of M14 are complete apart from a human browser pass, which needs
-the Chrome extension connected. `tools/section-dump.js` covers everything else the browser used to
-be needed for — it prints every metric, table and note a section renders, at any control setting.
+M11 through M14 are complete apart from a human browser pass, which needs the Chrome extension
+connected. `tools/section-dump.js` covers everything else the browser used to be needed for — it
+prints every metric, table and note a section renders, at any control setting, and since the
+`input`-event fix above that is finally true of slider settings too.
 
 A shared helper exists for the figure tests: `tests/support/worked-example-prose.js` exports
 `proseFor`, `quotes`, `fixed` and `grouped`.
 
-The shape to copy, unchanged through M13:
+The shape to copy, unchanged through M14:
 
 1. pure modules in `algorithms/` first, behind one shared interface;
 2. a `machines/` harness that drives every implementation through that interface, carrying a
    brute-force oracle whose disagreement count is a reported field rather than an exception;
 3. `viz/` renderers, and the CSS classes they need;
-4. `sections/<id>-template.js` + `<id>-section.js` — `tests/unit/template-ids.test.js` checks the
-   id collisions automatically, within a template and across all of them;
+4. `sections/<id>-template.js` + `<id>-section.js` — run `tests/unit/template-ids.test.js` first,
+   it catches control/element and metric/`-note` collisions faster than the render audit does;
 5. wire with `node tools/wire-section.js src/js/core/curriculum-<track>.js <after-id> <spec.json>`
    (or `group:<milestone>` to seed an empty group), then `node tests/render-audit.js <id>`;
 6. **dump every section with `node tools/section-dump.js <id>` and write the content from what it
    prints.** Measure first, then write the sentence that quotes the measurement — this is where
-   four of M13's six bugs and several of M14's were found;
+   four of M13's six bugs and all four of M14's false claims were found;
 7. the four content files, split per quarter of the milestone to stay under 1 000 lines;
 8. `<topic>-modules.test.js` (property tests against a brute-force reference) and
    `worked-examples-<topic>*.test.js` (recompute every quoted figure *and* assert the prose still

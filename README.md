@@ -14,7 +14,7 @@ faithfully in a browser, the section models it, says so plainly, and states what
 
 ## Status
 
-**M00–M13 shipped (125 sections). Building the curriculum, milestone by milestone.**
+**M00–M14 shipped (135 sections). Building the curriculum, milestone by milestone.**
 
 - ✅ Curriculum designed: 65 milestones, 634 sections, 11 tracks — one file per milestone in
   [`doc/milestones/`](doc/milestones/)
@@ -143,10 +143,25 @@ faithfully in a browser, the section models it, says so plainly, and states what
   198 pairs where the cheapest route does not, and binary lifting measured *losing* to the naive climb
   on a 200-node tree of depth 13 and winning by 19× on a path. 10 sections live.
 
-- ⬜ M14 onward
+- ✅ **M14 — graph algorithms II**: a maximum flow of 22 confirmed by six algorithms whose arc visits
+  spread 3.4×, path filling without a residual arc returning 1 999 where the answer is 2 000 and
+  falling short on 2 of 20 networks nobody arranged, a segmentation whose cut capacity rises from 92
+  to 242 across the very sweep that takes its misclassification from 15.6% to zero, five project
+  instances confirmed against all 256 subsets, push-relabel doing 369 relabels untuned against 50 —
+  and 44 with *one* of its two heuristics, which beats the pair — a min-cost curve of 1, 2, 4, 9, 18,
+  28 whose marginals never fall, Hopcroft-Karp measured *losing* to Kuhn below 32 vertices a side and
+  saving 2.74× at 256, a stable matching whose proposing side moves the other side's aggregate rank
+  from 10 to 20 with nobody worse off, a six-vertex graph on which bipartite-style augmentation
+  returns 2 where the answer is 3 — and returns 3 on the same eight edges in a different order — a
+  2-SAT relaxation of three-literal clauses that is wrongly negative on 46 of 100 instances and
+  wrongly positive on none, three greedy colourings of one graph at 5, 3 and 4 against an exhaustive
+  3, a force-directed layout finding a planar embedding of a grid while its energy *rises* on 34% of
+  the iterations, Euler's bound catching K5 and missing K3,3 entirely, and a PageRank vector that
+  leaks 57% of its probability while inverting nothing at all across 4 589 link graphs. 10 sections
+  live.
 
-`npm test` is green — wiring audit, 2 386 unit tests, and a **render audit** that boots the whole
-app headlessly and activates all 125 sections, failing on anything that throws while rendering, any
+`npm test` is green — wiring audit, 2 550 unit tests, and a **render audit** that boots the whole
+app headlessly and activates all 135 sections, failing on anything that throws while rendering, any
 table left with an empty body, and any metric tile still showing a placeholder without a note
 explaining it. `npm run lint:size` reports no offenders.
 
@@ -158,7 +173,7 @@ explaining it. `npm run lint:size` reports no offenders.
   opens to milestones, then sections. Tracks that are planned and not built are listed with their
   milestones and section counts, marked as planned, so the map shows what the platform teaches
   rather than only what happens to be finished. One track and one milestone stay open at a time, so
-  the nav is the same height at 125 sections and at 634.
+  the nav is the same height at 135 sections and at 634.
 - **Search across everything.** The header search indexes concepts, worked examples, reference
   entries and exercises as well as section titles, so "tombstone", "Little's law" or "round half to
   even" lands on the section that explains it. Ctrl/Cmd+K focuses it; arrows and Enter drive it.

@@ -9,13 +9,13 @@ explained in full, diagram, insight), **Examples** (runnable demo with charts, w
 graded code lab) and **References** (the structured reference block).
 
 ## Status
-**M00–M13 are built** (125 sections; M00–M10 also verified in a browser), each carrying 8+ concepts
-with full explanations, two worked examples, a reference entry and a graded exercise. **M14 is half
-built and the tree is deliberately red in exactly one place** — read `doc/BUILD-STATE.md` first; its
-"M14 — IN PROGRESS" section is the resume point and says what is missing and why. The rest of the curriculum follows the
-order in `doc/ROADMAP.md` (65 milestones in `doc/milestones/`). Keep `npm test` and
-`npm run lint:size` green at every step, and update the README status block and
-`doc/BUILD-STATE.md` as milestones land.
+**M00–M14 are built** (135 sections; M00–M10 also verified in a browser), each carrying 8+ concepts
+with full explanations, two worked examples, a reference entry and a graded exercise. The tree is
+green. **Next is M15 — string algorithms**; read `doc/BUILD-STATE.md` first, its "Next" section at
+the end carries the nine-step shape to copy. The rest of the curriculum follows the order in
+`doc/ROADMAP.md` (65 milestones in `doc/milestones/`). Keep `npm test` and `npm run lint:size`
+green at every step, and update the README status block and `doc/BUILD-STATE.md` as milestones
+land.
 
 ## Tech stack
 - **UI:** jQuery + Tailwind CSS (compiled to `lib/tailwind.css` by `npm run build:css`)
