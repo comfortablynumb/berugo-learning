@@ -458,6 +458,24 @@
               title: 'Palindromes: Manacher and the palindromic tree',
               summary: 'The mirror is the Z-window again, and how many differs from how many different by a factor of n.',
               tags: ['manacher', 'palindrome', 'mirror argument', 'interleaving separator', 'eertree', 'palindromic tree', 'amortisation', 'distinct substrings']
+            },
+            {
+              id: 'approximate-matching',
+              title: 'Approximate matching',
+              summary: 'A word-wide cliff, a band that refuses rather than answers, and a filter with a condition nobody checks.',
+              tags: ['approximate matching', 'bitap', 'shift-or', 'wu-manber', 'banded edit distance', 'q-gram filter', 'prefilter selectivity', 'agrep']
+            },
+            {
+              id: 'diff-and-merge',
+              title: 'Diff and merge',
+              summary: 'Myers costs the size of the answer, and the shortest edit script is routinely the least readable one.',
+              tags: ['diff', 'myers algorithm', 'edit graph', 'furthest reaching path', 'patience diff', 'hunks', 'three-way merge', 'conflict detection']
+            },
+            {
+              id: 'regex-engines',
+              title: 'Regular expression engines',
+              summary: 'One curve is exponential and one is linear, on the same pattern and the same input.',
+              tags: ['regex', 'backtracking', 'thompson nfa', 'state set simulation', 'catastrophic backtracking', 'redos', 're2', 'capture groups']
             }]
         }
       ],
@@ -465,7 +483,7 @@
         /* M15 is part built: the sections in the group above are live and the
            rest are declared here so the published total stays honest. Reduce
            this count as each one lands, and delete the entry when the last does. */
-        { id: 'M15-rest', title: 'String algorithms — the remaining sections', sections: 4 },
+        { id: 'M15-rest', title: 'String algorithms — the remaining section', sections: 1 },
         { id: 'M16', title: 'Computational geometry', sections: 10 },
         { id: 'M17', title: 'Numbers, bits and floating point', sections: 10 },
         { id: 'M18', title: 'Numerical methods, transforms and optimisation', sections: 10 },
