@@ -50,8 +50,12 @@ function entryText(entry) {
   ].join('\n');
 }
 
+/** `after` is either a section id, or `group:<milestone>` to insert as the
+ *  first members of a milestone group that is still empty. */
 function insertCurriculum(file, after, entries) {
   const source = fs.readFileSync(file, 'utf8');
+
+  if (after.indexOf('group:') === 0) return insertIntoGroup(file, source, after.slice(6), entries);
   const anchor = source.indexOf("id: '" + after + "'");
 
   if (anchor === -1) fail('no curriculum entry for ' + after + ' in ' + file);
@@ -61,16 +65,37 @@ function insertCurriculum(file, after, entries) {
   const at = close + '\n            }'.length;
   const addition = entries.map(function (entry) { return ',\n' + entryText(entry); }).join('');
   fs.writeFileSync(file, source.slice(0, at) + addition + source.slice(at));
+  return null;
 }
 
+/** Insert as the first members of a milestone group's `sections` array. */
+function insertIntoGroup(file, source, group, entries) {
+  const anchor = source.indexOf("id: '" + group + "',");
+
+  if (anchor === -1) fail('no group ' + group + ' in ' + file);
+  const marker = source.indexOf('sections: [', anchor);
+
+  if (marker === -1) fail('group ' + group + ' has no sections array');
+  const at = marker + 'sections: ['.length;
+  const existing = source.slice(at, source.indexOf(']', at)).trim().length > 0;
+  const addition = entries.map(function (entry) { return '\n' + entryText(entry); }).join(',');
+
+  fs.writeFileSync(file, source.slice(0, at) + addition + (existing ? ',' : '') + source.slice(at));
+  return null;
+}
+
+/** Containers go after the named section's, or at the end of `<main>` when the
+ *  anchor is a group rather than a section. */
 function insertContainers(entries, after) {
   const file = path.join(ROOT, 'index.html');
   const source = fs.readFileSync(file, 'utf8');
-  const anchor = '<section data-section="' + after + '" hidden>';
+  const anchor = after.indexOf('group:') === 0
+    ? '    </main>'
+    : '<section data-section="' + after + '" hidden>';
   const at = source.indexOf(anchor);
 
   if (at === -1) fail('no container for ' + after + ' in index.html');
-  const end = source.indexOf('\n', at) + 1;
+  const end = after.indexOf('group:') === 0 ? at : source.indexOf('\n', at) + 1;
   const html = entries.map(function (entry) {
     return '      <section data-section="' + entry.id + '" hidden><div class="section-body">' +
       '<div id="' + entry.id + '-content"></div></div></section>\n';
@@ -90,6 +115,20 @@ function insertScripts(entries) {
       '  <script src="src/js/sections/' + entry.id + '-section.js"></script>\n';
   }).join('');
   fs.writeFileSync(file, source.slice(0, at) + tags + source.slice(at));
+}
+
+function refuseIfWired(curriculum, entries) {
+  const source = fs.readFileSync(curriculum, 'utf8');
+  const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+
+  entries.forEach(function (entry) {
+    const inCurriculum = source.indexOf("id: '" + entry.id + "',") !== -1;
+    const inHtml = html.indexOf('data-section="' + entry.id + '"') !== -1;
+
+    if (!inCurriculum && !inHtml) return;
+    fail(entry.id + ' is already wired (curriculum: ' + inCurriculum + ', index.html: ' + inHtml +
+      ') — undo the partial wiring before re-running');
+  });
 }
 
 function checkFilesExist(entries) {
@@ -112,6 +151,10 @@ function main() {
 
   entries.forEach(checkQuotes);
   checkFilesExist(entries);
+  /* Wiring is three separate writes, so a failure in the second leaves the
+     first applied. Refusing on an id that is already present makes a re-run
+     after such a failure safe instead of silently duplicating the section. */
+  refuseIfWired(path.join(ROOT, args[0]), entries);
   insertCurriculum(path.join(ROOT, args[0]), args[1], entries);
   insertContainers(entries, args[1]);
   insertScripts(entries);

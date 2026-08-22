@@ -334,6 +334,99 @@
     return { value: value, network: network, report: report };
   }
 
+  /* ------------------------------------------------ the broken variant */
+
+  /**
+   * Path filling with no back edge, shipped on purpose.
+   *
+   * It finds a path, subtracts the bottleneck, and moves on - which is what
+   * everybody writes first and is not a slower algorithm but a wrong one.
+   * Without the residual twin, an early path that routes flow through the
+   * wrong vertex can never be undone, and the run stops below the maximum
+   * with nothing to indicate it. The section needs to be able to select it and
+   * watch the value fall short.
+   */
+  function greedyNoResidual(graph, source, sink, options) {
+    const report = (options || {}).report || emptyReport();
+    const remaining = graph.edges.map(function (edge) { return edge.capacity; });
+    const adjacency = [];
+
+    for (let v = 0; v < graph.n; v += 1) adjacency.push([]);
+    graph.edges.forEach(function (edge, id) { adjacency[edge.from].push(id); });
+    let value = 0;
+
+    for (;;) {
+      const path = greedyPath(graph, adjacency, remaining, { source: source, sink: sink,
+        report: report });
+
+      if (!path) break;
+      let bottleneck = Infinity;
+
+      path.forEach(function (id) { bottleneck = Math.min(bottleneck, remaining[id]); });
+      path.forEach(function (id) { remaining[id] -= bottleneck; report.pushes += 1; });
+      value += bottleneck;
+      report.augmentingPaths += 1;
+    }
+    return { value: value, remaining: remaining, report: report };
+  }
+
+  /** A depth-first walk with real backtracking, marking a vertex when it is
+   *  expanded rather than when it is queued - so a path through the middle of
+   *  the graph is reachable, which is what the counter-example needs. */
+  function greedyPath(graph, adjacency, remaining, context) {
+    const seen = new Array(graph.n).fill(false);
+    const cursor = new Array(graph.n).fill(0);
+    const stack = [context.source];
+    const arcs = [];
+
+    seen[context.source] = true;
+
+    while (stack.length) {
+      const v = stack[stack.length - 1];
+
+      if (v === context.sink) return arcs.slice();
+
+      if (cursor[v] >= adjacency[v].length) {
+        stack.pop();
+        arcs.pop();
+        continue;
+      }
+      const id = adjacency[v][cursor[v]];
+
+      cursor[v] += 1;
+      context.report.arcsExamined += 1;
+
+      if (remaining[id] <= 0 || seen[graph.edges[id].to]) continue;
+      seen[graph.edges[id].to] = true;
+      stack.push(graph.edges[id].to);
+      arcs.push(id);
+    }
+    return null;
+  }
+
+  /**
+   * The textbook instance where path filling without residuals falls short.
+   * The middle arc 1 -> 2 is worth one unit, and a search that takes it first
+   * strands `big - 1` units on each side with no way to reroute.
+   *
+   * The edge ORDER matters and is the natural one: a depth-first walk takes
+   * 0 -> 1 and then 1 -> 2, which is the bad first path. An instance that only
+   * fails under one tie-break is an honest demonstration as long as it says
+   * so - and the layered-network table beside it measures how often the same
+   * failure happens without any arrangement at all.
+   */
+  function backEdgeExample(width) {
+    const big = width || 1000;
+    return { n: 4, source: 0, sink: 3, name: 'back-edge counter-example',
+      edges: [
+        { from: 0, to: 1, capacity: big },
+        { from: 0, to: 2, capacity: big },
+        { from: 1, to: 2, capacity: 1 },
+        { from: 1, to: 3, capacity: big },
+        { from: 2, to: 3, capacity: big }
+      ] };
+  }
+
   /* --------------------------------------------------------- the cut */
 
   /**
@@ -403,6 +496,7 @@
   return {
     emptyReport: emptyReport, build: build, flowOnEdges: flowOnEdges,
     fordFulkerson: fordFulkerson, edmondsKarp: edmondsKarp, dinic: dinic,
-    capacityScaling: capacityScaling, minCut: minCut, checkFlow: checkFlow
+    capacityScaling: capacityScaling, greedyNoResidual: greedyNoResidual,
+    backEdgeExample: backEdgeExample, minCut: minCut, checkFlow: checkFlow
   };
 }));

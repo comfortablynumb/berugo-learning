@@ -342,10 +342,23 @@
               tags: ['lowest common ancestor', 'binary lifting', 'euler tour', 'sparse table', 'heavy-light decomposition', 'path query', 'kth ancestor']
             }
           ]
+        },
+        {
+          id: 'M14',
+          title: 'Graph algorithms II — flow, matching, connectivity, spectral',
+          summary: 'Scheduling, segmentation, assignment and satisfiability turn out to be four graph problems wearing different clothes.',
+          sections: [
+
+            {
+              id: 'maximum-flow',
+              title: 'Maximum flow',
+              summary: 'The back edge is the algorithm, and path filling without one is wrong rather than slow.',
+              tags: ['max flow', 'residual graph', 'ford-fulkerson', 'edmonds-karp', 'dinic', 'capacity scaling', 'augmenting path', 'blocking flow']
+            }
+          ]
         }
       ],
       planned: [
-        { id: 'M14', title: 'Graph algorithms II — flow, matching, connectivity, spectral', sections: 10 },
         { id: 'M15', title: 'String algorithms and pattern matching', sections: 11 },
         { id: 'M16', title: 'Computational geometry', sections: 10 },
         { id: 'M17', title: 'Numbers, bits and floating point', sections: 10 },
