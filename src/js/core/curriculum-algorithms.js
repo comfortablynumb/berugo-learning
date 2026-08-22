@@ -410,10 +410,38 @@
               tags: ['laplacian', 'fiedler vector', 'spectral bisection', 'pagerank', 'power iteration', 'damping', 'dangling nodes', 'brandes', 'betweenness', 'closeness', 'louvain', 'modularity']
             }
           ]
+        },
+
+        {
+          id: 'M15',
+          title: 'String algorithms and pattern matching',
+          summary: 'Everything between indexOf and a text pipeline, ending in a regex that is a denial-of-service primitive.',
+          sections: [
+            {
+              id: 'naive-matching',
+              title: 'The matching problem and the naive algorithm',
+              summary: 'Nearly linear on English, quadratic on one adversarial line, and the filter that saves no comparisons at all.',
+              tags: ['exact matching', 'naive algorithm', 'character comparisons', 'first-character filter', 'memchr', 'indexOf', 'adversarial input', 'matcher families']
+            },
+            {
+              id: 'kmp-prefix-function',
+              title: 'KMP and the prefix function',
+              summary: 'The array is worth more than the matcher: periods, powers and prefix counts all fall out of it.',
+              tags: ['kmp', 'prefix function', 'border array', 'failure function', 'period detection', 'string powers', 'stream matching', 'kmp automaton']
+            },
+            {
+              id: 'z-algorithm',
+              title: 'The Z-algorithm and string periodicity',
+              summary: 'Three cases, one window that never moves left, and the sentinel a hard-coded dollar sign gets wrong.',
+              tags: ['z-algorithm', 'z-array', 'amortised window', 'sentinel', 'periodicity', 'fine and wilf', 'fibonacci words', 'linear string algorithms']
+            }]
         }
       ],
       planned: [
-        { id: 'M15', title: 'String algorithms and pattern matching', sections: 11 },
+        /* M15 is part built: the sections in the group above are live and the
+           rest are declared here so the published total stays honest. Reduce
+           this count as each one lands, and delete the entry when the last does. */
+        { id: 'M15-rest', title: 'String algorithms — the remaining sections', sections: 8 },
         { id: 'M16', title: 'Computational geometry', sections: 10 },
         { id: 'M17', title: 'Numbers, bits and floating point', sections: 10 },
         { id: 'M18', title: 'Numerical methods, transforms and optimisation', sections: 10 },
