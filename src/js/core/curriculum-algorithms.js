@@ -446,6 +446,12 @@
               title: 'Rabin-Karp and rolling hashes',
               summary: 'A fixed base is a published function, and a birthday search breaks it in a second.',
               tags: ['rabin-karp', 'rolling hash', 'polynomial hashing', 'birthday attack', 'randomised base', 'content-defined chunking', 'rsync', 'deduplication']
+            },
+            {
+              id: 'aho-corasick',
+              title: 'Aho-Corasick multi-pattern matching',
+              summary: 'Failure links are KMP generalised; output links exist for one case, and dropping them under-reports in silence.',
+              tags: ['aho-corasick', 'multi-pattern matching', 'failure links', 'output links', 'goto trie', 'nested patterns', 'intrusion detection', 'keyword sets']
             }]
         }
       ],
@@ -453,7 +459,7 @@
         /* M15 is part built: the sections in the group above are live and the
            rest are declared here so the published total stays honest. Reduce
            this count as each one lands, and delete the entry when the last does. */
-        { id: 'M15-rest', title: 'String algorithms — the remaining sections', sections: 6 },
+        { id: 'M15-rest', title: 'String algorithms — the remaining sections', sections: 5 },
         { id: 'M16', title: 'Computational geometry', sections: 10 },
         { id: 'M17', title: 'Numbers, bits and floating point', sections: 10 },
         { id: 'M18', title: 'Numerical methods, transforms and optimisation', sections: 10 },
