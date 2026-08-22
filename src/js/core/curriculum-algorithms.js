@@ -434,6 +434,18 @@
               title: 'The Z-algorithm and string periodicity',
               summary: 'Three cases, one window that never moves left, and the sentinel a hard-coded dollar sign gets wrong.',
               tags: ['z-algorithm', 'z-array', 'amortised window', 'sentinel', 'periodicity', 'fine and wilf', 'fibonacci words', 'linear string algorithms']
+            },
+            {
+              id: 'boyer-moore',
+              title: 'Boyer-Moore and skipping algorithms',
+              summary: 'The only matcher that gets faster as the pattern grows, and the rule that does almost all the work.',
+              tags: ['boyer-moore', 'bad character rule', 'good suffix rule', 'horspool', 'sunday', 'sublinear matching', 'skipping', 'strstr']
+            },
+            {
+              id: 'rolling-hashes',
+              title: 'Rabin-Karp and rolling hashes',
+              summary: 'A fixed base is a published function, and a birthday search breaks it in a second.',
+              tags: ['rabin-karp', 'rolling hash', 'polynomial hashing', 'birthday attack', 'randomised base', 'content-defined chunking', 'rsync', 'deduplication']
             }]
         }
       ],
@@ -441,7 +453,7 @@
         /* M15 is part built: the sections in the group above are live and the
            rest are declared here so the published total stays honest. Reduce
            this count as each one lands, and delete the entry when the last does. */
-        { id: 'M15-rest', title: 'String algorithms — the remaining sections', sections: 8 },
+        { id: 'M15-rest', title: 'String algorithms — the remaining sections', sections: 6 },
         { id: 'M16', title: 'Computational geometry', sections: 10 },
         { id: 'M17', title: 'Numbers, bits and floating point', sections: 10 },
         { id: 'M18', title: 'Numerical methods, transforms and optimisation', sections: 10 },
