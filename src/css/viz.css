@@ -289,3 +289,35 @@ canvas.viz-canvas {
   color: var(--text-primary);
   font-weight: 600;
 }
+
+/* Pixel grid for the segmentation demo. A cut over a pixel graph is a picture
+   before it is a number, and a table of labels is unreadable at 64 pixels. */
+.pixel-grid {
+  display: inline-block;
+  padding: 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+}
+
+.pixel-row {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 2px;
+}
+
+.pixel-cell {
+  width: 18px;
+  height: 18px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--hue-gray) 16%, transparent);
+}
+
+.pixel-on {
+  background: color-mix(in srgb, var(--hue-blue) 62%, transparent);
+}
+
+.pixel-wrong {
+  outline: 2px solid var(--hue-amber);
+  outline-offset: -2px;
+}

@@ -156,17 +156,26 @@
     const rows = settings.rows || 6;
     const columns = settings.columns || 6;
     const smooth = settings.smooth === undefined ? 3 : settings.smooth;
+    const noise = settings.noise === undefined ? 20 : settings.noise;
     const n = rows * columns + 2;
     const source = n - 2;
     const sink = n - 1;
     const edges = [];
     const intensity = [];
+    const truth = [];
     const at = function (r, c) { return r * columns + c; };
 
     for (let r = 0; r < rows; r += 1) {
       for (let c = 0; c < columns; c += 1) {
-        const bright = c < columns / 2 ? 6 + random.int(4) : random.int(4);
+        /* The true label is the left half. `noise` per cent of pixels are
+           measured as the other side, which is what the smoothness term
+           exists to overrule - without noise the slider changes nothing and
+           the demo teaches that smoothing is free. */
+        const foreground = c < columns / 2;
+        const flipped = random.int(100) < noise;
+        const bright = (foreground !== flipped) ? 6 + random.int(4) : random.int(4);
 
+        truth.push(foreground ? 1 : 0);
         intensity.push(bright);
         edges.push({ from: source, to: at(r, c), capacity: bright });
         edges.push({ from: at(r, c), to: sink, capacity: 9 - bright });
@@ -182,7 +191,7 @@
       }
     }
     return { n: n, edges: edges, source: source, sink: sink, rows: rows, columns: columns,
-      intensity: intensity, name: 'segmentation' };
+      intensity: intensity, truth: truth, smooth: smooth, noise: noise, name: 'segmentation' };
   }
 
   /** One narrow pipe in the middle, so the min cut is obvious by eye and the

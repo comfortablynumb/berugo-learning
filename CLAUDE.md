@@ -9,9 +9,10 @@ explained in full, diagram, insight), **Examples** (runnable demo with charts, w
 graded code lab) and **References** (the structured reference block).
 
 ## Status
-**M00–M13 are built** (125 sections, tree green; M00–M10 also verified in a browser), each carrying 8+ concepts
-with full explanations, two worked examples, a reference entry and a graded exercise. `doc/BUILD-STATE.md`
-records what shipped and what the next session picks up. The rest of the curriculum follows the
+**M00–M13 are built** (125 sections; M00–M10 also verified in a browser), each carrying 8+ concepts
+with full explanations, two worked examples, a reference entry and a graded exercise. **M14 is half
+built and the tree is deliberately red in exactly one place** — read `doc/BUILD-STATE.md` first; its
+"M14 — IN PROGRESS" section is the resume point and says what is missing and why. The rest of the curriculum follows the
 order in `doc/ROADMAP.md` (65 milestones in `doc/milestones/`). Keep `npm test` and
 `npm run lint:size` green at every step, and update the README status block and
 `doc/BUILD-STATE.md` as milestones land.

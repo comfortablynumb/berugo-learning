@@ -354,11 +354,33 @@
               title: 'Maximum flow',
               summary: 'The back edge is the algorithm, and path filling without one is wrong rather than slow.',
               tags: ['max flow', 'residual graph', 'ford-fulkerson', 'edmonds-karp', 'dinic', 'capacity scaling', 'augmenting path', 'blocking flow']
+            },
+            {
+              id: 'minimum-cut',
+              title: 'Minimum cut and its applications',
+              summary: 'Segmentation and project selection are the same cut, and the modelling is the hard part.',
+              tags: ['min cut', 'max-flow min-cut', 'image segmentation', 'maximum closure', 'project selection', 'konig', 'vertex cover']
+            },
+            {
+              id: 'push-relabel',
+              title: 'Push-relabel and modern flow',
+              summary: 'The heuristics are not extras; without them the textbook version disappoints on purpose.',
+              tags: ['push-relabel', 'preflow', 'height function', 'gap heuristic', 'global relabel', 'excess', 'goldberg-tarjan']
+            },
+            {
+              id: 'min-cost-flow',
+              title: 'Minimum-cost flow and assignment',
+              summary: 'The potential is Johnson reweighting again, and after that it is Dijkstra in a loop.',
+              tags: ['min-cost flow', 'successive shortest paths', 'potentials', 'cycle cancelling', 'assignment problem', 'hungarian algorithm', 'reduced cost']
             }
           ]
         }
       ],
       planned: [
+        /* M14 is part built: the sections in the group above are live and the rest are
+           declared here so the published total stays honest. Reduce this count as each
+           one lands, and delete the entry when the last does. */
+        { id: 'M14-rest', title: 'Graph algorithms II — the remaining six sections', sections: 6 },
         { id: 'M15', title: 'String algorithms and pattern matching', sections: 11 },
         { id: 'M16', title: 'Computational geometry', sections: 10 },
         { id: 'M17', title: 'Numbers, bits and floating point', sections: 10 },
