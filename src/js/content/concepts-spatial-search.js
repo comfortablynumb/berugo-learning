@@ -21,6 +21,9 @@
         term: 'Fenwick: one array, and i & −i',
         plain: 'Slot i covers the (i & −i) values ending at i, and that single expression is both the coverage and the step.',
         formal: 'update: i += i & −i;  prefix: i −= i & −i',
+        readAs: 'i & −i isolates the lowest set bit of i. Adding it walks up the tree of responsibilities ' +
+          'when updating; subtracting it walks down the chain of partial sums when querying. Two lines, ' +
+          'and the whole Fenwick tree.',
         detail: 'There are no children, no padding to a power of two and no recursion: a Fenwick tree over n ' +
           'values is n+1 numbers, which is half a segment tree\'s array and a quarter of its allocation. The ' +
           'lowest-set-bit expression is doing double duty - it is the length of the range a slot covers and the ' +
@@ -44,6 +47,8 @@
         term: 'The canonical decomposition',
         plain: 'Any interval, however awkward, is the disjoint union of at most 2 log n stored nodes.',
         formal: '|decomposition(l, r)| ≤ 2⌈log₂ n⌉',
+        readAs: 'Any range breaks into at most about 2 log n stored nodes — the bars are "how many". That is ' +
+          'why a range query costs log n rather than the length of the range.',
         detail: 'This is the structure\'s whole idea and it is worth looking at once as a list of ranges rather ' +
           'than as a proof. The nodes come in two staircases - one climbing out of the left endpoint by powers of ' +
           'two and one descending into the right - and the bound is two per level because at most one node per ' +
@@ -66,6 +71,9 @@
         term: 'Sparse tables: O(1) queries by overlapping',
         plain: 'Cover any range with two power-of-two blocks that overlap in the middle.',
         formal: 'query(l, r) = combine(table[k][l], table[k][r − 2^k + 1]) with k = ⌊log₂(r − l + 1)⌋',
+        readAs: 'Cover the range with two power-of-two blocks that overlap in the middle. Overlap is fine ' +
+          'because min and max do not care about double-counting, which is exactly why sparse tables ' +
+          'work for those and not for sums.',
         detail: 'Overlapping is only legal because the operation is idempotent - min(a, a) = a - which is exactly ' +
           'why there is no sparse table for sums, and why the module refuses a sum monoid instead of returning ' +
           'wrong answers. The price is O(n log n) memory and no updates at all: the table is built once from a ' +
@@ -114,6 +122,9 @@
         term: 'Recall is the quantity, and it has to be measured',
         plain: 'The fraction of the true k nearest an approximate index actually returns, against brute force on your own data.',
         formal: 'recall@k = |returned ∩ true| / k',
+        readAs: 'Of the k nearest neighbours that genuinely exist, how many did you return? The ∩ is the ' +
+          'overlap. Approximate search trades this number for speed, and it has to be measured rather ' +
+          'than assumed.',
         detail: 'An approximate index has no exact answer to be compared against, so "it works" is not a ' +
           'statement anyone can check - and a recall of 0.8 is not "slightly slower", it is a different answer ' +
           'three times in ten. Shipping without measuring it is how "the search got worse" bugs enter a product ' +
@@ -126,6 +137,9 @@
         term: 'HNSW is a skip list in metric space',
         plain: 'A proximity graph at layer 0, a thinning subset at each layer above, and a greedy walk that descends.',
         formal: 'level ~ ⌊−ln(U)·1/ln M⌋; enter at the top, walk greedily, drop a layer, repeat',
+        readAs: 'Each node draws its level from a random number, which gives exponentially fewer nodes at ' +
+          'each level up. Searching starts at the sparse top for big jumps and descends into denser ' +
+          'layers for fine detail — the same idea as a skip list, in many dimensions.',
         detail: 'The upper layers are long-range links, and they do exactly what a skip list\'s upper levels do ' +
           'over a sorted list: without them a greedy walk on a proximity graph takes O(n^(1/d)) hops to cross the ' +
           'space, and with them it takes a logarithmic number. The layer assignment is the same exponential draw ' +
@@ -147,6 +161,9 @@
         term: 'The neighbour heuristic is what makes the graph navigable',
         plain: 'Keep a candidate only if the new node is closer to it than any already-kept neighbour is.',
         formal: 'keep c iff d(new, c) < d(kept_i, c) for every kept_i',
+        readAs: 'Keep a candidate only if it is closer to the new node than to anything already kept. That ' +
+          'test spreads the neighbours out in different directions instead of clustering them all on ' +
+          'one side.',
         detail: 'Taking the M nearest instead builds a graph with exactly the same degree that a greedy walk gets ' +
           'stuck in, because all M links point into the cluster the node is already in and none bridge to ' +
           'anywhere else. The heuristic spends the same budget on links that reach somewhere new, which is what ' +
@@ -158,6 +175,9 @@
         term: 'IVF: partition, then probe',
         plain: 'k-means the corpus into lists and search only the few lists nearest the query.',
         formal: 'cost ≈ lists + probe·(n/lists); recall rises with probe',
+        readAs: 'You pay to compare against every list centroid, then to scan the lists you chose. More lists ' +
+          'makes the first term dearer and the second cheaper; probing more of them buys recall at a ' +
+          'linear price.',
         detail: 'The failure is structural rather than random: a true neighbour just over a cell boundary is ' +
           'invisible no matter how many vectors the probed lists hold, which is why raising `probe` helps and ' +
           'raising the list count alone does not. It is the easiest index here to reason about and to shard - ' +
@@ -194,6 +214,9 @@
         term: 'The broad phase may be wrong in one direction only',
         plain: 'It may propose pairs that do not touch; it may never miss a pair that does.',
         formal: 'proposed ⊇ actual; the narrow phase computes actual from proposed',
+        readAs: 'The broad phase must return a superset of the real collisions — never missing one — and the ' +
+          'narrow phase then does the exact test on that shortlist. Missing a pair in the broad phase ' +
+          'is unrecoverable; including extras is only slow.',
         detail: 'That asymmetry is what makes the split work and what makes the broad phase cheap: it can use ' +
           'axis-aligned boxes, a grid, anything conservative, because a false positive costs one exact test and ' +
           'a false negative costs a bug nobody can reproduce. It also fixes the only two numbers worth reporting ' +
@@ -205,6 +228,9 @@
         term: 'Sweep and prune sorts on one axis and scans forward',
         plain: 'Sort the boxes by their low edge; for each, test forward only while the next box starts before this one ends.',
         formal: 'stop the inner scan at the first b with b.min > a.max',
+        readAs: 'Once the boxes are sorted along an axis, the first one starting past the current box\'s end ' +
+          'cannot overlap it — and neither can anything after it. That early exit is what makes sweep ' +
+          'and prune near-linear.',
         detail: 'The early exit is the whole algorithm, and it prunes on one axis only - which is the honest ' +
           'limitation. Two objects far apart vertically but overlapping horizontally are still tested, so on a ' +
           'scene that is wide in both directions the pruning is one-dimensional and a grid does better. It is ' +
@@ -216,6 +242,8 @@
         term: 'Temporal coherence is why the insertion sort is right',
         plain: 'Between two frames almost nothing changes order, so re-sorting the previous order costs almost nothing.',
         formal: 'insertion sort is O(n + inversions), and inversions per frame is near zero',
+        readAs: 'Between frames almost nothing changes order, so re-sorting costs about n. This is the one ' +
+          'place where insertion sort being adaptive is the reason for the whole design.',
         detail: 'This is the one place where insertion sort is the correct choice rather than the naive one, and ' +
           'it is worth seeing the two numbers side by side: the first frame is a full sort of a random order at ' +
           'about n²/4 swaps, and every frame after it is a couple of hundred. A comparison-optimal sort would be ' +
@@ -270,6 +298,10 @@
         term: 'The continuous test is a quadratic in t',
         plain: 'Relative motion is a straight line, so "do these two ever touch during the step" is a root-finding question.',
         formal: '|Δp + tΔv|² = (r₁ + r₂)² has a root in [0, dt]',
+        readAs: 'Two moving circles touch when the squared distance between them equals the squared sum of ' +
+          'their radii. Δ is "the difference in", so this is a quadratic in t, and a solution between 0 ' +
+          'and the frame time means they collided during the frame — even if they never overlap at ' +
+          'either end of it.',
         detail: 'Writing it down is what turns tunnelling from a mystery into arithmetic, and the same quadratic ' +
           'is the exact-time-of-impact solver a continuous engine uses. Two cases have to be handled before the ' +
           'discriminant: already overlapping at t = 0, which returns immediately, and zero relative velocity, ' +

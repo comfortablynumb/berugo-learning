@@ -10,6 +10,9 @@
         term: 'Minimum bounding rectangles, and siblings that overlap',
         plain: 'Every node stores the smallest rectangle covering its children, and two siblings may cover the same ground.',
         formal: 'MBR(node) = ⋃ MBR(child); MBR(a) ∩ MBR(b) need not be empty',
+        readAs: 'A node\'s bounding rectangle is the union of its children\'s — the smallest box holding all ' +
+          'of them. Unlike a k-d tree, sibling boxes are allowed to overlap, and that overlap is what ' +
+          'forces a query down more than one path.',
         detail: 'This is the one structural difference from every other index in the milestone, and every ' +
           'property of an R-tree follows from it. A quadtree or a k-d tree partitions space, so a point lies in ' +
           'exactly one leaf and a point query follows one path. An R-tree covers space, so a point can lie inside ' +
@@ -22,6 +25,9 @@
         term: 'Overlap governs query cost, not height',
         plain: 'Every extra intersecting sibling is another subtree the query has to enter.',
         formal: 'expected paths ≈ Π over levels (1 + overlap fraction at that level)',
+        readAs: 'The Π is a product rather than a sum: multiply together, level by level, one plus how much ' +
+          'the boxes overlap. Overlap compounds down the tree, which is why a small amount high up ' +
+          'costs so much.',
         detail: 'Two trees can hold the same rectangles at the same height with the same fan-out and differ by an ' +
           'order of magnitude in query cost, which is not something the usual "O(log n)" summary can express. ' +
           'Overlap accumulates multiplicatively down the levels, so a small excess near the root is far more ' +
@@ -34,6 +40,8 @@
         term: 'Choose the subtree that grows least',
         plain: 'Insert into the child whose rectangle has to expand the least, breaking ties by the smaller rectangle.',
         formal: 'argmin area(MBR(child) ∪ r) − area(MBR(child)), ties to smaller area',
+        readAs: '"argmin" means "the child that minimises this", not the value itself. Choose whichever child ' +
+          'grows least when the new rectangle is added, and break ties towards the smaller box.',
         detail: 'The tie-break is not cosmetic. Enlargement is frequently zero for several children at once - any ' +
           'child already containing the new rectangle enlarges by nothing - and without a second criterion the ' +
           'first such child wins every time, so one node grows fat and the tree skews. Choosing the smallest ' +
@@ -68,6 +76,9 @@
         term: 'STR bulk loading packs the leaves',
         plain: 'Sort by x, cut into vertical slices, sort each slice by y, and fill pages to capacity.',
         formal: 'slices = ⌈√(n/M)⌉; each slice is packed into ⌈n/(slices·M)⌉ full pages',
+        readAs: 'Sort-tile-recursive packing: cut the points into that many vertical slices, then fill each ' +
+          'slice with full pages. Bulk-loading this way gives far less overlap than inserting one at a ' +
+          'time.',
         detail: 'Incremental insertion leaves pages about 70% full because every split makes two half-empty ' +
           'nodes, so the tree is taller than it needs to be and every query pays for the extra level. A ' +
           'sort-tile-recursive build fills pages to capacity and produces near-disjoint tiles rather than ' +
@@ -116,6 +127,9 @@
         term: 'The slab method, and the NaN that eats it',
         plain: 'Intersect the ray with each axis\'s pair of planes and keep the overlap of the intervals.',
         formal: 'tnear = max over axes of min(t₀,t₁); tfar = min over axes of max(t₀,t₁); hit iff tnear ≤ tfar',
+        readAs: 'For each axis work out when the ray enters and leaves the slab. The ray is inside the box ' +
+          'only while it is inside every slab at once, so take the latest entry and the earliest exit — ' +
+          'and if the entry comes after the exit, it misses.',
         detail: 'The classic bug is the axis-parallel ray. With a direction component of zero the reciprocal is ' +
           'infinite, and if the origin sits exactly on a slab plane the numerator is zero, so the product is 0 × ' +
           '∞ = NaN. Every comparison against NaN is false, the interval test silently reports a miss, and the box ' +
@@ -127,6 +141,9 @@
         term: 'The surface-area heuristic is a cost model',
         plain: 'Estimate what a split will cost a random ray, and pick the split that minimises the estimate.',
         formal: 'C = Ct + Ci·(A(L)·N(L) + A(R)·N(R))/A(P)',
+        readAs: 'The surface-area heuristic: the cost of a split is a fixed traversal cost, plus the ' +
+          'intersection cost weighted by how likely a random ray is to enter each side. That likelihood ' +
+          'is the child\'s surface area over the parent\'s.',
         detail: 'The assumption underneath is precise and worth stating: for a uniformly distributed ray that ' +
           'already hits the parent box, the probability of hitting a child is the ratio of their surface areas. ' +
           'That turns "which split is better" into arithmetic instead of taste, which is what the word heuristic ' +
@@ -139,6 +156,9 @@
         term: 'The SAH also decides not to split',
         plain: 'If no split beats leaving the primitives in one leaf, make a leaf.',
         formal: 'leaf when min C(split) ≥ Ci·N',
+        readAs: 'Stop splitting once the best available split costs at least as much as simply testing every ' +
+          'primitive in the node. The heuristic decides where the leaves are, rather than a fixed depth ' +
+          'or count.',
         detail: 'A builder that always splits until a fixed leaf size produces a deeper tree whose extra levels ' +
           'cost traversal and buy no pruning, because the children\'s boxes are nearly the parent\'s. Comparing ' +
           'the best split cost against the cost of not splitting is one extra comparison, and it terminates the ' +
@@ -175,6 +195,8 @@
         term: 'Refitting works for coherent motion and only that',
         plain: 'Recompute the boxes bottom-up after the primitives move; the topology is untouched.',
         formal: 'box(node) = box(left) ∪ box(right), one post-order pass',
+        readAs: 'Every node\'s box is just its two children\'s boxes merged, so refitting the whole tree ' +
+          'after the geometry moves is a single bottom-up sweep — no rebuild required.',
         detail: 'When neighbouring primitives move together the grouping is still the right grouping and refitting ' +
           'is as good as rebuilding, at a fraction of the cost - which is why animated scenes refit per frame and ' +
           'rebuild occasionally. When primitives move independently the grouping becomes nonsense: the boxes are ' +
@@ -200,6 +222,9 @@
         term: 'One number for two coordinates',
         plain: 'Interleave the bits of x and y and you have a single integer that mostly preserves nearness.',
         formal: 'morton(x, y) = Σ (x_i·2^(2i) + y_i·2^(2i+1))',
+        readAs: 'Interleave the bits of the two coordinates — one from x, one from y, alternating — into a ' +
+          'single number. That one number sorts nearby points near each other, which is what turns a ' +
+          '2-D index into a 1-D one.',
         detail: 'This is the trick that lets a store with no spatial index at all answer spatial queries: the ' +
           'curve index becomes the sort key, and a rectangle becomes a set of key ranges, and a range scan is the ' +
           'one operation every ordered store already does well. It is why DynamoDB, Bigtable and every ' +
@@ -211,6 +236,8 @@
         term: 'A rectangle is not one range',
         plain: 'The cells of a rectangle are scattered along the curve, so a window query becomes many separate scans.',
         formal: 'ranges(rect) = the number of maximal runs of consecutive indices covering it',
+        readAs: 'How many separate contiguous stretches of the curve a query rectangle breaks into. Each run ' +
+          'is one range scan, so fewer runs means fewer seeks.',
         detail: 'This is the whole practical problem and it is invisible from the encoding. A 306-cell rectangle ' +
           'on a 64 × 64 grid decomposes into 45 separate Z-order ranges spanning 772 indices - so an exact answer ' +
           'means 45 round trips, and one scan of the whole span means reading 772 cells to get 306. Everything ' +
@@ -256,6 +283,9 @@
         term: 'Geohash is Z-order with an alphabet',
         plain: 'Interleave longitude and latitude bits, then write them five at a time in base 32.',
         formal: 'each character is 5 bits, so precision p covers 5p bits split between the two axes',
+        readAs: 'A geohash character carries 5 bits, alternating between longitude and latitude. More ' +
+          'characters means a smaller cell, and the shared prefix of two geohashes tells you how close ' +
+          'they are.',
         detail: 'The property that makes geohash useful is a direct consequence: because the bits are ' +
           'interleaved from the most significant end, a prefix of a geohash *is* a bounding box, and truncating ' +
           'the string is zooming out. That makes "everything near here" a prefix scan in any ordered store, with ' +
@@ -268,6 +298,8 @@
         term: 'The boundary problem, and why every query checks neighbours',
         plain: 'Two points a metre apart can sit either side of a cell boundary and share no prefix at all.',
         formal: 'adjacency in space does not imply adjacency in the code; the worst neighbour gap is Θ(grid area)',
+        readAs: 'Two points can be side by side on the map and at opposite ends of the curve. The worst gap ' +
+          'grows with the whole grid, which is why a range query has to be split into runs at all.',
         detail: 'The standard fix is to compute the query cell and its eight neighbours and scan all nine ' +
           'prefixes, which is why every geohash proximity recipe has that step and why leaving it out produces a ' +
           '"nearby" list that mysteriously omits things across a street. S2 and H3 exist largely to make this ' +

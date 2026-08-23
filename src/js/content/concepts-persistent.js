@@ -56,6 +56,9 @@
         term: 'Sharing is measured in distinct nodes, not allocations',
         plain: 'Count the node objects reachable from any version; that is what keeping the history actually costs.',
         formal: 'distinct nodes ≪ versions × size is the claim; anything else is not sharing',
+        readAs: 'If persistence is working, the total nodes ever allocated is far below the number of ' +
+          'versions times the size of each — that is what ≪ means. If it is not far below, every ' +
+          'version has quietly been copied whole.',
         detail: 'Counting allocations flatters the fat-node method, which allocates almost nothing and grows ' +
           'its existing nodes instead. Counting only the latest version flatters everything, because the latest ' +
           'version is one tree. The honest number is how many distinct objects the whole history holds, and ' +
@@ -67,6 +70,9 @@
         term: 'The read path is where the cost hides',
         plain: 'Every persistence method moves work somewhere; only path copying leaves the query untouched.',
         formal: 'path copying O(log n); fat node O(log n · log v); node copying O(log n)',
+        readAs: 'Three ways to make a structure persistent and what each costs per query. Path copying is the ' +
+          'simplest and the one to reach for; fat nodes add a second log because every field read has ' +
+          'to search a version list.',
         detail: 'This is the axis that decides the choice in practice, and it is invisible in a table of space ' +
           'costs. A structure that is read a thousand times per write wants the cheapest possible query and ' +
           'will happily pay a path per update; a structure recording an audit log that is almost never read ' +
@@ -194,6 +200,8 @@
         term: 'A persistent segment tree is path copying with a payload',
         plain: 'An update rebuilds one root-to-leaf path and shares every sibling subtree.',
         formal: 'exactly ⌈log₂ n⌉ + 1 new nodes per update',
+        readAs: 'Each update rebuilds only the root-to-leaf path, which is the tree height plus the leaf ' +
+          'itself. Everything else is shared with the previous version, untouched.',
         detail: 'This is the cleanest instance of structural sharing there is, because the count is exact ' +
           'rather than expected: a segment tree over n leaves is perfectly balanced, there is no rebalancing, ' +
           'and an update touches precisely the path. The measured figure and the bound are the same number, ' +
@@ -205,6 +213,8 @@
         term: 'Keeping every version is cheap; copying every version is not',
         plain: 'The whole history costs the initial tree plus one path per update.',
         formal: 'O(n + u log n) against O(u · n) for snapshots',
+        readAs: 'Persistence costs one build plus a log per update. Taking a full snapshot per update costs a ' +
+          'copy each time. The gap between those two is the entire reason the structure exists.',
         detail: 'The arithmetic is worth doing once because the ratio is larger than intuition suggests. 500 ' +
           'versions of a 1 024-element array is half a million element-slots if each version is a copy, and ' +
           'about seven and a half thousand nodes if the versions share - and the gap widens linearly with the ' +
@@ -227,6 +237,9 @@
         term: 'One version per prefix answers order statistics',
         plain: 'Build a counting tree over the value domain after each element; subtracting two versions counts a range.',
         formal: 'version r+1 minus version l counts exactly the values in positions [l, r]',
+        readAs: 'Subtract one persistent version from another and what remains is exactly the elements added ' +
+          'between them — the square brackets meaning both ends are included. Two roots and a ' +
+          'subtraction answer a range query with no extra structure.',
         detail: 'The trick is worth learning as a technique rather than as a structure. Two persistent trees ' +
           'built from the same shape can be walked *together*, and the difference of their stored counts is the ' +
           'count for the interval between them - so a descent guided by that difference finds the k-th smallest ' +
@@ -271,6 +284,8 @@
         term: 'The space accounting has to be per version',
         plain: 'Report nodes added by each version, not the total, or sharing is invisible.',
         formal: 'nodes(v) − nodes(v−1) is the number the structure is chosen for',
+        readAs: 'The figure that matters is how many nodes one more version costs, not how many exist in ' +
+          'total. If that difference is the tree height, the sharing is working.',
         detail: 'A total node count grows with the history whatever the structure does, so it cannot ' +
           'distinguish sharing from copying. The per-version delta can, and it is also the number an operator ' +
           'needs: it says what one more snapshot will cost, which is the question actually being asked when ' +

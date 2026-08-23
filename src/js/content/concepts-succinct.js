@@ -10,6 +10,9 @@
         term: 'The succinct model: close to the minimum, still fast',
         plain: 'Store about as many bits as information theory demands, and keep queries at their usual cost.',
         formal: 'Z + o(Z) bits, where Z is the information-theoretic minimum',
+        readAs: 'The structure uses the theoretical minimum number of bits, plus an overhead that becomes a ' +
+          'vanishing fraction of it as the data grows — that is what little-o means here. Not "small ' +
+          'overhead": overhead that disappears relative to the data.',
         detail: 'The definition is precise and it is worth holding onto, because "compressed" and "succinct" ' +
           'are different promises. A compressed structure is small and has to be decompressed to be used; a ' +
           'succinct one is small *and* supports its operations directly on the small form. The o(Z) is the ' +
@@ -21,6 +24,9 @@
         term: 'Rank in three lookups and a popcount',
         plain: 'Precompute a running count every superblock and every block, then popcount the partial word.',
         formal: 'rank1(i) = superblock[i/S] + block[i/B] + popcount(word & mask)',
+        readAs: 'Counting the 1 bits before position i is three lookups added together: a coarse total, a ' +
+          'finer one within it, and a single popcount for the last word. Constant time, and the tables ' +
+          'are what the extra bits are spent on.',
         detail: 'The two levels exist to keep both tables small: absolute counts every 2 048 bits are 32 bits ' +
           'each and cost 1.6%, and relative counts every 256 bits fit in 16 bits and cost 6.3%. One level ' +
           'alone forces a choice between a huge table and a long scan; two levels make the total under 8% with ' +
@@ -54,6 +60,8 @@
         term: 'Sometimes an array of positions is smaller',
         plain: 'At low density, storing where the ones are beats storing a bit for every position.',
         formal: 'positions cost 32m bits; the vector costs n(1 + overhead)',
+        readAs: 'Storing m positions outright costs 32 bits each; storing a bit per slot costs a bit per slot ' +
+          'plus the index overhead. Which is cheaper depends entirely on how dense the set is.',
         detail: 'The crossover is real and the section refuses to hide it. At 50% density a bit vector with its ' +
           'index is nearly fifteen times smaller than a list of positions, and at 2% density the list of ' +
           'positions is smaller. "Succinct" is a claim relative to a model, and the model here is a dense bit ' +
@@ -65,6 +73,9 @@
         term: 'Elias-Fano: monotone sequences in about 2 + log(u/n) bits each',
         plain: 'Split each value into high and low bits; store the high bits in unary in a bit vector and pack the low ones.',
         formal: 'n(2 + ⌈log₂(u/n)⌉) bits, independent of the universe size beyond the ratio',
+        readAs: 'Elias-Fano needs about 2 bits per element plus the log of how sparse the set is. The ' +
+          'universe can be enormous — what costs you is the ratio of universe to elements, not the ' +
+          'universe itself.',
         detail: 'The high-bit vector holds exactly n ones and at most n zeros, so it is 2n bits however large ' +
           'the universe is - which is why the cost depends on u/n rather than on u. Recovering a value is one ' +
           '`select1` on that vector plus a read of the packed low bits, so the structure is random access ' +
@@ -99,6 +110,9 @@
         term: 'Two bits per node, against forty-eight bytes',
         plain: 'An ordinal tree of n nodes needs about 2n bits; a pointer tree costs a node object per node.',
         formal: 'the number of ordinal trees on n nodes is the Catalan number, so log₂ C(n) ≈ 2n bits',
+        readAs: 'Count how many distinct trees of n nodes exist, take the log base 2, and you have the fewest ' +
+          'bits any encoding could use. It comes to about 2 bits per node — which is the target every ' +
+          'succinct tree encoding is measured against.',
         detail: 'The information-theoretic argument is what makes 2 bits the target rather than a lucky ' +
           'encoding: there are Catalan-many shapes, and naming one of them takes about 2n bits however you ' +
           'write it down. Both encodings in this section hit that bound, and the difference against a pointer ' +
@@ -110,6 +124,9 @@
         term: 'LOUDS: level-order unary degree sequence',
         plain: 'Write, for each node in breadth-first order, one 1 per child followed by a 0.',
         formal: 'B = 10 · (1^deg(v) 0 for each v in level order)',
+        readAs: 'Write the tree as bits: for every node in level order, one 1 per child followed by a 0. The ' +
+          'superscript means repetition. Two bits per node, and navigation becomes rank and select over ' +
+          'that string.',
         detail: 'The encoding has two indexes hiding in it, and seeing them is what makes the navigation ' +
           'obvious. The k-th one in the whole string is node k, because every node except the super-root is ' +
           'pointed at by exactly one 1. And node v\'s children are described in the run that starts just past ' +
@@ -121,6 +138,8 @@
         term: 'Balanced parentheses: depth-first, open and close',
         plain: 'Write ( on the way down and ) on the way up; subtree size and depth fall out immediately.',
         formal: 'subtree size = (close − open + 1) / 2; depth = excess at that position',
+        readAs: 'In a balanced-parentheses encoding, a subtree\'s size is how far apart its brackets sit, ' +
+          'halved. Its depth is how many brackets are still open at that point.',
         detail: 'BP and LOUDS encode the same tree in the same 2n bits and are good at different questions. ' +
           'BP gives subtree size and depth directly, which LOUDS does not, and it is the encoding of choice ' +
           'when those matter. The catch is that navigation needs `findClose`, and that is only constant time ' +
@@ -154,6 +173,9 @@
         term: 'Wavelet trees: the same idea over an alphabet',
         plain: 'At each level record which half of the alphabet each symbol went to, and recurse on rank.',
         formal: 'n log₂ σ bits; access, rank and select in O(log σ) bit-vector operations',
+        readAs: 'A wavelet tree costs the same bits as storing the text — n characters times the bits per ' +
+          'character, σ being the alphabet size — and answers rank and select in a number of steps set ' +
+          'by the alphabet, not by the text length.',
         detail: 'A bit vector answers rank and select for a two-symbol alphabet. A wavelet tree lifts that to ' +
           'any alphabet by splitting it in half at each level, so a symbol\'s path through the levels *is* its ' +
           'binary representation and the bit vectors record which way each occurrence went. The size is ' +
@@ -223,6 +245,8 @@
         term: 'The operations are why it won',
         plain: 'Every pair of container types has its own intersection path, and none of them decompresses.',
         formal: 'array ∩ bitmap probes the bitmap once per array element: O(|array|), not O(universe)',
+        readAs: 'Intersecting a sparse container with a dense one costs one probe per sparse element, not one ' +
+          'per possible value. Choosing the loop by container type is where Roaring gets its speed.',
         detail: 'This is the part that distinguishes Roaring from a merely smaller encoding. Intersecting a ' +
           'five-element array container with a full bitmap container touches five elements and zero bitmap ' +
           'words; the same operation on two bitmap containers touches 2 048 words and is a straight AND. A ' +
@@ -234,6 +258,9 @@
         term: 'Run containers are chosen by measurement',
         plain: 'Convert a chunk to runs only when 4 bytes per run beats what it currently costs.',
         formal: 'runBytes = 4 · runs; convert iff runBytes < min(arrayBytes, 8 KB)',
+        readAs: 'Runs cost 4 bytes each — a start and a length — so switch to a run encoding only when that ' +
+          'beats both of the other two representations. The container type is a measurement, not a ' +
+          'guess.',
         detail: '`runOptimize` is a separate pass rather than something the insert path decides, because the ' +
           'run count is only known once the chunk is complete. Sorted identifier sets - document ids, primary ' +
           'keys, timestamps - are mostly long consecutive stretches, so it is usually a large win; on random ' +
@@ -267,6 +294,8 @@
         term: 'Static indexes: a perfect hash plus a succinct payload',
         plain: 'When the key set never changes, drop the collision handling and store the values succinctly.',
         formal: 'minimal perfect hash at ~2.5 bits per key, plus a rank-indexed payload array',
+        readAs: 'About 2.5 bits per key buys a function that maps your keys onto 0 … n−1 with no collisions ' +
+          'and no gaps, so the values can sit in a plain array with no keys stored at all.',
         detail: 'This is where 9.7, 9.8 and 9.9 meet. A read-only dictionary needs no probing, no tombstones ' +
           'and no load factor: a minimal perfect hash maps each key to a distinct slot in [0, n), and the ' +
           'payload lives in an array indexed by that slot, itself possibly a wavelet tree or an Elias-Fano ' +

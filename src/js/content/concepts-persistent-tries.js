@@ -10,6 +10,9 @@
         term: 'Five bits per level, thirty-two children per node',
         plain: 'Consume 5 bits of the key at each level, so a 32-bit key is exhausted in seven levels at the very worst.',
         formal: 'depth ≤ ⌈32/5⌉ = 7, and 32^7 = 34 359 738 368',
+        readAs: 'Consuming 5 bits of the hash per level, a 32-bit hash runs out after 7 levels — and 7 levels ' +
+          'of 32-way branching addresses 34 billion entries. The tree is effectively constant depth for ' +
+          'any real map.',
         detail: 'This is where "O(log₃₂ n)" comes from and why immutable collections get away with calling ' +
           'themselves effectively constant time. The claim is fair rather than a fudge: seven levels covers ' +
           'thirty-four billion elements, so the depth is bounded by a small number in any program that fits in ' +
@@ -21,6 +24,9 @@
         term: 'popcount(bitmap & (bit − 1)) is the whole structure',
         plain: 'Store a 32-bit occupancy map and a dense array of only the occupied children; that expression is the index.',
         formal: 'slot = popcount(bitmap & (bit − 1)), where bit = 1 << fragment',
+        readAs: 'Mask off every bit below the one you want, then count the bits that remain set — that count ' +
+          'is the index into the compact child array. popcount is "how many bits are 1", and it is a ' +
+          'single CPU instruction.',
         detail: 'Without it a 32-way node is a 32-slot array that is almost entirely empty, and the structure ' +
           'allocates hundreds of bytes per node forever. With it a node holding three children is an array of ' +
           'three, and finding the right one is a mask, an AND and a population count - no search and no ' +
@@ -32,6 +38,9 @@
         term: 'A node array with holes is a bug, not an optimisation',
         plain: 'The child array length must equal the popcount of the bitmap, always.',
         formal: 'children.length === popcount(bitmap) is the invariant',
+        readAs: 'The array holds exactly as many children as the bitmap has bits set — no gaps and no spares. ' +
+          'That is what makes the node compact, and it is the first thing a bug in the bitmap ' +
+          'arithmetic breaks.',
         detail: 'The bitmap and the array are two representations of the same fact, and the index arithmetic ' +
           'assumes they agree. If an insertion updates the bitmap without splicing the array - or splices at ' +
           'the wrong offset - every subsequent lookup on that node reads a neighbour\'s child, which returns ' +
@@ -54,6 +63,8 @@
         term: 'The persistent vector is the same trie, indexed by position',
         plain: 'Use the bits of the index instead of the bits of a hash, and the trie becomes an array.',
         formal: 'element i lives at path (i >>> shift) & 31 for shift = level·5 down to 0',
+        readAs: 'Read the index 5 bits at a time, from the top down: shift the bits you want into place and ' +
+          'mask off the rest. Each group of 5 bits picks one of 32 children.',
         detail: 'Nothing about the structure changes; only where the five-bit fragments come from. Because ' +
           'positions are dense the nodes are full rather than sparse, so the bitmap is unnecessary and the ' +
           'child array is a plain 32-slot block. That is what makes indexing a handful of array reads and why ' +
@@ -86,6 +97,9 @@
         term: '"Immutable is slow" is a claim about allocation',
         plain: 'The asymptotics are fine; what costs is the garbage a path per update produces.',
         formal: 'O(log₃₂ n) time, O(log₃₂ n) allocation, and allocation is the term that hurts',
+        readAs: 'Log to base 32 is a small number — 7 at most — so both figures are effectively constant. The ' +
+          'one that costs you is the allocation, because it is real garbage rather than just pointer ' +
+          'chasing.',
         detail: 'A persistent update is a logarithm of pointer writes, which is not slow by any reasonable ' +
           'standard. What is expensive is that each of those writes is a *new object*, so a tight update loop ' +
           'produces garbage at a rate the collector notices. That is the whole reason transients exist, and ' +
@@ -166,6 +180,9 @@
         term: 'The measure must actually be a monoid',
         plain: 'Associative with an identity, or the cached values do not compose.',
         formal: '(a ⊕ b) ⊕ c = a ⊕ (b ⊕ c) and e ⊕ a = a',
+        readAs: 'The two rules a measurement must obey: brackets do not matter, and there is an identity ' +
+          'element that changes nothing. Any operation with those two properties can be cached in a ' +
+          'finger tree — which is why the same code counts, sums and takes maxima.',
         detail: 'The whole structure rests on being able to combine a node\'s cached measure with its ' +
           'neighbours\' in any grouping, because the grouping is whatever the tree happens to be. A ' +
           'non-associative measure gives answers that depend on the shape rather than on the contents, which ' +
@@ -212,6 +229,8 @@
         term: 'Local edits cost O(1), not O(depth)',
         plain: 'An edit replaces the focus and touches nothing else; the path is rebuilt once, when you ask for the root.',
         formal: 'k edits under one focus: O(k + depth) rather than O(k · depth)',
+        readAs: 'Walk to the spot once and make all k edits there, instead of descending from the root for ' +
+          'each one. The depth is paid once instead of k times.',
         detail: 'This is the property the whole idea exists for. A naive persistent "update at this path" ' +
           'rebuilds the path on every single edit, so a hundred edits under one subtree pay a hundred paths. A ' +
           'zipper defers the rebuild until the focus leaves, so the same hundred edits pay one. That is the ' +
@@ -222,6 +241,8 @@
         term: 'Navigating without editing is the identity',
         plain: 'Move anywhere you like and rebuild; the result must be the original tree.',
         formal: 'toRoot(moves(focus(t))) = t',
+        readAs: 'Focus somewhere, move about, walk back up, and you get the original tree back. That round ' +
+          'trip is what makes a zipper a view of a structure rather than a copy of one.',
         detail: 'This is the property to test first, because it catches every sibling-ordering mistake at once. ' +
           'The left siblings are stored reversed so the nearest is at the head - that is what makes `left` an ' +
           'O(1) move - and getting the reversal wrong on the way back out produces a tree with the same nodes ' +

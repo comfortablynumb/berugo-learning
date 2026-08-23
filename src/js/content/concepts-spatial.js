@@ -10,6 +10,9 @@
         term: 'Bucket by cell, scan the neighbourhood',
         plain: 'Divide space into equal squares, put each object in the square it lands in, and a query reads only the squares it touches.',
         formal: 'cell(x, y) = (⌊x/c⌋, ⌊y/c⌋); a radius-r query reads the cells covering [x±r, y±r]',
+        readAs: 'Divide each coordinate by the cell size and round down, and you have the cell a point lives ' +
+          'in. A query within radius r has to read every cell touching the square from x−r to x+r and ' +
+          'y−r to y+r.',
         detail: 'There is no tree, no balancing and no comparison: the cell index is two divisions and the bucket ' +
           'is an array offset. That is the entire structure, and it is why a grid beats every tree in this ' +
           'milestone whenever the data is evenly dense - the constant factor of "compute an index, read an array" ' +
@@ -22,6 +25,9 @@
         term: 'The cell size is a work minimum, not a rule of thumb',
         plain: 'Small cells scan many nearly empty buckets; large cells scan few buckets full of far-away objects.',
         formal: 'work(c) ≈ (⌈2r/c⌉+1)² + ρ·((⌈2r/c⌉+1)·c)²',
+        readAs: 'Two costs pulling opposite ways: the number of cells you visit, which grows as cells get ' +
+          'smaller, plus the points inside them, which grows as cells get larger. ρ is the point ' +
+          'density. The best cell size is where the two curves cross.',
         detail: 'Both terms are visible in the same sweep and they move in opposite directions, so the total has a ' +
           'genuine minimum rather than a monotone slope. The folklore answer - "make the cell the query radius" - ' +
           'is close but not exact: on 20 000 uniform points with radius 25 the measured minimum is at a cell of ' +
@@ -34,6 +40,8 @@
         term: 'Candidates per result is the only comparable number',
         plain: 'Divide the objects tested by the objects returned; 1.0 is perfect and anything large is wasted work.',
         formal: 'selectivity = πr² / (scanned cell area)',
+        readAs: 'What fraction of the area you scanned actually falls inside the query circle. πr² is the ' +
+          'circle\'s area; everything beyond it is work you did and threw away.',
         detail: 'Raw counts cannot be compared across structures whose nodes mean different things - a quadtree ' +
           'node and a grid cell are not the same unit - but "points examined per point returned" is the same ' +
           'quantity everywhere and is what actually costs time. It also exposes the failure mode that a hit rate ' +
@@ -45,6 +53,8 @@
         term: 'Density variation is what kills a grid',
         plain: 'A grid assumes objects are spread evenly; a cluster puts hundreds of them in one bucket.',
         formal: 'cost is ρ_local·(scanned area), and ρ_local can be many times the mean ρ',
+        readAs: 'The cost depends on the density where the query lands, not the average density of the whole ' +
+          'map. A grid sized on the mean falls apart in a city centre.',
         detail: 'The mean density is unchanged when the data clusters - the same 20 000 points are in the same ' +
           'box - so a sizing calculation based on the average is still "right" and the query is still slow, ' +
           'because a query only ever meets local density. That is why the trees in the rest of this milestone ' +
@@ -57,6 +67,8 @@
         term: 'Hashing the cell removes the bounds and adds collisions',
         plain: 'Mix the cell coordinates into a fixed table instead of addressing an array, so space can be unbounded.',
         formal: 'bucket = mix(cx·p₁ ⊕ cy·p₂) mod m',
+        readAs: 'Turn a pair of cell coordinates into one bucket index: multiply each by its own large prime, ' +
+          'XOR them together, mix, and take the remainder. Unbounded space, bounded memory.',
         detail: 'A direct-addressed grid costs memory proportional to the *area* it covers, occupied or not, which ' +
           'is fatal for sparse or unbounded worlds. Hashing makes memory proportional to the objects instead, at ' +
           'the price that two unrelated cells can share a bucket and a query then examines objects nowhere near ' +
@@ -80,6 +92,8 @@
         term: 'Objects larger than a cell straddle it',
         plain: 'An object overlapping four cells is stored in all four, so one query can meet it four times.',
         formal: 'placements(o) = ⌈w/c + 1⌉ · ⌈h/c + 1⌉',
+        readAs: 'How many cells one object of width w and height h can straddle, worst case. An object larger ' +
+          'than a cell has to be registered in every cell it touches, and this is that count.',
         detail: 'There are exactly two workable answers and one broken one. Store the object in every cell it ' +
           'overlaps and deduplicate at query time - which is what this module does, and it reports the repeats ' +
           'rather than hiding them - or store it once at a coarser level, which is the loose quadtree of 8.2. The ' +
@@ -92,6 +106,8 @@
         term: 'The prediction is a test, not a formality',
         plain: 'Compute what a uniform grid should cost from density alone, then compare it with the measurement.',
         formal: 'E[candidates] = (n/A) · ((⌈2r/c⌉+1)·c)²',
+        readAs: 'On average, the density (points over area) times the area you scan. It is the formula the ' +
+          'demo\'s candidate counts are checked against.',
         detail: 'Agreement means the data really is uniform at the scale the query works at, and the grid is the ' +
           'right structure. Disagreement is the single cheapest signal that it is not, and it arrives before any ' +
           'user notices a slow tail. This is the same discipline as reporting a predicted false-positive rate ' +
@@ -106,6 +122,8 @@
         term: 'Subdivision of space, not of the data',
         plain: 'A node owns a square; when it holds too many objects it splits into four children of a quarter the area.',
         formal: 'a node at depth d owns a square of side S/2^d',
+        readAs: 'Each level halves the side of the region, so depth d covers the whole space divided by 2 to ' +
+          'the power d. Ten levels take a kilometre down to a metre.',
         detail: 'This is the one structural difference from a k-d tree and everything else follows from it. The ' +
           'splits are at fixed geometric positions, so the tree\'s shape is a function of the coordinates rather ' +
           'than of the data - which makes a node\'s square computable from its path with no stored bounds, makes ' +
@@ -118,6 +136,9 @@
         term: 'The depth cap is a correctness requirement',
         plain: 'Coincident points never separate, so "split until one point per leaf" recurses until the stack dies.',
         formal: 'if p₁ = p₂ then every subdivision puts both in the same child, for every depth',
+        readAs: 'Two points at identical coordinates can never be separated by splitting, so the tree grows ' +
+          'forever trying. This is the degenerate case every quadtree implementation has to handle ' +
+          'explicitly.',
         detail: 'This is the bug that actually takes quadtrees down in production, and it is not an edge case: ' +
           'duplicate coordinates arrive from rounded GPS fixes, from default positions, from grid-snapped level ' +
           'data and from any integer coordinate system. The fix is two rules together - cap the depth, and let a ' +
@@ -173,6 +194,9 @@
         term: 'An object\'s size sets its level',
         plain: 'In a loose tree an object lives at the depth where a node is about as big as it is, whatever the depth cap says.',
         formal: 'depth(o) ≈ log₂(S / size(o))',
+        readAs: 'Where an object settles in a loose tree: log base 2 of how many times its size divides into ' +
+          'the world. Big objects sit near the root, small ones near the leaves, and nothing has to be ' +
+          'duplicated.',
         detail: 'This is the property that makes loose quadtrees the standard choice for moving objects: an ' +
           'object that moves a little stays in the same node, because the node it belongs to is decided by its ' +
           'size rather than by its exact position. It also explains a result that looks like a bug the first ' +
@@ -184,6 +208,9 @@
         term: 'Octrees are the same structure with eight children',
         plain: 'Three axes instead of two: each split makes eight children, and everything else is unchanged.',
         formal: 'children = 2^d for d dimensions',
+        readAs: 'A quadtree in 2 dimensions has 4 children, an octree in 3 has 8, and in d dimensions it is 2 ' +
+          'to the power d. By 10 dimensions that is 1 024 children per node, which is why these ' +
+          'structures stop at 3.',
         detail: 'The generalisation is mechanical and the cost is not. Fan-out doubles, so the tree is shallower ' +
           'for the same point count, but a node carries eight pointers instead of four and a split creates eight ' +
           'children for one crowded octant, so the empty-node problem gets worse in exactly the ratio the fan-out ' +
@@ -198,6 +225,9 @@
         term: 'Alternating splits at data points',
         plain: 'Split on x, then y, then x again, each time at the median of the points in that node.',
         formal: 'axis = depth mod d; the split value is a coordinate of an actual point',
+        readAs: 'Cycle through the axes as you descend — the remainder of the depth divided by the number of ' +
+          'dimensions — and split on a real point\'s coordinate rather than a midpoint, so the tree ' +
+          'stays balanced on the data you actually have.',
         detail: 'Splitting at the median rather than at the middle of the box is what makes the tree balanced on ' +
           'any distribution, which is precisely what a quadtree cannot promise. The cost is that a node has to ' +
           'store its split value - the geometry is no longer implied by the path - and that the tree cannot be ' +
@@ -210,6 +240,9 @@
         term: 'The descent finds a candidate; the backtrack makes it right',
         plain: 'Walking down to the leaf the query falls in gives a nearby point, very often not the nearest one.',
         formal: 'after the near side, revisit the far side whenever |q[axis] − split| < best',
+        readAs: 'Search the side the query falls on first, then check whether the splitting plane is closer ' +
+          'than the best point found so far. The bars are absolute distance. If it is not, the entire ' +
+          'far subtree can be skipped.',
         detail: 'The nearest neighbour is frequently on the other side of a plane the query is close to, so the ' +
           'descent alone is a heuristic with no bound at all. Deleting the backtrack does not produce a crash or ' +
           'an empty result: it produces a plausible point at a plausible distance, on every query, and nothing ' +
@@ -234,6 +267,8 @@
         term: 'k-nearest needs a bounded worst-so-far',
         plain: 'Keep the k best found so far; the pruning bound is the worst of them, and is infinite until you have k.',
         formal: 'prune when bound ≥ best[k−1], with best[k−1] = ∞ while |best| < k',
+        readAs: 'Skip a subtree once it cannot beat the worst of the k answers you are holding. Until you ' +
+          'have k of them that worst answer counts as infinity, so nothing is pruned at all.',
         detail: 'The infinite bound is not a special case bolted on: until k candidates exist there is nothing to ' +
           'prune against, and a search that prunes early there returns fewer than k answers. Keeping the set ' +
           'sorted rather than in a heap is worth it below a few dozen neighbours, because the bound is then a ' +
@@ -245,6 +280,8 @@
         term: 'Deletion is a tombstone and a rebuild',
         plain: 'Removing a point properly means finding a replacement along the same axis; every real implementation marks it instead.',
         formal: 'a proper delete is O(n^(1−1/d)) and rebalances nothing',
+        readAs: 'Removing a point costs n to the power (1 − 1/d) — in 2 dimensions about √n, and worse as ' +
+          'dimensions rise — and leaves the tree no better balanced than it found it.',
         detail: 'Marking is cheap and correct - a marked point is skipped when scoring - but it does not make the ' +
           'tree smaller, so the traversal still walks past the tombstones and the leaves stay as full as they ' +
           'were. That cost is invisible in the answers and visible in the counters, which is exactly why the ' +
@@ -267,6 +304,10 @@
         term: 'The curse of dimensionality is measurable',
         plain: 'As dimensions rise, a ball of radius r fills a vanishing share of the box, so nothing prunes.',
         formal: 'vol(ball)/vol(cube) → 0, so almost every subtree intersects the search radius',
+        readAs: 'As dimensions rise, a ball takes up a vanishing fraction of the cube around it, so a search ' +
+          'radius that seems small still reaches into nearly every branch. That is the curse of ' +
+          'dimensionality in one line, and it is why exact nearest-neighbour search degrades to a full ' +
+          'scan.',
         detail: 'This is not a slow degradation with a useful middle: the fraction of the data a k-d tree touches ' +
           'goes from a third of a percent at two dimensions to essentially all of it by sixteen, on the same ' +
           'point count. Past that the tree is a linear scan with pointer chasing added, which is strictly worse ' +
