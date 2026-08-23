@@ -40,13 +40,15 @@
         plain: 'A cap on instrumented operations. It is enforced from inside, so it can only count ' +
           'work that passes through the instrumented primitives.',
         formal: 'ops.count(name) throws StepBudgetExceeded past the limit',
+        readAs: 'Every counted operation adds one to a running total, and the first call past the ' +
+          'limit raises an error instead of doing its job.',
         detail: 'Every instrumented primitive increments a total, and past the limit the next call ' +
           'throws StepBudgetExceeded instead of returning. That gives you a named error at the ' +
           'operation that went over, which is far more useful than a terminated worker — but it only ' +
           'sees work routed through ops. A loop that compares with < directly, or one that does no ' +
           'work at all, passes the step budget untouched and has to be caught by the wall clock ' +
           'instead. The two limits are complementary on purpose: the step budget explains, the wall ' +
-          'clock guarantees. The default limit is 5 × 10⁷ operations.',
+          'clock guarantees. The default limit is 5 × 10⁷ operations — fifty million.',
         example: 'A runaway sort that keeps calling ops.cmp stops with a step-budget error.'
       },
       {
@@ -62,7 +64,8 @@
           'individually, which is what lets a lab distinguish an algorithm that scans twice from one ' +
           'that scans once. The trade is that uninstrumented work is invisible, so a lab that grades ' +
           'on counts must name the primitives it expects the answer to go through.',
-        example: 'The binary-search lab asserts at most ⌈log₂ n⌉ + 1 calls to ops.cmp.'
+        example: 'The binary-search lab asserts at most ⌈log₂ n⌉ + 1 calls to ops.cmp — the ' +
+          'number of times you can halve n before reaching one item, rounded up, plus one.'
       },
       {
         term: 'Seeded determinism',
@@ -83,8 +86,11 @@
         plain: 'A timing is reported as a median over repeated runs with the count shown, never as ' +
           'a single sample.',
         formal: 'median(t₁…tₙ) with n displayed',
+        readAs: 'Take the n timings, sort them, and report the one in the middle — then print n ' +
+          'beside it, so a reader can see how many runs that middle came from.',
         detail: 'A browser timing is a noisy sample: JIT warm-up, garbage collection, timer ' +
-          'quantisation and whatever else the machine is doing all land on it, and they land ' +
+          'quantisation — the clock only ticks in steps, so it rounds — and whatever else the ' +
+          'machine is doing all land on it, and they land ' +
           'asymmetrically — interference only ever makes a run slower. The median throws away that ' +
           'tail, where the mean chases it, so half the runs above and half below is the honest ' +
           'summary of a one-sided noise distribution. Showing n alongside it is the other half of the ' +
@@ -113,6 +119,9 @@
         plain: 'A graded test is serialised to source text and rebuilt inside the sandbox, so it can ' +
           'use its two arguments and nothing else from the file it was written in.',
         formal: "String(spec.assert) → new Function('return (' + src + ')')()",
+        readAs: 'Turn the test function back into its source text, send the text across to the ' +
+          'worker, and compile it into a function again on the other side. The arrow is "becomes": ' +
+          'what arrives is a new function built from the same characters, and nothing else.',
         detail: 'A worker is a separate realm, and the only thing that crosses to it is data. A ' +
           'function is not data: it carries a closure, and the closure cannot be posted. So each test ' +
           'is stringified, sent as source, and rebuilt on the far side with new Function — which ' +
@@ -131,12 +140,13 @@
         formal: 'assert on ops.snapshot(), not on durationMs',
         detail: 'Timing-based grading has to pick a threshold, and any threshold is wrong on some ' +
           'machine: too tight and a correct answer fails on a busy laptop, too loose and a quadratic ' +
-          'solution passes on a fast one. An operation count has no such dial. ⌈log₂ n⌉ + 1 ' +
+          'solution passes on a fast one. An operation count has no such dial. ⌈log₂ n⌉ + 1 — the ' +
+          'number of halvings it takes to reach a single item, rounded up, plus one — ' +
           'comparisons is a claim about the algorithm that holds on every machine, at every ' +
           'processor speed, under every JIT — which means a failed assertion says something true ' +
           'about your code rather than something true about the afternoon. Times are still measured ' +
           'and shown, because constants matter; they are just never what decides a pass.',
-        example: 'The binary-search lab asserts ≤ ⌈log₂ n⌉ + 1 comparisons; the same code on a slower ' +
+        example: 'The binary-search lab asserts at most ⌈log₂ n⌉ + 1 comparisons; the same code on a slower ' +
           'laptop still passes.'
       }
     ],
@@ -175,8 +185,14 @@
         term: 'Number is a float64',
         plain: 'Every JavaScript number is an IEEE 754 double, so integers are exact only up to 2⁵³.',
         formal: 'Number.MAX_SAFE_INTEGER = 2⁵³ − 1 = 9007199254740991',
-        detail: 'A double carries a 52-bit stored mantissa plus one implicit leading bit, so it can ' +
-          'represent every integer up to 2⁵³ exactly and then starts skipping: above 2⁵³ only even ' +
+        readAs: 'Two multiplied by itself 53 times, minus one: 9 007 199 254 740 991, a little over ' +
+          'nine quadrillion. Up to there every whole number has its own exact representation; past ' +
+          'it they start sharing one.',
+        detail: 'A double stores a number in three parts: a sign, an exponent saying roughly how ' +
+          'big it is, and a mantissa — the significant digits, written in binary. The mantissa is 52 ' +
+          'stored bits plus one leading bit that is always 1 and so is never written down, which ' +
+          'gives 53 bits of precision. That is exactly enough to name every whole number up to 2⁵³, ' +
+          'and past it the values start skipping: above 2⁵³ only even ' +
           'numbers are representable, above 2⁵⁴ only multiples of four, and so on. Nothing warns you ' +
           'at the boundary — 2⁵³ + 1 simply rounds to 2⁵³ and compares equal to it. This is why ' +
           'database ids, nanosecond timestamps and 64-bit counters cannot ride in a Number, and why ' +
@@ -188,9 +204,15 @@
         term: 'int32 coercion',
         plain: 'Bitwise operators convert to signed 32-bit first; >>> converts to unsigned 32-bit.',
         formal: 'ToInt32 for & | ^ << >> ~, ToUint32 for >>>',
+        readAs: 'Before any of the operators & | ^ << >> or ~ looks at your value, the language ' +
+          'quietly converts it to a signed 32-bit integer; >>> converts it to an unsigned one ' +
+          'instead. "Signed" means the top bit is read as a minus sign rather than as part of the ' +
+          'number.',
         detail: 'Every bitwise operator starts by truncating its operands to 32 bits, which is why ' +
           'they behave like a different language from the arithmetic around them. The conversion ' +
-          'wraps modulo 2³² and then reinterprets the top bit as a sign, so a value above 2³¹ − 1 ' +
+          'wraps modulo 2³² — it keeps only the remainder after dividing by 2³², which in bits just ' +
+          'means keeping the last 32 of them — and then reads the top bit as a sign, so a value ' +
+          'above 2³¹ − 1 ' +
           'comes back negative — the classic surprise being a hash that goes negative the moment it ' +
           'sets its high bit. The unsigned shift >>> is the one exception, and it is the standard ' +
           'idiom for getting an unsigned reading back: x >>> 0. Truncation also silently discards ' +
@@ -202,13 +224,18 @@
         plain: 'True 32-bit integer multiplication. Plain * goes through float64 and loses the low ' +
           'bits that hashing depends on.',
         formal: 'Math.imul(a, b) ≡ (a · b) mod 2³² as a signed int32',
+        readAs: 'Math.imul(a, b) gives the same answer as multiplying a by b and then throwing away ' +
+          'everything except the last 32 bits, read back with the top bit as a sign. "mod 2³²" is ' +
+          '"the remainder after dividing by 2³²", which in binary is exactly that truncation.',
         detail: 'Multiplying two 32-bit values produces up to 64 bits of product, and a double can ' +
           'only hold 53 of them exactly — so plain * rounds, and what it throws away is the low end. ' +
           'For a hash function that is fatal: mixing works precisely by carrying low-bit entropy ' +
           'upward, and a rounded product corrupts the bits the next step depends on. Math.imul does ' +
           'the multiply as the hardware does it, keeping the low 32 bits and discarding the high ' +
           'ones, which is exactly what a mod-2³² mixer wants. Every murmur- or xxhash-style step in ' +
-          'this platform is written with it, and swapping in * changes the avalanche result.',
+          'this platform is written with it, and swapping in * changes the avalanche result — ' +
+          'avalanche being the property a hash is judged on: flip one bit of the input and about ' +
+          'half the output bits should flip.',
         example: 'Every mixing step in a murmur-style hash is a Math.imul.'
       },
       {
@@ -229,9 +256,15 @@
         plain: 'The gap between neighbouring doubles grows with magnitude. Number.EPSILON is that gap ' +
           'just above 1 — it is not a universal tolerance.',
         formal: 'ulp(x) = 2^(⌊log₂|x|⌋ − 52); Number.EPSILON = 2⁻⁵²',
-        detail: 'Floating point spaces its values geometrically: the mantissa has a fixed 52 bits, so ' +
-          'the absolute gap between consecutive representable numbers doubles every time the exponent ' +
-          'does. Near 1 that gap is 2⁻⁵², which is what Number.EPSILON names; near 10⁹ it is about ' +
+        readAs: 'The gap between x and the next representable number along is two raised to the ' +
+          'power of (the exponent of x, minus 52) — where the exponent is how many times you can ' +
+          'halve x before landing between 1 and 2. Number.EPSILON is that same gap measured at ' +
+          'x = 1, which works out at 2⁻⁵², about 2.22 × 10⁻¹⁶.',
+        detail: 'Floating point does not space its values evenly. It has a fixed 52 bits of ' +
+          'precision to spend wherever the number happens to sit, so the gap between one ' +
+          'representable value and the next is a fixed fraction of the value rather than a fixed ' +
+          'amount — which means the gap doubles every time the magnitude does. Near 1 it is 2⁻⁵², ' +
+          'which is what Number.EPSILON names; near 10⁹ it is about ' +
           '1.19 × 10⁻⁷, roughly a billion times larger. Comparing with Math.abs(a − b) < ' +
           'Number.EPSILON therefore means "bit-identical" at large magnitudes — it rejects even ' +
           'adjacent doubles — and means "wildly loose" near zero. A tolerance that works across ' +

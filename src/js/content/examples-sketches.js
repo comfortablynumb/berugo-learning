@@ -135,7 +135,7 @@
           {
             do: 'State the trade in one line.',
             why: 'Because the decision is a comparison against what sits behind the filter.',
-            work: 'blocked: 1 line, 1.204% · standard: 6.95 lines, 0.992%\n' +
+            work: 'blocked: 1 line, 1.204%; standard: 6.95 lines, 0.992%\n' +
               '21% more misses, each costing whatever the miss path costs',
             result: 'buy the cache line when the miss path is cheap; buy the accuracy when it is a disk'
           }

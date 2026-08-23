@@ -99,7 +99,7 @@
           {
             do: 'Start with an extremely rare term.',
             why: 'This is the case galloping is famous for.',
-            work: '10 against 100 000\nlinear 90 566 comparisons · skip 1 749 · galloping 245',
+            work: '10 against 100 000\nlinear 90 566 comparisons; skip 1 749; galloping 245',
             result: 'galloping is 370× cheaper than the linear merge'
           },
           {

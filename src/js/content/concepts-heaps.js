@@ -120,7 +120,7 @@
       {
         term: 'The two curves',
         plain: 'Comparisons form a shallow U with its minimum near d = 3; swaps fall monotonically as d rises.',
-        formal: 'sift-up: log_d n comparisons · sift-down: d·log_d n',
+        formal: 'sift-up: log_d n comparisons; sift-down: d·log_d n',
         detail: 'The sift-down cost is d·log_d n = d·ln n / ln d, which is minimised at d = 3 and ' +
           'rises slowly after — and the sift-up cost is log_d n, which falls monotonically. Since a ' +
           'mix contains both, the total comparison count is a shallow U: measured over 50 000 ' +

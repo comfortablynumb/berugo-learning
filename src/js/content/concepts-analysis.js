@@ -17,22 +17,30 @@
         term: 'Witness pair',
         plain: 'The constant and threshold that make a big-O claim true. Without one, the claim is not yet a claim.',
         formal: 'f = O(g) ⟺ ∃c > 0, n₀ : ∀n ≥ n₀, f(n) ≤ c·g(n)',
-        detail: 'The definition is an existential statement, so proving it means exhibiting the two ' +
-          'numbers: a multiplier c and a size n₀ past which the inequality never fails again. Until ' +
-          'you can name them you have an impression rather than a bound. Neither number is unique — ' +
-          'if (c, n₀) works then so does (2c, n₀) and any larger threshold — which is why nobody ' +
-          'quotes them and why the smallest pair is not what you are asked for. What the pair buys ' +
-          'you is a decision procedure: to refute a claimed bound, show that for every candidate c ' +
-          'the inequality fails infinitely often.',
+        readAs: 'f is O(g) exactly when you can find one multiplier c and one starting size n₀ such ' +
+          'that, for every n from n₀ upward, f(n) never rises above c times g(n). The whole ' +
+          'definition is a promise that two such numbers exist.',
+        detail: 'Big-O never claims your function is g. It claims that if you scale g by some fixed ' +
+          'multiplier you get a ceiling your function stays under — and not everywhere, only from ' +
+          'some input size onward. That is why proving a bound means naming the two numbers the ' +
+          'definition promises exist: the multiplier c, and the size n₀ where the ceiling starts ' +
+          'holding. Until you can name them you have an impression rather than a bound. Neither ' +
+          'number is unique — if (c, n₀) works then so does (2c, n₀) and any larger threshold — ' +
+          'which is why nobody quotes them and why the smallest pair is not what you are asked for. ' +
+          'What the pair buys you is a way to argue back: to refute a claimed bound, show that for ' +
+          'every candidate c the inequality fails infinitely often.',
         example: 'n log n = O(n²) with c = 1, n₀ = 1.'
       },
       {
         term: 'Big-O, Ω and Θ',
         plain: 'Upper bound, lower bound, and both at once. O is an upper bound, not a tight one.',
         formal: 'Θ(g) = O(g) ∩ Ω(g)',
+        readAs: 'Θ(g) is the overlap of two claims: the functions O(g) caps from above, and the ' +
+          'functions Ω(g) floors from below. To be Θ(g) a function has to be in both groups.',
         detail: 'Three relations, and only one of them says what people usually mean. O(g) caps a ' +
           'function from above, Ω(g) floors it from below, and Θ(g) asserts both at once, so the ' +
-          'function grows exactly like g up to constants. Almost every sentence that reaches for O ' +
+          'function grows exactly like g up to constants — you are allowed to multiply g by any ' +
+          'fixed number, but not to change its shape. Almost every sentence that reaches for O ' +
           'is trying to say Θ: "merge sort is O(n log n)" is true, but so is "merge sort is O(n⁵)", ' +
           'and the reader cannot tell which you meant. Θ is a strictly stronger claim and needs two ' +
           'witness pairs rather than one, which is exactly why it is the one worth proving.',
@@ -42,6 +50,8 @@
         term: 'Abuse of notation',
         plain: 'O(g) is a set of functions, but everyone writes = instead of ∈. The equality does not run backwards.',
         formal: 'f = O(g) means f ∈ O(g)',
+        readAs: 'Read "f = O(g)" as "f is one of the functions in the collection O(g)". The equals ' +
+          'sign is doing the job of "is a member of", and it only works read left to right.',
         detail: 'O(g) denotes the set of all functions bounded above by a constant multiple of g, so ' +
           'the honest symbol is ∈. The convention of writing = is sixty years old and is not going ' +
           'to change, but it misleads in one specific way: equality is symmetric and this is not. ' +
@@ -54,9 +64,12 @@
         term: 'Little-o',
         plain: 'Strictly smaller: f is negligible compared with g, for every constant, not just some constant.',
         formal: 'f = o(g) ⟺ lim f(n)/g(n) = 0',
+        readAs: 'f is little-o of g exactly when the ratio f(n)/g(n) can be pushed below any number ' +
+          'you care to name, just by taking n large enough. That is what "the limit is 0" says.',
         detail: 'Big-O allows f to keep pace with g — n² = O(n²) — while little-o insists f is ' +
-          'eventually beaten by every constant multiple of g, however small. That quantifier swap is ' +
-          'the whole difference: O asks for some c that works, o demands that all of them do. So o(g) ' +
+          'eventually beaten by every constant multiple of g, however small. Swapping "some" for ' +
+          '"every" is the whole difference: O asks for some multiplier c that works, o demands that ' +
+          'all of them do. So o(g) ' +
           'is a strict subset of O(g), and the functions in the difference are exactly those that ' +
           'grow at the same rate as g. In practice little-o is how lower-order terms get dismissed ' +
           'cleanly: writing T(n) = n² + o(n²) says the rest genuinely vanishes relative to the main ' +
@@ -80,6 +93,8 @@
         term: 'Asymptotic ≠ practical',
         plain: 'The definition only promises behaviour past n₀, and n₀ can be larger than any input you have.',
         formal: 'the guarantee begins at n₀',
+        readAs: 'Everything the notation promises starts at some input size n₀ and says nothing at ' +
+          'all below it — and nothing in the definition stops n₀ from being astronomically large.',
         detail: 'Nothing in the definition constrains the constant or the threshold, so an algorithm ' +
           'can be asymptotically superior and useless: if the crossover sits at 10⁴⁰ items, the ' +
           'better complexity class is a statement about a machine nobody will build. Fast matrix ' +
@@ -94,6 +109,8 @@
         term: 'A case, not an algorithm',
         plain: 'O, Ω and Θ bound a stated case. A sentence that names no case is not yet a claim.',
         formal: 'worst-case T(n) = Θ(n²), not "the algorithm is Θ(n²)"',
+        readAs: 'T(n) is the running time on an input of size n, and the growth symbol bounds it ' +
+          'only for whichever case you named — worst, best or average. Name the case in the sentence.',
         detail: 'An algorithm does not have one running time, it has a different one for every input, ' +
           'so a bound has to say which of those it is talking about: the worst input of size n, the ' +
           'best, or the expectation over some distribution. The notation and the case are ' +
@@ -107,6 +124,8 @@
         term: 'More than one variable',
         plain: 'When the input has two sizes, both belong in the bound — collapsing them hides the case that hurts.',
         formal: 'O(V + E), not O(V) or O(E)',
+        readAs: 'V is how many vertices the graph has and E how many edges. The cost is capped by ' +
+          'their sum, and neither one on its own can stand in for it.',
         detail: 'Some inputs have two independent dimensions, and squeezing them into one loses the ' +
           'thing you needed to know. A graph traversal costs O(V + E), and neither term dominates in ' +
           'general: a sparse graph has E ≈ V so the bound behaves linearly in V, while a dense one ' +
@@ -123,6 +142,9 @@
         term: 'Recursion tree',
         plain: 'Each level of recursion drawn out, with the work it costs. Summing the levels solves the recurrence.',
         formal: 'level i has a^i subproblems of size n/b^i',
+        readAs: 'By depth i the problem has split a ways per level, so there are a multiplied by ' +
+          'itself i times — that is what a^i means, "a to the power of i" — and each piece is n ' +
+          'divided by b that many times over.',
         detail: 'The tree turns a recurrence into an arithmetic problem you can see. Level i holds a^i ' +
           'calls, each on an input of size n/b^i, so the work on that level is a^i · f(n/b^i) and the ' +
           'total is the sum down to the leaves. Drawing it answers the question the closed form hides ' +
@@ -136,7 +158,11 @@
         term: 'Critical exponent',
         plain: 'The exponent at which the leaves and the root cost the same. Comparing f(n) against it picks the case.',
         formal: 'log_b(a)',
-        detail: 'The number of leaves in the recursion tree is a^(log_b n) = n^(log_b a), and each ' +
+        readAs: 'Read it "log base b of a": how many times you multiply b by itself to reach a. ' +
+          'Splitting into a = 2 pieces that are each b = 2 times smaller gives 1.',
+        detail: 'The number of leaves in the recursion tree is a^(log_b n), which is the same number ' +
+          'as n^(log_b a) — the two are equal because raising to a power and taking a logarithm undo ' +
+          'each other. Each ' +
           'leaf costs a constant, so the leaf row alone costs Θ(n^log_b a). That expression is the ' +
           'pivot the whole analysis turns on: if f(n) grows more slowly, the leaves dominate and the ' +
           'answer is the leaf count; if it grows faster, the root dominates and the answer is f(n); ' +
@@ -149,12 +175,16 @@
         term: 'Master theorem',
         plain: 'A lookup table for T(n) = a·T(n/b) + f(n). Three cases: leaves win, tie, root wins.',
         formal: 'compare f(n) with n^log_b(a)',
+        readAs: 'Work out what the leaf row costs — n raised to the power log-base-b-of-a — then ask ' +
+          'whether the work you do per call, f(n), is smaller than that, the same, or larger. That ' +
+          'one comparison picks the case.',
         detail: 'The theorem packages the recursion-tree argument for the shape that covers most ' +
           'divide-and-conquer algorithms: a subproblems, each a factor b smaller, plus f(n) to split ' +
           'and combine. Case 1 has f polynomially smaller than n^log_b a and answers Θ(n^log_b a); ' +
           'case 2 has them equal and answers Θ(n^log_b a · log n); case 3 has f polynomially larger, ' +
           'passes the regularity check and answers Θ(f(n)). The word polynomially is the catch — the ' +
-          'comparison must be by a factor of n^ε for some ε > 0, not merely by a logarithm, which is ' +
+          'comparison must be by a whole factor of n raised to some positive power ε, however tiny, ' +
+          'and not merely by a logarithm — which is ' +
           'why perfectly ordinary recurrences fall into the gaps between the cases.',
         example: 'a=8, b=2, f=n² gives log₂8 = 3 > 2, so Θ(n³).'
       },
@@ -162,6 +192,9 @@
         term: 'Regularity condition',
         plain: 'Case 3 needs f to shrink fast enough as the problem shrinks, or the theorem does not apply.',
         formal: 'a·f(n/b) ≤ c·f(n) for some c < 1',
+        readAs: 'All the work one level down — a pieces, each costing f(n/b) — has to come to at ' +
+          'most some fixed fraction c of the work at this level, with c strictly below 1. That is ' +
+          'what makes the levels shrink fast enough for the total to collapse onto the top one.',
         detail: 'Case 3 concludes that the root dominates, which is only sound if the next level down ' +
           'really is cheaper by a constant factor — otherwise the levels could stay comparable and ' +
           'the sum would not collapse onto the root. The regularity condition states exactly that: ' +
@@ -175,6 +208,9 @@
         term: 'Gap cases',
         plain: 'Recurrences that fall between the cases. The theorem stays silent; the tree still answers.',
         formal: 'f between n^log_b(a) and n^log_b(a)·log n',
+        readAs: 'f sits above the leaf cost, but by less than a factor of log n — too little ' +
+          'separation for case 1 or case 3, and not equality for case 2. The theorem has no case ' +
+          'that fits.',
         detail: 'Because cases 1 and 3 require a polynomial separation, there is room between them ' +
           'that no case reaches: an f that beats n^log_b a by only a logarithmic factor is neither ' +
           'polynomially smaller, nor equal, nor polynomially larger. T(n) = 2T(n/2) + n/log n sits ' +
@@ -188,9 +224,13 @@
         term: 'Akra–Bazzi',
         plain: 'The generalisation for uneven splits, where subproblems are different sizes.',
         formal: 'T(n) = Σ aᵢT(n/bᵢ) + f(n)',
+        readAs: 'The cost at size n is the total over each differently shaped recursive call — aᵢ of ' +
+          'them, each on a piece n/bᵢ as big — plus f(n) for the work outside the calls. The Σ just ' +
+          'says "add all of these up", and the small i is the index counting through them.',
         detail: 'The master theorem assumes every subproblem is the same size, and plenty of real ' +
           'algorithms do not oblige. Akra–Bazzi handles a sum of differently shaped recursive calls ' +
-          'by solving Σ aᵢ·bᵢ^(−p) = 1 for the exponent p, then integrating f against it; the ' +
+          'by first solving Σ aᵢ·bᵢ^(−p) = 1 for the exponent p — one equation, whose only unknown ' +
+          'is p — then integrating f against it; the ' +
           'master theorem is the special case where all the bᵢ agree. It also tolerates the floors, ' +
           'ceilings and small perturbations that a careful implementation forces on you and that the ' +
           'simpler theorem quietly ignores. The cost is that you solve an equation and evaluate an ' +
@@ -201,6 +241,9 @@
         term: 'Substitution',
         plain: 'Guess the answer, then prove it by induction. The only method that works when nothing else applies.',
         formal: 'assume T(k) ≤ c·g(k) for k < n, prove it for n',
+        readAs: 'Take the bound as already granted for every input smaller than n, feed that into ' +
+          'the recurrence, and show the same bound falls out for n itself. That is induction: this ' +
+          'step plus a base case covers every size there is.',
         detail: 'Substitution is the fallback with no preconditions: assume the bound for all smaller ' +
           'inputs, substitute it into the recurrence, and show the same bound comes out for n. It is ' +
           'also the only method that verifies rather than derives, so the recursion tree usually ' +
@@ -243,6 +286,7 @@
         term: 'Aggregate method',
         plain: 'Total the whole sequence, then divide. Simplest, and often enough.',
         formal: 'T(n)/n',
+        readAs: 'Add up what all n operations cost, then divide by n. One figure for the whole run.',
         detail: 'The aggregate method skips the bookkeeping and bounds the sum directly. For a ' +
           'doubling array the copies form a geometric series — 1 + 2 + 4 + … + n < 2n — so n pushes ' +
           'cost under 3n in total and under 3 each on average. It works whenever you can see the ' +
@@ -269,11 +313,17 @@
         term: 'Potential method',
         plain: 'Define Φ over the data structure so a drop in Φ pays for an expensive step. The one that generalises.',
         formal: 'â = actual + Φ(after) − Φ(before)',
+        readAs: 'The amortised cost of an operation — written â and read "a-hat" — is what it really ' +
+          'cost, plus however much the stored-up potential Φ rose, or minus however much it fell. An ' +
+          'operation that banks potential is charged more than it spent; one that spends it is ' +
+          'charged less.',
         detail: 'The potential method replaces the scattered credits of the accounting method with a ' +
           'single function of the structure\'s state. Amortised cost is defined as the actual cost ' +
           'plus the change in Φ, so a cheap operation that builds up potential is charged extra and ' +
-          'an expensive one that discharges it is charged little. Summing telescopes: the total ' +
-          'amortised cost equals the total actual cost plus Φ(end) − Φ(start), so as long as Φ starts ' +
+          'an expensive one that discharges it is charged little. Add those up across the sequence ' +
+          'and the middle terms cancel in pairs — that is what "telescoping" means — leaving the ' +
+          'total amortised cost equal to the total actual cost plus Φ(end) − Φ(start). So as long ' +
+          'as Φ starts ' +
           'at zero and never goes negative, the amortised total bounds the real one. It generalises ' +
           'the other two methods and is what scales to splay trees and Fibonacci heaps, where no ' +
           'per-operation credit story is available.',
@@ -325,6 +375,9 @@
         term: 'Credit invariant',
         plain: 'The bank must be non-negative after every prefix of the sequence, not merely at the end.',
         formal: 'Σ(charged − actual) ≥ 0 for every prefix',
+        readAs: 'Add up (what you charged minus what it really cost) over the first operation, then ' +
+          'the first two, then the first three, and so on. Every one of those running totals has to ' +
+          'be zero or more — not merely the last one.',
         detail: 'The whole force of an amortised argument comes from the claim that charged work ' +
           'covers real work at all times, so the obligation is a prefix property: after every ' +
           'operation, the credit banked so far is at least the real cost incurred so far. A scheme ' +
@@ -341,6 +394,9 @@
         term: 'Indicator variable',
         plain: 'A 0/1 variable for "did this event happen". Summing them turns counting into probability.',
         formal: 'X = ΣXᵢⱼ, E[Xᵢⱼ] = P(event)',
+        readAs: 'X is the total, built by adding up one 0-or-1 variable per possible occurrence. ' +
+          'Because each of those is only ever 0 or 1, its long-run average is exactly the ' +
+          'probability that its event happens — which is what P(event) denotes.',
         detail: 'An indicator is 1 when its event happens and 0 otherwise, which makes its ' +
           'expectation exactly the probability of the event — the bridge that turns a counting ' +
           'problem into a probability problem. The technique is to write the quantity you care about ' +
@@ -354,6 +410,8 @@
         term: 'Linearity of expectation',
         plain: 'Expectations add even when the events depend on each other. The most useful fact in the subject.',
         formal: 'E[X + Y] = E[X] + E[Y], always',
+        readAs: 'The average of a sum is the sum of the averages, with no conditions attached — the ' +
+          'two quantities may be as tangled up with one another as you like.',
         detail: 'E[X + Y] = E[X] + E[Y] holds with no independence assumption whatsoever, which is ' +
           'what makes the indicator technique work on problems that are hopelessly tangled. In ' +
           'quicksort, whether elements 3 and 7 get compared is strongly dependent on which pivots ' +
@@ -367,12 +425,16 @@
         term: 'Expected comparisons',
         plain: 'Randomised quicksort compares two elements only if one is chosen as pivot before everything between them.',
         formal: 'E[X] = Σ_{i<j} 2/(j−i+1) ≈ 2n ln n',
+        readAs: 'Add up 2/(j − i + 1) over every pair of ranks i and j where i comes before j — that ' +
+          'restriction is what the small print under the Σ says — and the total works out at roughly ' +
+          '2n ln n.',
         detail: 'Consider the j − i + 1 elements ranked between i and j inclusive. The first of them ' +
           'chosen as a pivot decides everything: if it is i or j the two are compared, and if it is ' +
           'any of the ones between, they are split apart and never compared at all. Every one of ' +
           'those elements is equally likely to be picked first, so the probability is exactly ' +
           '2/(j − i + 1) — no conditioning on the rest of the run required. Summing over all pairs ' +
-          'gives a harmonic series and the classic ≈ 2n ln n ≈ 1.39 n log₂ n, which is about 39% more ' +
+          'gives a harmonic series — 1 + 1/2 + 1/3 + … , whose total grows like ln n — and the ' +
+          'classic ≈ 2n ln n ≈ 1.39 n log₂ n, which is about 39% more ' +
           'comparisons than the information-theoretic floor.',
         example: 'At n = 200 that is about 2 000 comparisons.'
       },
@@ -394,6 +456,9 @@
         term: 'Concentration',
         plain: 'How rarely a run strays far from the expectation. Without it, an expectation says little about one run.',
         formal: 'Markov, Chebyshev, Chernoff',
+        readAs: 'Three named inequalities, in rising order of strength and of what each demands: ' +
+          'Markov needs only the average, Chebyshev also needs the spread, and Chernoff needs the ' +
+          'parts being added up to be independent of one another.',
         detail: 'An expectation is one number summarising a distribution, and on its own it does not ' +
           'promise that any particular run lands near it — a variable that is 0 almost always and ' +
           'enormous occasionally can have a comfortable mean. Concentration results supply the ' +
@@ -421,20 +486,27 @@
         term: 'Union bound',
         plain: 'The probability that any of several bad events happens is at most the sum of their probabilities. Crude, and usually enough.',
         formal: 'P(∪Aᵢ) ≤ ΣP(Aᵢ)',
+        readAs: 'The chance that at least one of the bad events happens is at most the sum of their ' +
+          'individual chances. The ∪ is "or" taken across the whole list, and P(…) is "the ' +
+          'probability of".',
         detail: 'The union bound throws away all information about how the bad events overlap and ' +
           'simply adds their probabilities, which is why it needs no independence and never fails. ' +
           'It is loose exactly when the events overlap heavily, and tight when they are nearly ' +
           'disjoint — which describes most failure analyses, where each bad event is individually ' +
           'rare. The standard move is to make each of n bad events improbable enough that n times ' +
           'that probability is still small: for the coupon collector, running n·(ln n + c) draws ' +
-          'leaves each coupon unseen with probability at most e^(−c)/n, so the chance that any is ' +
-          'missing is at most e^(−c).',
+          'leaves each coupon unseen with probability at most e^(−c)/n — e being the constant ' +
+          '2.718…, so e^(−c) shrinks fast as c grows — and the chance that any is missing is ' +
+          'therefore at most e^(−c).',
         example: 'n coupons each unseen with probability 1/(n·e^c) gives P(not done) ≤ e^(−c).'
       },
       {
         term: 'The mean is not the typical run',
         plain: 'For a skewed distribution the expectation can sit where almost no run lands.',
         formal: 'E[X] ≠ median(X) whenever the distribution is skewed',
+        readAs: 'The average and the middle value are two different numbers whenever the outcomes ' +
+          'are lopsided: a long tail on one side drags the average towards it and leaves the middle ' +
+          'roughly where it was.',
         detail: 'Reporting an expectation invites the reader to picture runs clustered around it, ' +
           'which is only true for a symmetric, tightly concentrated variable. Coupon collection at ' +
           'n = 100 has a mean of 518.7 draws and a standard deviation of 128.3 — a quarter of the ' +
@@ -465,6 +537,9 @@
         term: 'Decision tree',
         plain: 'Every execution is a root-to-leaf path; each leaf is one possible answer.',
         formal: 'height ≥ ⌈log₂(leaves)⌉',
+        readAs: 'The longest root-to-leaf path is at least log base 2 of the number of leaves, ' +
+          'rounded up — because every extra comparison can at best double how many leaves you are ' +
+          'able to reach.',
         detail: 'Model the algorithm as a binary tree: internal nodes are comparisons, the two edges ' +
           'are the two answers, and a leaf is the point at which the algorithm commits to an output. ' +
           'A run is a path, so the number of comparisons in the worst case is the height. Since the ' +
@@ -478,9 +553,14 @@
         term: 'Information-theoretic bound',
         plain: 'k yes/no answers distinguish at most 2^k outcomes. Counting outcomes gives the floor.',
         formal: 'k ≥ log₂ n! ≈ n log₂ n − 1.44n',
+        readAs: 'You need at least log base 2 of n! comparisons, where n! — "n factorial" — is the ' +
+          'number of different orders n items can be put in. A standard approximation turns that ' +
+          'into roughly n log₂ n minus 1.44n.',
         detail: 'Each comparison returns one bit, so k of them can distinguish at most 2^k cases; if ' +
           'the answer must select among N possibilities then 2^k ≥ N and k ≥ log₂ N. For sorting, ' +
-          'N = n! and Stirling gives log₂ n! ≈ n log₂ n − n log₂ e = n log₂ n − 1.4427n, which is ' +
+          'N = n! — the number of orders n items can be in — and Stirling\'s approximation, the ' +
+          'standard closed form for a factorial, gives log₂ n! ≈ n log₂ n − n log₂ e = ' +
+          'n log₂ n − 1.4427n, which is ' +
           'where the familiar n log n comes from and also where the −1.44n correction that people ' +
           'forget comes from. The argument is entirely about counting outcomes, so it applies to any ' +
           'problem you can count the answers of — searching among n items needs log₂ n, and finding ' +
@@ -544,6 +624,9 @@
         term: 'Facts, not comparisons',
         plain: 'Count what the answer requires the algorithm to know, then how much one operation can supply.',
         formal: '2n − 2 facts, ≤ 2 per comparison of two untouched elements',
+        readAs: 'Certifying both a minimum and a maximum takes 2n − 2 separate pieces of knowledge, ' +
+          'and one comparison supplies two of them only when both elements are still fresh — any ' +
+          'other comparison supplies just one.',
         detail: 'The sharpest bounds come from accounting for information rather than operations. To ' +
           'certify both a minimum and a maximum, every one of the other n − 2 elements must be known ' +
           'to have lost at least once and won at least once: that is 2n − 2 facts. A comparison ' +

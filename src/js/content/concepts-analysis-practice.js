@@ -17,6 +17,8 @@
         term: 'Crossover point',
         plain: 'The input size where the asymptotically better algorithm actually becomes faster.',
         formal: 'smallest n with T_better(n) < T_worse(n)',
+        readAs: 'The crossover is the first input size at which the algorithm with the better complexity ' +
+          'class finally runs faster than the simpler one. Below it, the simpler one wins.',
         detail: 'Two algorithms in different complexity classes still cross at a specific size, and ' +
           'below it the worse class wins — asymptotics only promise an ordering eventually. The ' +
           'crossover is set entirely by the constants: insertion sort does more comparisons than ' +
@@ -31,6 +33,9 @@
         term: 'Hidden constant',
         plain: 'Everything the notation drops: allocation, recursion, branch misses, cache misses.',
         formal: 'T(n) = c·f(n) + lower-order terms',
+        readAs: 'The real running time is some fixed multiplier c times the shape f(n), plus smaller terms ' +
+          'that stop mattering as n grows. The notation keeps f and throws away c — and c is ' +
+          'where most engineering effort actually goes.',
         detail: 'Θ deliberately quotients out the multiplier so that algorithms can be compared ' +
           'independently of the machine, and that multiplier is where most engineering lives. It ' +
           'absorbs the cost of an allocation per node, a mispredicted branch per iteration, a cache ' +
@@ -85,6 +90,8 @@
         term: 'The line is the unit',
         plain: 'Memory moves in cache lines, not bytes. What a program costs is how many lines it touches, and how much of each it uses.',
         formal: '64-byte line = 16 int32 values',
+        readAs: 'A cache line is 64 bytes and a 32-bit integer is 4 bytes, so one line carries sixteen of ' +
+          'them. Touch any one and the hardware has already fetched all sixteen.',
         detail: 'The memory system has no way to move four bytes; the smallest transfer is a 64-byte ' +
           'line, so touching one int32 costs the same as touching all sixteen in that line. Traffic ' +
           'is therefore lines fetched, and efficiency is the fraction of each line you actually use ' +
@@ -97,7 +104,10 @@
       {
         term: 'Memory hierarchy',
         plain: 'Each level is roughly an order of magnitude slower and larger than the one above it.',
-        formal: 'L1 ≈ 1 ns · L2 ≈ 4 ns · L3 ≈ 12 ns · DRAM ≈ 80 ns',
+        formal: 'L1 ≈ 1 ns; L2 ≈ 4 ns; L3 ≈ 12 ns; DRAM ≈ 80 ns',
+        readAs: 'Four levels of memory with their typical access times, fastest first — L1, L2 and L3 being ' +
+          'progressively larger and slower caches, and DRAM the main memory behind them. A ' +
+          'nanosecond is a thousandth of a microsecond.',
         detail: 'Caches exist because fast memory is small and large memory is slow, so the hardware ' +
           'stages data through levels that trade capacity against latency. The ratios matter more ' +
           'than the absolute figures: a DRAM access costs roughly eighty times an L1 hit, which is ' +
@@ -156,6 +166,8 @@
         term: 'Streaming',
         plain: 'Hold one item, not the collection. Peak memory stops depending on input size.',
         formal: 'O(1) peak, O(n) time',
+        readAs: 'Peak memory stays at some fixed amount no matter how large the input is, while the time ' +
+          'still grows in step with it.',
         detail: 'If each item can be processed and discarded, peak memory becomes a constant and the ' +
           'input size stops being a limit at all — the difference between a job that handles a ' +
           'hundred-gigabyte file on a laptop and one that needs a bigger machine. The requirement is ' +
@@ -210,6 +222,8 @@
         term: 'Working set',
         plain: 'The bytes actually touched in a window of time. It, not the allocation, is what a cache sees.',
         formal: 'W(t, τ) = pages referenced in [t − τ, t]',
+        readAs: 'The working set at time t is every page the program touched during the window of length τ ' +
+          'ending at t. The square brackets denote that window, from t − τ up to and including t.',
         detail: 'Caches respond to what is being referenced now, not to what has been allocated, so ' +
           'the quantity that decides hit rate is the set of bytes touched within a recent window. A ' +
           'structure much larger than cache performs perfectly well if each phase touches a small ' +
@@ -240,6 +254,9 @@
         term: 'Doubling experiment',
         plain: 'Double the input and look at the cost ratio. The ratio names the exponent.',
         formal: 'T(2n)/T(n) → 2^k for Θ(n^k)',
+        readAs: 'If cost grows like n to the power k, then doubling n multiplies the cost by 2 to the power ' +
+          'k. So divide the two measured times and the ratio names the exponent: about 2 means ' +
+          'k = 1, about 4 means k = 2, about 8 means k = 3.',
         detail: 'For a power law the constant cancels in a ratio, so doubling the input and dividing ' +
           'the times gives 2^k directly and you never need to know c. A ratio near 2 is linear, near ' +
           '4 quadratic, near 8 cubic, and a little above 2 is linearithmic. The method is robust ' +
@@ -253,6 +270,9 @@
         term: 'Log-log slope',
         plain: 'A power law is a straight line on log-log axes, and its slope is the exponent.',
         formal: 'log T = k·log n + log c',
+        readAs: 'Take the logarithm of both sides of T = c·n^k and the power turns into a multiplication, ' +
+          'leaving the equation of a straight line: slope k, intercept log c. That is why a power ' +
+          'law plots straight on log-log axes.',
         detail: 'Taking logs of T = c·n^k gives log T = k·log n + log c, which is a straight line ' +
           'whose slope is the exponent and whose intercept is the constant. Plotting on log-log axes ' +
           'therefore turns "which curve is this" into "is this straight, and how steep" — a question ' +
@@ -266,6 +286,9 @@
         term: 'Curve fitting',
         plain: 'Fit candidate curves and compare residuals. Useful, and easy to over-trust when two candidates are close.',
         formal: 'minimise ‖y − c·f(n)‖',
+        readAs: 'Pick the multiplier c that makes the candidate curve sit as close to the measured points as ' +
+          'possible. The double bars mean the overall size of the gap between the two — one ' +
+          'number summarising the error at every point at once.',
         detail: 'Fitting each candidate model and ranking them by residual is the natural mechanised ' +
           'version of reading a plot, and it works well when the candidates are far apart. It ' +
           'becomes misleading when they are not: over a single decade of n, n log n and n^1.1 are ' +
@@ -279,6 +302,8 @@
         term: 'Asymptotic regime',
         plain: 'Small inputs are dominated by constants, so the measured exponent only settles at larger n.',
         formal: 'the fit applies past n₀',
+        readAs: 'Whatever the fit tells you is a claim about behaviour from some input size n₀ upward. Points ' +
+          'measured below n₀ describe the setup costs instead.',
         detail: 'Every complexity claim is about behaviour past some threshold, and measurement below ' +
           'that threshold describes the lower-order terms instead. At small n a quadratic routine ' +
           'spends most of its time in setup, allocation and the linear part, so the fitted exponent ' +
@@ -307,6 +332,9 @@
         term: 'Resolution limit',
         plain: 'A ratio table separates classes that differ by a factor of n. It cannot separate two curves that differ by a logarithm.',
         formal: 'n log n and n^1.1 give ratios 2.15 and 2.14 over a 16× range',
+        readAs: 'Two genuinely different growth shapes produce doubling ratios that differ in the second ' +
+          'decimal place, even measured across a sixteenfold spread of input sizes. Ordinary ' +
+          'measurement noise is larger than that gap.',
         detail: 'The doubling ratio for n log n creeps up as log n grows, while the ratio for n^1.1 ' +
           'is a constant 2.14 — and over a realistic 16× range those two sequences agree to within a ' +
           'hundredth. Since ordinary run-to-run jitter is a percent or two, the measurement cannot ' +
@@ -333,6 +361,9 @@
         term: 'Pre-asymptotic constants',
         plain: 'At small n the low-order terms dominate, so the fitted exponent describes the constants, not the class.',
         formal: 'T(n) = an² + bn + c with bn ≫ an² for small n',
+        readAs: 'The true cost has a quadratic part, a linear part and a fixed part. At small n the linear ' +
+          'part is much the larger, so what you measure there is the linear term wearing the name ' +
+          'of the quadratic one.',
         detail: 'A real cost function is a sum of terms, and the leading one only leads once n is ' +
           'large enough. With T(n) = an² + bn + c and a small a, the linear term can dominate ' +
           'throughout the range you measured, so the fit reports an exponent near 1 for a genuinely ' +
@@ -375,6 +406,9 @@
         term: 'Median and MAD',
         plain: 'A robust centre and a robust spread. The mean and standard deviation are moved by one outlier.',
         formal: 'MAD = median(|xᵢ − median|)',
+        readAs: 'Take how far each reading sits from the middle reading — the bars mean distance, so the ' +
+          'sign is dropped — and then take the middle of those distances. It is a spread that a ' +
+          'handful of extreme runs cannot move.',
         detail: 'Benchmark noise is one-sided — interference only ever makes a run slower — so the ' +
           'sample has a long right tail and the mean chases it: one GC pause in fifteen runs can ' +
           'move the mean several percent while leaving the median untouched. The median absolute ' +
@@ -414,6 +448,8 @@
         term: 'Reporting',
         plain: 'A number nobody can refute is not a result: give the median, the spread, the run count and the conditions.',
         formal: 'median ± MAD over n runs',
+        readAs: 'Report the middle reading, how far readings typically sit either side of it, and how many ' +
+          'runs produced both. All three, or the number cannot be argued with.',
         detail: 'A bare "3.2 ms" cannot be argued with, reproduced or compared, which makes it ' +
           'rhetoric rather than measurement. The minimum that makes a claim checkable is the centre, ' +
           'the spread, the number of runs and the conditions — machine, build, input size, warm or ' +
@@ -427,6 +463,10 @@
         term: 'Coefficient of variation',
         plain: 'The spread as a fraction of the middle. It is the one measured number that decides how many runs a claim needs.',
         formal: 'CV = sigma / mu',
+        readAs: 'The coefficient of variation is the standard deviation (sigma, the typical distance from ' +
+          'the average) divided by the mean (mu, the average itself). Dividing one by the other ' +
+          'cancels the units, which is what lets you compare noise between benchmarks of ' +
+          'completely different durations.',
         detail: 'Absolute spread cannot be compared across benchmarks of different durations, so ' +
           'divide it by the mean and you get a dimensionless noise level that can. The CV is what ' +
           'converts a desired resolution into a sample size, because the number of runs needed ' +
@@ -440,6 +480,10 @@
         term: 'Statistical power',
         plain: 'The chance of seeing a real difference of a given size. "No difference" from an underpowered run means nothing at all.',
         formal: 'n per arm = 2(z_a + z_b)^2 (CV/delta)^2',
+        readAs: 'The runs you need per side scales with the square of (your noise level divided by the ' +
+          'difference you want to detect). The z terms are fixed constants set by how confident ' +
+          'you want to be; everything that varies is in that ratio, and it is squared — so ' +
+          'halving the difference you want to resolve costs four times the runs.',
         detail: 'Power is the probability that an experiment detects an effect that is genuinely ' +
           'there. Run too few samples and the experiment is not capable of resolving the difference ' +
           'you are looking for, so "we saw no regression" reports the design of the benchmark rather ' +

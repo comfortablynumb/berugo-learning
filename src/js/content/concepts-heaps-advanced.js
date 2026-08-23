@@ -390,7 +390,7 @@
       {
         term: 'Little\'s law, from the other side',
         plain: 'The simulation reproduces L = λ·W to four decimal places, which is what makes it trustworthy.',
-        formal: 'L = λ·W · L = ρ/(1 − ρ) · W = 1/(μ − λ)',
+        formal: 'L = λ·W; L = ρ/(1 − ρ); W = 1/(μ − λ)',
         detail: 'M02.5 introduced Little\'s law as a measurement tool that needs no assumptions. Here ' +
           'it is a check on the simulator: measure the time-average number in the system, the ' +
           'per-customer average time in the system, and the arrival rate, and the three must satisfy ' +

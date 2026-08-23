@@ -248,7 +248,7 @@
       {
         term: 'Space reduction deletes the reconstruction',
         plain: 'One row keeps the value exactly and destroys the information a traceback walks.',
-        formal: 'a traceback requires best[i−1][·] at every i; a rolling array holds only the current row',
+        formal: 'a traceback requires every column of best[i−1] at every i; a rolling array holds only the current row',
         detail: 'This is the failure in the family that produces a plausible answer rather than an error. The ' +
           'one-row version is correct about the optimum and has no rows to walk backwards through, so ' +
           'traceback code left unchanged after the reduction returns an item list that does not sum to the ' +
