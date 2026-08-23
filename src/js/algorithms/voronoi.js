@@ -395,7 +395,9 @@
 
       stats.iterations += 1;
       stats.movement = moved;
-      history.push({ round: round + 1, movement: moved, spread: areaSpread(built.cells).spread });
+      const measured = areaSpread(built.cells);
+      history.push({ round: round + 1, movement: moved, spread: measured.spread,
+        ratio: measured.ratio });
       current = next;
     }
     return { sites: current, history: history, bounds: box, report: stats };

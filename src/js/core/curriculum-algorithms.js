@@ -519,6 +519,12 @@
               title: 'Triangulation',
               summary: 'Any valid triangulation joins the same points; the one that maximises the smallest angle is the one interpolation survives.',
               tags: ['triangulation', 'ear clipping', 'delaunay', 'empty circle property', 'in-circle predicate', 'bowyer-watson', 'edge flip', 'circumcircle', 'mesh quality', 'skinny triangles']
+            },
+            {
+              id: 'voronoi-diagrams',
+              title: 'Voronoi diagrams',
+              summary: 'A wrong diagram still looks right, so the only check worth trusting is a brute-force nearest-site grid.',
+              tags: ['voronoi', 'delaunay dual', 'circumcentre', 'half-plane intersection', 'unbounded cells', 'clipping', 'lloyd relaxation', 'centroidal', 'fortune sweep', 'nearest site']
             }]
         }
       ],
