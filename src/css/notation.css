@@ -1,0 +1,102 @@
+/*
+ * Notation chips: a symbol that explains itself.
+ *
+ * The marker has to be quiet enough that a paragraph with six of them still
+ * reads as prose, and obvious enough that a reader who is stuck knows there is
+ * something to reach for. A dotted underline in the accent hue does both, and
+ * costs no layout - an underline cannot reflow a line the way a border or a
+ * background chip can.
+ *
+ * The panel is CSS only. It opens on hover, on keyboard focus and on tap
+ * (tabindex makes an abbr focusable, which is what gives touch devices the
+ * gesture), so nothing here needs JavaScript and nothing can leak a listener
+ * when a section re-renders.
+ */
+
+abbr.notation {
+  text-decoration: underline dotted var(--accent);
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+  cursor: help;
+  position: relative;
+  font-variant: none;
+}
+
+abbr.notation:hover,
+abbr.notation:focus-visible {
+  text-decoration-style: solid;
+  outline: none;
+}
+
+/* The panel itself. Hidden by visibility rather than display so the text is
+   available to a screen reader through aria-label without a reflow on open. */
+abbr.notation::after {
+  content: attr(data-note);
+  position: absolute;
+  left: 0;
+  top: calc(100% + 0.5rem);
+  z-index: 40;
+  width: max-content;
+  max-width: min(22rem, 70vw);
+  padding: 0.5rem 0.625rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: left;
+  text-decoration: none;
+  letter-spacing: normal;
+  white-space: normal;
+  box-shadow: 0 6px 18px rgb(15 23 42 / 18%);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 120ms ease;
+  pointer-events: none;
+}
+
+abbr.notation:hover::after,
+abbr.notation:focus-visible::after,
+abbr.notation:focus::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Near the right edge the panel would run off the page, so the last chips on a
+   line hang their panel from the right instead. */
+abbr.notation.notation-end::after {
+  left: auto;
+  right: 0;
+}
+
+/* Inside the formal line every symbol is chipped, so the underline there has
+   to be lighter still or the line turns into a rule. */
+.concept .formal abbr.notation {
+  text-decoration-color: var(--text-muted);
+}
+
+.concept .formal abbr.notation:hover,
+.concept .formal abbr.notation:focus-visible {
+  text-decoration-color: var(--accent);
+}
+
+/* The plain-English reading of the formal line. It sits directly under the
+   notation it decodes, which is the only placement that makes it a translation
+   rather than another fact to hold. */
+.concept .reads-as {
+  display: block;
+  margin: -0.0625rem 0 0.5rem;
+  padding: 0.375rem 0.5rem 0.375rem 0.625rem;
+  border-left: 2px solid var(--accent-soft);
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+.concept .reads-as strong {
+  color: var(--text-muted);
+  font-weight: 600;
+}

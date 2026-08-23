@@ -37,10 +37,18 @@
     return host.Helpers.escapeHtml(value);
   }
 
-  function orientation(paragraphs) {
+  /* Orientation and the insight are prose the learner meets before any
+     concept, so they get their own annotator rather than sharing one: a symbol
+     first met in the opening paragraph should be decoded there too. */
+  function mark(sectionId) {
+    return host.NotationMarkup.createAnnotator({ sectionId: sectionId });
+  }
+
+  function orientation(paragraphs, sectionId) {
     if (!paragraphs || !paragraphs.length) return '';
+    const annotate = mark(sectionId);
     return '<div class="section-orientation">' +
-      paragraphs.map(function (text) { return '<p>' + esc(text) + '</p>'; }).join('') +
+      paragraphs.map(function (text) { return '<p>' + annotate.annotate(text) + '</p>'; }).join('') +
       '</div>';
   }
 
@@ -71,9 +79,10 @@
       '</section>';
   }
 
-  function insight(text) {
+  function insight(text, sectionId) {
     if (!text) return '';
-    return '<div class="insight"><strong>Senior insight.</strong> ' + esc(text) + '</div>';
+    return '<div class="insight"><strong>Senior insight.</strong> ' +
+      mark(sectionId).annotate(text) + '</div>';
   }
 
   function navLinks(sectionId) {
@@ -86,10 +95,10 @@
   }
 
   function describe(config, sectionId) {
-    return orientation(config.orientation) +
-      host.SectionConcepts.markup(host.ConceptRegistry.get(sectionId)) +
+    return orientation(config.orientation, sectionId) +
+      host.SectionConcepts.markup(host.ConceptRegistry.get(sectionId), { sectionId: sectionId }) +
       diagram(config.diagram, sectionId) +
-      insight(config.insight);
+      insight(config.insight, sectionId);
   }
 
   function exemplify(config, sectionId, exercises) {
@@ -177,6 +186,14 @@
     }));
   }
 
+  /* Notation chips explain themselves through a CSS panel, and only a browser
+     can say whether that panel would run off the column. This is that measure. */
+  function mountNotation(sectionId) {
+    const container = host.jQuery('#' + sectionId + '-content')[0];
+    host.NotationPanel.watch();
+    return host.NotationPanel.place(container);
+  }
+
   /** Mounts everything the shell owns: labs, the diagram, then the tab strip.
    *  Sections call this after injecting the rendered markup, then wire their
    *  own demo. Takes only { sectionId, app }: the rest comes from the config
@@ -190,8 +207,9 @@
     mountLabs(sectionId, exercises, app);
     const drewDiagram = mountDiagram(sectionId, config, app);
     const tabs = mountTabs(sectionId);
+    const flipped = mountNotation(sectionId);
 
-    return { labs: exercises.length, diagram: drewDiagram, tabs: tabs };
+    return { labs: exercises.length, diagram: drewDiagram, tabs: tabs, notation: flipped };
   }
 
   return {

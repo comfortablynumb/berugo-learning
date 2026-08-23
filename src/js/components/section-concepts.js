@@ -1,13 +1,23 @@
 /**
  * Renders the concepts block: term, plain statement, formal statement, the
- * detailed explanation, and a concrete example.
+ * plain-English reading of that statement, the detailed explanation, and a
+ * concrete example.
  *
- * All four are required. A term with only the formal notation teaches nobody,
- * a term with only the plain gloss cannot be checked against anything, and a
- * one-line gloss is a definition rather than an explanation - so `detail`
- * carries the mechanism, the reason it is built that way, and what breaks when
- * it is ignored. This block is the Description tab, and it is what the learner
- * lands on.
+ * A term with only the formal notation teaches nobody, a term with only the
+ * plain gloss cannot be checked against anything, and a one-line gloss is a
+ * definition rather than an explanation - so `detail` carries the mechanism,
+ * the reason it is built that way, and what breaks when it is ignored. This
+ * block is the Description tab, and it is what the learner lands on.
+ *
+ * `readAs` is the translation of the formal line into a sentence you could say
+ * out loud. It exists because the formal line is the one place the curriculum
+ * writes maths at a reader who was told the prose would be enough, and a line
+ * of symbols with no reading is a wall rather than a summary.
+ *
+ * Every field runs through the notation annotator, which decodes each symbol
+ * the first time it appears in a concept. The formal line asks for all of them
+ * decoded rather than the first: it *is* the notation, and a reader stuck on
+ * its third symbol is not helped by the first one being the only chip.
  */
 (function (root, factory) {
   const api = factory(root);
@@ -16,8 +26,21 @@
 }(typeof window !== 'undefined' ? window : null, function (scope) {
   'use strict';
 
-  function esc(value) {
-    return scope.Helpers.escapeHtml(value);
+  function markup(entries, options) {
+    if (!entries || !entries.length) return '';
+    const sectionId = options && options.sectionId;
+    return '<section class="section-block">' +
+      '<h3>Concepts</h3>' +
+      '<div class="concept-list">' +
+      entries.map(function (entry, index) {
+        return concept(entry, index, sectionId);
+      }).join('') +
+      '</div>' +
+      '</section>';
+  }
+
+  function annotator(sectionId) {
+    return scope.NotationMarkup.createAnnotator({ sectionId: sectionId });
   }
 
   /** `detail` is one paragraph or several; both arrive here as an array. */
@@ -26,30 +49,38 @@
     return (Array.isArray(detail) ? detail : [detail]).filter(Boolean);
   }
 
-  function explanation(detail) {
+  function explanation(detail, mark) {
     const parts = paragraphs(detail);
     if (!parts.length) return '';
     return '<div class="detail">' +
-      parts.map(function (text) { return '<p>' + esc(text) + '</p>'; }).join('') +
+      parts.map(function (text) { return '<p>' + mark.annotate(text) + '</p>'; }).join('') +
       '</div>';
   }
 
-  function concept(entry, index) {
-    return '<article class="concept">' +
-      '<h4 class="term"><span class="term-n">' + (index + 1) + '</span>' + esc(entry.term) + '</h4>' +
-      '<p class="plain">' + esc(entry.plain) + '</p>' +
-      (entry.formal ? '<div class="formal">' + esc(entry.formal) + '</div>' : '') +
-      explanation(entry.detail) +
-      (entry.example ? '<div class="example"><strong>In practice.</strong> ' + esc(entry.example) + '</div>' : '') +
-      '</article>';
+  function formal(entry, mark) {
+    if (!entry.formal) return '';
+    return '<div class="formal">' + mark.annotate(entry.formal, { all: true }) + '</div>' +
+      (entry.readAs
+        ? '<p class="reads-as"><strong>In words.</strong> ' + mark.annotate(entry.readAs) + '</p>'
+        : '');
   }
 
-  function markup(entries) {
-    if (!entries || !entries.length) return '';
-    return '<section class="section-block">' +
-      '<h3>Concepts</h3>' +
-      '<div class="concept-list">' + entries.map(concept).join('') + '</div>' +
-      '</section>';
+  function example(entry, mark) {
+    if (!entry.example) return '';
+    return '<div class="example"><strong>In practice.</strong> ' +
+      mark.annotate(entry.example) + '</div>';
+  }
+
+  function concept(entry, index, sectionId) {
+    const mark = annotator(sectionId);
+    return '<article class="concept">' +
+      '<h4 class="term"><span class="term-n">' + (index + 1) + '</span>' +
+      mark.annotate(entry.term) + '</h4>' +
+      '<p class="plain">' + mark.annotate(entry.plain) + '</p>' +
+      formal(entry, mark) +
+      explanation(entry.detail, mark) +
+      example(entry, mark) +
+      '</article>';
   }
 
   return { markup: markup };

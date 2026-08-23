@@ -21,6 +21,8 @@ const SectionShell = require('../../src/js/components/section-shell.js');
 const TabController = require('../../src/js/components/tab-controller.js');
 const Curriculum = require('../../src/js/core/curriculum.js');
 const Helpers = require('../../src/js/utils/helpers.js');
+const NotationMarkup = require('../../src/js/utils/notation-markup.js');
+const NotationPanel = require('../../src/js/components/notation-panel.js');
 
 function makeHost(options) {
   const settings = options || {};
@@ -43,6 +45,8 @@ function makeHost(options) {
       }
     },
     ChartBase: { repaints: 0, refreshVisible: function () { this.repaints += 1; return this.repaints; } },
+    NotationMarkup: NotationMarkup,
+    NotationPanel: NotationPanel,
     SectionConcepts: { markup: function (entries) { return entries ? '<concepts n="' + entries.length + '">' : ''; } },
     SectionExamples: { markup: function (entries) { return entries ? '<examples n="' + entries.length + '">' : ''; } },
     SectionReference: { markup: function (entry) { return entry ? '<reference>' : ''; } },
