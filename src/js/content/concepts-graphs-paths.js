@@ -10,6 +10,8 @@
         term: 'A bridge is an edge whose loss disconnects something',
         plain: 'Remove it and the number of connected components goes up.',
         formal: 'e is a bridge iff components(G − e) > components(G); equivalently, e is on no cycle',
+        readAs: 'An edge is a bridge exactly when removing it breaks the graph into more pieces — which is ' +
+          'the same as saying it lies on no cycle, because a cycle would provide a way round.',
         detail: 'The cycle characterisation is the one to hold on to, because it says immediately what ' +
           'the fix is: an edge on no cycle has no alternative route, and adding any second route ' +
           'removes it from the list. That is what redundancy purchases, and it is why the answer to ' +
@@ -36,6 +38,8 @@
         term: 'Lowlink: the earliest ancestor a subtree can still reach',
         plain: 'One number per vertex decides both questions.',
         formal: 'low[v] = min(disc[v], disc of ancestors reached by back edges, low of children)',
+        readAs: 'The earliest-discovered vertex reachable from v\'s subtree without using the edge that ' +
+          'entered it. Comparing that against the parent\'s discovery number is the whole bridge test.',
         detail: 'A depth-first walk numbers vertices as it discovers them, and `low[v]` records the ' +
           'smallest discovery number the subtree rooted at v can reach using tree edges and at most ' +
           'one back edge. The tree edge (u, v) is a bridge exactly when `low[v] > disc[u]` — the ' +
@@ -87,6 +91,8 @@
         term: 'The block-cut tree is a tree, and that is checkable',
         plain: 'Blocks and cut vertices as nodes, membership as edges — the result is always a forest.',
         formal: 'nodes = blocks + cut vertices; edges = memberships; nodes − components = edges',
+        readAs: 'The block-cut tree has one node per biconnected block and one per cut vertex, joined by ' +
+          'membership. The last equation is just the statement that it is a forest.',
         detail: 'The block-cut tree is the structure that answers "if this vertex fails, what is ' +
           'stranded and how much of it" — you delete the cut vertex from the tree and read off the ' +
           'pieces. It is always a forest, which is a theorem, and this milestone\'s habit is to verify ' +
@@ -115,6 +121,8 @@
         term: 'Relaxation is the whole of shortest paths',
         plain: 'If going through u is cheaper than what I have, take it.',
         formal: 'if d[u] + w(u, v) < d[v] then d[v] = d[u] + w(u, v), parent[v] = u',
+        readAs: 'Relaxation, the single operation behind every shortest-path algorithm here: if going via u ' +
+          'is cheaper than the best route to v found so far, take it and remember where you came from.',
         detail: 'Every algorithm in this milestone is the same three lines wrapped in a different rule ' +
           'about *when* to apply them. Dijkstra relaxes out of the closest unsettled vertex, ' +
           'Bellman-Ford relaxes everything n − 1 times, DAG shortest paths relax in topological order, ' +
@@ -128,6 +136,8 @@
         term: 'Dijkstra’s invariant, and exactly what it needs',
         plain: 'The closest unsettled vertex is finished, because no cheaper route can exist.',
         formal: 'settling u is sound iff every edge weight is >= 0; a negative edge can lower a total after the fact',
+        readAs: 'Dijkstra declares a vertex final the moment it pops. That is only safe if no edge can reduce ' +
+          'a total later — which is exactly what a negative weight does.',
         detail: 'The greedy step is justified by an argument that mentions non-negativity exactly once ' +
           'and depends on it completely: any other route to the closest unsettled vertex has to pass ' +
           'through some vertex that is at least as far away, and with non-negative edges it cannot get ' +
@@ -167,6 +177,9 @@
         term: '0-1 BFS: a deque replaces the heap entirely',
         plain: 'Zero-weight edges go to the front, one-weight edges to the back.',
         formal: 'with weights in {0, 1} the frontier holds at most two distinct distances; Θ(n + m), no comparisons',
+        readAs: 'When every edge costs 0 or 1, the queue only ever holds two distance values at once, so a ' +
+          'deque replaces the heap: push 0-edges on the front, 1-edges on the back. No priority queue ' +
+          'and no log factor.',
         detail: 'When every edge costs 0 or 1 the queue only ever contains two distance values, so a ' +
           'deque keeps it sorted for free and no comparison is ever needed. This is worth recognising ' +
           'because the shape appears constantly in disguise: toggling a state, entering or leaving a ' +
@@ -192,6 +205,9 @@
         term: 'Settling everything versus stopping at the target',
         plain: 'Dijkstra can stop when the target pops, and by then it has usually settled most of the graph.',
         formal: 'the settled set at the moment t pops is every vertex closer than t — a ball, not a corridor',
+        readAs: 'Dijkstra explores outward in all directions equally, so by the time it reaches the target it ' +
+          'has settled everything nearer than the target. For a long-distance query that is most of the ' +
+          'map, and it is the cost the next section attacks.',
         detail: 'Early termination is correct and rarely dramatic, because the algorithm has no idea ' +
           'where the target is: it grows a ball of radius d(s, t) and everything inside that ball is ' +
           'settled first. On a corner-to-corner grid query that ball is the whole grid. That single ' +
@@ -220,6 +236,9 @@
         term: 'Bellman-Ford relaxes everything n − 1 times, and that is enough',
         plain: 'A shortest path has at most n − 1 edges, so n − 1 rounds settle every one of them.',
         formal: 'after round k, every vertex reachable by a shortest path of <= k edges has its final distance',
+        readAs: 'Bellman-Ford makes progress by edge count rather than by distance: after k passes every ' +
+          'route using at most k edges is correct. Since no shortest path uses more than n−1 edges, n−1 ' +
+          'passes suffice.',
         detail: 'The proof is an induction on path length rather than on anything clever, which is why ' +
           'the algorithm needs no assumption about weights at all. Its practical form always carries ' +
           'an early exit: if a round changes nothing, no later round can either, and most graphs ' +
@@ -232,6 +251,9 @@
         term: 'An n-th improving round proves a negative cycle',
         plain: 'No simple path is that long, so something is going round in circles and getting cheaper.',
         formal: 'if round n still relaxes an edge, some vertex is reachable through a cycle of negative total weight',
+        readAs: 'After n−1 passes everything should be settled. If a pass still improves something, the only ' +
+          'explanation is a loop you can go round to keep getting cheaper — and then no shortest path ' +
+          'exists at all.',
         detail: 'This is detection, and detection is the cheap half. What it gives the caller is a ' +
           'boolean they usually already suspected — the rate table is inconsistent, the cost model has ' +
           'a hole — with no indication of where. The vertex that improved on the last round is a ' +
@@ -255,6 +277,9 @@
         term: 'A rate table becomes a shortest-path problem under −log',
         plain: 'Multiplying rates around a loop becomes adding their negative logarithms.',
         formal: 'prod(rates) > 1 iff sum(−log rate) < 0; a profitable loop is exactly a negative cycle',
+        readAs: 'Taking logs turns multiplying exchange rates into adding them, and negating turns "gains ' +
+          'more than 1" into "sums below 0". An arbitrage cycle becomes a negative cycle, and ' +
+          'Bellman-Ford finds it.',
         detail: 'The transform is the entire trick and it is worth being able to derive rather than ' +
           'remember: logarithms turn products into sums, and the negation turns "greater than one" ' +
           'into "less than zero", which is what a negative cycle is. Everything after that is ' +
@@ -268,6 +293,9 @@
         term: 'Floyd-Warshall’s loop order is not a style choice',
         plain: 'k must be the outer loop. Swap it and the answer is quietly wrong.',
         formal: 'd_k[i][j] = min(d_{k−1}[i][j], d_{k−1}[i][k] + d_{k−1}[k][j]) — the recurrence is over k',
+        readAs: 'Floyd-Warshall asks, for each intermediate vertex k in turn: is going through k better than ' +
+          'what I had? The outer loop is over k, not over i or j — swapping them is the classic way to ' +
+          'get a subtly wrong answer.',
         detail: 'The state being built is "shortest path using intermediates drawn from {0..k}", and it ' +
           'is defined in terms of the same quantity at k − 1. Making k the outer loop is what ensures ' +
           'every cell read at level k has already been finalised at level k − 1. Put i or j outermost ' +
@@ -281,6 +309,10 @@
         term: 'Johnson: one reweighting makes Dijkstra legal',
         plain: 'Add a super-source, compute a potential, and every edge becomes non-negative.',
         formal: 'w′(u, v) = w(u, v) + h(u) − h(v) >= 0 by the triangle inequality on h; path costs shift by h(s) − h(t)',
+        readAs: 'Johnson\'s reweighting adds a potential to each vertex so every edge becomes non-negative — ' +
+          'w′ is read "w prime", a second related weight. Every path between the same two endpoints ' +
+          'shifts by the same amount, so the ordering of paths is untouched and Dijkstra becomes ' +
+          'usable.',
         detail: 'The potential h comes from one Bellman-Ford run from a super-source joined to every ' +
           'vertex at cost zero, so h(v) is at most h(u) + w(u, v) for every edge — which rearranges ' +
           'exactly into the reweighted edge being non-negative. Because the shift telescopes along any ' +
@@ -294,6 +326,8 @@
         term: 'All pairs has a memory wall before it has a time wall',
         plain: 'n² cells is the binding constraint long before n³ operations are.',
         formal: 'n = 100 000 is 10¹⁰ cells — 80 GB at 8 bytes — whatever the running time is',
+        readAs: 'All-pairs output is n² numbers, and at a hundred thousand vertices that is eighty gigabytes. ' +
+          'The algorithm\'s speed is irrelevant; the answer does not fit.',
         detail: 'People reach for all-pairs shortest paths and then discover the answer does not fit ' +
           'anywhere. At a hundred thousand vertices the matrix alone is tens of gigabytes, so the ' +
           'question is never "how fast can we compute it" but "do we actually need every pair". Usually ' +

@@ -10,6 +10,9 @@
         term: 'The cut property is the correctness engine for all three algorithms',
         plain: 'Split the vertices any way you like; the lightest edge across the split is in some MST.',
         formal: 'for any cut (S, V∖S), a minimum-weight crossing edge belongs to some minimum spanning tree',
+        readAs: 'Split the vertices into any two groups — V∖S is "everything not in S" — and the cheapest ' +
+          'edge crossing between them is safe to take. Every MST algorithm in this section is that one ' +
+          'fact applied differently.',
         detail: 'The proof is an exchange argument: take any MST, add the light crossing edge, and the ' +
           'cycle that forms must contain another crossing edge, which is no lighter — so swapping them ' +
           'gives a spanning tree of no greater weight. That single fact justifies Kruskal, Prim and ' +
@@ -23,6 +26,9 @@
         term: 'The cycle property is its mirror',
         plain: 'The heaviest edge on any cycle is in no minimum spanning tree.',
         formal: 'if e is the unique heaviest edge of some cycle, no MST contains e',
+        readAs: 'Around any cycle, the single heaviest edge can always be dropped: the rest of the cycle ' +
+          'already connects its ends more cheaply. "Unique" matters — with a tie, either edge may be in ' +
+          'some optimal tree.',
         detail: 'Where the cut property says which edges to take, the cycle property says which to ' +
           'discard, and together they are why every faint edge on the demo\'s map is faint: each one is ' +
           'the heaviest edge of some cycle. The cycle property is also what makes the second-best ' +
@@ -62,6 +68,9 @@
         term: 'The minimax path is the maximum edge on the MST path',
         plain: 'Minimising the worst hop is answered for free by a structure you built for something else.',
         formal: 'for all u, v: min over paths of max edge = max edge on the u–v path in any MST',
+        readAs: 'The bottleneck between two vertices — the smallest possible worst edge on a route between ' +
+          'them — is exactly the heaviest edge on the path joining them in the minimum spanning tree. ' +
+          'One tree answers the question for every pair.',
         detail: 'The connection is the most useful thing in this section and almost nobody makes it. ' +
           '"Minimise the total cost" and "minimise the worst link on the route" are different ' +
           'questions with different answers, and the second one — which is what network design, ' +
@@ -75,6 +84,9 @@
         term: 'Shortest and minimax are genuinely different questions',
         plain: 'The cheapest route often contains a worse single link than the best-worst-link route.',
         formal: 'argmin over paths of sum(w) ≠ argmin over paths of max(w), in general',
+        readAs: 'The path with the smallest total is usually not the path with the smallest worst edge. ' +
+          '"argmin" is "the path that minimises this", and the two questions genuinely have different ' +
+          'answers.',
         detail: 'It is easy to assume the two coincide, and on small examples they often do, which is ' +
           'exactly why the demo counts how often they do not. If the quantity you care about is the ' +
           'weakest link — a video call limited by its worst hop, a supply chain limited by its ' +
@@ -130,6 +142,9 @@
         term: 'Rooting a tree turns every path question into an ancestor question',
         plain: 'Pick a root; the path between two nodes is up to their lowest common ancestor and down again.',
         formal: 'dist(a, b) = depth(a) + depth(b) − 2·depth(lca(a, b))',
+        readAs: 'The distance between two nodes is how far each is from the root, less twice the depth of ' +
+          'their lowest common ancestor — because the shared stretch from the root down to that ' +
+          'ancestor is counted in both and travelled in neither.',
         detail: 'A tree has no distinguished vertex until you choose one, and choosing one is what makes ' +
           'the rest of this section possible: parent, depth and subtree size all become well defined, ' +
           'and every path decomposes at a single vertex. The distance formula falls straight out, and ' +
@@ -156,6 +171,9 @@
         term: 'Binary lifting stores the 2^k-th ancestor',
         plain: 'Every ancestor distance is a sum of powers of two, so any jump is at most log n hops.',
         formal: 'up[k][v] = up[k−1][up[k−1][v]]; n log n cells, Θ(log n) per query',
+        readAs: 'The ancestor 2^k levels above v is the ancestor 2^(k−1) levels above the ancestor 2^(k−1) ' +
+          'levels above v. Doubling like that lets any jump be assembled from powers of two, in log n ' +
+          'steps.',
         detail: 'The table is built by squaring: the 2^k-th ancestor is the 2^(k−1)-th ancestor of the ' +
           '2^(k−1)-th ancestor. Answering LCA then has two phases — level the two nodes using the ' +
           'binary representation of their depth difference, then jump both upward by the largest power ' +
@@ -169,6 +187,8 @@
         term: 'The descent stops one step short on purpose',
         plain: 'Jump both nodes up only while they stay apart; the answer is then the parent.',
         formal: 'if up[k][x] ≠ up[k][y] the ancestor is still above, so jump; afterwards lca = up[0][x]',
+        readAs: 'Jump both nodes upward by the largest power of two that still leaves them under different ' +
+          'ancestors. When no such jump remains, their parents are the answer.',
         detail: 'Testing "have we reached the ancestor?" directly would require knowing the answer, so ' +
           'the algorithm tests the opposite: two nodes whose 2^k-th ancestors differ are certainly still ' +
           'below their common ancestor, so that jump is safe. Descending through the powers of two from ' +
@@ -195,6 +215,9 @@
         term: 'Heavy-light: continue each chain through the largest child',
         plain: 'One heavy edge per node; every other child starts a new chain.',
         formal: 'heavy(v) = argmax over children of subtree size; the chains partition the vertices',
+        readAs: 'From each node, follow the child with the biggest subtree. Those paths split the tree into ' +
+          'chains with no vertex in two of them, which is what lets a path query become a handful of ' +
+          'array ranges.',
         detail: 'The decomposition lays the tree out as a set of paths, each of which is a contiguous ' +
           'range in one array — so a segment tree, a Fenwick tree or any range structure applies ' +
           'directly. That is what makes it the general answer to "range query over a tree path": sum ' +
@@ -207,6 +230,8 @@
         term: 'Every light edge halves the subtree, which is the whole bound',
         plain: 'A light child holds less than half its parent’s subtree, so you cross at most log n of them.',
         formal: 'a root-to-leaf path crosses <= log₂n light edges; a path between two nodes crosses <= 2 log₂n',
+        readAs: 'Every time you step off a heavy chain the subtree at least halves, so you can only do it ' +
+          'log₂ n times. That bound is why heavy-light decomposition is logarithmic rather than linear.',
         detail: 'The counting argument is worth being able to state, because it is the reason the ' +
           'technique works and it is one sentence: if a child were not the heaviest, its subtree is at ' +
           'most half its parent\'s, so crossing a light edge at least halves the region you are in and ' +

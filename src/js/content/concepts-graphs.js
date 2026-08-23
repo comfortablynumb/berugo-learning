@@ -37,6 +37,9 @@
         term: 'The adjacency matrix buys one operation and pays n² for it',
         plain: 'Constant-time "is there an edge?" at the cost of storing every absent edge.',
         formal: 'Θ(n²) entries whatever m is; the neighbour scan is Θ(n) per vertex, mostly over Infinity',
+        readAs: 'A matrix reserves a cell for every possible edge, whether it exists or not — n vertices ' +
+          'means n² cells. Scanning one vertex\'s neighbours then costs n, nearly all of it spent ' +
+          'reading "no edge here".',
         detail: 'The matrix is the right structure exactly when the graph is dense or when the ' +
           'algorithm is defined over the matrix itself — Floyd-Warshall, transitive closure, anything ' +
           'that wants a bit-parallel row operation. Everywhere else it is a trap that looks tidy: at ' +
@@ -49,6 +52,9 @@
         term: 'BFS and DFS do identical work and differ in what they hold',
         plain: 'Same vertices, same edges — the peak memory is the whole difference.',
         formal: 'both are Θ(n + m); BFS peaks at the widest level, DFS at the longest root-to-node path',
+        readAs: 'The two traversals cost the same — one visit per vertex and one per edge — and differ only ' +
+          'in memory. BFS holds a whole level at once; DFS holds one path. Which is worse depends ' +
+          'entirely on the shape of the graph.',
         detail: 'This is the comparison that gets stated backwards. Neither search is faster; they ' +
           'visit every reachable vertex and examine every incident edge exactly once, and on the same ' +
           'graph the counters are equal. What differs is the frontier: breadth-first holds one level, ' +
@@ -100,6 +106,9 @@
         term: 'Two-colouring is BFS with one extra array',
         plain: 'Alternate colours by level; a same-colour edge is an odd cycle.',
         formal: 'a graph is bipartite iff it has no odd cycle; the witness is one edge plus the path around it',
+        readAs: 'A graph can be two-coloured exactly when it contains no cycle of odd length — and the "iff" ' +
+          'means that is a complete test, not just a necessary one. When it fails, the offending edge ' +
+          'and the tree path joining its ends are the proof.',
         detail: 'Bipartiteness is the smallest example of the pattern this whole milestone repeats: the ' +
           'boolean is nearly useless and the witness is what you needed. "Not bipartite" leaves the ' +
           'caller with nowhere to go; "these two vertices have the same colour and here is the odd ' +
@@ -116,6 +125,8 @@
         term: 'A topological order is a promise about predecessors',
         plain: 'Every edge points forwards, so everything a vertex depends on is already settled.',
         formal: 'an ordering v1..vn such that every edge (vi, vj) has i < j; exists iff the graph is acyclic',
+        readAs: 'Line the vertices up so every edge points forwards. Such an ordering exists exactly when ' +
+          'there are no cycles — a cycle would need an edge pointing back.',
         detail: 'The list itself is rarely the goal. What the order buys is the right to process ' +
           'vertices in one sweep with no memoisation, no priority queue and no fixpoint iteration, ' +
           'because when you reach a vertex every predecessor is finished. That single guarantee turns ' +
@@ -222,6 +233,9 @@
         term: 'A strongly connected component is a mutual-reachability class',
         plain: 'Every vertex in it can reach every other one, going the right way down the arrows.',
         formal: 'u ~ v iff u reaches v and v reaches u; this is an equivalence relation, so the classes partition V',
+        readAs: 'Two vertices are in the same component when each can reach the other. Because that relation ' +
+          'is reflexive, symmetric and transitive — an equivalence relation — it carves the vertices ' +
+          'into disjoint groups with nothing left over and nothing in two groups.',
         detail: 'Because mutual reachability is an equivalence relation, the components partition the ' +
           'vertices — every vertex is in exactly one, including vertices on no cycle at all, which form ' +
           'components of size one. That last case is the one people forget, and it is why a singleton ' +
@@ -234,6 +248,9 @@
         term: 'Tarjan: one pass, one stack, one number per vertex',
         plain: 'Track the earliest vertex reachable from this subtree that is still on the stack.',
         formal: 'lowlink[v] = min(index[v], lowlink of children, index of stack neighbours); v is a root iff lowlink = index',
+        readAs: 'Each vertex records the earliest-discovered vertex reachable from its subtree. When that ' +
+          'value equals the vertex\'s own discovery number, nothing under it escapes upward — so it is ' +
+          'the root of a component.',
         detail: 'The algorithm is a depth-first walk with a stack of vertices whose component is not yet ' +
           'decided. A vertex whose lowlink never falls below its own index cannot reach anything ' +
           'earlier that is still open, so it is the root of its component and everything above it on ' +
@@ -259,6 +276,9 @@
         term: 'Kosaraju: two passes, and it exists to check the first one',
         plain: 'Finish-order DFS, then a DFS on the reversed graph in that order.',
         formal: 'order by decreasing finish time in G, then take DFS trees in that order on Gᵀ',
+        readAs: 'Kosaraju\'s two passes: one to order the vertices by when the search finished with them, and ' +
+          'one on the graph with every edge reversed — that is what the superscript T means — taking ' +
+          'the trees in that order.',
         detail: 'Kosaraju needs the reverse graph and walks every edge twice, so it is the slower ' +
           'algorithm — and it is the one to keep, because it is derived completely differently and ' +
           'therefore fails differently. Two independent implementations that agree on a partition are ' +
@@ -286,6 +306,9 @@
         term: 'The condensation loses parallel crossings, and should',
         plain: 'Many edges between two components collapse into one.',
         formal: 'edges(condensation) <= edges(G), usually far fewer; only the existence of a crossing survives',
+        readAs: 'Collapsing each component to a single node keeps at most as many edges and usually far ' +
+          'fewer, because many edges between two components become one. What survives is whether a ' +
+          'connection exists, not how many.',
         detail: 'The de-duplication is what makes the condensation small enough to be useful, and it is ' +
           'also the thing to remember when a caller wants edge weights back. Component-level analysis ' +
           'answers "can this group reach that group", not "how expensive is the cheapest crossing" — ' +

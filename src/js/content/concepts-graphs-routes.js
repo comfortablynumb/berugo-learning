@@ -10,6 +10,8 @@
         term: 'A* is Dijkstra with a different queue key',
         plain: 'Order by cost so far plus an estimate of what remains, instead of cost so far alone.',
         formal: 'f(v) = g(v) + h(v); Dijkstra is the special case h ≡ 0',
+        readAs: 'A* orders its queue by the cost already spent plus an estimate of the cost remaining. Set ' +
+          'the estimate to zero everywhere — the ≡ means "is identically" — and you have Dijkstra back.',
         detail: 'Nothing else changes — the relaxation, the settled set, the parent pointers and the ' +
           'termination test are identical. That is worth internalising because it means A* inherits ' +
           'Dijkstra\'s correctness argument wholesale and only has to defend the new term, and it means ' +
@@ -23,6 +25,8 @@
         term: 'Admissible buys optimality',
         plain: 'If the estimate never overestimates, the path returned is the shortest one.',
         formal: 'h(v) <= true cost from v to the goal, for every v',
+        readAs: 'The estimate must never overstate what is left. Admissible means optimistic: an estimate ' +
+          'that guesses too high makes A* fast and wrong.',
         detail: 'The argument is short: when the goal is popped, its key is its true cost because ' +
           'h(goal) = 0, and any cheaper route would have to sit in the queue under a key at or below ' +
           'that true cost, so it would have been popped first. Admissibility is therefore the property ' +
@@ -36,6 +40,9 @@
         term: 'Consistent buys the right to close a node forever',
         plain: 'If the estimate falls by at most the edge weight along every edge, nothing is ever reopened.',
         formal: 'h(u) <= w(u, v) + h(v) for every edge; implies f is non-decreasing along any path',
+        readAs: 'Consistency is the triangle inequality for the estimate: crossing one edge can never improve ' +
+          'the estimate by more than the edge costs. It guarantees f never falls along a path, which is ' +
+          'what lets a settled node stay settled.',
         detail: 'Consistency is strictly stronger than admissibility and it is a statement about *edges* ' +
           'rather than about vertices, which is why the two are so easy to conflate. Its consequence is ' +
           'that f never decreases along a path, so when a node is popped its g is already final and it ' +
@@ -88,6 +95,9 @@
         term: 'ALT: the triangle inequality gives a heuristic with no geometry at all',
         plain: 'Precompute exact distances to a few landmarks; |d(L,t) − d(L,v)| is a valid lower bound.',
         formal: 'for any landmark L: |d(L, t) − d(L, v)| <= d(v, t); take the maximum over landmarks',
+        readAs: 'Precompute distances to a few fixed landmarks. The difference between two of those distances ' +
+          'is a lower bound on the distance between the vertices — the bars are absolute value — and ' +
+          'the best landmark gives the tightest bound.',
         detail: 'ALT is the technique to reach for whenever the graph has no coordinates or its costs ' +
           'are not distances — a road network with turn penalties, a transit network with transfer ' +
           'times, a state space with no geometry whatsoever. Each landmark costs one full single-source ' +
@@ -102,6 +112,9 @@
         term: 'Weighted A*: give up optimality by a factor you choose',
         plain: 'Multiply h by w > 1 and the returned path is at most w times optimal.',
         formal: 'f = g + w·h with w > 1; the result is w-admissible, and the gap is measured rather than assumed',
+        readAs: 'Multiply the estimate by more than one and A* finds an answer faster, at the cost of it ' +
+          'possibly being up to w times too long. The point is that the bound is known, and the actual ' +
+          'gap is measured.',
         detail: 'Inflating the heuristic makes the search greedier and the guarantee weaker in a way ' +
           'that is bounded and controllable, which is the honest version of "good enough is fine". The ' +
           'trap is testing it on the wrong instance: on a uniform grid every monotone route to the goal ' +
@@ -114,6 +127,9 @@
         term: 'Bidirectional search is a constant factor that depends on the query',
         plain: 'Two balls of radius d/2 are smaller than one ball of radius d — sometimes much smaller.',
         formal: 'stop when the two frontier keys sum to at least the best meeting cost, not at first contact',
+        readAs: 'The two searches meeting does not mean the best route has been found — a cheaper one may ' +
+          'still be forming. The correct stopping rule compares the two frontier keys against the best ' +
+          'meeting found so far.',
         detail: 'The saving is geometric and therefore entirely dependent on the shape of the search ' +
           'space: in an open region two half-radius balls cover a fraction of one full ball, and ' +
           'against a boundary they cover nearly all of it. The subtle part is the stopping condition — ' +
@@ -144,6 +160,8 @@
         term: 'Plain Dijkstra settles a ball, and a continent is a big ball',
         plain: 'Every node closer than the destination is settled before the destination pops.',
         formal: 'settled set = { v : d(s, v) <= d(s, t) }, which for a cross-country query is most of the network',
+        readAs: 'The set of vertices Dijkstra settles is everything nearer to the start than the target is. ' +
+          'For a long journey that is nearly the whole map, which is why route planners preprocess.',
         detail: 'This is why route planning is a separate subject rather than a call to a shortest-path ' +
           'routine. The work is not proportional to the length of the answer; it is proportional to the ' +
           'area the answer spans. A twenty-million-node continental network answers a local query in ' +
@@ -181,6 +199,9 @@
         term: 'The two witness-search errors are not symmetric',
         plain: 'Missing a witness is slow. Inventing one is wrong.',
         formal: 'false negative ⇒ an unnecessary shortcut, still correct; false positive ⇒ a missing shortcut, incorrect',
+        readAs: 'The witness search decides whether a shortcut is needed. Failing to find a witness that ' +
+          'exists costs you an extra edge and nothing else; believing in one that does not exist ' +
+          'deletes a route.',
         detail: 'This asymmetry is what licenses every practical shortcut in the implementation. The ' +
           'search may be truncated by hop count, bounded by distance, or abandoned early, because all ' +
           'of those failures fall on the safe side: they add edges nobody needed, making the graph ' +
