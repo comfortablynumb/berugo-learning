@@ -10,6 +10,8 @@
         term: 'Two objectives, and the second one only matters once the first is fixed',
         plain: 'Among all flows of a given value, find the cheapest.',
         formal: 'minimise sum over arcs of cost(e)·f(e) subject to capacity, conservation and |f| = k',
+        readAs: 'Send exactly k units from source to sink as cheaply as possible: total cost is each arc\'s ' +
+          'price times how much it carries, and the flow rules still apply.',
         detail: 'Maximum flow has one objective and min-cost flow has two, ordered: the value is a ' +
           'constraint and the cost is what gets minimised. That ordering is why "the min-cost ' +
           'maximum flow" and "the minimum-cost flow of value 3" are different problems with ' +
@@ -22,6 +24,9 @@
         term: 'Send one unit at a time along the cheapest path',
         plain: 'Successive shortest paths: repeatedly find the cheapest residual route and saturate it.',
         formal: 'if f is a minimum-cost flow of value k, augmenting along a shortest residual path gives a minimum-cost flow of value k + 1',
+        readAs: 'Cheapest-path augmentation is safe at every step: get the cheapest flow of size k, push one ' +
+          'more unit along the cheapest remaining route, and you have the cheapest flow of size k+1. No ' +
+          'backtracking is ever needed.',
         detail: 'The correctness argument is the useful part. If the current flow is optimal for its ' +
           'value, then its residual graph has no negative-cost cycle; augmenting along a *shortest* ' +
           'path cannot create one, so the next flow is optimal for the next value. That inductive ' +
@@ -46,6 +51,9 @@
         term: 'Potentials are Johnson\'s reweighting, and Dijkstra needs them',
         plain: 'Residual backward arcs have negative cost, so shift every cost by a potential difference.',
         formal: 'reduced cost c′(u,v) = c(u,v) + p(u) − p(v) >= 0, and a shortest path under c′ is a shortest path under c',
+        readAs: 'Adding a potential to each vertex shifts every arc\'s price so none is negative — c′ is read ' +
+          '"c prime". Every route between the same two ends shifts by the same total, so which route is ' +
+          'cheapest does not change, and Dijkstra becomes usable.',
         detail: 'The first shortest-path computation may need Bellman-Ford, because the input can ' +
           'have negative costs. After that, the distances themselves become the potentials, every ' +
           'reduced cost is non-negative, and Dijkstra takes over — which is the whole reason the ' +
@@ -59,6 +67,8 @@
         term: 'Cycle cancelling is the other direction and the other cost profile',
         plain: 'Start from any maximum flow and repeatedly cancel a negative-cost residual cycle.',
         formal: 'a flow is minimum-cost for its value exactly when its residual graph has no negative-cost cycle',
+        readAs: 'A complete test for optimality that does not need the algorithm that produced the answer: if ' +
+          'you could go round a loop and come out cheaper, you are not optimal. If you cannot, you are.',
         detail: 'That equivalence is the actual optimality theorem, and it is more useful than the ' +
           'algorithm: it gives a check that owes nothing to how the flow was produced. Cycle ' +
           'cancelling reaches the optimum from above rather than from below, which means it always ' +
@@ -137,6 +147,9 @@
         term: 'Hopcroft-Karp finds a whole layer of disjoint paths per phase',
         plain: 'A breadth-first search finds the shortest augmenting length, then a depth-first pass takes as many disjoint paths of that length as exist.',
         formal: 'O(E·sqrt(V)): the shortest augmenting path strictly lengthens each phase, so there are O(sqrt(V)) phases',
+        readAs: 'Hopcroft-Karp augments along many disjoint shortest paths at once. After about the square ' +
+          'root of V phases, the paths are long enough that few can remain — which is where the square ' +
+          'root comes from.',
         detail: 'The bound comes from a counting argument rather than from the search: after ' +
           'sqrt(V) phases the shortest augmenting path is longer than sqrt(V), and vertex-disjoint ' +
           'paths of that length cannot number more than sqrt(V), so at most sqrt(V) augmentations ' +
@@ -175,6 +188,9 @@
         term: 'Koenig: maximum matching equals minimum vertex cover, and the cover is constructible',
         plain: 'Start from the unmatched left vertices, alternate, then take the left vertices not reached plus the right vertices that were.',
         formal: 'on a bipartite graph max matching = min vertex cover; the complement of the cover is a maximum independent set',
+        readAs: 'König\'s theorem: on a bipartite graph the largest matching and the smallest set of vertices ' +
+          'touching every edge are the same number. Everything outside that cover is then the largest ' +
+          'set of mutually unconnected vertices.',
         detail: 'The construction is what makes the theorem usable rather than decorative: it hands ' +
           'you the cover, not merely its size, from a search you already ran. And the restriction to ' +
           'bipartite graphs is the important part — minimum vertex cover is NP-hard in general, so ' +
@@ -188,6 +204,9 @@
         term: 'Hall\'s condition hands back a witness rather than a boolean',
         plain: 'If some set of left vertices has fewer neighbours than members, no perfect matching exists — and that set is the proof.',
         formal: 'a perfect matching exists iff |N(S)| >= |S| for every subset S of the left side',
+        readAs: 'Hall\'s theorem: everyone on the left can be matched exactly when no group of them is ' +
+          'collectively short of options. N(S) is everything that group is connected to, and the bars ' +
+          'are "how many".',
         detail: 'A search that fails tells an operator nothing; a witness tells them exactly which ' +
           'demand to relax. The alternating search from an unmatched left vertex produces one for ' +
           'free: every right vertex it reaches is already matched back into the set it reached it ' +
@@ -201,6 +220,9 @@
         term: 'Stable is not maximum, and the proposing side wins',
         plain: 'Gale-Shapley optimises "no pair would both rather defect", and it does so in the proposers\' favour.',
         formal: 'the proposer-optimal stable matching gives every proposer the best partner they have in ANY stable matching, and every receiver the worst',
+        readAs: 'Which side proposes is not a detail. Gale-Shapley gives the proposing side simultaneously ' +
+          'their best possible stable outcome and the other side their worst — so choosing who proposes ' +
+          'is a policy decision.',
         detail: 'Three properties are constantly conflated: perfect (everyone is matched), maximum ' +
           '(no larger matching exists) and stable (no blocking pair). Gale-Shapley guarantees the ' +
           'first and third on complete preferences and says nothing about total satisfaction, so a ' +

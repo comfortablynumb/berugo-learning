@@ -10,6 +10,9 @@
         term: 'A flow is two constraints and nothing else',
         plain: 'No arc carries more than its capacity, and every vertex but the two terminals passes on exactly what it receives.',
         formal: '0 <= f(e) <= c(e) for every arc, and sum of inflow = sum of outflow at every vertex except s and t',
+        readAs: 'Two rules make something a flow: no pipe carries more than it can hold or a negative amount, ' +
+          'and everything entering a junction leaves it again. Only the source and the sink are allowed ' +
+          'to create or absorb.',
         detail: 'Those two rules are the entire definition, and everything else in the section is a ' +
           'consequence of them. Capacity is local and easy to check; conservation is what makes the ' +
           'problem global, because a decision on one arc constrains arcs several hops away. The two ' +
@@ -23,6 +26,9 @@
         term: 'The residual graph is the algorithm',
         plain: 'Pushing f along an arc leaves capacity − f forward and adds f backward.',
         formal: 'residual capacity c_f(u,v) = c(u,v) − f(u,v) forward, and f(u,v) backward on the reverse arc',
+        readAs: 'The residual graph records what you could still do: how much spare room each pipe has, and — ' +
+          'crucially — how much you could undo by pushing back. That backward arc is what lets the ' +
+          'algorithm correct an earlier bad choice.',
         detail: 'The backward arc does not exist in the input file, in the road network, or in the ' +
           'pipe. It is bookkeeping: permission for a later augmenting path to route flow back out ' +
           'of a vertex that an earlier path filled badly. Without it, repeatedly finding paths and ' +
@@ -65,6 +71,8 @@
         term: 'Dinic\'s phase count is bounded by the graph, not by the capacities',
         plain: 'Scaling every capacity by 64 leaves the phase count exactly where it was.',
         formal: 'each phase strictly increases the shortest augmenting path length, so there are at most V − 1 phases',
+        readAs: 'Dinic works in phases, and each one leaves the shortest route from source to sink strictly ' +
+          'longer than before. A path cannot exceed V−1 edges, so the phases run out.',
         detail: 'This is the property that separates the algorithms that care about the *numbers* ' +
           'from the algorithms that care about the *shape*. A blocking flow saturates at least one ' +
           'arc on every shortest path, so after a phase no shortest path of that length survives ' +
@@ -79,6 +87,9 @@
         term: 'Integrality is why flow answers combinatorial questions',
         plain: 'With whole-number capacities, some maximum flow is whole-number too.',
         formal: 'every augmenting path pushes an integral amount, so the flow stays integral throughout',
+        readAs: 'With whole-number capacities, every step moves a whole number, so the answer is a whole ' +
+          'number too. That is why max-flow can decide matchings and assignments — problems where half ' +
+          'an edge would be meaningless.',
         detail: 'This is not an implementation convenience, it is the bridge between a continuous ' +
           'optimisation problem and a discrete one. A unit-capacity flow of value k is exactly k ' +
           'edge-disjoint paths, so maximum flow answers "how many disjoint routes are there" ' +
@@ -123,6 +134,9 @@
         term: 'The cut and the flow are one number seen twice',
         plain: 'Maximise what gets through, or minimise what has to be severed — the answers are equal.',
         formal: 'max over flows of |f| = min over s-t cuts of c(S, V∖S)',
+        readAs: 'The largest possible flow equals the cheapest way to sever the source from the sink. Two ' +
+          'completely different questions with provably the same answer, and every application in this ' +
+          'section uses one to answer the other.',
         detail: 'Weak duality is obvious: every unit of flow crosses every cut, so no flow exceeds ' +
           'any cut. Strong duality — that they are exactly equal — is the theorem, and it is what ' +
           'makes the cut usable as an answer rather than merely as a bound. In practice the cut is ' +
@@ -191,6 +205,9 @@
         term: 'Every arc crossing a minimum cut is saturated',
         plain: 'If one were not, the source could still reach the far side and the cut would not be minimum.',
         formal: 'for the cut S derived from residual reachability: f(e) = c(e) for e leaving S, and f(e) = 0 for e entering S',
+        readAs: 'When the algorithm stops, take everything still reachable from the source in the residual ' +
+          'graph. Every pipe leaving that set is completely full and every pipe entering it is ' +
+          'completely empty — which is what makes it a minimum cut.',
         detail: 'This is the structural check that makes a reported cut trustworthy, and it is ' +
           'cheap. A cut is just a set of vertices; any set of vertices has a capacity, and reporting ' +
           'the wrong set produces a number that is too large rather than an error. Verifying that ' +
@@ -235,6 +252,9 @@
         term: 'A preflow lets vertices hold excess',
         plain: 'Conservation is relaxed to "inflow is at least outflow", and the excess is drained later.',
         formal: 'excess(v) = inflow − outflow >= 0 for every v other than s; a flow is a preflow with every excess zero',
+        readAs: 'A preflow lets water pile up at a junction rather than balancing immediately. Push-relabel ' +
+          'works with those piles and only drains them at the end, which is what frees it from having ' +
+          'to find whole paths.',
         detail: 'Augmenting-path algorithms maintain a valid flow at every step and improve it. ' +
           'Push-relabel does the opposite: it floods the network immediately, violating ' +
           'conservation everywhere, and then spends its whole run repairing that violation. The ' +
@@ -248,6 +268,9 @@
         term: 'The height function is a distance estimate that only rises',
         plain: 'Flow may only be pushed downhill by exactly one, and a stuck vertex is lifted.',
         formal: 'a push along (u,v) requires h(u) = h(v) + 1; h(s) = n and h(t) = 0 throughout',
+        readAs: 'Water only ever flows downhill, and exactly one step at a time. The heights are a made-up ' +
+          'ordering that the algorithm raises as it goes; the source starts n high and the sink at ' +
+          'zero.',
         detail: 'The heights are a lower bound on the residual distance to the sink, and the ' +
           'one-step rule is what stops flow cycling between two vertices for ever. Because heights ' +
           'only ever increase and are bounded by 2n, the relabel count is bounded, and that is the ' +
@@ -288,6 +311,9 @@
         term: 'The gap heuristic lifts a whole stranded layer at once',
         plain: 'If no vertex has height h, nothing below h can reach the sink, so lift them all past n.',
         formal: 'if the height histogram has an empty bucket at h, every vertex with height in (h, n) is raised to n + 1',
+        readAs: 'If no vertex sits at some height, nothing above that height can ever reach the sink — the ' +
+          'downhill chain is broken. Lifting them all out at once is the gap heuristic, and it is worth ' +
+          'several times the running time.',
         detail: 'Without it, each of those vertices discovers independently, one relabel at a time, ' +
           'that it is cut off from the sink, and the cost of that discovery is quadratic in the ' +
           'layer size. The gap test is a histogram lookup — genuinely one array of counts — and it ' +

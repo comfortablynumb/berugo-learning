@@ -10,6 +10,9 @@
         term: 'Greedy colouring is a family indexed by an ordering',
         plain: 'Take the vertices in some order; give each the lowest colour none of its coloured neighbours holds.',
         formal: 'greedy uses at most Δ + 1 colours in any order, and the ordering decides where in that range it lands',
+        readAs: 'Δ is the largest number of neighbours any vertex has. However you order the vertices, greedy ' +
+          'never needs more than one colour beyond that — because a vertex can only ever be blocked by ' +
+          'its own neighbours.',
         detail: 'The named methods in the literature are named *orderings*, not named algorithms — ' +
           'Welsh-Powell is largest-degree-first and smallest-last is degeneracy order, and the ' +
           'colouring loop underneath them is identical. This matters because it tells you where to ' +
@@ -47,6 +50,9 @@
         term: 'The largest clique is a lower bound, and interval graphs make it tight',
         plain: 'Every vertex of a clique needs its own colour, so no colouring can beat the clique number.',
         formal: 'omega(G) <= chi(G); on a perfect graph they are equal, and interval graphs are perfect',
+        readAs: 'The largest group of mutually connected vertices (omega) is a floor on the colours needed ' +
+          '(chi) — they all need different ones. On some graph families the floor is also the answer, ' +
+          'and interval graphs are one of those families.',
         detail: 'On an interval graph — vertices are bookings, edges are overlaps — greedy in ' +
           'left-endpoint order uses exactly the maximum number of intervals alive at once, which is ' +
           'the clique number, which is a lower bound on any colouring. So the answer is optimal and ' +
@@ -60,6 +66,9 @@
         term: 'Clique, independent set and vertex cover are one problem with three names',
         plain: 'Complement the graph and a clique becomes an independent set; the rest of the vertices are a cover.',
         formal: 'omega(G) = alpha(complement of G), and alpha(G) + tau(G) = n',
+        readAs: 'Flip every edge to a non-edge and a largest clique becomes a largest set of mutually ' +
+          'unconnected vertices. And the vertices not in that set are exactly a smallest vertex cover, ' +
+          'so the two always add to n.',
         detail: 'One search answers all three, and the three NP-hardness results are one result. ' +
           'What does *not* transfer is approximation: a factor-2 vertex cover is not a factor-2 ' +
           'independent set, because complementing a set does not complement its ratio — vertex ' +
@@ -113,6 +122,9 @@
         term: 'Euler\'s formula rules out planarity and never rules it in',
         plain: 'A simple planar graph on three or more vertices has at most 3V − 6 edges.',
         formal: 'V − E + F = 2, and every face has at least three edges, so 2E >= 3F',
+        readAs: 'Euler\'s formula for a planar drawing: vertices minus edges plus faces is always 2. Since ' +
+          'every face is bounded by at least three edges and each edge borders two faces, that gives E ' +
+          '<= 3V − 6 — the reason a graph can be too dense to draw flat.',
         detail: 'The bound is a genuinely useful rejection filter — it is two integers and a ' +
           'comparison — and it is one-directional. A graph that exceeds it is certainly not planar. ' +
           'A graph below it may or may not be, and treating the check as a test is a classic error ' +
@@ -137,6 +149,9 @@
         term: 'Force-directed layout minimises energy and has no idea what a crossing is',
         plain: 'Vertices repel, edges pull, and the step size cools linearly.',
         formal: 'Fruchterman-Reingold: repulsion k²/d, attraction d²/k, displacement capped by a falling temperature',
+        readAs: 'Every pair of vertices pushes apart with a force that grows as they get closer, connected ' +
+          'pairs pull together with a force that grows as they get further, and the maximum movement ' +
+          'per round shrinks over time so the layout settles instead of oscillating.',
         detail: 'It is worth being precise about what the algorithm is optimising, because it is ' +
           'not what you want. There is no crossing term anywhere in the energy; the model is purely ' +
           'geometric. It lands on planar drawings of planar graphs because crossings and high ' +
@@ -187,6 +202,8 @@
         term: 'The crossing count is the only objective measure of a drawing anyone agrees on',
         plain: 'Count the pairs of edges that share no endpoint and intersect.',
         formal: 'the denominator is m(m−1)/2 minus the adjacent pairs, so the rate is comparable across graphs',
+        readAs: 'Counting crossings alone favours small graphs. Dividing by the pairs of edges that could ' +
+          'possibly cross gives a rate that means the same thing at any size.',
         detail: 'Edge-length uniformity, angular resolution and symmetry all matter to a reader and ' +
           'none of them has an agreed definition. The crossing count does, it is cheap to compute, ' +
           'and it turns "this diagram is unreadable" into a number that a different layout can be ' +
@@ -214,6 +231,8 @@
         term: 'The Laplacian turns connectivity into arithmetic',
         plain: 'L = D − A has smallest eigenvalue 0, and the second-smallest is 0 exactly when the graph is disconnected.',
         formal: 'the multiplicity of eigenvalue 0 equals the number of connected components',
+        readAs: 'How many times zero appears among the Laplacian\'s eigenvalues is exactly how many pieces ' +
+          'the graph is in. A connectivity question answered by linear algebra.',
         detail: 'The second-smallest eigenvalue — the algebraic connectivity, or Fiedler value — is ' +
           'a continuous measure of how hard the graph is to cut, and it degrades gracefully: a graph ' +
           'that is barely connected has a small positive value rather than jumping from 0 to ' +
@@ -237,6 +256,9 @@
         term: 'PageRank is a random walk with a restart, and the restart is what makes it exist',
         plain: 'Follow a link with probability d, jump anywhere with probability 1 − d.',
         formal: 'r = d·Mᵀr + (1 − d)/n · 1; the teleport makes the chain irreducible and aperiodic',
+        readAs: 'PageRank in one line: your score is a damped share of your inbound neighbours\' scores, plus ' +
+          'a small fixed amount everyone gets. That fixed amount — the teleport — is what guarantees ' +
+          'the iteration converges at all.',
         detail: 'Without the teleport the chain need not have a unique stationary distribution at ' +
           'all — a graph with two disconnected halves has infinitely many, and a bipartite one ' +
           'oscillates instead of converging. The damping factor is therefore not a tuning knob bolted ' +
@@ -262,6 +284,9 @@
         term: 'Dangling pages leak probability, and the leak is invisible in the ranking',
         plain: 'A page with no outbound links has nowhere to send its mass, and dropping it makes the vector stop summing to one.',
         formal: 'redistribute the dangling mass uniformly, or the iteration converges to a substochastic fixed point',
+        readAs: 'A page with no outbound links is a leak: rank flows in and never comes back out. Left ' +
+          'unfixed the totals quietly shrink towards zero, and the ranking still looks perfectly ' +
+          'plausible.',
         detail: 'The usual description of this bug is that "the ranking drifts", and measurement ' +
           'says otherwise: over thousands of small link graphs, dropping the dangling mass never ' +
           'once inverts a pair in the ranking, while leaking up to 85% of the probability. That ' +
@@ -287,6 +312,9 @@
         term: 'Brandes computes all betweenness in O(VE) without enumerating paths',
         plain: 'One breadth-first sweep per source, accumulating dependencies backwards.',
         formal: 'delta(v) = sum over successors w of (sigma(v)/sigma(w))·(1 + delta(w))',
+        readAs: 'Brandes\' accumulation: a vertex\'s betweenness credit is its share of each successor\'s ' +
+          'shortest paths, times what that successor already accumulated plus one for itself. It is ' +
+          'what turns betweenness from cubic into V times E.',
         detail: 'The naive method enumerates shortest paths, and there can be exponentially many of ' +
           'them, so the algorithm is not an optimisation but the difference between feasible and ' +
           'not. The recurrence works because the dependency of a source on a vertex decomposes over ' +
@@ -299,6 +327,9 @@
         term: 'Modularity finds communities in graphs that have none',
         plain: 'A structureless graph still scores around 0.25 and still gets partitioned.',
         formal: 'modularity compares internal edges to a degree-matched random graph, and a random graph has fluctuations',
+        readAs: 'Modularity scores a partition against what random chance would have produced. Since chance ' +
+          'produces clumps of its own, a positive score is not by itself evidence of community ' +
+          'structure.',
         detail: 'This is the number to remember before believing a community-detection result. ' +
           'Louvain maximises modularity greedily and always returns a partition; on a graph built ' +
           'with four planted communities it recovers them exactly, and on a random graph of the same ' +
