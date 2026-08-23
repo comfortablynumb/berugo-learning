@@ -525,6 +525,30 @@
               title: 'Voronoi diagrams',
               summary: 'A wrong diagram still looks right, so the only check worth trusting is a brute-force nearest-site grid.',
               tags: ['voronoi', 'delaunay dual', 'circumcentre', 'half-plane intersection', 'unbounded cells', 'clipping', 'lloyd relaxation', 'centroidal', 'fortune sweep', 'nearest site']
+            },
+            {
+              id: 'polygon-clipping',
+              title: 'Boolean operations and clipping',
+              summary: 'Against a concave clip the algorithm returns either nothing or a plausible polygon two-thirds too small.',
+              tags: ['sutherland-hodgman', 'polygon clipping', 'boolean operations', 'concave clip', 'convex decomposition', 'greiner-hormann', 'minkowski sum', 'offsetting', 'buffering', 'rasterised oracle']
+            },
+            {
+              id: 'rotating-calipers',
+              title: 'Rotating calipers and optimisation on hulls',
+              summary: 'One theorem turns a continuous optimisation into an O(h) scan, and on diagonal data it beats the bounding box thirtyfold.',
+              tags: ['rotating calipers', 'antipodal pairs', 'diameter', 'width', 'minimum area rectangle', 'bounding box', 'welzl', 'smallest enclosing circle', 'convex optimisation']
+            },
+            {
+              id: 'transforms-and-3d',
+              title: 'Transforms and 3-D geometry',
+              summary: 'Gimbal lock is a degree of freedom draining away for the whole approach, not a cliff at ninety degrees.',
+              tags: ['homogeneous coordinates', 'affine transforms', 'composition order', 'row major', 'quaternions', 'slerp', 'gimbal lock', 'euler angles', 'moller-trumbore', 'barycentric coordinates', 'projection pipeline']
+            },
+            {
+              id: 'applied-geometry',
+              title: 'Applied geometry',
+              summary: 'Where continuous geometry meets a pixel grid, and treating latitude and longitude as planar is the most common bug in application code.',
+              tags: ['bresenham', 'scanline fill', 'anti-aliasing', 'coverage', 'curve flattening', 'bezier', 'separating axis theorem', 'minimum translation vector', 'collision response', 'geodesic distance', 'map projection']
             }]
         }
       ],

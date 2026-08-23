@@ -69,10 +69,11 @@
   /**
    * The float reference: sample the line and round.
    *
-   * It is NOT the same pixels. The two agree on 81.5% of random integer lines,
-   * always agree on the endpoints and always agree on the pixel count - and
-   * every one of the 554 disagreements in 3 000 lines is a line whose ideal
-   * path passes exactly between two pixels. Bresenham breaks that tie the same
+   * It is NOT the same pixels. The two agree on about 83% of random integer
+   * lines (2 492 of 3 000 on the seeded set the section draws), always agree on
+   * the endpoints and always agree on the pixel count - and every one of the
+   * differences is a line whose ideal path passes exactly between two pixels.
+   * Bresenham breaks that tie the same
    * way every time, by an integer comparison; rounding breaks it by whatever
    * the floating-point midpoint happened to land on. Neither is wrong, and a
    * renderer that mixes the two draws its outlines and its fills one pixel
