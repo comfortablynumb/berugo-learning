@@ -35,6 +35,8 @@
         term: 'Split',
         plain: 'Cut the treap into everything below a key and everything at or above it, in O(log n).',
         formal: 'split(t, k) → (L, R), both valid treaps',
+        readAs: 'Splitting a treap at key k hands back two treaps — everything below k and everything above — ' +
+          'each still a correct treap on its own. The arrow is "produces".',
         detail: 'Split walks one root-to-leaf path. At each node it decides which side the node ' +
           'belongs to, keeps that side, and recurses into the child that still straddles the cut. ' +
           'Both halves come out as valid treaps with no repair needed, because the heap order within ' +
@@ -59,6 +61,9 @@
         term: 'Expected height',
         plain: 'About 3·log₂ n, with no balance bookkeeping of any kind.',
         formal: 'E[height] ≈ 4.311·ln n, the random-BST result',
+        readAs: 'Because the priorities are random, the shape a treap ends up in is the shape a randomly ' +
+          'built search tree would have: average height about 4.311 times the natural log of n, ' +
+          'regardless of what order the keys arrived in.',
         detail: 'The height of a treap is the height of a BST built by inserting the keys in a random ' +
           'order, because that is exactly what the random priorities encode. So the expected height ' +
           'is the classic 4.311·ln n ≈ 3·log₂ n, and the distribution is tight: measured over 40 ' +
@@ -109,7 +114,7 @@
       {
         term: 'Splaying',
         plain: 'Every access rotates the touched node to the root, in pairs rather than one step at a time.',
-        formal: 'zig · zig-zig · zig-zag',
+        formal: 'zig; zig-zig; zig-zag',
         detail: 'The operation is not "rotate the node up until it is the root" — that version, ' +
           'move-to-root, also puts the node on top and has no amortised bound at all. Splaying looks ' +
           'at two levels: if the node and its parent lean the same way it rotates the *parent* first ' +
@@ -134,6 +139,9 @@
         term: 'The potential argument',
         plain: 'Φ = Σ log(subtree size). A splay that costs a lot must have discharged a lot of potential.',
         formal: 'amortised cost = actual + ΔΦ = O(log n)',
+        readAs: 'The charged cost of a splay is what it really cost plus the change in the stored potential Φ ' +
+          '— the triangle is "change in". Averaged over any sequence that comes to O(log n) per ' +
+          'operation, even though a single splay can be far worse.',
         detail: 'The analysis is the potential method from M01.3, with the potential defined as the ' +
           'sum over nodes of the log of the subtree size. A deep access is expensive in real work, ' +
           'but it also flattens the path it walked, which lowers Φ by roughly as much — so the ' +
@@ -158,6 +166,9 @@
         term: 'Static optimality',
         plain: 'On a fixed access distribution, splaying is within a constant factor of the best possible static tree.',
         formal: 'O(Σ pᵢ log(1/pᵢ)) — the entropy bound',
+        readAs: 'Add up, over every key, how often it is asked for times the log of one over that frequency. ' +
+          'That total is the entropy of the access pattern, and a splay tree matches it without ever ' +
+          'being told what the frequencies are.',
         detail: 'If you knew the access probabilities in advance you could build the optimal static ' +
           'search tree by dynamic programming, and its cost is the entropy of the distribution. A ' +
           'splay tree achieves that within a constant factor without being told the probabilities, ' +
@@ -222,6 +233,9 @@
         term: 'The α parameter',
         plain: 'A node is α-weight-balanced when neither child holds more than α of its subtree. α sets everything else.',
         formal: '½ < α < 1; depth limit = log_{1/α}(n)',
+        readAs: 'The balance parameter α sits strictly between a half and one, and the depth the tree is ' +
+          'allowed to reach is log of n taken to base 1/α. Push α towards 1 and you tolerate a deeper ' +
+          'tree in exchange for rebuilding less often.',
         detail: 'α is the single dial. It defines what counts as too lopsided, and through that it ' +
           'defines the depth limit an insertion is allowed to reach before triggering a repair — ' +
           'which is why a stricter α gives a shallower tree and more rebuilding. The relationship is ' +
@@ -234,6 +248,8 @@
         term: 'The scapegoat',
         plain: 'The lowest ancestor of a too-deep insertion whose subtree is more than α-heavy on one side.',
         formal: 'size(child) > α · size(node)',
+        readAs: 'A node is out of balance when one of its children holds more than the fraction α of the ' +
+          'whole subtree. At α = 0.7, a child holding over 70% of the nodes triggers a rebuild.',
         detail: 'When an insertion lands deeper than the limit, the tree walks back up from the new ' +
           'node computing subtree sizes, and stops at the first node that fails the weight test. ' +
           'That node is the scapegoat, and its whole subtree is rebuilt perfectly balanced. The ' +
@@ -258,6 +274,8 @@
         term: 'Deletion by decay',
         plain: 'Deletions never rebuild a subtree. The tree is allowed to thin out, then rebuilt whole.',
         formal: 'rebuild everything when live count < α · high-water mark',
+        readAs: 'Deletions do not rebuild anything until the number of live keys falls below the fraction α ' +
+          'of the largest the tree has ever been. That delay is what keeps the amortised cost down.',
         detail: 'Deletion is the plain BST algorithm with no repair at all. The tree is permitted to ' +
           'become sparse, and only when the live count drops below α times the largest it has ever ' +
           'been does the whole thing get rebuilt — once, in a single linear pass, resetting the ' +
@@ -295,6 +313,8 @@
         term: 'Weight-balanced trees',
         plain: 'The same balance-by-size idea, maintained with rotations and a stored subtree size instead of rebuilds.',
         formal: 'BB[α] trees: rotate when the weight ratio is exceeded',
+        readAs: 'Weight-balanced trees measure balance by subtree size rather than height, and rotate as soon ' +
+          'as the ratio between two siblings passes a threshold set by α.',
         detail: 'Weight-balanced trees use the same α-weight condition but store the subtree size on ' +
           'each node and repair with rotations, giving worst-case O(log n) per operation rather than ' +
           'amortised. The stored size is not wasted — it is the order-statistic augmentation from ' +

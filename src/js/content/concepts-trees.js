@@ -24,6 +24,8 @@
         term: 'Height is the cost',
         plain: 'Search, insert and delete all follow one root-to-leaf path, so all three cost the height.',
         formal: 'comparisons ≤ height, for every operation',
+        readAs: 'No operation ever does more comparisons than the tree is deep. That is why the whole subject ' +
+          'is about keeping the height down, and nothing else.',
         detail: 'There is only one cost model in this section and it is the height. That is why the ' +
           'whole of M04 is about controlling the height and nothing else — the operations themselves ' +
           'are already as cheap as they can be. It also tells you what to measure: not the number of ' +
@@ -36,7 +38,7 @@
       {
         term: 'The three delete cases',
         plain: 'A leaf is unlinked, a node with one child is replaced by it, and a node with two children is replaced by its successor.',
-        formal: 'no child · one child · two children',
+        formal: 'no child; one child; two children',
         detail: 'Deletion is the operation that separates a working tree from a demo, and it has ' +
           'exactly three shapes. A leaf is simply unlinked. A node with one child is replaced by ' +
           'that child, which cannot break the ordering because the child\'s whole subtree was ' +
@@ -63,6 +65,9 @@
         term: 'In-order traversal is the sorted view',
         plain: 'Visit left, then the node, then right, and the keys come out in sorted order. It is the invariant, read aloud.',
         formal: 'inOrder(T) is sorted ⟺ T is a search tree',
+        readAs: 'Walking the tree left-subtree, node, right-subtree gives a sorted list exactly when the tree ' +
+          'obeys the search property — and the "exactly when" runs both ways, so a sorted walk is a ' +
+          'complete test of the invariant.',
         detail: 'The in-order sequence is not a property the tree happens to have; it is equivalent ' +
           'to the invariant, which makes it the single best test in the whole subject. Any operation ' +
           'that claims to preserve the search-tree property can be checked by comparing the in-order ' +
@@ -88,6 +93,9 @@
         term: 'Degeneration on sorted input',
         plain: 'Insert keys in sorted order and every one goes right: the tree is a linked list of height n.',
         formal: 'sorted insertion ⇒ height = n, build cost = n(n−1)/2',
+        readAs: 'Insert already-sorted keys and every one goes to the right of the last, so the tree is a ' +
+          'linked list n deep. The total comparisons to build it are n(n−1)/2 — about half of n ' +
+          'squared, which is the quadratic collapse the balanced trees exist to prevent.',
         detail: 'Each key in a sorted stream is larger than everything already inserted, so it walks ' +
           'the entire right spine and hangs off the end. The result is a linked list with a tree API: ' +
           'height n, mean lookup n/2, and a build that costs n(n−1)/2 comparisons — 499 500 for a ' +
@@ -101,6 +109,9 @@
         term: 'Height versus node count',
         plain: 'A random insertion order gives a height near 2·log₂ n at practical sizes; the worst case is still n.',
         formal: 'E[height] → 4.311·ln n; E[depth] → 2·ln n',
+        readAs: 'Over random insertion orders the average height settles at about 4.311 times the natural log ' +
+          'of n, and the average node sits about 2 ln n deep. Both are a constant factor off the ideal ' +
+          'log₂ n, which is why a random tree is good but a balanced one is better.',
         detail: 'Random insertion order is well behaved: the expected depth of a node approaches ' +
           '2·ln n and the expected height approaches 4.311·ln n, both logarithmic. The constants ' +
           'arrive slowly, though, and quoting the asymptotic figure at a practical size overstates ' +

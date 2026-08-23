@@ -82,7 +82,7 @@
       {
         term: '0-based against 1-based',
         plain: 'With the root at index 1 the arithmetic is 2i and 2i + 1, which is a shift rather than a shift and an add.',
-        formal: '1-based: children 2i, 2i+1 · 0-based: 2i+1, 2i+2',
+        formal: '1-based: children 2i, 2i+1; 0-based: 2i+1, 2i+2',
         detail: 'The 1-based layout wastes slot zero and buys simpler index arithmetic: the children ' +
           'of i are 2i and 2i + 1, and the parent is i >> 1. The 0-based layout uses every slot and ' +
           'pays an extra add per index. In a language with 0-based arrays the second is idiomatic and ' +
@@ -306,7 +306,7 @@
       {
         term: 'Meld as the primitive',
         plain: 'Make merging the one operation, and insert and pop fall out of it in a line each.',
-        formal: 'insert = meld(h, singleton) · pop = meld(left, right)',
+        formal: 'insert = meld(h, singleton); pop = meld(left, right)',
         detail: 'An array heap treats insert and extract as primitives and cannot merge at all. The ' +
           'mergeable families invert that: meld is the only structural operation, insert melds a ' +
           'one-node heap, and pop drops the root and melds its two children. There is no other ' +
@@ -343,7 +343,7 @@
       {
         term: 'Binomial trees',
         plain: 'A tree of order k holds exactly 2^k nodes and is two order-(k − 1) trees, one hung under the other.',
-        formal: 'B_k = two B_(k−1) linked · |B_k| = 2^k',
+        formal: 'B_k = two B_(k−1) linked; |B_k| = 2^k',
         detail: 'The definition is recursive and the consequences are all arithmetic. A binomial tree ' +
           'of order k has exactly 2^k nodes, height k, and a root with exactly k children whose ' +
           'orders are k − 1, k − 2, …, 0. The name comes from the level sizes, which are the binomial ' +

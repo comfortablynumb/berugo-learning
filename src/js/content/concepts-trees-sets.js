@@ -10,6 +10,9 @@
         term: 'Probabilistic levels',
         plain: 'Each node is promoted to the next level with probability p, so tower heights are geometric.',
         formal: 'P(height = k) = p^(k−1)(1 − p)',
+        readAs: 'The chance a node gets exactly k levels: it has to win the coin k−1 times running, at ' +
+          'probability p each, and then lose once. That is the geometric distribution, and it is the ' +
+          'whole of how a skip list decides its shape.',
         detail: 'There is no balance rule and no restructuring: when a node is inserted it flips a ' +
           'coin repeatedly, and the number of heads decides how many express lanes it joins. The ' +
           'resulting height distribution is geometric, which is what makes the analysis work — about ' +
@@ -34,6 +37,8 @@
         term: 'What p really trades',
         plain: 'Not speed — memory. Smaller p means fewer levels and more steps along each, so the search cost is nearly flat.',
         formal: 'cost ≈ L/p + 1/(1 − p), L = log_{1/p}(n)',
+        readAs: 'A search costs about the number of levels divided by p, plus a term for the walking done ' +
+          'within each level. The level count L is log of n taken to base 1/p.',
         detail: 'The intuitive reading of p is that a smaller value means fewer levels and therefore ' +
           'a faster search, and the intuition is wrong because it only looks at one of the two ' +
           'factors. Fewer levels means each level covers more ground, so more forward steps are ' +
@@ -47,6 +52,8 @@
         term: 'Expected tower height',
         plain: '1/(1 − p) pointers per node — the memory the structure costs, exactly.',
         formal: 'E[height] = Σ k·p^(k−1)(1 − p) = 1/(1 − p)',
+        readAs: 'Average the height over the coin flips — each possible height k, weighted by how likely it ' +
+          'is — and the sum collapses to 1/(1 − p). At p = 0.5 that is 2 levels per node on average.',
         detail: 'The geometric distribution has a mean of 1/(1 − p), which is the number of forward ' +
           'pointers an average node carries and therefore the memory overhead per key. Measured over ' +
           '100 000 keys the figures land on the prediction to three decimals: 1.999 at p = 0.5 and ' +
@@ -162,6 +169,9 @@
         term: 'The inverse Ackermann bound',
         plain: 'Both optimisations together give O(α(n)) amortised, and α(n) is below 5 for every n anyone will run.',
         formal: 'O(m · α(n)) for m operations',
+        readAs: 'The total for m operations is m multiplied by α(n), the inverse Ackermann function — a value ' +
+          'that stays below 5 for any n that could be stored on any machine. It is not constant in ' +
+          'theory and it is indistinguishable from constant in practice.',
         detail: 'Tarjan proved that union by rank plus path compression gives an amortised bound of ' +
           'α(n) per operation, where α is the inverse of the Ackermann function — a function that ' +
           'grows so slowly it is 4 for every n up to 2^65536. That is why "effectively constant" is ' +

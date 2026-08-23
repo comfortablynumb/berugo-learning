@@ -58,7 +58,7 @@
       {
         term: 'Backward search',
         plain: 'Read the pattern right to left, narrowing the suffix-array range as you go.',
-        formal: 'first = C[c] + rank(c, first) · last = C[c] + rank(c, last)',
+        formal: 'first = C[c] + rank(c, first); last = C[c] + rank(c, last)',
         detail: 'The range being maintained is the set of rows whose suffix begins with the part of ' +
           'the pattern read so far. Prepending a character to that pattern maps the range through ' +
           'LF, which is two rank queries and two table lookups — independent of the text length and ' +
@@ -168,7 +168,7 @@
       {
         term: 'Variable-byte and word-aligned coding',
         plain: 'Seven payload bits per byte with a continuation flag, or several values packed per word.',
-        formal: 'varbyte: 1 byte for gaps ≤ 127 · Simple-9: 28 one-bit values or 1 twenty-eight-bit value per word',
+        formal: 'varbyte: 1 byte for gaps ≤ 127; Simple-9: 28 one-bit values or 1 twenty-eight-bit value per word',
         detail: 'Variable-byte is byte-aligned, trivially decodable and wastes one bit in eight. ' +
           'Simple-9 packs as many equal-width values as fit into a 32-bit word with a four-bit ' +
           'selector, so a run of tiny gaps costs about a bit each — better compression and a ' +

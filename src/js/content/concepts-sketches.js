@@ -9,7 +9,7 @@
       {
         term: 'A clear bit is proof; a set bit is not',
         plain: 'No false negatives ever, because every bit a key sets stays set.',
-        formal: 'x ∈ S ⇒ has(x) = true · has(x) = true ⇏ x ∈ S',
+        formal: 'x ∈ S ⇒ has(x) = true; has(x) = true ⇏ x ∈ S',
         detail: 'The asymmetry is the entire structure. Adding a key only ever turns bits on, so if any ' +
           'of the k bits a key tests is clear, that key was definitely never added — the filter has ' +
           'found positive evidence of absence. A set bit carries no such evidence, because any of the ' +
@@ -108,7 +108,7 @@
       {
         term: 'Counters instead of bits',
         plain: 'A small counter per cell makes removal possible, at four times the memory.',
-        formal: 'add: c += 1 · remove: c −= 1 · has: all counters > 0',
+        formal: 'add: c += 1; remove: c −= 1; has: all counters > 0',
         detail: 'Nobody reads the counters — they are not there to count anything. They exist so that ' +
           'decrementing on behalf of one key cannot clear a cell another key still needs, which is ' +
           'the precise reason a plain Bloom filter cannot delete. Four bits per cell is the standard ' +
@@ -131,7 +131,7 @@
       {
         term: 'One block, one cache line',
         plain: 'Confine a key\'s k bits to one aligned block and a query touches one line instead of k.',
-        formal: 'block = h₁ mod b · the k offsets are within the block',
+        formal: 'block = h₁ mod b; the k offsets are within the block',
         detail: 'A standard filter\'s k bit positions are spread uniformly over the whole array, so a ' +
           'query touches up to k different cache lines — 6.95 measured at k = 7 — and every one of ' +
           'them is an unpredictable access the prefetcher cannot help with. A blocked filter picks ' +

@@ -30,6 +30,24 @@
     Notation.registerLocal(id, LOAD_FACTOR);
   });
 
+  Notation.registerLocal('scapegoat-trees', {
+    'α': {
+      reads: 'alpha, the balance parameter',
+      means: 'How lopsided a node is allowed to get before the subtree under it is rebuilt: a ' +
+        'child may hold at most this fraction of the subtree. It sits between ½ and 1, and moving ' +
+        'it towards 1 tolerates a deeper tree in exchange for rebuilding less often.'
+    }
+  });
+
+  Notation.registerLocal('disjoint-sets', {
+    'α': {
+      reads: 'alpha, the inverse Ackermann function',
+      means: 'A function that grows so slowly it is below 5 for any n that could be stored on any ' +
+        'machine that will ever be built. Not constant in theory, indistinguishable from constant ' +
+        'in practice.'
+    }
+  });
+
   Notation.registerLocal('perfect-hashing', {
     'λ': {
       reads: 'lambda, the bucket load',

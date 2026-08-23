@@ -221,7 +221,7 @@
       {
         term: 'The pruning bound can be the plane or the box',
         plain: 'Compare the best distance so far against the splitting plane, or against the far subtree\'s actual bounding box.',
-        formal: 'plane: (q[axis] − split)²  ·  box: Σ max(min[i] − q[i], 0, q[i] − max[i])²',
+        formal: 'plane: (q[axis] − split)²; box: Σ max(min[i] − q[i], 0, q[i] − max[i])²',
         detail: 'The plane bound is the textbook one and costs a subtraction; the box bound costs a few more ' +
           'operations and is never weaker, because the subtree\'s points lie inside the box and the box lies ' +
           'beyond the plane. The difference is much larger than the extra arithmetic, which makes this one of the ' +

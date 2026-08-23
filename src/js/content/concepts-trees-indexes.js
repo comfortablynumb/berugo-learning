@@ -10,6 +10,9 @@
         term: 'The node is a page',
         plain: 'A B-tree node is one unit of I/O, so the branching factor is decided by the storage rather than chosen.',
         formal: 'order = ⌊(page + key) / (key + pointer)⌋',
+        readAs: 'How many children fit in a node: the page size plus one key\'s worth, divided by the space a ' +
+          'key-and-pointer pair takes, rounded down. It is a question about bytes per disk page, not ' +
+          'about the algorithm.',
         detail: 'This is the sentence the whole family follows from. A read from disk or from a page ' +
           'cache costs the same whether you use one byte of the page or all of it, so the node is ' +
           'sized to the page and filled with as many children as fit. Each child costs a pointer and ' +
@@ -22,6 +25,9 @@
         term: 'Height from the branching factor',
         plain: 'log_B(n) rather than log₂ n, which is why a million keys sit three levels deep.',
         formal: 'height = ⌈log_B(n)⌉',
+        readAs: 'The depth is log of n taken to base B — how many times you multiply the branching factor B ' +
+          'by itself to reach n — rounded up. With B in the hundreds, a few levels cover millions of ' +
+          'rows.',
         detail: 'Raising the branching factor from 2 to 256 divides the height by log₂ 256 = 8, and ' +
           'since every level is a separate I/O that is the entire performance argument. A million ' +
           'keys in a binary tree is 20 levels and 20 page reads; the same keys in a 256-way B+ tree ' +
@@ -45,7 +51,7 @@
       {
         term: 'Split and promote',
         plain: 'A full page splits in half; a leaf copies its separator up, an internal node moves it up.',
-        formal: 'leaf: copy the first key of the right half · internal: promote the median',
+        formal: 'leaf: copy the first key of the right half; internal: promote the median',
         detail: 'When a page overflows it splits into two half-full pages and the parent gains a ' +
           'separator. The two cases differ in one detail that matters: a leaf split *copies* the ' +
           'first key of the right half upward, because that key is data and has to stay in a leaf, ' +
@@ -82,6 +88,8 @@
         term: 'The range scan',
         plain: 'One descent, then the leaf chain. No internal page is read twice, and the cost is per page rather than per row.',
         formal: 'reads = height + ⌈rows / rows-per-leaf⌉',
+        readAs: 'A range scan costs one descent down the tree, plus one read per leaf the range spans: the ' +
+          'number of rows wanted divided by how many fit in a leaf, rounded up.',
         detail: 'This is the operation B+ trees are shaped for and the reason they beat hash indexes ' +
           'for anything ordered. Descend once to the first key, then follow the leaf pointers: no ' +
           'internal page is touched again and each page read yields a whole leaf-full of rows. The ' +
@@ -185,6 +193,8 @@
         term: 'The fields that cannot be augmented',
         plain: 'Anything needing more than the node and its two children — a median, a distinct count, a k-th value.',
         formal: 'the rule fails ⇒ repair after a rotation is not O(1)',
+        readAs: 'If the augmented value at a node cannot be recomputed from its two children alone, then a ' +
+          'rotation cannot fix it in constant time and the whole augmentation stops paying for itself.',
         detail: 'The instructive failures are the ones that look plausible. A subtree median cannot ' +
           'be computed from two child medians, because the answer depends on how the two ' +
           'distributions interleave. A distinct-value count cannot be computed from two child counts, ' +

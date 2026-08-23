@@ -10,6 +10,9 @@
         term: 'The height-balance invariant',
         plain: 'The two subtrees of every node differ in height by at most one.',
         formal: 'balance(node) = h(left) − h(right) ∈ {−1, 0, +1}',
+        readAs: 'A node\'s balance is the height of its left subtree minus the height of its right, and AVL ' +
+          'allows only three values: left-heavy by one, level, or right-heavy by one. Anything outside ' +
+          'that set triggers a rotation.',
         detail: 'This is the strictest rule any practical family imposes, and everything else about ' +
           'AVL follows from it. Because it is a rule about heights rather than about sizes or ' +
           'colours, it can be checked in constant time from the two children — which is why each ' +
@@ -22,6 +25,9 @@
         term: 'Balance factor',
         plain: 'One small integer per node: left height minus right height. It is what the rebalance rule reads.',
         formal: 'stored as height, read as h(left) − h(right)',
+        readAs: 'What is kept in the node is the subtree height; the balance is computed by subtracting the ' +
+          'two children\'s heights when needed. Storing the difference directly saves a byte and costs ' +
+          'you the ability to repair the tree after a bulk change.',
         detail: 'Implementations store either the height or the balance factor itself; storing the ' +
           'height costs a few more bits and makes the update trivial, which is why this platform ' +
           'does it. Either way the field must be recomputed for every node whose children changed, ' +
@@ -34,7 +40,7 @@
       {
         term: 'The four rebalance cases',
         plain: 'LL and RR need one rotation; LR and RL need an inner rotation first, so they cost two.',
-        formal: 'LL · LR · RL · RR, keyed by the heavy side and its heavy side',
+        formal: 'LL; LR; RL; RR, keyed by the heavy side and its heavy side',
         detail: 'When a node goes to ±2 the fix depends on where the extra height came from. If the ' +
           'heavy subtree is heavy on the same side (LL or RR), a single rotation at the unbalanced ' +
           'node fixes it. If it is heavy on the inside (LR or RL), a single rotation just moves the ' +
@@ -72,6 +78,9 @@
         term: 'The height bound',
         plain: 'h < 1.4404·log₂(n + 2) − 0.328, which is about 44% worse than a perfect tree.',
         formal: 'N(h) = N(h−1) + N(h−2) + 1, the Fibonacci recurrence',
+        readAs: 'The fewest nodes an AVL tree of height h can hold is one root plus the smallest trees of ' +
+          'height h−1 and h−2 hanging off it. That is the Fibonacci pattern, and it is what pins the ' +
+          'height at about 1.44 log₂ n.',
         detail: 'The bound comes from asking the opposite question: what is the fewest nodes an AVL ' +
           'tree of height h can hold? The answer is a Fibonacci-shaped recurrence, because the ' +
           'sparsest legal tree has one subtree of height h−1 and the other of h−2. That gives ' +
@@ -96,6 +105,8 @@
         term: 'Sorted input is the easy case here',
         plain: 'The order that destroys a plain BST is the cheapest one for AVL: every rebalance is a single rotation.',
         formal: 'monotone insertion ⇒ only RR (or only LL) cases',
+        readAs: 'Insert keys in increasing order and every imbalance leans the same way, so only one of the ' +
+          'four rotation cases ever fires. The ⇒ is "which means".',
         detail: 'A sorted stream always inserts on the right spine, so the only imbalance that ever ' +
           'appears is right-right, and the only fix ever needed is a single left rotation. That ' +
           'makes it both the most frequent rebalancing (almost one per insert, 0.999 measured) and ' +
@@ -110,7 +121,7 @@
       {
         term: 'The five rules',
         plain: 'Nodes are red or black; the root is black; null children count black; no red node has a red child; every root-to-leaf path has the same number of black nodes.',
-        formal: 'colour · black root · black leaves · no red-red · equal black height',
+        formal: 'colour; black root; black leaves; no red-red; equal black height',
         detail: 'Only the last two rules do any work. "No red node has a red child" caps how many ' +
           'red nodes a path can contain — at most every other one. "Every path has the same black ' +
           'count" pins the black nodes exactly. Together they say the longest path is at most twice ' +
@@ -135,7 +146,7 @@
       {
         term: 'The 2-3-4 isomorphism',
         plain: 'A black node with its red children is one node of a 2-3-4 tree. Red is not a node, it is a second key.',
-        formal: 'black alone = 2-node · one red child = 3-node · two red children = 4-node',
+        formal: 'black alone = 2-node; one red child = 3-node; two red children = 4-node',
         detail: 'This mapping is what makes the colour rules stop being arbitrary. A 2-3-4 tree keeps ' +
           'all its leaves at the same depth by storing one, two or three keys per node; a red-black ' +
           'tree stores the same thing in a binary tree, using red edges to glue the extra keys onto ' +
@@ -149,6 +160,8 @@
         term: 'Recolouring versus rotating',
         plain: 'Most of the insert fixup is recolouring, which touches no pointers at all.',
         formal: 'red uncle ⇒ recolour and move up two levels',
+        readAs: 'When the new node\'s uncle is red, no rotation is needed: recolour the parent and uncle ' +
+          'black, the grandparent red, and carry the problem up two levels to fix there.',
         detail: 'The insert fixup has two shapes. When the new node\'s uncle is red, the fix is three ' +
           'colour changes and the problem moves two levels up — no rotation, no pointer written. ' +
           'When the uncle is black, one or two rotations end the fixup for good. Since the recolour ' +
@@ -187,6 +200,8 @@
         term: 'Why libraries chose it',
         plain: 'Bounded rotations per update, on both insert and delete. AVL bounds only the insert.',
         formal: 'insert ≤ 2 rotations, delete ≤ 3',
+        readAs: 'However large the tree, a single insert never needs more than two rotations and a delete ' +
+          'never more than three. The recolouring may travel to the root; the structural work does not.',
         detail: 'std::map, java.util.TreeMap, the Linux kernel scheduler and most ordered maps are ' +
           'red-black, and the reason is the write path rather than the read path. Red-black bounds ' +
           'the structural change per update by a constant on both operations, while AVL bounds only ' +

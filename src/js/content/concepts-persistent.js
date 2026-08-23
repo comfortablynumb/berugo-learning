@@ -66,7 +66,7 @@
       {
         term: 'The read path is where the cost hides',
         plain: 'Every persistence method moves work somewhere; only path copying leaves the query untouched.',
-        formal: 'path copying O(log n) · fat node O(log n · log v) · node copying O(log n)',
+        formal: 'path copying O(log n); fat node O(log n · log v); node copying O(log n)',
         detail: 'This is the axis that decides the choice in practice, and it is invisible in a table of space ' +
           'costs. A structure that is read a thousand times per write wants the cheapest possible query and ' +
           'will happily pay a path per update; a structure recording an audit log that is almost never read ' +

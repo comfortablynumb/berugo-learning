@@ -109,7 +109,7 @@
       {
         term: 'One primitive: link',
         plain: 'Compare two roots; the loser becomes the winner\'s newest child. Everything else is built from that.',
-        formal: 'insert = link · meld = link · decrease-key = cut then link',
+        formal: 'insert = link; meld = link; decrease-key = cut then link',
         detail: 'A pairing heap is a single multiway tree in heap order, and its whole structural ' +
           'vocabulary is one operation. Insert links a new node with the root. Meld links two roots. ' +
           'Decrease-key cuts the node out of its parent\'s child list and links it back at the top. ' +

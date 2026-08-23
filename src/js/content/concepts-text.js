@@ -46,7 +46,7 @@
       {
         term: 'Not a faster hash table',
         plain: 'On membership alone a hash table wins on memory and on steps per lookup.',
-        formal: 'trie: |query| character steps · hash: one hash, one probe',
+        formal: 'trie: |query| character steps; hash: one hash, one probe',
         detail: 'The trie costs 92.8 bytes per key with map nodes against roughly 40 for an ' +
           'open-addressing hash table at a sane load factor, and a lookup takes 5.04 character ' +
           'steps against one hash and one probe. Each of those steps is a pointer chase into an ' +
@@ -59,7 +59,7 @@
       {
         term: 'The child-storage decision',
         plain: 'How a node stores its children changes the memory by an order of magnitude and the structure not at all.',
-        formal: 'map · alphabet-sized array · sorted array + binary search',
+        formal: 'map; alphabet-sized array; sorted array + binary search',
         detail: 'A map per node costs one entry per real child. An array with a slot per alphabet ' +
           'symbol makes each step a single index and pays for every unused slot. A sorted child ' +
           'array with a binary search pays nothing per symbol and costs log(children) comparisons ' +
@@ -197,7 +197,7 @@
       {
         term: 'Lookups do more character work',
         plain: 'Compression moves cost from pointer chases into substring comparisons.',
-        formal: 'plain: |query| pointer steps · radix: fewer steps, each comparing a label',
+        formal: 'plain: |query| pointer steps; radix: fewer steps, each comparing a label',
         detail: 'This is the honest counterweight to the node-count column. A plain-trie lookup takes ' +
           'one step per query character, each a hash or an index into a child container. A radix ' +
           'lookup takes one step per *edge*, and each step compares the whole edge label against ' +

@@ -171,7 +171,7 @@
       {
         term: 'SA-IS sorts by induction',
         plain: 'Classify positions S or L, place the LMS seeds, and induce the rest twice.',
-        formal: 'S-type: suffix i < suffix i + 1 · LMS: an S-type after an L-type',
+        formal: 'S-type: suffix i < suffix i + 1; LMS: an S-type after an L-type',
         detail: 'The linear construction does no character comparisons after the first pass. It ' +
           'classifies each position by whether its suffix sorts before the next one, places the ' +
           'left-most S-type positions into their buckets, and then derives the order of every other ' +
