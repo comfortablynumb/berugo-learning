@@ -32,6 +32,8 @@
       means: 'A ceiling on cost, ignoring constant factors: "never worse than this, once the input is big enough". It does not promise the cost is actually that high - O(n log n) is also truthfully O(n⁵).' },
     { token: 'o', source: '\\bo(?=\\s*\\()', reads: 'little oh',
       means: 'Strictly smaller: negligible next to this, no matter which constant factor you pick. o(n) grows so much slower than n that the ratio falls to zero.' },
+    { token: 'log2', source: '\\blog_?2\\b', reads: 'log base two',
+      means: 'The ASCII spelling of log₂: how many times you can halve a number before reaching 1. log2 1024 = 10.' },
     { token: 'log', source: '\\blog\\b(?!₂)', reads: 'log',
       means: 'The logarithm: how many times you must multiply the base by itself to reach this number. In algorithms the base is almost always 2, and it barely matters which - changing base only multiplies the answer by a constant.' },
     { token: 'ln', source: '\\bln\\b', reads: 'natural log',

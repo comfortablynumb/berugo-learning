@@ -22,6 +22,9 @@
         term: 'Run detection and minrun',
         plain: 'Find the ascending stretches, and pad short ones up to a computed floor.',
         formal: 'minrun is the top 5 bits of n plus 1 if any lower bit is set, giving 16..32',
+        readAs: 'Timsort picks a minimum run length between 16 and 32, chosen so the number of runs is close ' +
+          'to a power of two — which is what keeps the merges balanced instead of repeatedly merging a ' +
+          'huge run with a tiny one.',
         detail: 'Merging runs of wildly different lengths is wasteful, so Timsort establishes a floor: any ' +
           'natural run shorter than minrun is extended to it with a binary insertion sort. The value is not ' +
           'arbitrary. It is chosen so that n/minrun is just below a power of two, which makes the merge tree ' +
@@ -33,6 +36,9 @@
         term: 'The merge-stack invariants',
         plain: 'Two inequalities over the top three run lengths keep the stack shallow and the merges balanced.',
         formal: 'for runs X (newest), Y, Z: Z > Y + X and Y > X',
+        readAs: 'The stack invariant: each run on the stack must be larger than the two above it combined. It ' +
+          'keeps merges between comparable sizes, and getting it subtly wrong is what caused the ' +
+          'well-known Java and Python bug.',
         detail: 'Runs are pushed on a stack and merged lazily, which raises the question of when to merge. ' +
           'The invariants answer it: the lengths must grow at least as fast as the Fibonacci numbers going ' +
           'down the stack, which forces the stack depth to be O(log n) and keeps merges between runs of ' +
@@ -57,6 +63,9 @@
         term: 'Galloping mode',
         plain: 'When one run keeps winning, binary-search for how far it keeps winning.',
         formal: 'switch after MIN_GALLOP consecutive wins; doubling search then binary search',
+        readAs: 'When one run keeps winning the comparison, stop comparing element by element and start ' +
+          'jumping: double the step until you overshoot, then binary search back. It turns a long ' +
+          'one-sided merge from linear into logarithmic.',
         detail: 'Merging two runs one element at a time is optimal when they interleave and wasteful when ' +
           'they do not. If one run wins seven comparisons in a row that is evidence a whole block of it ' +
           'precedes the other run\'s head, so Timsort switches to a doubling search to find how large that ' +
@@ -69,6 +78,9 @@
         term: 'pdqsort: an unbalanced partition is evidence, not luck',
         plain: 'When the split is bad, swap a few elements so the next pivot sample is uncorrelated with the pattern.',
         formal: 'if either side is below size/8, break the pattern with fixed-offset swaps inside each partition',
+        readAs: 'A partition that splits worse than one to seven is evidence of an adversarial pattern, so ' +
+          'pdqsort deliberately shuffles a few fixed positions to destroy it — no randomness needed, ' +
+          'and no way for an attacker to predict the result.',
         detail: 'A deterministic pivot rule defeated once will be defeated the same way again, because the ' +
           'thing that defeated it is a property of the arrangement. pdqsort responds by deliberately ' +
           'disturbing the arrangement: a handful of swaps at fixed offsets, costing nothing, which decorrelate ' +
@@ -92,6 +104,9 @@
         term: 'A deterministic worst-case bound',
         plain: 'pdqsort reaches O(n log n) worst case without a random pivot.',
         formal: 'a depth budget of log2 n, then heapsort - and no randomness anywhere',
+        readAs: 'Introsort counts how deep the recursion has gone, and once it passes log₂ n it abandons ' +
+          'quicksort for heapsort. That gives an n log n worst case with no random number generator in ' +
+          'sight.',
         detail: 'Randomised pivots give a probabilistic guarantee at the cost of reproducibility: two runs on ' +
           'the same input do different work, which complicates benchmarking, debugging and any cache that ' +
           'depends on the output being computed the same way twice. pdqsort gets the same worst-case bound ' +
@@ -118,6 +133,9 @@
         term: 'Counting sort is priced by the key range',
         plain: 'One counter per possible key, so memory depends on k and not on n.',
         formal: 'O(n + k) time and O(k) space, where k is the size of the key domain',
+        readAs: 'Counting sort costs one pass over the data plus one over the range of possible keys. When ' +
+          'the range is small that beats any comparison sort; when it is large the k term is the whole ' +
+          'cost.',
         detail: 'This is the constraint that decides whether counting sort is usable, and it has nothing to ' +
           'do with how many elements there are. Sorting a thousand values with byte-sized keys needs a ' +
           '1 024-byte table and beats any comparison sort outright. Sorting a thousand 32-bit integers the ' +
@@ -130,6 +148,9 @@
         term: 'LSD radix: stable-or-broken',
         plain: 'Every digit pass must preserve the order the previous passes established.',
         formal: 'sort by digit 0, then digit 1, ...; each pass must be stable or the earlier ones are undone',
+        readAs: 'Least-significant-digit radix sort works only because each pass preserves the order the ' +
+          'previous one established. An unstable pass anywhere in the chain silently destroys all the ' +
+          'work before it.',
         detail: 'Least-significant-digit radix works by induction: after sorting on digits 0..i the array is ' +
           'ordered by the low i+1 digits, and the pass on digit i+1 preserves that ordering *within* each ' +
           'group of equal digit-(i+1) values only because it is stable. Break stability in any single pass ' +
@@ -142,6 +163,9 @@
         term: 'The failure is graded by how many passes matter',
         plain: 'One meaningful pass hides an unstable scatter; four passes expose it completely.',
         formal: 'passes that carry information = ceil(log_radix(key range))',
+        readAs: 'You only need as many digit passes as it takes to cover the actual range of keys, not the ' +
+          'full width of the type. Sorting 32-bit integers that all fit in 16 bits needs half the ' +
+          'passes.',
         detail: 'This is why the bug survives testing. If the keys all fit in one digit, only one pass does ' +
           'anything, and an unstable pass still produces sorted output - only the tie order is wrong, which ' +
           'nothing downstream may notice. Widen the keys so four passes carry information and the same code ' +
@@ -153,6 +177,9 @@
         term: 'Negative numbers and the sign bias',
         plain: 'Two\'s-complement negatives have the top bit set, so an unsigned digit sort puts them last.',
         formal: 'map value to (value XOR 0x80000000), which is order-preserving on the full 32-bit range',
+        readAs: 'Flipping the sign bit turns signed integers into unsigned ones that sort in the same order, ' +
+          'so a radix sort can treat them as plain bit patterns. Without it, every negative number ' +
+          'sorts above every positive one.',
         detail: 'The bug is universal in hand-rolled radix sorts because it is invisible on non-negative test ' +
           'data. A negative 32-bit integer has its most significant bit set, so treating the key as unsigned ' +
           'sorts every negative after every positive. Flipping that sign bit maps the signed range onto the ' +
@@ -186,6 +213,9 @@
         term: 'Digit width: passes against table size',
         plain: 'A wider digit means fewer passes and a bigger counter table, and the cache decides.',
         formal: 'r bits per digit gives ceil(32/r) passes over 2^r buckets',
+        readAs: 'Wider digits mean fewer passes over more buckets: 8 bits gives 4 passes over 256 buckets, 16 ' +
+          'bits gives 2 passes over 65 536. The buckets have to stay in cache, which is what caps the ' +
+          'digit width.',
         detail: 'Four bits gives 16 buckets and eight passes; sixteen bits gives 65 536 buckets and two ' +
           'passes. Fewer passes is less data movement, so the wide digit looks obviously better until the ' +
           'counter table stops fitting in cache and every scatter becomes a miss. Eight bits - 256 counters, ' +
@@ -200,6 +230,9 @@
         term: 'Recursing into one side turns n log n into 2n',
         plain: 'Quickselect is quicksort that throws away the half it does not need.',
         formal: 'T(n) = T(n/2) + n sums to 2n; T(n) = 2T(n/2) + n sums to n log n',
+        readAs: 'Recursing into one half gives a total of 2n — the work halves every level, so the series ' +
+          'converges. Recursing into both gives n at every level and log n levels. That single ' +
+          'difference is why selection is linear and sorting is not.',
         detail: 'The two recurrences differ by a single coefficient and that coefficient is the whole result. ' +
           'Quicksort handles the entire array at every level, so the per-level cost stays n and there are ' +
           'log n levels. Quickselect discards one side, so the per-level cost halves and the geometric series ' +
@@ -211,6 +244,9 @@
         term: 'Median of medians: a guarantee with a large constant',
         plain: 'Groups of five, the median of each, then the median of those - and at least 30% is discarded.',
         formal: 'the pivot exceeds at least 3n/10 elements, so T(n) <= T(n/5) + T(7n/10) + n is linear',
+        readAs: 'Median-of-medians guarantees the pivot beats at least three tenths of the input, so the ' +
+          'larger side is at most seven tenths. Because 1/5 + 7/10 is less than 1, the recursion ' +
+          'shrinks geometrically and the total is linear.',
         detail: 'The chosen value is greater than three elements in at least half the groups of five, so at ' +
           'least 3n/10 of the array is below it and at least 3n/10 above - meaning the recursion is on at ' +
           'most 7n/10 whichever way the partition falls. Since 1/5 + 7/10 < 1 the recurrence is linear. That ' +
@@ -244,6 +280,8 @@
         term: 'Top-k is a different question with a different answer',
         plain: 'A bounded heap of size k is one streaming pass; quickselect needs the whole array.',
         formal: 'heap: O(n log k) time, O(k) space, streaming. quickselect: O(n) time, O(n) space, in place',
+        readAs: 'Two ways to get the top k. The heap is slower in theory but holds only k items and works on ' +
+          'a stream; quickselect is linear but needs the whole array in memory and reorders it.',
         detail: 'These are not competing implementations of one operation, they are answers to different ' +
           'constraints. The heap holds k elements, sees each input once and never needs the data resident - ' +
           'so it works on a stream of a billion records with k = 10. Quickselect is asymptotically better and ' +
@@ -277,6 +315,9 @@
         term: 'Sort-then-index is usually the right answer',
         plain: 'The log factor is a factor of 15 at a hundred thousand elements, not a factor of a thousand.',
         formal: 'n log2 n / 2n = log2(n) / 2, which is 8.5 at n = 100 000',
+        readAs: 'Sorting everything costs about n log₂ n; selecting the median costs about 2n. Divide one by ' +
+          'the other and at a hundred thousand elements sorting is roughly eight and a half times the ' +
+          'work — for an answer you did not ask for.',
         detail: 'Reaching for quickselect before there is a reason is the mirror of the mistake this section ' +
           'warns about. Sorting and indexing is one line, obviously correct, and gives you every other order ' +
           'statistic for free. The measured penalty at a hundred thousand elements is about 4.6× against ' +

@@ -22,6 +22,9 @@
         term: 'Stability, and when it is load-bearing',
         plain: 'A stable sort leaves equal elements in the order it found them.',
         formal: 'i < j and key(a[i]) = key(a[j]) implies a[i] precedes a[j] in the output',
+        readAs: 'If two records have equal keys, the one that started earlier finishes earlier. That is the ' +
+          'whole definition of stability, and it is what lets you sort by one field and then another ' +
+          'without destroying the first.',
         detail: 'Stability is what makes multi-key sorting compose. Sort a table by date, then sort the result ' +
           'by author, and with a stable sort each author\'s rows are still in date order - the second sort ' +
           'preserves the first one\'s work. With an unstable sort the second pass scrambles the first, and the ' +
@@ -34,6 +37,9 @@
         term: 'Adaptivity: paying for the disorder that is actually there',
         plain: 'An adaptive sort costs less on input that is already partly ordered.',
         formal: 'insertion sort is O(n + I) where I is the number of inversions',
+        readAs: 'An inversion is any pair that is currently in the wrong order. Insertion sort costs one step ' +
+          'per element plus one per inversion, so on nearly-sorted data — where there are few ' +
+          'inversions — it is close to linear.',
         detail: 'Insertion sort\'s cost is not n² - it is the number of inversions, the pairs that are out of ' +
           'order. On a sorted array there are none and it does n-1 comparisons and no moves at all; on a ' +
           'reversed array every pair is inverted and it does n(n-1)/2. That is why it is the fallback inside ' +
@@ -58,6 +64,9 @@
         term: 'The comparison model, and the bound it implies',
         plain: 'A sort that only compares pairs needs at least log₂(n!) comparisons.',
         formal: 'a decision tree with n! leaves has depth >= log2(n!) ~ n log2 n - 1.44n',
+        readAs: 'Sorting n items has n! possible answers — n factorial, the number of orders they could be in ' +
+          '— and each comparison only halves the possibilities. So you need at least log base 2 of that ' +
+          'many comparisons, which works out at about n log₂ n minus 1.44n.',
         detail: 'The lower bound is a counting argument, not a statement about cleverness. A comparison sort ' +
           'is a decision tree: each internal node is a comparison and each leaf is one of the n! possible ' +
           'orderings. A tree with n! leaves has height at least log₂(n!), which is about n log₂ n. Any ' +
@@ -70,6 +79,9 @@
         term: 'The comparator contract: a strict weak ordering',
         plain: 'Irreflexive on equality, antisymmetric, and transitive - all three, or the sort is undefined.',
         formal: 'compare(x, x) = 0; sign(compare(a, b)) = -sign(compare(b, a)); a < b and b < c implies a < c',
+        readAs: 'The three rules a comparator must obey: an element equals itself, swapping the arguments ' +
+          'flips the sign, and the ordering is transitive. Break any of them and the sort may crash, ' +
+          'loop, or silently produce garbage — none of which points at the comparator.',
         detail: 'These are not pedantic conditions; they are what the algorithm reasons with. A sort that has ' +
           'established a < b and b < c will never compare a with c, so if transitivity fails the wrong order ' +
           'is not detected - it is assumed. C++ calls a violation undefined behaviour, Java throws ' +
@@ -109,6 +121,8 @@
         term: 'The merge is the algorithm',
         plain: 'Two sorted runs into one, reading both forwards and writing forwards.',
         formal: 'merge two runs of a and b in a + b - 1 comparisons at worst',
+        readAs: 'Merging two sorted runs costs at most one comparison per element, less one — because the ' +
+          'last element goes across without needing to be compared to anything.',
         detail: 'Everything else in merge sort is a schedule for performing merges. The merge itself takes ' +
           'the smaller of the two heads, and it is the access pattern rather than the comparison count that ' +
           'matters: both inputs are read strictly forwards and the output is written strictly forwards, so it ' +
@@ -121,6 +135,8 @@
         term: 'Stability is one character in the merge',
         plain: 'Take from the left run when the heads are equal.',
         formal: 'take right only when right < left, never when right <= left',
+        readAs: 'Break ties towards the left run and the merge is stable; break them towards the right and it ' +
+          'is not. One character in one comparison decides the property.',
         detail: 'The left run holds the element that was originally earlier, so on a tie the left one must go ' +
           'first. Changing that comparison from strict to non-strict leaves every other figure in the section ' +
           'identical - the same comparisons, the same moves, the same correct ordering - and silently removes ' +
@@ -133,6 +149,9 @@
         term: 'Top-down against bottom-up: the same merges, different bookkeeping',
         plain: 'Recursion or a loop over widths 1, 2, 4, 8 - and the loop copies half as much.',
         formal: 'both do ceil(log2 n) passes; bottom-up alternates the buffer instead of copying back',
+        readAs: 'Top-down and bottom-up merge sort do the same number of passes — log base 2 of n, rounded ' +
+          'up. What differs is that bottom-up swaps which buffer it writes into rather than copying the ' +
+          'result back each time.',
         detail: 'The textbook recursion merges into a buffer and copies the result back at every level, which ' +
           'is a second pass over the data per level and buys nothing. The bottom-up loop swaps the roles of ' +
           'the array and the buffer each pass, so nothing is copied back until the end, and it needs no ' +
@@ -166,6 +185,8 @@
         term: 'In-place merging, and what O(1) space really costs',
         plain: 'Rotation-based merging needs no buffer and moves far more data.',
         formal: 'O(n log n) comparisons, O(n log^2 n) moves, O(1) auxiliary space',
+        readAs: 'In-place merging keeps the comparison count but pays an extra log factor in element moves — ' +
+          'the caret means "to the power of" — in exchange for needing no scratch buffer at all.',
         detail: 'Merging without a buffer is done by rotation: split both runs at the point that lets each ' +
           'side be rotated into position, then recurse. It is genuinely in place and it is genuinely stable - ' +
           'the asymmetry between a lower bound on one side and an upper bound on the other is what preserves ' +
@@ -178,6 +199,8 @@
         term: 'The k-way merge buys passes, not comparisons',
         plain: 'Merging k runs at once costs the same comparisons and touches the data far less often.',
         formal: 'a heap over k run cursors: log2(k) comparisons per element emitted, in one pass',
+        readAs: 'To merge k sorted runs at once, keep a heap of the k current positions. Each output element ' +
+          'costs one heap operation, so the whole merge is a single streaming pass.',
         detail: 'Picking the smallest of k heads costs log₂ k comparisons however the merging is arranged, so ' +
           'merging k runs at once and merging them pairwise in log₂ k rounds cost about the same total. What ' +
           'differs is how many times the data is read and written: one pass against log₂ k passes. In memory ' +
@@ -204,6 +227,9 @@
         term: 'Partition, then recurse into both sides',
         plain: 'Put everything below the pivot before it and everything above after it, then repeat.',
         formal: 'T(n) = T(k) + T(n-k-1) + n, which is n log n when k is near n/2 and n^2 when it is not',
+        readAs: 'Quicksort\'s cost is the two sides plus the partition. Split near the middle and the ' +
+          'recursion is log deep; split off one element at a time and it is n deep — the same ' +
+          'algorithm, and the difference is entirely the pivot.',
         detail: 'The recurrence is the whole analysis, and it says the split is everything. A pivot that lands ' +
           'near the middle halves the problem twice per level and the recursion is log n deep; a pivot that ' +
           'lands at one end removes one element per level and the recursion is n deep. Quicksort is not fast ' +
@@ -239,6 +265,9 @@
         term: 'Pivot rules, and what each one is defeated by',
         plain: 'First, middle, median-of-three, ninther, random - each fails on a different input.',
         formal: 'a sample of s elements gives a pivot in the middle 1/(s+1) fraction with high probability',
+        readAs: 'Sampling more candidates narrows where the pivot can land: three samples put it in the ' +
+          'middle quarter or so, nine put it much nearer the centre. Each extra sample costs a ' +
+          'comparison and buys a better split.',
         detail: 'Taking the first element is quadratic on sorted input, which is the most common real input ' +
           'there is. Median-of-three fixes that and is still defeated by an organ-pipe arrangement or a ' +
           'constructed one. The ninther - the median of three medians of three - samples nine points and is ' +
@@ -285,6 +314,9 @@
         term: 'Recurse into the smaller side, loop on the larger',
         plain: 'Tail-recursion elimination bounds the stack at O(log n) even when the recursion is not.',
         formal: 'recursing into the smaller half guarantees the stack depth is at most log2 n',
+        readAs: 'Always recurse into the smaller side and loop on the larger, and the stack can never exceed ' +
+          'log₂ n frames — because each recursion at least halves the remaining size. It costs nothing ' +
+          'and removes the stack overflow entirely.',
         detail: 'A naive quicksort on an unlucky input recurses n deep and overflows the stack - which is a ' +
           'crash rather than a slowdown, and a different failure from the quadratic one. The fix costs ' +
           'nothing: after partitioning, recurse into the smaller side and loop on the larger by reassigning ' +

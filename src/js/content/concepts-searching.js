@@ -10,6 +10,8 @@
         term: 'Write the invariant, and the code follows',
         plain: 'The half-open interval [low, high) always contains the answer.',
         formal: 'low <= answer <= high is maintained by every branch; the loop ends when low = high',
+        readAs: 'The answer is always somewhere between the two bounds, and every iteration keeps that true ' +
+          'while shrinking the gap. When the bounds meet, the gap holds exactly one thing.',
         detail: 'Bentley found that most published binary searches were wrong, and the cause was not ' +
           'carelessness - it was writing a loop from a mental picture instead of from a stated property. ' +
           'Once the invariant is written down every decision is forced: `high` starts at the length because ' +
@@ -22,6 +24,9 @@
         term: 'The two branches are deliberately not symmetric',
         plain: '`high = mid` discards a half-open range; `low = mid + 1` discards a closed one.',
         formal: 'high = mid removes [mid, high); low = mid + 1 removes [low, mid]',
+        readAs: 'The two updates discard different halves, and the bracket styles say exactly which: a square ' +
+          'bracket includes its endpoint, a round one excludes it. Getting one of them wrong is what ' +
+          'makes a binary search loop forever.',
         detail: 'This is where every plus-one argument comes from, and the asymmetry is correct rather than ' +
           'an oversight. When the probe says the answer is at or below `mid`, the range from `mid` upwards is ' +
           'gone and `mid` itself might still be the answer - so `high = mid`. When the probe says the answer ' +
@@ -33,6 +38,9 @@
         term: 'Lower bound and upper bound, not "find"',
         plain: 'First index >= target, and first index > target - and their difference is the count.',
         formal: 'upperBound(x) - lowerBound(x) is the number of occurrences of x',
+        readAs: 'The first position where x could go and the first position after every x, subtracted, give ' +
+          'how many copies of x there are. Two searches answer a counting question with no extra ' +
+          'structure.',
         detail: 'A plain "does it contain x" search throws away information the same loop already computed. ' +
           'The two bounds answer where x would be inserted at the front or the back of its run of equals, ' +
           'which gives membership, insertion position, occurrence count and range extraction from one ' +
@@ -67,6 +75,9 @@
         term: 'The midpoint overflow',
         plain: '`(low + high) / 2` overflows in fixed-width arithmetic; `low + (high - low) / 2` does not.',
         formal: 'in 32-bit signed arithmetic, low + high wraps negative once the sum exceeds 2^31 - 1',
+        readAs: 'Adding two large indices can overflow past the largest signed 32-bit value and come back ' +
+          'negative. Writing low + (high - low) / 2 instead of (low + high) / 2 avoids it — the famous ' +
+          'bug that sat in the JDK for nine years.',
         detail: 'This is the bug Bentley\'s own published version carried for two decades and Java\'s ' +
           'binarySearch carried until 2006. JavaScript numbers are exact to 2^53, so the naive form is ' +
           'genuinely safe here - which is why the demo shows the same expression forced through 32 bits ' +
@@ -89,6 +100,9 @@
         term: 'Interpolation search and its assumption',
         plain: 'Guess where the target is instead of splitting in half - if the keys are uniform.',
         formal: 'O(log log n) on uniform keys, O(n) when the distribution assumption fails',
+        readAs: 'Interpolation search guesses where the key should be rather than taking the midpoint. On ' +
+          'evenly spread keys that is extraordinarily fast; on clustered keys it degenerates to a ' +
+          'linear scan.',
         detail: 'Interpolation search estimates the position by linear extrapolation between the endpoints, ' +
           'which on uniformly distributed keys lands almost on the answer: measured, one probe over ten ' +
           'thousand uniform values. The estimate is a straight line, so on keys whose gaps grow the guess is ' +
@@ -103,6 +117,8 @@
         term: 'The array being searched is the predicate\'s output',
         plain: 'Nothing is sorted except the trues and falses the feasibility check produces.',
         formal: 'feasible: [lo, hi] -> bool, monotone false-then-true; find the first true',
+        readAs: 'Binary search does not need a sorted array — it needs a yes/no test that is false for a ' +
+          'while and then true forever after. Find where it flips, and that is your answer.',
         detail: 'This is the reframe that makes the technique visible. There is no sorted array anywhere - ' +
           'what is ordered is the boolean sequence induced over the candidate answers, and that sequence is ' +
           'false, false, ..., false, true, true, ..., true. Once you see that, "the smallest capacity that ' +
@@ -137,6 +153,8 @@
         term: 'First-true and last-true are different loops',
         plain: 'Maximising needs its own invariant and a midpoint that rounds up.',
         formal: 'last-true: mid = lo + ceil((hi - lo)/2), and lo = mid on success',
+        readAs: 'When you want the last position that answers true rather than the first, the midpoint has to ' +
+          'round up instead of down — otherwise the loop stops making progress and hangs.',
         detail: 'Writing the maximising search as a minimising search on the negated predicate is the classic ' +
           'off-by-one: it is correct until the entire range is feasible, and then it is one too small. And ' +
           'the midpoint must round *up*: with `lo = mid` and a rounded-down midpoint, an interval of width ' +
@@ -159,6 +177,9 @@
         term: 'Ternary search for a unimodal function',
         plain: 'No monotone predicate, but a single peak - two probes discard a third.',
         formal: 'compare f at two interior points; log base 1.5 rather than log base 2',
+        readAs: 'Ternary search on a single-peaked function compares two inner points and discards one third ' +
+          'of the range each time, rather than one half. Slower per step, and the only option when ' +
+          'there is no yes/no test to binary search on.',
         detail: 'When the thing being searched is a function with one maximum rather than a predicate that ' +
           'flips once, binary search does not apply - knowing f(mid) tells you nothing about which side the ' +
           'peak is on. Two probes do: if f(a) < f(b) the peak cannot be at or below a. Each round discards a ' +
@@ -170,6 +191,9 @@
         term: 'Floating-point termination is by iteration count, not tolerance',
         plain: '`while (high - low > 1e-9)` can spin forever; a fixed 200 rounds cannot.',
         formal: 'once the interval approaches the ULP, the midpoint can equal an endpoint and the width stops shrinking',
+        readAs: 'On floating-point values the midpoint eventually rounds to one of the two ends, and the ' +
+          'interval stops narrowing. Loop until the width is small enough, or for a fixed count — never ' +
+          'until the ends are equal.',
         detail: 'This is the floating-point trap in an otherwise integer technique. As the interval narrows ' +
           'toward the limit of double precision, `(lo + hi) / 2` can round to exactly `lo` or `hi`, the ' +
           'interval stops shrinking, and a loop conditioned on the width never exits. A fixed iteration count ' +
@@ -197,6 +221,9 @@
         term: 'The unit of cost changes when the data leaves memory',
         plain: 'Count passes over the data, not comparisons.',
         formal: 'Aggarwal-Vitter: (N/B) log_{M/B}(N/B) block transfers',
+        readAs: 'External sorting costs block reads and writes rather than comparisons: N items in blocks of ' +
+          'B, with a memory of M. The log is to base M/B, which is large, so the number of passes is ' +
+          'small — usually two.',
         detail: 'Once the array does not fit, the CPU is not what you are spending. The external-memory model ' +
           'counts block transfers between fast and slow storage, and the expression it gives has one lever: ' +
           'the base of the logarithm, which is the merge order. That is why doubling memory does not halve ' +
@@ -220,6 +247,9 @@
         term: 'Halving the runs can remove an entire pass',
         plain: 'The pass count is log base k of the run count, so fewer runs is a discrete saving.',
         formal: 'passes = ceil(log_k(runs)); one fewer pass is 2N of I/O',
+        readAs: 'Each merge pass folds k runs into one, so the pass count is the log to base k of the run ' +
+          'count. Every pass reads and writes the entire dataset, so removing one saves two full sweeps ' +
+          'of I/O.',
         detail: 'This is why the 2M result matters rather than being a curiosity. Pass count is a ceiling of a ' +
           'logarithm, so it moves in whole steps: halving the run count sometimes changes nothing and ' +
           'sometimes removes a complete pass over the dataset. Measured on 10 000 records with 100 resident ' +
@@ -242,6 +272,9 @@
         term: 'Depth is the parallel running time',
         plain: 'Comparators in the same round touch disjoint wires and run simultaneously.',
         formal: 'bitonic depth is log2(n)(log2(n)+1)/2; total comparators are O(n log^2 n)',
+        readAs: 'A bitonic network has about half of log₂ n squared stages, and each stage holds n/2 ' +
+          'comparators. It does more total work than a comparison sort — and every comparison in a ' +
+          'stage runs at once, which is the whole point on a GPU.',
         detail: 'The two numbers that describe a network answer different questions. The comparator count is ' +
           'total work and it is worse than merge sort\'s - 28 160 against about 10 240 at n = 1 024. The ' +
           'depth is the number of dependent steps, and with enough lanes it is the time: 55 rounds at ' +
@@ -253,6 +286,9 @@
         term: 'The zero-one principle',
         plain: 'A network sorts everything if and only if it sorts every input of zeros and ones.',
         formal: 'if a comparator network sorts all 2^n binary inputs, it sorts all inputs',
+        readAs: 'The zero-one principle: to verify a sorting network you only need to test it on inputs of ' +
+          'zeros and ones. That turns an infinite check into a finite one, and it is why these networks ' +
+          'can be proved correct by brute force.',
         detail: 'This turns verification from an infinite question into a finite one, and it is the only ' +
           'exhaustive correctness argument available anywhere in this milestone. Sixteen wires are settled ' +
           'completely by 65 536 runs - a proof rather than a sample. The reason it holds is that any ' +
@@ -322,6 +358,8 @@
         term: 'The comparator runs O(n log n) times',
         plain: 'Any work inside it - lowercasing, parsing, property lookup - is multiplied by the comparison count.',
         formal: 'the Schwartzian transform moves key computation from O(n log n) to O(n)',
+        readAs: 'Compute each element\'s sort key once up front, sort the pairs, then throw the keys away. ' +
+          'Without it an expensive key function runs once per comparison rather than once per element.',
         detail: 'A comparator that calls `toLowerCase()`, parses a date or walks a property path does that ' +
           'work once per comparison, which is about 20 000 times for a thousand elements. Decorating each ' +
           'element with its computed key, sorting on the key and undecorating does it n times. The idea is ' +
