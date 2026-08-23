@@ -17,6 +17,9 @@
         term: 'Stride',
         plain: 'The distance in bytes between consecutive elements. Indexing is base + i × stride.',
         formal: 'address(i) = base + i · stride',
+        readAs: 'The address of element i is where the array starts, plus i lots of the element size. One ' +
+          'multiply and one add, whatever i is — which is why an array index costs the same at position ' +
+          '0 and at position a million.',
         detail: 'Stride, not element size, is what indexing multiplies by, and the two differ ' +
           'whenever padding is involved: a record whose fields add up to 21 bytes but which must be ' +
           '8-byte aligned has a stride of 24. Every cost that scales with the array scales with the ' +
@@ -30,6 +33,8 @@
         term: 'Alignment',
         plain: 'A value of width w must sit at an address divisible by w, or the hardware pays for it.',
         formal: 'address mod sizeof(T) = 0',
+        readAs: 'An address is correctly aligned when dividing it by the size of the type leaves no remainder ' +
+          '— that is what "mod … = 0" says. A 4-byte value belongs at an address divisible by 4.',
         detail: 'Memory is fetched in aligned blocks, so a value that straddles a boundary needs two ' +
           'accesses and a merge — on the architectures that allow it at all. Compilers therefore ' +
           'place each field at an offset divisible by its own width, inserting whatever padding that ' +
@@ -43,6 +48,8 @@
         term: 'Padding',
         plain: 'The bytes the compiler inserts to satisfy alignment. Reordering fields removes most of it.',
         formal: 'stride − Σ field sizes',
+        readAs: 'Padding is the gap: take the space one record actually occupies and subtract the total of ' +
+          'the field sizes you asked for. The Σ just means "add all the field sizes up".',
         detail: 'Padding appears in two places: between fields, to align the next one, and at the end ' +
           'of the record, to keep the following element aligned. Declaration order decides how much ' +
           'you get, and the pathological order is small-large-small: {u8, f64, u8} pays 7 bytes of ' +
@@ -56,6 +63,9 @@
         term: 'Array of structs (AoS)',
         plain: 'Records stored whole, one after another. Good when you use most fields of one record.',
         formal: 'record i occupies [i·stride, (i+1)·stride)',
+        readAs: 'Record i runs from i times the stride up to, but not including, the next multiple. The ' +
+          'square bracket includes its endpoint and the round bracket excludes it, so consecutive ' +
+          'records touch without ever overlapping by a byte.',
         detail: 'AoS is the layout every language gives you by default, and it is the right one when ' +
           'the unit of work is a whole record: everything about record i arrives in the same line or ' +
           'two, so a lookup that reads several fields pays for one fetch. It is the wrong one when ' +
@@ -69,6 +79,9 @@
         term: 'Struct of arrays (SoA)',
         plain: 'Each field stored contiguously. Good when you scan one field across many records.',
         formal: 'field f of record i at base_f + i · sizeof(f)',
+        readAs: 'In a struct-of-arrays layout each field has its own base address, and record i sits i ' +
+          'field-widths along from it. So one field of every record is contiguous, rather than every ' +
+          'field of one record.',
         detail: 'SoA transposes the layout: one array per field, indexed in parallel. A scan over a ' +
           'single field then reads a dense run of bytes, so every byte fetched is used, the ' +
           'prefetcher sees a unit stride and the loop is trivially vectorisable. The price is paid ' +
@@ -82,6 +95,9 @@
         term: 'Cache line',
         plain: 'Memory moves in 64-byte lines, so touching one byte costs the whole line.',
         formal: 'line = ⌊address / 64⌋',
+        readAs: 'Which cache line an address falls in is the address divided by 64, rounded down — the floor ' +
+          'bars are that rounding. Every address in the same line shares one number, which is why ' +
+          'touching either end of a line costs the same.',
         detail: 'The line is the unit of transfer between every level of the hierarchy, which means ' +
           'the cost of a read is decided by which line it falls in rather than by how many bytes you ' +
           'asked for. Efficiency is therefore the fraction of each fetched line the program actually ' +
@@ -137,6 +153,8 @@
         term: 'Growth factor',
         plain: 'How much bigger the new allocation is. It sets total copies and wasted space.',
         formal: 'capacity ← ⌈capacity · r⌉',
+        readAs: 'On a grow, the new capacity is the old one multiplied by the growth factor r and rounded up ' +
+          'to a whole number. The left arrow is assignment — plain `=` in JavaScript.',
         detail: 'The factor trades copying against waste, and both sides are geometric. A larger ' +
           'factor means fewer reallocations and more slack; a smaller one means the reverse. Total ' +
           'copying over n pushes is about n/(r − 1) elements, so doubling copies roughly n and 1.5× ' +
@@ -164,6 +182,9 @@
         term: 'Shift cost',
         plain: 'Inserting at position p moves the n − p elements after it. Append moves none.',
         formal: 'moved = n − p',
+        readAs: 'Inserting at position p in an array of n items shifts everything after p along by one, so ' +
+          'the number of elements moved is n minus p. At the front that is all of them; at the end it ' +
+          'is none.',
         detail: 'Contiguity is what makes indexing free, and the price is that inserting anywhere but ' +
           'the end has to make room by moving everything after it. Position decides the cost ' +
           'completely: appending moves nothing, inserting in the middle moves n/2 elements and ' +
@@ -191,6 +212,9 @@
         term: 'Swap-remove',
         plain: 'Overwrite the hole with the last element instead of shifting. Θ(1), and it destroys the order.',
         formal: 'a[i] = a[n − 1]; n -= 1',
+        readAs: 'To remove element i without shifting anything, copy the last element over it and shorten the ' +
+          'array by one. It costs two operations instead of n — and it changes the order, which is the ' +
+          'whole trade.',
         detail: 'If the order of the array does not carry meaning, removal does not need to shift ' +
           'anything: move the last element into the hole and shorten the array. That converts a ' +
           'Θ(n) operation into two writes, and the difference is not academic — 100 000 removals ' +
@@ -339,6 +363,8 @@
         term: 'Unrolled list',
         plain: 'Store a small array in each node. It buys back most of the locality and keeps most of the splice.',
         formal: 'k elements per node ⇒ n/k pointer follows',
+        readAs: 'Pack k items into each node and you follow n divided by k pointers instead of n. The ⇒ is ' +
+          '"which means": the pointer chasing falls by exactly the factor you packed.',
         detail: 'An unrolled list keeps a small array of k elements in each node, which is the ' +
           'obvious middle point between the two structures and is closer to optimal than either for ' +
           'many workloads. Pointer follows drop by a factor of k, the per-element pointer overhead ' +
@@ -421,6 +447,8 @@
         term: 'Frame budget',
         plain: 'The stack size divided by the frame size. It is fixed before your code runs, and it is small.',
         formal: '1 MiB / 96 B = 10 922 frames',
+        readAs: 'A one-mebibyte stack divided by a 96-byte frame gives about eleven thousand nested calls ' +
+          'before it overflows. A mebibyte is 1 048 576 bytes.',
         detail: 'Dividing the stack you were given by the size of one frame turns a vague worry into ' +
           'a number: 1 MiB at 96 bytes per frame is 10 922 frames, and that is the entire depth ' +
           'budget for the thread. It is small compared with the data sizes people happily recurse ' +
@@ -464,6 +492,8 @@
         term: 'Ring buffer',
         plain: 'A fixed array where indices wrap around, so a queue needs no allocation at all.',
         formal: 'index ← (index + 1) mod capacity',
+        readAs: 'Step the index forward by one, then take the remainder after dividing by the capacity — so ' +
+          'the position after the last one is 0 again. That wrap-around is the whole idea of a ring.',
         detail: 'A ring is one preallocated array with a head and a tail index that wrap when they ' +
           'reach the end. Nothing is allocated after construction, nothing is shifted, and both ' +
           'operations are a write plus an index update, so the cost per item is constant and, more ' +
@@ -477,6 +507,9 @@
         term: 'Masking',
         plain: 'A power-of-two capacity turns the modulo into a bitwise AND.',
         formal: '(index + 1) & (capacity − 1)',
+        readAs: 'When the capacity is a power of two, capacity − 1 is a run of 1 bits, and a bitwise AND ' +
+          'against it keeps only the low bits — which is exactly the remainder, computed in one ' +
+          'instruction instead of a division.',
         detail: 'Integer division and remainder are among the slowest arithmetic instructions, tens ' +
           'of cycles on many machines, and a naive ring performs one per operation. Choosing a ' +
           'power-of-two capacity replaces it with a bitwise AND against capacity − 1, which is a ' +
@@ -530,6 +563,9 @@
         term: 'Utilisation',
         plain: 'Arrival rate over service rate. Everything about a queue’s behaviour is a function of this one number.',
         formal: 'ρ = λ/μ, stable only while ρ < 1',
+        readAs: 'Utilisation (rho) is the arrival rate (lambda) divided by the service rate (mu) — work ' +
+          'coming in, over work going out. Below 1 the queue stays finite; at or above 1 it grows ' +
+          'without limit, because more arrives than can leave.',
         detail: 'Utilisation is arrival rate divided by service rate, and the queue is stable only ' +
           'while it stays below 1 — at ρ ≥ 1 the backlog grows without limit whatever the capacity. ' +
           'What surprises people is the shape of the approach: queue length goes as ρ/(1 − ρ), so ' +
@@ -543,6 +579,9 @@
         term: 'Little’s law',
         plain: 'Items in the system equal arrival rate times time in the system. It holds for any arrival process at all.',
         formal: 'L = λ·W',
+        readAs: 'The number of items in the system equals the arrival rate multiplied by the time each one ' +
+          'spends there. It holds for any queue at all, whatever the arrival pattern or service order, ' +
+          'which is what makes it so useful.',
         detail: 'Little\'s law says the average number of items in a system equals the arrival rate ' +
           'times the average time each spends there, and its power is how few assumptions it needs: ' +
           'no distribution, no independence, no service discipline — only that the system is stable ' +

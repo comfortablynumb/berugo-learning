@@ -17,6 +17,9 @@
         term: 'Avalanche',
         plain: 'Flipping one input bit should flip about half the output bits, and which half should look random.',
         formal: 'P(output bit j flips | input bit i flips) ≈ 0.5',
+        readAs: 'Given that you flipped one bit of the input, the chance that any particular output bit flips ' +
+          'should be about a half. The vertical bar reads "given that" — everything after it is the ' +
+          'condition you are assuming.',
         detail: 'Avalanche is the practical test for whether a hash mixes. Flip one input bit, ' +
           'compare the outputs, and every output bit should flip about half the time — because if ' +
           'some output bit is insensitive to some input bit, then keys differing only there are ' +
@@ -31,6 +34,9 @@
         term: 'Finaliser',
         plain: 'The shift-multiply-shift tail that mixes the accumulated state before it is used.',
         formal: 'h ^= h>>>16; h *= C; h ^= h>>>13; …',
+        readAs: 'Repeatedly fold the high bits down onto the low ones with a shift and an XOR, then multiply ' +
+          'by a constant to smear them back up. Each round moves entropy between the two ends; the ' +
+          'pattern is shift, mix, shift, mix.',
         detail: 'The main loop of a hash accumulates bytes cheaply and leaves the state unevenly ' +
           'mixed — in FNV-1a the last byte is still visible in the low bits. The finaliser fixes that ' +
           'in a few instructions: an XOR-shift moves high entropy down, a multiply by an odd ' +
@@ -44,6 +50,9 @@
         term: 'Low bits matter most',
         plain: 'A table masks with capacity − 1, so it uses the *low* bits and throws the rest away.',
         formal: 'slot = h & (m − 1)',
+        readAs: 'When the table size m is a power of two, m − 1 is a run of 1 bits, so ANDing against it ' +
+          'keeps the low bits and discards the rest. That is the remainder after dividing by m, in a ' +
+          'single instruction.',
         detail: 'A power-of-two table computes its slot by masking, which keeps the bottom log₂ m ' +
           'bits and discards everything else. So the quality of the top 22 bits is irrelevant to ' +
           'that table, and a hash with excellent high bits and poor low ones will cluster badly ' +
@@ -57,6 +66,9 @@
         term: 'Math.imul',
         plain: 'JavaScript numbers are doubles, so a 32-bit multiply needs the intrinsic or the low bits are lost.',
         formal: 'imul(a, b) = (a·b) mod 2³²',
+        readAs: 'A 32-bit multiply keeps only the bottom 32 bits of the product and throws the rest away — ' +
+          '"mod 2³²" is exactly that truncation. Plain * in JavaScript would round instead, losing the ' +
+          'low bits the mixing depends on.',
         detail: 'Multiplying two 32-bit values can produce 64 bits, and a double holds only 53 ' +
           'exactly, so plain * rounds — and the bits it discards are the low ones, which is exactly ' +
           'the entropy a mixer is trying to propagate. The failure is silent: the code runs, the ' +
@@ -70,6 +82,9 @@
         term: 'Chi-squared uniformity',
         plain: 'Compare observed bucket counts against the uniform expectation; the ratio to the degrees of freedom should be near 1.',
         formal: 'χ² = Σ (observed − expected)² / expected',
+        readAs: 'For each bucket take how far its count sits from what you expected, square it so sign does ' +
+          'not matter, divide by the expected count to keep buckets comparable, and add all of those ' +
+          'up. The symbol is a Greek chi, and the whole thing reads "chi-squared".',
         detail: 'Avalanche tests the bits; chi-squared tests the distribution actually produced by ' +
           'your keys. Bucket the hashes, compare each count against the uniform expectation, and ' +
           'normalise by the degrees of freedom so the statistic reads near 1 for a good hash ' +
@@ -83,6 +98,9 @@
         term: 'The hashCombine trap',
         plain: 'XOR-ing field hashes makes (a, b) collide with (b, a), because XOR is commutative.',
         formal: 'h(a) ^ h(b) = h(b) ^ h(a)',
+        readAs: 'XOR gives the same answer whichever way round you feed it, so combining two hashes with it ' +
+          'cannot tell {a, b} from {b, a}. That is exactly what you want for a set, and exactly what ' +
+          'you must not use for an ordered pair.',
         detail: 'Combining field hashes with XOR is the obvious thing to write and it destroys ' +
           'positional information: (a, b) and (b, a) produce the same hash, and any pair of equal ' +
           'fields hashes to zero. For a composite key of (row, column) or (from, to) that is a ' +
@@ -96,6 +114,9 @@
         term: 'Which end the consumer reads',
         plain: 'A table masks the low bits; a Swiss table and every displace scheme shift and read the high ones. A hash can be uniform at one end and useless at the other.',
         formal: 'h & (m − 1) against h >>> (32 − k)',
+        readAs: 'Two ways to cut a hash down to a table index: keep the low k bits with a mask, or shift the ' +
+          'high k bits down into place. They select different halves of the hash, and a weak mixer ' +
+          'usually leaves one of those halves much better than the other.',
         detail: 'Different consumers read different ends of the same 32 bits, so "is this hash good" ' +
           'is not a well-formed question until you say which end. A power-of-two table masks and ' +
           'reads the bottom; a Swiss table shifts H1 out of the top; multiply-shift is universal ' +
@@ -125,6 +146,9 @@
         term: 'Universal family',
         plain: 'A set of hash functions such that any two distinct keys collide with probability at most 1/m when the function is picked at random.',
         formal: 'P_{h∈H}[h(x) = h(y)] ≤ 1/m for x ≠ y',
+        readAs: 'Pick a hash function at random from the family H. For any two different keys you care to ' +
+          'name, the chance that this randomly chosen function maps them to the same slot is at most 1 ' +
+          'in m. The randomness is in the choice of function, never in the keys.',
         detail: 'A single fixed hash function always has bad key sets — the pigeonhole principle ' +
           'guarantees it, and an attacker who can read your source can find them. Universality moves ' +
           'the randomness out of the input and into the choice of function: for any two distinct ' +
@@ -138,6 +162,9 @@
         term: 'Multiply-shift',
         plain: 'Multiply by a random odd number and take the high bits. Two instructions, and universal.',
         formal: 'h(x) = (a·x mod 2^w) >>> (w − m), a odd',
+        readAs: 'Multiply the key by a randomly chosen odd number, keep the low w bits, then shift the top m ' +
+          'of those down to use as the index. Multiplying carries information upward, so the top bits ' +
+          'are the well-mixed ones.',
         detail: 'Dietzfelbinger\'s multiply-shift is about as cheap as a hash can be — one multiply ' +
           'and one shift — and it is provably universal when a is drawn at random from the odd ' +
           'integers. The high bits are the ones with the guarantee, because multiplication mixes ' +
@@ -151,6 +178,9 @@
         term: 'Tabulation hashing',
         plain: 'Split the key into bytes, look each byte up in its own random table, XOR the results.',
         formal: 'h(x) = ⊕ T_i[byte_i(x)]',
+        readAs: 'Split the key into bytes, look each byte up in its own table of random numbers, and XOR all ' +
+          'the results together. One table per byte position, so the same byte value in a different ' +
+          'position gives a different number.',
         detail: 'Tabulation hashing pre-fills one table of random words per byte position, then ' +
           'hashes by XOR-ing the four lookups. It has no arithmetic mixing at all, and it is ' +
           '3-independent — a stronger guarantee than multiply-shift — which is what bounds the ' +
@@ -164,6 +194,8 @@
         term: 'Hash flooding',
         plain: 'Send keys that all collide. Insertion becomes quadratic and one request eats a core.',
         formal: 'n keys in one bucket ⇒ Θ(n²) work',
+        readAs: 'Land every key in the same bucket and each insert scans everything already there, so n ' +
+          'inserts do roughly n²/2 comparisons. The ⇒ is "which means".',
         detail: 'If the hash function is fixed and public, an attacker can precompute keys that all ' +
           'land in one bucket and send them as form fields, JSON keys or headers. Every insertion ' +
           'then walks the whole chain, so n keys cost Θ(n²) comparisons and a few thousand ' +
@@ -203,6 +235,9 @@
         term: 'The randomness is the guarantee',
         plain: 'Universality bounds the collision probability over the random choice of the parameter. A constant shipped in the source has no randomness left.',
         formal: 'P_a[h_a(x) = h_a(y)] ≤ 2/m for fixed x ≠ y',
+        readAs: 'For a randomly drawn multiplier a, any two fixed distinct keys collide with probability at ' +
+          'most 2 in m. The 2 rather than 1 is the price of the multiply-shift construction being ' +
+          'cheap; it costs nothing that matters.',
         detail: 'The probability in the definition is over the draw of the parameter, not over the ' +
           'keys — so a "universal" hash with the parameter hard-coded has a probability of either 0 ' +
           'or 1 for any given pair, and the guarantee has evaporated. The failure is not subtle when ' +
@@ -216,6 +251,9 @@
         term: 'Independence, and how much of it',
         plain: 'Pairwise independence is enough for expected chain length; higher independence is what bounds the tail.',
         formal: '2-independent, 3-independent, k-independent families',
+        readAs: 'How many keys the family guarantees behave independently at once. 2-independent means any ' +
+          'two keys land independently; k-independent extends that to any k of them, and each step up ' +
+          'costs more work per hash.',
         detail: 'k-independence says any k distinct keys are mapped independently and uniformly, and ' +
           'the level you need depends on which statistic you are trying to control. Pairwise ' +
           '(2-independent) is enough for the expected chain length, because that is a sum over ' +
@@ -233,6 +271,8 @@
         term: 'Load factor α',
         plain: 'Keys divided by buckets. For chaining it is the expected chain length, and it may exceed 1.',
         formal: 'α = n / m',
+        readAs: 'The load factor is the number of entries divided by the number of slots. At 0.75 the table ' +
+          'is three-quarters full.',
         detail: 'For a chained table the load factor is literally the average chain length, so it can ' +
           'exceed 1 without anything breaking — at α = 2 the average bucket holds two entries and ' +
           'lookups get proportionally slower, gracefully. That is the structural difference from ' +
@@ -246,6 +286,10 @@
         term: 'Poisson occupancy',
         plain: 'Under a good hash, the number of keys in a bucket is Poisson with mean α.',
         formal: 'P(k keys) = e^-α α^k / k!',
+        readAs: 'The chance a given bucket holds exactly k keys, when n keys are spread at random over m ' +
+          'slots. Read it as: e (2.718…) to the power of minus the load, times the load to the power k, ' +
+          'divided by k factorial. This is the Poisson distribution, and it is what makes the longest ' +
+          'chain predictable.',
         detail: 'Throwing n keys into m buckets independently and uniformly makes each bucket\'s ' +
           'count binomial, and for large m that is Poisson with mean α. That single fact predicts ' +
           'the whole occupancy distribution without simulation: at α = 1 with 1 000 buckets, about ' +
@@ -259,6 +303,9 @@
         term: 'Longest chain',
         plain: 'The tail, not the mean, is what a request waits on — and it grows with the table.',
         formal: '≈ ln m / ln ln m at α = 1',
+        readAs: 'With as many keys as slots, the longest chain is about the natural log of m divided by the ' +
+          'natural log of that — a number that grows extremely slowly. At a million slots it is roughly ' +
+          '5.',
         detail: 'A user does not experience the average bucket, they experience the one their key ' +
           'landed in, and the maximum over m buckets grows with m even at a fixed load factor. The ' +
           'asymptotic form ln m / ln ln m drops constants that matter at real sizes: at m = 1 000 ' +
@@ -310,6 +357,9 @@
         term: 'The threshold rarely fires',
         plain: 'Treeification is insurance, not an optimisation: at α = 1 a bucket reaches 8 entries with probability 10⁻⁵.',
         formal: 'P(X ≥ 8) = 1 − Σ_{k≤7} e^−α α^k/k!',
+        readAs: 'The chance a bucket reaches eight or more is one minus the chance it holds seven or fewer, ' +
+          'and that second part is just the Poisson probabilities for 0 through 7 added up. Subtract ' +
+          'from 1 because it is easier to total the small cases than the unbounded tail.',
         detail: 'The Poisson tail makes the treeify threshold almost unreachable by chance: at α = 1 ' +
           'the probability a given bucket reaches 8 entries is about 1.0 × 10⁻⁵, so in a table of a ' +
           'thousand buckets it fires roughly once in a hundred tables. The measured consequence is ' +
@@ -338,6 +388,9 @@
         term: 'Probe sequence',
         plain: 'The order of slots a key visits. Linear is h+i, quadratic is h+i(i+1)/2, double hashing is h₁+i·h₂.',
         formal: 'slot(i) = (h + f(i)) mod m',
+        readAs: 'The i-th slot a probe tries is the home slot plus some offset f(i), wrapped around the ' +
+          'table. Choosing f is what separates linear probing (f(i) = i) from quadratic and double ' +
+          'hashing.',
         detail: 'With no chains, a key that finds its home slot taken must have a deterministic order ' +
           'of alternatives, and that order is the design decision the whole scheme turns on. The ' +
           'requirement is that it be a permutation of the table — if the sequence cycles before ' +
@@ -364,6 +417,9 @@
         term: 'The 1/(1−α) wall',
         plain: 'Expected probes blow up as the table fills, and the blow-up is sudden.',
         formal: '½(1 + 1/(1−α)) for a hit',
+        readAs: 'The expected probes for a successful linear-probing lookup: one half of (1 plus 1 divided by ' +
+          'the space left). At α = 0.5 that is 1.5 probes; at α = 0.9 it is 5.5, and the 1/(1−α) is ' +
+          'what makes it explode as the table fills.',
         detail: 'The cost of open addressing is hyperbolic in the load factor, not linear, so the ' +
           'behaviour near full is qualitatively different from the behaviour at moderate load: a ' +
           'successful lookup averages 5.5 probes at α = 0.9 and 10.5 at α = 0.95. Five percentage ' +
@@ -377,6 +433,9 @@
         term: 'Tombstone',
         plain: 'A marker meaning "something was here, keep probing". Needed because emptying a slot breaks probe sequences.',
         formal: 'state ∈ {empty, full, deleted}',
+        readAs: 'Every slot is in exactly one of three states — the ∈ means "is one of". Two states are not ' +
+          'enough: a deleted slot has to stop a lookup from concluding early without stopping it from ' +
+          'continuing.',
         detail: 'A probe stops at the first empty slot, so simply emptying a slot on delete would cut ' +
           'every probe chain running through it and lose keys that are still in the table. The ' +
           'tombstone is a third state that says "keep going": probes pass through it, and inserts ' +

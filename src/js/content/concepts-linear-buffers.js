@@ -18,6 +18,8 @@
         term: 'Batch size',
         plain: 'How many items are processed per unit of overhead. The one dial in this section.',
         formal: 'batches = ⌈n / size⌉',
+        readAs: 'The number of batches is n divided by the batch size, rounded up — the ceiling bars — ' +
+          'because a final partial batch still has to run.',
         detail: 'Batch size decides how many times a fixed cost is paid, and that is usually the ' +
           'dominant term: 10 000 rows sent one at a time is 10 000 round trips, and in batches of ' +
           '500 it is 20. Because the number of batches falls as n/size, the benefit is steep at ' +
@@ -31,6 +33,8 @@
         term: 'Per-batch overhead',
         plain: 'The fixed cost paid once per batch: a round trip, a commit, a flush.',
         formal: 'total = n·per-item + batches·overhead',
+        readAs: 'Total cost is the per-item work done n times, plus the fixed per-batch cost paid once per ' +
+          'batch. Bigger batches shrink the second term and leave the first alone.',
         detail: 'Cost splits into a part that scales with items and a part that is charged per batch, ' +
           'and knowing which is which tells you immediately whether batching will help at all. If ' +
           'the fixed cost is a 1 ms commit and per-row work is a microsecond, the fixed cost ' +
@@ -83,6 +87,8 @@
         term: 'Amortising a fixed cost',
         plain: 'A per-batch cost divided by the batch size. Doubling the batch halves it, and nothing else changes.',
         formal: 'per item = perItem + fixed/batch',
+        readAs: 'Divide the whole cost by n and the fixed cost per batch is spread across the items in it, so ' +
+          'the per-item figure falls as the batch grows — but only towards perItem, never below it.',
         detail: 'The per-item cost of a batched pipeline is the intrinsic per-item work plus the ' +
           'fixed cost divided by the batch size, and only the second term moves when you tune. A ' +
           '1 ms commit is 1 ms per row at batch 1, 1 µs per row at batch 1 000 and 0.1 µs per row at ' +
@@ -95,6 +101,8 @@
         term: 'Latency budget',
         plain: 'The largest batch a deadline allows. It is the requirement that picks the batch size, not throughput.',
         formal: 'batch ≤ budget / (perRow × stages)',
+        readAs: 'The largest batch you can afford is your latency budget divided by the work one row costs ' +
+          'across every stage. Anything larger overshoots the deadline.',
         detail: 'Throughput improves monotonically with batch size, so it cannot choose a batch size ' +
           'on its own — it always says "larger". The binding constraint is the deadline: a batch ' +
           'must be assembled and pushed through every stage within the latency budget, which caps ' +
@@ -108,6 +116,8 @@
         term: 'Pipeline depth',
         plain: 'Stages let batches overlap, so throughput follows the slowest stage rather than the sum of them.',
         formal: 'throughput = 1 / max(stage time)',
+        readAs: 'A pipeline emits one result per slowest-stage time, so its rate is one divided by that ' +
+          'stage. Speeding up any other stage changes nothing at all.',
         detail: 'Once a pipeline is full, every stage is working on a different batch at the same ' +
           'time, so a new result emerges every max(stage time) rather than every sum of stage times: ' +
           'three stages of 0.4 µs deliver a row every 0.4 µs, not every 1.2 µs. Two consequences ' +
@@ -124,6 +134,9 @@
         term: 'Bump allocation',
         plain: 'Allocation is one pointer addition; there is no individual free, only a reset.',
         formal: 'top ← align(top) + size',
+        readAs: 'Allocating from a bump allocator is: round the current top up to the alignment the type ' +
+          'needs, hand that address out, and move top past it. No search and no free list — which is ' +
+          'why it is a handful of instructions.',
         detail: 'A bump allocator holds one pointer into a block and serves each request by aligning ' +
           'it and adding the size — a couple of instructions, no search, no free list, no metadata ' +
           'per object. Nothing this cheap can support individual freeing, because the allocator ' +
@@ -137,6 +150,8 @@
         term: 'Free list',
         plain: 'A linked list of free slots, threaded through the free memory itself, so it costs nothing extra.',
         formal: 'head → next → next → −1',
+        readAs: 'A free list is a chain: the head points at a free slot, that slot holds the index of the ' +
+          'next free one, and −1 marks the end. The arrows are "points at".',
         detail: 'For fixed-size objects, the free slots can store the list that tracks them: each ' +
           'free slot holds the index of the next free slot, so the bookkeeping lives inside memory ' +
           'that is by definition not in use and costs zero extra bytes. Allocation pops the head and ' +
@@ -150,6 +165,9 @@
         term: 'External fragmentation',
         plain: 'Enough free bytes in total, none of them contiguous enough to serve the request.',
         formal: '1 − largest free run / total free',
+        readAs: 'Fragmentation is what fraction of your free space you cannot use in one piece: take the ' +
+          'biggest contiguous run, divide by the total free, and subtract from 1. Zero means it is all ' +
+          'in one block.',
         detail: 'A general-purpose allocator hands back blocks of many sizes in an order it does not ' +
           'control, and over time the free space breaks into pieces separated by live ones. The ' +
           'total can be large and useless: a heap that is 40% free can fail a 1 KB request because ' +
@@ -326,6 +344,9 @@
         term: 'Rebalancing',
         plain: 'A rope that only ever appends grows a spine and degenerates into a list. Rebuilding restores the logarithmic depth.',
         formal: 'rebuild when height > c·log₂(leaves)',
+        readAs: 'Rebuild the tree once its height exceeds some fixed multiple of log base 2 of its leaf count ' +
+          '— that is, once it is more than a constant factor deeper than a perfectly balanced tree of ' +
+          'the same size would be.',
         detail: 'A rope\'s guarantees are all statements about its height, and nothing in the ' +
           'insertion rule preserves height on its own: appending repeatedly hangs each new leaf off ' +
           'the right edge, and the tree becomes a linked list with O(n) descents. The structure has ' +
@@ -342,6 +363,8 @@
         term: 'Eytzinger layout',
         plain: 'The search tree stored breadth-first, so the first levels share a cache line.',
         formal: 'children of i are 2i and 2i+1',
+        readAs: 'In an array-backed binary tree, node i keeps its children at positions 2i and 2i+1, so no ' +
+          'pointers are stored at all — the arithmetic is the structure.',
         detail: 'Eytzinger order writes the implicit binary search tree level by level, so the root ' +
           'and the first few levels are adjacent in memory and arrive together in one or two cache ' +
           'lines. Every search visits those nodes, so after the first query they are permanently ' +
@@ -355,6 +378,8 @@
         term: 'Blocking',
         plain: 'Packing B keys per node so one cache line answers B comparisons.',
         formal: 'B = line size / key size',
+        readAs: 'The branching factor B is how many keys fit in one cache line: the line size divided by the ' +
+          'size of a key. It is the number of comparisons you get for a single memory fetch.',
         detail: 'If a fetch delivers 64 bytes regardless, the layout should put 64 bytes of useful ' +
           'keys there: sixteen 4-byte keys fill a line exactly, so one fetch answers a sixteen-way ' +
           'decision instead of a two-way one. The tree\'s fan-out rises from 2 to B and its height ' +
@@ -394,6 +419,8 @@
         term: 'Layout beats algorithm',
         plain: 'The same comparisons with a better arrangement move far less memory.',
         formal: 'same Θ, different constant',
+        readAs: 'Two layouts with the identical growth rate can still differ by a large fixed multiplier, and ' +
+          'that multiplier is the memory system rather than the algorithm.',
         detail: 'All three layouts in this section run the same logarithmic search and differ only in ' +
           'where the keys sit, so asymptotics cannot tell them apart — and on 256 KB of keys the ' +
           'blocked layout takes 2.8 times fewer misses than the sorted array. That gap is entirely ' +

@@ -17,6 +17,8 @@
         term: 'Probe distance',
         plain: 'How far a key sits from its home slot. The mean is fixed by the load factor; the spread is not.',
         formal: 'd(k) = (slot − home) mod m',
+        readAs: 'A key\'s displacement is how far it sits from the slot it wanted, counted forward and ' +
+          'wrapping round the end of the table. Zero means it got its first choice.',
         detail: 'Probe distance is the per-key version of the load-factor arithmetic, and it is the ' +
           'right thing to look at because the mean is not the interesting part. At a given load ' +
           'factor the average distance is essentially fixed — the keys have to go somewhere — so ' +
@@ -43,6 +45,9 @@
         term: 'The monotone invariant',
         plain: 'Along a probe sequence, distance from home never decreases — so a lookup can stop early.',
         formal: 'd(slot i) ≥ d(slot i−1) − 1 within a cluster',
+        readAs: 'Walking forward through a cluster, each slot\'s displacement can drop by at most one from ' +
+          'the slot before it. That single guarantee is what lets a lookup stop early: once the ' +
+          'displacement falls below yours, your key cannot be further along.',
         detail: 'The swap rule has a consequence that is easy to miss and is the real payoff: entries ' +
           'end up ordered by probe distance along the run. So a lookup that reaches a slot whose ' +
           'resident is closer to home than the searched key has travelled can stop immediately — if ' +
@@ -55,6 +60,9 @@
         term: 'Hopscotch neighbourhood',
         plain: 'Every key is guaranteed to live within H slots of home, so a lookup reads one window.',
         formal: 'd(k) < H, typically H = 8..32',
+        readAs: 'Every key is guaranteed to sit within H slots of its home, where H is a small fixed ' +
+          'neighbourhood size. That bound is what makes a lookup a single cache line rather than an ' +
+          'open-ended walk.',
         detail: 'Hopscotch hashing enforces a hard bound rather than merely improving the ' +
           'distribution: every key lives within H slots of its home, and insertion maintains that by ' +
           'moving other keys — hopping a free slot backwards toward the home — until it holds. A ' +
@@ -68,6 +76,9 @@
         term: 'Cuckoo hashing',
         plain: 'Two tables, two hashes, and a key lives in one of exactly two slots. Lookup is two probes, always.',
         formal: 'x ∈ {T₁[h₁(x)], T₂[h₂(x)]}',
+        readAs: 'A key is in one of exactly two places: the slot its first hash names in the first table, or ' +
+          'the slot its second hash names in the second. A lookup is therefore always two probes and ' +
+          'never more.',
         detail: 'Cuckoo hashing gives every key exactly two possible homes, one in each table, so a ' +
           'lookup checks two slots and stops — a true worst-case O(1) guarantee, which no other ' +
           'scheme in this section provides. The two probes are independent, so they can be issued in ' +
@@ -122,6 +133,9 @@
         term: 'Control byte',
         plain: 'One byte per slot, stored in a separate array: empty, deleted, or a 7-bit tag from the hash.',
         formal: 'ctrl ∈ {0x80, 0xFE} ∪ [0, 0x7F]',
+        readAs: 'Each control byte is either one of two special markers — 0x80 for empty, 0xFE for deleted — ' +
+          'or any value from 0 to 0x7F standing for a live entry. The ∪ joins the two possibilities ' +
+          'into one set of allowed values.',
         detail: 'A Swiss table keeps a one-byte summary of each slot in a separate array: the top bit ' +
           'distinguishes the special states — empty and deleted — from an occupied slot, whose ' +
           'remaining seven bits hold a tag taken from the key\'s hash. Because the summaries are ' +
@@ -134,6 +148,8 @@
         term: 'H1 and H2',
         plain: 'The hash is split: high bits choose the group, the low 7 bits become the tag.',
         formal: 'H1 = h >> 7, H2 = h & 0x7F',
+        readAs: 'Split the hash in two: shift it right by 7 to get the part that picks the group, and keep ' +
+          'the bottom 7 bits as the tag stored in the control byte. One hash, two independent jobs.',
         detail: 'The design uses the hash twice, and it uses different parts for the two jobs so they ' +
           'stay independent: the upper bits select which group to probe, and the low seven become ' +
           'the tag stored in the control byte. If those two parts were correlated, keys landing in ' +
@@ -160,6 +176,8 @@
         term: 'Tag false positive',
         plain: 'Two different keys can share a 7-bit tag, costing one real key comparison.',
         formal: 'P = 1/128 ≈ 0.008',
+        readAs: 'Two different keys share a 7-bit tag about once in every 128 tries, so roughly 0.8% of ' +
+          'candidate matches are false and need a full key comparison to reject.',
         detail: 'Seven bits cannot identify a key, so two distinct keys in the same group share a tag ' +
           'about one time in 128, and the table pays a full key comparison to discover the mismatch. ' +
           'That is the entire error budget of the design, and it is well spent: 0.8% of probes cost ' +
@@ -333,6 +351,8 @@
         term: 'Perfect hash',
         plain: 'For a fixed key set, a function with no collisions at all — so a lookup is one probe.',
         formal: 'h injective on S',
+        readAs: '"Injective" means no two different keys in S get the same output — the function never ' +
+          'collides on the set you actually have, though it may collide on keys outside it.',
         detail: 'When the key set is known in advance and never changes, the collision problem can be ' +
           'solved once at build time instead of handled at every lookup: search for a function that ' +
           'is injective on exactly those keys. The result needs no probing, no chains and no load ' +
@@ -346,6 +366,9 @@
         term: 'Minimal perfect hash',
         plain: 'Perfect and onto: n keys map to exactly [0, n) with no empty slots.',
         formal: 'h : S → [0, n) bijective',
+        readAs: 'The function maps the set S onto the whole numbers from 0 up to but not including n, hitting ' +
+          'every one of them exactly once. "Bijective" is that perfect pairing: no gaps and no ' +
+          'collisions, so n keys occupy exactly n slots.',
         detail: 'A perfect hash into a larger range is easy; making it minimal — a bijection onto ' +
           '[0, n) with no gaps — is what makes the table exactly as large as the data. Compare an ' +
           'ordinary hash table, which must run below its maximum load factor and therefore wastes a ' +
@@ -358,6 +381,9 @@
         term: 'FKS two-level',
         plain: 'Spread keys over n buckets, then give a bucket of b keys a table of b² slots.',
         formal: 'E[Σ b_i²] < 2n',
+        readAs: 'Add up the square of each bucket\'s size, and on average that total stays under twice the ' +
+          'number of keys. It matters because the squares are exactly the space the second-level tables ' +
+          'need.',
         detail: 'Fredman, Komlós and Szemerédi\'s 1984 construction is the classic result: hash into ' +
           'n buckets, then give each bucket its own second-level table of size b² and search for a ' +
           'seed that is collision-free within it. Quadratic space per bucket sounds ruinous until ' +
@@ -370,6 +396,9 @@
         term: 'Hash and displace',
         plain: 'Group keys into buckets, then find a displacement per bucket that places its keys in free slots.',
         formal: 'slot = h(key, d_bucket) mod n',
+        readAs: 'Hash the key again, this time seeded with the displacement value stored for its bucket, and ' +
+          'take the remainder to land in the table. Choosing that displacement per bucket is what ' +
+          'removes the collisions.',
         detail: 'Hash-and-displace keeps FKS\'s two levels but stores far less: instead of a ' +
           'second-level table per bucket, it stores a single displacement value per bucket, chosen ' +
           'so that re-hashing that bucket\'s keys with it lands them all on currently free slots. ' +
@@ -396,6 +425,8 @@
         term: 'Bits per key',
         plain: 'The space measure for a minimal perfect hash, since it stores no keys.',
         formal: 'r · ⌈log₂(max d)⌉ / n',
+        readAs: 'The space cost per key: the number of displacement entries, times the bits each one needs ' +
+          '(log base 2 of the largest displacement, rounded up), divided by the number of keys.',
         detail: 'A minimal perfect hash stores no keys and no values of its own — only the ' +
           'displacement array — so the meaningful space measure is bits per key: the number of ' +
           'displacement entries times the bits each needs, divided by the key count. That makes the ' +
@@ -409,6 +440,8 @@
         term: 'The lambda dial',
         plain: 'The average bucket size in hash-and-displace. Larger buckets mean fewer displacements to store and an exponentially harder search to find them.',
         formal: 'r = ⌈n/λ⌉ displacement entries',
+        readAs: 'How many buckets there are: the key count divided by the average keys per bucket, rounded ' +
+          'up. Fewer buckets means a smaller table and a harder search.',
         detail: 'λ is the average number of keys per bucket, and it trades build time against space ' +
           'along a brutally non-linear curve. Larger buckets mean fewer of them and so fewer ' +
           'displacements to store, but each displacement must place all of its bucket\'s keys ' +
@@ -422,6 +455,9 @@
         term: 'Membership is not included',
         plain: 'A minimal perfect hash maps every key to a distinct slot — and maps a non-key to a slot as well. Nothing detects a stranger unless the keys are stored.',
         formal: 'lookup(x) ∈ [0, n) for every x, member or not',
+        readAs: 'The function returns a slot in range for any input at all, including keys that were never ' +
+          'stored. It cannot tell you whether the key belongs — that is what makes it minimal perfect ' +
+          'hashing rather than a set.',
         detail: 'The function is defined on the whole universe, and it is injective only on the set ' +
           'it was built for — so a key that was never in the set still hashes to some slot in ' +
           '[0, n) and returns whatever lives there, confidently and wrongly. If the input is ' +
