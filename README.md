@@ -14,14 +14,14 @@ faithfully in a browser, the section models it, says so plainly, and states what
 
 ## Status
 
-**M00–M16 shipped (156 sections). Building the curriculum, milestone by milestone.**
+**M00–M17 shipped (166 sections). Building the curriculum, milestone by milestone.**
 
 - ✅ Curriculum designed: 65 milestones, 634 sections, 11 tracks — one file per milestone in
   [`doc/milestones/`](doc/milestones/)
 - ✅ Architecture and conventions fixed — [`doc/architecture.md`](doc/architecture.md)
 - ✅ Build order and dependency graph — [`doc/ROADMAP.md`](doc/ROADMAP.md)
 - ✅ Scope decisions recorded — [`doc/topic-suggestions.md`](doc/topic-suggestions.md)
-- ✅ **Notation decoder across all 156 sections**: every mathematical symbol carries how to say it
+- ✅ **Notation decoder across all 166 sections**: every mathematical symbol carries how to say it
   and what it does, revealed on hover, tap or keyboard focus, and every formal statement whose
   notation a reader cannot pronounce carries an "In words" translation beneath it. The audience is
   a senior engineer with little or no mathematics, so the Description tab explains the idea before
@@ -219,8 +219,36 @@ faithfully in a browser, the section models it, says so plainly, and states what
   separates the shapes where taking the push from the centroids fails 38 of 800 overlapping pairs.
   10 sections live.
 
-`npm test` is green — wiring audit, 2 906 unit tests, and a **render audit** that boots the whole
-app headlessly and activates all 156 sections, failing on anything that throws while rendering, any
+- ✅ **M17 — numbers, bits and floating point**: carry and overflow measured as the separate
+  flags they are, where 0xFF + 0x01 at eight bits carries without overflowing and 0x7F + 0x01
+  overflows without carrying — an earlier model computed carry from the signed sum and got the
+  canonical case backwards; the De Bruijn bit scan costing *more* than the loop it replaces on
+  random words, 5.00 operations against 4.00, and 9.20× less in the worst case, against SWAR
+  popcount's flat 12 against 96 on every one of 85 536 checked inputs; a bitset's crossing density
+  solved rather than asserted at 3 906 elements — 0.391% — under a *stated* 32-byte model for a
+  `Set` entry, with word operations touching 31 250 words whatever the answer's size and iteration
+  costing 51 031 steps against a scan's 1 000 000; 0.1 printed as the specific rational it is,
+  3 602 879 701 896 397 / 2⁵⁵, with the spacing ladder locating 2⁵³ exactly and the three float
+  comparisons disagreeing at 8 388 608 doubles apart and at 4 503 599 627 370 496; four orderings
+  of one array landing 0, 41 434 and 50 078 representable doubles from the exact BigInt sum while
+  compensation lands on it every time, and the textbook one-pass variance wrong by a relative
+  2.619e+5 where Welford is 1.167e-7 and two passes 7.010e-11; the money claim *refuted* — a
+  million transactions summed as doubles are out by 6.855e-5 of a cent and round correctly every
+  time, and what they lose is equality, on 88.4% of ledgers — while applying an 8.75% rate loses a
+  cent on 1 026 of 200 000 lines and a 20% rate on none, with no way to tell from the rate;
+  Karatsuba crossing at 128 bits on multiplications, 2 048 on total limb work and nowhere on wall
+  clock, and algorithm D's add-back firing once in 500 034 quotient digits so that two named
+  fixtures are the only way it is ever tested; every coprime base fooling the Fermat test on all
+  eight Carmichael numbers at 100.0% while base 2 alone rejects them, and Pollard's rho factoring a
+  15-digit semiprime in 2 532 operations against trial division's exhausted 5 000 000; every
+  generator passing a one-dimensional histogram including RANDU, whose statistic of 0.1 against an
+  expectation of 63 is *too even* and whose triples satisfy x[n+2] = 6·x[n+1] − 9·x[n] with a
+  residual of exactly 0; and a random UUID touching all 64 index pages in a 64-insert window where
+  a sequence touches 14 — with UUIDv7 at 15 and out of order on 6 735 of 13 333 same-millisecond
+  pairs, which is exactly what breaks a cursor. 10 sections live.
+
+`npm test` is green — wiring audit, 3 101 unit tests, and a **render audit** that boots the whole
+app headlessly and activates all 166 sections, failing on anything that throws while rendering, any
 table left with an empty body, and any metric tile still showing a placeholder without a note
 explaining it. `npm run lint:size` reports no offenders.
 
@@ -234,7 +262,7 @@ The render audit is not a substitute for opening the page, and M16's browser pas
   opens to milestones, then sections. Tracks that are planned and not built are listed with their
   milestones and section counts, marked as planned, so the map shows what the platform teaches
   rather than only what happens to be finished. One track and one milestone stay open at a time, so
-  the nav is the same height at 156 sections and at 634.
+  the nav is the same height at 166 sections and at 634.
 - **Search across everything.** The header search indexes concepts, worked examples, reference
   entries and exercises as well as section titles, so "tombstone", "Little's law" or "round half to
   even" lands on the section that explains it. Ctrl/Cmd+K focuses it; arrows and Enter drive it.

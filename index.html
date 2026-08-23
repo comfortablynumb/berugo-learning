@@ -219,6 +219,16 @@
       <section data-section="rotating-calipers" hidden><div class="section-body"><div id="rotating-calipers-content"></div></div></section>
       <section data-section="transforms-and-3d" hidden><div class="section-body"><div id="transforms-and-3d-content"></div></div></section>
       <section data-section="applied-geometry" hidden><div class="section-body"><div id="applied-geometry-content"></div></div></section>
+      <section data-section="integer-representation" hidden><div class="section-body"><div id="integer-representation-content"></div></div></section>
+      <section data-section="bit-manipulation" hidden><div class="section-body"><div id="bit-manipulation-content"></div></div></section>
+      <section data-section="bitsets-and-swar" hidden><div class="section-body"><div id="bitsets-and-swar-content"></div></div></section>
+      <section data-section="ieee-754" hidden><div class="section-body"><div id="ieee-754-content"></div></div></section>
+      <section data-section="floating-point-hazards" hidden><div class="section-body"><div id="floating-point-hazards-content"></div></div></section>
+      <section data-section="fixed-and-decimal" hidden><div class="section-body"><div id="fixed-and-decimal-content"></div></div></section>
+      <section data-section="arbitrary-precision" hidden><div class="section-body"><div id="arbitrary-precision-content"></div></div></section>
+      <section data-section="modular-arithmetic" hidden><div class="section-body"><div id="modular-arithmetic-content"></div></div></section>
+      <section data-section="random-generation" hidden><div class="section-body"><div id="random-generation-content"></div></div></section>
+      <section data-section="integer-algorithms" hidden><div class="section-body"><div id="integer-algorithms-content"></div></div></section>
     </main>
   </div>
 
@@ -427,6 +437,16 @@
   <script src="src/js/algorithms/calipers.js"></script>
   <script src="src/js/algorithms/transforms-3d.js"></script>
   <script src="src/js/algorithms/raster.js"></script>
+  <script src="src/js/algorithms/integer-ops.js"></script>
+  <script src="src/js/algorithms/bit-tricks.js"></script>
+  <script src="src/js/algorithms/bitset.js"></script>
+  <script src="src/js/algorithms/float-inspect.js"></script>
+  <script src="src/js/algorithms/summation.js"></script>
+  <script src="src/js/algorithms/fixed-decimal.js"></script>
+  <script src="src/js/algorithms/bignum.js"></script>
+  <script src="src/js/algorithms/number-theory.js"></script>
+  <script src="src/js/algorithms/prng.js"></script>
+  <script src="src/js/algorithms/id-generators.js"></script>
   <script src="src/js/machines/search-tree-lab.js"></script>
   <script src="src/js/machines/dp-lab.js"></script>
   <script src="src/js/machines/graph-lab.js"></script>
@@ -437,6 +457,10 @@
   <script src="src/js/machines/graph-analysis-lab.js"></script>
   <script src="src/js/machines/match-lab.js"></script>
   <script src="src/js/machines/geometry-lab.js"></script>
+  <script src="src/js/machines/number-lab.js"></script>
+  <script src="src/js/machines/float-lab.js"></script>
+  <script src="src/js/machines/bignum-lab.js"></script>
+  <script src="src/js/machines/entropy-lab.js"></script>
 
   <script src="src/js/viz/chart-base.js"></script>
   <script src="src/js/viz/canvas.js"></script>
@@ -461,6 +485,7 @@
   <script src="src/js/viz/flow-view.js"></script>
   <script src="src/js/viz/alignment-view.js"></script>
   <script src="src/js/viz/geometry-view.js"></script>
+  <script src="src/js/viz/bit-view.js"></script>
 
   <!-- Components -->
   <script src="src/js/components/tab-controller.js"></script>
@@ -625,6 +650,10 @@
   <script src="src/js/content/concepts-geometry-sweep.js"></script>
   <script src="src/js/content/concepts-geometry-boolean.js"></script>
   <script src="src/js/content/concepts-geometry-applied.js"></script>
+  <script src="src/js/content/concepts-numbers.js"></script>
+  <script src="src/js/content/concepts-floats.js"></script>
+  <script src="src/js/content/concepts-bignum.js"></script>
+  <script src="src/js/content/concepts-entropy.js"></script>
   <script src="src/js/content/examples-graphs.js"></script>
   <script src="src/js/content/examples-graphs-paths.js"></script>
   <script src="src/js/content/examples-graphs-routes.js"></script>
@@ -641,6 +670,10 @@
   <script src="src/js/content/examples-geometry-sweep.js"></script>
   <script src="src/js/content/examples-geometry-boolean.js"></script>
   <script src="src/js/content/examples-geometry-applied.js"></script>
+  <script src="src/js/content/examples-numbers.js"></script>
+  <script src="src/js/content/examples-floats.js"></script>
+  <script src="src/js/content/examples-bignum.js"></script>
+  <script src="src/js/content/examples-entropy.js"></script>
   <script src="src/js/content/reference-graphs.js"></script>
   <script src="src/js/content/reference-graphs-paths.js"></script>
   <script src="src/js/content/reference-graphs-routes.js"></script>
@@ -657,6 +690,10 @@
   <script src="src/js/content/reference-geometry-sweep.js"></script>
   <script src="src/js/content/reference-geometry-boolean.js"></script>
   <script src="src/js/content/reference-geometry-applied.js"></script>
+  <script src="src/js/content/reference-numbers.js"></script>
+  <script src="src/js/content/reference-floats.js"></script>
+  <script src="src/js/content/reference-bignum.js"></script>
+  <script src="src/js/content/reference-entropy.js"></script>
   <script src="src/js/content/exercises-graphs.js"></script>
   <script src="src/js/content/exercises-graphs-paths.js"></script>
   <script src="src/js/content/exercises-graphs-routes.js"></script>
@@ -673,6 +710,10 @@
   <script src="src/js/content/exercises-geometry-sweep.js"></script>
   <script src="src/js/content/exercises-geometry-boolean.js"></script>
   <script src="src/js/content/exercises-geometry-applied.js"></script>
+  <script src="src/js/content/exercises-numbers.js"></script>
+  <script src="src/js/content/exercises-floats.js"></script>
+  <script src="src/js/content/exercises-bignum.js"></script>
+  <script src="src/js/content/exercises-entropy.js"></script>
 
   <!-- Views -->
   <script src="src/js/views/sidebar-view.js"></script>
@@ -992,6 +1033,26 @@
   <script src="src/js/sections/transforms-and-3d-section.js"></script>
   <script src="src/js/sections/applied-geometry-template.js"></script>
   <script src="src/js/sections/applied-geometry-section.js"></script>
+  <script src="src/js/sections/integer-representation-template.js"></script>
+  <script src="src/js/sections/integer-representation-section.js"></script>
+  <script src="src/js/sections/bit-manipulation-template.js"></script>
+  <script src="src/js/sections/bit-manipulation-section.js"></script>
+  <script src="src/js/sections/bitsets-and-swar-template.js"></script>
+  <script src="src/js/sections/bitsets-and-swar-section.js"></script>
+  <script src="src/js/sections/ieee-754-template.js"></script>
+  <script src="src/js/sections/ieee-754-section.js"></script>
+  <script src="src/js/sections/floating-point-hazards-template.js"></script>
+  <script src="src/js/sections/floating-point-hazards-section.js"></script>
+  <script src="src/js/sections/fixed-and-decimal-template.js"></script>
+  <script src="src/js/sections/fixed-and-decimal-section.js"></script>
+  <script src="src/js/sections/arbitrary-precision-template.js"></script>
+  <script src="src/js/sections/arbitrary-precision-section.js"></script>
+  <script src="src/js/sections/modular-arithmetic-template.js"></script>
+  <script src="src/js/sections/modular-arithmetic-section.js"></script>
+  <script src="src/js/sections/random-generation-template.js"></script>
+  <script src="src/js/sections/random-generation-section.js"></script>
+  <script src="src/js/sections/integer-algorithms-template.js"></script>
+  <script src="src/js/sections/integer-algorithms-section.js"></script>
   <script src="src/js/app.js"></script>
 </body>
 </html>

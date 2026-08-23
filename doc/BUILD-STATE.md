@@ -3,7 +3,7 @@
 Where the implementation stands, and exactly what the next session should pick up.
 Update this file at the end of any session that leaves work unfinished.
 
-**Last updated:** 2026-08-23 (M16 complete and verified in Chrome; the tree is green — next is M17, numbers, bits and floating point)
+**Last updated:** 2026-08-23 (M17 complete and render-audited; the tree is green — next is M18, numerical methods, transforms and optimisation)
 
 ---
 
@@ -28,11 +28,12 @@ Update this file at the end of any session that leaves work unfinished.
 | M14 — graph algorithms II | 10 | ✅ built, tested, render-audited |
 | M15 — string algorithms and pattern matching | 11 | ✅ built, tested, render-audited |
 | M16 — computational geometry | 10 | ✅ built, tested, verified in Chrome |
+| M17 — numbers, bits and floating point | 10 | ✅ built, tested, render-audited |
 
-**The tree is GREEN.** `npm test` reports 2 906 unit tests with 0 failures (6 skipped — the
-wall-clock-budget starters the inline sandbox cannot fail); the wiring audit passes at 156 sections
-and 749 modules, the render audit activates all 156 with no exception and no empty table,
-`npm run lint:size` passes across 835 files, and `npm run build:css` is up to date.
+**The tree is GREEN.** `npm test` reports 3 101 unit tests with 0 failures (6 skipped — the
+wall-clock-budget starters the inline sandbox cannot fail); the wiring audit passes at 166 sections
+and 800 modules, the render audit activates all 166 with no exception and no empty table,
+`npm run lint:size` passes across 890 files, and `npm run build:css` is up to date.
 
 All nine M07 sections were opened in Chrome on `npm start`: the three tabs render, every demo
 figure matches the prose *exactly* (see "aligning the demo with the prose" below), the references
@@ -1928,13 +1929,105 @@ A sweep of all 154 teaching sections in the browser, before and after, went from
 zero or below, a zero in the data cannot become that floor, and every cost-curve shape the sections
 actually pass maps to finite positions. `logDomain` and `lowestPositive` are exported for it.
 
+
+## M17 — numbers, bits and floating point (complete)
+
+Ten sections, 166 in the tree. Ten algorithm modules, four harnesses, one viz renderer, ten
+template + section pairs, sixteen content files, one module property suite and three figure suites.
+
+### The shape of the milestone
+
+Every section pairs an implementation against an oracle that cannot share a bug with it: fixed-width
+arithmetic against BigInt, bit tricks against the loop they replace over *all* 2^16 low words,
+bitsets against `Set`, summation against an exact BigInt sum of exactly the doubles involved, money
+against an exact rational ledger, big integers against BigInt again, Miller-Rabin against a sieve,
+and the generators against a two-tailed chi-squared threshold.
+
+### Modules
+
+`algorithms/`: `integer-ops.js`, `bit-tricks.js`, `bitset.js`, `float-inspect.js`, `summation.js`,
+`fixed-decimal.js`, `bignum.js`, `number-theory.js`, `prng.js`, `id-generators.js`.
+`machines/`: `number-lab.js` (17.1-17.3), `float-lab.js` (17.4-17.6), `bignum-lab.js` (17.7-17.8),
+`entropy-lab.js` (17.9-17.10). `viz/bit-view.js` (bit rows, field colouring, a heat strip and the
+two's-complement wheel).
+
+Four harnesses rather than the spec's one, for the same reason M08 needed three: they answer
+unrelated questions and one file would pass 1 000 lines.
+
+### Six defects and false claims the measurements found
+
+1. **`Random.seeded` yields only 32 significant bits**, so a sum of fewer than 2^21 of its values is
+   *exactly representable* — naive summation over them scored a relative error of exactly zero at
+   five separate seeds. A summation section built on that data demonstrates the opposite of its own
+   claim. `FloatLab.unit` builds a full 53-bit mantissa from two draws, and the figure test asserts
+   the naive error is non-trivial so it cannot regress.
+2. **Carry was computed from the signed sum**, which gets the canonical case backwards: at eight bits
+   (−1) + 1 is 0, inside 0 … 255, so that model reports no carry where the hardware raises one.
+   Both flags now come from the bit patterns, and "0xFF + 0x01 carries and does not overflow" is
+   true in the demo rather than only in the prose.
+3. **A wall-clock "crossover at 64 bits"** that was pure noise: below the recursion floor both
+   algorithms run the identical kernel. `crossingOf` now requires the ratio to stay above one for
+   every larger size.
+4. **65 537 and 65 535 do not have the same bit length** — 17 against 16 — so "identical bit lengths,
+   so identical squaring counts" was false. The control is now 131 071, which is 17 bits with every
+   bit set, and the claim holds exactly at both settings.
+5. **A chi-squared verdict named only one tail.** RANDU scores 0.1 where 63 is expected, which is
+   *too even* rather than a pass — a full-period generator enumerates rather than samples, and so
+   does the Numerical Recipes LCG's low byte at exactly 0.0. `uniformityVerdict` now reports
+   `uneven`, `too even` or `plausible`.
+6. **The Carmichael table reported a trial-division factor in a column headed "witness".**
+   `millerRabin` short-circuits on the small primes and returned 3 for 561, which is a factor and
+   not a Miller-Rabin witness at all. The table now takes its witness from the rounds themselves,
+   and base 2 catches all eight with the reason shown.
+
+Two further claims were corrected against measurement rather than being defects: the add-back rate
+("one input in a few thousand" → **1 in 500 034 quotient digits**, and the earlier search never
+reached it at all because its divisors were single-limb), and Kahan's order-independence (it is not
+exact — compensation removes the *linear* growth of the error, and four orderings agree to an ulp
+or two rather than exactly).
+
+### The measurement that refutes the folk claim
+
+**Summing money in doubles does not lose cents.** A million transactions total to within 6.855e-5 of
+a cent and round to the correct cent at every size tested. What a double loses is *equality*: across
+500 independent ledgers the total differed from the exact value 442 times (88.4%) while formatting
+identically every time. The cent is genuinely lost at **multiplication** — applying 8.75% puts the
+product a fraction of an ulp below a half-cent tie on 1 026 of 200 000 lines, and applying 20% loses
+nothing at all, with nothing about either rate saying which kind it is.
+
+### Figures worth keeping (all recomputed in the figure tests)
+
+Carry and overflow disagreeing on 100 + 100 at int8 (overflow only, exact 200, wrapping −56,
+saturating 127) and on 100 × 100 (both, exact 10 000, wrapping 16); 128 negatives against 127
+positives; SWAR popcount at 12 operations against 96 on all 85 536 checked inputs while the De
+Bruijn bit scan costs 5.00 against 4.00 on the mean and 5 against 46 at the worst; 0xDEADBEEF
+tracing 0x9959699A → 0x33233334 → 0x06050607 → 24. A bitset crossing at 3 906 elements — 0.391% —
+with 31 250 words touched for answers of 417, 39 583 and 19 583 elements, iteration at 51 031 steps
+against 1 000 000, and a sieve writing the identical 2 122 048 marks at 122.1 KB against 28.1 MB.
+0.1 as 3 602 879 701 896 397 / 2⁵⁵ with all fifty-five decimal places, a gap of 1.3878e-17 either
+side, 107 374 182 doubles lost to binary32, and the ladder at 1 / 2 / 262 144 for 2⁵² / 2⁵³ / 2⁷⁰.
+Naive summation at 1.002e-11 against pairwise's 4.329e-15 for 1% more operations and Kahan's
+7.126e-17 for four times as many; four orderings at 50 078 / 0 / 50 078 / 41 434 doubles from
+exact; the one-pass variance at 2.18103808e+4 against a true 8.32836041e-2. Karatsuba at
+65 536 / 13 834 multiplications and 65 536 / 49 374 total limb operations at 4 096 bits; the
+add-back at 1 in 500 034 against Knuth's 3.05e-5 estimate; 561 trailing 263 → 166 → 67 → 1 for base
+2; rho at 2 532 operations against trial division's exhausted 5 000 000, a speedup of 1 975 where
+√11 489 279 is 3 390; the linear sieve at 921 501 marks against 2 122 048 for 4× the memory; Euclid
+at 14.06 divisions a pair against Stein's 77.06. RANDU's bits 0 to 5 with periods 1, 2, 1, 4, 8 and
+16 and its plane identity holding with residual 0; modulo bias predicted at 2.000× and measured at
+2.219× against rejection's 1.2790 draws a sample; Fisher-Yates at chi-squared 7.0 against the naive
+shuffle's 1 509.7 over a threshold of 11.0. And a random UUID at 64 pages of working set in a
+64-insert window against a sequence's 14, UUIDv7 at 15 with 6 735 of 13 333 same-millisecond pairs
+out of order, a 40 ms clock regression issuing 13 of 13 under waiting and 5 of 13 under refusing
+with 0 duplicates either way, and a 5 000-identifier burst borrowing exactly 1 millisecond.
+
 ## Next
 
-**M17 — numbers, bits and floating point**, then onward through `doc/milestones/` in the order
-`doc/ROADMAP.md` gives.
+**M18 — numerical methods, transforms and optimisation**, then onward through
+`doc/milestones/` in the order `doc/ROADMAP.md` gives.
 
-M11 through M15 are complete apart from a human browser pass, which needs the Chrome extension
-connected; M16 has had one (see above, and the chart defect it found). `tools/section-dump.js` covers everything else the browser used to be needed for — it
+M11 through M15 and M17 are complete apart from a human browser pass, which needs the Chrome
+extension connected; M16 has had one (see above, and the chart defect it found). `tools/section-dump.js` covers everything else the browser used to be needed for — it
 prints every metric, table and note a section renders, at any control setting, and since the
 `input`-event fix above that is finally true of slider settings too.
 

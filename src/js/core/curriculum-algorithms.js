@@ -550,10 +550,76 @@
               summary: 'Where continuous geometry meets a pixel grid, and treating latitude and longitude as planar is the most common bug in application code.',
               tags: ['bresenham', 'scanline fill', 'anti-aliasing', 'coverage', 'curve flattening', 'bezier', 'separating axis theorem', 'minimum translation vector', 'collision response', 'geodesic distance', 'map projection']
             }]
+        },
+
+        {
+          id: 'M17',
+          title: 'Numbers, bits and floating point',
+          summary: 'The representation layer every other track silently assumes, turned into measurements.',
+          sections: [
+            {
+              id: 'integer-representation',
+              title: 'Integer representation',
+              summary: 'Carry and overflow are different flags, and which one was the bug is decided by the types in your source rather than by the hardware.',
+              tags: ['twos complement', 'carry', 'overflow', 'sign extension', 'saturating', 'wrapping', 'trapping', 'endianness', 'int32 coercion', 'int min']
+            },
+            {
+              id: 'bit-manipulation',
+              title: 'The bit-manipulation toolkit',
+              summary: 'The showpiece bit-scan trick does more work than the loop it replaces on random data, and nine times less in the worst case.',
+              tags: ['popcount', 'swar', 'de bruijn', 'count trailing zeros', 'count leading zeros', 'gray code', 'bit reversal', 'branchless', 'bit fields', 'hackers delight']
+            },
+            {
+              id: 'bitsets-and-swar',
+              title: 'Bitsets and SWAR algorithms',
+              summary: 'A bitset is not compact, it is compact above a density, and the crossing is far sparser than anybody guesses.',
+              tags: ['bitset', 'bitboard', 'word parallelism', 'density', 'set operations', 'sieve', 'typed arrays', 'cache', 'iteration', 'chess']
+            },
+            {
+              id: 'ieee-754',
+              title: 'IEEE 754',
+              summary: 'A double is not an approximation of a real number, it is a specific rational one, and the demo prints all fifty-five digits of it.',
+              tags: ['ieee 754', 'binary64', 'mantissa', 'exponent bias', 'subnormal', 'nan', 'signed zero', 'ulp', 'machine epsilon', 'spacing', 'max safe integer']
+            },
+            {
+              id: 'floating-point-hazards',
+              title: 'Floating-point hazards',
+              summary: 'Four orderings of one array give four different totals, and none of them is the bug.',
+              tags: ['cancellation', 'absorption', 'non associativity', 'kahan', 'neumaier', 'pairwise summation', 'welford', 'variance', 'quadratic formula', 'error accumulation']
+            },
+            {
+              id: 'fixed-and-decimal',
+              title: 'Fixed point, decimal and rational arithmetic',
+              summary: 'A million transactions summed as doubles are out by a ten-thousandth of a cent; applying a tax rate loses ten dollars.',
+              tags: ['fixed point', 'decimal', 'integer cents', 'rational', 'bankers rounding', 'half even', 'rounding policy', 'money', 'scaled integer', 'gcd growth']
+            },
+            {
+              id: 'arbitrary-precision',
+              title: 'Arbitrary-precision arithmetic',
+              summary: 'Karatsuba crosses over at three different sizes depending on which column you count, and wall clock is not one of them.',
+              tags: ['bignum', 'limbs', 'karatsuba', 'schoolbook', 'knuth algorithm d', 'add back', 'montgomery', 'modpow', 'bigint', 'crossover']
+            },
+            {
+              id: 'modular-arithmetic',
+              title: 'Modular arithmetic and number theory',
+              summary: 'On a Carmichael number the Fermat test is not probabilistic, it is wrong for every base, and Miller-Rabin below 2 to the 64 is not probabilistic either.',
+              tags: ['modular arithmetic', 'extended euclid', 'modular inverse', 'chinese remainder', 'miller rabin', 'carmichael', 'fermat test', 'pollard rho', 'sieve', 'linear sieve']
+            },
+            {
+              id: 'random-generation',
+              title: 'Random number generation',
+              summary: 'Every generator here passes a histogram, RANDU included, and one of them satisfies a linear identity exactly on every triple it emits.',
+              tags: ['prng', 'lcg', 'randu', 'xorshift', 'pcg', 'splitmix', 'mersenne twister', 'modulo bias', 'rejection sampling', 'fisher yates', 'chi squared']
+            },
+            {
+              id: 'integer-algorithms',
+              title: 'Integer algorithms in practice',
+              summary: 'The columns that make an identifier cheap to index are exactly the columns that make it informative to a stranger.',
+              tags: ['uuid', 'ulid', 'snowflake', 'sequential ids', 'index locality', 'buffer pool', 'clock regression', 'monotonic', 'bit packing', 'information leakage']
+            }]
         }
       ],
       planned: [
-        { id: 'M17', title: 'Numbers, bits and floating point', sections: 10 },
         { id: 'M18', title: 'Numerical methods, transforms and optimisation', sections: 10 },
         { id: 'M19', title: 'Randomised and approximation algorithms', sections: 9 },
         { id: 'M20', title: 'NP-completeness, reductions and metaheuristics', sections: 9 },

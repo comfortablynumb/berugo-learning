@@ -418,3 +418,197 @@ canvas.viz-canvas {
 .diff-delete .diff-line:first-child {
   background: color-mix(in srgb, var(--hue-red) 18%, transparent);
 }
+
+
+/* A word, one cell per bit. Monospaced and fixed-width so the columns line up
+   between two stacked words - the whole point of the SWAR stage view is that
+   the reader can follow one bit position down the stack. The eight-bit gap is
+   a span rather than a margin on every eighth cell, because the grouping is a
+   reading aid and should not survive a copy-paste of the bits. */
+.bit-word {
+  margin: 0.5rem 0;
+}
+
+.bit-caption {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-bottom: 0.2rem;
+}
+
+.bit-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1px;
+  font-family: var(--font-mono);
+}
+
+.bit-cell {
+  width: 1.05rem;
+  height: 1.35rem;
+  line-height: 1.35rem;
+  text-align: center;
+  font-size: 0.7rem;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--hue-gray) 12%, transparent);
+  color: var(--text-muted);
+}
+
+.bit-one {
+  background: color-mix(in srgb, var(--hue-blue) 55%, transparent);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.bit-lit {
+  outline: 2px solid var(--hue-amber);
+  outline-offset: -2px;
+}
+
+.bit-gap {
+  width: 0.4rem;
+}
+
+.bit-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.35rem;
+}
+
+.bit-chip {
+  font-size: 0.68rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--hue-gray) 18%, transparent);
+  color: var(--text-secondary);
+}
+
+.bit-chip-width {
+  color: var(--text-muted);
+}
+
+.bit-readings {
+  margin-top: 0.35rem;
+  display: grid;
+  gap: 0.1rem;
+}
+
+.bit-reading {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.74rem;
+}
+
+.bit-reading-label {
+  color: var(--text-muted);
+  min-width: 9rem;
+}
+
+.bit-reading-value {
+  color: var(--text-primary);
+  word-break: break-all;
+}
+
+.bit-stack {
+  display: grid;
+  gap: 0.15rem;
+}
+
+/* One cell per bit position, shaded by how often that bit came up set. The
+   outline marks a column that is off one half by more than the tolerance,
+   because at 32 columns the shading alone is not a reliable read. */
+.bit-heat {
+  display: flex;
+  gap: 1px;
+  margin: 0.4rem 0;
+}
+
+.bit-heat-cell {
+  width: 1.05rem;
+  height: 1.6rem;
+  border-radius: 2px;
+  background: linear-gradient(to top,
+    color-mix(in srgb, var(--hue-teal) 70%, transparent) var(--bit-heat),
+    color-mix(in srgb, var(--hue-gray) 12%, transparent) var(--bit-heat));
+}
+
+.bit-heat-off {
+  outline: 2px solid var(--hue-red);
+  outline-offset: -2px;
+}
+
+/* The two's-complement wheel. Drawn in pixels like every other diagram here,
+   so it does not follow the text scale. */
+.bit-wheel {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+  height: auto;
+  overflow: visible;
+}
+
+.bit-wheel-ring {
+  fill: none;
+  stroke: var(--border-strong);
+  stroke-width: 1.5;
+}
+
+.bit-wheel-tick {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.bit-wheel-cut {
+  stroke: var(--hue-red);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 3;
+}
+
+.bit-wheel-mark {
+  stroke: var(--surface);
+  stroke-width: 1.5;
+}
+
+.bit-wheel-label {
+  fill: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 8px;
+}
+
+/* One tone per named field. Written out rather than composed, because a class
+   built by string concatenation is a class the Tailwind purge cannot see and
+   the reviewer cannot grep for. */
+.bit-hue-red { background: color-mix(in srgb, var(--hue-red) 45%, transparent); }
+.bit-hue-orange { background: color-mix(in srgb, var(--hue-orange) 45%, transparent); }
+.bit-hue-amber { background: color-mix(in srgb, var(--hue-amber) 45%, transparent); }
+.bit-hue-green { background: color-mix(in srgb, var(--hue-green) 45%, transparent); }
+.bit-hue-teal { background: color-mix(in srgb, var(--hue-teal) 45%, transparent); }
+.bit-hue-blue { background: color-mix(in srgb, var(--hue-blue) 45%, transparent); }
+.bit-hue-indigo { background: color-mix(in srgb, var(--hue-indigo) 45%, transparent); }
+.bit-hue-purple { background: color-mix(in srgb, var(--hue-purple) 45%, transparent); }
+.bit-hue-pink { background: color-mix(in srgb, var(--hue-pink) 45%, transparent); }
+.bit-hue-gray { background: color-mix(in srgb, var(--hue-gray) 30%, transparent); }
+
+.bit-cell.bit-one.bit-hue-red { background: color-mix(in srgb, var(--hue-red) 75%, transparent); }
+.bit-cell.bit-one.bit-hue-orange { background: color-mix(in srgb, var(--hue-orange) 75%, transparent); }
+.bit-cell.bit-one.bit-hue-amber { background: color-mix(in srgb, var(--hue-amber) 75%, transparent); }
+.bit-cell.bit-one.bit-hue-green { background: color-mix(in srgb, var(--hue-green) 75%, transparent); }
+.bit-cell.bit-one.bit-hue-teal { background: color-mix(in srgb, var(--hue-teal) 75%, transparent); }
+.bit-cell.bit-one.bit-hue-blue { background: color-mix(in srgb, var(--hue-blue) 75%, transparent); }
+.bit-cell.bit-one.bit-hue-indigo { background: color-mix(in srgb, var(--hue-indigo) 75%, transparent); }
+.bit-cell.bit-one.bit-hue-purple { background: color-mix(in srgb, var(--hue-purple) 75%, transparent); }
+.bit-cell.bit-one.bit-hue-pink { background: color-mix(in srgb, var(--hue-pink) 75%, transparent); }
+.bit-cell.bit-one.bit-hue-gray { background: color-mix(in srgb, var(--hue-gray) 55%, transparent); }
+
+.bit-wheel-mark.bit-hue-red { fill: var(--hue-red); }
+.bit-wheel-mark.bit-hue-orange { fill: var(--hue-orange); }
+.bit-wheel-mark.bit-hue-amber { fill: var(--hue-amber); }
+.bit-wheel-mark.bit-hue-green { fill: var(--hue-green); }
+.bit-wheel-mark.bit-hue-teal { fill: var(--hue-teal); }
+.bit-wheel-mark.bit-hue-blue { fill: var(--hue-blue); }
+.bit-wheel-mark.bit-hue-indigo { fill: var(--hue-indigo); }
+.bit-wheel-mark.bit-hue-purple { fill: var(--hue-purple); }
+.bit-wheel-mark.bit-hue-pink { fill: var(--hue-pink); }
+.bit-wheel-mark.bit-hue-gray { fill: var(--hue-gray); }
