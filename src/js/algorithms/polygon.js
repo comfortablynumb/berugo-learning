@@ -79,9 +79,30 @@
   }
 
   /**
-   * Convex when every turn has the same sign, ignoring the collinear ones. A
-   * ring with a repeated vertex or a spike is reported non-convex rather than
-   * crashing, which is what the degenerate fixtures exercise.
+   * How many complete turns the ring makes as you walk it, as a signed count.
+   * A simple polygon turns exactly once; a pentagram turns twice.
+   */
+  function turningNumber(ring) {
+    if (ring.length < 3) return 0;
+    let total = 0;
+
+    for (let i = 0; i < ring.length; i += 1) {
+      const into = G.sub(at(ring, i + 1), at(ring, i));
+      const outOf = G.sub(at(ring, i + 2), at(ring, i + 1));
+      total += Math.atan2(G.cross(into, outOf), G.dot(into, outOf));
+    }
+    return Math.round(total / (2 * Math.PI));
+  }
+
+  /**
+   * Convex when every turn has the same sign AND the ring closes after exactly
+   * one full turn.
+   *
+   * The sign test alone is the familiar one and it is not enough: a pentagram
+   * turns the same way at all five vertices and is emphatically not convex -
+   * it goes round twice. Testing only the signs reported the pentagram as
+   * convex, which is how a self-intersecting star ends up handed to a routine
+   * that assumes convexity and quietly produces nonsense.
    */
   function isConvex(ring, stats) {
     if (ring.length < 3) return false;
@@ -93,7 +114,7 @@
       if (seen === 0) seen = turn;
       else if (turn !== seen) return false;
     }
-    return seen !== 0;
+    return seen !== 0 && Math.abs(turningNumber(ring)) === 1;
   }
 
   /** Is the point exactly on one of the ring's edges? */
@@ -256,6 +277,7 @@
     perimeter: perimeter,
     centroid: centroid,
     isCounterClockwise: isCounterClockwise,
+    turningNumber: turningNumber,
     isConvex: isConvex,
     onBoundary: onBoundary,
     rayCasting: rayCasting,

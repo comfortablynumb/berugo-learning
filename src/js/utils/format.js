@@ -69,6 +69,18 @@
     return exact(value) + (value === 1 ? ' bit' : ' bits');
   }
 
+  /**
+   * Scientific notation with a readable exponent. A determinant of 4.996e-16
+   * printed as 0.0000000000000005 tells a reader nothing, and printed as
+   * "4.996e-16" it tells them the value is at the edge of what a double can
+   * distinguish from zero - which is the whole point of showing it.
+   */
+  function exponential(value, digits) {
+    if (!Number.isFinite(value)) return '—';
+    if (value === 0) return '0';
+    return value.toExponential(digits === undefined ? 3 : digits);
+  }
+
   return {
     count: count,
     exact: exact,
@@ -79,6 +91,7 @@
     perRun: perRun,
     ratio: ratio,
     plural: plural,
-    bits: bits
+    bits: bits,
+    exponential: exponential
   };
 }));

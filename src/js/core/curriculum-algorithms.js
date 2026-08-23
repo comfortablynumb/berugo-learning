@@ -483,10 +483,28 @@
               summary: 'The selectivity of the prefilter decides the throughput, and no similarity metric is right about every pair.',
               tags: ['tokenisation', 'byte-pair encoding', 'normalisation', 'jaro-winkler', 'jaccard', 'log template extraction', 'drain', 'prefilter selectivity', 'precision and recall']
             }]
+        },
+
+        {
+          id: 'M16',
+          title: 'Computational geometry',
+          summary: 'The one area where floating point does not lose precision, it returns answers that contradict each other.',
+          sections: [
+            {
+              id: 'geometry-primitives',
+              title: 'Primitives and robustness',
+              summary: 'The epsilon test never contradicts itself and is wrong on every input, which is the quieter of the two failures.',
+              tags: ['orientation predicate', 'orient2d', 'robustness', 'exact arithmetic', 'adaptive predicates', 'shewchuk', 'floating point', 'collinear', 'epsilon comparison', 'in-circle']
+            },
+            {
+              id: 'polygon-containment',
+              title: 'Polygons, areas and containment',
+              summary: 'Ray casting and the winding number disagree at the pentagram centre, and the polygon does not say which is meant.',
+              tags: ['shoelace formula', 'signed area', 'point in polygon', 'ray casting', 'winding number', 'fill rule', 'even-odd', 'non-zero', 'self-intersection', 'douglas-peucker', 'visvalingam', 'simplification']
+            }]
         }
       ],
       planned: [
-        { id: 'M16', title: 'Computational geometry', sections: 10 },
         { id: 'M17', title: 'Numbers, bits and floating point', sections: 10 },
         { id: 'M18', title: 'Numerical methods, transforms and optimisation', sections: 10 },
         { id: 'M19', title: 'Randomised and approximation algorithms', sections: 9 },
