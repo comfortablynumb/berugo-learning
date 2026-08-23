@@ -285,10 +285,87 @@
   }
 
   /**
-   * A deliberately non-Delaunay triangulation of the same points, for
-   * comparison: fan every point off the first one inside the hull. It is a
-   * valid triangulation and its angles are far worse, which is the measurement
-   * the section quotes.
+   * A valid, deliberately non-Delaunay triangulation of the SAME points
+   * covering the SAME region, produced by flipping Delaunay's own edges.
+   *
+   * This is what the comparison needs. A fan from one vertex is also a valid
+   * triangulation and it covers only the region star-shaped from that vertex,
+   * not the convex hull - so comparing its angles against Delaunay's compares
+   * two different shapes and the claim "the same points, triangulated two
+   * ways" is not true of it.
+   *
+   * A flip of a convex quadrilateral is always legal: it keeps the vertex set,
+   * the covered region and the triangle count, and changes only which diagonal
+   * is drawn. So flipping away from Delaunay leaves everything comparable
+   * except the thing being compared.
+   */
+  function degrade(points, triangles, rounds, seed) {
+    let current = triangles.map(function (t) { return t.slice(); });
+    let state = (seed === undefined ? 12345 : seed) >>> 0;
+
+    function next() {
+      state = (state * 1103515245 + 12345) >>> 0;
+      return state / 4294967296;
+    }
+
+    for (let round = 0; round < (rounds || 1); round += 1) {
+      const options = flippableEdges(points, current);
+      if (!options.length) break;
+      const pick = options[Math.floor(next() * options.length) % options.length];
+      current = applyFlip(current, pick);
+    }
+    return { points: points, triangles: current };
+  }
+
+  /** Shared edges whose two triangles form a convex quadrilateral. */
+  function flippableEdges(points, triangles) {
+    const shared = new Map();
+
+    triangles.forEach(function (t, ti) {
+      [[t[0], t[1]], [t[1], t[2]], [t[2], t[0]]].forEach(function (e) {
+        const id = edgeKey(e[0], e[1]);
+        if (!shared.has(id)) shared.set(id, { u: Math.min(e[0], e[1]), v: Math.max(e[0], e[1]), tris: [] });
+        shared.get(id).tris.push(ti);
+      });
+    });
+
+    const out = [];
+    shared.forEach(function (entry) {
+      if (entry.tris.length !== 2) return;
+      const a = opposite(triangles[entry.tris[0]], entry.u, entry.v);
+      const b = opposite(triangles[entry.tris[1]], entry.u, entry.v);
+      if (a === null || b === null) return;
+
+      /* The quadrilateral u-a-v-b is convex exactly when u and v fall on
+         opposite sides of the line a-b. Flipping a non-convex one produces
+         overlapping triangles. */
+      const su = G.orient2d(points[a], points[b], points[entry.u]);
+      const sv = G.orient2d(points[a], points[b], points[entry.v]);
+      if (su === 0 || sv === 0 || su === sv) return;
+
+      out.push({ u: entry.u, v: entry.v, a: a, b: b, tris: entry.tris });
+    });
+    return out;
+  }
+
+  function opposite(triangle, u, v) {
+    const found = triangle.filter(function (i) { return i !== u && i !== v; });
+    return found.length === 1 ? found[0] : null;
+  }
+
+  function applyFlip(triangles, pick) {
+    const out = triangles.filter(function (t, ti) {
+      return ti !== pick.tris[0] && ti !== pick.tris[1];
+    });
+    out.push([pick.a, pick.b, pick.u]);
+    out.push([pick.b, pick.a, pick.v]);
+    return out;
+  }
+
+  /**
+   * A fan from the first point. Kept because it is what people reach for, and
+   * because it covers only the star-shaped region rather than the hull - which
+   * is exactly why it is NOT the right comparison for mesh quality.
    */
   function fanTriangulation(points) {
     const unique = dedupe(points);
@@ -322,6 +399,8 @@
     delaunay: delaunay,
     checkDelaunay: checkDelaunay,
     angleProfile: angleProfile,
-    fanTriangulation: fanTriangulation
+    fanTriangulation: fanTriangulation,
+    degrade: degrade,
+    flippableEdges: flippableEdges
   };
 }));

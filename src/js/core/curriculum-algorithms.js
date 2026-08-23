@@ -507,6 +507,18 @@
               title: 'Convex hulls',
               summary: 'O(n log n) and O(nh) are different bounds rather than better and worse, and the point set decides which wins.',
               tags: ['convex hull', 'monotone chain', 'andrew', 'graham scan', 'gift wrapping', 'jarvis march', 'quickhull', 'collinear policy', 'orientation tests', 'output sensitive']
+            },
+            {
+              id: 'sweep-line-algorithms',
+              title: 'Sweep-line algorithms',
+              summary: 'The paradigm is a paragraph and the implementation is the degeneracies, which never announce themselves.',
+              tags: ['sweep line', 'bentley-ottmann', 'event queue', 'status structure', 'segment intersection', 'rectangle union', 'skyline', 'coordinate compression', 'degeneracy', 'vertical segments']
+            },
+            {
+              id: 'polygon-triangulation',
+              title: 'Triangulation',
+              summary: 'Any valid triangulation joins the same points; the one that maximises the smallest angle is the one interpolation survives.',
+              tags: ['triangulation', 'ear clipping', 'delaunay', 'empty circle property', 'in-circle predicate', 'bowyer-watson', 'edge flip', 'circumcircle', 'mesh quality', 'skinny triangles']
             }]
         }
       ],
