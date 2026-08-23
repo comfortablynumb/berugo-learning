@@ -10,6 +10,9 @@
         term: 'Every optimisation is a narrowing, and every narrowing has a precondition',
         plain: 'These techniques do not compute faster; they look at fewer candidates.',
         formal: 'each replaces argmin over [0, j) with argmin over a subset S(j) ⊆ [0, j)',
+        readAs: 'Every optimisation in this section does the same thing: instead of searching all previous ' +
+          'positions for the best predecessor, prove that only a few of them can ever win, and search ' +
+          'those. The ⊆ means that smaller set sits inside the full range.',
         detail: 'The convex hull trick, divide-and-conquer optimisation, the monotonic queue and Knuth\'s ' +
           'optimisation all restrict which earlier states a transition considers. That is why the failure ' +
           'mode is uniform across the family and uniformly nasty: when the precondition is false the ' +
@@ -23,6 +26,9 @@
         term: 'The convex hull trick, derived',
         plain: 'Expand the square and the transition becomes the minimum of a set of lines.',
         formal: 'dp[j] = P[j]² + c + min over i of ((−2P[i])·P[j] + dp[i] + P[i]²)',
+        readAs: 'Rewritten this way, each earlier position i contributes a straight line in P[j]: slope ' +
+          '−2P[i], intercept dp[i] + P[i]². Minimising over i is then asking which of a set of lines is ' +
+          'lowest at a given x — which is a geometry problem with a fast answer.',
         detail: 'The rewriting *is* the technique and everything else is bookkeeping. A cost of the form ' +
           '(P[j] − P[i])² expands into a term depending only on j, a term depending only on i, and a cross ' +
           'term linear in P[j] - so each earlier state contributes a line y = m·x + c with m = −2P[i], and ' +
@@ -61,6 +67,9 @@
         term: 'Divide and conquer optimisation needs a monotone argmin',
         plain: 'If the best split point never moves backwards, solving the middle bounds both halves.',
         formal: 'opt(j) non-decreasing in j ⟹ solving the middle j gives ranges for the left and right recursions',
+        readAs: 'If the best predecessor only ever moves rightwards, then solving the middle position pins ' +
+          'down where the left and right halves must look. Recursing on that gives n log n instead of ' +
+          'n².',
         detail: 'Settle the middle index of a layer first, and its optimum splits the candidate range for ' +
           'everything on either side. Recursing gives O(n log n) per layer instead of O(n²), and the ' +
           'precondition is that the argmin is monotone. Checking that precondition is itself quadratic - it ' +
@@ -73,6 +82,8 @@
         term: 'The monotonic queue, applied to a transition',
         plain: 'When the transition looks back over a sliding window, the deque from M11.7 applies unchanged.',
         formal: 'dp[j] = min over i in [j − w, j − 1] of dp[i] + cost(j); the front of the deque is that minimum',
+        readAs: 'When only a fixed window of previous positions is eligible, a monotone deque keeps the ' +
+          'minimum of that window available in constant time — the same sliding-window trick as in M11.',
         detail: 'This is the least glamorous of the four and the most reusable, because "the transition ' +
           'looks at the previous w states" is an extremely common shape. Each index enters the deque once ' +
           'and leaves once, so the whole sweep is linear regardless of the window width, while the rescan ' +
@@ -86,6 +97,8 @@
         term: 'The Lagrangian (aliens) trick',
         plain: 'Price a group, binary-search the price, and "exactly k" falls out of the unconstrained problem.',
         formal: 'solve with penalty λ per group; the optimal group count is monotone in λ; subtract k·λ at the end',
+        readAs: 'The Lagrangian trick: instead of forcing exactly k groups, charge a fee λ per group and ' +
+          'binary-search λ until the solver naturally chooses k. Then subtract the fees you charged.',
         detail: 'A constraint of the form "use exactly k of something" usually adds a dimension to the DP ' +
           'and multiplies the cost by k. The Lagrangian move removes the dimension by charging λ per use ' +
           'and searching for the λ at which the unconstrained optimum happens to use exactly k. It needs ' +
@@ -127,6 +140,9 @@
         term: 'Alpha-beta prunes what cannot matter',
         plain: 'Once a node is provably no better than something already in hand, its remaining moves are irrelevant.',
         formal: 'maintain [α, β]; at a node where β ≤ α the parent will never choose this branch, so stop',
+        readAs: 'Alpha-beta pruning: α is the best the maximising side is already assured of, β the best the ' +
+          'minimising side is. Once they cross, whatever is below cannot change the answer, so it is ' +
+          'never looked at.',
         detail: 'The window carries "the best the maximiser is already guaranteed" and "the best the ' +
           'minimiser is already guaranteed". When they cross, the current node\'s value cannot influence ' +
           'the answer whatever its unexamined moves contain, so they are never examined. The value returned ' +
@@ -139,6 +155,9 @@
         term: 'The saving belongs to the move ordering',
         plain: 'Alpha-beta with bad ordering approaches the full tree; with perfect ordering it approaches its square root.',
         formal: 'best case Θ(b^(d/2)), worst case Θ(b^d) — the same algorithm, different orders',
+        readAs: 'With perfect move ordering, alpha-beta searches the square root of the tree — which is twice ' +
+          'the depth for the same effort. With the worst ordering it searches all of it. Nothing else ' +
+          'changes.',
         detail: 'This is the fact that matters in practice, and it reframes engineering effort: once ' +
           'alpha-beta is in place, the returns come from ordering heuristics rather than from the search. ' +
           'It also explains why real engines spend so much on move ordering - killer moves, history ' +
@@ -176,6 +195,9 @@
         term: 'Sprague-Grundy: the XOR is exact',
         plain: 'A sum of impartial games behaves exactly like one Nim heap of size equal to the XOR.',
         formal: 'g(G₁ + G₂ + … + Gₙ) = g(G₁) ⊕ g(G₂) ⊕ … ⊕ g(Gₙ)',
+        readAs: 'The Sprague-Grundy theorem: the value of several games played side by side is the XOR of ' +
+          'their individual values. Exact, not approximate — which is why a position with XOR zero is a ' +
+          'loss and anything else is a win.',
         detail: 'This is a theorem rather than a heuristic, and it is the reason the family exists. A ' +
           'position made of independent components would otherwise need a state space that is the product ' +
           'of the components\', and the theorem replaces that product with a XOR of independently computed ' +
@@ -200,6 +222,8 @@
         term: 'Retrograde analysis handles cycles',
         plain: 'Work backwards from the terminal positions, counting each state\'s unresolved successors.',
         formal: 'a state is won if any successor is lost; lost when all successors are won; anything unresolved is a draw',
+        readAs: 'Work backwards from the end: you win if you can move to a position your opponent loses from, ' +
+          'and lose if every move hands them a win. Positions that never resolve are draws.',
         detail: 'A forward memoised search cannot label a game whose positions can repeat - it recurses ' +
           'forever - and repetition is exactly what produces draws. Retrograde analysis starts at the ' +
           'terminals and propagates backwards with a counter of unresolved successors per state, so a state ' +
@@ -228,6 +252,9 @@
         term: 'A cycle makes it a linear system, not a hard DP',
         plain: 'If a state can reach itself, there is no topological order and no recursion.',
         formal: 'E[s] − Σ p(s→t)·E[t] = cost(s) is one row of a linear system in the transient states',
+        readAs: 'The expected cost from a state is its own cost plus the weighted average of the expected ' +
+          'costs of where it can go. Written out for every state, that is a system of linear equations ' +
+          '— which is why cyclic chains need elimination rather than a sweep.',
         detail: 'This is the section\'s whole point. A memoised recursion on a cyclic chain either recurses ' +
           'forever or returns whatever half-filled value was in the memo, which is worse. Rearranged, the ' +
           'same equation moves E[s] to the left and becomes one row of an n × n system - and n states give ' +
@@ -254,6 +281,9 @@
         term: 'The overshoot rule is a self-loop',
         plain: 'A roll that would pass the end leaves you where you are, and that alone makes the chain cyclic.',
         formal: 'p(s→s) = |{r : s + r > n}| / faces > 0 for s > n − faces',
+        readAs: 'Near the end of the board most rolls overshoot and leave you where you are, so the state has ' +
+          'a genuine chance of transitioning to itself. That self-loop is what makes the chain cyclic ' +
+          'and defeats a topological sweep.',
         detail: 'It is worth naming because it is so easy to miss: nobody thinks of "you must land exactly" ' +
           'as introducing a cycle, and it does. Every square within one die-roll of the end names itself on ' +
           'the right-hand side of its own equation, which is precisely the case a recursion cannot handle. ' +
@@ -266,6 +296,9 @@
         term: 'Partial pivoting is not optional',
         plain: 'A zero on the diagonal produces Infinity, then NaN, far from where it went wrong.',
         formal: 'swap in the row with the largest absolute value in the current column before eliminating',
+        readAs: 'Partial pivoting. Dividing by a near-zero number amplifies floating-point error, so pick the ' +
+          'largest available pivot first. It costs a swap and it is the difference between an answer ' +
+          'and noise.',
         detail: 'A transient state with no self-loop puts a zero on its own diagonal, and an unpivoted ' +
           'elimination divides by it. The result is not an exception at the point of failure - it is an ' +
           'Infinity that becomes a NaN and propagates through the back-substitution into a table of them, ' +
@@ -278,6 +311,8 @@
         term: 'Monte Carlo checks the model, not the arithmetic',
         plain: 'A simulation is far too noisy to verify algebra, and it is the only thing that verifies the rules.',
         formal: 'the standard error falls as 1/√trials, so four times the work halves the interval',
+        readAs: 'Monte Carlo accuracy improves with the square root of the sample count. Halving the error ' +
+          'costs four times the trials — which is why simulation is a way to get two digits, not six.',
         detail: 'A transition table that does not describe the game produces an exact answer to the wrong ' +
           'question, and no amount of checking the linear solver will notice. Simulating the rules as ' +
           'written is the independent implementation that does. What it cannot do is confirm a fourth ' +
@@ -303,6 +338,9 @@
         term: 'Optimal stopping: the threshold is the state',
         plain: 'The secretary problem is an expectation over one parameter, and the sweep finds n/e.',
         formal: 'P(best | observe k) = (k/n)·Σ_{i=k+1..n} 1/(i−1), maximised near k = n/e',
+        readAs: 'The secretary problem: watch the first k candidates without hiring, then take the next one ' +
+          'better than all of them. The vertical bar is "given that". The best k is n divided by e ' +
+          '(2.718…), about 37%, and it succeeds about 37% of the time.',
         detail: 'The classic result - observe about 37% of the candidates, then take the first one better ' +
           'than all of them, and you win about 37% of the time - is usually quoted and rarely computed. ' +
           'Computing it is a one-parameter sweep over an exact formula, and doing so turns a remembered ' +

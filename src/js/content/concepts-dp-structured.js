@@ -10,6 +10,9 @@
         term: 'The state is a contiguous range',
         plain: 'best[i][j] is the answer for the sub-range from i to j, and it asks where that range breaks.',
         formal: 'best[i][j] = op over k in [i, j) of combine(best[i][k], best[k+1][j], join(i, k, j))',
+        readAs: 'For an interval from i to j, try every place k to split it, and combine the answers for the ' +
+          'two halves with whatever the join itself costs. The round bracket means k stops just short ' +
+          'of j.',
         detail: 'Matrix-chain multiplication, optimal binary search trees, palindrome partitioning and burst ' +
           'balloons are one recurrence with four join costs. Because a range of length L is built from ' +
           'ranges of length strictly less than L, the family shares an evaluation order and a shape - the ' +
@@ -36,6 +39,8 @@
         term: 'The lower triangle is not empty, it is absent',
         plain: 'An interval [i, j] with j < i does not exist, so a zero there is a lie.',
         formal: 'the domain is {(i, j) : i ≤ j}; cells outside it have no value, not the value zero',
+        readAs: 'Only cells where the start is at or before the end mean anything. Leaving the others as zero ' +
+          'rather than as "no value" is how a nonsense interval sneaks into a minimum.',
         detail: 'Half the table is not part of the problem, and treating it as unfilled-but-legitimate is how ' +
           'a mis-ordered sweep gets away with returning a plausible number. Drawing it greyed out rather ' +
           'than as zeros is not decoration - it is the difference between a reader seeing "this cell has ' +
@@ -60,6 +65,9 @@
         term: "Knuth's optimisation narrows the split range",
         plain: 'The best split for [i, j] lies between the best splits for [i, j−1] and [i+1, j].',
         formal: 'opt[i][j−1] ≤ opt[i][j] ≤ opt[i+1][j], summing to O(n²) split tests instead of O(n³)',
+        readAs: 'The best split point only ever moves right as the interval grows. So instead of trying every ' +
+          'k for every cell, each cell searches between its two neighbours\' answers — and those ranges ' +
+          'add up to n² rather than n³.',
         detail: 'The k loop is what makes an interval DP cubic, and monotonicity of the optimal split bounds ' +
           'it. Because the ranges telescope across each diagonal, the total number of split tests over the ' +
           'whole table collapses from cubic to quadratic - the same trick as divide-and-conquer ' +
@@ -85,6 +93,8 @@
         term: 'The precondition check needs a tolerance',
         plain: 'Interval weights are differences of prefix sums, so exact comparison rejects valid instances.',
         formal: 'w(i, j) = P[j+1] − P[i]; floating-point error accumulates in P and must be tolerated in the test',
+        readAs: 'Interval weights come from differences of prefix sums, and those differences drift by tiny ' +
+          'amounts in floating point. A test that demands exact equality will fail on correct code.',
         detail: 'This is a real subtlety rather than a caveat. Nine two-decimal probabilities - the textbook ' +
           'optimal-BST instance - violate the quadrangle inequality by about 1.11 × 10⁻¹⁶ purely because ' +
           'the prefix sums are computed in binary floating point. An exact `<=` therefore rejects exactly ' +
@@ -151,6 +161,9 @@
         term: 'The reroot step for sum of distances',
         plain: 'Moving the root to a child brings size(child) nodes closer and pushes the rest further.',
         formal: 'answer[child] = answer[parent] + n − 2·size(child)',
+        readAs: 'Rerooting in one line: moving the root from a parent to a child brings every node in the ' +
+          'child\'s subtree one step closer and every other node one step further. That is n minus ' +
+          'twice the subtree size.',
         detail: 'This single line is the whole upward pass, and it is worth deriving rather than memorising ' +
           'because the derivation is the pattern. Every node inside the child\'s subtree is one edge nearer ' +
           'once the root moves across that edge, and every node outside it is one edge further; there are ' +
@@ -164,6 +177,8 @@
         term: 'Prefix and suffix, not "all but one"',
         plain: 'Each node must give every child the combination of its other children, in O(deg) not O(deg²).',
         formal: 'without[k] = combine(prefix[k−1], suffix[k+1]); both arrays are one pass each',
+        readAs: 'To get the combination of everything except item k, combine what came before it with what ' +
+          'comes after. Two sweeps rather than one recomputation per item.',
         detail: 'This is the part that makes rerooting linear, and skipping it reintroduces the quadratic ' +
           'cost the technique exists to remove. Recomputing "everything except this child" by looping over ' +
           'the siblings is O(deg²) at that node, which on a random tree is invisible and on a star is the ' +
@@ -218,6 +233,9 @@
         term: 'A set in the state, written as an integer',
         plain: 'Subsets of n things are the integers below 2ⁿ, and bit operations are the set operations.',
         formal: 'mask ∈ [0, 2ⁿ); union is |, intersection is &, membership is mask & (1 << i)',
+        readAs: 'A subset is stored as a number whose bits say which elements are in it. Union is bitwise OR, ' +
+          'intersection is AND, and testing membership is shifting a 1 into position and masking. Set ' +
+          'operations become single instructions.',
         detail: 'The representation is what makes the family practical: a set becomes an array index, so a ' +
           'table over subsets is a flat array rather than a map, and the transitions are single ' +
           'instructions. It is also what fixes the ceiling, because the table is 2ⁿ entries whatever is in ' +
@@ -229,6 +247,8 @@
         term: 'Held-Karp: (visited set, current city)',
         plain: 'Two routes visiting the same cities and ending in the same place are interchangeable.',
         formal: 'best[mask][last] = min over prev in mask of best[mask ^ (1<<last)][prev] + d(prev, last)',
+        readAs: 'To reach a set of visited cities ending at `last`, come from some earlier city, having ' +
+          'visited everything except `last` — which is that set with the `last` bit XORed off.',
         detail: 'The saving comes from one observation about the *future*: everything that happens after a ' +
           'partial tour depends only on which cities remain and where you are standing, not on the order ' +
           'the visited ones were taken in. So all (k−1)! orderings that reach the same set and endpoint ' +
@@ -242,6 +262,9 @@
         term: 'Submask enumeration totals 3ⁿ',
         plain: 'The idiom `sub = (sub - 1) & mask` walks every subset of a mask, and the total over all masks is 3ⁿ.',
         formal: 'Σ over masks of 2^popcount(mask) = 3ⁿ, since each bit is in neither, in the submask, or in the mask only',
+        readAs: 'Enumerating every subset of every subset costs 3 to the power n, not 4 — because each ' +
+          'element is in exactly one of three situations. That single observation is what makes submask ' +
+          'enumeration affordable.',
         detail: 'The loop looks like it is 2ⁿ inside 2ⁿ, and the natural bound people reach for is 4ⁿ. The ' +
           'true count is 3ⁿ, by a one-line counting argument: summing over (submask, mask) pairs, each of ' +
           'the n bits independently has three states. At n = 12 that is 531 441 against 16 777 216 - a ' +
@@ -253,6 +276,8 @@
         term: 'Sum over subsets is n·2ⁿ, not 3ⁿ',
         plain: 'Relax one bit at a time instead of walking every submask.',
         formal: 'for each bit b, for each mask with b set: f[mask] += f[mask ^ (1<<b)]',
+        readAs: 'The subset-sum transform: one pass per bit, each folding in the value of the mask with that ' +
+          'bit removed. It computes every subset total in n·2ⁿ rather than 3ⁿ.',
         detail: 'The submask loop computes "the aggregate over all subsets of each mask" directly, in 3ⁿ. ' +
           'SOS computes the identical table by absorbing one bit at a time, so after round b every entry ' +
           'has taken in the submasks differing only in bits 0…b. That is n·2ⁿ, and at n = 10 the difference ' +
@@ -278,6 +303,9 @@
         term: 'Broken profile: the frontier is the state',
         plain: 'Fill cell by cell and carry the boundary between filled and unfilled as a mask.',
         formal: 'the state is (cell index, profile of the m-cell frontier), so 2^m states per column',
+        readAs: 'Broken-profile DP carries the boundary between the solved and unsolved parts as a bitmask. ' +
+          'The cost is exponential in the width of that boundary and linear in the length, so you ' +
+          'orient the grid to make the width the smaller dimension.',
         detail: 'Tiling problems look like they need the whole partial board in the state and need only the ' +
           'frontier - the cells whose fate is not yet settled. That is m bits for an m-wide board, and it ' +
           'is why the *narrow* side must be the one in the state: a 2 × 12 board has 4 profiles and a ' +
@@ -289,6 +317,8 @@
         term: 'The wall is memory, and it is a number',
         plain: '2ⁿ·n cells at eight bytes is 6.7 GB by n = 25.',
         formal: 'bytes = 8 · n · 2ⁿ; the ceiling is set by allocation, not by time',
+        readAs: 'The table is n times 2 to the n entries, eight bytes each. At n = 20 that is 168 MB — you ' +
+          'run out of memory long before you run out of patience.',
         detail: '"It does not scale" is unfalsifiable and useless for deciding. The table is 393 KB at ' +
           'n = 12, 168 MB at n = 20, 738 MB at n = 22 and 6.7 GB at n = 25 - and no improvement to the ' +
           'inner loop moves any of those. Working the number out before writing code tells you whether the ' +
@@ -315,6 +345,9 @@
         term: 'Walk the representation, not the values',
         plain: 'Counting numbers in a huge range means walking the bound\'s digits, not the range.',
         formal: 'state is (position, property state, tight), so the cost is Θ(digits · |property| · 2)',
+        readAs: 'Digit DP walks the number one digit at a time, carrying whatever the property needs plus one ' +
+          'bit for whether you are still hugging the upper bound. The cost is digits, not the value — ' +
+          'which is the entire point.',
         detail: 'This is the general move and it goes far beyond numbers: when a range is too large to ' +
           'iterate, count over the structure that describes its members instead. For integers that ' +
           'structure is the decimal expansion, so the cost depends on how many digits the bound has rather ' +
@@ -328,6 +361,9 @@
         term: 'The tight flag',
         plain: 'Tight means every digit so far equals the bound\'s, so the next one is capped.',
         formal: 'tight ∧ digit = bound[i] ⟹ still tight; digit < bound[i] ⟹ free for every later position',
+        readAs: 'While you are matching the limit digit for digit you are constrained; the moment you pick ' +
+          'anything smaller, every later digit is unconstrained. The ∧ is "and", the ⟹ is "which ' +
+          'means".',
         detail: 'This is the only subtle part of the technique and the only part that goes wrong. Drop the ' +
           'flag and the count runs past the bound; freeze it on and the count stops at the bound\'s own ' +
           'prefix. It also explains the memoisation rule: a tight state lies on exactly one path - the ' +
@@ -366,6 +402,8 @@
         term: 'An inclusive range is two counts and a subtraction',
         plain: 'count(L, R) = count(0, R) − count(0, L−1), and L−1 is where the off-by-one lives.',
         formal: 'the prefix-count function is monotone, so the range count is a difference of prefixes',
+        readAs: 'Count everything up to the high end, count everything below the low end, subtract. The same ' +
+          'trick as a prefix sum, applied to a counting problem.',
         detail: 'Writing the subtraction once, in the module, rather than at every call site is a small ' +
           'discipline with a large payoff, because `low - 1` is exactly the kind of expression that gets ' +
           'typed as `low` in one place out of five. It also interacts with the zero bug above in a way ' +
@@ -390,6 +428,8 @@
         term: 'Counting can overflow, and should say so',
         plain: 'Path counts on a dense DAG exceed the safe integer range without any warning.',
         formal: 'report whether every count stayed ≤ 2^53 − 1 rather than returning a rounded double',
+        readAs: 'Counting problems overflow the exactly-representable integer range quickly, and a rounded ' +
+          'answer looks exactly like a right one. Report whether the bound held.',
         detail: 'JavaScript numbers are exact integers only up to 2^53 − 1, and a path count doubles with ' +
           'depth. Past that the arithmetic silently rounds, so the returned counts are approximately right ' +
           'and never flagged - which is the worst kind of numeric failure because it looks like a correct ' +

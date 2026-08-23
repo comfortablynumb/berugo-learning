@@ -10,6 +10,9 @@
         term: 'Optimal substructure',
         plain: 'An optimal answer is built out of optimal answers to smaller versions of the same problem.',
         formal: 'opt(s) = best over transitions t of combine(cost(t), opt(child(s, t)))',
+        readAs: 'The best answer at a state is the best you can do over every move available from it: the ' +
+          'cost of the move, combined with the best answer at wherever it takes you. Every DP in this ' +
+          'milestone is that one sentence with different words for state, move and combine.',
         detail: 'This is the property that makes the recurrence *correct*, and it is the one people assume ' +
           'rather than check. It fails more often than it looks: burst balloons has no optimal substructure ' +
           'under "which balloon do I pop first", because popping changes who is adjacent to whom and the two ' +
@@ -49,6 +52,9 @@
         term: 'States × transitions is the complexity',
         plain: 'Multiply how many subproblems there are by how many predecessors each looks at.',
         formal: 'time = Θ(|S| · b) where b is the branching factor of the transition relation',
+        readAs: 'The running time is the number of distinct states times the moves available from each. The ' +
+          'bars mean "how many". That product is the whole cost model — which is why shrinking the ' +
+          'state is the only optimisation that matters.',
         detail: 'This is the single most useful habit in the subject and it costs ten seconds. Say the state ' +
           'out loud, count how many there are, count how many predecessors each one reads, and multiply. ' +
           'That product is the running time, the memory (before any reduction) and a correctness argument ' +
@@ -76,6 +82,9 @@
         term: 'The state is the design; the recurrence follows',
         plain: 'Almost all the difficulty is in choosing what to remember, not in writing the transition.',
         formal: 'a state must be a sufficient statistic: everything the future depends on and nothing else',
+        readAs: 'A state has to carry every piece of the past that still affects what happens next, and ' +
+          'nothing more. Too little and the recurrence is wrong; too much and the table is larger than ' +
+          'it needs to be.',
         detail: 'A state has to carry exactly the information the remaining decisions depend on. Too little ' +
           'and the recurrence is wrong - it will conflate positions that behave differently. Too much and ' +
           'the state space explodes for no benefit, which is the usual reason a correct DP is unusably slow. ' +
@@ -133,6 +142,8 @@
         term: 'Kadane is a recurrence, not a trick',
         plain: 'Maximum subarray is a one-line DP with the table thrown away.',
         formal: 'dp[i] = max(a[i], dp[i−1] + a[i]); answer = max over i of dp[i]',
+        readAs: 'At each position, either start a fresh run here or extend the previous one — whichever is ' +
+          'larger. The answer is the best value any position reached, not the last one.',
         detail: 'It is taught as a clever scan and it is an ordinary DP whose table happens to be a single ' +
           'variable, because dp[i] depends only on dp[i−1]. Seeing it that way is worth more than memorising ' +
           'it: the same collapse applies to any recurrence with bounded look-back, and recognising when a ' +
@@ -196,6 +207,9 @@
         term: 'Impossible is not a large number',
         plain: 'Report unreachable as null rather than as Infinity or a sentinel.',
         formal: 'the codomain of a min-DP is value ∪ {⊥}, and ⊥ must not be comparable with values',
+        readAs: 'A minimising table holds either a real value or "unreachable" — the ⊥ — and the two must ' +
+          'never be compared. Using a large number for unreachable instead is what makes an impossible ' +
+          'path win a minimum.',
         detail: 'Coin change with an amount no coin combination can make, and jump games where the end is ' +
           'unreachable, both need an answer that is not a number. Using Infinity works inside the recurrence ' +
           'and leaks the moment it is returned: a caller that formats it, sums it or compares it against a ' +
@@ -224,6 +238,8 @@
         term: 'The state is (items considered, capacity left)',
         plain: 'Two axes, two incoming edges per cell, and the complexity falls out of that.',
         formal: 'best[i][c] = max(best[i−1][c], best[i−1][c − w_i] + v_i)',
+        readAs: 'For each item and each capacity, take the better of skipping the item or taking it — and ' +
+          'taking it means looking up the best answer with that much less capacity left.',
         detail: 'Every member of the family is this recurrence with one thing changed. The two edges are ' +
           '"skip item i", which is the cell directly above, and "take item i", which is one row up and ' +
           'w_i columns left. Because there are exactly two, the running time is the number of cells: items ' +
@@ -262,6 +278,9 @@
         term: 'Pseudo-polynomial: polynomial in the wrong input',
         plain: 'O(n·C) is linear in the capacity\'s value and exponential in its number of digits.',
         formal: 'input size is Θ(log C) bits, so Θ(nC) = Θ(n·2^(log C)) is exponential in the input length',
+        readAs: 'The capacity C is written down in about log C digits, so a running time proportional to C is ' +
+          'exponential in how long the input actually is. That is what "pseudo-polynomial" means, and ' +
+          'it is why knapsack is still NP-hard.',
         detail: 'Complexity is measured against the length of the input, and a capacity is written down in ' +
           'about log₂C bits rather than in C of anything. So a table proportional to C grows by a factor of ' +
           'ten each time the capacity gains one decimal digit, while the input file grows by one character. ' +
@@ -274,6 +293,8 @@
         term: 'Binary splitting for bounded counts',
         plain: 'Bundle 1, 2, 4, … copies so any count is a subset of ⌊log₂k⌋+1 bundles.',
         formal: 'every integer in [0, k] is representable as a subset sum of {1, 2, 4, …, k − 2^m + 1}',
+        readAs: 'Any count up to k can be built from powers of two plus one remainder, so an item available k ' +
+          'times can be replaced by about log k items. That turns a bounded knapsack into a 0/1 one.',
         detail: 'Expanding forty copies of an item into forty 0/1 items is correct and pays forty times over. ' +
           'Binary splitting bundles them into powers of two plus a remainder, which is enough to represent ' +
           'every achievable count exactly - so the answer does not change and the item list shrinks ' +
@@ -286,6 +307,9 @@
         term: 'The monotonic queue removes the count entirely',
         plain: 'Cells sharing a residue modulo the weight form a chain, and the best predecessor is a sliding maximum.',
         formal: 'for fixed w, {c : c ≡ r mod w} is a chain in which the transition is a window maximum of width k',
+        readAs: 'Capacities that leave the same remainder when divided by the item weight form an independent ' +
+          'chain, and along each chain the recurrence is a sliding-window maximum. That is what removes ' +
+          'a factor of k.',
         detail: 'This is the point at which bounded knapsack stops depending on the copy count at all. For ' +
           'one item, only cells whose capacities differ by multiples of its weight can reach each other, so ' +
           'the table decomposes into independent chains; within a chain, "the best of the previous k ' +
@@ -311,6 +335,8 @@
         term: 'Verify the set, not the number',
         plain: 'Recompute the weight and value of whatever was returned, every time.',
         formal: 'assert Σw(chosen) ≤ C and Σv(chosen) = reported value',
+        readAs: 'Two checks on the reconstructed answer: the chosen items really do fit, and their values ' +
+          'really do add up to the number reported. A traceback bug fails one or the other.',
         detail: 'A knapsack solver has two outputs and only one of them can be checked cheaply against the ' +
           'problem statement. The value is a bare number; the chosen set can be re-summed in three lines, ' +
           'and that check catches a traceback walked over a reduced table, an off-by-one in the decision ' +
@@ -326,6 +352,9 @@
         term: 'Three predecessors, three operations',
         plain: 'Each cell is the cheapest of substitute, insert and remove.',
         formal: 'd[i][j] = min(d[i−1][j−1] + sub, d[i−1][j] + del, d[i][j−1] + ins)',
+        readAs: 'Each cell of the edit table is the cheapest of three moves: substitute (diagonal), delete ' +
+          '(from above), or insert (from the left). The cost of substituting is 0 when the characters ' +
+          'already match.',
         detail: 'Edit distance is the two-dimensional DP everything else in the family varies. The diagonal ' +
           'edge lines two characters up and costs nothing when they match; the two orthogonal edges each ' +
           'consume one character against a gap. Because there are three edges and (m+1)(n+1) cells, the ' +
@@ -351,6 +380,9 @@
         term: 'Two rows keep the distance and lose the alignment',
         plain: 'The recurrence only reads the previous row, so one row is enough - for the number only.',
         formal: 'Θ(min(m, n)) space computes d, but the traceback needs the full Θ(mn) table',
+        readAs: 'You can find the distance while holding only one row, but recovering the actual alignment ' +
+          'needs the whole grid — unless you use the divide-and-conquer trick, which is what the next ' +
+          'concept is for.',
         detail: 'This is the temptation the section is built around, because it is a three-line change that ' +
           'keeps every distance test passing. The traceback walks backwards through cells that have been ' +
           'overwritten, so code left in place after the reduction produces something shaped like an ' +
@@ -364,6 +396,9 @@
         term: "Hirschberg's algorithm: both, for twice the time",
         plain: 'Find where the optimal alignment crosses the midpoint, then recurse on the two halves.',
         formal: 'split a at m/2; the crossing column j minimises forward(j) + backward(n − j); recurse',
+        readAs: 'Hirschberg\'s method: compute one row forward from the top and one backward from the bottom, ' +
+          'find where they meet most cheaply, and recurse on the two halves. Linear space, twice the ' +
+          'time.',
         detail: 'The row-only computation gives the distance from every prefix of one string to all of the ' +
           'other. Run it forwards on the top half and backwards on the bottom half, and the column ' +
           'minimising the sum is where the optimal alignment passes through the middle row. That splits the ' +
@@ -389,6 +424,8 @@
         term: 'LCS is edit distance with substitution forbidden',
         plain: 'Take away the diagonal-on-mismatch edge and the same table computes a diff.',
         formal: 'lcs[i][j] = a_i = b_j ? lcs[i−1][j−1] + 1 : max(lcs[i−1][j], lcs[i][j−1])',
+        readAs: 'If the two characters match, extend the diagonal answer by one; if they do not, take the ' +
+          'better of dropping one character from either string.',
         detail: 'This is why `git diff` and spell-checking are the same algorithm with different costs. A ' +
           'diff cannot substitute a line - it can only add or remove - so the diagonal edge is available ' +
           'only on a match, and everything not in the longest common subsequence is either an addition or a ' +
@@ -413,6 +450,9 @@
         term: 'Affine gaps need three tables',
         plain: '"Am I already inside a gap" is state, so it belongs in the state.',
         formal: 'M, X and Y for aligned, gap-in-b and gap-in-a; a run of k costs open + k·extend',
+        readAs: 'Three tables instead of one, so the algorithm knows whether it is currently inside a gap. ' +
+          'That is what lets a long gap cost an opening fee plus a small charge per position, rather ' +
+          'than a full charge for each — which is what biology actually needs.',
         detail: 'With a linear penalty, k gaps cost k·g however they are arranged, so the aligner has no ' +
           'reason to keep them together and produces alignments shredded into single-character holes - which ' +
           'is biologically and textually wrong, because real indels are contiguous. Charging once to open a ' +
