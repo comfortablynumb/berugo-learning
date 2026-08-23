@@ -171,11 +171,11 @@
 
   function update(app) {
     const values = panel.values();
-    const key = values['tr-scene'] + '|' + values['tr-points'] + '|' + values['tr-flips'];
+    const key = values['tg-set'] + '|' + values['tg-points'] + '|' + values['tg-flips'];
     const state = meshFor(key);
 
-    paintMetrics(state, values['tr-mode'], values['tr-polygon']);
-    paintScene(state, values['tr-mode'], values['tr-polygon']);
+    paintMetrics(state, values['tg-mode'], values['tg-polygon']);
+    paintScene(state, values['tg-mode'], values['tg-polygon']);
     paintCompare(state);
     paintHistogram(histogramFor(key), app);
     paintEars(allEarsFor(''));
@@ -185,33 +185,33 @@
     if (mode === 'ear-clipping') {
       const ears = earsFor(polygonName);
       root.MetricGrid.update({
-        'tr-triangles': { value: root.Format.exact(ears.clipped.triangles.length),
+        'tg-triangles': { value: root.Format.exact(ears.clipped.triangles.length),
           note: 'expected ' + root.Format.exact(ears.clipped.expected) + ' for ' +
             root.Format.exact(ears.ring.length) + ' vertices' },
-        'tr-empty': { value: 'not applicable',
+        'tg-empty': { value: 'not applicable',
           note: 'ear clipping makes no claim about circumcircles' },
-        'tr-minangle': { value: root.Format.fixed(
+        'tg-minangle': { value: root.Format.fixed(
           root.Triangulation.angleProfile(ears.clipped.ring, ears.clipped.triangles).minimum, 2) + '°',
         note: 'any valid triangulation is acceptable here' },
-        'tr-work': { value: root.Format.exact(ears.stats.earTests),
+        'tg-work': { value: root.Format.exact(ears.stats.earTests),
           note: 'ear tests, each scanning the remaining vertices' }
       });
       return;
     }
 
     root.MetricGrid.update({
-      'tr-triangles': { value: root.Format.exact(state.mesh.triangles.length),
+      'tg-triangles': { value: root.Format.exact(state.mesh.triangles.length),
         note: 'over ' + root.Format.exact(state.mesh.points.length) + ' distinct points' },
-      'tr-empty': { value: root.Format.exact(state.check.violations.length),
+      'tg-empty': { value: root.Format.exact(state.check.violations.length),
         note: state.check.ok ? 'every triangle checked against every vertex'
           : 'the empty-circle property does NOT hold' },
       /* The MEAN smallest angle is the number that moves. The single worst
          triangle often survives the flips untouched, so quoting the minimum
          alone makes the two meshes look identical when they are not. */
-      'tr-minangle': { value: root.Format.fixed(state.angles.minimum, 2) + '°',
+      'tg-minangle': { value: root.Format.fixed(state.angles.minimum, 2) + '°',
         note: 'mean smallest angle ' + root.Format.fixed(state.angles.mean, 2) +
           '°, against ' + root.Format.fixed(state.fanAngles.mean, 2) + '° after the flips' },
-      'tr-work': { value: root.Format.exact(state.stats.orient + state.stats.inCircle),
+      'tg-work': { value: root.Format.exact(state.stats.orient + state.stats.inCircle),
         note: root.Format.exact(state.stats.inCircleExact + state.stats.orientExact) +
           ' needed exact arithmetic' }
     });
@@ -223,7 +223,7 @@
   }
 
   function drawScene(state, mode, polygonName) {
-    const host = root.jQuery('#tr-scene')[0];
+    const host = root.jQuery('#tg-scene')[0];
     if (!host) return;
 
     if (mode === 'ear-clipping') return drawEars(host, earsFor(polygonName));
@@ -243,7 +243,7 @@
       ariaLabel: 'polygon cut into triangles by ear clipping'
     });
 
-    root.Helpers.setText('tr-scene-note',
+    root.Helpers.setText('tg-scene-note',
       'Orange vertices are the ears, in the order they were cut. ' +
       root.Format.exact(ears.clipped.triangles.length) + ' triangles from ' +
       root.Format.exact(ears.ring.length) + ' vertices — always two fewer than the vertex count — ' +
@@ -273,7 +273,7 @@
       ariaLabel: 'Delaunay triangulation with one circumcircle drawn'
     });
 
-    root.Helpers.setText('tr-scene-note',
+    root.Helpers.setText('tg-scene-note',
       'One triangle\'s circumcircle is drawn. The empty-circle property says no other vertex may ' +
       'lie inside it, and the check runs that test for every triangle against every vertex: ' +
       root.Format.exact(state.check.violations.length) + ' violations over ' +
@@ -290,7 +290,7 @@
         angles: state.fanAngles, violations: state.fanCheck.violations.length }
     ];
 
-    root.jQuery('#tr-compare tbody').html(rows.map(function (row) {
+    root.jQuery('#tg-compare tbody').html(rows.map(function (row) {
       return '<tr><td>' + row.name + '</td><td>' + root.Format.exact(row.triangles) + '</td><td>' +
         root.Format.fixed(row.angles.minimum, 2) + '°</td><td>' +
         root.Format.fixed(row.angles.mean, 2) + '°</td><td>' +
@@ -298,7 +298,7 @@
         root.Format.exact(row.violations) + '</td></tr>';
     }).join(''));
 
-    root.Helpers.setText('tr-compare-note',
+    root.Helpers.setText('tg-compare-note',
       'The second row is the first one with some of its diagonals flipped. Flipping a convex ' +
       'quadrilateral is always legal, so both rows have the identical vertices, the identical ' +
       'covered region and the identical triangle count — the only thing that changed is which ' +
@@ -311,7 +311,7 @@
   }
 
   function paintHistogram(bins, app) {
-    const host = root.jQuery('#tr-chart')[0];
+    const host = root.jQuery('#tg-chart')[0];
     if (!host) return;
 
     root.GrowthPlot.render(host, {
@@ -323,12 +323,12 @@
       ],
       xLabel: 'smallest angle in the triangle, degrees',
       yLabel: 'triangles',
-      legendHost: root.jQuery('#tr-legend')[0],
+      legendHost: root.jQuery('#tg-legend')[0],
       ariaLabel: 'distribution of smallest angles for both triangulations'
     });
 
     const worstBin = bins[0];
-    root.Helpers.setText('tr-chart-note',
+    root.Helpers.setText('tg-chart-note',
       'The first bucket is triangles whose smallest angle is under ten degrees — the ones that ' +
       'ruin an interpolation. Delaunay puts ' + root.Format.exact(worstBin.delaunay) + ' triangles ' +
       'there and the flipped mesh puts ' + root.Format.exact(worstBin.fan) + '. Delaunay does not ' +
@@ -337,14 +337,14 @@
   }
 
   function paintEars(rows) {
-    root.jQuery('#tr-ears tbody').html(rows.map(function (row) {
+    root.jQuery('#tg-ears tbody').html(rows.map(function (row) {
       return '<tr><td>' + row.name + '</td><td>' + root.Format.exact(row.vertices) + '</td><td>' +
         root.Format.exact(row.triangles) + '</td><td>' + root.Format.exact(row.expected) +
         '</td><td>' + root.Format.exact(row.earTests) + '</td><td>' +
         root.Format.fixed(100 * row.preserved, 2) + '%</td></tr>';
     }).join(''));
 
-    root.Helpers.setText('tr-ears-note',
+    root.Helpers.setText('tg-ears-note',
       'The triangle count is always vertices minus two, whatever the shape — that is a theorem, ' +
       'not a coincidence, and a run that produces a different number has failed. What the shape ' +
       'changes is the ear tests: a convex polygon finds an ear at the first vertex every time, ' +
