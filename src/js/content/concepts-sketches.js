@@ -10,6 +10,9 @@
         term: 'A clear bit is proof; a set bit is not',
         plain: 'No false negatives ever, because every bit a key sets stays set.',
         formal: 'x ∈ S ⇒ has(x) = true; has(x) = true ⇏ x ∈ S',
+        readAs: 'If the key really is in the set the filter always says yes — no false negatives, ever. The ' +
+          'reverse does not follow: a yes does not prove membership, and ⇏ is exactly that "does not ' +
+          'imply".',
         detail: 'The asymmetry is the entire structure. Adding a key only ever turns bits on, so if any ' +
           'of the k bits a key tests is clear, that key was definitely never added — the filter has ' +
           'found positive evidence of absence. A set bit carries no such evidence, because any of the ' +
@@ -22,6 +25,9 @@
         term: 'The sizing formula',
         plain: 'm = −n ln p / (ln 2)² bits and k = (m/n) ln 2 hashes, for n keys at error p.',
         formal: 'm/n = −log₂ p / ln 2 = 1.4427 · log₂(1/p)',
+        readAs: 'Bits per key, given the false-positive rate p you want. About 1.44 bits for every halving of ' +
+          'the rate — so 1% costs roughly 9.6 bits per key and 0.1% costs 14.4, whatever the key ' +
+          'actually is.',
         detail: 'Bits per key depends only on the target error rate, never on the keys themselves: a ' +
           '1% filter costs 9.59 bits per key whether the keys are three characters or three kilobytes, ' +
           'because only a hash of each key is ever consulted. That is what makes the structure so ' +
@@ -34,6 +40,9 @@
         term: 'k is a compromise, not a maximum',
         plain: 'More hashes set more bits; the optimum balances the two effects.',
         formal: 'k* = (m/n) ln 2, at which exactly half the bits are set',
+        readAs: 'The best number of hash functions is the bits-per-key figure times the natural log of 2, ' +
+          'about 0.693. At that setting exactly half the bit array ends up set — which is the point of ' +
+          'maximum information per bit.',
         detail: 'Raising k gives a query more chances to find a clear bit, which lowers the error; it ' +
           'also fills the array faster, which raises it. The two curves cross at k = (m/n) ln 2, and ' +
           'that is precisely the k at which half the array is set — a memorable check, because a ' +
@@ -58,6 +67,9 @@
         term: 'The error grows past n with no signal',
         plain: 'Nothing happens when the filter passes the n it was sized for; the curve just continues.',
         formal: 'fpr(n) = (1 − e^(−kn/m))^k, monotonically increasing and continuous at the sizing point',
+        readAs: 'The chance of a false positive after n insertions: one minus the chance a given bit is still ' +
+          'clear, raised to the power of the number of hashes. It only ever rises as you add keys, ' +
+          'which is why a filter has a capacity rather than a load factor.',
         detail: 'A filter sized for 10 000 keys at 1% measures 1.010% at 10 000, 5.82% at 15 000 and ' +
           '16.05% at 20 000. There is no discontinuity, no counter that crosses a line and no way for ' +
           'the filter to notice: the predicted and measured curves agree the whole way, which is ' +
@@ -82,6 +94,9 @@
         term: 'Union is exact; intersection is not',
         plain: 'Bitwise OR of two same-shaped filters is the filter of the union. Bitwise AND is not the filter of the intersection.',
         formal: 'A ∪ B: exact. A ∩ B: may report keys in neither set.',
+        readAs: 'Bitwise OR of two filters gives exactly the filter of the combined set. Bitwise AND does not ' +
+          'give the intersection: a key can set its bits from A in one place and from B in another, and ' +
+          'the AND keeps both.',
         detail: 'OR works because a key\'s bits are set in the result exactly when they were set on ' +
           'either side, which is what the union means. AND fails because a key absent from both sets ' +
           'may still have each of its bits covered — bit 3 by a key on the left, bit 9 by a different ' +
@@ -94,6 +109,8 @@
         term: 'The filter can estimate its own load',
         plain: 'The fraction of set bits gives back an estimate of how many keys went in.',
         formal: 'n̂ = −(m/k) · ln(1 − fill)',
+        readAs: 'Estimate how many keys went in by looking at how full the bit array is. The hat on the n ' +
+          'means "estimated", and the logarithm inverts the filling curve.',
         detail: 'Counting the set bits and inverting the fill formula recovers the insert count to ' +
           'within a fraction of a per cent — 99 905 recovered from a filter holding 100 000 keys. ' +
           'It is not a substitute for the counter, because it needs a full scan of the array and it ' +
@@ -120,6 +137,9 @@
         term: 'A saturated counter is permanent',
         plain: 'A counter at its ceiling can never be decremented again without risking a false negative.',
         formal: 'c = 2^b − 1 ⇒ c is frozen for the life of the filter',
+        readAs: 'A counter with b bits saturates at its maximum value, and once there it can never be ' +
+          'decremented safely — you no longer know how many increments it swallowed. That slot is ' +
+          'permanently stuck.',
         detail: 'Once a 4-bit counter reaches 15 it has lost track of how many keys it really ' +
           'represents, so decrementing it could take it below the true count and make a live key ' +
           'vanish. The correct behaviour is to freeze it, and the cost is that the filter slowly ' +
@@ -168,6 +188,9 @@
         term: 'Layers for an unknown n',
         plain: 'When the newest layer fills, add a larger one with a tighter target in front of it.',
         formal: 'layer i: capacity n₀·s^i, target p·r^i',
+        readAs: 'Each layer of a scalable filter is s times bigger than the last and aims at r times the ' +
+          'accuracy, so the sizes grow geometrically while the error rates shrink geometrically — and ' +
+          'the total error stays bounded.',
         detail: 'The whole difficulty with a Bloom filter is that the sizing needs an n, and a ' +
           'scalable filter is the answer when that number is genuinely unknowable. Each new layer is ' +
           'sized larger and aims lower, so the errors form a geometric series and their sum stays ' +
@@ -180,6 +203,8 @@
         term: 'The chain is paid for on the miss path',
         plain: 'A "yes" can stop at the first layer that matches; a "no" must consult every layer.',
         formal: 'cost(miss) = Σ over layers of k_i probes',
+        readAs: 'A key that is absent has to be ruled out by every layer, so a miss costs the sum of all ' +
+          'their probe counts. Hits are cheap and misses get steadily dearer as layers accumulate.',
         detail: 'The layers are searched in order and a hit short-circuits, but the negative answer — ' +
           'which is the answer a filter exists to give quickly — has to prove absence in all of them. ' +
           'The measured cost is 9.11 cache lines per query against the standard filter\'s 6.95, and ' +
@@ -208,6 +233,9 @@
         term: 'A fingerprint, not a set of bits',
         plain: 'Store f bits derived from the key, so a delete can remove the fingerprint again.',
         formal: 'fpr ≈ 1 − (1 − 2^−f)^(2b·α) ≈ 2bα/2^f',
+        readAs: 'For a cuckoo filter the error rate is set by the fingerprint length f: roughly the number of ' +
+          'fingerprints you compare against, divided by 2 to the power f. Each extra fingerprint bit ' +
+          'halves the rate.',
         detail: 'Bloom filters cannot delete because the bits are shared and unattributable. A ' +
           'fingerprint is a single object, so removing it removes exactly what one key put there — ' +
           'subject to the caveat that two keys with the same fingerprint in the same bucket are ' +
@@ -220,6 +248,9 @@
         term: 'Partial-key cuckoo hashing',
         plain: 'The alternative bucket is the first XOR a hash of the fingerprint.',
         formal: 'i₂ = i₁ ⊕ h(f), which is its own inverse',
+        readAs: 'The second bucket is the first XORed with a hash of the fingerprint. XOR undoes itself, so ' +
+          'from either bucket you can compute the other using only the fingerprint — which is what ' +
+          'makes eviction possible without ever storing the key.',
         detail: 'Ordinary cuckoo hashing recomputes both candidate positions from the key, and a ' +
           'filter has thrown the key away. The trick is to derive the second bucket from the first ' +
           'and the *fingerprint*, using XOR so that applying it again returns the original: from ' +
@@ -280,6 +311,9 @@
         term: 'Quotient and remainder',
         plain: 'Split the fingerprint: the quotient is the slot, the remainder is what gets stored.',
         formal: 'fingerprint = q·2^r + rem, with three metadata bits per slot',
+        readAs: 'Split the fingerprint in two: the top part q picks the slot, and the remainder r bits are ' +
+          'what gets stored there. Three metadata bits per slot record how the runs that collide are ' +
+          'laid out.',
         detail: 'A quotient filter stores only the remainder, and recovers the quotient from *where* ' +
           'the remainder sits — which is a saving of q bits per item, paid for with three metadata ' +
           'bits. is_occupied marks a slot as some fingerprint\'s canonical home, is_continuation ' +
@@ -292,6 +326,9 @@
         term: 'The sorted read-out is why it merges',
         plain: 'Slots can be walked in ascending fingerprint order in one pass, so two filters merge like two sorted lists.',
         formal: 'merge: q → q + 1, r → r − 1, p unchanged, no key consulted',
+        readAs: 'Doubling a quotient filter moves one bit from the stored remainder into the slot index. The ' +
+          'total fingerprint length p is unchanged and no original key is needed, which is why a ' +
+          'quotient filter can resize and a Bloom filter cannot.',
         detail: 'Because runs are ordered by quotient and remainders are sorted within a run, a ' +
           'linear scan of the table produces every stored fingerprint in ascending order. Two such ' +
           'streams merge in one pass into a filter with one more quotient bit and one fewer ' +

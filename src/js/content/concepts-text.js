@@ -10,6 +10,9 @@
         term: 'One node per distinct prefix',
         plain: 'Every node is a prefix of at least one key, and every prefix of a key is a node.',
         formal: 'nodes = |{ p : p is a prefix of some key }|',
+        readAs: 'The trie holds one node per distinct prefix of any key. The outer bars mean "how many", the ' +
+          'braces are a set, and the colon reads "such that" — so the whole line is "the count of ' +
+          'strings p such that p is a prefix of some key".',
         detail: 'This is the whole data structure stated once, and every property follows from it. ' +
           'The node count is the number of distinct prefixes, not the number of keys and not the ' +
           'number of characters: 883 English words hold 4 732 characters between them and produce ' +
@@ -23,6 +26,9 @@
         term: 'Terminal markers, not sentinels',
         plain: 'A node is a key when it carries a terminal flag, not when it is a leaf.',
         formal: 'key(node) ⇔ node.terminal',
+        readAs: 'A node stores a key exactly when it is marked terminal. Both directions matter: an unmarked ' +
+          'node is a waypoint even if it spells a real word, and a marked node is a key even if it has ' +
+          'children below it.',
         detail: 'The alternative is to append a sentinel character to every key so that keys always ' +
           'end at leaves. It works and it costs a node per key: "an" and "ant" become "an$" and ' +
           '"ant$", which share only "an" and need two extra nodes where a terminal flag needs one ' +
@@ -35,6 +41,9 @@
         term: 'The prefix query is the point',
         plain: 'Every key under a prefix is the subtree below the prefix node, in sorted order.',
         formal: 'withPrefix(p) costs |p| + |answer|, independent of the dictionary size',
+        readAs: 'A prefix query costs the length of the prefix to walk down, plus the size of what it returns ' +
+          'to collect. The bars mean length. Nothing in that depends on how many keys the trie holds, ' +
+          'which is what a hash table cannot match.',
         detail: 'This is the query a hash table cannot answer at all, because hashing deliberately ' +
           'destroys the ordering it needs. A hash table asked for every key beginning with "con" ' +
           'has to test all 883 keys; the trie walks three nodes and then enumerates a subtree of ' +
@@ -73,6 +82,9 @@
         term: 'The alphabet tax',
         plain: 'An alphabet-sized node wastes a slot for every symbol the node does not use.',
         formal: 'waste = (|Σ| − children) / |Σ|',
+        readAs: 'How much of an array-per-node is empty: the alphabet size minus the children actually ' +
+          'present, over the alphabet size. Σ here is the alphabet, not a sum, and the bars are its ' +
+          'size.',
         detail: 'A 256-slot node is the natural choice for arbitrary bytes and it is the wrong one ' +
           'almost always, because fan-out is not uniform: a DNA sequence uses 4 of those 256 slots, ' +
           'which is 98% waste per node, and even English text leaves most nodes with a handful of ' +
@@ -112,6 +124,9 @@
         term: 'A node only where the keys branch',
         plain: 'Collapse every non-branching chain into one edge carrying a substring.',
         formal: 'nodes ≤ 2k − 1 for k keys, whatever the key length',
+        readAs: 'A compressed trie over k keys has at most 2k − 1 nodes, no matter how long the keys are — ' +
+          'because every internal node has at least two children, and a binary tree with k leaves has ' +
+          'fewer than k internal nodes.',
         detail: 'A plain trie\'s node count is bounded by the total number of characters; a radix ' +
           'trie\'s is bounded by the number of keys, because a node exists only where the key set ' +
           'branches or a key ends. That bound is independent of key length, which is the whole ' +
@@ -136,6 +151,8 @@
         term: 'The split is the whole algorithm',
         plain: 'When a key and an edge agree for a while and then differ, the edge becomes two.',
         formal: 'edge → head(shared) + tail(rest), new leaf under head',
+        readAs: 'Splitting an edge means cutting it into the part the new key shares and the part it does ' +
+          'not, then hanging the new leaf off the join. The arrow is "becomes".',
         detail: 'Insertion has three cases and only this one is interesting. The shared part becomes ' +
           'a new internal node, the old child keeps the remainder of its label and hangs below it, ' +
           'and the incoming key hangs beside it. The case that gets written wrong is the one where ' +
@@ -173,7 +190,7 @@
       {
         term: 'Adaptive node sizes',
         plain: 'Choose the child layout by fan-out: a small list for few children, an array for many.',
-        formal: 'node4 · node16 · node48 · node256',
+        formal: 'node4; node16; node48; node256',
         detail: 'Fan-out is not uniform, and over 400 English words 94.5% of the radix nodes have ' +
           'four children or fewer. Sizing every node for the maximum therefore wastes almost all of ' +
           'the memory, and sizing them all as maps costs an indirection on the hot path. ART picks ' +
@@ -186,6 +203,8 @@
         term: 'Over-allocation is the price',
         plain: 'A node4 holds four slots whether it uses one or four.',
         formal: 'bytes = header + label + capacity(class) × slot',
+        readAs: 'What one adaptive node costs: its header, its edge label, and the slots its size class ' +
+          'reserves multiplied by the slot width. Growing a node means moving to the next class up.',
         detail: 'The adaptive scheme trades a little waste for a lot of locality, and on a small ' +
           'key set the trade can go the wrong way — a map node holding one child costs one entry ' +
           'where a node4 costs four slots. That is worth stating rather than hiding, because it ' +
@@ -214,6 +233,8 @@
         term: 'Three pointers, whatever the alphabet',
         plain: 'A ternary node holds one symbol and lo/eq/hi pointers, so the alphabet costs nothing.',
         formal: 'node = { symbol, terminal, lo, eq, hi }',
+        readAs: 'A ternary trie node holds one character and three pointers: go to lo if the query character ' +
+          'is smaller, hi if larger, and eq to advance to the next character. Only eq consumes input.',
         detail: 'The ternary search tree is the compromise between a map node and an array node: no ' +
           'per-symbol slot, no hash per step, a fixed three pointers per node. A search compares ' +
           'the current query character against the node symbol and goes left, right or — on a match ' +
@@ -251,6 +272,9 @@
         term: 'Sharing suffixes as well as prefixes',
         plain: 'A DAWG merges keys that end the same way, not only keys that start the same way.',
         formal: 'states = |{ equivalence classes of remaining-suffix sets }|',
+        readAs: 'A DAWG has one state per group of positions that have the same set of continuations. Two ' +
+          'prefixes that can be completed in identical ways are the same state, which is what lets the ' +
+          'structure share the tails of words.',
         detail: 'A trie merges "walking" and "talking" up to the point they differ and then keeps two ' +
           'separate copies of "king". A DAWG notices that the two subtrees accept the same language ' +
           'and makes them one state. That turns the tree into a DAG, and over an English word list ' +
@@ -289,6 +313,9 @@
         term: 'A DAG has many paths to one state',
         plain: 'Enumerating the language must memoise on the path, never on the state.',
         formal: 'words(s) = Σ over incoming paths, not a property of s alone',
+        readAs: 'How many words pass through a state is a total over every path that reaches it, so you ' +
+          'cannot read it off the state itself. That is the difference between a trie, where each node ' +
+          'has one parent, and a DAWG, where it may have many.',
         detail: 'In a trie every node is reached by exactly one string, so a traversal can carry the ' +
           'spelling and a visited-set on nodes is harmless. In a DAWG a state is reached by many ' +
           'strings — that is the compression — so marking a state visited drops every word that ' +

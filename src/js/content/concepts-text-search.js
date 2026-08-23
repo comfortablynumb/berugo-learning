@@ -10,6 +10,8 @@
         term: 'The last column of the sorted rotations',
         plain: 'Sort every rotation of the text and take the final character of each.',
         formal: 'bwt[i] = T[(sa[i] − 1) mod n]',
+        readAs: 'Row i of the transform is the character just before the i-th smallest suffix, wrapping round ' +
+          'to the end of the text when that suffix starts at position 0. The mod is that wrap-around.',
         detail: 'That is the definition, and no implementation uses it — building the matrix costs ' +
           'n² characters. The suffix array gives the same column directly: row i of the sorted ' +
           'rotation matrix is the suffix starting at sa[i], so its last character is the one just ' +
@@ -23,6 +25,9 @@
         term: 'The LF mapping',
         plain: 'The i-th occurrence of a character in the last column is the i-th in the first.',
         formal: 'LF(row) = C[bwt[row]] + rank(bwt[row], row)',
+        readAs: 'To step backwards one character: take the character in this row, look up where its block of ' +
+          'rows begins, and add how many times that character has appeared above. It lands you on the ' +
+          'row for the previous position, which is the whole trick of the index.',
         detail: 'This is why a transform that looks destructive is reversible. Rotations beginning ' +
           'with the same character sort together, and among those the order is decided by what ' +
           'follows — which is exactly the order in which those characters appear in the last column ' +
@@ -47,6 +52,9 @@
         term: 'Runs are where the compression comes from',
         plain: 'The transform groups equal characters, and repetitive text groups hardest.',
         formal: 'runs(bwt) ≪ n for structured text; ≈ n for random text',
+        readAs: 'On real text the transform collapses into far fewer runs of repeated characters than there ' +
+          'are characters — the ≪ is "much less than" — which is what makes it compressible. On random ' +
+          'data it does not, and the index gives you nothing.',
         detail: 'Rotations that begin the same way sort together, so the characters that preceded ' +
           'those contexts land next to one another. In English "he" is usually preceded by "t", so ' +
           'the block of rows beginning "he" contributes a run of t\'s. That is the entire ' +
@@ -59,6 +67,9 @@
         term: 'Backward search',
         plain: 'Read the pattern right to left, narrowing the suffix-array range as you go.',
         formal: 'first = C[c] + rank(c, first); last = C[c] + rank(c, last)',
+        readAs: 'Extending a search by one character to the left narrows the row range: both ends are ' +
+          'remapped by the same rule, so the range either shrinks or becomes empty. Empty means the ' +
+          'pattern is not in the text.',
         detail: 'The range being maintained is the set of rows whose suffix begins with the part of ' +
           'the pattern read so far. Prepending a character to that pattern maps the range through ' +
           'LF, which is two rank queries and two table lookups — independent of the text length and ' +
@@ -71,6 +82,9 @@
         term: 'Rank is the whole cost',
         plain: 'Everything above is two rank queries per character, so rank decides the performance.',
         formal: 'rank(c, i) = occurrences of c in bwt[0 … i)',
+        readAs: 'How many times character c appears in the rows above row i, not counting row i itself — the ' +
+          'round bracket at the end excludes it. Answering this quickly is what the checkpoints are ' +
+          'for.',
         detail: 'A rank query answered by scanning is O(n) and costs no space; answered from a full ' +
           'table it is O(1) and costs |Σ|·n integers. The practical answer is checkpoints every B ' +
           'positions plus a short scan, which is O(B) time and |Σ|·n/B space — one dial with the ' +
@@ -110,6 +124,8 @@
         term: 'Term to sorted document list',
         plain: 'Invert the document-to-terms map, and keep each posting list sorted by id.',
         formal: 'postings[t] = sorted [ d : t ∈ d ]',
+        readAs: 'Every term maps to the sorted list of documents containing it. The colon reads "such that", ' +
+          'and sorted is not a detail — it is what makes two lists intersectable in one pass.',
         detail: 'The structure takes one sentence and the engineering takes a career, which is worth ' +
           'saying plainly. Sorted order is not incidental: it makes an AND query a merge rather ' +
           'than a set intersection, it makes gaps small enough to compress, and it lets a query ' +
@@ -133,6 +149,8 @@
         term: 'Galloping search',
         plain: 'Probe 1, 2, 4, 8 … positions ahead, then binary-search the bracket you overshot.',
         formal: 'O(m log(n/m)) for lists of length m ≪ n',
+        readAs: 'Intersecting a short list of length m against a much longer one of length n costs about m ' +
+          'galloping searches, each log of the ratio between the two. Far better than reading all n.',
         detail: 'A linear merge costs the sum of the list lengths whatever their shapes, which is ' +
           'wasteful when one list is rare and one is common — the common list is walked in full to ' +
           'find a handful of matches. Galloping finds each target in the long list in logarithmic ' +
@@ -157,6 +175,8 @@
         term: 'Gaps, not ids',
         plain: 'Store the difference between consecutive postings, because differences are small.',
         formal: 'gap[i] = id[i] − id[i − 1], with gap[0] = id[0]',
+        readAs: 'Store the difference from the previous id rather than the id itself. Because the list is ' +
+          'sorted the gaps are small positive numbers, and small numbers compress.',
         detail: 'A raw document id needs 32 bits whatever the corpus. The gap between consecutive ' +
           'postings of a common term is small — a term in half the documents has an average gap of ' +
           '2 — and small numbers can be coded in far fewer bits. That makes the compression ratio a ' +
@@ -208,6 +228,10 @@
         term: 'The triangle inequality does the pruning',
         plain: 'If the query is distance d from a node, only children keyed d − k … d + k can match.',
         formal: 'd(q, c) ≥ |d(q, n) − d(n, c)|',
+        readAs: 'The triangle inequality, rearranged: the distance from the query to a candidate is at least ' +
+          'the gap between their two distances to any node you have already measured. The bars are ' +
+          'absolute value — sign discarded — and that inequality is what lets you skip a subtree ' +
+          'without looking in it.',
         detail: 'A BK-tree keys each child by its distance to its parent, and the triangle inequality ' +
           'turns that key into a bound: a child at distance j from the node cannot be closer than ' +
           '|d − j| to a query at distance d, so subtrees outside the window are provably empty and ' +
@@ -232,6 +256,8 @@
         term: 'A Levenshtein automaton carries the DP row',
         plain: 'Walk the dictionary trie with the dynamic-programming row as the state.',
         formal: 'row_{next}[i] = min(row_next[i−1] + 1, row[i] + 1, row[i−1] + cost)',
+        readAs: 'Each cell of the edit-distance table is the cheapest of three moves: insert, delete, or ' +
+          'substitute. cost is 0 when the two characters match and 1 when they do not.',
         detail: 'The classical construction builds an explicit DFA for "within k edits of this ' +
           'query" and intersects it with the dictionary. Carrying the DP row down the trie is the ' +
           'same machine with its state written out rather than numbered, and it is far easier to ' +
@@ -244,6 +270,8 @@
         term: 'Exactness is a property worth measuring',
         plain: 'Two of the three back-ends return every match; one returns a subset.',
         formal: 'recall = |returned ∩ correct| / |correct|',
+        readAs: 'Of the answers that were genuinely correct, what fraction did you return? The ∩ is the ' +
+          'overlap of the two sets and the bars are "how many".',
         detail: 'A fuzzy search that returns 30% of the matches looks exactly like one that returns ' +
           'all of them: the results are relevant, the latency is good, and the missing answers are ' +
           'invisible from the outside. The only signal is a user saying "it did not find my thing", ' +
@@ -256,6 +284,9 @@
         term: 'The n-gram threshold is a heuristic',
         plain: 'Requiring enough shared n-grams is fast, and short words within budget may share none.',
         formal: 'threshold ≈ |grams| − 1 − (k − 1)·size',
+        readAs: 'How many q-grams two strings must share to be within k edits: the number in the query, less ' +
+          'one, less the grams each edit can destroy. If it comes out zero or negative the filter ' +
+          'rejects nothing and you are paying for it for no reason.',
         detail: 'Indexing every word by its character n-grams and retrieving those sharing enough of ' +
           'them is the cheapest fuzzy search there is — two orders of magnitude fewer visits than ' +
           'an exact method. The rule for how many is enough is derived from how many n-grams k ' +

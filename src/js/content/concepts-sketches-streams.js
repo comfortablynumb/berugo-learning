@@ -10,6 +10,9 @@
         term: 'The min-hash identity',
         plain: 'For a random permutation, the chance two sets share a minimum is exactly their Jaccard similarity.',
         formal: 'P[min h(A) = min h(B)] = |A ∩ B| / |A ∪ B|',
+        readAs: 'The chance two sets share their smallest hash equals the fraction of their combined elements ' +
+          'that they have in common. That single identity is what turns similarity into something you ' +
+          'can sample.',
         detail: 'Take the union of the two sets and hash every element. The smallest hash in the union ' +
           'belongs to some element, and that element is equally likely to be any of them; the two ' +
           'minima agree exactly when it lies in the intersection. So a single hash is a Bernoulli ' +
@@ -22,6 +25,8 @@
         term: 'Shingling turns a document into a set',
         plain: 'Overlapping k-character or k-word windows, so word order is partly preserved.',
         formal: 'shingles(t, k) = { t[i..i+k) : 0 ≤ i ≤ |t| − k }',
+        readAs: 'Cut the text into every window of k consecutive characters. The square-then-round bracket ' +
+          'means the window includes its start and excludes its end, and the colon reads "such that".',
         detail: 'MinHash compares sets, so the first decision is what the set is, and it is a bigger ' +
           'decision than the sketch parameters. A bag of words treats a reordering as identical; ' +
           'five-character shingles do not, because reordering breaks the windows that spanned the ' +
@@ -34,6 +39,9 @@
         term: 'Banding, and the S-curve',
         plain: 'Split the signature into b bands of r rows; a pair is a candidate if any band matches entirely.',
         formal: 'P[candidate] = 1 − (1 − s^r)^b',
+        readAs: 'With b bands of r rows each, two items become candidates unless every band misses. The shape ' +
+          'of that curve is an S: similar pairs almost always pass, dissimilar ones almost never, and b ' +
+          'and r set where the step falls.',
         detail: 'The curve is flat near zero, rises steeply, and flattens near one — which is exactly ' +
           'the shape a threshold wants, except that it is a probability rather than a cut. Its steep ' +
           'part sits near (1/b)^(1/r), and moving b and r moves it: 16 bands of 8 rows turns at ' +
@@ -58,6 +66,9 @@
         term: 'SimHash answers a different question',
         plain: 'One random hyperplane per output bit; the differing-bit fraction estimates the angle.',
         formal: 'P[bit differs] = θ/π, so cos θ ≈ cos(π · hamming / bits)',
+        readAs: 'For random hyperplane hashes, the chance two signatures differ in a bit is the angle between ' +
+          'the vectors over π. Invert it and the Hamming distance between signatures estimates the ' +
+          'cosine similarity.',
         detail: 'MinHash estimates set overlap and SimHash estimates the angle between weighted ' +
           'vectors, and those rank a corpus differently: two documents can share most of their ' +
           'tokens while emphasising them very differently. SimHash is far cheaper — 8 bytes per ' +
@@ -70,6 +81,9 @@
         term: 'Random projection and Johnson-Lindenstrauss',
         plain: 'A random ±1/√k matrix preserves every pairwise distance to within 1 ± ε, given enough k.',
         formal: 'k ≥ 8 ln n / ε² suffices for n points',
+        readAs: 'The Johnson-Lindenstrauss bound: to keep all pairwise distances within ε for n points you ' +
+          'need only about 8 ln n over ε squared dimensions — a number that depends on how many points ' +
+          'you have, and not at all on how many dimensions they started in.',
         detail: 'The lemma is a worst-case statement over every pair and its constant is generous. ' +
           'For 60 points at ε = 0.3 it asks for 364 dimensions; projecting the same points into 64 ' +
           'measures a worst distortion of 29.95% — just inside the promise — and a mean of 6.68%. So ' +
@@ -82,6 +96,8 @@
         term: 'The estimate is unbiased, unlike count-min',
         plain: 'MinHash straddles the true similarity rather than sitting above it.',
         formal: 'E[estimate] = s, with variance s(1 − s)/L',
+        readAs: 'The estimate is right on average, and its spread shrinks as one over the signature length L. ' +
+          'Longer signatures cost linear time and buy square-root accuracy.',
         detail: 'Every position of the signature is an independent Bernoulli trial for the same ' +
           'probability, so the fraction that agree is an unbiased estimator and the scatter of ' +
           'estimate against truth is centred on the y = x line rather than lying above it. That ' +
@@ -94,6 +110,8 @@
         term: 'The index is the point, not the estimate',
         plain: 'Comparing every pair is quadratic; the band index makes the search sublinear.',
         formal: 'candidates ≪ n(n − 1)/2',
+        readAs: 'The number of pairs actually examined is far smaller than all n(n−1)/2 of them. That gap is ' +
+          'the whole value of the scheme.',
         detail: 'A signature that estimates similarity accurately still needs every pair compared, ' +
           'and at 60 documents that is 1 770 comparisons — at a million it is 5×10¹¹. The band index ' +
           'turns the problem into a hash lookup: documents that share any band bucket are candidates ' +
@@ -109,6 +127,9 @@
         term: 'Exact windowed counting needs Ω(N) bits',
         plain: 'Answering "how many ones in the last N" exactly requires storing the window.',
         formal: 'the algorithm must distinguish all 2^N possible windows',
+        readAs: 'A sliding window of N bits has 2 to the power N possible contents, and telling them apart ' +
+          'exactly needs N bits of state. That is why exact windowed counting cannot be done in less ' +
+          'space, and why the approximate scheme exists.',
         detail: 'The lower bound is an information argument rather than an engineering one: two ' +
           'different windows that the algorithm cannot tell apart will produce the same answer, and ' +
           'since every one of the 2^N windows has a potentially different count, the state must be ' +
@@ -121,6 +142,8 @@
         term: 'DGIM buckets, timestamped by their newest one',
         plain: 'Buckets of size 1, 2, 4, … each stamped with the position of its most recent one.',
         formal: 'at most r buckets of any size, so there are O(log N) buckets',
+        readAs: 'Bucket sizes double as they age and only r of each size are kept, so the whole window is ' +
+          'summarised in a number of buckets that grows like the log of the window length.',
         detail: 'The bucket sizes double because that is what keeps the count logarithmic, and each ' +
           'carries the timestamp of its newest member because that is the one that determines when ' +
           'the whole bucket leaves the window. Only the oldest bucket is ever uncertain — everything ' +
@@ -132,6 +155,9 @@
         term: 'The bucket allowance is one geometric dial',
         plain: 'Allowing r buckets per size bounds the relative error by about 1/2r.',
         formal: 'error ≤ (oldest/2) / total, and the newer buckets sum to at least r(2^j − 1)',
+        readAs: 'The only uncertainty is how much of the oldest bucket is still inside the window, so the ' +
+          'error is at most half of it — and because the newer buckets together are guaranteed large, ' +
+          'that half is a small fraction of the answer.',
         detail: 'The uncertainty is half the oldest bucket, and with r buckets of every smaller size ' +
           'the certain part is at least r times as large — so the ratio is bounded and shrinks ' +
           'linearly in r. That gives a single clean knob rather than a family of algorithms: 2 ' +
@@ -156,6 +182,9 @@
         term: 'Space-saving: nothing starts from zero',
         plain: 'An unmonitored key takes over the smallest counter and inherits its value as a recorded error.',
         formal: 'count ← min + 1, error ← min',
+        readAs: 'A new key takes over the least-counted slot, inherits that count as its own starting point, ' +
+          'and records it as the amount it might be over by. The true count is somewhere between count ' +
+          '− error and count.',
         detail: 'Starting a new key at 1 would let a genuinely heavy key be evicted and then ' +
           'permanently under-reported. Inheriting the minimum instead makes every counter an upper ' +
           'bound on its key\'s true frequency, with the inherited part recorded as the slack — so a ' +
@@ -168,6 +197,8 @@
         term: 'Lossy counting is the mirror image',
         plain: 'It under-estimates by at most εN, and also never misses a frequent key.',
         formal: 'count ≤ truth ≤ count + εN',
+        readAs: 'The recorded count never exceeds the truth, and the truth never exceeds it by more than a ' +
+          'fixed slice of the stream. Both bounds are hard, not probabilistic.',
         detail: 'The stream is cut into windows of ⌈1/ε⌉ items, a key first seen in window b carries ' +
           'a handicap of b − 1, and at each boundary any key whose count plus handicap has not ' +
           'reached the window number is dropped. A key that keeps arriving survives; one that does ' +
@@ -180,6 +211,9 @@
         term: 'Decay changes the question, not the memory',
         plain: 'Exponential decay makes counts recent; it does nothing to bound the number of keys.',
         formal: 'value ← value · 2^(−Δt/H) + 1, applied lazily on touch',
+        readAs: 'Each hit multiplies the stored score by a half raised to (time elapsed over the half-life) ' +
+          'and then adds one. Applying it only when the key is touched means no periodic sweep is ' +
+          'needed.',
         detail: 'A decayed counter is cheap — multiply by 2^(−Δt/H) when the key is next touched, ' +
           'so the cost is per update rather than per tick — and it answers "most frequent lately" ' +
           'rather than "most frequent". What it does not do is bound anything: a decayed value only ' +
@@ -219,6 +253,8 @@
         term: 'Price exactness first',
         plain: 'A hash set of the keys is often affordable, and it is always right.',
         formal: 'exact memory = Θ(distinct keys × key size)',
+        readAs: 'Counting exactly costs one entry per distinct key. Every sketch in this milestone is a way ' +
+          'of not paying that, and each one gives up something different in exchange.',
         detail: 'A Set holding 21 619 string keys is about 1.2 MB, which is a lot next to a Bloom ' +
           'filter\'s 26 KB and nothing at all next to the machine it runs on. Sketches earn their ' +
           'place when the key count is genuinely large, when there are thousands of streams rather ' +
@@ -255,6 +291,9 @@
         term: 'A published seed is an attack surface',
         plain: 'Knowing the seed lets an attacker manufacture false positives for the cost of arithmetic.',
         formal: 'expected probes per manufactured false positive = 1/ε',
+        readAs: 'An attacker who can test membership needs about one over the error rate attempts to ' +
+          'manufacture one false positive. At a 1% rate that is a hundred probes — which is nothing, if ' +
+          'the hash is not keyed.',
         detail: 'Every structure here assumes keys are independent of the hash, and an attacker who ' +
           'can compute the hash chooses keys that are not. Against a 1% filter it costs about 104 ' +
           'probes to find a key the filter accepts, and 50 of them took 5 179 candidates — a search ' +
@@ -267,6 +306,9 @@
         term: 'A guarantee that holds is not an answer you can act on',
         plain: 'A flooded count-min sketch is still within its bound, and still 400× wrong.',
         formal: 'ε·N grows with the flood, so the bound stretches to cover the damage',
+        readAs: 'The error guarantee is a fraction of the total stream, so an attacker who inflates the ' +
+          'stream inflates the allowance too. The sketch keeps its promise and the promise stops ' +
+          'meaning anything.',
         detail: 'Finding eight keys that collide with a victim in every row of a 32 × 3 sketch takes ' +
           '305 021 candidate probes, and pushing 5 000 events through each drives the victim\'s ' +
           'estimate from 100 to 40 100. Count-min has not been violated: N grew, so ε·N grew with ' +

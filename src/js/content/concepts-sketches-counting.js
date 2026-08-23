@@ -10,6 +10,9 @@
         term: 'Leading zeros as a counter',
         plain: 'A hash with ρ leading zeros turns up about once in every 2^ρ distinct values.',
         formal: 'P[ρ(h(x)) ≥ j] = 2^(−j+1) for a uniform hash',
+        readAs: 'The chance a hash begins with j−1 zero bits is one in 2 to that power. Seeing a long run of ' +
+          'leading zeros is therefore evidence that you have hashed many distinct things — which is the ' +
+          'entire idea behind counting distinct items in a few kilobytes.',
         detail: 'The observation is that rare patterns are evidence of many draws. Seeing a hash that ' +
           'begins with fifteen zeros suggests roughly 2^15 distinct values have gone past, because ' +
           'that is how often such a hash appears. Used alone it is a terrible estimator — it is a ' +
@@ -34,6 +37,9 @@
         term: 'The harmonic mean, not the arithmetic one',
         plain: 'Average the 2^M[j] harmonically, so one overlarge register cannot dominate.',
         formal: 'E = α_m · m² / Σ_j 2^(−M[j])',
+        readAs: 'The estimate is a correction constant times the number of registers squared, divided by the ' +
+          'total of 2 to the minus each register. That division is a harmonic mean, which is what stops ' +
+          'one unlucky large register from dominating the answer.',
         detail: 'Register values are maxima of geometric variables, so their distribution has a long ' +
           'right tail: one register that happens to see a hash with twenty leading zeros would drag ' +
           'an arithmetic mean of 2^M far above the truth. The harmonic mean is dominated by the ' +
@@ -46,6 +52,9 @@
         term: 'Error that does not depend on the answer',
         plain: 'The standard error is 1.04/√m whether the count is a thousand or a trillion.',
         formal: 'σ = 1.04/√m, and memory = m registers',
+        readAs: 'The relative error is about 1.04 divided by the square root of the register count. ' +
+          'Quadrupling the memory halves the error — the usual square-root law, and the reason 16 KB ' +
+          'gets you around 1%.',
         detail: 'This is the property that makes the structure usable: the cost model has no ' +
           'cardinality in it at all. Halving the error costs four times the memory and nothing else ' +
           'changes — p = 10 gives 3.25% from 768 bytes, p = 12 gives 1.63% from 3 072 and p = 14 ' +
@@ -58,6 +67,9 @@
         term: 'Merging is exact, not approximate',
         plain: 'Register-wise maximum gives precisely the sketch the union would have produced.',
         formal: 'merge(A, B)[j] = max(A[j], B[j]) = sketch(A ∪ B)[j]',
+        readAs: 'Merging two sketches is taking the larger value in each register, and the result is exactly ' +
+          'the sketch you would have built from both streams together. Not an approximation of the ' +
+          'merge — the merge itself.',
         detail: 'A register holds a maximum, and the maximum of two maxima is the maximum over the ' +
           'union — so the merged register array is identical, entry for entry, to the array the ' +
           'concatenated stream would have built. That is an equality and not a tolerance, which is ' +
@@ -70,6 +82,9 @@
         term: 'Adding estimates is not merging',
         plain: 'Summing per-shard counts double-counts every key that appears in more than one shard.',
         formal: 'Σ|S_i| ≠ |∪S_i| unless the shards are disjoint',
+        readAs: 'Adding up the distinct counts of each shard does not give the distinct count of the whole, ' +
+          'because anything appearing in two shards is counted twice. Merging the sketches does give ' +
+          'it.',
         detail: 'This is the mistake the mergeability property exists to prevent and it is made ' +
           'constantly, because the per-shard numbers are the ones a dashboard already has. On a ' +
           'stream split four ways, the four estimates sum to 36 702 against a true distinct count of ' +
@@ -94,6 +109,9 @@
         term: 'The corrections, and the band neither of them fixes',
         plain: 'Linear counting rescues small cardinalities; between 2.5m and 4m both rules read a few per cent high.',
         formal: 'if zeros > 0 and E ≤ 2.5m: E = m · ln(m/zeros)',
+        readAs: 'At small cardinalities the main estimator is biased, so switch to counting empty registers ' +
+          'instead: the number of registers times the natural log of the fraction still empty. It is ' +
+          'the same argument as the coupon collector.',
         detail: 'Below the register count the raw harmonic estimator is not merely inaccurate but ' +
           'useless — 1 388% high at n = 0.05m — because almost every register is still zero and the ' +
           'sum it divides by is dominated by them. Counting the zero registers instead is exact ' +
@@ -109,6 +127,8 @@
         term: 'A d×w matrix and one cell per row',
         plain: 'Increment one cell in each of d rows; query reads those d cells and takes the smallest.',
         formal: 'est(x) = min_i C[i][h_i(x)]',
+        readAs: 'Look up the key in every row and take the smallest count you find. Every row over-counts ' +
+          'because of collisions, so the smallest is the closest to the truth.',
         detail: 'Every cell holds the true count of the keys that hash to it, so each of the d cells a ' +
           'key touches is its true count plus contamination from other keys. Taking the minimum picks ' +
           'the least contaminated of d estimates, and because contamination is never negative, the ' +
@@ -120,6 +140,9 @@
         term: 'One-sided error is the design decision',
         plain: 'Count-min never under-counts. That makes it safe for some uses and unsafe for others.',
         formal: 'est(x) ≥ f(x) always; est(x) ≤ f(x) + εN with probability 1 − δ',
+        readAs: 'The estimate is never below the real frequency — collisions can only add — and with ' +
+          'probability 1 − δ it is no more than εN above it, where N is the total stream length. ' +
+          'Overcounting is guaranteed; undercounting is impossible.',
         detail: 'Knowing the direction of the error is worth more than knowing its size. An estimate ' +
           'that is never low is safe wherever over-counting is conservative — rate limiting, load ' +
           'shedding, alerting — and unsafe wherever the number turns into money or a quota, because ' +
@@ -132,6 +155,9 @@
         term: 'ε and δ, and what each buys',
         plain: 'Width sets how wrong; depth sets how often.',
         formal: 'w = ⌈e/ε⌉, d = ⌈ln(1/δ)⌉, error ≤ εN with probability 1 − δ',
+        readAs: 'The table is e (2.718…) divided by your error tolerance wide, and the natural log of one ' +
+          'over your failure probability deep. Width buys accuracy, depth buys confidence, and they are ' +
+          'independent dials.',
         detail: 'The two parameters are independent and they are bought in different currencies. Width ' +
           'is linear in memory and linear in accuracy: doubling w halves the additive error. Depth is ' +
           'linear in memory and *logarithmic* in the failure probability, so going from d = 5 to ' +
@@ -144,6 +170,9 @@
         term: 'The bound is additive, so it hurts the small keys',
         plain: 'ε·N is the same number for a key seen ten times and one seen a hundred thousand times.',
         formal: 'absolute error ≤ εN, so relative error ≤ εN / f(x)',
+        readAs: 'The error is a fixed slice of the whole stream, not a fraction of the item\'s own count. For ' +
+          'a heavy hitter that is tiny; for a rare item it can be larger than the true count, which is ' +
+          'why the sketch answers about heavy hitters and nothing else.',
         detail: 'At w = 512 over a 200 000-item stream the bound is 1 062, which is a rounding error ' +
           'for the heaviest key and a hundredfold over-count for a key seen ten times. This is why a ' +
           'count-min sketch is a heavy-hitter structure rather than a frequency table: the estimates ' +
@@ -156,6 +185,9 @@
         term: 'Conservative update',
         plain: 'On an increment, raise only the cells that are currently at the minimum.',
         formal: 'C[i][h_i(x)] ← max(C[i][h_i(x)], min_j C[j][h_j(x)] + c)',
+        readAs: 'Conservative update: work out what the estimate would become, then raise each counter only ' +
+          'as far as that. Counters that were already higher are left alone, so less error is injected ' +
+          '— at the cost of no longer being able to delete.',
         detail: 'A cell that is already above the key\'s current estimate is above it because of some ' +
           'other key, and raising it further only pollutes that other key\'s answer. Skipping those ' +
           'writes cannot break the never-under guarantee — every cell is still at least the true ' +
@@ -168,6 +200,9 @@
         term: 'Count-sketch: signs instead of a minimum',
         plain: 'Multiply each update by a ±1 hash and take the median at query time.',
         formal: 'est(x) = median_i s_i(x) · C[i][h_i(x)]',
+        readAs: 'Each row is multiplied by a random ±1 sign before being read, so collisions cancel instead ' +
+          'of accumulating, and the median across rows discards the rows that went badly. That is what ' +
+          'lets the count-sketch estimate be too low as well as too high.',
         detail: 'With a sign attached, a colliding key adds to a cell as often as it subtracts, so ' +
           'collisions cancel in expectation rather than accumulating. The estimator is unbiased and ' +
           'its error is bounded relative to ‖f‖₂ rather than ‖f‖₁, which is much tighter on a ' +
@@ -180,6 +215,8 @@
         term: 'The rows must be genuinely independent',
         plain: 'Deriving the d row hashes from two by a linear rule breaks the guarantee.',
         formal: 'h_i = finalise(h₁ + i·h₂ + i²), not h₁ + i·h₂',
+        readAs: 'Double hashing needs a final mixing step, or the rows are linearly related and their errors ' +
+          'stop being independent — at which point taking the minimum across rows buys you nothing.',
         detail: 'Two hashes are enough for a Bloom filter, whose error analysis does not need ' +
           'independence between probes. A count-min sketch does: the whole argument is that a key is ' +
           'unlucky in one row independently of the others. With the raw linear rule, two keys whose ' +
@@ -219,6 +256,8 @@
         term: 'Exact quantiles need the data sorted',
         plain: 'There is no streaming algorithm that gives an exact p99 in sublinear space.',
         formal: 'exact selection over an unordered stream needs Ω(n) space',
+        readAs: 'You cannot report an exact quantile of a stream without keeping essentially all of it. That ' +
+          'lower bound is why quantile sketches exist at all.',
         detail: 'The p99 of a stream cannot be maintained incrementally without keeping enough of the ' +
           'stream to identify it, and the adversary argument is the usual one: whatever you discard ' +
           'could have been the answer. Keeping 200 000 doubles is 1.6 MB per stream per window, ' +
@@ -230,6 +269,8 @@
         term: 'Reservoir sampling keeps a uniform sample',
         plain: 'Algorithm R: the i-th item replaces a random resident with probability k/i.',
         formal: 'every item is in the sample with probability k/n, at every point',
+        readAs: 'Reservoir sampling keeps every item equally likely to be in the sample, at every moment, ' +
+          'without ever knowing how long the stream will be.',
         detail: 'The invariant is stronger than "uniform at the end": after any number of items the ' +
           'sample is a uniform draw without replacement from everything seen so far, which is what ' +
           'makes it safe to query a reservoir at any moment. It is the most general of the four — the ' +
@@ -242,6 +283,9 @@
         term: 't-digest sizes centroids by a scale function',
         plain: 'Centroids may be large in the middle and must be small at both tails.',
         formal: 'k(q) = δ/2π · asin(2q − 1), and a centroid may absorb while Δk ≤ 1',
+        readAs: 'The scale function stretches the ends of the distribution and squashes the middle, so ' +
+          'centroids near the extremes stay small. A centroid may absorb another only while the change ' +
+          'in scale stays under one, which is what keeps the tails accurate.',
         detail: 'The scale function is flat near q = 0.5 and steep as q approaches 0 or 1, so the ' +
           'merging rule allows a centroid to swallow thousands of points in the middle and only a ' +
           'handful at the edges. That puts the resolution where the interesting quantiles are: with ' +
@@ -266,6 +310,9 @@
         term: 'DDSketch bounds the value, not the rank',
         plain: 'Logarithmic buckets: bucket i covers [γ^i, γ^(i+1)) for γ = (1+α)/(1−α).',
         formal: '|v̂ − v| ≤ α·v, for every quantile, always',
+        readAs: 'The estimate is within a fixed fraction of the true value — a relative guarantee rather than ' +
+          'an absolute one, which is what latency work needs, because being 1 ms out matters at p50 and ' +
+          'not at p99.9.',
         detail: 'Every value in a bucket is within a relative α of the bucket\'s representative, so ' +
           'the returned value is within α of *some* value at the requested rank — a guarantee about ' +
           'milliseconds rather than about position. That is the form an SLO is written in, and it is ' +
@@ -289,6 +336,8 @@
         term: 'Averaging quantiles across shards is meaningless',
         plain: 'The mean of per-shard p99s is not an estimate of the global p99.',
         formal: 'quantile(∪ S_i) ≠ mean_i quantile(S_i)',
+        readAs: 'Averaging the p99s of several shards does not give the p99 of the whole. It is a genuinely ' +
+          'wrong operation, and it is the most common mistake in latency dashboards.',
         detail: 'It is not a worse estimate; it is an estimate of nothing. When the shards are ' +
           'statistically identical the two numbers happen to be close and the dashboard looks ' +
           'correct, which is why the mistake survives. The moment one shard is degraded — the only ' +

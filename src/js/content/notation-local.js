@@ -48,6 +48,28 @@
     }
   });
 
+  /* In the sketch milestone ε and δ are the two dials every structure exposes:
+     how wrong the answer may be, and how often it is allowed to be that wrong. */
+  const SKETCH_DIALS = {
+    'ε': {
+      reads: 'epsilon, the error tolerance',
+      means: 'How far the answer is allowed to be from the truth. It is the accuracy dial, and it ' +
+        'usually costs memory as 1/ε — so halving the error doubles the sketch.'
+    },
+    'δ': {
+      reads: 'delta, the failure probability',
+      means: 'How often the sketch is allowed to miss its error bound entirely. It is the ' +
+        'confidence dial, and it usually costs memory as log(1/δ) — so it is far cheaper to buy ' +
+        'than accuracy is.'
+    }
+  };
+
+  ['bloom-filters', 'bloom-variants', 'fingerprint-filters', 'hyperloglog',
+    'count-min-sketch', 'quantile-sketches', 'minhash-and-lsh', 'windowed-counting',
+    'choosing-sketches'].forEach(function (id) {
+    Notation.registerLocal(id, SKETCH_DIALS);
+  });
+
   Notation.registerLocal('perfect-hashing', {
     'λ': {
       reads: 'lambda, the bucket load',

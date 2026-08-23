@@ -23,6 +23,8 @@
         term: 'Heap order, not search order',
         plain: 'A parent outranks both children — and that is all. Siblings are unordered.',
         formal: 'key(parent) ≤ key(child), for every node',
+        readAs: 'Every node is at most its children — that is the entire heap rule. It says nothing about ' +
+          'left versus right, which is why a heap is far cheaper to maintain than a search tree.',
         detail: 'The rule is much weaker than a search tree\'s, and the weakness is the point. It is ' +
           'strong enough to put the minimum at the root, and cheap enough to restore with a single ' +
           'root-to-leaf walk after any change. What it cannot do is find an arbitrary key: nothing ' +
@@ -46,6 +48,9 @@
         term: 'Why the build is linear',
         plain: 'Heapifying an array is O(n), not O(n log n), because most nodes are leaves and sink nowhere.',
         formal: 'Σ h·⌈n/2^(h+1)⌉ < n',
+        readAs: 'Add up, over every level height h, that height times how many nodes sit at it. The node ' +
+          'counts halve as the heights grow, so the total stays below n — which is why building a heap ' +
+          'is linear rather than n log n.',
         detail: 'The naive reading is that n elements each sift down log n levels, which would be ' +
           'O(n log n). The correction is that almost none of them sift that far: half the nodes are ' +
           'leaves with height 0 and do no work at all, a quarter are at height 1 and can sink one ' +
@@ -83,6 +88,9 @@
         term: '0-based against 1-based',
         plain: 'With the root at index 1 the arithmetic is 2i and 2i + 1, which is a shift rather than a shift and an add.',
         formal: '1-based: children 2i, 2i+1; 0-based: 2i+1, 2i+2',
+        readAs: 'Where a node\'s children live in the array, in the two indexing conventions. Counting from 1 ' +
+          'gives the tidier arithmetic; counting from 0 is what JavaScript gives you, and mixing the ' +
+          'two is the classic off-by-one in this structure.',
         detail: 'The 1-based layout wastes slot zero and buys simpler index arithmetic: the children ' +
           'of i are 2i and 2i + 1, and the parent is i >> 1. The 0-based layout uses every slot and ' +
           'pays an extra add per index. In a language with 0-based arrays the second is idiomatic and ' +
@@ -110,6 +118,8 @@
         term: 'Arity as a parameter',
         plain: 'Nothing requires two children. With d of them the tree is log_d n deep instead of log₂ n.',
         formal: 'children of i are d·i + 1 … d·i + d',
+        readAs: 'In a d-ary heap each node has d children, sitting in a contiguous run starting at d times ' +
+          'the index plus one. Contiguous is the point: all d of them arrive in the same cache line.',
         detail: 'The index arithmetic generalises without any change to the algorithm: the parent of ' +
           'i is ⌊(i − 1)/d⌋ and the children are contiguous. Raising d makes the tree shallower, ' +
           'which shortens every sift-up, and widens each node, which lengthens every sift-down. So d ' +
@@ -121,6 +131,9 @@
         term: 'The two curves',
         plain: 'Comparisons form a shallow U with its minimum near d = 3; swaps fall monotonically as d rises.',
         formal: 'sift-up: log_d n comparisons; sift-down: d·log_d n',
+        readAs: 'Raising the branching factor d makes the tree shallower, so sifting up gets cheaper — but ' +
+          'sifting down has to compare all d children at each level, so it gets dearer. The best d is ' +
+          'wherever those two curves cross for your workload.',
         detail: 'The sift-down cost is d·log_d n = d·ln n / ln d, which is minimised at d = 3 and ' +
           'rises slowly after — and the sift-up cost is log_d n, which falls monotonically. Since a ' +
           'mix contains both, the total comparison count is a shallow U: measured over 50 000 ' +
@@ -133,6 +146,8 @@
         term: 'The cache-line argument',
         plain: 'The d children of a node are contiguous, so a 4-ary or 8-ary node fetches all of them in one line.',
         formal: '64-byte line ÷ 4-byte key = 16 children',
+        readAs: 'A cache line holds sixteen 32-bit keys, so a 16-ary heap can examine a whole sibling group ' +
+          'for the price of one memory fetch.',
         detail: 'This is the argument the comparison count cannot see, and the one that decides real ' +
           'implementations. A binary heap fetches two children — eight bytes of a sixty-four-byte ' +
           'line — and throws the rest away, and does that at every level. A 4-ary heap uses sixteen ' +
@@ -181,6 +196,8 @@
         term: 'What stays the same',
         plain: 'The build is still linear, the height bound still holds, and the code is the binary code with one constant changed.',
         formal: 'Σ h·n/d^(h+1) still converges',
+        readAs: 'The same level-by-level sum as before, with d children instead of 2. It still adds up to a ' +
+          'multiple of n rather than n log n, so a d-ary heap builds in linear time too.',
         detail: 'None of the analysis breaks. The sum-of-heights argument still converges — to ' +
           'n·d/(d − 1)² rather than n, which is smaller for larger d — so the build stays linear and ' +
           'gets cheaper. The height bound is log_d n, the invariant is unchanged, and an ' +
@@ -255,6 +272,9 @@
         term: 'Bottom-up heapsort',
         plain: 'Sift the hole all the way down first, then walk back up to place the element. It halves the comparisons.',
         formal: '≈ n log n rather than 2n log n comparisons',
+        readAs: 'Bottom-up heapsort sifts each element all the way down and then walks back up, which costs ' +
+          'about one comparison per level instead of two — halving the comparison count for the same ' +
+          'number of moves.',
         detail: 'The classical sift-down does two comparisons per level: one to pick the better child ' +
           'and one to decide whether to stop. The bottom-up variant observes that the element being ' +
           'sifted is almost always going nearly all the way down — it came from the bottom of the ' +
@@ -267,6 +287,8 @@
         term: 'Top-k with a bounded heap',
         plain: 'Keep a heap of the k best seen so far. Peak memory is k, whatever the stream length is.',
         formal: 'O(n log k) time, O(k) space',
+        readAs: 'Keeping only the best k seen so far costs a log-k heap operation per element and holds only ' +
+          'k of them at once, so the stream can be far larger than memory.',
         detail: 'This is the pattern that earns a heap its place in ordinary code, more often than ' +
           'heapsort does. Hold a max-heap of size k; for each new element, compare it against the ' +
           'root and discard it if it is worse. The comparison count is dominated by that single gate ' +
@@ -319,6 +341,8 @@
         term: 'Null-path length',
         plain: 'The distance to the nearest missing child. A leftist heap keeps the larger one on the left.',
         formal: 'npl(node) = 1 + min(npl(left), npl(right))',
+        readAs: 'A node\'s null path length is one more than the shorter of its two children\'s. Keeping the ' +
+          'shorter side on the right is what stops a leftist heap degenerating into a list.',
         detail: 'The field measures how far you must walk to fall out of the tree, taking the shortest ' +
           'route. Insisting that npl(left) ≥ npl(right) forces the short paths to the right, which ' +
           'means the right spine is the shortest root-to-null path in the tree and therefore has ' +
@@ -344,6 +368,8 @@
         term: 'Binomial trees',
         plain: 'A tree of order k holds exactly 2^k nodes and is two order-(k − 1) trees, one hung under the other.',
         formal: 'B_k = two B_(k−1) linked; |B_k| = 2^k',
+        readAs: 'A binomial tree of order k is two trees of order k−1 joined at the root, so it holds exactly ' +
+          '2 to the power of k nodes. The bars mean "the size of".',
         detail: 'The definition is recursive and the consequences are all arithmetic. A binomial tree ' +
           'of order k has exactly 2^k nodes, height k, and a root with exactly k children whose ' +
           'orders are k − 1, k − 2, …, 0. The name comes from the level sizes, which are the binomial ' +
@@ -355,6 +381,8 @@
         term: 'The forest is a binary number',
         plain: 'A heap of n elements holds one tree per set bit of n. Thirteen elements is 1101 — a B₃, a B₂ and a B₀.',
         formal: 'n = Σ 2^k over the tree orders present',
+        readAs: 'The trees a binomial heap holds are exactly the 1 bits of n written in binary: n nodes ' +
+          'total, split into powers of two. Merging two heaps is binary addition, carries and all.',
         detail: 'This is the reading that makes the whole family obvious rather than clever. Since ' +
           'each tree holds a power of two and no order repeats, the multiset of orders is the binary ' +
           'expansion of the size — and every operation is arithmetic on that number. Inserting is ' +

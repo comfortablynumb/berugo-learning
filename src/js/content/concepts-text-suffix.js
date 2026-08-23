@@ -10,6 +10,8 @@
         term: 'The suffix trie is quadratic',
         plain: 'Every suffix of a length-n text, uncompressed, is n(n+1)/2 nodes.',
         formal: 'Σ |suffix i| = n(n+1)/2',
+        readAs: 'Add up the lengths of all n suffixes — n, then n−1, then n−2, down to 1 — and the total is ' +
+          'n(n+1)/2, about half of n squared. That is why you never store the suffixes themselves.',
         detail: 'The idea is obvious and the naive form is unusable: put every suffix into a trie ' +
           'and substring search becomes a walk down. For a 2 000-character text that is two million ' +
           'nodes, and for a genome it is not a structure, it is a joke. Compressing every ' +
@@ -22,6 +24,8 @@
         term: 'A unique terminator',
         plain: 'Appending a character that occurs nowhere else makes every suffix end at its own leaf.',
         formal: 'no suffix is a prefix of another ⇒ leaves = n + 1',
+        readAs: 'Append a character that appears nowhere else and no suffix can be a prefix of another, so ' +
+          'every suffix gets its own leaf: n + 1 of them, counting the empty one.',
         detail: 'Without it a suffix that is also a prefix of a longer suffix ends inside an edge, ' +
           'with nothing to mark it — the tree is *implicit*, and questions like "how many times ' +
           'does P occur" become wrong because counting leaves under a match point misses the ' +
@@ -34,6 +38,9 @@
         term: 'Open edges make rule 1 free',
         plain: 'A leaf stores "the current end", so extending the text extends every leaf at once.',
         formal: 'leaf.end = ∞, resolved to the current position when read',
+        readAs: 'A leaf edge is stored as running to infinity rather than to a fixed position, so extending ' +
+          'the text extends every leaf at once without touching any of them. The infinity is read as ' +
+          '"however far we have got".',
         detail: 'This is the first of Ukkonen\'s three tricks and the easiest to miss when reading ' +
           'the algorithm, because it is a representation choice rather than a step. In the ' +
           'phase-by-phase definition, every existing leaf must be extended by the new character; ' +
@@ -59,6 +66,9 @@
         term: 'Suffix links',
         plain: 'From the node spelling cα, a pointer to the node spelling α.',
         formal: 'link(node for cα) = node for α',
+        readAs: 'A suffix link takes the node spelling some string with its first character chopped off. ' +
+          'Following one is how the construction jumps to where it needs to work next instead of ' +
+          'walking back down from the root.',
         detail: 'After splitting at some point inside suffix i, the corresponding point in suffix ' +
           'i + 1 is the same string with its first character removed — and the suffix link goes ' +
           'straight there instead of walking down from the root again. Every internal node created ' +
@@ -84,6 +94,8 @@
         term: 'Occurrences are leaves below the match',
         plain: 'Walk the pattern down, then count the leaves in the subtree you land in.',
         formal: 'count(P) = leaves below the locus of P',
+        readAs: 'How many times a pattern occurs is how many leaves hang under the node where the pattern ' +
+          'runs out — each leaf being one starting position in the text.',
         detail: 'Every leaf is a suffix start position, and every suffix starting with P corresponds ' +
           'to an occurrence of P, so the number of occurrences is the number of leaves below the ' +
           'point where the pattern walk ends. That makes existence O(m) and counting O(m + occ) ' +
@@ -111,6 +123,9 @@
         term: 'Sorted suffix starts',
         plain: 'One integer per character, in the order the suffixes sort.',
         formal: 'sa[i] = start of the i-th smallest suffix',
+        readAs: 'The suffix array holds starting positions, sorted by how the suffixes compare ' +
+          'alphabetically. It is a permutation of 0 … n−1 and nothing more, which is why it costs one ' +
+          'integer per character.',
         detail: 'The array holds no characters and no pointers — the text is already there, and a ' +
           'suffix is fully described by where it starts. That is the entire space argument: four ' +
           'bytes per character where a suffix tree needs a node with four fields, and the ' +
@@ -123,6 +138,8 @@
         term: 'A pattern occupies one contiguous range',
         plain: 'Every suffix beginning with P sorts together, so a search is two binary searches.',
         formal: 'occurrences(P) = sa[first … last), found in O(m log n)',
+        readAs: 'Every occurrence of a pattern sits in one contiguous stretch of the suffix array, because ' +
+          'the suffixes are sorted and they all begin the same way. Two binary searches find its ends.',
         detail: 'This follows immediately from sorting and it is the property the structure exists ' +
           'for: if two suffixes both begin with P then everything sorting between them also begins ' +
           'with P. So the answer set is an interval, and the two ends are found by binary search ' +
@@ -135,6 +152,8 @@
         term: 'The LCP array',
         plain: 'lcp[i] is how many characters suffix sa[i] shares with sa[i − 1].',
         formal: 'lcp[i] = |longest common prefix of sa[i − 1] and sa[i]|',
+        readAs: 'How many characters each sorted suffix shares with the one before it. The bars are length. ' +
+          'This array is what turns the suffix array from a search structure into a substring one.',
         detail: 'It is what turns a sorted list into the equal of a tree. The internal nodes of a ' +
           'suffix tree correspond exactly to the local minima structure of the LCP array, so ' +
           'anything the tree answers by finding a deep internal node, the array answers by finding ' +
@@ -147,6 +166,8 @@
         term: 'Kasai\'s amortised walk',
         plain: 'Compute the LCPs in text order, not array order, and carry the match length.',
         formal: 'h can fall by at most 1 per step, so total work is O(n)',
+        readAs: 'Kasai\'s argument: the shared-prefix length loses at most one character each time you move ' +
+          'to the next position, so although it can rise a lot, it can only fall n times in total.',
         detail: 'The trick is a one-line observation with a large consequence: if suffix i shares h ' +
           'characters with its neighbour, then suffix i + 1 — the same string with the first ' +
           'character removed — shares at least h − 1 with *its* neighbour. So walking the suffixes ' +
@@ -160,6 +181,9 @@
         term: 'Prefix doubling',
         plain: 'Sort by 1 character, then use the ranks to sort by 2, 4, 8 …',
         formal: 'rank_{2k}(i) = (rank_k(i), rank_k(i + k))',
+        readAs: 'To sort by twice as many characters, pair each position\'s existing rank with the rank of ' +
+          'the position k further along. Sorting those pairs doubles the compared length per round, so ' +
+          'log n rounds cover the whole string.',
         detail: 'The insight is that once suffixes are ranked by their first k characters, comparing ' +
           'the first 2k characters of two suffixes is comparing a pair of integers rather than a ' +
           'pair of strings — because the second half of a suffix starting at i is a suffix starting ' +
@@ -197,6 +221,9 @@
         term: 'Distinct substrings, two ways',
         plain: 'n(n+1)/2 minus the sum of the LCP array, which a suffix automaton must agree with.',
         formal: 'distinct = n(n+1)/2 − Σ lcp[i]',
+        readAs: 'Every substring is a prefix of some suffix, so counting them is counting all n(n+1)/2 ' +
+          'prefixes and subtracting the ones already seen — which is exactly what the shared-prefix ' +
+          'lengths total up to.',
         detail: 'Every substring is a prefix of some suffix, so summing the suffix lengths counts ' +
           'every substring once per suffix it prefixes; subtracting the LCP sum removes exactly the ' +
           'duplicates, because two adjacent suffixes share precisely lcp[i] prefixes. The value is ' +
@@ -213,6 +240,8 @@
         term: 'The minimal DFA of all substrings',
         plain: 'One automaton accepting exactly the substrings of the text, and nothing else.',
         formal: 'L(A) = { P : P occurs in T }',
+        readAs: 'The language the automaton accepts is the set of strings that appear somewhere in the text. ' +
+          'L(A) is standard notation for "everything this machine says yes to".',
         detail: 'A trie of all substrings is quadratic; the minimal deterministic automaton for the ' +
           'same language is linear — at most 2n − 1 states and 3n − 4 transitions, both tight. That ' +
           'is remarkable enough on its own, and it is buildable online in one left-to-right pass, ' +
@@ -225,6 +254,8 @@
         term: 'A state is an endpos class',
         plain: 'One state stands for every substring that ends at exactly the same set of positions.',
         formal: 'endpos(P) = { i : T[i − |P| … i) = P }',
+        readAs: 'The end-position set of a pattern is every index where an occurrence finishes. Two patterns ' +
+          'with the same set are the same state, which is what keeps the automaton linear in size.',
         detail: 'Two substrings that always co-occur — always end together — cannot be distinguished ' +
           'by anything that follows them, so a minimal automaton must merge them. That is the whole ' +
           'reason the state count is linear rather than quadratic: the number of distinct endpos ' +
@@ -237,6 +268,8 @@
         term: 'The link tree is containment',
         plain: 'A state\'s suffix link points at the state holding the next shorter class.',
         formal: 'endpos(v) ⊊ endpos(link(v)), and the links form a tree',
+        readAs: 'A state\'s end positions are a strict subset of its suffix link\'s — strictly fewer, never ' +
+          'equal — so following links always widens the set, and the links can never form a cycle.',
         detail: 'Removing characters from the front of a substring can only ever add end positions, ' +
           'never remove them, so the endpos sets nest — and the suffix links, which walk to the ' +
           'next shorter class, therefore form a tree ordered by set containment. That tree is where ' +
@@ -262,6 +295,9 @@
         term: 'Skipping the clone accepts a superset',
         plain: 'The broken automaton still accepts every substring — plus strings that never occurred.',
         formal: 'L(oracle) ⊇ L(automaton), with the inclusion strict in general',
+        readAs: 'The factor oracle accepts everything the exact automaton does and usually more besides: it ' +
+          'never misses a real substring, but it does say yes to some strings that are not there. That ' +
+          'is the trade for its smaller, simpler construction.',
         detail: 'This is why the clone case is dangerous rather than merely hard. An automaton built ' +
           'without it passes every test of the form "insert the text, check that each of its ' +
           'substrings is accepted", because accepting more is not detected by such a test. What it ' +
@@ -274,6 +310,8 @@
         term: 'The factor oracle is that structure, kept on purpose',
         plain: 'Exactly n + 1 states, no clones, and a known false-accept rate.',
         formal: 'states = n + 1 always; L(oracle) ⊇ substrings(T)',
+        readAs: 'The oracle has exactly one state per character plus one, whatever the text — a hard ' +
+          'guarantee the exact automaton cannot give — and it accepts at least every real substring.',
         detail: 'It is the same left-to-right construction with the clone step removed, and it is ' +
           'used deliberately in string-matching algorithms where a false accept costs a ' +
           'verification step and nothing else — BOM and its descendants search with one. Keeping it ' +

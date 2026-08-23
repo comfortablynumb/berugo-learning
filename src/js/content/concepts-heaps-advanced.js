@@ -22,6 +22,9 @@
         term: 'Consolidation',
         plain: 'Extract-min collapses the root list so no two roots share a degree, using an array indexed by degree.',
         formal: 'at most log_φ(n) + 1 roots afterwards',
+        readAs: 'After a consolidation the root list is at most log of n taken to base φ (phi, the golden ' +
+          'ratio, about 1.618), plus one. The golden ratio appears because the degree bound comes from ' +
+          'a Fibonacci argument.',
         detail: 'The consolidation walks the root list, and for each root repeatedly links it with ' +
           'whatever root already occupies its degree slot — which is the binomial carry from M05.4, ' +
           'done all at once. Afterwards the root list has at most one tree per degree, so its length ' +
@@ -34,6 +37,9 @@
         term: 'The mark bit',
         plain: 'A node is marked when it loses a child while being a child. Losing a second one cuts it too.',
         formal: 'marked ⇒ has already lost one child since becoming a child',
+        readAs: 'The mark on a node is a memory: it has lost one child since it was last made a child of ' +
+          'someone. Losing a second one cuts the node loose too, which is what keeps the trees from ' +
+          'being shredded.',
         detail: 'The mark is the bookkeeping that makes the amortised analysis work, and it has one ' +
           'rule that is easy to break: only a child can be marked, so promoting a node to the root ' +
           'list must clear it. Miss that in extract-min — where the children of the removed minimum ' +
@@ -46,6 +52,9 @@
         term: 'Cascading cuts',
         plain: 'Cutting a marked node cuts its parent too, and the parent\'s parent if that was marked, up the tree.',
         formal: 'a node of degree d keeps at least F(d + 2) descendants',
+        readAs: 'A node with d children is guaranteed at least the (d+2)-th Fibonacci number of descendants ' +
+          'underneath it. Since Fibonacci numbers grow like φ to the power of d, the degree can never ' +
+          'exceed log base φ of n.',
         detail: 'Without the cascade a node could lose all of its children one at a time and keep a ' +
           'high degree while holding almost nothing — which would break the degree bound and with it ' +
           'the analysis. The cascade limits each non-root node to losing one child before it is cut ' +
@@ -58,6 +67,9 @@
         term: 'The amortised bounds',
         plain: 'O(1) insert, meld and decrease-key; O(log n) extract-min. All amortised, by a potential function.',
         formal: 'Φ = trees + 2·marked nodes',
+        readAs: 'The stored potential is the number of trees in the root list plus twice the number of marked ' +
+          'nodes. Cheap operations add to it and the expensive consolidation spends it, which is what ' +
+          'makes the amortised bounds come out.',
         detail: 'The potential counts the mess: one unit per root and two per marked node. An insert ' +
           'adds a root and so pays one unit of potential on top of its constant work; a decrease-key ' +
           'that cuts adds a root and clears a mark, which is why the cascade is free in amortised ' +
@@ -219,6 +231,9 @@
         term: 'The position map',
         plain: 'A third array: handle → slot, updated on every swap the heap makes.',
         formal: 'positions[ids[i]] === i, for every i',
+        readAs: 'The index and the heap agree: whatever id sits at heap position i, the index maps that id ' +
+          'back to i. Every swap has to update both, and this is the invariant a bug in that update ' +
+          'breaks.',
         detail: 'The map is the whole mechanism, and the invariant is one line: the slot recorded for ' +
           'a handle is the slot that actually holds it. Maintaining it means every swap writes three ' +
           'things rather than two, which is a real cost on the hottest path in the structure. The ' +
@@ -318,6 +333,8 @@
         term: 'The simple wheel',
         plain: 'One array of buckets, indexed by due tick modulo the wheel width. Timers further out ride round again.',
         formal: 'slot = due mod slots',
+        readAs: 'A timer\'s bucket is its due time wrapped around the number of slots — the remainder after ' +
+          'dividing. That turns "find the next timer" from a search into an array index.',
         detail: 'A single wheel of s slots covers s ticks exactly. A timer due further out is filed in ' +
           'the slot it will eventually land on and skipped on each earlier visit, so a long-dated ' +
           'timer is touched once per revolution. That is fine when the delays are short and uniform ' +
@@ -331,6 +348,8 @@
         term: 'Hierarchical wheels',
         plain: 'Several wheels, each covering the span of the one below times its width. Entries cascade down as time passes.',
         formal: 'level L spans slots^(L+1) ticks',
+        readAs: 'Each level of a hierarchical timer wheel covers the number of slots raised to one more ' +
+          'power, so a handful of levels covers an enormous range at one tick of resolution.',
         detail: 'The hierarchy is the same idea as a clock face: seconds, minutes, hours. A timer due ' +
           'a long time out is filed on a coarse wheel, and when the finer wheels wrap past it, the ' +
           'coarse bucket is emptied and its entries refiled where they now belong. Each timer ' +
@@ -391,6 +410,11 @@
         term: 'Little\'s law, from the other side',
         plain: 'The simulation reproduces L = λ·W to four decimal places, which is what makes it trustworthy.',
         formal: 'L = λ·W; L = ρ/(1 − ρ); W = 1/(μ − λ)',
+        readAs: 'Three queueing results: the number in the system equals arrival rate times time spent (true ' +
+          'of any queue at all); for this particular model that number is utilisation over one minus ' +
+          'utilisation; and the wait is one over the slack between service and arrival rates. The 1 − ρ ' +
+          'in the denominator is why a queue at 99% utilisation is a hundred times worse than one at ' +
+          '90%.',
         detail: 'M02.5 introduced Little\'s law as a measurement tool that needs no assumptions. Here ' +
           'it is a check on the simulator: measure the time-average number in the system, the ' +
           'per-customer average time in the system, and the arrival rate, and the three must satisfy ' +
