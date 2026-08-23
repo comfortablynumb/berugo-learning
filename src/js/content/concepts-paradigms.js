@@ -23,6 +23,8 @@
         term: 'Pruning is an argument, not an optimisation',
         plain: 'A pruning claims no solution lies below a node, and a wrong claim removes answers silently.',
         formal: 'a predicate p on partial states is admissible when p(s) false implies no completion of s is a goal',
+        readAs: 'A pruning test is safe only if a "no" guarantees that nothing built on top of this partial ' +
+          'answer could ever work. A test that is merely usually right silently deletes real solutions.',
         detail: 'The difference between a pruning and a bug is a proof. Both make the search faster and only ' +
           'one of them keeps the answer, and the failure is not an exception - the search returns a smaller set ' +
           'of solutions and looks like it worked. That is why every configuration in this section reports its ' +
@@ -35,6 +37,9 @@
         term: 'Where the check happens is the whole difference',
         plain: 'The same test at the placement instead of the leaf removes a subtree instead of a candidate.',
         formal: 'moving a feasibility test from depth n to depth k removes b^(n−k) descendants per rejection',
+        readAs: 'Rejecting a bad partial answer early kills everything below it — b branches per level, for ' +
+          'the levels you skipped. That is why testing at depth 3 instead of depth 8 is not a small ' +
+          'improvement.',
         detail: 'This is the most reliable order-of-magnitude in the milestone and it needs no new idea at all. ' +
           'The leaf-only configuration enumerates every permutation and rejects the illegal ones at the end; ' +
           'the pruned configuration performs the identical test the moment a queen is placed. Same test, same ' +
@@ -48,6 +53,8 @@
         term: 'Prunings multiply',
         plain: 'Two independent prunings that leave a half and a fiftieth leave a hundredth, not a third.',
         formal: 'for independent prunings, the surviving fraction is the product of the individual fractions',
+        readAs: 'Two prunings that each keep a tenth of the tree together keep a hundredth — the fractions ' +
+          'multiply rather than add. Compounding is why stacking cheap prunings beats one clever one.',
         detail: 'This is the argument for adding a weak second constraint. A pruning that removes only a third ' +
           'of the tree still removes a third of whatever the first one left, so its value is multiplicative ' +
           'rather than additive. Dependent prunings do worse than the product - they cut some of the same ' +
@@ -112,6 +119,8 @@
         term: 'The combine step is the algorithm',
         plain: 'Splitting is trivial; what happens when the halves come back is where the idea lives.',
         formal: 'T(n) = a·T(n/b) + f(n), where f is the combine cost and the master theorem reads off the answer',
+        readAs: 'A problem of size n splits into a pieces of size n/b, plus f(n) to divide and recombine. ' +
+          'Those three numbers are all the master theorem needs.',
         detail: 'Almost every divide-and-conquer algorithm splits its input in half by index or by coordinate, ' +
           'which is a line of code. The invention is always in the combine: merge sort\'s merge, closest ' +
           'pair\'s strip, Karatsuba\'s subtraction, Strassen\'s seven products. Reading a new algorithm in ' +
@@ -125,6 +134,9 @@
         term: 'Karatsuba: three products instead of four',
         plain: 'The middle term of a product is recoverable by subtraction, so one multiplication disappears.',
         formal: '(aB + b)(cB + d) = acB² + ((a+b)(c+d) − ac − bd)B + bd, giving T(n) = 3T(n/2) + O(n)',
+        readAs: 'Karatsuba\'s trick: the middle term of the product can be recovered from the other two plus ' +
+          'one extra multiplication, instead of two. Three multiplications of half-size numbers rather ' +
+          'than four, which is where the speedup comes from.',
         detail: 'The identity is the whole algorithm and it is one line of algebra. Four half-size products ' +
           'are the obvious split; the middle coefficient ad + bc is the difference between (a+b)(c+d) and the ' +
           'two products already computed, so three suffice and the extra additions are linear. The recurrence ' +
@@ -149,6 +161,8 @@
         term: 'Strassen, and why the exponent is not the whole story',
         plain: 'Seven block products instead of eight, at the cost of eighteen block additions and some accuracy.',
         formal: 'T(n) = 7T(n/2) + O(n²) = O(n^log₂7) ≈ O(n^2.807)',
+        readAs: 'Strassen does seven half-size matrix multiplications instead of eight, so the exponent falls ' +
+          'from 3 to log base 2 of 7, about 2.807. The caret is "to the power of".',
         detail: 'Strassen matters historically because it proved the cubic algorithm is not optimal, and ' +
           'practically because it is the standard example of an asymptotic win that arrives late. The ' +
           'measured product counts are exactly 7^k against 8^k, so the improvement is real and visible at ' +
@@ -163,6 +177,9 @@
         term: 'Closest pair: the strip and the constant',
         plain: 'Only points within the current best distance of the dividing line can beat it.',
         formal: 'in the strip, sorted by y, each point need be compared with at most seven successors',
+        readAs: 'Once the candidate strip is sorted vertically, geometry guarantees no point can have more ' +
+          'than seven others close enough to matter. That fixed number is what keeps the closest-pair ' +
+          'scan linear.',
         detail: 'The combine step is a geometric argument rather than a bookkeeping one, which is what makes ' +
           'this the standard demonstration of the pattern. If the best distance found so far is delta, a ' +
           'crossing pair closer than delta must have both points within delta of the line, and within the ' +
@@ -188,6 +205,8 @@
         term: 'Reading an exponent off a log-log chart',
         plain: 'An asymptotic difference is a difference of slope; a constant factor is a vertical shift.',
         formal: 'log(cn^k) = k·log n + log c, so k is the slope and c is the intercept',
+        readAs: 'Take logs of a power law and it becomes a straight line — the exponent turns into the slope ' +
+          'and the constant into the intercept. That is why these curves are read on log-log axes.',
         detail: 'This is the one reliable way to compare growth rates from measurements, and it is worth ' +
           'stating explicitly because linear axes make an asymptotic difference and a large constant look ' +
           'identical. On log axes the schoolbook line has slope 2, the Karatsuba line has slope 1.585, and ' +
@@ -216,6 +235,8 @@
         term: 'The greedy-choice property',
         plain: 'Some locally best choice is part of some optimal solution.',
         formal: 'there exists an optimal solution containing the greedy first choice',
+        readAs: 'The property that makes greedy safe: whatever the best answer is, there is a best answer ' +
+          'that agrees with your first move. Prove that and induction does the rest.',
         detail: 'This is the precondition, and it is a statement about the problem rather than about the ' +
           'algorithm. It is also weaker than it looks: it does not say every locally best choice is safe, or ' +
           'that the greedy solution is the only optimum. It says one optimum agrees with greedy at the first ' +
@@ -279,6 +300,9 @@
         term: 'Fractional against 0/1',
         plain: 'Greedy by value density is optimal when items can be cut and wrong when they cannot.',
         formal: 'the LP relaxation of 0/1 knapsack is fractional knapsack, and its optimum is an upper bound',
+        readAs: 'Allow items to be taken in fractions and the problem becomes easy — and because you relaxed ' +
+          'a constraint, its answer can only be better than the real one. That makes it a ceiling you ' +
+          'can compute cheaply and prune against.',
         detail: 'These two problems differ by one word in the statement and by a complexity class in the ' +
           'answer. Sorting by value per unit weight and filling is provably optimal for the fractional ' +
           'version by an exchange argument, and it is not optimal for the integral one - the last item either ' +
@@ -305,6 +329,8 @@
         term: 'Huffman coding as a greedy proof',
         plain: 'Repeatedly merging the two least frequent symbols is optimal, and the proof is an exchange argument.',
         formal: 'the two least frequent symbols are siblings at maximum depth in some optimal prefix code',
+        readAs: 'The two rarest symbols can always be placed together at the very bottom of some optimal ' +
+          'tree. That single fact is the whole proof of Huffman coding, and the whole algorithm.',
         detail: 'Huffman is worth carrying as the canonical non-trivial greedy proof because the exchange step ' +
           'is genuinely surprising: it is not obvious that the two rarest symbols can be assumed to be ' +
           'siblings, and the argument that swapping them down cannot increase the weighted path length is the ' +

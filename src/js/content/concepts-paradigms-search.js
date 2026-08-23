@@ -10,6 +10,10 @@
         term: 'An independence system',
         plain: 'A ground set, and a family of subsets called independent that is closed downwards.',
         formal: '(E, I) with I ⊆ 2^E, ∅ ∈ I, and A ⊆ B ∈ I implying A ∈ I',
+        readAs: 'A matroid is a ground set E plus a collection I of its subsets called independent. 2^E means ' +
+          '"all possible subsets of E", so I is some of them. Two rules: the empty set is always ' +
+          'independent, and any subset of an independent set is independent too — you can always throw ' +
+          'things away.',
         detail: 'This is the weakest structure worth naming, and almost every feasibility notion satisfies ' +
           'it: acyclic edge sets, matchings, subsets under a size cap, sets respecting a quota. Being ' +
           'hereditary is what makes "extend the current set" a sensible move at all, because it guarantees ' +
@@ -21,6 +25,10 @@
         term: 'The exchange property',
         plain: 'A larger independent set can always donate an element to a smaller one.',
         formal: 'A, B ∈ I with |A| < |B| implies there is x ∈ B \\ A with A ∪ {x} ∈ I',
+        readAs: 'The exchange property. If one independent set is smaller than another, you can always find ' +
+          'something in the bigger one that is not in the smaller one — the backslash is "minus" — and ' +
+          'add it to the smaller one while keeping it independent. That is what stops greedy painting ' +
+          'itself into a corner.',
         detail: 'This is the property that stops greedy from painting itself into a corner. It says a smaller ' +
           'independent set is never stuck: whatever it has committed to, something in a larger set can still ' +
           'be added. Two consequences follow immediately - every maximal independent set has the same size, ' +
@@ -34,6 +42,9 @@
         term: 'The Rado-Edmonds theorem',
         plain: 'Greedy is optimal for every weighting if and only if the independence system is a matroid.',
         formal: 'greedy finds a maximum-weight basis for all weight functions ⇔ (E, I) satisfies the exchange property',
+        readAs: 'Greedy works for every possible set of weights exactly when the structure is a matroid — and ' +
+          'the "exactly when" runs both ways. So if greedy fails on even one weighting, the structure ' +
+          'is not a matroid, and if it is a matroid, greedy can never fail.',
         detail: 'The theorem is what turns "does greedy work here?" from an argument into a check, and it is ' +
           'an if-and-only-if, which makes it useful in both directions. If the structure is a matroid, no ' +
           'weighting can defeat greedy and no proof needs writing. If it is not, some weighting does defeat ' +
@@ -71,6 +82,9 @@
         term: 'Uniform and partition matroids',
         plain: '"At most k of anything" and "at most k_i from each group" are both matroids.',
         formal: 'uniform: I = {A : |A| <= k}; partition: I = {A : |A ∩ E_i| <= k_i for each block E_i}',
+        readAs: 'Two of the simplest matroids. Uniform: any set of at most k things is independent. ' +
+          'Partition: at most k_i things from each block. The colon reads "such that" and the bars are ' +
+          '"how many".',
         detail: 'These two cover a surprising amount of practical scheduling and selection. Any problem that ' +
           'reads "choose the highest-value items subject to a cap, or to a cap per category" is a matroid, so ' +
           'sorting by value and taking greedily is provably optimal and needs no further argument. Recognising ' +
@@ -83,6 +97,9 @@
         term: 'Matroid intersection, and the cliff after it',
         plain: 'Two matroids at once is still polynomial; three is NP-hard.',
         formal: 'max |A| with A independent in both M₁ and M₂ is in P (Edmonds); for three matroids it is NP-hard',
+        readAs: 'Finding the largest set independent in two matroids at once is solvable in polynomial time. ' +
+          'Add a third and it becomes NP-hard — one of the sharpest easy-to-hard boundaries in the ' +
+          'subject.',
         detail: 'The boundary is worth carrying because it is so close. Feasible sets that must satisfy two ' +
           'independent structural constraints - a bipartite matching is a partition matroid intersected with ' +
           'another - remain tractable, though no longer by greedy: the algorithm becomes an augmenting-path ' +
@@ -95,6 +112,9 @@
         term: 'When the structure is not a matroid',
         plain: 'Greedy becomes a heuristic with, at best, a known approximation ratio.',
         formal: 'for a k-system, greedy is a 1/k-approximation; for submodular maximisation under a cardinality constraint, 1 − 1/e',
+        readAs: 'When the structure is not quite a matroid you still get a guarantee, just a weaker one: at ' +
+          'least 1/k of the best possible. For submodular objectives the guarantee is 1 − 1/e, about ' +
+          '63%, and that figure is provably the best any efficient algorithm can promise.',
         detail: 'A negative answer from the checker is not the end of greedy, it is the end of greedy as an ' +
           'exact algorithm. Weaker structures still support guarantees - independence systems where every ' +
           'maximal set is within a factor k of every other give greedy a 1/k ratio, and monotone submodular ' +
@@ -124,6 +144,8 @@
         term: 'Minimum remaining values',
         plain: 'Branch on the variable with the fewest legal values left.',
         formal: 'select argmin over unassigned x of |domain(x)|; ties broken by degree or by index',
+        readAs: '"argmin" means "the variable that minimises this". Pick whichever unassigned variable has ' +
+          'the fewest values left to try, so failures surface as early and as cheaply as possible.',
         detail: 'The argument is that a variable with two options doubles the tree and one with nine ' +
           'multiplies it by nine, so taking the small one first keeps the tree narrow near the top and finds ' +
           'dead ends immediately. It is the single most valuable heuristic in constraint search and it is not ' +
@@ -136,6 +158,8 @@
         term: 'Forward checking',
         plain: 'After an assignment, check that nothing has been left with no options.',
         formal: 'after assigning x = v, fail immediately if any unassigned y has domain(y) = ∅',
+        readAs: 'After each assignment, check whether any other variable has run out of options — the ∅ is ' +
+          'the empty set. If one has, backtrack now rather than discovering it several levels deeper.',
         detail: 'This is the cheapest form of lookahead: one scan of the remaining variables, rejecting the ' +
           'branch as soon as any of them is stuck. It catches failures one level earlier than plain ' +
           'consistency checking, which sounds small and is worth a constant factor rather than an order of ' +
@@ -175,6 +199,9 @@
         term: 'Iterative deepening',
         plain: 'Repeated depth-limited searches cost barely more than the deepest one and need no queue.',
         formal: 'sum over d of b^d = b^D · (1 + 1/b + 1/b² + …) ≈ b^D · b/(b−1)',
+        readAs: 'Adding up the nodes at every level of a tree comes to only a constant factor more than the ' +
+          'bottom level alone, because each level up is b times smaller. At b = 10 the whole tree is ' +
+          'about 1.11 times its last level — which is why iterative deepening costs so little.',
         detail: 'Depth-first search uses memory proportional to the depth and can fall down an infinite ' +
           'branch; breadth-first finds the shallowest answer and uses memory proportional to the frontier. ' +
           'Iterative deepening takes both properties by re-running the depth-first search with an increasing ' +
@@ -227,6 +254,8 @@
         term: 'Admissibility is one-sided',
         plain: 'A bound may overestimate what a subtree can reach; it may never underestimate.',
         formal: 'for maximisation, bound(s) >= max{value(t) : t is a completion of s}',
+        readAs: 'The bound must be optimistic: never lower than the best any completion could actually reach. ' +
+          'An optimistic bound may waste time; a pessimistic one deletes the answer.',
         detail: 'The asymmetry is the entire correctness condition and it is easy to get backwards. An ' +
           'over-estimate is safe: the search descends into a subtree that turns out not to contain anything ' +
           'better, which costs time. An under-estimate is fatal: the search skips a subtree that did contain ' +
@@ -251,6 +280,8 @@
         term: 'The LP relaxation as a bound',
         plain: 'Drop the integrality constraint, solve the easier problem, and use its optimum as the ceiling.',
         formal: 'max c·x subject to Ax <= b, x ∈ {0,1}ⁿ is bounded above by the same program over 0 <= x <= 1',
+        readAs: 'The integer problem forces each variable to be 0 or 1; letting them slide anywhere between ' +
+          'gives an easier problem whose answer is at least as good. That relaxed answer is the bound.',
         detail: 'Relaxation is the general recipe for constructing an admissible bound and it always works ' +
           'the same way: remove a constraint, so the feasible set grows, so the optimum can only improve, so ' +
           'the relaxed optimum is a ceiling on the original. For 0/1 knapsack the relaxation is fractional ' +
@@ -263,6 +294,9 @@
         term: 'The gap is the progress measure',
         plain: 'The distance between the best bound and the incumbent is what tells you how far there is to go.',
         formal: 'gap = (bestBound − incumbent) / incumbent; zero means optimality is proved',
+        readAs: 'The gap between the best answer found and the best that could still exist, as a fraction. ' +
+          'When it reaches zero you have not just found a good answer — you have proved nothing better ' +
+          'exists.',
         detail: 'Branch and bound does two things at once - it finds solutions and it proves that none is ' +
           'better - and the gap is the only number that reflects both. A solver stopped early reports its ' +
           'incumbent and its gap, and that pair is a genuine guarantee: "at most 3% below optimal" is usable ' +
@@ -287,6 +321,9 @@
         term: 'The travelling salesman as a bound exercise',
         plain: 'Even a crude bound removes most of the permutation tree.',
         formal: 'travelled + Σ over unvisited cities of the cheapest edge leaving that city',
+        readAs: 'A bound for the travelling salesman: what you have spent already, plus the cheapest possible ' +
+          'way out of every city you still have to visit. It is optimistic, which is what makes it ' +
+          'valid.',
         detail: 'The TSP is where bounding gets interesting because the obvious search is a factorial, so ' +
           'the constant factor a bound buys is measured in cities rather than in percentages. The cheapest-' +
           'edge bound is close to the weakest usable one and still removes most of the tree; a 1-tree or an ' +

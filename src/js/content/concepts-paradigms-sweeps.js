@@ -10,6 +10,9 @@
         term: 'The amortisation argument',
         plain: 'Each element enters the structure once and leaves once, so the nested loop is linear.',
         formal: 'total work = Σ pushes + Σ pops <= 2n, however the inner loop is distributed',
+        readAs: 'Every element enters the window once and leaves once, so the inner loop runs at most 2n ' +
+          'times in total — no matter how uneven any single iteration looks. That is amortised ' +
+          'counting, and it is why a nested loop here is still linear.',
         detail: 'This is the only idea in the section, and everything else is a disguise for it. The inner ' +
           'loop of a two-pointer sweep can run for a long time at one position and not at all at the next, ' +
           'so per-iteration reasoning gives no bound; the total does, because every element can only be ' +
@@ -34,6 +37,9 @@
         term: 'The monotonic deque',
         plain: 'Keep the window\'s candidates in decreasing order; the front is always the answer.',
         formal: 'maintain indices i₁ < i₂ < … with a[i₁] > a[i₂] > …, dropping expired fronts and dominated backs',
+        readAs: 'Keep a deque of positions whose values decrease left to right. Drop from the front what has ' +
+          'fallen out of the window, and from the back anything a newer larger value has made ' +
+          'irrelevant. The front is then always the window maximum.',
         detail: 'The invariant does two jobs. Dropping the front when it leaves the window handles expiry; ' +
           'dropping the back while it is no larger than the arriving element handles domination, because an ' +
           'earlier smaller element can never be the maximum again while a later larger one is present. What ' +
@@ -46,6 +52,9 @@
         term: 'Time and space are different claims',
         plain: 'The operation total does not move with the data; the largest deque does.',
         formal: 'work is Θ(n) for every input; peak size ranges over [1, k] depending on the input shape',
+        readAs: 'The time is linear whatever the data. What the data changes is how large the deque grows — ' +
+          'anywhere from one element to the full window — so the memory is input-dependent and the time ' +
+          'is not.',
         detail: 'Reporting only the total hides the memory behaviour and reporting only the peak suggests the ' +
           'work varies when it does not. Both belong in the table because they answer different questions - ' +
           'how long will this take, and how much will it hold - and they respond to different properties of ' +
@@ -81,6 +90,9 @@
         term: 'The sortedness precondition',
         plain: 'The classic two-pointer pair search assumes a sorted array and is silently wrong without one.',
         formal: 'with a[lo] + a[hi] compared against the target, correctness depends on a being non-decreasing',
+        readAs: 'Two pointers converging from the ends work only because the array is sorted: too small means ' +
+          'move the left pointer up, too large means move the right one down. On unsorted data the ' +
+          'moves are meaningless.',
         detail: 'The inward-moving pair search is the first two-pointer algorithm anyone learns, and its ' +
           'precondition is invisible in the code: nothing about the loop mentions order, and on unsorted ' +
           'input it terminates and returns "not found" for pairs that exist. This is the same class of ' +
@@ -108,6 +120,9 @@
         term: 'Halving the exponent',
         plain: 'Two searches of half the size, combined by a lookup, replace one search of the full size.',
         formal: '2^n becomes 2·2^(n/2) states plus 2^(n/2)·log(2^(n/2)) work to combine',
+        readAs: 'Meet in the middle: split the input in half, enumerate each half separately, then match them ' +
+          'up. Two square-roots of the original count instead of the count itself — at n = 50, about 34 ' +
+          'million instead of 10^15.',
         detail: 'The improvement is entirely structural: nothing is learned about the problem, and no branch ' +
           'is pruned. Enumerating each half separately is exponentially cheaper than enumerating the whole, ' +
           'and if the two halves can be recombined by searching one of them rather than by pairing them all, ' +
@@ -132,6 +147,8 @@
         term: 'Memory is the price and it is exponential',
         plain: 'Both halves must be resident, so the technique stops near n = 50 whatever the machine.',
         formal: 'peak memory is Θ(2^(n/2)) entries; at n = 50 that is 2^25 ≈ 3.4 × 10⁷ per side',
+        readAs: 'The technique trades time for memory, and the memory is the binding constraint: 34 million ' +
+          'entries per side at n = 50, which is what actually stops you going further.',
         detail: 'A time improvement bought with an exponential space cost has a ceiling, and stating it is ' +
           'part of teaching the technique honestly. Each two items added multiply the memory by two, so the ' +
           'practical limit arrives quickly and arrives as an allocation failure rather than as slowness. ' +
@@ -144,6 +161,8 @@
         term: 'Extrapolate rather than saying "infeasible"',
         plain: 'Time the exhaustive search at a size that finishes and double from there.',
         formal: 'measure t(k) for a feasible k, then project t(n) = t(k)·2^(n−k)',
+        readAs: 'Time a size you can actually run, then double the estimate for every extra element. It turns ' +
+          '"this is exponential" into a number of hours.',
         detail: 'A comparison needs two numbers, and "infeasible" is not one. Measuring an eighteen-item ' +
           'exhaustive search takes milliseconds, and doubling from there gives a defensible projection for ' +
           'forty items on this machine. It also keeps the claim honest in the other direction: the projection ' +
@@ -156,6 +175,9 @@
         term: 'Bidirectional search',
         plain: 'Search forward from the start and backward from the goal; stop where they meet.',
         formal: 'b^d becomes b^(d/2) + b^(d/2), provided the graph can be traversed backwards',
+        readAs: 'Searching from both ends means two half-depth searches instead of one full-depth one — a ' +
+          'square root of the work. It needs the edges to be followable in reverse, which not every ' +
+          'graph allows.',
         detail: 'The same halving, on a graph. It needs two things that are easy to overlook: predecessors ' +
           'must be enumerable, which rules out many implicit state spaces, and the goal must be a single ' +
           'known state rather than a predicate, because the backward frontier has to start somewhere. When ' +
@@ -167,6 +189,8 @@
         term: 'The meeting test must run at generation time',
         plain: 'Check each new node against the other side immediately, not after the level completes.',
         formal: 'on generating v from u, if v ∈ seen(other) then the answer is dist(u) + 1 + distOther(v)',
+        readAs: 'The two searches meet when one generates a node the other has already seen. The total ' +
+          'distance is what each side spent, plus the edge joining them.',
         detail: 'Testing for a meeting only between levels finds the intersection one level late, and on an ' +
           'odd-length shortest path that returns a distance one too large. It is a bug that passes every test ' +
           'with an even-length answer, which is half of them, and it is the single most common defect in a ' +
@@ -191,6 +215,9 @@
         term: 'When the split buys nothing',
         plain: 'If the halves constrain each other, there is nothing to sort and nothing to look up.',
         formal: 'the technique needs the objective to decompose as f(left) ⊕ g(right) with ⊕ searchable',
+        readAs: 'Splitting only works if the thing you are optimising can be computed from the two halves ' +
+          'separately and then combined — and combined by an operation you can search over, such as ' +
+          'addition, rather than one you cannot.',
         detail: 'Subset sum splits because a total is a sum of the two halves\' totals, and the best partner ' +
           'for a given left sum is found by a single search. A problem where the halves interact - a graph ' +
           'colouring whose edges cross the cut, a schedule where left-half choices change the right half\'s ' +
@@ -219,6 +246,9 @@
         term: 'Mo\'s ordering',
         plain: 'Sort queries by the block of the left endpoint, then by the right endpoint.',
         formal: 'key(q) = (⌊q.left / b⌋, q.right); two pointers then walk to each query in turn',
+        readAs: 'Mo\'s algorithm sorts the queries by which block their left end falls in, then by their ' +
+          'right end. Answering them in that order means the two window pointers travel a total ' +
+          'distance that is far less than answering them as they came.',
         detail: 'The ordering is the entire algorithm - the sweep underneath is four while-loops that could ' +
           'be written by anyone. Inside a block the right pointer only advances, so it costs n per block ' +
           'across all queries in it; the left pointer stays within its block, so it costs at most b per ' +
@@ -231,6 +261,9 @@
         term: 'The block size is n/√q, not √n',
         plain: 'Minimising q·b + n²/b gives n/√q, and the two coincide only when q = n.',
         formal: 'd/db (q·b + n²/b) = 0 at b = n/√q, giving total 2n√q',
+        readAs: 'Differentiate the cost with respect to the block size and set it to zero — the standard way ' +
+          'to find a minimum. The best block size is n over the square root of the query count, and the ' +
+          'total movement is 2n√q.',
         detail: 'The folklore choice of √n is the minimiser for the case q = n and is measurably worse ' +
           'otherwise - with six hundred queries over four thousand elements it costs about 1.7× the ' +
           'minimum. The curve is broad, so being roughly right is enough and nobody should tune this ' +
@@ -256,6 +289,9 @@
         term: 'Decomposable questions do not need this',
         plain: 'If the answer for a range follows from the answers for two halves, a segment tree wins online.',
         formal: 'decomposable: f(A ∪ B) = f(A) ⊕ f(B) for an associative ⊕',
+        readAs: 'The aggregate must be computable from partial answers: work out each piece separately and ' +
+          'combine. Sums and maxima qualify; a median does not, which is why these techniques do not ' +
+          'apply to it.',
         detail: 'Sums, minima, maxima and gcds are decomposable, so a segment tree answers them online in ' +
           'log n and reordering buys nothing at all. Distinct counts are not: knowing the distinct counts of ' +
           'two halves says nothing about their union, because the overlap is unknown. That property, rather ' +
@@ -280,6 +316,9 @@
         term: 'Sqrt decomposition as the parent idea',
         plain: 'Split into √n blocks so that per-block work and per-element work balance.',
         formal: 'block updates in O(1) and queries touching O(√n) blocks plus O(√n) elements',
+        readAs: 'Square-root decomposition splits the array into about √n blocks of about √n elements. A ' +
+          'query touches a handful of whole blocks and a handful of loose elements, so both halves come ' +
+          'to √n — which is why that block size is the one chosen.',
         detail: 'Mo\'s algorithm is one member of a family whose organising principle is the same: choose a ' +
           'block size so that the two costs a design trades off become equal. Range updates with lazy block ' +
           'tags, offline dynamic connectivity over time blocks and small-to-large merging all follow it. The ' +
