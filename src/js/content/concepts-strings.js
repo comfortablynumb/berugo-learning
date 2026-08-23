@@ -35,6 +35,9 @@
         term: 'On natural language the naive scan is nearly linear',
         plain: 'Most alignments fail on their first character, so the inner loop almost never runs.',
         formal: 'expected comparisons per alignment is 1/(1 − p) where p is the probability two random characters agree',
+        readAs: 'If two random characters match a fraction p of the time, the average alignment runs 1/(1−p) ' +
+          'comparisons before failing. On English p is small, so that is barely above 1 — which is why ' +
+          'the naive scan is nearly linear on real text.',
         detail: 'The worst case is `n·m` and the typical case is close to `n`, and the distance ' +
           'between those two facts is the whole of this milestone. On English 95.2% of alignments ' +
           'fail immediately, so the average alignment costs just over one comparison. That is why ' +
@@ -72,6 +75,8 @@
         term: 'A matcher must report overlapping occurrences',
         plain: 'Searching for aa in aaaa finds three, not two.',
         formal: 'the occurrence set is every start position p with text[p..p+m) = pattern, without exclusion',
+        readAs: 'Every position where the pattern starts counts, even where two occurrences overlap. The ' +
+          'square-then-round bracket means the window includes p and stops just before p+m.',
         detail: 'This is the first thing a hand-rolled matcher gets wrong, usually by advancing the ' +
           'start position by `m` after a hit rather than by one. The bug is invisible on natural ' +
           'language, where a pattern rarely overlaps itself, and catastrophic on the periodic data ' +
@@ -113,6 +118,8 @@
         term: 'A border is a prefix that is also a suffix',
         plain: 'The longest border of "ababcabab" is "abab", of length 4.',
         formal: 'border(s) = the longest proper prefix of s that is also a suffix of s',
+        readAs: 'The longest stretch that appears both at the start and at the end of the string, without ' +
+          'being the whole string — "proper" is what rules that out. On "ababa" it is "aba".',
         detail: 'The border array records the longest border of every prefix of the pattern, and it ' +
           'is the single most reusable object in string algorithms. Everything KMP does is a ' +
           'consequence of one observation: after matching k characters and failing, the longest ' +
@@ -125,6 +132,9 @@
         term: 'The construction looks quadratic and is linear',
         plain: 'The inner loop walks a chain of borders, and the chain can only be walked n times in total.',
         formal: 'the border length rises by at most 1 per position, so across n positions it can fall at most n times',
+        readAs: 'The classic amortised argument: a quantity that can only creep up one step at a time cannot ' +
+          'fall more than n times in total, however far each individual fall goes. That is why the ' +
+          'construction is linear despite its inner loop.',
         detail: 'This is the same amortisation argument as a dynamic array\'s doubling and it is the ' +
           'only subtle thing in the algorithm. A single position can walk a long chain, so no ' +
           'per-position bound holds; the total is bounded because every step down the chain is paid ' +
@@ -148,6 +158,9 @@
         term: 'The smallest period is one subtraction',
         plain: 'n minus the longest border is the smallest period, and it divides n exactly when the string is a power.',
         formal: 'period(s) = |s| − border(s); s is an exact repetition iff period(s) divides |s|',
+        readAs: 'The period is the length minus the border. When the period divides the length exactly, the ' +
+          'string is some block repeated a whole number of times — which is how you detect a repetition ' +
+          'without ever comparing blocks.',
         detail: 'This is the most reusable consequence of the array and it has nothing to do with ' +
           'searching. "Is this string a repetition of something shorter", "what is the shortest ' +
           'string that generates it", "how many times does it repeat" are all answered by one ' +
@@ -183,6 +196,9 @@
         term: 'The automaton form trades memory for the inner loop',
         plain: 'Resolve every fallback into a table and matching is one lookup per character.',
         formal: 'next[state][symbol] with all failures precomputed; |alphabet| × (m + 1) cells',
+        readAs: 'Flatten every failure jump into a lookup table so each character costs one array read. The ' +
+          'table has one row per pattern position and one column per possible character, so it grows ' +
+          'with the alphabet — cheap for DNA, expensive for Unicode.',
         detail: 'The border array keeps a fallback loop that runs zero or more times per character; ' +
           'the table has no loop at all. The cost is a cell per state per alphabet symbol, so the ' +
           'decision is entirely about the alphabet: on DNA the table is trivially affordable and on ' +
@@ -211,6 +227,9 @@
         term: 'The Z-array is the longest common prefix with every suffix',
         plain: 'z[i] is how far s and s[i..] agree from their starts.',
         formal: 'z[i] = max { k : s[0..k) = s[i..i+k) }',
+        readAs: 'The Z-value at position i is how many characters starting there still match the start of the ' +
+          'string. The braces and the colon read "the largest k such that", and the brackets mark a ' +
+          'window that stops just short of its end.',
         detail: 'It carries the same information as the border array — each is recoverable from the ' +
           'other in linear time — and it is expressed in a way most people find easier to hold. ' +
           'Where a border is "a prefix that is also a suffix", a Z value is "how much of the string ' +
@@ -222,6 +241,8 @@
         term: 'The window is the algorithm, and it never moves left',
         plain: 'Keep the interval that reaches furthest right and is known to equal a prefix.',
         formal: '[l, r] with s[l..r) = s[0..r−l); r is non-decreasing over the whole run',
+        readAs: 'The algorithm remembers one window already known to match the string\'s own beginning. Its ' +
+          'right edge only ever moves forward, never back, which is what caps the total work at linear.',
         detail: 'Every position inside the window has a mirror whose answer is already computed, so ' +
           'the only work the algorithm ever does is extending past `r`. Each successful extension ' +
           'moves `r` right, `r` never moves left, and `r` is bounded by `n` — so the total ' +
@@ -246,6 +267,9 @@
         term: 'Matching is a concatenation and a sentinel',
         plain: 'Take the Z-array of pattern + sentinel + text and read off every position with z >= m.',
         formal: 'occurrences are exactly the positions i > m with z[i] = m, offset back by m + 1',
+        readAs: 'Glue the pattern, a separator and the text together, then any Z-value equal to the pattern ' +
+          'length marks a match. Subtract the pattern length and the separator to get the real ' +
+          'position.',
         detail: 'The reduction is three lines and it is the reason the Z-algorithm is often the ' +
           'fastest thing to write in a competitive setting. It also costs: the array is as long as ' +
           'the text, so the memory is O(n) rather than O(m), and the whole text has to be available ' +
@@ -282,6 +306,9 @@
         term: 'Fine and Wilf: two short periods force a shorter one',
         plain: 'If a string of length n has periods p and q with p + q − gcd(p, q) <= n, then gcd(p, q) is a period too.',
         formal: 'the bound is tight: at exactly p + q − gcd the gcd is forced, and one character shorter it is not',
+        readAs: 'Fine and Wilf: a string long enough to have two periods must also have their greatest common ' +
+          'divisor as a period. "Long enough" is exactly p + q − gcd — one character less and a ' +
+          'counterexample exists.',
         detail: 'The consequence worth carrying is that a string cannot have two unrelated ' +
           '"almost-short" periods: two of them collapse into their greatest common divisor as soon ' +
           'as the string is long enough. The tightness is a construction rather than a citation — ' +
@@ -295,6 +322,9 @@
         term: 'The Fibonacci words are the extremal family',
         plain: 'Their two shortest periods sit just clear of the Fine-Wilf bound, every time.',
         formal: 'F(n) = F(n−1) + F(n−2) as strings; the periods are consecutive Fibonacci numbers and the bound exceeds the length',
+        readAs: 'Build strings the way Fibonacci numbers are built — each one is the previous two joined — ' +
+          'and their periods come out as Fibonacci numbers too. They are the standard worst case ' +
+          'because the theorem\'s length requirement is never quite met.',
         detail: 'They are the standard test for any periodicity or border-array implementation ' +
           'because they are engineered to be awkward: long borders, no exact period, and a bound ' +
           'that never quite applies. An implementation that is correct on `aaaa` and `abcabc` and ' +

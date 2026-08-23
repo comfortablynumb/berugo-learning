@@ -112,6 +112,8 @@
         term: 'Test the optimised against the unoptimised',
         plain: 'One property test over random instances catches every precondition violation there is.',
         formal: '∀ instances: optimised(instance) = reference(instance), asserted on values not on timings',
+        readAs: 'For every instance — the ∀ is "for all" — the fast version and the plain one must agree on ' +
+          'the answer. The test is on values, never on how long each took.',
         detail: 'Each of these techniques has a proof obligation, and discharging it in a test is far more ' +
           'reliable than discharging it in your head. Running both versions on a few hundred random ' +
           'instances and asserting the values are equal catches violations you knew about and violations ' +
@@ -268,6 +270,9 @@
         term: 'Detect the cycle; do not be told about it',
         plain: 'Run a topological sort first and let the result choose the method.',
         formal: 'topologicalOrder(chain) = null ⟺ a transient cycle exists ⟹ use elimination',
+        readAs: 'Failing to find an ordering happens exactly when there is a cycle, and a cycle means the ' +
+          'sweep cannot work so you must solve the equations instead. The double arrow is "exactly ' +
+          'when"; the single one is "which means".',
         detail: 'Whether a chain is cyclic is a property of the rules, and rules change - a board gains a ' +
           '"miss a turn" square, a protocol gains a retry, a game gains a snake. Deciding the method by ' +
           'inspection means the decision goes stale silently. Deciding it by running a topological sort ' +
@@ -326,6 +331,8 @@
         term: 'Rows must sum to one',
         plain: 'A chain whose probabilities do not sum to one is not a chain, and its answer is meaningless.',
         formal: 'Σ_t p(s→t) = 1 for every transient s, within floating-point tolerance',
+        readAs: 'Add up the probabilities of every move out of a state and they must come to exactly one — ' +
+          'something has to happen. Checking it catches the transition bugs nothing else notices.',
         detail: 'This is the cheapest possible sanity check on a transition table and it catches the ' +
           'commonest modelling error - a case the generator forgot, or a branch that returns early. The ' +
           'linear solver will happily solve a system built from a defective table and return numbers that ' +

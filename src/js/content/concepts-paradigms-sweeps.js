@@ -331,6 +331,9 @@
         term: 'The bound is an over-estimate that does not diverge',
         plain: '(n + q)·√n bounds the sweep; the measurement sits comfortably below it and tracks it.',
         formal: 'measured moves <= (n + q)·√n, with the ratio roughly constant as n and q grow',
+        readAs: 'The pointer movement stays under the predicted bound, and the ratio between measured and ' +
+          'predicted holds steady as the problem grows — which is what makes the bound a usable ' +
+          'estimate rather than just a true statement.',
         detail: 'A bound is useful when the measurement stays a stable fraction of it, and useless when the ' +
           'ratio drifts - the second case means the bound is describing a worst case the workload never ' +
           'reaches, and it will mislead any capacity plan built on it. Reporting both, and the ratio, is what ' +

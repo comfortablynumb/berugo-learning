@@ -91,6 +91,8 @@
         term: 'Eviction cycle',
         plain: 'A cuckoo insertion can displace a key that displaces another, forever. The only repair is a rebuild.',
         formal: 'kick limit ⇒ rehash with new seeds',
+        readAs: 'When the eviction chain runs too long, there is no repair available — the table has to be ' +
+          'rebuilt with different hash seeds. The ⇒ is "which means".',
         detail: 'An eviction chain can close into a cycle in which every slot involved is occupied by ' +
           'a key whose alternative is also in the cycle, and no amount of further kicking resolves ' +
           'it. Implementations detect this with a kick limit and respond by rehashing the whole ' +
@@ -191,6 +193,8 @@
         term: 'Load factor 7/8',
         plain: 'Group probing stays cheap where linear probing is already walking long runs.',
         formal: 'grow at α > 0.875',
+        readAs: 'Resize once the table is more than seven-eighths full. Higher than most open-addressing ' +
+          'schemes dare, and the SIMD group scan is what makes it affordable.',
         detail: 'A conventional open-addressed table is deep into the 1/(1 − α) wall at 87.5% load, ' +
           'averaging four probes and walking long runs. A Swiss table is not, because its unit of ' +
           'work is a group rather than a slot: a run of occupied slots is scanned sixteen at a time, ' +
@@ -322,6 +326,8 @@
         term: 'Reserve beats both schemes',
         plain: 'When the final size is known, reserving removes the spike instead of spreading it — and does less total work than either alternative.',
         formal: 'capacity = ⌈n / maxLoad⌉, rounded to a power of two',
+        readAs: 'To hold n entries without resizing, reserve n divided by the maximum load factor, rounded up ' +
+          'and then up again to a power of two. Reserving up front skips every intermediate rehash.',
         detail: 'Reserving is not merely the smoothest option, it is the cheapest: 20 000 inserts ' +
           'cost 36 043 units of work from a reserved table, against 84 633 growing from an initial ' +
           '16 and 149 468 with an incremental migration. Growth pays to move entries repeatedly, and ' +

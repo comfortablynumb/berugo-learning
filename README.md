@@ -21,6 +21,13 @@ faithfully in a browser, the section models it, says so plainly, and states what
 - ✅ Architecture and conventions fixed — [`doc/architecture.md`](doc/architecture.md)
 - ✅ Build order and dependency graph — [`doc/ROADMAP.md`](doc/ROADMAP.md)
 - ✅ Scope decisions recorded — [`doc/topic-suggestions.md`](doc/topic-suggestions.md)
+- ✅ **Notation decoder across all 146 sections**: every mathematical symbol carries how to say it
+  and what it does, revealed on hover, tap or keyboard focus, and every formal statement whose
+  notation a reader cannot pronounce carries an "In words" translation beneath it. The audience is
+  a senior engineer with little or no mathematics, so the Description tab explains the idea before
+  the symbol — see [`src/js/content/notation.js`](src/js/content/notation.js) for the glossary and
+  [`notation-local.js`](src/js/content/notation-local.js) for the per-section meanings of α, ε, δ
+  and λ.
 - ✅ **M00 — platform foundation**: shell, curriculum-driven navigation, worker sandbox, graded
   code labs, content registries, D3/mermaid pipelines, progress, and three automated checks.
   4 sections live.

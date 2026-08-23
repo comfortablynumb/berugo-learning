@@ -249,6 +249,9 @@
         term: 'Coalescing trades false positives for round trips',
         plain: 'Merge adjacent ranges across the smallest gaps until the count fits a budget, and scan the gaps too.',
         formal: 'scanned = cells + Σ (merged gap sizes)',
+        readAs: 'Merging two nearby ranges into one saves a round trip and costs you everything in the gap ' +
+          'between them. The total scanned is what you wanted plus the sum of every gap you decided to ' +
+          'swallow.',
         detail: 'A store that charges per request rather than per row would much rather read a few extra cells ' +
           'than issue forty scans, so the real query planner picks a range budget and merges cheapest-gap-first ' +
           'up to it. The cost curve is steep at the low end and flat afterwards, which makes the decision easy ' +

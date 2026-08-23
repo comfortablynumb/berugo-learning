@@ -80,6 +80,9 @@
         term: 'The quadrangle inequality is the precondition',
         plain: 'Knuth\'s narrowing is valid only if the interval weight satisfies w(a,c) + w(b,d) ≤ w(a,d) + w(b,c).',
         formal: 'for a ≤ b ≤ c ≤ d, the QI plus monotonicity on nested intervals implies the argmin is monotone',
+        readAs: 'Given four points in order, the quadrangle inequality says that widening an interval never ' +
+          'costs less than widening a narrower one inside it. That is what forces the best split point ' +
+          'to move only rightwards.',
         detail: 'When the inequality fails, the narrowed range can exclude the true optimum, so the run is ' +
           'faster *and wrong* - and nothing raises, because a smaller search producing a larger minimum is ' +
           'indistinguishable from a correct one without a reference. Non-negative weights always satisfy it, ' +
@@ -108,6 +111,9 @@
         term: 'Keep the split, or lose the answer',
         plain: 'The scalar count does not say which parenthesisation achieved it.',
         formal: 'store argmin k per cell; recomputing it from the values breaks on ties',
+        readAs: 'Record which split won, rather than working it out again later from the stored costs. When ' +
+          'two splits tie, recomputation can pick the other one and the reconstructed answer stops ' +
+          'matching its own reported cost.',
         detail: 'A matrix-chain cost is a number and the thing a caller actually wants is the order to ' +
           'multiply in. Recording the argmin as the cell is settled costs one array and makes the ' +
           'reconstruction a walk; recomputing it afterwards from the value table is possible and breaks on ' +
@@ -136,6 +142,8 @@
         term: 'Every traversal is iterative',
         plain: 'A path of 20 000 nodes is a recursion 20 000 deep.',
         formal: 'replace the call stack with an explicit stack; depth is Θ(n) in the worst case',
+        readAs: 'A path-shaped tree is n deep, and n recursive calls will overflow the engine stack. Keeping ' +
+          'your own stack in an array removes the limit entirely.',
         detail: 'A random tree has depth around log n and a path has depth n, and both are legitimate inputs. ' +
           'On the sizes these sections replay, a recursive traversal is a stack overflow rather than a slow ' +
           'answer - the same lesson the M04 search trees learned when a sorted build produced a spine. The ' +
@@ -192,6 +200,9 @@
         term: 'Prefix/suffix is insurance, and it has a premium',
         plain: 'On low-degree trees the naive loop is actually cheaper.',
         formal: 'prefix/suffix is Θ(deg) with a larger constant; the loop is Θ(deg²) with a small one',
+        readAs: 'Two ways to combine all children except one. Prefix/suffix arrays scale linearly in the ' +
+          'number of children but allocate; the nested loop is quadratic with almost no overhead. For ' +
+          'small degrees the quadratic one wins.',
         detail: 'The honest measurement is that on a path the loop costs 7 994 operations and the ' +
           'prefix/suffix machinery costs 11 994 - it loses. On a caterpillar it loses too. It wins by 333× ' +
           'on a star, and the star is the shape a random test-tree generator will never produce. That is ' +

@@ -22,6 +22,9 @@
         term: 'The mirror is the Z-window wearing different clothes',
         plain: 'Keep the palindrome reaching furthest right; a position inside it has a mirror already computed.',
         formal: 'radius[i] starts at min(r − i, radius[2c − i]) rather than at zero',
+        readAs: 'Manacher seeds each position from its mirror image inside the palindrome already known — 2c ' +
+          '− i is that mirror, c being the centre. Capping it at the distance to the known edge is what ' +
+          'keeps the answer correct.',
         detail: 'If `i` lies inside the palindrome centred at `c` and reaching to `r`, then the ' +
           'characters around `i` mirror those around `2c − i`, whose radius is known. When that ' +
           'radius is strictly smaller than the distance to `r` the answer is exact and free; when it ' +
@@ -109,6 +112,9 @@
         term: 'Bitap keeps the whole match state in the bits of a register',
         plain: 'Bit j is set when the first j+1 pattern characters match ending here.',
         formal: 'Shift-Or: state = (state << 1) | mask[c], where a ZERO bit means a match',
+        readAs: 'Keep the whole search state in one machine word, one bit per pattern position. Shifting left ' +
+          'advances every partial match at once, and OR-ing the character mask kills the ones that no ' +
+          'longer fit. Zero means match because that makes the shift bring in the right default.',
         detail: 'The negative logic is not perversity: shifting a 0 into the low bit starts a fresh ' +
           'match attempt at every position for free, which is exactly what the algorithm needs. One ' +
           'shift and one OR advance every pattern position simultaneously, so a 32-character ' +
@@ -121,6 +127,9 @@
         term: 'The word size is a cliff, and the cliff is the design constraint',
         plain: 'A 32-character pattern costs one word per character; a 33-character one costs two.',
         formal: 'cost is ceil(m / w) words per character per error level, for a machine word of w bits',
+        readAs: 'While the pattern fits in one machine word the cost is one operation per character — ' +
+          'genuinely constant. Past that it needs a second word, and the cost doubles in a single step. ' +
+          'That cliff is what makes bit-parallel matching a short-pattern technique.',
         detail: 'That is the entire reason `agrep` and its descendants exist and the entire reason ' +
           'they have a documented pattern-length limit. The cost curve is a staircase whose step is ' +
           'the machine word, which is why this family of algorithms got faster in 1985 and again ' +
@@ -145,6 +154,9 @@
         term: 'A distance cutoff restricts the DP to a band, and the restriction is exact',
         plain: 'An alignment costing at most k cannot stray more than k cells from the diagonal.',
         formal: 'only the (2k+1)-wide band around the diagonal can hold a value at most k',
+        readAs: 'A cell far from the diagonal already implies more than k edits, so it need not be computed ' +
+          'at all. Restricting to a band of that width is what turns quadratic edit distance into ' +
+          'something linear in the text for small k.',
         detail: 'Every step away from the diagonal costs at least one edit and every step back ' +
           'costs another, so a cell more than k from it has value greater than k by construction. ' +
           'That makes the band a correct restriction rather than a heuristic — which is what ' +
@@ -157,6 +169,9 @@
         term: 'A banded answer above the band is a refusal, not a number',
         plain: 'The routine says "greater than k", and reading that as "exactly k+1" is wrong.',
         formal: 'the banded distance is exact iff it is at most k; outside, only the inequality holds',
+        readAs: 'Inside the band the answer is the true distance. If the computation runs off the band, all ' +
+          'you learn is that the distance exceeds k — the correct response is to refuse rather than to ' +
+          'report the band\'s number.',
         detail: 'This is the column implementations lose. A banded routine that returns `k + 1` is ' +
           'reporting an artefact of the band, because the true distance could be anything above it — ' +
           'and code that sorts by that value, or thresholds on it, or averages it, is using a number ' +
@@ -168,6 +183,9 @@
         term: 'The q-gram filter has a usability condition, and it is one subtraction',
         plain: 'A match within k errors must share at least m − q + 1 − kq q-grams with the pattern.',
         formal: 'each of the k errors destroys at most q q-grams, out of the m − q + 1 the pattern has',
+        readAs: 'One edit can spoil at most q of the overlapping q-grams, so k edits spoil at most k·q. ' +
+          'Anything within k edits must therefore still share the rest — which is the filter\'s ' +
+          'threshold, and it goes negative once q gets large.',
         detail: 'When that number is positive the filter is sound and useful; when it is zero or ' +
           'below, every window passes and the filter is a q-gram count per position for no benefit ' +
           'at all. The expression involves the pattern length, the error budget and q together, so a ' +
@@ -207,6 +225,8 @@
         term: 'A diff is a shortest path in an edit graph',
         plain: 'Right deletes a line of A, down inserts a line of B, and the diagonal is free when the lines match.',
         formal: 'the shortest edit script is the shortest path from (0,0) to (N,M) in that graph',
+        readAs: 'Lay the two files out as the axes of a grid. Moving right deletes, moving down inserts, ' +
+          'moving diagonally keeps a matching line for free. The cheapest route across is the diff.',
         detail: 'Framing it as a longest common subsequence is equivalent and less useful, because ' +
           'the LCS formulation invites an O(NM) table and the graph formulation invites a search ' +
           'that stops when it reaches the corner. The difference between those two mental models is ' +
@@ -219,6 +239,9 @@
         term: 'Myers searches by cost, so it stops when the answer is found',
         plain: 'Keep the furthest point reachable on each diagonal at the current edit distance, and increase it until you arrive.',
         formal: 'O((N + M)·D) where D is the edit distance — proportional to the SIZE OF THE ANSWER',
+        readAs: 'Myers costs the file sizes times the number of differences, not times the file sizes. Two ' +
+          'large files that differ in three lines are diffed almost instantly — which is why this is ' +
+          'the algorithm every version control system uses.',
         detail: 'That is the property that makes `git diff` on a one-line change to a ten-thousand ' +
           'line file return instantly. The work is not a function of the file size but of how ' +
           'different the two files are, so the common case — a small change to a large file — is ' +
@@ -266,6 +289,8 @@
         term: 'An edit script is only worth asserting about if it round-trips',
         plain: 'Apply it to A and check you get B, character for character.',
         formal: 'apply(A, script) = B is the only claim; the length and the hunk count are commentary',
+        readAs: 'The one thing a diff must guarantee is that applying it to the first file produces the ' +
+          'second. How short or how readable the script is are preferences, not correctness.',
         detail: 'A diff that does not reconstruct the second file is a plausible list of line ' +
           'numbers, and every other number computed from it is meaningless. The check is four lines ' +
           'and it catches the whole family of backtracking errors that produce scripts which look ' +

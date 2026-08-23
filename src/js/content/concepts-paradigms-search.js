@@ -58,6 +58,8 @@
         term: 'The independence oracle',
         plain: 'The algorithm never inspects the structure — it only asks "is this set still independent?".',
         formal: 'greedy(E, oracle, w): sort E by w descending; keep x when oracle(kept ∪ {x}) holds',
+        readAs: 'The entire algorithm: sort by weight, then take each element if adding it to what you have ' +
+          'kept is still allowed. The ∪ is "together with". Everything difficult is inside the oracle.',
         detail: 'Writing greedy against an oracle rather than against a graph is what makes the abstraction ' +
           'pay. The same twelve lines become Kruskal, a scheduling algorithm with deadlines, or a quota-' +
           'respecting selection, purely by changing the oracle. It also makes the cost model explicit: the ' +

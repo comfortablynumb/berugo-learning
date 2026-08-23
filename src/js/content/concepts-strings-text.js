@@ -34,6 +34,9 @@
         term: 'The state set is bounded by the pattern, never by the input',
         plain: 'A set of NFA states cannot be larger than the number of NFA states.',
         formal: 'per character the simulation costs O(states), so the search is O(n · m)',
+        readAs: 'Track the whole set of states the machine could be in at once, and each character costs one ' +
+          'pass over that set. Linear in the text, linear in the pattern, and no path is ever explored ' +
+          'twice — which is why this cannot blow up.',
         detail: 'The bound is almost too simple to state, and it is the whole guarantee: whatever ' +
           'the input does, the set cannot grow past the machine. So the per-character cost is ' +
           'fixed before the input is seen, which is what lets a service accept a user-supplied ' +
@@ -46,6 +49,9 @@
         term: 'Catastrophic backtracking is caused by ambiguity, not by length',
         plain: 'The engine re-explores the same split of the same characters in every arrangement.',
         formal: 'the path count is exponential when a quantifier nests inside another over the same characters',
+        readAs: 'A pattern like (a+)+ can split the same run of characters in exponentially many ways, and a ' +
+          'backtracking engine tries all of them. That nesting is the specific shape to look for when ' +
+          'auditing a regex.',
         detail: 'In `(a+)+b` the inner `a+` and the outer `+` can divide a run of `a`s in every ' +
           'possible way, and each division is a distinct path the engine must exhaust before ' +
           'failing. That is 2^(n−1) paths. The trigger is not a long pattern or a long input — it ' +
@@ -58,6 +64,9 @@
         term: 'The failing case is the expensive one',
         plain: 'A match returns at the first success; a non-match must exhaust every path.',
         formal: 'the exponent is paid only when no path accepts',
+        readAs: 'A catastrophic pattern is fast on input that matches, because the first success stops the ' +
+          'search. It is the near-miss — the input that almost matches — that runs every path, which is ' +
+          'why the bug survives testing.',
         detail: 'This is why regular-expression denial of service is a real attack and not a ' +
           'curiosity: an attacker does not need to guess a matching input, they need an input that ' +
           'ALMOST matches. Removing the final `b` from a string of `a`s costs nothing to construct ' +
@@ -70,6 +79,9 @@
         term: 'Ratios grow with the input; that is what makes it an attack',
         plain: 'The gap is not a constant factor, so a bigger input widens it.',
         formal: 'each four extra characters multiply the backtracking cost by about sixteen',
+        readAs: 'The cost roughly doubles per added character on these patterns, so four more characters is ' +
+          'sixteen times the work. An input the attacker controls the length of is therefore a ' +
+          'denial-of-service dial.',
         detail: 'A constant-factor difference is an engineering choice; a growing ratio is a ' +
           'liability, because the input size is the attacker\'s parameter. Measuring the ratio at ' +
           'one length tells you nothing about the next length, so the honest report is the growth ' +
@@ -81,6 +93,9 @@
         term: 'What the state-set engine gives up: backreferences and captures',
         plain: 'A set of states does not record which path put a state in the set.',
         formal: 'backreferences make the language non-regular, so no NFA can express them',
+        readAs: 'Once a pattern can refer back to what an earlier group captured, it is asking for something ' +
+          'a finite automaton cannot do. That is why engines offering backreferences cannot offer the ' +
+          'linear-time guarantee — not an implementation choice.',
         detail: 'Matching `(a+)\\1` requires remembering what the group captured, and the set has ' +
           'thrown that away. This is not an implementation gap to be closed later: a language with ' +
           'backreferences is not regular, so the linear bound and backreferences cannot coexist. ' +
@@ -165,6 +180,9 @@
         term: 'Token-set metrics ignore order; edit distance cannot',
         plain: 'Swapping two words costs an edit distance almost as large as the string.',
         formal: 'Jaccard and cosine over q-grams are invariant to a reordering that edit distance charges for',
+        readAs: 'Set-based similarity does not care what order the pieces came in, so "John Smith" and "Smith ' +
+          'John" score high. Edit distance charges the full cost of moving them, and scores the same ' +
+          'pair low. Neither is wrong; they answer different questions.',
         detail: '"Elizabeth Windsor" and "Windsor Elizabeth" are the same name written twice, and a ' +
           'character-level distance sees almost nothing in common. A set-of-q-grams comparison sees ' +
           'most of it, because the shared pieces are still shared wherever they sit. The lesson is ' +
@@ -176,6 +194,9 @@
         term: 'Blocking decides the cost; verification decides the answer',
         plain: 'A prefilter narrows candidates; the comparison that follows produces the result.',
         formal: 'cost = records × filter + candidates × verify, and only the second term is expensive',
+        readAs: 'Every record pays the cheap filter, and only the survivors pay the expensive check. So the ' +
+          'number that decides your throughput is how many candidates the filter lets through, not how ' +
+          'fast either step is.',
         detail: 'Comparing every record against every other is quadratic and pointless, because ' +
           'almost every pair is obviously unrelated. Blocking on a cheap key admits the plausible ' +
           'pairs and the verifier decides among them. Keeping the two jobs separate is what makes ' +

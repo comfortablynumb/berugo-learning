@@ -149,6 +149,9 @@
         term: 'The crossover is measured, not derived',
         plain: 'Asymptotics choose the algorithm; a benchmark chooses where to switch to it.',
         formal: 'the threshold minimising c₁n² against c₂n^1.585 + additions depends on the machine, not the analysis',
+        readAs: 'Where the clever algorithm overtakes the simple one is set by the two constant factors, and ' +
+          'those come from the hardware. The exponents tell you a crossover exists; only measurement ' +
+          'tells you where.',
         detail: 'Below the crossover the asymptotically better algorithm is worse, and the crossover is a ' +
           'property of the constants rather than of the exponents. Karatsuba at four digits does more work ' +
           'than schoolbook - measurably, 17 digit products against 16 - because the recursion pays for its ' +

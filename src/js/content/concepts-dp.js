@@ -196,6 +196,8 @@
         term: 'Rolling the table down to O(1)',
         plain: 'When dp[i] reads only a bounded window, keep the window instead of the table.',
         formal: 'a recurrence with look-back k needs Θ(k) live state, not Θ(n)',
+        readAs: 'If each entry only reads the last k entries, only k of them need to still exist. The rest of ' +
+          'the table is history you are paying to keep.',
         detail: 'Fibonacci needs two variables, house robber needs two, Kadane needs one. The saving is real ' +
           'and it costs exactly one thing: the traceback, which walks backwards through cells that no longer ' +
           'exist. Deciding up front whether the caller wants the answer or only its value is what keeps that ' +
@@ -323,6 +325,9 @@
         term: 'Subset sum is the same table without the values',
         plain: 'Reachability instead of optimisation, and the recurrence does not change.',
         formal: 'reachable[c] = reachable[c] ∨ reachable[c − w_i], over the same iteration order',
+        readAs: 'Subset sum is knapsack with the values thrown away: a capacity is reachable if it already ' +
+          'was, or if it is reachable after removing this item. The ∨ is "or", and it is a boolean ' +
+          'table rather than a numeric one.',
         detail: 'Dropping the value column turns the knapsack into "which totals can be made", which is ' +
           'subset sum, equal partition and the coin-change feasibility question all at once. It is worth ' +
           'seeing as one recurrence rather than three problems, because everything learned about the ' +

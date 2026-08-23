@@ -145,6 +145,8 @@
         term: 'Why pairing first matters',
         plain: 'A single left-to-right fold builds a spine, and the next pop pays for it. The pairing pass is not optional.',
         formal: 'one-pass merge degrades to Θ(n) behaviour',
+        readAs: 'Pairing heaps get their bound from merging siblings two at a time before folding them ' +
+          'together. Skip that first pass and the structure degenerates into a list.',
         detail: 'Folding the children left to right in one pass links each child under the ' +
           'accumulated result, which produces a path rather than a tree — and the following pop has ' +
           'to walk that path. The pairing pass breaks the list into independent pairs first, so the ' +
@@ -220,6 +222,8 @@
         term: 'The handle problem',
         plain: 'decrease-key needs to find the element first, and a heap is an array in no useful order.',
         formal: 'locating an arbitrary key is Θ(n) without an index',
+        readAs: 'A heap can find its minimum instantly and any other element not at all. Changing a specific ' +
+          'key needs a separate map from key to position, kept in step with every swap.',
         detail: 'Every statement of the decrease-key bound quietly assumes you already hold a pointer ' +
           'to the node. In an array heap you do not: the element for node 4 711 is at whatever slot ' +
           'the sifts have left it in, and finding it means scanning. That turns an O(log n) operation ' +

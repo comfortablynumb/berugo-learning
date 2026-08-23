@@ -41,6 +41,9 @@
         term: 'Kruskal sorts, Prim grows, Borůvka does everything at once',
         plain: 'Global lightest joining edge; lightest edge leaving one tree; every component picking simultaneously.',
         formal: 'Kruskal Θ(m log m) dominated by the sort; Prim Θ(m log n) with a heap; Borůvka Θ(m log n) in <= log₂n rounds',
+        readAs: 'Three algorithms with effectively the same bound, arrived at differently: Kruskal pays for a ' +
+          'sort, Prim for heap operations, and Borůvka halves the component count each round so it ' +
+          'finishes in log₂ n of them.',
         detail: 'The three differ in which cut they apply the property to, and therefore in where their ' +
           'cost lives. Kruskal\'s is the sort, paid whether or not the edges get used. Prim\'s is the ' +
           'heap, and in the lazy form it pushes an entry per edge examined, so it degrades as the graph ' +
@@ -158,6 +161,8 @@
         term: 'The naive climb is the oracle, and often the right answer as well',
         plain: 'Lift the deeper node to the shallower one, then step both up together.',
         formal: 'Θ(depth) per query and Θ(1) preprocessing; correct by construction',
+        readAs: 'Walking up from both nodes until they meet needs no preprocessing at all and costs the depth ' +
+          'per query. On a shallow tree that beats every cleverer structure.',
         detail: 'Keep it for two reasons. It is the only implementation of the four that cannot be ' +
           'subtly wrong, so it is what everything else gets checked against — and a check against a ' +
           'slow obvious version is worth more than any number of self-consistency assertions. And on ' +
@@ -202,6 +207,9 @@
         term: 'The Euler tour turns LCA into a range minimum',
         plain: 'Walk the tree recording every visit; the shallowest node between two appearances is their ancestor.',
         formal: 'lca(a, b) = the minimum-depth entry of the tour between first[a] and first[b]; a sparse table answers it in Θ(1)',
+        readAs: 'Write down the tree as a walk that visits each node on the way in and on the way back. The ' +
+          'shallowest node between the two first appearances is their common ancestor — so an ancestor ' +
+          'question becomes a range-minimum question.',
         detail: 'The tour visits a node again every time the walk returns to it, so the segment between ' +
           'two nodes\' first appearances contains exactly the vertices on the path between them plus ' +
           'their subtrees — and the shallowest of those is the common ancestor. A sparse table over the ' +
@@ -245,6 +253,9 @@
         term: 'Which structure is cheapest depends on the shape, not on the theory',
         plain: 'On a shallow tree binary lifting costs more than the naive climb it replaces.',
         formal: 'naive is Θ(depth); lifting is Θ(log n) with a large constant and n log n cells of preprocessing',
+        readAs: 'Binary lifting has the better bound and a worse constant, plus a table to build. On a ' +
+          'shallow tree the naive climb wins outright, which is why the choice is about shape rather ' +
+          'than about the bounds.',
         detail: 'Complexity tables compare log n against depth and quietly assume depth is n, which is ' +
           'the worst case and almost never the case. On a random 200-node tree the depth is 13 and the ' +
           'naive climb averages eight steps, while binary lifting averages nine jumps and needs 1 800 ' +

@@ -324,6 +324,9 @@
         term: 'Counting occurrences up the link tree',
         plain: 'Give each prefix state a 1, give clones a 0, and propagate up the links.',
         formal: 'count(v) = [v is a prefix state] + Σ count(children in the link tree)',
+        readAs: 'A state\'s occurrence count is one if it is itself the end of a prefix, plus everything its ' +
+          'children in the suffix-link tree contribute. The square brackets are 1 when the condition ' +
+          'holds and 0 when it does not.',
         detail: 'A state\'s occurrence count is the size of its endpos set, and endpos sets are ' +
           'unions of their link children\'s plus the state\'s own end position when it is a prefix ' +
           'of the text. So one pass down the text to mark the prefix states and one pass over the ' +

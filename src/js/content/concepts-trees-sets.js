@@ -67,6 +67,9 @@
         term: 'The optimum nobody uses',
         plain: 'The search cost is minimised at p = 1/e ≈ 0.368, and implementations use 0.25 anyway.',
         formal: 'argmin over p of L/p',
+        readAs: '"argmin" means the value of p that makes this smallest, not the smallest value itself. ' +
+          'Minimising search cost gives p around 1/e, about 0.37 — and everyone uses 0.5 anyway, ' +
+          'because halving is one bit test.',
         detail: 'Differentiating the search cost gives an optimum at p = 1/e, and the curve around it ' +
           'is so flat that the difference from p = 0.25 or p = 0.5 is a couple of percent — well ' +
           'inside the noise of any real workload. Since the memory term is not flat at all, ' +

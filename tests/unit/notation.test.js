@@ -168,3 +168,48 @@ test('notation: every mathematical character in the curriculum is in the glossar
     'these symbols appear in the content with no glossary entry, so a learner ' +
     'meeting them cold has nowhere to go:\n  ' + report.join('\n  '));
 });
+
+/* Every formal line a non-mathematical reader cannot say out loud must carry a
+   reading. "Cannot say out loud" is the HARD set below: quantifiers, set
+   operators, sums and products, ceilings and floors, norms, Greek variables,
+   subscripted indices, argmin/argmax, expectations, factorials and the named
+   functions ln, lim and mod. A line whose notation is only an O(...) or a ≤
+   inside an English sentence is already readable, and adding a reading there
+   would be noise rather than help - so the floor is this set, not all of it. */
+const HARD = new RegExp(
+  '[∀∃⟺⟹⇒⇔⇏∈∉⊆⊇⊊∪∩∖∅⋃∧∨¬⊥ΣΠ⌈⌉⌊⌋‖√∝≡≪≫⊕αβγδεθλμσρτφχΦΔΩΘ₀₁₂₃₄₅ₙₘᵢⱼ]' +
+  '|argmin|argmax|\bE\[|\bmod\b|\bln\b|\blim\b|[0-9)][!](?![=])', 'u');
+
+test('notation: a formal line a reader cannot say out loud carries its reading', function () {
+  const missing = [];
+
+  registries.ConceptRegistry.ids().forEach(function (id) {
+    (registries.ConceptRegistry.get(id) || []).forEach(function (concept) {
+      if (!HARD.test(concept.formal || '')) return;
+      if (concept.readAs) return;
+      missing.push(id + ' :: ' + concept.term);
+    });
+  });
+
+  assert.deepStrictEqual(missing, [],
+    'these formal lines use notation a reader without a maths background cannot ' +
+    'pronounce, and carry no readAs to translate it:\n  ' + missing.join('\n  '));
+});
+
+test('notation: a reading explains rather than restating the symbols', function () {
+  const tooShort = [];
+
+  registries.ConceptRegistry.ids().forEach(function (id) {
+    (registries.ConceptRegistry.get(id) || []).forEach(function (concept) {
+      if (!concept.readAs) return;
+      const text = String(concept.readAs);
+      if (text.length < 80) tooShort.push(id + ' :: ' + concept.term + ' (' + text.length + ')');
+      assert.ok(/[.!?]$/.test(text.trim()),
+        'the reading for "' + concept.term + '" is a truncated sentence');
+    });
+  });
+
+  assert.deepStrictEqual(tooShort, [],
+    'a reading shorter than a sentence is a restatement, not a translation:\n  ' +
+    tooShort.join('\n  '));
+});

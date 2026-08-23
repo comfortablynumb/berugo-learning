@@ -344,6 +344,8 @@
         term: 'Sparse iteration',
         plain: 'Iterating a chained table walks every bucket, including the empty ones.',
         formal: 'Θ(m + n)',
+        readAs: 'Iterating a chained table costs a step per slot as well as per entry, so a mostly-empty ' +
+          'table is dominated by the empty slots you walk past.',
         detail: 'Iteration has to visit every bucket to find the non-empty ones, so it costs Θ(m + n) ' +
           'rather than Θ(n). For a table that grew large and was then mostly emptied, that is ' +
           'dominated by m: iterating a million-bucket table holding ten entries reads a million ' +
@@ -404,6 +406,9 @@
         term: 'Primary clustering',
         plain: 'Linear probing makes occupied runs, and a long run captures more keys, making it longer.',
         formal: 'runs grow superlinearly in α',
+        readAs: 'Occupied stretches do not lengthen in step with the load — they lengthen faster, because a ' +
+          'longer run is a bigger target for the next insertion. That feedback is what makes linear ' +
+          'probing collapse near a full table.',
         detail: 'Linear probing has a positive feedback loop: any key hashing anywhere into an ' +
           'occupied run is appended to its end, so long runs capture more keys and grow faster than ' +
           'short ones. The result is that cost rises superlinearly with load, much worse than the ' +
@@ -488,6 +493,8 @@
         term: 'Deletion decides the probe sequence',
         plain: 'Backward-shift deletion needs every key in the run to have probed through the hole, which only linear probing guarantees.',
         formal: 'contiguous runs ⇒ shiftable; scattered steps ⇒ tombstones',
+        readAs: 'If a probe sequence walks consecutive slots you can close a gap by shifting elements back. ' +
+          'If it jumps around you cannot, so a deleted slot has to be marked rather than cleared.',
         detail: 'The choice of probe sequence and the choice of deletion strategy are not ' +
           'independent, which is the point most treatments leave out. Backward shift works because ' +
           'linear probing visits consecutive slots, so every key that could be affected by the hole ' +

@@ -94,6 +94,14 @@ berugo-learning/
 - **Every concept needs a `detail` paragraph** (>= 240 characters, enforced by
   `content-coverage.test.js`): the mechanism, why it is built that way, what breaks without it.
   `plain` is the one-line gloss; `detail` is the teaching.
+- **The audience does not read maths.** Explain the idea before the symbol, and gloss the jargon
+  in place. A `formal` line whose notation a reader cannot pronounce needs a `readAs` - the same
+  statement as a sentence you could say out loud; `notation.test.js` enforces it over a set of
+  hard symbols (quantifiers, set operators, Sigma/Pi, ceilings, Greek variables, argmin, E[...],
+  n!, ln, lim, mod). Symbols decode themselves through `content/notation.js`, and that file must
+  gain an entry for any new symbol in the same commit - a test walks all registered content and
+  fails otherwise. Where a section pins a Greek letter to one meaning, add it to
+  `content/notation-local.js` rather than hedging the global entry.
 - **jQuery is the UI layer** (events, DOM, values). Logic modules stay DOM-free so `node --test`
   can load them directly.
 - Global rules apply: interfaces for dependencies, functions <= 50 lines, files < 1000 lines,

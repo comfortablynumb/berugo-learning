@@ -1757,6 +1757,49 @@ scoring two different services and two different accounts at 0.956 while Levensh
 against itself reordered at 0.059, and blocking cutting 267 records to 12 candidates without moving
 precision off 50% or recall off 100%.
 
+## The notation pass (after M15, before M16)
+
+The Description tab was written at a reader who already reads mathematics, and the audience is a
+senior engineer who may not. Two things changed, across all 146 sections.
+
+**A decoder.** `content/notation.js` is a glossary of every symbol the curriculum uses, carrying
+how to *say* it and what it does. `utils/notation-markup.js` escapes and annotates in one pass —
+escaping first and injecting after would let the matcher chip something inside `&amp;` — and marks
+the *first* occurrence of each symbol per concept, because Θ appears nine hundred times and a page
+underlining all of them is unreadable. The formal line is the exception and asks for all of it,
+since it *is* the notation. The panel is pure CSS (hover, tap and keyboard focus);
+`components/notation-panel.js` measures which chips would run off the column and flips those to
+hang from the right, because nothing in CSS can measure that.
+
+**A reading.** Concepts grew a `readAs` field: the formal statement as a sentence you could say
+out loud, rendered as "In words" directly beneath it. 578 of 1 161 concepts carry one, and every
+one of the 261 formal lines using hard notation does.
+
+Three tests hold the line, all in `tests/unit/notation.test.js`:
+
+- every mathematical character in any registered content has a glossary entry, so a milestone that
+  introduces a symbol has to explain it in the same commit;
+- every formal line using hard notation carries a `readAs` (quantifiers, set operators, Σ/Π,
+  ceilings, norms, Greek variables, argmin, `E[…]`, `n!`, `ln`, `lim`, `mod`);
+- a reading is a sentence rather than a restatement — at least 80 characters, ending in a full
+  stop.
+
+`content/notation-local.js` pins a letter where a section fixes its meaning: α is the load factor
+in the eight hashing sections, the balance parameter in scapegoat trees and the inverse Ackermann
+function in disjoint sets; ε and δ are the accuracy and confidence dials across the nine sketch
+sections. The rule for adding to it is in its header — pin only where the section really does use
+the letter in one sense throughout.
+
+### Two content defects the decoder exposed
+
+- **`·` was doing two jobs.** It is multiplication nearly everywhere, but 22 formal lines used it
+  as a bullet between alternatives — `zig · zig-zig · zig-zag` is a list, not a product — and one
+  line had it both ways at once (`fat node O(log n · log v)`, separated from its neighbours by
+  bullets). Those are semicolons now. Prose and worked-example lines still use both, so the
+  glossary entry says so and tells the reader how to tell them apart.
+- **Ambiguity the prose had absorbed.** `L1 ≈ 1 ns · L2 ≈ 4 ns` was a list of latencies reading as
+  a product; `best[i−1][·]` used the dot as an "any index" placeholder. Both are words now.
+
 ## Next
 
 **M16 — computational geometry**, then onward through `doc/milestones/` in the order

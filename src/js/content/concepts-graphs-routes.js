@@ -143,6 +143,9 @@
         term: 'IDA* trades the frontier for repeated work, and the trade is often terrible',
         plain: 'Keep only the current path; re-expand everything shallow on every threshold round.',
         formal: 'memory is Θ(depth); work is the sum over rounds, and the round count grows with the cost range',
+        readAs: 'IDA* keeps only the current path, so memory is tiny. The price is redoing every earlier ' +
+          'round, and with real-valued costs the threshold barely moves each time — so the rounds ' +
+          'multiply.',
         detail: 'Iterative deepening on f is the right answer when the frontier genuinely cannot be ' +
           'stored — puzzle state spaces with billions of positions and no room for a closed set. On a ' +
           'graph that fits in memory it is a bad deal, and the reason is the threshold schedule: with ' +

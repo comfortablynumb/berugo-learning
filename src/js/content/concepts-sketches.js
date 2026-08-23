@@ -152,6 +152,8 @@
         term: 'One block, one cache line',
         plain: 'Confine a key\'s k bits to one aligned block and a query touches one line instead of k.',
         formal: 'block = h₁ mod b; the k offsets are within the block',
+        readAs: 'Pick one block from the first hash, then place all k bits inside that block. Every probe for ' +
+          'a key then lands in the same cache line, so a lookup is one memory fetch instead of k.',
         detail: 'A standard filter\'s k bit positions are spread uniformly over the whole array, so a ' +
           'query touches up to k different cache lines — 6.95 measured at k = 7 — and every one of ' +
           'them is an unpredictable access the prefetcher cannot help with. A blocked filter picks ' +

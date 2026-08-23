@@ -341,6 +341,9 @@
         term: 'SPFA is Bellman-Ford with a queue and no better bound',
         plain: 'Only re-relax vertices whose distance actually changed. Fast in practice, quadratic when attacked.',
         formal: 'worst case Θ(n·m), same as Bellman-Ford; typical case far below it, with no guarantee',
+        readAs: 'SPFA has exactly the same worst-case bound as the algorithm it optimises, and is usually ' +
+          'much faster in practice. "Usually" is not a bound, and adversarial graphs hit the worst case ' +
+          'reliably.',
         detail: 'The optimisation is obvious and correct: a vertex whose distance did not change cannot ' +
           'improve its neighbours, so keep a queue of the ones that did. On ordinary graphs this is a ' +
           'large constant-factor win. The catch is that adversarial inputs exist and are easy to ' +

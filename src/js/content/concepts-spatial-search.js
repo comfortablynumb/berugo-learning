@@ -85,6 +85,8 @@
         term: 'Sqrt decomposition: worse on paper, written most often',
         plain: 'Blocks of √n each with a cached aggregate; a query walks two partial blocks and the whole blocks between.',
         formal: 'update O(√n), query O(√n)',
+        readAs: 'Both operations cost the square root of n, which is worse than a segment tree\'s log n on ' +
+          'paper. It is written far more often because it is twenty lines and hard to get wrong.',
         detail: 'It loses to every tree here and it is the one people reach for under time pressure, because ' +
           'changing what it aggregates is two lines and there is no index arithmetic to get wrong. It is also the ' +
           'only structure in the file that extends painlessly to queries no monoid can express - "the k-th ' +

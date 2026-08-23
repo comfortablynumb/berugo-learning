@@ -140,6 +140,8 @@
         term: 'Kahn: repeatedly take a vertex with no unmet dependency',
         plain: 'Count incoming edges, start from the zeroes, and decrement as you go.',
         formal: 'maintain in-degrees; a vertex joins the ready set when its count reaches zero; Θ(n + m)',
+        readAs: 'Count how many unmet dependencies each vertex has. Every time one is satisfied, decrement; ' +
+          'when it hits zero the vertex is ready. One visit per vertex and per edge.',
         detail: 'Kahn\'s algorithm is the one to reach for when the order has to mean something ' +
           'operationally, because its ready set is literally "what can be built right now". That makes ' +
           'it the natural fit for a scheduler: hand ready vertices to workers, decrement on completion, ' +
@@ -205,6 +207,8 @@
         term: 'DAG shortest paths need no priority queue',
         plain: 'Relax edges in topological order, once each, and negative weights are fine.',
         formal: 'Θ(n + m) rather than Θ(m log n); Dijkstra’s non-negativity requirement disappears entirely',
+        readAs: 'On a DAG the topological order already tells you the right sequence, so no priority queue is ' +
+          'needed — and because nothing is ever settled early, negative weights are fine.',
         detail: 'Dijkstra needs a heap because it has to decide which vertex is safe to settle next; on ' +
           'a DAG the topological order has already decided, so the heap is pure overhead. More ' +
           'importantly the non-negativity restriction goes with it: the order guarantees every ' +
@@ -217,6 +221,8 @@
         term: 'Longest path is easy here and NP-hard everywhere else',
         plain: 'Negate the weights and run the same sweep; on a general graph the problem is intractable.',
         formal: 'longest path in a DAG is Θ(n + m); longest simple path in a general graph is NP-hard',
+        readAs: 'The same question is linear on an acyclic graph and intractable on a general one. Cycles are ' +
+          'what makes the difference: without them there is nothing to go round twice.',
         detail: 'The gap between those two facts is the sharpest illustration of what acyclicity buys, ' +
           'and it is worth being able to state in a design review. On a DAG the recurrence "longest ' +
           'path ending here = the best of my predecessors, plus my weight" terminates because there is ' +

@@ -23,6 +23,9 @@
         term: 'The bad-character rule slides the rightmost matching copy into place',
         plain: 'On a mismatch against text character c, line up the last c in the pattern — or skip the window entirely.',
         formal: 'shift = max(1, j − last[c]), where last[c] is the rightmost index of c in the pattern, or −1',
+        readAs: 'On a mismatch, slide the pattern so its last occurrence of the offending character lines up. ' +
+          'If the character is absent entirely, last[c] is −1 and the whole pattern jumps past it. The ' +
+          'max(1, …) stops the shift going backwards.',
         detail: 'The big jumps come from the absent case. A pattern of length m contains at most m ' +
           'distinct characters, so on a large alphabet most text characters are in no row of the ' +
           'table at all and license a full m-position slide. Shrink the alphabet and that stops ' +
@@ -48,6 +51,8 @@
         term: 'Both rules are safe, so the algorithm takes the larger',
         plain: 'Neither rule can ever slide past an occurrence, so their maximum cannot either.',
         formal: 'shift = max(badCharacter, goodSuffix); correctness follows from each being individually safe',
+        readAs: 'Two rules propose a shift and you take the larger. Both are individually guaranteed never to ' +
+          'skip an occurrence, so taking whichever is bigger is safe too.',
         detail: 'This is a small and useful piece of reasoning: two independently sound lower bounds ' +
           'on how far the pattern may move combine into a better one for free, with no interaction ' +
           'to check. It is the same shape as taking the maximum of two admissible heuristics in A*, ' +
@@ -85,6 +90,9 @@
         term: 'Horspool and Sunday drop machinery on purpose',
         plain: 'One table and no good-suffix pass; or look one character past the window instead.',
         formal: 'Horspool keys on the character aligned with pattern[m−1]; Sunday keys on text[start + m] and can shift by m + 1',
+        readAs: 'Two simplifications of Boyer-Moore. Horspool looks at the character under the pattern\'s ' +
+          'last position; Sunday looks one past the end, which lets it jump the entire pattern length ' +
+          'plus one.',
         detail: 'Both are shorter than full Boyer-Moore and neither is uniformly worse, which is ' +
           'the interesting part. Horspool ignores where the mismatch happened and keys only on the ' +
           'window\'s last character; Sunday looks one position beyond the window, which buys a ' +
@@ -113,6 +121,9 @@
         term: 'The window hash is a polynomial, so sliding it is arithmetic',
         plain: 'Subtract the leading term, multiply by the base, add the new character.',
         formal: 'h′ = (h − c₀·bᵐ⁻¹)·b + cₘ, all modulo M — constant time whatever the window length',
+        readAs: 'Rolling the hash forward: subtract the departing character\'s contribution, multiply ' +
+          'everything up one place, add the arriving character. Three operations regardless of window ' +
+          'size — h′ is read "h prime", the next hash.',
         detail: 'That constant-time update is what makes a fingerprint per position affordable at ' +
           'all. Without it, hashing every window costs the same as comparing every window and the ' +
           'whole approach is pointless. With it, matching becomes a stream of integer comparisons ' +
@@ -125,6 +136,9 @@
         term: 'Verification is not optional',
         plain: 'Every hash hit is checked character by character before it is reported.',
         formal: 'with verification the algorithm is Las Vegas — always correct, sometimes slower; without it, Monte Carlo',
+        readAs: 'Two kinds of randomised algorithm. Las Vegas is always right and takes a variable amount of ' +
+          'time; Monte Carlo runs in fixed time and is occasionally wrong. Checking each hash hit is ' +
+          'what moves Rabin-Karp from the second to the first.',
         detail: 'Rabin-Karp with the verification removed returns wrong answers at a rate you have ' +
           'to reason about, and the rate depends on the modulus, the text and — if anybody is ' +
           'choosing the text — on them. With verification a collision costs a comparison run and ' +
@@ -138,6 +152,8 @@
         term: 'The spurious-hit rate is windows over modulus',
         plain: 'A well-spread hash collides about n/M times over n windows.',
         formal: 'expected spurious hits ≈ (n − m + 1)/M for a hash spreading uniformly',
+        readAs: 'False hash matches happen about once per M windows, so the number is the window count over ' +
+          'the modulus. At M around a million and a few thousand windows, that is essentially none.',
         detail: 'That prediction is what makes the modulus choice a calculation rather than a ' +
           'superstition, and comparing it against the measurement is what tells you whether the ' +
           'hash actually spreads. A modulus of a million over four thousand windows predicts 0.004 ' +
@@ -150,6 +166,9 @@
         term: 'A fixed base and modulus is a published function',
         plain: 'A birthday search over about √M random strings finds two with the same fingerprint.',
         formal: 'the birthday bound: √M candidates suffice with constant probability, and M ≈ 10⁶ means about 1 000 tries',
+        readAs: 'You do not need M tries to force a collision, only about the square root of M — the same ' +
+          'reason 23 people in a room share a birthday. A million-sized modulus falls in a thousand ' +
+          'attempts, which is instant.',
         detail: 'The attacker needs no cleverness and no access — only the constants, which are in ' +
           'the source. A second of work produces a colliding pair; repeating one half of it produces ' +
           'a text on which every window hits and every verification fails, so the filter admits ' +
@@ -175,6 +194,9 @@
         term: 'Content-defined chunking is the same hash asked a different question',
         plain: 'Cut wherever the rolling hash of the last few bytes has enough low zero bits.',
         formal: 'a boundary at position i iff hash(text[i−w..i]) mod 2^k = 0 — a property of the CONTENT, not the offset',
+        readAs: 'Cut the file wherever the rolling hash of the last w bytes ends in k zeros. Because the ' +
+          'decision depends only on the bytes themselves, inserting something at the start does not ' +
+          'move any later boundary — which is the whole point for deduplication.',
         detail: 'Because the boundary depends on the bytes around it rather than on the distance ' +
           'from the start of the file, inserting a byte moves one boundary and leaves every other ' +
           'chunk byte-identical. A fixed-size chunker shifts every boundary after the insertion ' +
@@ -274,6 +296,9 @@
         term: 'Overlapping and nested matches are both required',
         plain: 'Every occurrence of every pattern, reported exactly once each.',
         formal: 'the output multiset is { (pattern, position) : the pattern occurs there }, with no deduplication and no omission',
+        readAs: 'Every pattern-and-position pair where a match genuinely occurs, reported once each. A ' +
+          'multiset rather than a set because the same pattern can legitimately appear at many ' +
+          'positions.',
         detail: 'Two separate requirements that are easy to conflate. Overlapping means the same ' +
           'pattern occurring at nearby positions; nested means different patterns ending at the ' +
           'same position. An implementation can get one right and the other wrong, so the oracle ' +
@@ -286,6 +311,8 @@
         term: 'The dense goto table is the same trade as KMP\'s automaton, at a larger scale',
         plain: 'Resolve every fallback in advance and matching is one lookup per character.',
         formal: '|alphabet| × states cells; the failure links are never followed at run time',
+        readAs: 'Precomputing every transition costs one cell per state per character, and in exchange the ' +
+          'scan never walks a failure chain. Memory for a guaranteed one-array-read per character.',
         detail: 'The sparse form follows links on a mismatch, which is a short loop per character; ' +
           'the dense form has no loop at all. The cost is a cell per state per alphabet symbol, and ' +
           'a keyword set has many more states than a single pattern, so the multiplication bites ' +

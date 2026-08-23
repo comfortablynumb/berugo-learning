@@ -139,6 +139,9 @@
         term: 'The saving tracks the distinct tails',
         plain: 'Compression removes the chain after keys diverge — not the prefix they share.',
         formal: 'saved ≈ Σ (length of each key\'s unshared tail) − 1 per key',
+        readAs: 'Compression saves one node for every character in a key\'s unshared tail, less the one node ' +
+          'that tail still needs. So the saving tracks how distinctive the keys are, not how many there ' +
+          'are.',
         detail: 'This is the sentence that clears up the usual confusion. A plain trie already ' +
           'shares prefixes; that is what a trie *is*. What it cannot do is collapse the run of ' +
           'single-child nodes that follows the point where a key stops sharing, and that run is as ' +
@@ -248,6 +251,9 @@
         term: 'Insertion order decides the shape',
         plain: 'A ternary tree is a BST at every level, so sorted input builds a spine.',
         formal: 'sorted insertion: height Θ(n) at each character position',
+        readAs: 'Inserting keys in sorted order sends every one down the same side, so the ternary trie ' +
+          'degenerates into a list at each character position. Shuffle or use the median character ' +
+          'instead.',
         detail: 'This is the inherited defect and it is easy to walk into, because a dictionary is ' +
           'usually already sorted. Inserting the word list in order gives height 34; inserting the ' +
           'same words by recursive median selection gives 18, and the lookup cost falls from 36.2 ' +
@@ -300,6 +306,8 @@
         term: 'Sorted input is a correctness requirement',
         plain: 'Keys must arrive in order, or a merged state can silently gain a word nobody inserted.',
         formal: 'sorted arrival ⇒ a left-behind branch can never be extended',
+        readAs: 'When keys arrive in order, any branch you have moved past can never receive another key — ' +
+          'which is exactly what lets it be frozen and shared immediately, rather than at the end.',
         detail: 'The incremental algorithm minimises a branch the moment it is left behind, which is ' +
           'only safe because sorted arrival guarantees no later key will extend it. Break that and ' +
           'the failure is invisible: a state that was merged into a canonical one acquires a new ' +

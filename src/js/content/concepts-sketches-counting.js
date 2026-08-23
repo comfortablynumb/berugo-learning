@@ -325,6 +325,9 @@
         term: 'Rank error and value error are different claims',
         plain: 'A tiny rank error lands a long way away in value wherever the distribution is steep.',
         formal: 'Δvalue ≈ Δrank / density at that quantile',
+        readAs: 'An error in rank turns into an error in value by dividing by how tightly packed the data is ' +
+          'there — the Δ is "an error in". Where points are sparse, being a few ranks out moves the ' +
+          'reported value a long way.',
         detail: 'On a bimodal stream the quantile function is nearly vertical between the modes, so a ' +
           'sketch that is 0.267 percentage points out in rank at p90 is 23.55% out in milliseconds — ' +
           'and both numbers describe the same answer. Reporting only one of them makes three of the ' +
