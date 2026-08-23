@@ -3,7 +3,7 @@
 Where the implementation stands, and exactly what the next session should pick up.
 Update this file at the end of any session that leaves work unfinished.
 
-**Last updated:** 2026-08-23 (M16 complete; the tree is green — next is M17, numbers, bits and floating point)
+**Last updated:** 2026-08-23 (M16 complete and verified in Chrome; the tree is green — next is M17, numbers, bits and floating point)
 
 ---
 
@@ -27,12 +27,12 @@ Update this file at the end of any session that leaves work unfinished.
 | M13 — graph algorithms I | 10 | ✅ built, tested, render-audited |
 | M14 — graph algorithms II | 10 | ✅ built, tested, render-audited |
 | M15 — string algorithms and pattern matching | 11 | ✅ built, tested, render-audited |
-| M16 — computational geometry | 10 | ✅ built, tested, render-audited |
+| M16 — computational geometry | 10 | ✅ built, tested, verified in Chrome |
 
-**The tree is GREEN.** `npm test` reports 2 904 unit tests with 0 failures (6 skipped — the
+**The tree is GREEN.** `npm test` reports 2 906 unit tests with 0 failures (6 skipped — the
 wall-clock-budget starters the inline sandbox cannot fail); the wiring audit passes at 156 sections
 and 749 modules, the render audit activates all 156 with no exception and no empty table,
-`npm run lint:size` passes across 834 files, and `npm run build:css` is up to date.
+`npm run lint:size` passes across 835 files, and `npm run build:css` is up to date.
 
 All nine M07 sections were opened in Chrome on `npm start`: the three tabs render, every demo
 figure matches the prose *exactly* (see "aligning the demo with the prose" below), the references
@@ -1889,13 +1889,52 @@ eight-vertex polygon — and the section never computes an even-odd fill area at
 the measurement the section does make: the same silhouette drawn as an 8-vertex simple ring produces
 0 disagreeing probes where the 5-vertex crossing ring produces 44.
 
+## The browser pass (M16, and a defect it found in every log-scale chart)
+
+All ten M16 sections were opened in Chrome on `npm start`: three tabs each, every mermaid diagram
+rendered, every scene canvas painted, every table populated, no metric left on a placeholder, no
+console errors, and both themes correct. All ten graded exercises were then run through the **real
+Worker sandbox** rather than the inline one — every solution passes (4/4, 3/3, 4/4, 4/4, 3/3, 3/3,
+4/4, 3/3, 3/3, 3/3) and every starter fails (2/4, 1/3, 3/4, 1/4, 1/3, 1/3, 2/4, 0/3, 0/3, 2/3).
+BigInt works in the Worker, which the `orient2d` lab depends on.
+
+### The defect: every log-Y chart in the platform was drawing nothing
+
+The convex-hulls chart rendered its axes, its grid, its legend and its caption — and no data. The
+four series paths were `M215.867,NaN L344.508,NaN …`, every y a NaN, and the y axis carried no tick
+labels at all.
+
+`viz/growth-plot.js` built the y domain as `[config.yMin === undefined ? 0 : config.yMin, max]`.
+A d3 log scale given a floor of zero **does not throw**: `makeScale` clamped the floor to
+`Number.MIN_VALUE`, and then `.nice()` rounded it down to the power of ten below — `1e-324`, which
+underflows to exactly zero. From that point every point maps to NaN.
+
+**28 sections across M01 through M16 pass `logY: true` without a `yMin`.** All of them were drawing
+an empty plot, and had been for as long as those sections have existed.
+
+Nothing headless could have caught it. jsdom has no layout, so the render audit sees a populated
+`<svg>` and a non-empty table; the figure tests only ever look at the numbers going *in*. It took
+opening the page.
+
+**The fix** is in one place rather than at 28 call sites: `logDomain()` forces a positive floor for
+any logarithmic axis, and the y floor for a log chart is now the smallest strictly positive value in
+the series rather than zero. Linear axes are untouched — the arithmetic there is identical to what
+it was.
+
+A sweep of all 154 teaching sections in the browser, before and after, went from `convex-hulls` and
+`dynamic-arrays` (and the rest of the 28) carrying NaN paths to **zero NaN paths anywhere**.
+
+`tests/unit/growth-plot.test.js` pins the invariant: a logarithmic axis is never handed a floor of
+zero or below, a zero in the data cannot become that floor, and every cost-curve shape the sections
+actually pass maps to finite positions. `logDomain` and `lowestPositive` are exported for it.
+
 ## Next
 
 **M17 — numbers, bits and floating point**, then onward through `doc/milestones/` in the order
 `doc/ROADMAP.md` gives.
 
-M11 through M16 are complete apart from a human browser pass, which needs the Chrome extension
-connected. `tools/section-dump.js` covers everything else the browser used to be needed for — it
+M11 through M15 are complete apart from a human browser pass, which needs the Chrome extension
+connected; M16 has had one (see above, and the chart defect it found). `tools/section-dump.js` covers everything else the browser used to be needed for — it
 prints every metric, table and note a section renders, at any control setting, and since the
 `input`-event fix above that is finally true of slider settings too.
 

@@ -25,12 +25,37 @@
     return [min, max];
   }
 
+  /** The smallest strictly positive value a log axis could start at. */
+  function lowestPositive(series, accessor) {
+    let min = Infinity;
+    series.forEach(function (entry) {
+      entry.points.forEach(function (point) {
+        const value = accessor(point);
+        if (Number.isFinite(value) && value > 0 && value < min) min = value;
+      });
+    });
+    return min;
+  }
+
+  /* A log scale may not start at zero, and it does not throw when it does -
+     `nice()` rounds the floor down to the power of ten below it, zero rounds
+     to zero, and every point then maps to NaN. The result is a chart with its
+     axes, its grid and its legend drawn and no data in it at all, which is why
+     this was invisible to a headless render audit. The floor is forced
+     positive here rather than at each of the thirty call sites. */
+  function logDomain(span) {
+    const hi = Number.isFinite(span[1]) && span[1] > 0 ? span[1] : 1;
+    const floor = Number.isFinite(span[0]) && span[0] > 0 ? Math.min(span[0], hi) : hi / 1000;
+    return [floor, hi > floor ? hi : floor * 10];
+  }
+
   function makeScale(d3, options) {
-    const scale = options.log ? d3.scaleLog() : d3.scaleLinear();
+    if (options.log) {
+      return d3.scaleLog().domain(logDomain(options.domain)).range(options.range).nice();
+    }
     const span = options.domain;
-    const lo = options.log ? Math.max(span[0], Number.MIN_VALUE) : span[0];
-    const hi = span[1] > lo ? span[1] : lo * (options.log ? 10 : 1) + 1;
-    return scale.domain([lo, hi]).range(options.range).nice();
+    const hi = span[1] > span[0] ? span[1] : span[0] + 1;
+    return d3.scaleLinear().domain([span[0], hi]).range(options.range).nice();
   }
 
   function drawSeries(ctx, series, x, y) {
@@ -98,7 +123,10 @@
       if (!series.length) return;
 
       const x = makeScale(ctx.d3, { log: config.logX, domain: extent(series, function (p) { return p.x; }), range: [0, ctx.width] });
-      const y = makeScale(ctx.d3, { log: config.logY, domain: [config.yMin === undefined ? 0 : config.yMin, extent(series, function (p) { return p.y; })[1]], range: [ctx.height, 0] });
+      const yTop = extent(series, function (p) { return p.y; })[1];
+      const yFloor = config.yMin !== undefined ? config.yMin
+        : (config.logY ? lowestPositive(series, function (p) { return p.y; }) : 0);
+      const y = makeScale(ctx.d3, { log: config.logY, domain: [yFloor, yTop], range: [ctx.height, 0] });
 
       scope.ChartBase.grid(ctx, y, { ticks: 5 });
       scope.ChartBase.axes(ctx, {
@@ -129,5 +157,6 @@
     return null;
   }
 
-  return { render: render, crossover: crossover };
+  return { render: render, crossover: crossover,
+    logDomain: logDomain, lowestPositive: lowestPositive };
 }));

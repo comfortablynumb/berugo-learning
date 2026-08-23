@@ -219,10 +219,12 @@ faithfully in a browser, the section models it, says so plainly, and states what
   separates the shapes where taking the push from the centroids fails 38 of 800 overlapping pairs.
   10 sections live.
 
-`npm test` is green — wiring audit, 2 904 unit tests, and a **render audit** that boots the whole
+`npm test` is green — wiring audit, 2 906 unit tests, and a **render audit** that boots the whole
 app headlessly and activates all 156 sections, failing on anything that throws while rendering, any
 table left with an empty body, and any metric tile still showing a placeholder without a note
 explaining it. `npm run lint:size` reports no offenders.
+
+The render audit is not a substitute for opening the page, and M16's browser pass proved it: every chart in the platform drawn on a **logarithmic y axis** was rendering its axes, its grid and its legend with no data in them at all. A d3 log scale handed a domain floor of zero does not throw — `nice()` rounds the floor down to the power of ten below it, that underflows to zero, and every point then maps to NaN. Twenty-eight sections across M01–M16 were affected. `viz/growth-plot.js` now forces a positive floor for any logarithmic axis, and `tests/unit/growth-plot.test.js` pins the invariant.
 
 ### The shell
 

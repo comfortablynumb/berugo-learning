@@ -9,7 +9,7 @@ explained in full, diagram, insight), **Examples** (runnable demo with charts, w
 graded code lab) and **References** (the structured reference block).
 
 ## Status
-**M00–M16 are built** (156 sections; M00–M10 also verified in a browser), each carrying 8+ concepts
+**M00–M16 are built** (156 sections; M00–M10 and M16 also verified in a browser), each carrying 8+ concepts
 with full explanations, two worked examples, a reference entry and a graded exercise. The tree is
 green. **Next is M17 — numbers, bits and floating point**; read `doc/BUILD-STATE.md` first, its
 "Next" section at the end carries the nine-step shape to copy. The rest of the curriculum follows
