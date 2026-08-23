@@ -184,6 +184,21 @@
     return Exact.inCircle(a, b, c, d);
   }
 
+  /**
+   * Is p further from the line a-b than q is? Exact, and needed wherever an
+   * algorithm ranks candidates by distance to a line rather than merely asking
+   * which side they are on.
+   */
+  function fartherFromLine(a, b, p, q, stats) {
+    count(stats, 'orient');
+    const value = (b.x - a.x) * (p.y - q.y) - (b.y - a.y) * (p.x - q.x);
+    const magnitude = Math.abs((b.x - a.x) * (p.y - q.y)) + Math.abs((b.y - a.y) * (p.x - q.x));
+
+    if (Math.abs(value) > ORIENT_BOUND * magnitude) return value > 0 ? 1 : -1;
+    count(stats, 'orientExact');
+    return Exact.fartherFromLine(a, b, p, q);
+  }
+
   /* ------------------------------------------------------- primitives */
 
   /** Twice the signed area of the triangle, as a magnitude rather than a sign. */
@@ -251,6 +266,7 @@
     inCircle: inCircle,
     inCircleNaive: inCircleNaive,
     inCircleValue: inCircleValue,
+    fartherFromLine: fartherFromLine,
     signedArea2: signedArea2,
     collinear: collinear,
     onSegment: onSegment,

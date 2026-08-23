@@ -501,6 +501,12 @@
               title: 'Polygons, areas and containment',
               summary: 'Ray casting and the winding number disagree at the pentagram centre, and the polygon does not say which is meant.',
               tags: ['shoelace formula', 'signed area', 'point in polygon', 'ray casting', 'winding number', 'fill rule', 'even-odd', 'non-zero', 'self-intersection', 'douglas-peucker', 'visvalingam', 'simplification']
+            },
+            {
+              id: 'convex-hulls',
+              title: 'Convex hulls',
+              summary: 'O(n log n) and O(nh) are different bounds rather than better and worse, and the point set decides which wins.',
+              tags: ['convex hull', 'monotone chain', 'andrew', 'graham scan', 'gift wrapping', 'jarvis march', 'quickhull', 'collinear policy', 'orientation tests', 'output sensitive']
             }]
         }
       ],

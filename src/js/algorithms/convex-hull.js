@@ -290,27 +290,39 @@
     return { hull: finish(hull, pts, config), report: stats };
   }
 
-  /* Ties are the whole difficulty. Several points at the same distance from
-     the base line - a flat edge - are all equally "farthest", and picking
-     whichever came first in the array puts an interior-of-an-edge point on the
-     hull. Breaking the tie towards the end of the base direction picks a real
-     corner instead. */
+  /**
+   * The point furthest from the line a-b, on the left of it.
+   *
+   * Two things here are easy to get wrong and both were.
+   *
+   * Whether a point is outside at all is decided by the ADAPTIVE predicate,
+   * never by the raw determinant. Ranking by the raw value alone is fine on
+   * integer coordinates, where it happens to be exact, and wrong on points a
+   * few units in the last place apart: a point that is genuinely inside can
+   * carry a tiny positive value, become the apex, and put a reflex vertex on
+   * the hull. On a 60-point near-collinear zigzag that produced a hull with
+   * five of the input points outside it.
+   *
+   * Among the points that ARE outside, the raw value ranks them - it is a
+   * magnitude and only its ordering is needed. Ties, which is what a flat edge
+   * produces, are broken along the base direction so a real corner wins rather
+   * than whichever point came first in the array.
+   */
   function farthestFrom(a, b, pts, stats) {
     let best = null;
-    let bestValue = 0;
     let bestAlong = 0;
     const along = G.sub(b, a);
 
     pts.forEach(function (p) {
-      if (stats) stats.orient += 1;
-      const value = G.orient2dValue(a, b, p);
-      if (value < bestValue) return;
+      if (G.orient2d(a, b, p, stats) <= 0) return;
       const reach = G.dot(along, G.sub(p, a));
-      if (value === bestValue && (best === null || reach <= bestAlong)) return;
-      if (value === 0) return;
-      bestValue = value;
-      bestAlong = reach;
+      if (best === null) { best = p; bestAlong = reach; return; }
+
+      const further = G.fartherFromLine(a, b, p, best, stats);
+      if (further < 0) return;
+      if (further === 0 && reach <= bestAlong) return;
       best = p;
+      bestAlong = reach;
     });
     return best;
   }
@@ -365,7 +377,18 @@
    */
   function verify(points, hull, stats) {
     const problems = [];
-    if (hull.length < 3) return { ok: points.length < 3, problems: problems, outside: 0 };
+
+    /* A hull of fewer than three vertices is CORRECT when the input has no
+       interior - every point on one line, or all points equal. Judging that a
+       failure is an oracle bug, and it reported four on a sixty-point
+       collinear set that every algorithm had handled properly. */
+    if (hull.length < 3) {
+      const flat = points.every(function (p) {
+        return hull.length < 2 || G.orient2d(hull[0], hull[hull.length - 1], p, stats) === 0;
+      });
+      if (!flat) problems.push('the hull is degenerate but the points are not collinear');
+      return { ok: flat, problems: problems, outside: 0, degenerate: true };
+    }
 
     for (let i = 0; i < hull.length; i += 1) {
       const a = hull[i];

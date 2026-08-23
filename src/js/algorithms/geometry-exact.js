@@ -122,6 +122,27 @@
     return sign((bx - ax) * (cy - ay) - (by - ay) * (cx - ax));
   }
 
+  /**
+   * Which of p and q is further from the line through a and b, exactly.
+   * Returns 1 when p is further, -1 when q is, 0 when they are equidistant.
+   *
+   * The distances themselves are never formed. The signed area of a-b-p minus
+   * that of a-b-q is the cross product of (b - a) with (p - q), so the whole
+   * comparison is one 2x2 determinant - and doing it exactly matters because
+   * quickhull picks its apex with it. Ranking by the rounded value instead is
+   * correct on integer coordinates and loses hull vertices on points a few
+   * units in the last place apart.
+   */
+  function fartherFromLine(a, b, p, q) {
+    const bits = commonScale([a.x, a.y, b.x, b.y, p.x, p.y, q.x, q.y]);
+    const ax = toBigInt(a.x, bits), ay = toBigInt(a.y, bits);
+    const bx = toBigInt(b.x, bits), by = toBigInt(b.y, bits);
+    const px = toBigInt(p.x, bits), py = toBigInt(p.y, bits);
+    const qx = toBigInt(q.x, bits), qy = toBigInt(q.y, bits);
+
+    return sign((bx - ax) * (py - qy) - (by - ay) * (px - qx));
+  }
+
   /* The 3x3 determinant of the lifted differences, evaluated exactly. Positive
      when d lies inside the circle through a, b and c, given that a, b, c turn
      counter-clockwise - a caller with the opposite orientation gets the
@@ -145,6 +166,7 @@
   return {
     orient2d: orient2d,
     inCircle: inCircle,
+    fartherFromLine: fartherFromLine,
     decompose: decompose,
     fractionBits: fractionBits,
     commonScale: commonScale,
