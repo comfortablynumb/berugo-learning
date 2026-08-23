@@ -3,7 +3,7 @@
 Where the implementation stands, and exactly what the next session should pick up.
 Update this file at the end of any session that leaves work unfinished.
 
-**Last updated:** 2026-08-22 (M15 complete; the tree is green — next is M16, computational geometry)
+**Last updated:** 2026-08-23 (M16 complete; the tree is green — next is M17, numbers, bits and floating point)
 
 ---
 
@@ -27,11 +27,12 @@ Update this file at the end of any session that leaves work unfinished.
 | M13 — graph algorithms I | 10 | ✅ built, tested, render-audited |
 | M14 — graph algorithms II | 10 | ✅ built, tested, render-audited |
 | M15 — string algorithms and pattern matching | 11 | ✅ built, tested, render-audited |
+| M16 — computational geometry | 10 | ✅ built, tested, render-audited |
 
-**The tree is GREEN.** `npm test` reports 2 740 unit tests with 0 failures (6 skipped — the
-wall-clock-budget starters the inline sandbox cannot fail); the wiring audit passes at 146 sections
-and 696 modules, the render audit activates all 146 with no exception and no empty table,
-`npm run lint:size` passes across 775 files, and `npm run build:css` is up to date.
+**The tree is GREEN.** `npm test` reports 2 904 unit tests with 0 failures (6 skipped — the
+wall-clock-budget starters the inline sandbox cannot fail); the wiring audit passes at 156 sections
+and 749 modules, the render audit activates all 156 with no exception and no empty table,
+`npm run lint:size` passes across 834 files, and `npm run build:css` is up to date.
 
 All nine M07 sections were opened in Chrome on `npm start`: the three tabs render, every demo
 figure matches the prose *exactly* (see "aligning the demo with the prose" below), the references
@@ -1760,7 +1761,7 @@ precision off 50% or recall off 100%.
 ## The notation pass (after M15, before M16)
 
 The Description tab was written at a reader who already reads mathematics, and the audience is a
-senior engineer who may not. Two things changed, across all 146 sections.
+senior engineer who may not. Two things changed, across all 146 sections then live (156 now).
 
 **A decoder.** `content/notation.js` is a glossary of every symbol the curriculum uses, carrying
 how to *say* it and what it does. `utils/notation-markup.js` escapes and annotates in one pass —
@@ -1800,12 +1801,100 @@ the letter in one sense throughout.
 - **Ambiguity the prose had absorbed.** `L1 ≈ 1 ns · L2 ≈ 4 ns` was a list of latencies reading as
   a product; `best[i−1][·]` used the dot as an "any index" placeholder. Both are words now.
 
+## M16 — computational geometry (complete)
+
+Ten sections, 156 in the tree. The modules, the harness, the scene renderer, the templates and the
+controllers landed first (commits `654e8b3` through `fc1b079`); this pass added the four content
+files per quarter, the module property tests and the figure tests, and wired all sixteen content
+files into `index.html`.
+
+### The shape of the milestone
+
+Every section pairs a fast, subtle routine against something slow and obviously right, and reports
+the disagreement count as a field rather than throwing:
+
+- `orient2d` and `inCircle` against exact BigInt arithmetic (`geometry-exact.js`);
+- four hull algorithms against each other *and* against an "every point inside, no reflex vertex"
+  oracle, under both collinear policies;
+- Bentley-Ottmann against a pairwise scan, on four fixtures built to be degenerate;
+- rectangle-union area against inclusion-exclusion over every non-empty subset;
+- Delaunay against an exhaustive every-triangle-against-every-vertex circumcircle check;
+- two Voronoi constructions that share no code, both against a brute-force nearest-site grid;
+- Sutherland-Hodgman and a convex decomposition against a 160 000-cell rasteriser;
+- calipers against an all-pairs diameter scan and a 3 600-angle rotation sweep;
+- Möller-Trumbore against a plane-and-edge-cross-products reference, plus a barycentric round-trip;
+- SAT against a sampling oracle, and the minimum translation vector against "apply it and ask again".
+
+### Figures worth keeping (all recomputed in the figure tests)
+
+Over 4 000 near-collinear triples the naive determinant contradicts itself 1 121 times and is wrong
+642 times; the tolerance test at 1e-12 contradicts itself **0** times and is wrong **4 000** times,
+calling a real turn collinear on every one of them; the adaptive predicate scores 0 and 0, at an
+escalation rate of 0.00% on ordinary points and 62.67% on the adversarial ones. Ray casting and the
+winding number disagree on 44 of 441 probes at the pentagram's centre and on 0 probes for all six
+simple fixtures — and on 0 for the bowtie, which crosses itself but encircles each lobe only once.
+Four hull algorithms return the identical 12-vertex hull from 200 points at 789, 1 314, 1 651 and
+2 400 orientation tests; at 1 024 points gift wrapping costs 16 384 tests on a cloud and 1 047 552
+on a circle while the monotone chain goes 4 077 → 4 090.
+
+A 12-segment sweep processes 24 events against 66 pairwise tests for the same 12 crossings, and
+agrees with brute force on all 7 fixtures (3 segments → 1 crossing on shared endpoints, 4 → 5 on
+verticals, 3 → 1 on a triple point, 3 → 2 on a collinear overlap); rectangle union is 876.00 from 9
+compressed slabs and from 63 subset terms. Delaunay puts 108 triangles over 60 points with 0
+empty-circle violations from 7 531 predicate calls, 0 of them exact; 60 legal flips keep the points,
+the region and the triangle count and take violations to 562, the mean smallest angle from 26.79° to
+18.94°, skinny triangles from 34 to 57 and sub-ten-degree ones from 18 to 37. Ear clipping gives
+vertices − 2 triangles on all 6 simple fixtures at 100.00% of the area, with ear tests running 1 for
+a square to 21 for a comb. Half-plane intersection and the Delaunay dual give the same 24 cells and
+the same 10 660.52 of area, agreeing to 3.33e-15, with 19 unbounded cells, 0 of 900 grid points
+misassigned and 0 sites outside their own cell; twelve Lloyd rounds take movement 137.675 → 14.859
+and the largest-to-smallest ratio 65.6× → 3.2×, monotonically and never to zero.
+
+Sutherland-Hodgman returns 0 vertices against 2 of the 5 concave clips and a plausible polygon at
+66.7%, 66.8% and 60.0% error against the other 3, while the convex rows sit at 0.0% and 0.3% — that
+0.3% being the sampler's own resolution of 0.0625 per cell. Union 9 600.0 plus intersection 2 800.0
+is 12 400.0 and the exclusive-or of 6 800.0 is their difference. A buffer's disc loses 11.80% of its
+area at 3 corners, 0.17% at 16 and 0.01% at 64, always inscribed and therefore always short.
+Rotating calipers finds a 932.6 rectangle against a 10 058.0 axis-aligned box on diagonal data —
+10.79× — and exactly 1.000 of the box on a grid, with the diameter exact against every pair and the
+rectangle 0.024% better than a 3 600-angle sweep whose step is 0.0250°. Gimbal freedom drains
+13.91% / 29.29% / 45.88% / 63.40% / 81.54% at pitches 15 / 30 / 45 / 60 / 75, from a baseline of
+0.8103° that is *measured* rather than derived — two perpendicular nudges differ by the nudge times
+√2, not twice it. 20 000 rays give 715 hits and 0 disagreements with a differently-derived reference
+and 0 barycentric round-trip errors. Bresenham and rounding produce identical pixel sets on 2 492 of
+3 000 lines with endpoints and pixel counts equal on all 3 000; coverage sums to 377.63 against a
+true area of 377.50 with 67 of 411 touched pixels partly covered; flattening goes 8 → 110 segments
+for a 256× tighter tolerance; and the SAT push separates the shapes at every overlapping separation,
+where taking the direction from the centroids fails 38 of 800 pairs.
+
+### Three module subtleties the new tests pinned down
+
+- **`Calipers.supportOf` returns every point ON the circle, not Welzl's basis.** The basis is at
+  most three points; a point set that already lies on a circle puts all of them on the boundary. A
+  property test asserting `support.length <= 3` is wrong, and the section's note quoting "2 points
+  sit on it" is about the diagonal fixture rather than a universal bound.
+- **The diameter can differ from the pairwise scan by one ulp on tie-heavy sets.** On 60 points
+  arranged on a circle there are many antipodal pairs at the same distance and the two walks can
+  land on different ones. Equality holds on the section's own fixture and is asserted there; the
+  property test uses a relative tolerance of 1e-9 and says why.
+- **A ring whose signed area cancels to zero has no orientation to reverse.** The bowtie's two lobes
+  are wound opposite ways, so `isCounterClockwise` is false for it and for its reverse. The
+  orientation property test skips zero-area rings rather than pretending otherwise.
+
+### One content figure the dumps corrected
+
+The first draft of the containment prose claimed the pentagram fills 1 980.0 under the even-odd rule
+and 3 600.0 under the non-zero rule. 1 980.0 is the *star* fixture's area — a different, simple,
+eight-vertex polygon — and the section never computes an even-odd fill area at all. The step is now
+the measurement the section does make: the same silhouette drawn as an 8-vertex simple ring produces
+0 disagreeing probes where the 5-vertex crossing ring produces 44.
+
 ## Next
 
-**M16 — computational geometry**, then onward through `doc/milestones/` in the order
+**M17 — numbers, bits and floating point**, then onward through `doc/milestones/` in the order
 `doc/ROADMAP.md` gives.
 
-M11 through M15 are complete apart from a human browser pass, which needs the Chrome extension
+M11 through M16 are complete apart from a human browser pass, which needs the Chrome extension
 connected. `tools/section-dump.js` covers everything else the browser used to be needed for — it
 prints every metric, table and note a section renders, at any control setting, and since the
 `input`-event fix above that is finally true of slider settings too.
@@ -1813,7 +1902,7 @@ prints every metric, table and note a section renders, at any control setting, a
 A shared helper exists for the figure tests: `tests/support/worked-example-prose.js` exports
 `proseFor`, `quotes`, `fixed` and `grouped`.
 
-The shape to copy, unchanged through M14:
+The shape to copy, unchanged through M16:
 
 1. pure modules in `algorithms/` first, behind one shared interface;
 2. a `machines/` harness that drives every implementation through that interface, carrying a

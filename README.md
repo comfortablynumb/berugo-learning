@@ -14,14 +14,14 @@ faithfully in a browser, the section models it, says so plainly, and states what
 
 ## Status
 
-**M00–M15 shipped (146 sections). Building the curriculum, milestone by milestone.**
+**M00–M16 shipped (156 sections). Building the curriculum, milestone by milestone.**
 
 - ✅ Curriculum designed: 65 milestones, 634 sections, 11 tracks — one file per milestone in
   [`doc/milestones/`](doc/milestones/)
 - ✅ Architecture and conventions fixed — [`doc/architecture.md`](doc/architecture.md)
 - ✅ Build order and dependency graph — [`doc/ROADMAP.md`](doc/ROADMAP.md)
 - ✅ Scope decisions recorded — [`doc/topic-suggestions.md`](doc/topic-suggestions.md)
-- ✅ **Notation decoder across all 146 sections**: every mathematical symbol carries how to say it
+- ✅ **Notation decoder across all 156 sections**: every mathematical symbol carries how to say it
   and what it does, revealed on hover, tap or keyboard focus, and every formal statement whose
   notation a reader cannot pronounce carries an "In words" translation beneath it. The audience is
   a senior engineer with little or no mathematics, so the Description tab explains the idea before
@@ -190,8 +190,37 @@ faithfully in a browser, the section models it, says so plainly, and states what
   Jaro-Winkler scores two *different* accounts at 0.956 and Levenshtein scores one name against
   itself reordered at 0.059. 11 sections live.
 
-`npm test` is green — wiring audit, 2 740 unit tests, and a **render audit** that boots the whole
-app headlessly and activates all 146 sections, failing on anything that throws while rendering, any
+- ✅ **M16 — computational geometry**: the orientation predicate measured three ways over 4 000
+  near-collinear triples, where the tolerance test everyone reaches for scores 0 self-contradictions
+  and 4 000 wrong answers while the naive determinant scores 1 121 and 642 — and the adaptive one
+  scores 0 and 0 for an escalation rate of 0.00% on ordinary points against 62.67% on adversarial
+  ones; ray casting and the winding number disagreeing on 44 of 441 probes at a pentagram's centre
+  and on none of the six simple fixtures, with the bowtie crossing itself and still agreeing
+  everywhere; four hull algorithms returning the identical 12-vertex hull at 789, 1 314, 1 651 and
+  2 400 orientation tests, and gift wrapping costing 16 384 tests on a 1 024-point cloud and
+  1 047 552 on 1 024 points arranged on a circle; a sweep replacing 66 pairwise tests with 24 events
+  and agreeing with brute force on all seven fixtures including the four degenerate ones, with
+  rectangle-union area at 876.00 from 9 compressed slabs and from 63 inclusion-exclusion terms;
+  Delaunay checked exhaustively at 0 empty-circle violations over 108 triangles and 60 vertices,
+  against 562 after 60 legal flips that leave the points, the region and the triangle count
+  untouched while the mean smallest angle falls from 26.79° to 18.94°; two Voronoi constructions
+  sharing no code agreeing to 3.33e-15 of relative area with 0 of 900 grid points in the wrong cell,
+  and Lloyd relaxation taking the largest-to-smallest cell ratio from 65.6× to 3.2× without ever
+  converging; Sutherland-Hodgman returning *nothing* against 2 of 5 concave clips and a plausible
+  polygon missing 60 to 67% of its area against the other 3, where a convex decomposition lands on
+  the sampled area exactly, and a buffer's disc losing 11.80% of its area at 3 corners and 0.17% at
+  16; rotating calipers finding a rectangle 10.79× smaller than the axis-aligned box on diagonal
+  data and exactly equal to it on a grid, with the diameter exact against every pair and the
+  rectangle 0.024% better than a 3 600-angle sweep; gimbal freedom draining 45.88% by pitch 45° and
+  63.40% by 60° rather than cliffing at 90°, and a ray-triangle routine agreeing with a
+  differently-derived reference on all 20 000 rays; and Bresenham against rounding producing
+  identical pixel sets on 2 492 of 3 000 lines with the endpoints and pixel counts always equal,
+  coverage summing to 377.63 against a true area of 377.50, and a minimum translation vector that
+  separates the shapes where taking the push from the centroids fails 38 of 800 overlapping pairs.
+  10 sections live.
+
+`npm test` is green — wiring audit, 2 904 unit tests, and a **render audit** that boots the whole
+app headlessly and activates all 156 sections, failing on anything that throws while rendering, any
 table left with an empty body, and any metric tile still showing a placeholder without a note
 explaining it. `npm run lint:size` reports no offenders.
 
@@ -203,7 +232,7 @@ explaining it. `npm run lint:size` reports no offenders.
   opens to milestones, then sections. Tracks that are planned and not built are listed with their
   milestones and section counts, marked as planned, so the map shows what the platform teaches
   rather than only what happens to be finished. One track and one milestone stay open at a time, so
-  the nav is the same height at 146 sections and at 634.
+  the nav is the same height at 156 sections and at 634.
 - **Search across everything.** The header search indexes concepts, worked examples, reference
   entries and exercises as well as section titles, so "tombstone", "Little's law" or "round half to
   even" lands on the section that explains it. Ctrl/Cmd+K focuses it; arrows and Enter drive it.

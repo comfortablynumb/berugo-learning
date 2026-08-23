@@ -124,6 +124,8 @@
       means: 'Division. Written this way rather than with a slash when the surrounding formula already uses slashes for something else.' },
     { token: '−', reads: 'minus',
       means: 'Subtraction, or a negative sign. It is a true minus sign, drawn wider than a hyphen so it lines up with + in a formula.' },
+    { token: '°', reads: 'degrees',
+      means: 'An angle measured in degrees: a full turn is 360° and a right angle is 90°. The other unit is radians, where a full turn is 2π — every trigonometric function in a standard library expects radians, which is the single most common unit bug in geometry code.' },
     { token: '±', reads: 'plus or minus',
       means: 'A value with a tolerance either side: 5 ± 2 covers everything from 3 to 7.' },
     { token: '√', reads: 'the square root of',
