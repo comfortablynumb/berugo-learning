@@ -3,7 +3,7 @@
 Where the implementation stands, and exactly what the next session should pick up.
 Update this file at the end of any session that leaves work unfinished.
 
-**Last updated:** 2026-08-24 (M19 complete and render-audited; the tree is green — next is M20, NP-completeness, reductions and metaheuristics)
+**Last updated:** 2026-08-24 (M19 complete; M20 started — four algorithm modules landed and wired, no sections yet. The tree is GREEN.)
 
 ---
 
@@ -2305,10 +2305,75 @@ expectation 35.00, random mean 35.10 with 178 of 500 below and a worst at 70.0%,
 against an exact 40 from 16 384 assignments.
 
 
+## M20 — NP-completeness, reductions and metaheuristics (IN PROGRESS)
+
+Spec: `doc/milestones/M20-np-completeness.md`. Nine sections planned, **none wired yet** — the
+curriculum still has M20 in `planned`, and no section, template or content file exists. What is
+done is the bottom of the stack.
+
+**The tree is green.** The four modules below are committed, loaded from `index.html` and covered
+by nothing except the ad-hoc checks recorded here, so the first job of the next session is a
+`tests/unit/np-modules.test.js` that pins them.
+
+### Done: four algorithm modules, measured but not yet unit-tested
+
+| Module | State |
+|---|---|
+| `algorithms/sat-basics.js` | CNF shape, DPLL (unit propagation + pure literal, with decision/propagation/conflict/node counters and a node budget), Horn-SAT by propagation, brute-force SAT and MAX-SAT oracles, `toThreeCnf`. |
+| `algorithms/np-verifiers.js` | Step-counting verifiers and searches for Hamiltonian cycle, subset sum, 3-colouring, clique; verifiers for vertex cover and SAT; a `PROBLEMS` table of certificate shapes and costs. |
+| `algorithms/instance-generators.js` | `randomKSat` (ratio dial), `plantedKSat`, `pigeonhole`, `hornInstance`, planted/obstructed graph and subset-sum generators. |
+| `algorithms/reductions.js` | 3-SAT → independent set / clique / 3-colouring, vertex cover → set cover, subset sum → partition, each with forward, solve, backward and **validate against the source**. |
+
+### Measurements already taken, and what they settled
+
+- **DPLL agrees with the brute-force oracle on 800 random 3-SAT instances** across ratios 2, 3,
+  4.27 and 6 at n = 12, and every satisfiable answer satisfies every clause.
+- **Pigeonhole is the exponential family it is advertised as.** PHP(4) through PHP(8) cost 47, 239,
+  1 439, 10 079 and 80 639 DPLL nodes while the clause count grows only 45 → 297. That is the
+  counter-example to "SAT solvers are fast now" and it belongs in 20.8.
+- **The verifier/search contrast has to be built on NO instances, not YES ones.** A backtracking
+  search on a planted YES instance is often *faster* than the verifier — Hamiltonian at 14 steps
+  against a 28-step verify — because it stumbles onto the planted answer. The honest framing, and
+  the one the demo must use, is that the verifier's cost is the same either way while the search
+  explodes on the NO side: 10 617 steps for non-Hamiltonian, 1 048 576 for unsolvable subset sum,
+  977 for non-3-colourable. That is the co-NP asymmetry, and it is what 20.1 is really about.
+- **Two generators had to be fixed before they measured anything.** The planted Hamiltonian cycle
+  was originally 0, 1, 2, … so the search walked straight down it; it is now a random permutation.
+  The K₄ obstruction in `nonColourableGraph` was on vertices 0–3, which a search that assigns
+  vertices in order hits in six steps; it is now on the last four, and the search costs 977.
+
+### Still to do, in order
+
+1. **Unit tests for the four modules** — `tests/unit/np-modules.test.js`. DPLL against brute force,
+   Horn-SAT against brute force, every verifier rejecting malformed as well as wrong certificates,
+   and every reduction round-tripping on both satisfiable and unsatisfiable sources. The last one
+   was mid-run when the session stopped: `Reductions.run(name, formula)` over 40 seeds × 4 ratios ×
+   3 SAT reductions, asserting `agrees` and `valid`. **That run has not completed once**, so treat
+   the three SAT reductions as unverified.
+2. **Four more algorithm modules**: `qbf.js` (quantifier expansion, game-tree trace),
+   `fpt.js` (brute force / branch-and-reduce / Buss kernelisation for vertex cover),
+   `metaheuristics.js` (nearest neighbour, 2-opt, or-opt, annealing, tabu, genetic, ACO, GRASP on a
+   shared TSP evaluation budget), `encodings.js` (pairwise / commander / sequential at-most-one,
+   colouring → CNF, symmetry breaking).
+3. **Two harnesses**: `machines/np-lab.js` (20.1–20.5) and `machines/heuristic-lab.js` (20.6–20.9,
+   budgeted tournament with best-so-far curves). `machines/reduction-lab.js` already exists from
+   M14 and already round-trips; M20's reductions go in `np-lab.js` rather than being bolted on,
+   because reduction-lab is at 372 lines and the size limit wins over the spec's table.
+4. Then the usual: nine template + section pairs, `template-ids.test.js` FIRST, wiring, section
+   dumps, twelve content files, figure suites, docs.
+
+### Section ids and prefixes to use (none are taken)
+
+`decision-problems` (`dcp-`), `reductions` (`rdx-`), `sat-zoo` (`saz-`), `beyond-np` (`bnp-`),
+`parameterised-algorithms` (`fpt-`), `metaheuristics` (`mth-`), `using-solvers` (`slv-`),
+`hardness-in-practice` (`hip-`), `reduction-workshop` (`rwk-`).
+
+
 ## Next
 
-**M20 — NP-completeness, reductions and metaheuristics**, then onward through
-`doc/milestones/` in the order `doc/ROADMAP.md` gives.
+**Finish M20 — NP-completeness, reductions and metaheuristics.** Its four algorithm modules are
+already written, wired and green; the section immediately above lists exactly what remains and in
+what order. After it, onward through `doc/milestones/` in the order `doc/ROADMAP.md` gives.
 
 M11 through M15 and M17 through M19 are complete apart from a human browser pass, which needs the Chrome
 extension connected; M16 has had one (see above, and the chart defect it found). `tools/section-dump.js` covers everything else the browser used to be needed for — it
