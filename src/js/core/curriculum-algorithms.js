@@ -617,10 +617,76 @@
               summary: 'The columns that make an identifier cheap to index are exactly the columns that make it informative to a stranger.',
               tags: ['uuid', 'ulid', 'snowflake', 'sequential ids', 'index locality', 'buffer pool', 'clock regression', 'monotonic', 'bit packing', 'information leakage']
             }]
+        },
+
+        {
+          id: 'M18',
+          title: 'Numerical methods, transforms and optimisation',
+          summary: 'Error and conditioning tracked at every step, so "the algorithm is wrong" can be told apart from "the problem is ill-conditioned".',
+          sections: [
+            {
+              id: 'conditioning-and-error',
+              title: 'Conditioning, stability and error',
+              summary: 'The residual sits at machine precision across nine orders of conditioning while the answer loses every correct digit, and nothing warns the caller.',
+              tags: ['condition number', 'forward error', 'backward error', 'residual', 'stability', 'hilbert matrix', 'digits lost', 'machine epsilon', 'relative error', 'error bound']
+            },
+            {
+              id: 'root-finding',
+              title: 'Root finding',
+              summary: 'Newton converges to a genuine root from nine starting points and it is the wrong one from three of them, with no error raised.',
+              tags: ['bisection', 'newton', 'secant', 'brent', 'false position', 'fixed point', 'convergence order', 'basin of attraction', 'bracketing', 'contraction']
+            },
+            {
+              id: 'linear-systems',
+              title: 'Linear systems',
+              summary: 'A pivot of 1e-18 is small and never zero, so no check fires and the answer comes back wrong in its first component by 100 percent.',
+              tags: ['gaussian elimination', 'partial pivoting', 'growth factor', 'lu decomposition', 'cholesky', 'jacobi', 'gauss seidel', 'sor', 'conjugate gradient', 'preconditioning', 'never invert']
+            },
+            {
+              id: 'least-squares',
+              title: 'Least squares, QR and the SVD',
+              summary: 'Forming A-transpose-A squares the condition number exactly, which is half your digits gone before any solving happens.',
+              tags: ['normal equations', 'qr', 'gram schmidt', 'householder', 'svd', 'pseudo inverse', 'eckart young', 'low rank', 'numerical rank', 'ridge', 'vandermonde']
+            },
+            {
+              id: 'eigenvalues',
+              title: 'Eigenvalues and the QR algorithm',
+              summary: 'The Wilkinson polynomial has roots at 1 through 20 and a fifteenth-digit nudge to one coefficient moves one of them by most of a whole unit.',
+              tags: ['power iteration', 'spectral gap', 'shifted inverse', 'qr algorithm', 'hessenberg', 'characteristic polynomial', 'wilkinson polynomial', 'similarity transformation', 'eigenvector', 'krylov']
+            },
+            {
+              id: 'interpolation',
+              title: 'Interpolation and approximation',
+              summary: 'Five times the data makes the polynomial fit six hundred times worse, and moving the same nodes to the Chebyshev positions fixes it.',
+              tags: ['runge phenomenon', 'chebyshev nodes', 'lagrange', 'barycentric', 'cubic spline', 'monotone interpolation', 'overshoot', 'bezier', 'de casteljau', 'knots']
+            },
+            {
+              id: 'differentiation-and-autodiff',
+              title: 'Differentiation, integration and autodiff',
+              summary: 'The best a forward difference can ever do is eight correct digits out of sixteen, and no step size gets under that floor.',
+              tags: ['finite difference', 'step size', 'truncation error', 'richardson', 'complex step', 'trapezoid', 'simpson', 'gauss legendre', 'adaptive quadrature', 'forward mode', 'reverse mode', 'tape', 'adjoint']
+            },
+            {
+              id: 'differential-equations',
+              title: 'Differential equations and simulation',
+              summary: 'Over 200 000 steps the fourth-order method loses energy monotonically and the second-order one does not, which is why games use the second-order one.',
+              tags: ['euler', 'midpoint', 'rk4', 'verlet', 'symplectic', 'energy drift', 'convergence order', 'stiffness', 'stability limit', 'implicit euler', 'leapfrog']
+            },
+            {
+              id: 'fourier-transforms',
+              title: 'Fourier transforms and signal processing',
+              summary: 'A pure tone smeared across the whole spectrum is not a resolution problem, and 1100 Hz sampled at 1 kHz is indistinguishable from 100 Hz forever after.',
+              tags: ['dft', 'fft', 'butterfly', 'bit reversal', 'twiddle factor', 'windowing', 'spectral leakage', 'hann', 'blackman', 'aliasing', 'nyquist', 'convolution theorem', 'ntt']
+            },
+            {
+              id: 'optimisation',
+              title: 'Optimisation',
+              summary: 'Gradient descent goes from two iterations to nine thousand as the conditioning worsens, and Newton takes two at every point on that range.',
+              tags: ['convexity', 'gradient descent', 'step size', 'stability limit', 'momentum', 'line search', 'armijo', 'bfgs', 'newton method', 'coordinate descent', 'affine invariance', 'conditioning']
+            }]
         }
       ],
       planned: [
-        { id: 'M18', title: 'Numerical methods, transforms and optimisation', sections: 10 },
         { id: 'M19', title: 'Randomised and approximation algorithms', sections: 9 },
         { id: 'M20', title: 'NP-completeness, reductions and metaheuristics', sections: 9 },
         { id: 'M21', title: 'Online, external-memory and cache-oblivious algorithms', sections: 9 },

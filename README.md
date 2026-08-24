@@ -14,7 +14,7 @@ faithfully in a browser, the section models it, says so plainly, and states what
 
 ## Status
 
-**M00–M17 shipped (166 sections). Building the curriculum, milestone by milestone.**
+**M00–M18 shipped (176 sections). Building the curriculum, milestone by milestone.**
 
 - ✅ Curriculum designed: 65 milestones, 634 sections, 11 tracks — one file per milestone in
   [`doc/milestones/`](doc/milestones/)
@@ -247,8 +247,40 @@ faithfully in a browser, the section models it, says so plainly, and states what
   a sequence touches 14 — with UUIDv7 at 15 and out of order on 6 735 of 13 333 same-millisecond
   pairs, which is exactly what breaks a cursor. 10 sections live.
 
-`npm test` is green — wiring audit, 3 101 unit tests, and a **render audit** that boots the whole
-app headlessly and activates all 166 sections, failing on anything that throws while rendering, any
+- ✅ **M18 — numerical methods, transforms and optimisation**: the residual holding flat at
+  machine precision across nine orders of conditioning while the relative error climbs from
+  1.65e-16 to 1.89e-1, and the Hilbert matrix losing every correct digit by n = 13 with a residual
+  still at 2.04e-16 — so every automated correctness check passes on an answer with no relationship
+  to the truth; Newton fitting a convergence order of 1.957 and the secant 1.580 against the golden
+  ratio, while bisection’s column is deliberately blank because an earlier version fitted it a
+  confident 1.857 that means nothing — its bracket contraction of exactly 0.5000 against false
+  position’s 1.0000 is the honest characterisation; Newton returning a genuine root correct to
+  fifteen digits and the *wrong* one from 3 of 9 starting points, with the basin flipping between
+  0.8150 and 0.8165 where the derivative vanishes; a pivot of 1e-18 destroying an answer by an
+  *addition* rather than a division — 1 − 1e18 rounds to −1e18 — for a relative error of 7.07e-1
+  with no exception raised, against Wilkinson’s matrix attaining the 2ⁿ⁻¹ growth bound exactly while
+  partial pivoting performs zero swaps; the explicit inverse measured at 8.4× the error of the
+  factorisation it was built from, for more work; κ(AᵀA) sitting at exactly κ(A)² until the
+  measurement itself saturates near 1/ε, and classical Gram–Schmidt landing 4.4e+13 further from
+  orthogonal than Householder on one degree-9 Vandermonde; power iteration priced entirely by the
+  spectral gap at 33 iterations for 0.5 and 1 802 for 0.99 with the matrix size absent from both
+  columns, and Wilkinson’s polynomial moving a root by 9.051e-1 from a perturbation in the
+  eleventh digit; five times the data making a polynomial fit 5.9e+2 times *worse*, fixed twice —
+  Chebyshev nodes at 8.166e-3 and a spline at 1.926e-3 — and a C² spline dipping 0.1094 below
+  non-negative data while interpolating every point to 1.1e-16; the V curve bottoming out at
+  h = 1e-8 and 2.97e-9 for a forward difference against √ε = 1.49e-8, with the complex step scoring
+  exactly 0 because it never subtracts; reverse-mode autodiff at 9.60× less work than forward mode
+  on 24 inputs and one sweep against 24; RK4’s orbital radius decaying monotonically to 0.994302
+  over 200 000 steps while Verlet oscillates inside 1.000000–1.004988 — an effect that *does not
+  reproduce* at h = 0.01, where both hold to a part in 10⁹, so the demo defaults to the step where
+  it is real; a butterfly count of exactly (n/2)log₂n and one pure tone leaving a 74×
+  peak-to-sidelobe ratio that a Blackman window takes to 54 709×, with 1 100 Hz landing on 100 Hz
+  irrecoverably; and gradient descent going from 2 iterations to 9 244 as κ goes 1 → 1 000 while
+  Newton takes 2 throughout, with a pure 45° rotation costing coordinate descent a factor of 34 on
+  a surface whose eigenvalues did not move. 10 sections live.
+
+`npm test` is green — wiring audit, 3 237 unit tests, and a **render audit** that boots the whole
+app headlessly and activates all 176 sections, failing on anything that throws while rendering, any
 table left with an empty body, and any metric tile still showing a placeholder without a note
 explaining it. `npm run lint:size` reports no offenders.
 

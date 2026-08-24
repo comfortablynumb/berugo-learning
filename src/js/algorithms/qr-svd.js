@@ -316,8 +316,17 @@
       }
     }
     const dropped = decomposition.s.slice(Math.min(k, decomposition.s.length));
+    /* Eckart-Young states the optimum in TWO norms and they are different
+       numbers: the spectral-norm error is the next singular value, and the
+       Frobenius-norm error is the root of the sum of the squares of all the
+       dropped ones. A demo that measures a Frobenius difference and compares
+       it to the spectral bound reports the error EXCEEDING its own bound,
+       which is what the first version of the truncation table did. */
+    let squares = 0;
+    dropped.forEach(function (value) { squares += value * value; });
     return { matrix: out, singular: decomposition.s,
-      errorBound: dropped.length > 0 ? dropped[0] : 0 };
+      errorBound: dropped.length > 0 ? dropped[0] : 0,
+      frobeniusBound: Math.sqrt(squares) };
   }
 
   /** The pseudo-inverse, with small singular values discarded rather than

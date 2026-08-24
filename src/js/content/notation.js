@@ -101,6 +101,8 @@
     { token: '≥', reads: 'is greater than or equal to',
       means: 'At least - the value may touch the bound but not fall below it.' },
     { token: '≠', reads: 'is not equal to', means: 'The two sides differ.' },
+    { token: '≲', reads: 'is at most, up to a constant',
+      means: 'Less than or equal to, ignoring a constant factor nobody is tracking. Used in error bounds, where the shape of the bound is the point and the leading constant is not.' },
     { token: '≈', reads: 'is approximately',
       means: 'Close enough for the point being made; the exact value is not what matters here.' },
     { token: '≡', reads: 'is congruent to, or is identical to',
@@ -130,6 +132,8 @@
       means: 'A value with a tolerance either side: 5 ± 2 covers everything from 3 to 7.' },
     { token: '√', reads: 'the square root of',
       means: 'The number that gives this one when multiplied by itself. √n grows very slowly: √1 000 000 is 1 000.' },
+    { token: '∛', reads: 'the cube root of',
+      means: 'The number that gives this one when multiplied by itself twice. It shrinks even more slowly than a square root: the cube root of a millionth is a hundredth.' },
     { token: '∞', reads: 'infinity',
       means: 'Unbounded. In code it is normally a sentinel - `Infinity`, or a number chosen large enough that nothing can beat it.' },
     { token: '⌈', reads: 'ceiling, open',
@@ -155,6 +159,14 @@
       means: 'Join the two sequences end to end.' },
     { token: '′', reads: 'prime',
       means: 'Marks a second, related variable rather than an operation: s′ is read "s prime" and normally means the state after a step.' },
+    { token: '″', reads: 'double prime',
+      means: 'The second derivative: f″ is how fast the slope of f is changing, which is its curvature.' },
+    { token: '∇', reads: 'gradient, or nabla',
+      means: 'The vector of every partial derivative at once: ∇f points in the direction the function increases fastest, and its length is how fast.' },
+    { token: '∂', reads: 'partial derivative',
+      means: 'A derivative with respect to one variable while the others are held fixed. ∂f/∂x reads “the partial of f with respect to x”.' },
+    { token: '∓', reads: 'minus or plus',
+      means: 'The opposite sign to a ± written elsewhere in the same statement: where one is plus the other is minus.' },
     { token: '→', reads: 'goes to, or maps to',
       means: 'Approaches a value in a limit, or becomes a value in a mapping - "this on the left turns into that on the right".' },
     { token: '←', reads: 'takes the value',
@@ -179,6 +191,8 @@
       means: 'A deliberately tiny positive number: an error you are willing to accept, or a tolerance you compare against. In automata it instead means the empty string - a transition taken without consuming input.' },
     { token: 'θ', reads: 'theta, lowercase',
       means: 'An angle, or a threshold. Not the same as capital Θ, which is the growth-rate symbol.' },
+    { token: 'κ', reads: 'kappa',
+      means: 'The condition number: how much a small relative wobble in the input can be magnified on the way to the output. It is a property of the problem rather than of any code, and log10 of it is roughly how many decimal digits you should expect to lose.' },
     { token: 'λ', reads: 'lambda',
       means: 'An anonymous function in the lambda calculus, an arrival rate in queueing, or an eigenvalue in linear algebra. ' + CONTEXT },
     { token: 'μ', reads: 'mu',
@@ -193,6 +207,8 @@
     { token: 'τ', reads: 'tau', means: 'A time constant or a threshold. ' + CONTEXT },
     { token: 'φ', reads: 'phi, lowercase',
       means: 'Often the golden ratio, about 1.618, which is why it turns up in Fibonacci growth. ' + CONTEXT },
+    { token: 'ω', reads: 'omega, lowercase',
+      means: 'A tuning factor deliberately set above 1 to overshoot an update, as in successive over-relaxation, where the best value is found by sweeping rather than by formula. Not the same as capital Ω, which is the growth-rate symbol.' },
     { token: 'χ', reads: 'chi',
       means: 'Usually the chromatic number of a graph - the fewest colours needed so no edge joins two same-coloured vertices.' },
     { token: 'ℓ', reads: 'script ell', means: 'A length or a level, written in script to keep it distinct from the digit 1.' }
@@ -225,7 +241,9 @@
     { token: 'ₙ', reads: 'sub n', means: 'A subscript index - the n-th, that is the last, of a numbered family.' },
     { token: 'ₘ', reads: 'sub m', means: 'A subscript index - the m-th of a numbered family.' },
     { token: 'ᵢ', reads: 'sub i', means: 'A subscript index: aᵢ reads "a sub i" and means the i-th item, the maths spelling of `a[i]`.' },
-    { token: 'ⱼ', reads: 'sub j', means: 'A subscript index: the j-th item, the maths spelling of `a[j]`.' }
+    { token: 'ⱼ', reads: 'sub j', means: 'A subscript index: the j-th item, the maths spelling of `a[j]`.' },
+    { token: '₊', reads: 'plus, in a subscript', means: 'Arithmetic inside an index rather than on the value: σₖ₊₁ reads “sigma sub k plus one” and means the next one after the k-th.' },
+    { token: '₋', reads: 'minus, in a subscript', means: 'Arithmetic inside an index rather than on the value: hᵢ₋₁ reads “h sub i minus one” and means the one before the i-th.' }
   ];
 
   const ENTRIES = GROWTH.concat(LOGIC, ARITHMETIC, GREEK, MARKS);

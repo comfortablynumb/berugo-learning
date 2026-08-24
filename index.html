@@ -229,6 +229,16 @@
       <section data-section="modular-arithmetic" hidden><div class="section-body"><div id="modular-arithmetic-content"></div></div></section>
       <section data-section="random-generation" hidden><div class="section-body"><div id="random-generation-content"></div></div></section>
       <section data-section="integer-algorithms" hidden><div class="section-body"><div id="integer-algorithms-content"></div></div></section>
+      <section data-section="conditioning-and-error" hidden><div class="section-body"><div id="conditioning-and-error-content"></div></div></section>
+      <section data-section="root-finding" hidden><div class="section-body"><div id="root-finding-content"></div></div></section>
+      <section data-section="linear-systems" hidden><div class="section-body"><div id="linear-systems-content"></div></div></section>
+      <section data-section="least-squares" hidden><div class="section-body"><div id="least-squares-content"></div></div></section>
+      <section data-section="eigenvalues" hidden><div class="section-body"><div id="eigenvalues-content"></div></div></section>
+      <section data-section="interpolation" hidden><div class="section-body"><div id="interpolation-content"></div></div></section>
+      <section data-section="differentiation-and-autodiff" hidden><div class="section-body"><div id="differentiation-and-autodiff-content"></div></div></section>
+      <section data-section="differential-equations" hidden><div class="section-body"><div id="differential-equations-content"></div></div></section>
+      <section data-section="fourier-transforms" hidden><div class="section-body"><div id="fourier-transforms-content"></div></div></section>
+      <section data-section="optimisation" hidden><div class="section-body"><div id="optimisation-content"></div></div></section>
     </main>
   </div>
 
@@ -472,6 +482,8 @@
   <script src="src/js/machines/float-lab.js"></script>
   <script src="src/js/machines/bignum-lab.js"></script>
   <script src="src/js/machines/entropy-lab.js"></script>
+  <script src="src/js/machines/numeric-lab.js"></script>
+  <script src="src/js/machines/analysis-lab.js"></script>
 
   <script src="src/js/viz/chart-base.js"></script>
   <script src="src/js/viz/canvas.js"></script>
@@ -497,6 +509,7 @@
   <script src="src/js/viz/alignment-view.js"></script>
   <script src="src/js/viz/geometry-view.js"></script>
   <script src="src/js/viz/bit-view.js"></script>
+  <script src="src/js/viz/function-plot.js"></script>
 
   <!-- Components -->
   <script src="src/js/components/tab-controller.js"></script>
@@ -665,6 +678,10 @@
   <script src="src/js/content/concepts-floats.js"></script>
   <script src="src/js/content/concepts-bignum.js"></script>
   <script src="src/js/content/concepts-entropy.js"></script>
+  <script src="src/js/content/concepts-numerics.js"></script>
+  <script src="src/js/content/concepts-numerics-linear.js"></script>
+  <script src="src/js/content/concepts-numerics-calculus.js"></script>
+  <script src="src/js/content/concepts-numerics-transforms.js"></script>
   <script src="src/js/content/examples-graphs.js"></script>
   <script src="src/js/content/examples-graphs-paths.js"></script>
   <script src="src/js/content/examples-graphs-routes.js"></script>
@@ -685,6 +702,10 @@
   <script src="src/js/content/examples-floats.js"></script>
   <script src="src/js/content/examples-bignum.js"></script>
   <script src="src/js/content/examples-entropy.js"></script>
+  <script src="src/js/content/examples-numerics.js"></script>
+  <script src="src/js/content/examples-numerics-linear.js"></script>
+  <script src="src/js/content/examples-numerics-calculus.js"></script>
+  <script src="src/js/content/examples-numerics-transforms.js"></script>
   <script src="src/js/content/reference-graphs.js"></script>
   <script src="src/js/content/reference-graphs-paths.js"></script>
   <script src="src/js/content/reference-graphs-routes.js"></script>
@@ -705,6 +726,10 @@
   <script src="src/js/content/reference-floats.js"></script>
   <script src="src/js/content/reference-bignum.js"></script>
   <script src="src/js/content/reference-entropy.js"></script>
+  <script src="src/js/content/reference-numerics.js"></script>
+  <script src="src/js/content/reference-numerics-linear.js"></script>
+  <script src="src/js/content/reference-numerics-calculus.js"></script>
+  <script src="src/js/content/reference-numerics-transforms.js"></script>
   <script src="src/js/content/exercises-graphs.js"></script>
   <script src="src/js/content/exercises-graphs-paths.js"></script>
   <script src="src/js/content/exercises-graphs-routes.js"></script>
@@ -725,6 +750,10 @@
   <script src="src/js/content/exercises-floats.js"></script>
   <script src="src/js/content/exercises-bignum.js"></script>
   <script src="src/js/content/exercises-entropy.js"></script>
+  <script src="src/js/content/exercises-numerics.js"></script>
+  <script src="src/js/content/exercises-numerics-linear.js"></script>
+  <script src="src/js/content/exercises-numerics-calculus.js"></script>
+  <script src="src/js/content/exercises-numerics-transforms.js"></script>
 
   <!-- Views -->
   <script src="src/js/views/sidebar-view.js"></script>
@@ -1064,6 +1093,26 @@
   <script src="src/js/sections/random-generation-section.js"></script>
   <script src="src/js/sections/integer-algorithms-template.js"></script>
   <script src="src/js/sections/integer-algorithms-section.js"></script>
+  <script src="src/js/sections/conditioning-and-error-template.js"></script>
+  <script src="src/js/sections/conditioning-and-error-section.js"></script>
+  <script src="src/js/sections/root-finding-template.js"></script>
+  <script src="src/js/sections/root-finding-section.js"></script>
+  <script src="src/js/sections/linear-systems-template.js"></script>
+  <script src="src/js/sections/linear-systems-section.js"></script>
+  <script src="src/js/sections/least-squares-template.js"></script>
+  <script src="src/js/sections/least-squares-section.js"></script>
+  <script src="src/js/sections/eigenvalues-template.js"></script>
+  <script src="src/js/sections/eigenvalues-section.js"></script>
+  <script src="src/js/sections/interpolation-template.js"></script>
+  <script src="src/js/sections/interpolation-section.js"></script>
+  <script src="src/js/sections/differentiation-and-autodiff-template.js"></script>
+  <script src="src/js/sections/differentiation-and-autodiff-section.js"></script>
+  <script src="src/js/sections/differential-equations-template.js"></script>
+  <script src="src/js/sections/differential-equations-section.js"></script>
+  <script src="src/js/sections/fourier-transforms-template.js"></script>
+  <script src="src/js/sections/fourier-transforms-section.js"></script>
+  <script src="src/js/sections/optimisation-template.js"></script>
+  <script src="src/js/sections/optimisation-section.js"></script>
   <script src="src/js/app.js"></script>
 </body>
 </html>

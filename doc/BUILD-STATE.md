@@ -2021,12 +2021,139 @@ shuffle's 1 509.7 over a threshold of 11.0. And a random UUID at 64 pages of wor
 out of order, a 40 ms clock regression issuing 13 of 13 under waiting and 5 of 13 under refusing
 with 0 duplicates either way, and a 5 000-identifier burst borrowing exactly 1 millisecond.
 
+## M18 — numerical methods, transforms and optimisation (complete)
+
+Ten sections, 176 in the tree. Eleven algorithm modules, two harnesses, one viz renderer, ten
+template + section pairs, sixteen content files and three figure suites.
+
+### The shape of the milestone
+
+The milestone rests on one distinction and every section is an instance of it: the conditioning of
+the **problem** and the stability of the **algorithm** are different things, and a stable algorithm
+on an ill-conditioned problem still returns a bad answer without that being a contradiction. So
+every demo reports both a residual and a solution error where they differ, and the pattern that
+recurs is an easily computed quantity that measures agreement with what you *specified* rather than
+with what you *wanted* — the residual in 18.1, "it passes through every data point" in 18.6,
+"the trajectory looks plausible" in 18.8.
+
+### Modules
+
+`algorithms/`: `linalg.js`, `qr-svd.js`, `root-finding.js`, `iterative-solvers.js`, `eigen.js`,
+`interpolation.js`, `quadrature.js`, `autodiff.js`, `ode-solvers.js`, `fft.js`, `optimization.js`.
+`machines/`: `numeric-lab.js` (18.1-18.5), `analysis-lab.js` (18.6-18.10).
+`viz/function-plot.js` (curves with a y clip, log-scaled contour bands with optimiser paths, and a
+convergence plot that delegates to `GrowthPlot`).
+
+Two harnesses rather than the spec's one: the linear-algebra half and the calculus half answer
+unrelated questions, and one file would pass 1 000 lines.
+
+### Defects and false claims the measurements found
+
+1. **The exact reference for the pivoting demo was destroyed by its own cancellation.** The obvious
+   derivation of the answer to `[[e, 1], [1, 1]] x = [1, 2]` solves for x₂ first and recovers
+   x₁ = (1 − x₂)/e. At e = 1e-18 that subtraction cancels to exactly zero, so the "exact" reference
+   came back as [0, 1] — which is the *wrong* answer, and it scored the correctly pivoted solve as
+   the failure. The arrangement that survives is x₁ = 1/(1 − e), x₂ = 2 − x₁, and
+   `exactTinyPivotSolution` now carries a comment saying why.
+
+2. **Fitting a convergence order to bisection produced a confident 1.857.** Bisection halves the
+   *bracket*, not the error, so its iterate errors are not geometric and the fit is a curve through
+   a sequence that does not have the assumed form. Worse, 1.857 invites a comparison against
+   Newton's 1.957 that means nothing at all. `convergenceOrder` now excludes steps at machine
+   precision and non-monotone steps and returns null when fewer than two usable ratios remain; the
+   bracketing methods report `bracketContraction` instead, which is exactly 0.5000 for bisection and
+   1.0000 for false position.
+
+3. **"RK4 makes an orbit decay" did not reproduce at the step the demo first used.** At h = 0.01
+   both RK4 and Verlet hold the orbit to a part in 10⁹ and there is nothing to see. The effect is
+   real at h = 0.1 over 200 000 steps, where RK4's radius decays monotonically to 0.994302 (its own
+   minimum) and Verlet oscillates inside 1.000000–1.004988. The demo defaults to the step where the
+   difference exists and says so in the note, and `orbitStudy` carries the reasoning in a comment.
+
+4. **Jacobi preconditioning is a no-op on the demo's default matrix.** A uniform diagonal makes the
+   rescaling exactly the identity, so the condition number and the iteration count do not move —
+   and an earlier note claimed an improvement anyway. `scaledPoisson(n, spread)` was added so the
+   demo has a matrix with a varying diagonal to switch to, and the note now branches on whether
+   preconditioning actually helped rather than asserting that it did.
+
+5. **The low-rank truncation error exceeded its own bound.** Eckart–Young states the optimum in two
+   norms and they are different numbers: the spectral error is σₖ₊₁ and the Frobenius error is the
+   root of the sum of the squares of *all* the dropped values. The demo measured a Frobenius
+   difference and printed it against the spectral bound, so the table showed 2.97e-1 "exceeding" a
+   bound of 2.85e-1. `lowRank` now returns `frobeniusBound` alongside `errorBound`, the table shows
+   both, and the note names the units error explicitly, because it is the mistake a reader is most
+   likely to make themselves.
+
+6. **κ(AᵀA) stops climbing at high degree, and it is not the problem improving.** The ratio column
+   reads 1.000 while the Gram matrix is measurable and then collapses to 0.682 and 0.000 — because
+   its smallest singular value has fallen below the largest one times machine epsilon and the SVD
+   cannot resolve it. The reported condition number saturates near 1/ε. The note now says the
+   measurement has hit its own floor rather than letting the reader conclude the squaring stopped.
+
+7. **The starting vector for inverse iteration was an eigenvector.** The all-ones vector is an
+   eigenvector of every matrix with constant row sums — including `[[2, 1], [1, 2]]`, which the
+   condition-number exercise used as a test — so power iteration started there reports that
+   eigenvalue whatever the others are. Both affected exercises now start from 1, 2, … n, and the
+   trap is a concept in its own right in 18.5, because it is a real bug in a three-line algorithm.
+
+8. **The line search was described as reaching a better answer "in a fraction of the iterations".**
+   It does not: on Rosenbrock both it and the best fixed step run the full 5 000, and the line
+   search gets four orders further at 64 587 gradient evaluations against 10 000. The claim is now
+   that it never diverges and gets further in the same iteration budget, at about six times the
+   evaluations — which is the actual trade.
+
+9. **Adaptive Simpson looks like the loser in the quadrature table and is not.** It spends 1 023
+   evaluations on eˣ, against Gauss–Legendre's 4, because the integrand is smooth and the adaptation
+   has nothing to find. The note now says the table measures its overhead rather than its value, and
+   names the case it exists for.
+
+10. **Two prose ratios were wrong against the measurement.** "Gauss–Seidel takes about half as many
+    sweeps as Jacobi" — measured 2 711 against 7 621, which is 2.81× — and "the central-difference
+    column is off by around 10⁻⁸", which ranges from 4.2e-11 to 2.2e-8 across the four fixtures.
+    Both now quote what the measurement says.
+
+### Figures worth keeping (all recomputed in the figure tests)
+
+A residual pinned at ~1e-16 across κ = 1 → 1.07e16 while the relative error goes 1.65e-16 → 1.89e-1,
+and the Hilbert ladder at κ 5.24e2 → 1.73e18 with the error reaching 2.01e0 and the residual still
+2.04e-16. Five root finders on x³ − 2x − 5: bisection 41 iterations / 43 evaluations / contraction
+0.5000, false position 31 / contraction 1.0000, Newton 6 / 12 / order 1.957, secant 8 / 9 / order
+1.580 (the cheapest in the table), Brent 9 / 10. Newton on x³ − 2x returning the wrong root from 3
+of 9 starts, flipping between 0.8150 and 0.8165 where f′ vanishes at √(2/3) = 0.816497; the fixed
+points |g′| = 0.3820 converging in 28 and 3.2361 never. Pivoting: growth 1e18 and answer [0, 1]
+without, growth 1 and [1, 1] with, one swap; Wilkinson attaining 2ⁿ⁻¹ exactly at every size with
+zero swaps; the inverse at 8.4× the factorisation's error. Jacobi 7 621 / Gauss–Seidel 2 711 / SOR
+271 / CG 40 at size 40, with the ω sweep finding 153 at ω = 1.85 against 2 163 at ω = 1; the scaled
+matrix at κ 1.75e7 → 6.81e2 and CG 196 → 40. κ(A) 2.15e7 against κ(AᵀA) 4.63e14 at degree 10 with
+the ratio 1.002; QR at 6.92e-15 against the normal equations' 1.31e-10 there and 3.77e-16 against
+2.28e-8 at degree 14; orthogonality loss 1.023e-1 / 2.164e-10 / 2.337e-15. Power iteration 33 at a
+gap of 0.5 and 1 802 at 0.99 against predictions of 33 and 2 291; shifted inverse at 10–24 for every
+eigenvalue including the smallest; QR in 37 sweeps; Wilkinson's polynomial moving a root 3.906e-8 at
+n = 5 and 9.051e-1 at n = 20. Runge at 4.384e-1 → 2.572e+2 for 5 → 25 nodes against Chebyshev's
+8.166e-3 and a spline's 1.926e-3; overshoot 0.1094 below and 0.1078 above against the monotone
+cubic's 0.0000, both interpolating to 1.1e-16. The V curve at h = 1e-8 / 2.97e-9 forward and
+h = 1e-5 / 1.11e-11 central against √ε = 1.49e-8 and ∛ε = 6.06e-6, complex step exactly 0;
+Gauss–Legendre 9.33e-10 in 4 evaluations against Simpson's 2.326e-6 in 9, exact at 2n − 1 and not
+2n; autodiff exact on every fixture at 9.60× less work than forward mode on 24 inputs, with the tape
+for sin(xy) + eˣ giving 2.619990 and 0.347128 from six nodes. Orders 0.998 / 1.996 / 3.995 / 2.000;
+the orbit at RK4 → 0.994302 (drift 5.73e-3) against Verlet inside 1.000000–1.004988 (2.46e-5), and
+5.56e-9 against 2.50e-9 at h = 0.01; stiffness limit 2.000e-3, 500 explicit steps against 10
+implicit at 50× the limit. Butterflies exactly (n/2)log₂n — 1 024 against 65 536 at n = 256, a 64.0×
+saving, agreeing with the naive DFT to 2.89e-12; round trip 1.29e-12 at n = 65 536; windows at 74× /
+642× / 22 244× / 54 709× with Hamming *below* Hann on distant rejection; aliasing folding 4 of 8
+components, 1 100 Hz onto 100 Hz; convolution at 96 butterflies against 48 schoolbook operations, so
+the crossover is above these lengths. Rosenbrock: fixed 0.01 diverging to 4.146e+35 in 5 iterations,
+fixed 0.001 reaching 3.761e-3, line search 9.105e-7 at 64 587 evaluations, BFGS 4.251e-21 in 36,
+Newton 3.744e-21 in 22; the stability cliff at 1 834 / 1 016 / no convergence / diverged in 79 /
+diverged in 14; conditioning 2 / 30 / 75 / 279 / 841 / 1 439 / 9 244 for descent against 2 for
+Newton throughout; coordinate descent 2 iterations aligned and 68 rotated.
+
 ## Next
 
-**M18 — numerical methods, transforms and optimisation**, then onward through
+**M19 — randomised and approximation algorithms**, then onward through
 `doc/milestones/` in the order `doc/ROADMAP.md` gives.
 
-M11 through M15 and M17 are complete apart from a human browser pass, which needs the Chrome
+M11 through M15, M17 and M18 are complete apart from a human browser pass, which needs the Chrome
 extension connected; M16 has had one (see above, and the chart defect it found). `tools/section-dump.js` covers everything else the browser used to be needed for — it
 prints every metric, table and note a section renders, at any control setting, and since the
 `input`-event fix above that is finally true of slider settings too.
@@ -2034,7 +2161,7 @@ prints every metric, table and note a section renders, at any control setting, a
 A shared helper exists for the figure tests: `tests/support/worked-example-prose.js` exports
 `proseFor`, `quotes`, `fixed` and `grouped`.
 
-The shape to copy, unchanged through M16:
+The shape to copy, unchanged through M18:
 
 1. pure modules in `algorithms/` first, behind one shared interface;
 2. a `machines/` harness that drives every implementation through that interface, carrying a
