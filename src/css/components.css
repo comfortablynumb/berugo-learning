@@ -292,3 +292,28 @@ input[type="range"] {
     grid-template-columns: 1fr;
   }
 }
+
+/* ------------------------------------------------------------- callouts */
+/* A standing notice a section renders above its demo. The cryptography
+   milestone uses it for the "teaching code, never for real data" disclaimer,
+   which a content test asserts is present on every one of its sections. */
+
+.callout {
+  border-left: 3px solid var(--hue-amber);
+  background: color-mix(in srgb, var(--hue-amber) 12%, transparent);
+  padding: 0.6rem 0.9rem;
+  border-radius: 0.25rem;
+  margin-bottom: 0.875rem;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.callout-warning {
+  border-left-color: var(--hue-red);
+  background: color-mix(in srgb, var(--hue-red) 12%, transparent);
+}
+
+.callout strong {
+  display: block;
+  margin-bottom: 0.2rem;
+}

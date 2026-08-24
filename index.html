@@ -277,6 +277,17 @@
       <section data-section="domain-specific-compression" hidden><div class="section-body"><div id="domain-specific-compression-content"></div></div></section>
       <section data-section="checksums-and-crc" hidden><div class="section-body"><div id="checksums-and-crc-content"></div></div></section>
       <section data-section="error-correction" hidden><div class="section-body"><div id="error-correction-content"></div></div></section>
+      <section data-section="threat-models-and-primitives" hidden><div class="section-body"><div id="threat-models-and-primitives-content"></div></div></section>
+      <section data-section="randomness-for-cryptography" hidden><div class="section-body"><div id="randomness-for-cryptography-content"></div></div></section>
+      <section data-section="hash-functions-and-macs" hidden><div class="section-body"><div id="hash-functions-and-macs-content"></div></div></section>
+      <section data-section="password-hashing" hidden><div class="section-body"><div id="password-hashing-content"></div></div></section>
+      <section data-section="symmetric-encryption" hidden><div class="section-body"><div id="symmetric-encryption-content"></div></div></section>
+      <section data-section="authenticated-encryption" hidden><div class="section-body"><div id="authenticated-encryption-content"></div></div></section>
+      <section data-section="public-key-cryptography" hidden><div class="section-body"><div id="public-key-cryptography-content"></div></div></section>
+      <section data-section="signatures-and-pki" hidden><div class="section-body"><div id="signatures-and-pki-content"></div></div></section>
+      <section data-section="protocol-construction" hidden><div class="section-body"><div id="protocol-construction-content"></div></div></section>
+      <section data-section="constant-time-programming" hidden><div class="section-body"><div id="constant-time-programming-content"></div></div></section>
+      <section data-section="applied-constructions" hidden><div class="section-body"><div id="applied-constructions-content"></div></div></section>
     </main>
   </div>
 
@@ -296,6 +307,7 @@
 
   <!-- Core -->
   <script src="src/js/core/curriculum-other-tracks.js"></script>
+  <script src="src/js/core/curriculum-algorithms-later.js"></script>
   <script src="src/js/core/curriculum-algorithms.js"></script>
   <script src="src/js/core/curriculum-data-structures.js"></script>
   <script src="src/js/core/curriculum.js"></script>
@@ -378,6 +390,15 @@
   <script src="src/js/algorithms/integer-codecs.js"></script>
   <script src="src/js/algorithms/checksums.js"></script>
   <script src="src/js/algorithms/ecc.js"></script>
+  <script src="src/js/algorithms/crypto-hash.js"></script>
+  <script src="src/js/algorithms/block-cipher.js"></script>
+  <script src="src/js/algorithms/aead.js"></script>
+  <script src="src/js/algorithms/public-key.js"></script>
+  <script src="src/js/algorithms/signatures.js"></script>
+  <script src="src/js/algorithms/kdf.js"></script>
+  <script src="src/js/algorithms/constant-time.js"></script>
+  <script src="src/js/algorithms/threshold.js"></script>
+  <script src="src/js/algorithms/ratchet.js"></script>
   <script src="src/js/algorithms/inverted-index.js"></script>
   <script src="src/js/algorithms/fuzzy-search.js"></script>
   <script src="src/js/machines/text-corpus.js"></script>
@@ -571,6 +592,7 @@
   <script src="src/js/machines/lossy-lab.js"></script>
   <script src="src/js/machines/columnar-lab.js"></script>
   <script src="src/js/machines/integrity-lab.js"></script>
+  <script src="src/js/machines/crypto-lab.js"></script>
   <script src="src/js/machines/model-lab.js"></script>
 
   <script src="src/js/viz/chart-base.js"></script>
@@ -598,6 +620,7 @@
   <script src="src/js/viz/geometry-view.js"></script>
   <script src="src/js/viz/bit-view.js"></script>
   <script src="src/js/viz/bitstream-view.js"></script>
+  <script src="src/js/viz/block-image-view.js"></script>
   <script src="src/js/viz/function-plot.js"></script>
 
   <!-- Components -->
@@ -814,6 +837,22 @@
   <script src="src/js/content/examples-integrity.js"></script>
   <script src="src/js/content/reference-integrity.js"></script>
   <script src="src/js/content/exercises-integrity.js"></script>
+  <script src="src/js/content/concepts-crypto-basics.js"></script>
+  <script src="src/js/content/examples-crypto-basics.js"></script>
+  <script src="src/js/content/reference-crypto-basics.js"></script>
+  <script src="src/js/content/exercises-crypto-basics.js"></script>
+  <script src="src/js/content/concepts-crypto-symmetric.js"></script>
+  <script src="src/js/content/examples-crypto-symmetric.js"></script>
+  <script src="src/js/content/reference-crypto-symmetric.js"></script>
+  <script src="src/js/content/exercises-crypto-symmetric.js"></script>
+  <script src="src/js/content/concepts-crypto-public.js"></script>
+  <script src="src/js/content/examples-crypto-public.js"></script>
+  <script src="src/js/content/reference-crypto-public.js"></script>
+  <script src="src/js/content/exercises-crypto-public.js"></script>
+  <script src="src/js/content/concepts-crypto-applied.js"></script>
+  <script src="src/js/content/examples-crypto-applied.js"></script>
+  <script src="src/js/content/reference-crypto-applied.js"></script>
+  <script src="src/js/content/exercises-crypto-applied.js"></script>
   <script src="src/js/content/examples-graphs.js"></script>
   <script src="src/js/content/examples-graphs-paths.js"></script>
   <script src="src/js/content/examples-graphs-routes.js"></script>
@@ -1330,6 +1369,28 @@
   <script src="src/js/sections/checksums-and-crc-section.js"></script>
   <script src="src/js/sections/error-correction-template.js"></script>
   <script src="src/js/sections/error-correction-section.js"></script>
+  <script src="src/js/sections/threat-models-and-primitives-template.js"></script>
+  <script src="src/js/sections/threat-models-and-primitives-section.js"></script>
+  <script src="src/js/sections/randomness-for-cryptography-template.js"></script>
+  <script src="src/js/sections/randomness-for-cryptography-section.js"></script>
+  <script src="src/js/sections/hash-functions-and-macs-template.js"></script>
+  <script src="src/js/sections/hash-functions-and-macs-section.js"></script>
+  <script src="src/js/sections/password-hashing-template.js"></script>
+  <script src="src/js/sections/password-hashing-section.js"></script>
+  <script src="src/js/sections/symmetric-encryption-template.js"></script>
+  <script src="src/js/sections/symmetric-encryption-section.js"></script>
+  <script src="src/js/sections/authenticated-encryption-template.js"></script>
+  <script src="src/js/sections/authenticated-encryption-section.js"></script>
+  <script src="src/js/sections/public-key-cryptography-template.js"></script>
+  <script src="src/js/sections/public-key-cryptography-section.js"></script>
+  <script src="src/js/sections/signatures-and-pki-template.js"></script>
+  <script src="src/js/sections/signatures-and-pki-section.js"></script>
+  <script src="src/js/sections/protocol-construction-template.js"></script>
+  <script src="src/js/sections/protocol-construction-section.js"></script>
+  <script src="src/js/sections/constant-time-programming-template.js"></script>
+  <script src="src/js/sections/constant-time-programming-section.js"></script>
+  <script src="src/js/sections/applied-constructions-template.js"></script>
+  <script src="src/js/sections/applied-constructions-section.js"></script>
   <script src="src/js/app.js"></script>
 </body>
 </html>

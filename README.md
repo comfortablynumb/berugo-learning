@@ -14,14 +14,14 @@ faithfully in a browser, the section models it, says so plainly, and states what
 
 ## Status
 
-**M00–M22 shipped (214 sections). Building the curriculum, milestone by milestone.**
+**M00–M23 shipped (225 sections). Building the curriculum, milestone by milestone.**
 
 - ✅ Curriculum designed: 65 milestones, 634 sections, 11 tracks — one file per milestone in
   [`doc/milestones/`](doc/milestones/)
 - ✅ Architecture and conventions fixed — [`doc/architecture.md`](doc/architecture.md)
 - ✅ Build order and dependency graph — [`doc/ROADMAP.md`](doc/ROADMAP.md)
 - ✅ Scope decisions recorded — [`doc/topic-suggestions.md`](doc/topic-suggestions.md)
-- ✅ **Notation decoder across all 214 sections**: every mathematical symbol carries how to say it
+- ✅ **Notation decoder across all 225 sections**: every mathematical symbol carries how to say it
   and what it does, revealed on hover, tap or keyboard focus, and every formal statement whose
   notation a reader cannot pronounce carries an "In words" translation beneath it. The audience is
   a senior engineer with little or no mathematics, so the Description tab explains the idea before
@@ -399,9 +399,39 @@ faithfully in a browser, the section models it, says so plainly, and states what
   equal to the flipped position every time, 448 of 448 double errors detected rather than
   miscorrected, and an erasure code giving more durability than 3× replication at 47% of the
   storage and ten times the rebuild traffic. 11 sections live.
+- ✅ **M23 — applied cryptography and constant-time programming**: six published test vectors —
+  FIPS 180-4, FIPS 197, RFC 4231, RFC 6070 and RFC 8439 — recomputed at render time rather than
+  asserted in a comment, because a cryptographic implementation with a wrong constant produces
+  stable, well-distributed, completely wrong output and nothing else detects it; a statistical
+  generator state-recovered from **one** observed value and its next eight predicted *exactly*,
+  while the same stream measures **7.9553 bits of entropy per byte** over 4 000 samples and its low
+  byte measures 1.2946 with 17 distinct values — both equally predictable, only one of them looking
+  it; a length-extension forgery computing **29 glue bytes** from a length nobody hid and producing
+  a tag the key holder's own verifier accepts, with the identical attack rejected by HMAC; six
+  password stores priced at one 250 ms budget, from 4.096 × 10¹⁰ guesses per second down to
+  2.048 × 10⁴, and a memory sweep dividing the attacker by **128×** at unchanged defender cost while
+  bcrypt's 4 KiB does not constrain a 16 GiB rig at all; an image whose 144 blocks collapse to **26
+  distinct ciphertext blocks** under ECB against 145 under CBC, drawn as pixels so the shape is
+  visible; a padding oracle decrypting a 30-byte message in **2 749 yes-or-no answers** without
+  touching AES, and five edited bytes rewriting a CTR plaintext with **zero** queries; one repeated
+  nonce handing over a 15-byte plaintext in full and then a tag AES-GCM *accepts*, with the birthday
+  bound putting random 96-bit nonces at 1.164 × 10⁻¹⁰ risk at 2³² messages and **39.35%** at 2⁴⁸;
+  one eavesdropper, one loop, breaking Diffie–Hellman in 872 steps at 13 bits and giving up at 31,
+  and one chosen-ciphertext query recovering a textbook RSA plaintext that trial division would have
+  found in 1 060 divisions anyway; an ECDSA private key falling out of two signatures sharing a
+  nonce in **four modular operations**, and five certificate chains run through a real validator
+  that applies 9 checks to the well-formed one and 14 to the leaf-signs-leaf case, each broken chain
+  failing on exactly its own check; a stolen session state opening **3 of 10** messages — none
+  before the theft, none after the ratchet turned, with nobody detecting the compromise; a 4-byte
+  token recovered from timing in **1 024 guesses** against a blind space of 4.295 × 10⁹, separating
+  right bytes from wrong by 4.5029 σ where the branchless comparison separates them by 0.0885 and
+  fails in all 24 cells of the noise sweep; and every one of 10 three-share Shamir subsets
+  reconstructing exactly while two shares silently return 446 296 622 and rule out **none** of the
+  candidates, next to a Merkle proof of one entry in a billion at 30 hashes and 960 bytes against
+  34.4 GB. Every attack executes; nothing is narrated. 11 sections live.
 
-`npm test` is green — wiring audit, 3 878 unit tests, and a **render audit** that boots the whole
-app headlessly and activates all 214 sections, failing on anything that throws while rendering, any
+`npm test` is green — wiring audit, 4 058 unit tests, and a **render audit** that boots the whole
+app headlessly and activates all 225 sections, failing on anything that throws while rendering, any
 table left with an empty body, and any metric tile still showing a placeholder without a note
 explaining it. `npm run lint:size` reports no offenders.
 

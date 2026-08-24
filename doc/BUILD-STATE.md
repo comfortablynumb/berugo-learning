@@ -3,7 +3,7 @@
 Where the implementation stands, and exactly what the next session should pick up.
 Update this file at the end of any session that leaves work unfinished.
 
-**Last updated:** 2026-08-24 (M20 complete — nine sections, 194 in the tree. The tree is GREEN.)
+**Last updated:** 2026-08-24 (M23 complete — eleven sections, 225 in the tree. The tree is GREEN.)
 
 ---
 
@@ -32,11 +32,14 @@ Update this file at the end of any session that leaves work unfinished.
 | M18 — numerical methods, transforms and optimisation | 10 | ✅ built, tested, render-audited |
 | M19 — randomised and approximation algorithms | 9 | ✅ built, tested, render-audited |
 | M20 — NP-completeness, reductions and metaheuristics | 9 | ✅ built, tested, render-audited |
+| M21 — online, external-memory and cache-oblivious algorithms | 9 | ✅ built, tested, render-audited |
+| M22 — compression, information theory and error correction | 11 | ✅ built, tested, render-audited |
+| M23 — applied cryptography and constant-time programming | 11 | ✅ built, tested, render-audited |
 
-**The tree is GREEN.** `npm test` reports 3 555 unit tests with 0 failures (6 skipped — the
-wall-clock-budget starters the inline sandbox cannot fail); the wiring audit passes at 194 sections
-and 932 modules, the render audit activates all 194 with no exception and no empty table,
-`npm run lint:size` passes across 1 035 files, and `npm run build:css` is up to date.
+**The tree is GREEN.** `npm test` reports 4 058 unit tests with 0 failures (6 skipped — the
+wall-clock-budget starters the inline sandbox cannot fail); the wiring audit passes at 225 sections
+and 1 079 modules, the render audit activates all 225 with no exception and no empty table,
+`npm run lint:size` passes across 1 196 files, and `npm run build:css` is up to date.
 
 All nine M07 sections were opened in Chrome on `npm start`: the three tabs render, every demo
 figure matches the prose *exactly* (see "aligning the demo with the prose" below), the references
@@ -2714,12 +2717,12 @@ nobody quotes — 10 fragment reads to rebuild one loss, against 1.
 
 ## Next
 
-**M23 — applied cryptography and constant-time programming (11 sections).** Nothing of it
-exists yet: no modules, no sections, and its track file still carries it in `planned`. The
-spec is `doc/milestones/M23-cryptography.md`; it depends on M17 and M22, both now built.
-After it, onward through `doc/milestones/` in the order `doc/ROADMAP.md` gives.
+**M24 — regular languages, automata and lexing (the automata track opens).** Nothing of it
+exists yet: no modules, no sections, and its track file still carries it in `planned`. The spec
+is `doc/milestones/M24-regular-languages.md`. After it, onward through `doc/milestones/` in the
+order `doc/ROADMAP.md` gives.
 
-M11 through M15 and M17 through M22 are complete apart from a human browser pass, which needs the
+M11 through M15 and M17 through M23 are complete apart from a human browser pass, which needs the
 Chrome extension connected; M16 has had one (see above, and the chart defect it found).
 `tools/section-dump.js` covers everything else the browser used to be needed for — it prints every
 metric, table and note a section renders, at any control setting, and since the `input`-event fix
@@ -2780,3 +2783,86 @@ Three things M22 added to the shape and worth keeping:
 - **When a demo contradicts the folklore, run the loop before rewriting the prose.** Generation
   loss, canonical Huffman's table size and LZW's ratio against LZSS were all written from received
   wisdom and all three measured differently. The prose now says what the demo prints.
+
+---
+
+## M23 — applied cryptography and constant-time programming (complete)
+
+Eleven sections, 225 in the tree. Nine algorithm modules, one harness (`machines/crypto-lab.js`),
+one new viz renderer (`viz/block-image-view.js`), eleven template + section pairs, sixteen content
+files, two property suites, two figure suites and a dedicated disclaimer test.
+
+### The shape of the milestone
+
+Every section is arranged around one discipline: **the attack executes, or it does not ship.** The
+spec's acceptance criteria say so explicitly and they were taken literally. The padding oracle
+really decrypts, the length extension really forges, the nonce repeat really recovers a plaintext
+and then a tag GCM accepts, the timing attack really empties a token, and the ECDSA nonce reuse
+really returns the private key. Nothing in the milestone says "imagine the attacker recovers the
+key".
+
+The second discipline is that **every primitive is validated against somebody else's answer before
+any property is asserted about it.** A cryptographic implementation with a wrong constant produces
+stable, well-distributed, completely wrong output, and no test written against your own
+implementation detects it. `crypto-lab.js` checks six published vectors at render time, and
+`tests/unit/crypto-modules.test.js` additionally checks SHA-1, SHA-256, HMAC, AES at all three key
+sizes, CBC, CTR and PBKDF2 against node's own `crypto`.
+
+### Modules
+
+`algorithms/`: `crypto-hash.js` (SHA-1, SHA-256 with resumable state, HMAC, `glueFor`, the
+length-extension attack), `block-cipher.js` (AES with a computed S-box, ECB/CBC/CTR, PKCS#7),
+`aead.js` (GHASH, AES-GCM, ChaCha20, Poly1305, ChaCha20-Poly1305, encrypt-then-MAC, constant-time
+tag compare, the nonce-reuse study), `public-key.js` (modPow, RSA, trial-division factoring, the
+malleability attack, Diffie–Hellman, brute-force discrete log, curve arithmetic, ECDH, the
+key-size table), `signatures.js` (ECDSA, deterministic nonces, nonce-reuse recovery, certificates
+and chain validation), `kdf.js` (PBKDF2, a memory-hard sketch, the cracking-cost model, iteration
+tuning, register/verify with rehash detection), `constant-time.js` (mask, select, `lessThan`,
+branchless equals, scanning lookup, the timing attack and profile), `threshold.js` (Shamir split
+and reconstruct, Lagrange interpolation anywhere, the underdetermination study, commitments,
+Merkle trees and proofs), `ratchet.js` (chain steps, forward secrecy, the DH ratchet,
+post-compromise recovery, a scripted conversation).
+
+`machines/`: `crypto-lab.js` (the vector harness, the padding oracle, ECB leakage, LCG recovery, a
+CSPRNG, the requirement-to-primitive chooser and the standing disclaimer).
+
+`viz/`: `block-image-view.js` (bytes drawn as a greyscale bitmap, so the ECB picture is a picture).
+
+### What was wrong before it was right
+
+- **AES-192, AES-256 and every decryption were wrong.** The S-box build read `exp[255 - log[i]]`,
+  which indexes `exp[255]` — undefined — so `SBOX[1]` came out `0x63` instead of `0x7c`. AES-128
+  encryption happened to agree with the vector; nothing else did. `% 255` fixed all three key sizes
+  and both directions. This is the milestone's own lesson landing on the milestone: without the
+  FIPS-197 vector, the output would have looked perfect forever.
+- **`lessThan(0, 0xffffffff)` returned 0.** The branchless comparison needs the Hacker's Delight
+  form `((~x & y) | (~(x ^ y) & (x - y))) >>> 31`; the first attempt was subtly wrong only at the
+  sign boundary, which is exactly where a hand-checked example would not have looked.
+- **ECDSA threw "Cannot mix BigInt".** The demo curve's order was composite, so some nonces had no
+  inverse. A prime-order generator (order 3 359 over p = 10 007) was needed before the signature
+  scheme worked at all — which is itself the parameter lesson from the public-key section.
+- **The double ratchet delivered nothing after the first change of direction.** `dhRatchet` derived
+  two different chain keys with `'send'` and `'receive'` labels, so the two parties never agreed.
+  It now derives ONE chain key and assigns it by role.
+- **`underdetermined()` was a stub that asserted its own conclusion.** It marked every candidate
+  "consistent" by comparing array lengths. It now interpolates the polynomial through each candidate
+  and checks that it reproduces every held share, and reports how many distinct values the
+  candidates imply for a share nobody holds — 8 for 8 candidates, which is the same fact from the
+  other side.
+- **A metric id and a table id collided in three sections.** `MetricGrid` writes its note into
+  `#<id>-note`, so a hand-written `<p id="thr-vectors-note">` was overwritten by the table's note
+  and the metric's note vanished. `template-ids.test.js` catches the control/element case; this one
+  was found by reading `section-dump.js` output, which is what that tool is for.
+
+### Three things M23 added to the shape and worth keeping
+
+- **A milestone-wide invariant deserves its own test.** The standing disclaimer is an acceptance
+  criterion, so `tests/unit/crypto-disclaimer.test.js` walks M23's curriculum group and asserts
+  each template renders a warning callout, each controller writes a module `DISCLAIMER` into it,
+  and each orientation opens with the warning bullet. It found two sections mid-build.
+- **Read the exported value, not the source text.** That test first parsed `const DISCLAIMER = …`
+  out of the file and broke on a semicolon inside the string. `require(path).DISCLAIMER` is shorter
+  and cannot be defeated by punctuation.
+- **A curriculum file will cross 1 000 lines mid-milestone.** `curriculum-algorithms.js` did, at
+  M23. The split is `curriculum-algorithms-later.js` holding M17 onward, spliced on with
+  `.concat(later)` — a milestone boundary, so nothing but the line count moves.
