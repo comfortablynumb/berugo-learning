@@ -162,10 +162,87 @@
               summary: 'Three systems checked against two properties, where the server that may wait forever passes safety and fails liveness with a lasso no finite test could find.',
               tags: ['buchi automaton', 'infinite words', 'lasso trace', 'nested depth first search', 'emptiness', 'safety', 'liveness', 'fairness', 'ltl', 'parity condition']
             }]
+        },
+        {
+          id: 'M25',
+          title: 'Context-free languages and parsing',
+          summary: 'Not use a parser generator but knowing what each algorithm can and cannot do, why a grammar conflicts, how to fix it, and how real languages get parsed despite not being context-free.',
+          sections: [
+            {
+              id: 'grammars-and-ambiguity',
+              title: 'Grammars, derivations and ambiguity',
+              summary: 'Every parse tree for an input enumerated, so ambiguity is a count rather than an opinion, with the shortest ambiguous string found by search.',
+              tags: ['context-free grammar', 'derivation', 'parse tree', 'leftmost', 'rightmost', 'ambiguity', 'dangling else', 'precedence', 'associativity', 'inherent ambiguity']
+            },
+            {
+              id: 'grammar-transformations',
+              title: 'Grammar transformations',
+              summary: 'Six transformations run in sequence with the language re-checked against the original at every step, and the input whose tree shape changed named.',
+              tags: ['useless symbols', 'epsilon removal', 'unit productions', 'left recursion', 'paull algorithm', 'left factoring', 'chomsky normal form', 'greibach', 'differential testing', 'tree shape']
+            },
+            {
+              id: 'pushdown-automata',
+              title: 'Pushdown automata',
+              summary: 'The stack drawn beside the tape with every nondeterministic branch alive at once, and the CFG to PDA construction checked against Earley string by string.',
+              tags: ['pushdown automaton', 'stack', 'empty stack acceptance', 'final state acceptance', 'cfg to pda', 'nondeterminism', 'deterministic pda', 'dcfl', 'closure properties', 'pumping']
+            },
+            {
+              id: 'top-down-parsing-and-ll1',
+              title: 'Top-down parsing and LL(1)',
+              summary: 'Every table cell traceable to the FIRST or FOLLOW computation that produced it, each conflict named with a minimal input reaching it, and the repair applied live.',
+              tags: ['recursive descent', 'predictive parsing', 'first set', 'follow set', 'll1 table', 'table conflict', 'left recursion', 'left factoring', 'll star', 'error detection point']
+            },
+            {
+              id: 'shift-reduce-and-lr0',
+              title: 'Bottom-up parsing: shift-reduce and LR(0)/SLR',
+              summary: 'The item-set automaton drawn and walked, with LR(0) conflicts dropping to zero under SLR on the same twelve states and every conflict naming its items.',
+              tags: ['shift reduce', 'handle', 'viable prefix', 'lr0 items', 'closure', 'goto', 'action table', 'goto table', 'slr', 'shift reduce conflict']
+            },
+            {
+              id: 'lalr-and-canonical-lr1',
+              title: 'LALR and canonical LR(1)',
+              summary: 'Fourteen canonical states merged to thirteen, and the two reduce/reduce conflicts that appear are shown to exist in neither LR(1) nor SLR.',
+              tags: ['lr1 items', 'lookahead', 'state explosion', 'core merging', 'lalr', 'reduce reduce conflict', 'precedence declarations', 'yacc', 'bison', 'ielr']
+            },
+            {
+              id: 'general-parsing-earley-cyk-glr',
+              title: 'General parsing: Earley, CYK and GLR',
+              summary: 'Three unrelated mechanisms agreeing on every input, and a forest of eighty-seven nodes holding sixteen thousand seven hundred and ninety-six distinct trees.',
+              tags: ['earley', 'chart parsing', 'predict scan complete', 'cyk', 'chomsky normal form', 'glr', 'graph structured stack', 'sppf', 'shared packed forest', 'nullable rules']
+            },
+            {
+              id: 'pegs-and-packrat-parsing',
+              title: 'PEGs and packrat parsing',
+              summary: 'Six hundred and six thousand plain steps against one hundred and twenty-four memoised ones, and the alternative that can never win named with the reason.',
+              tags: ['parsing expression grammar', 'ordered choice', 'packrat', 'memoisation', 'syntactic predicates', 'greedy repetition', 'left recursion', 'unreachable alternative', 'linear time', 'peg semantics']
+            },
+            {
+              id: 'pratt-parsing-and-precedence',
+              title: 'Pratt parsing and expression precedence',
+              summary: 'An editable binding-power table with ten expected parenthesisations asserted against it, so moving one number breaks exactly the cases that depend on it.',
+              tags: ['pratt parsing', 'precedence climbing', 'binding power', 'null denotation', 'left denotation', 'right associativity', 'prefix operators', 'postfix operators', 'ternary', 'operator table']
+            },
+            {
+              id: 'lexing-in-context',
+              title: 'Lexing in context',
+              summary: 'The same nested template through two lexers, where the one without a mode stack finds zero interpolations instead of two and reports no error at all.',
+              tags: ['lexer parser split', 'maximal munch', 'keywords', 'soft keywords', 'context sensitive lexing', 'lexer modes', 'mode stack', 'offside rule', 'indent dedent', 'template literals']
+            },
+            {
+              id: 'error-recovery-and-diagnostics',
+              title: 'Error recovery and diagnostics',
+              summary: 'Three strategies on one broken file: one diagnostic and one survivor, three and four, three and five, with cascade suppression as a control you can move.',
+              tags: ['error detection', 'panic mode', 'synchronising tokens', 'phrase level recovery', 'error productions', 'repair cost model', 'cascade suppression', 'incremental reparsing', 'language server', 'diagnostic quality']
+            },
+            {
+              id: 'parsing-real-languages',
+              title: 'Parsing real languages',
+              summary: 'Eight constructs where the published grammar is not the language, each with a runnable failing input and the fix that shipped, including six ASI cases asserted against the specification.',
+              tags: ['lexer hack', 'typedef ambiguity', 'template angle brackets', 'most vexing parse', 'automatic semicolon insertion', 'restricted productions', 'soft keywords', 'yaml', 'scannerless parsing', 'semantic filters']
+            }]
         }
       ],
       planned: [
-        { id: 'M25', title: 'Context-free languages and parsing', sections: 12 },
         { id: 'M26', title: 'Computability and complexity theory', sections: 10 },
         { id: 'M27', title: 'Lambda calculus, type systems and semantics', sections: 11 },
         { id: 'M28', title: 'Compiler front end — build a language', sections: 9 },

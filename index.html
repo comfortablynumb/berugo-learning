@@ -299,6 +299,18 @@
       <section data-section="automata-in-production" hidden><div class="section-body"><div id="automata-in-production-content"></div></div></section>
       <section data-section="weighted-and-probabilistic" hidden><div class="section-body"><div id="weighted-and-probabilistic-content"></div></div></section>
       <section data-section="automata-over-infinite-words" hidden><div class="section-body"><div id="automata-over-infinite-words-content"></div></div></section>
+      <section data-section="grammars-and-ambiguity" hidden><div class="section-body"><div id="grammars-and-ambiguity-content"></div></div></section>
+      <section data-section="grammar-transformations" hidden><div class="section-body"><div id="grammar-transformations-content"></div></div></section>
+      <section data-section="pushdown-automata" hidden><div class="section-body"><div id="pushdown-automata-content"></div></div></section>
+      <section data-section="top-down-parsing-and-ll1" hidden><div class="section-body"><div id="top-down-parsing-and-ll1-content"></div></div></section>
+      <section data-section="shift-reduce-and-lr0" hidden><div class="section-body"><div id="shift-reduce-and-lr0-content"></div></div></section>
+      <section data-section="lalr-and-canonical-lr1" hidden><div class="section-body"><div id="lalr-and-canonical-lr1-content"></div></div></section>
+      <section data-section="general-parsing-earley-cyk-glr" hidden><div class="section-body"><div id="general-parsing-earley-cyk-glr-content"></div></div></section>
+      <section data-section="pegs-and-packrat-parsing" hidden><div class="section-body"><div id="pegs-and-packrat-parsing-content"></div></div></section>
+      <section data-section="pratt-parsing-and-precedence" hidden><div class="section-body"><div id="pratt-parsing-and-precedence-content"></div></div></section>
+      <section data-section="lexing-in-context" hidden><div class="section-body"><div id="lexing-in-context-content"></div></div></section>
+      <section data-section="error-recovery-and-diagnostics" hidden><div class="section-body"><div id="error-recovery-and-diagnostics-content"></div></div></section>
+      <section data-section="parsing-real-languages" hidden><div class="section-body"><div id="parsing-real-languages-content"></div></div></section>
     </main>
   </div>
 
@@ -614,6 +626,21 @@
   <script src="src/js/algorithms/redos-analysis.js"></script>
   <script src="src/js/algorithms/hmm.js"></script>
   <script src="src/js/algorithms/buchi.js"></script>
+  <script src="src/js/machines/grammar.js"></script>
+  <script src="src/js/algorithms/earley.js"></script>
+  <script src="src/js/algorithms/grammar-transform.js"></script>
+  <script src="src/js/algorithms/cyk.js"></script>
+  <script src="src/js/algorithms/ll-parser.js"></script>
+  <script src="src/js/algorithms/lr-items.js"></script>
+  <script src="src/js/algorithms/lr-parser.js"></script>
+  <script src="src/js/algorithms/glr.js"></script>
+  <script src="src/js/algorithms/pda.js"></script>
+  <script src="src/js/algorithms/peg.js"></script>
+  <script src="src/js/algorithms/pratt.js"></script>
+  <script src="src/js/algorithms/lexer-modes.js"></script>
+  <script src="src/js/algorithms/error-recovery.js"></script>
+  <script src="src/js/algorithms/real-languages.js"></script>
+  <script src="src/js/machines/parse-lab.js"></script>
   <script src="src/js/machines/language-lab.js"></script>
   <script src="src/js/machines/model-lab.js"></script>
 
@@ -644,6 +671,8 @@
   <script src="src/js/viz/bitstream-view.js"></script>
   <script src="src/js/viz/block-image-view.js"></script>
   <script src="src/js/viz/automaton-view.js"></script>
+  <script src="src/js/viz/parse-tree-view.js"></script>
+  <script src="src/js/viz/parse-table-view.js"></script>
   <script src="src/js/viz/function-plot.js"></script>
 
   <!-- Components -->
@@ -885,6 +914,18 @@
   <script src="src/js/content/reference-automata-structure.js"></script>
   <script src="src/js/content/exercises-automata-structure.js"></script>
   <script src="src/js/content/concepts-automata-applied.js"></script>
+  <script src="src/js/content/concepts-parsing-grammars.js"></script>
+  <script src="src/js/content/concepts-parsing-tables.js"></script>
+  <script src="src/js/content/concepts-parsing-practice.js"></script>
+  <script src="src/js/content/examples-parsing-grammars.js"></script>
+  <script src="src/js/content/examples-parsing-tables.js"></script>
+  <script src="src/js/content/examples-parsing-practice.js"></script>
+  <script src="src/js/content/reference-parsing-grammars.js"></script>
+  <script src="src/js/content/reference-parsing-tables.js"></script>
+  <script src="src/js/content/reference-parsing-practice.js"></script>
+  <script src="src/js/content/exercises-parsing-grammars.js"></script>
+  <script src="src/js/content/exercises-parsing-tables.js"></script>
+  <script src="src/js/content/exercises-parsing-practice.js"></script>
   <script src="src/js/content/examples-automata-applied.js"></script>
   <script src="src/js/content/reference-automata-applied.js"></script>
   <script src="src/js/content/exercises-automata-applied.js"></script>
@@ -1448,6 +1489,30 @@
   <script src="src/js/sections/weighted-and-probabilistic-section.js"></script>
   <script src="src/js/sections/automata-over-infinite-words-template.js"></script>
   <script src="src/js/sections/automata-over-infinite-words-section.js"></script>
+  <script src="src/js/sections/grammars-and-ambiguity-template.js"></script>
+  <script src="src/js/sections/grammars-and-ambiguity-section.js"></script>
+  <script src="src/js/sections/grammar-transformations-template.js"></script>
+  <script src="src/js/sections/grammar-transformations-section.js"></script>
+  <script src="src/js/sections/pushdown-automata-template.js"></script>
+  <script src="src/js/sections/pushdown-automata-section.js"></script>
+  <script src="src/js/sections/top-down-parsing-and-ll1-template.js"></script>
+  <script src="src/js/sections/top-down-parsing-and-ll1-section.js"></script>
+  <script src="src/js/sections/shift-reduce-and-lr0-template.js"></script>
+  <script src="src/js/sections/shift-reduce-and-lr0-section.js"></script>
+  <script src="src/js/sections/lalr-and-canonical-lr1-template.js"></script>
+  <script src="src/js/sections/lalr-and-canonical-lr1-section.js"></script>
+  <script src="src/js/sections/general-parsing-earley-cyk-glr-template.js"></script>
+  <script src="src/js/sections/general-parsing-earley-cyk-glr-section.js"></script>
+  <script src="src/js/sections/pegs-and-packrat-parsing-template.js"></script>
+  <script src="src/js/sections/pegs-and-packrat-parsing-section.js"></script>
+  <script src="src/js/sections/pratt-parsing-and-precedence-template.js"></script>
+  <script src="src/js/sections/pratt-parsing-and-precedence-section.js"></script>
+  <script src="src/js/sections/lexing-in-context-template.js"></script>
+  <script src="src/js/sections/lexing-in-context-section.js"></script>
+  <script src="src/js/sections/error-recovery-and-diagnostics-template.js"></script>
+  <script src="src/js/sections/error-recovery-and-diagnostics-section.js"></script>
+  <script src="src/js/sections/parsing-real-languages-template.js"></script>
+  <script src="src/js/sections/parsing-real-languages-section.js"></script>
   <script src="src/js/app.js"></script>
 </body>
 </html>

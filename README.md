@@ -14,14 +14,14 @@ faithfully in a browser, the section models it, says so plainly, and states what
 
 ## Status
 
-**M00–M24 shipped (236 sections). Building the curriculum, milestone by milestone.**
+**M00–M25 shipped (248 sections). Building the curriculum, milestone by milestone.**
 
 - ✅ Curriculum designed: 65 milestones, 634 sections, 11 tracks — one file per milestone in
   [`doc/milestones/`](doc/milestones/)
 - ✅ Architecture and conventions fixed — [`doc/architecture.md`](doc/architecture.md)
 - ✅ Build order and dependency graph — [`doc/ROADMAP.md`](doc/ROADMAP.md)
 - ✅ Scope decisions recorded — [`doc/topic-suggestions.md`](doc/topic-suggestions.md)
-- ✅ **Notation decoder across all 236 sections**: every mathematical symbol carries how to say it
+- ✅ **Notation decoder across all 248 sections**: every mathematical symbol carries how to say it
   and what it does, revealed on hover, tap or keyboard focus, and every formal statement whose
   notation a reader cannot pronounce carries an "In words" translation beneath it. The audience is
   a senior engineer with little or no mathematics, so the Description tab explains the idea before
@@ -458,9 +458,38 @@ faithfully in a browser, the section models it, says so plainly, and states what
   steps** for one symbol and never within 2 000 for another; and a server that may wait forever
   **passing the safety check and failing the liveness one**, with a lasso no finite test could
   find. 11 sections live.
+- ✅ **M25 — context-free languages and parsing**: every parser differentially tested against
+  Earley on **13 186 parser-input checks** across eight grammars with **zero disagreements**, and
+  Earley itself checked against a brute-force derivation search so the reference is not trusted
+  either; ambiguity as a count rather than an opinion — **1, 1, 2 and 5 trees** for one to four
+  operands of `E → E + E | a`, with the shortest ambiguous input found by search and both tree
+  shapes printed; six grammar transformations run in sequence with the language re-checked against
+  the original at every step, taking **6 productions over 3 nonterminals to 33 over 22** with zero
+  differences — and the first input whose tree SHAPE changed named, because that is the thing the
+  language check is designed not to see; a pushdown automaton with **1 state and 4 transitions**
+  matching any bracket depth, and the CFG→PDA construction agreeing with Earley on **31 of 31**
+  exhaustive inputs; LL(1) conflicts reported with the two competing productions and a **minimal
+  input that reaches the cell** — `"a"`, `"ibtx"`, `"(a)"` — and the repair applied live so two
+  grammars reach zero conflicts and the dangling else does not; LR(0)'s **2 shift/reduce conflicts
+  dropping to 0** under SLR on the same 12 states, with every conflict naming its state, its
+  token, both actions and the items responsible — *state 7, on `e`, shift to 8 against reduce by
+  `S → i E t S`*; canonical LR(1)'s **14 states merged to 13** by core, gaining **2
+  reduce/reduce conflicts** that exist in neither LR(1) nor SLR, with the pooled lookaheads shown;
+  a shared packed parse forest of **87 nodes holding 16 796 distinct trees** at 21 tokens, with
+  Earley, CYK and GLR agreeing on every input including the nullable grammar that breaks naive
+  Earley implementations; packrat measured at **606 207 plain steps against 124 memoised** — a
+  ratio of **4 888.8×** with 28 memo entries — and the PEG alternative that can never win named
+  with its reason; a Pratt binding-power table you can edit, with **ten expected parenthesisations
+  asserted** and cross-checked against an equivalent precedence *grammar* parsed by Earley; the
+  same nested template through two lexers, where the one without a mode stack finds **0
+  interpolations instead of 2** and reports no error at all; three recovery strategies on one
+  broken file at **1 diagnostic / 1 survivor, 3 / 4 and 3 / 5**; and eight constructs where the
+  published grammar is not the language, each with a runnable failing input and the fix that
+  shipped — including **6 of 6** automatic-semicolon-insertion cases asserted against the
+  ECMAScript rules. 12 sections live.
 
-`npm test` is green — wiring audit, 4 213 unit tests, and a **render audit** that boots the whole
-app headlessly and activates all 236 sections, failing on anything that throws while rendering, any
+`npm test` is green — wiring audit, 4 376 unit tests, and a **render audit** that boots the whole
+app headlessly and activates all 248 sections, failing on anything that throws while rendering, any
 table left with an empty body, and any metric tile still showing a placeholder without a note
 explaining it. `npm run lint:size` reports no offenders.
 

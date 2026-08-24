@@ -3,7 +3,7 @@
 Where the implementation stands, and exactly what the next session should pick up.
 Update this file at the end of any session that leaves work unfinished.
 
-**Last updated:** 2026-08-24 (M24 complete — eleven sections, 236 in the tree. The tree is GREEN.)
+**Last updated:** 2026-08-24 (M25 complete — twelve sections, 248 in the tree. The tree is GREEN.)
 
 ---
 
@@ -36,11 +36,12 @@ Update this file at the end of any session that leaves work unfinished.
 | M22 — compression, information theory and error correction | 11 | ✅ built, tested, render-audited |
 | M23 — applied cryptography and constant-time programming | 11 | ✅ built, tested, render-audited |
 | M24 — regular languages and finite automata | 11 | ✅ built, tested, render-audited |
+| M25 — context-free languages and parsing | 12 | ✅ built, tested, render-audited |
 
-**The tree is GREEN.** `npm test` reports 4 213 unit tests with 0 failures (6 skipped — the
-wall-clock-budget starters the inline sandbox cannot fail); the wiring audit passes at 236 sections
-and 1 125 modules, the render audit activates all 236 with no exception and no empty table,
-`npm run lint:size` passes across 1 245 files, and `npm run build:css` is up to date.
+**The tree is GREEN.** `npm test` reports 4 376 unit tests with 0 failures (6 skipped — the
+wall-clock-budget starters the inline sandbox cannot fail); the wiring audit passes at 248 sections
+and 1 178 modules, the render audit activates all 248 with no exception and no empty table,
+`npm run lint:size` passes across 1 301 files, and `npm run build:css` is up to date.
 
 All nine M07 sections were opened in Chrome on `npm start`: the three tabs render, every demo
 figure matches the prose *exactly* (see "aligning the demo with the prose" below), the references
@@ -2716,13 +2717,130 @@ the 7th — exactly twice the error limit from identical parity. And the durabil
 at 1.40× storage tolerating 4 losses against 3× replication at 3.00× tolerating 2, with the column
 nobody quotes — 10 fragment reads to rebuild one loss, against 1.
 
+## M25 notes worth keeping
+
+Twelve sections: grammars and ambiguity, grammar transformations, pushdown automata, LL(1),
+shift-reduce and LR(0)/SLR, LALR and canonical LR(1), general parsing (Earley, CYK, GLR), PEGs
+and packrat, Pratt parsing, lexing in context, error recovery, and parsing real languages.
+
+### The rule that shaped the milestone
+
+**Every parser is differentially tested against Earley on the same grammar and the same inputs,
+and Earley is checked against a brute-force derivation search so the reference is not trusted
+either.** `machines/parse-lab.js` runs all eight parsers over every string up to a length and
+reports a NAMED failing input rather than a percentage — 13 186 parser-input checks across eight
+fixtures, zero disagreements. That sweep found the two real bugs listed below, both of which
+would have passed any spot check.
+
+### Modules
+
+`machines/`: `grammar.js` (one shape, FIRST/FOLLOW with fixed points, nullable, language
+enumeration, `sameLanguage`, the shared parse-tree format), `parse-lab.js` (eight parsers over one
+grammar, `run`, `classify`, `sweep`, and the eight fixtures every section and test shares).
+
+`algorithms/`: `earley.js` (chart with the Aycock–Horspool nullable fix and a cycle-guarded tree
+reconstruction), `cyk.js` (CNF internally, table rows, tree), `grammar-transform.js` (six steps
+and a pipeline that re-checks against the ORIGINAL grammar), `ll-parser.js` (table with a reason
+per cell, `diagnose`, `conflictExample`), `lr-items.js` (closure, goto, collection, `mergeByCore`),
+`lr-parser.js` (four flavours, conflict reports carrying both raw actions), `glr.js` (a real
+graph-structured stack with a per-position reduction fixed point, and a shared packed forest),
+`pda.js` (breadth-first over configurations, CFG→PDA), `peg.js` (packrat, ordered choice, the
+unreachable-alternative check, the exponential fixture), `pratt.js` (binding-power table, both
+denotations, ternary), `lexer-modes.js` (mode stack, maximal munch, the offside rule),
+`error-recovery.js` (three strategies, a cost model, cascade suppression),
+`real-languages.js` (ASI, the lexer hack, angle brackets, the gallery).
+
+`viz/`: `parse-tree-view.js` (trees and forests as SVG markup), `parse-table-view.js` (LL and LR
+tables as scrolling HTML with conflicted cells marked and their reason on hover).
+
+### What was wrong before it was right
+
+- **GLR silently lost derivations, twice.** The first version kept one back-pointer per stack top,
+  so two branches shifting into the same state merged into one and half the trees vanished; the
+  tree count disagreed with Earley from three operands upwards. The second version had a real
+  graph-structured stack and reduced in a single pass — but adding an edge to a vertex already
+  reduced from opens paths that were not there the first time, so it still lost trees. Both are
+  fixed: vertices carry a list of back-edges, and the reduce sweep runs to a fixed point per input
+  position. Catalan agreement with Earley to 42 trees is the check.
+- **Earley rejected the empty string for `S → A A A A`, `A → a | ε`.** The classic nullable bug: a
+  nullable nonterminal completes in the column it was predicted in, so a prediction made after the
+  completion never learns about it. Fixed with the Aycock–Horspool rule — when predicting a
+  nullable nonterminal, advance the predicting item immediately. That grammar is now a fixture in
+  the sweep and a case in the graded exercise.
+- **`ParseLab` was calling `LlParser.parse(built, tokens)` when the signature is
+  `(grammar, tokens, built)`.** It threw, the `safely` wrapper caught it, the row reported
+  `built: false`, and LL(1) was silently excluded from every sweep. The sweep count went from
+  13 124 to 13 186 when it was fixed. A test harness that swallows its own errors is worse than
+  no harness.
+- **The PEG unreachable check found nothing.** `firstWinner` required an alternative to consume
+  the WHOLE input, and ordered choice commits to the first that succeeds at all — which is the
+  entire hazard. Now `("a" / "ab")` correctly reports alternative 2 as shadowed.
+- **The PEG exponential fixture was not exponential.** Both the first construction and Ford's own
+  expression grammar succeed on their first alternative, so nothing backtracks. The fixture is now
+  `Aᵢ ← Aᵢ₊₁ Aᵢ₊₁ "z" / Aᵢ₊₁` on the input `a`: at depth 14, 606 207 plain steps against 124
+  memoised, a ratio of 4 888.8 with 28 memo entries.
+- **The ASI exercise starter accidentally implemented the rule it was meant to omit**, because
+  `return` matched the identifier pattern in `endsExpression`. The exercises test caught it as
+  "the starter passes every test, so the exercise is vacuous".
+- **Two sections quoted figures their default control setting did not show.** The LR section's
+  prose named twelve states and two conflicts while defaulting to a six-state grammar, and the
+  transformations section quoted 6 → 33 productions while defaulting to a three-rule one. Both
+  defaults were changed to the grammar the prose describes.
+- **The grammars section claimed two grammars were the same language and they were not.** The
+  precedence grammar has parentheses and a second operator, so it accepts `(a)` and `a*a`. The
+  comparison now COMPUTES which fixtures share a language instead of asserting it, and finds
+  three that do.
+
+### Three things M25 added to the shape and worth keeping
+
+- **A differential harness must not swallow its own errors.** `safely` turned a signature mismatch
+  into "this parser is not applicable to this grammar", which is a legitimate outcome for a
+  different reason — so the row looked correct and the coverage silently dropped. If a harness has
+  a "not applicable" state, it needs a separate "threw" state, and the counts have to be asserted.
+- **When two components produce the same kind of answer, assert the COUNT, not just the verdict.**
+  GLR and Earley agreed on acceptance while disagreeing on tree counts through two rewrites. The
+  acceptance sweep never saw it.
+- **A section's default control setting is part of its prose.** Every figure the orientation and
+  the insight quote must be visible on arrival, or the learner reads a number and sees a different
+  one. `node tools/section-dump.js <id>` with no arguments shows exactly what they will see.
+
+### Measured figures quoted in the M25 examples
+
+- Tree counts for `E → E + E | a`: 1, 1, 2, 5 for one to four operands; 21 chart items, 6 columns.
+- The transformation pipeline on the precedence grammar: 6/3 → 6/3 → 9/3 → 11/5 → 11/5 → 33/22.
+- Bracket PDA: 1 state, 4 transitions; `()` 5 configurations depth 2, `(())` 7 and 3, `(())()`
+  10 and 3. CFG→PDA against Earley: 31 inputs, 0 mismatches.
+- LL(1): 3 productions/1 conflict/witness "a"; 4/1/"ibtx"; 6/4/"(a)". After both repairs: 4/0,
+  5/1 (the ambiguous one is not fixed), 8/0. The LL(1) parse of `a + a + a` is 13 steps,
+  7 of them expansions.
+- LR on the precedence grammar: LR(0) 12 states 2 shift/reduce, SLR 12/0, LALR 12/0 from 22
+  canonical with 10 merged, LR(1) 22/0. The SLR parse of `a + a * a` is 14 steps.
+- The dangling-else conflict: state 7 on `e`, shift to 8 against reduce by `S → i E t S`, items
+  `S → i E t S •` and `S → i E t S • e S`; it survives all four flavours.
+- The non-LALR grammar: LR(1) 14 states 0 conflicts, LALR 13 states 1 core merged 2 reduce/reduce.
+- Forest against trees on the ambiguous sum: 11/2, 24/14, 41/132, 62/1 430, 87/16 796.
+- The sweep: 13 186 parser-input checks, 0 disagreements.
+- Packrat at depths 2–14: memo 16/34/52/70/88/106/124 steps, plain 27/191/1 087/5 631/27 647/
+  131 071/606 207, ratio up to 4 888.8× with 28 entries.
+- Pratt: `a + b * c ^ d` → `(a + (b * (c ^ d)))`, depth 4, 4 calls; 18 table rows; ten asserted
+  parenthesisations.
+- Lexing: the nested template gives 15 tokens / depth 5 / 2 interpolations with a mode stack and
+  12 / 1 / 0 without, with 0 errors either way. Indentation: 2 INDENT, 2 DEDENT, 6 LINE from
+  8 lines; tab columns 0, 8, 8, 16.
+- Recovery on three independent errors: stop 1 diagnostic / 1 survivor, panic 3 / 4, repair
+  3 / 5 with 1 insertion. `let = = = ;` under repair: 1 reported, 1 suppressed.
+- ASI: 6 of 6 cases match the specification, including the three that insert nothing.
+
+---
+
 ## Next
 
-**M25 — context-free languages and parsing (12 sections).** Nothing of it exists yet: no
+**M26 — computability and complexity theory (10 sections).** Nothing of it exists yet: no
 modules, no sections, and its track file still carries it in `planned`. The spec is
-`doc/milestones/M25-context-free-parsing.md`, and it depends on M24, which is now built — the shared
-`machines/automaton.js` representation and `viz/automaton-view.js` are both meant to be reused
-by it. After it, onward through `doc/milestones/` in the order `doc/ROADMAP.md` gives.
+`doc/milestones/M26-computability.md`, and it depends on M25, which is now built —
+`machines/grammar.js`, `machines/parse-lab.js` and the automaton machinery from M24 are all
+available to it, and `viz/parse-tree-view.js` and `viz/parse-table-view.js` are new this
+milestone. After it, onward through `doc/milestones/` in the order `doc/ROADMAP.md` gives.
 
 M11 through M15 and M17 through M24 are complete apart from a human browser pass, which needs the
 Chrome extension connected; M16 has had one (see above, and the chart defect it found).
@@ -2772,6 +2890,20 @@ Three things M21 added to the shape and worth keeping:
 - **A null result is a bug until proved otherwise.** The vEB layout measuring exactly level order
   looked like an honest negative finding and was an off-by-a-recursion. Where a technique is
   *supposed* to win, assert that it does, and let the assertion fail.
+
+Three things M25 added to the shape and worth keeping:
+
+- **A differential harness must not swallow its own errors.** M25's `safely` wrapper turned a
+  wrong call signature into "this parser is not applicable to this grammar" — a legitimate outcome
+  for a different reason — so LL(1) was silently absent from every sweep and the row looked fine.
+  If a harness has a "not applicable" state it needs a separate "threw" state, and the check count
+  has to be asserted.
+- **When two components produce the same kind of answer, assert the COUNT, not just the verdict.**
+  GLR and Earley agreed on acceptance while disagreeing on tree counts through two rewrites of the
+  graph-structured stack. The acceptance sweep never saw it; `trees(...).length` did.
+- **A section's default control setting is part of its prose.** Two M25 sections quoted figures
+  their shipped default did not show. `node tools/section-dump.js <id>` with no arguments prints
+  exactly what a learner sees on arrival; align the prose to that.
 
 Three things M22 added to the shape and worth keeping:
 

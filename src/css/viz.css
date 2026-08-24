@@ -728,3 +728,111 @@ canvas.viz-canvas {
   text-align: right;
   opacity: 0.8;
 }
+
+/* --------------------------------------------------------------- parsing */
+/* Parse trees and forests (viz/parse-tree-view.js). Nodes are boxes rather
+   than circles because the labels are symbol names rather than single
+   characters, and a circle wide enough for `E'` is wider than it is tall. */
+
+.tree-edge {
+  stroke: color-mix(in srgb, var(--hue-gray) 55%, transparent);
+  stroke-width: 1.2;
+}
+
+.tree-node rect {
+  fill: color-mix(in srgb, var(--hue-blue) 16%, transparent);
+  stroke: color-mix(in srgb, var(--hue-blue) 55%, transparent);
+  stroke-width: 1;
+}
+
+.tree-node text {
+  fill: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+
+.tree-node-leaf rect {
+  fill: color-mix(in srgb, var(--hue-gray) 14%, transparent);
+  stroke: color-mix(in srgb, var(--hue-gray) 45%, transparent);
+}
+
+/* An ambiguous forest node, or a highlighted symbol — the only thing in a
+   tree picture worth colouring differently. */
+.tree-node-active rect {
+  fill: color-mix(in srgb, var(--hue-amber) 26%, transparent);
+  stroke: color-mix(in srgb, var(--hue-amber) 70%, transparent);
+  stroke-width: 1.5;
+}
+
+/* Parse tables (viz/parse-table-view.js). Wide tables scroll inside their own
+   container rather than pushing the page sideways. */
+
+.table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.parse-table {
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  min-width: 100%;
+}
+
+.parse-table caption {
+  caption-side: top;
+  text-align: left;
+  padding-bottom: 0.35rem;
+  font-size: 0.78rem;
+  opacity: 0.75;
+}
+
+.parse-table th,
+.parse-table td {
+  border: 1px solid color-mix(in srgb, var(--hue-gray) 25%, transparent);
+  padding: 0.15rem 0.4rem;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.parse-table th {
+  background: color-mix(in srgb, var(--hue-gray) 12%, transparent);
+  font-weight: 600;
+}
+
+.table-cell-empty {
+  background: color-mix(in srgb, var(--hue-gray) 6%, transparent);
+}
+
+.table-cell-goto {
+  background: color-mix(in srgb, var(--hue-green) 12%, transparent);
+}
+
+/* A cell wanting two actions. It is the only thing on the page worth
+   hunting for, so it is the only thing coloured. */
+.table-cell-conflict {
+  background: color-mix(in srgb, var(--hue-amber) 30%, transparent);
+  font-weight: 600;
+}
+
+/* Earley chart items, coloured by which of the three operations added them. */
+.chart-item {
+  display: inline-block;
+  padding: 0.05rem 0.3rem;
+  margin: 0.08rem;
+  border-radius: 0.2rem;
+  font-size: 0.72rem;
+  background: color-mix(in srgb, var(--hue-gray) 14%, transparent);
+}
+
+.chart-item-predict {
+  background: color-mix(in srgb, var(--hue-blue) 18%, transparent);
+}
+
+.chart-item-scan {
+  background: color-mix(in srgb, var(--hue-green) 18%, transparent);
+}
+
+.chart-item-complete {
+  background: color-mix(in srgb, var(--hue-purple) 18%, transparent);
+}
