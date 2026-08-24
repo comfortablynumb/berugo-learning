@@ -3,7 +3,7 @@
 Where the implementation stands, and exactly what the next session should pick up.
 Update this file at the end of any session that leaves work unfinished.
 
-**Last updated:** 2026-08-23 (M17 complete and render-audited; the tree is green — next is M18, numerical methods, transforms and optimisation)
+**Last updated:** 2026-08-24 (M19 complete and render-audited; the tree is green — next is M20, NP-completeness, reductions and metaheuristics)
 
 ---
 
@@ -29,11 +29,13 @@ Update this file at the end of any session that leaves work unfinished.
 | M15 — string algorithms and pattern matching | 11 | ✅ built, tested, render-audited |
 | M16 — computational geometry | 10 | ✅ built, tested, verified in Chrome |
 | M17 — numbers, bits and floating point | 10 | ✅ built, tested, render-audited |
+| M18 — numerical methods, transforms and optimisation | 10 | ✅ built, tested, render-audited |
+| M19 — randomised and approximation algorithms | 9 | ✅ built, tested, render-audited |
 
-**The tree is GREEN.** `npm test` reports 3 101 unit tests with 0 failures (6 skipped — the
-wall-clock-budget starters the inline sandbox cannot fail); the wiring audit passes at 166 sections
-and 800 modules, the render audit activates all 166 with no exception and no empty table,
-`npm run lint:size` passes across 890 files, and `npm run build:css` is up to date.
+**The tree is GREEN.** `npm test` reports 3 392 unit tests with 0 failures (6 skipped — the
+wall-clock-budget starters the inline sandbox cannot fail); the wiring audit passes at 185 sections
+and 890 modules, the render audit activates all 185 with no exception and no empty table,
+`npm run lint:size` passes across 988 files, and `npm run build:css` is up to date.
 
 All nine M07 sections were opened in Chrome on `npm start`: the three tabs render, every demo
 figure matches the prose *exactly* (see "aligning the demo with the prose" below), the references
@@ -2148,12 +2150,167 @@ Newton 3.744e-21 in 22; the stability cliff at 1 834 / 1 016 / no convergence / 
 diverged in 14; conditioning 2 / 30 / 75 / 279 / 841 / 1 439 / 9 244 for descent against 2 for
 Newton throughout; coordinate descent 2 iterations aligned and 68 rotated.
 
+## M19 — randomised and approximation algorithms (complete)
+
+Nine sections, 185 in the tree. Eight algorithm modules, two harnesses, no new viz renderer
+(`ErrorBandView` and `GraphView` covered every chart), nine template + section pairs, twelve
+content files, one property suite and three figure suites.
+
+### The shape of the milestone
+
+Every section is arranged around the same discipline, and it is the reason the milestone exists:
+**a bound, an expectation and a measurement are three different numbers, and they are routinely
+printed in the same column.** So every table names which it is showing, every ratio is measured
+against an exact optimum from an enumeration oracle rather than assumed, and every tight instance
+is generated rather than described.
+
+### Modules
+
+`algorithms/`: `karger.js`, `monte-carlo.js`, `mcmc.js`, `fingerprinting.js`, `approximation.js`,
+`lp-rounding.js` (including a tableau simplex with Bland's rule), `fptas.js`, `derandomize.js`.
+`machines/`: `randomized-lab.js` (19.1-19.5), `approx-lab.js` (19.6-19.9, plus every exact oracle).
+
+Two harnesses rather than one because the repetition studies and the exact-optimum studies answer
+unrelated questions, and one file would pass 1 000 lines.
+
+### Defects and false claims the measurements found
+
+1. **The set-cover "tight instance" was not tight — greedy solved it in one set.** The first
+   construction was a chain of halving sets over two rows, and the largest chain set covered the
+   entire universe, so greedy paid 1 against an optimum of 2. Vazirani's weighted family replaced
+   it: n singletons priced at 1/(n − i) plus the whole universe at 1 + ε, where greedy pays
+   *exactly* H(n) — 5.4331 at n = 128, matching the harmonic column to every digit.
+
+2. **The vertex-cover trap instance was too small to show the effect it exists for.** At k = 8
+   highest-degree greedy scored 1.50 against the matching algorithm's 1.75, which is the opposite
+   of the lesson. The ratio grows like H(k) − 1, so the demo sweeps k up to 200; the curves cross
+   around k = 20 and reach 3.82 against 1.98 at k = 100. The optimum was confirmed to be k by
+   computing the maximum matching and invoking König, rather than asserted.
+
+3. **A fingerprint collision rate of zero was about to be quoted as agreement with the n/p bound.**
+   Two sequences differing in one position have a *monomial* difference whose only root is base
+   zero, which is never drawn — so the measured rate is 0 at every field size while the bound reads
+   1.0 at p = 101. `adversarialPair` now builds the worst case: choose the bases to defeat, expand
+   the polynomial with exactly those roots, and use its coefficients as the difference. That
+   measures 0.08575 against a bound of 0.0792. The demo shows both columns side by side, because
+   the contrast is the teaching.
+
+4. **The dimension sweep showed the grid winning in every dimension, which is backwards.** The
+   integrand was a product of sines, and the midpoint rule integrates a full period *exactly* — so
+   the grid column read 1e-15 at d = 12 and the curse of dimensionality was invisible. A product of
+   exponentials has a non-zero second derivative everywhere, and the grid error then climbs
+   2.48e-9 → 7.98e-2 across d = 1 to 8 while the sampled error does not move. The Monte Carlo
+   column is also averaged over 20 seeds, because one seed made the crossover column jump around.
+
+5. **The "inside its 95% interval" column reported NO for two correct estimators.** A single run's
+   coverage flag is a coin weighted 19 to 1, and every estimator in a row shares the seed stream, so
+   one bad draw hits several at once and looks systematic. `intervalCoverage` replaced it with
+   coverage over 200 seeds: 96.0%, 96.0%, 95.0% — and 100.0% for the stratified estimator, whose
+   interval comes from the stratum width and is genuinely conservative.
+
+6. **Karger's bound looked sixty-six times too pessimistic, and it is exact.** The demo was
+   measuring "found *a* minimum cut" while the theorem is about one *nominated* cut. On C12 the
+   first reads 100.00% and the second 1.65% against a bound of 1.52%. `repeat()` now reports both,
+   plus the count of distinct minimum cuts found — 66, which is n(n−1)/2 exactly, so the demo also
+   exhibits the counting corollary rather than only quoting it.
+
+7. **The Freivalds metric read 47.3% detection beside a bound of "at least 50%".** Sampling error
+   at 400 trials, not a violation — the standard error is 2.5 points. The trial count went to 4 000
+   and the note now carries ±0.8%. For a single corrupted entry the failure probability is *exactly*
+   1/2 per round, so the measured 0.50850 is the bound being attained rather than respected.
+
+8. **The FPTAS's default epsilon showed an achieved ratio of exactly 100%.** True and
+   uninformative. The default moved to ε = 0.5, where the guarantee is 50% and the measured value is
+   99.6452% — which is the point of the section. The sweep also exposed the fact nobody writes down:
+   at ε = 0.01 the scaling divisor K = ε·P_max/n falls to 0.503, so the "approximate" table is
+   514 000 cells against the exact DP's 258 640, for the identical answer.
+
+9. **Five metric ids collided with their own note paragraphs.** `rzd-vegas` and `rzd-vegas-note`,
+   `mce-rare`, `arx-tsp`, `lpr-sat`, `drz-walk` — every one a metric whose auto-generated `-note`
+   span had the same id as a hand-written one. `tests/unit/template-ids.test.js` caught all five
+   before the render audit did, which is why step 4 of the shape says to run it first.
+
+### Design decisions that are easy to undo by accident
+
+- **`spreadOf` reports `min` and `max`, never `best` and `worst`.** Which end is bad flips between
+  a minimisation study and a maximisation one, and a column labelled "worst" that silently means
+  "largest" is how a MAX-SAT table ends up quoting its best case as its guarantee.
+- **`karger.js` ships the uniform-supernode rule on purpose.** It is the plausible misreading of
+  "contract a random edge", it raises no error, and it drops the measured success rate from 34.55%
+  to 23.40%. The section's claim is that the analysis is about the *distribution* and not the loop.
+- **`fptas.scaleWeights` is kept although it is wrong.** It returns 6 931 against a true optimum of
+  6 764 with a weight of 5 631 against a capacity of 5 465, and a value *above* the optimum is the
+  only visible symptom of an infeasible answer.
+- **Every approximation's feasibility is checked separately from its cost.** A cover that misses an
+  edge is smaller than a valid one and flatters the ratio column; the studies report an `invalid`
+  count next to the ratio for exactly that reason.
+- **The MCMC width sweep keeps width 0.3, which is worse than both its neighbours.** It has the
+  worst effective sample size in the table (23.2) because it crosses between modes just often
+  enough to make the chain a poor predictor of itself. A monotone sweep would be tidier and would
+  hide the fact that proposal tuning is a search rather than a direction.
+
+### Figures worth keeping (all recomputed in the figure tests)
+
+561 fooling Fermat on 318 of 558 bases (56.99%) and Miller-Rabin on 8 (1.43%), with amplification
+measured at 1.385e-2, 4.000e-4 and then 0 of 20 000; a Las Vegas mean of 5.074 against 1/p = 5, a
+99th percentile of 21 against 20.64, a worst of 36, and 454 of 4 000 over a budget of 10 (11.3%
+against a predicted 10.7%). Two cliques joined by two edges: 32 edges, one optimal partition of
+2 047 examined, 691 of 2 000 runs succeeding (34.55%) against a bound of 1.52%, the supernode rule
+at 23.40%, and 3 020 contractions at the bound against 110 at the measured rate and 64 for one
+Karger-Stein call across 63 recursive calls. C12 with 66 minimum cuts, 100.00% "some cut" and 1.65%
+"this cut". The five estimators on the exponential integrand at 4 000 evaluations: errors 3.748e-3,
+2.966e-3, 2.142e-3, 1.088e-6 and 5.214e-4, with variance factors 61.87x, 60.16x and 0.97x, and
+interval coverage 96.0/96.0/95.0/100.0%; on sin squared of 10x, antithetic gives 1.41x and makes the
+error 2.5x worse while the control variate gives 1.01x. The rate at 1.083e-1 → 7.898e-3 (predicted
+6.767e-3) → 1.590e-3 (predicted 1.692e-3), with van der Corput at 5.115e-2 → 1.311e-5 tracking a
+star discrepancy of 6.250e-2 → 1.526e-5. The dimension sweep at 2.48e-9 / 3.19e-3 in one dimension
+and 7.98e-2 / 1.11e-2 in eight, crossing at d = 5. P(Z > 4) = 3.167124e-5 needing 31 574 draws a
+hit, plain sampling returning 0, shift 2 at 3.907% with ESS 387.3, shift 4 at 0.121% with ESS
+3 628.9, shift 7 at 15.709% with 19 982 hits and ESS 75.4.
+
+MCMC: acceptance 92.7 / 79.1 / 43.5 / 17.1 / 6.3 / 1.2% against ESS 74.9 / 23.2 / 174.8 / 559.7 /
+456.1 / 151.4 and errors 1.3849 / 0.3504 / 0.1380 / 0.0663 / 0.0687 / 0.3838; tau = 267.2 at width
+0.1 giving a naive bar of 0.00557 against an honest 0.09099 (16.3x) on an error of 1.3849, a
+second-mode share of 1.3% against 35.0%, and R-hat = 1.5081 over chains at −2.2719, −1.6051,
+−1.4836 and +1.2352. Freivalds at 432 000 operations to multiply and 43 200 to check eight times,
+with miss rates 0.50850 / 0.24550 / 0.12300 / 0.05650 / 0.03275 / 0.01575 / 0.00925 / 0.00500 and 0
+false alarms; Schwartz-Zippel accepting 2 000 of 2 000 true claims and 3 and 4 of 2 000 false ones
+against bounds of 0.00198 and 0.00297; fingerprints at 0 of 4 000 for a one-character difference
+and 343 / 41 / 5 / 0 of 4 000 for a built pair against bounds of 0.0792 down to 8.00e-6; a Merkle
+tree over 79 chunks with 7-hash proofs.
+
+Vertex cover on 200 graphs: matching 1.5161 / 1.4286 / 2.0000, degree greedy 1.0321 / 1.0000 /
+1.2857, LP rounding 1.4950, the relaxation itself at 0.8812 — with 0 bound violations and 0
+infeasible answers. The trap at k = 20 / 60 / 100 giving 46 / 201 / 382 against optima of
+20 / 60 / 100 while the matching cover holds at 1.90 / 1.97 / 1.98. Greedy set cover at H(n)
+exactly — 2.0833, 4.7439, 5.4331 at n = 4, 64, 128 — against ln 128 = 4.8520, and 1.2330 mean on
+120 random instances. TSP on 60 ten-city instances: MST/OPT 0.7326, doubling 1.1428 / 1.1520 /
+1.3275, Christofides 1.0675 / 1.0635 / 1.2281. k-centre 1.0547 / 1.4313 / 1.2297 from 120 / 560 /
+1 820 enumerated centre sets; list scheduling 1.1465 / 1.4074 against LPT's 1.0294 / 1.0882, and
+the trap attaining exactly 1.75 = 2 − 1/4 where LPT is optimal.
+
+LP: 150 of 150 half-integral, gap mean 1.1456 and worst 1.3333, complete graphs at 1.3333 → 1.8667
+matching 2 − 2/n exactly, one instance at LP 6.00 with all twelve coordinates at 0.500 rounding to
+12 against an exact 7. MAX-SAT: coin 79.00 / 79.31 / 60.00%, LP rounding 97.62 / 100.00 / 82.76%,
+best-of-two the same with an 82.76% floor inside 3/4, conditional expectations 98.66 / 100.00 /
+93.10%. Knapsack: exact 6 764 at 258 640 cells; ε = 0.5 giving 6 740 (99.6452%) at 10 100 cells
+(25.6x smaller) with K = 25.150, through to ε = 0.01 at 514 000 cells with K = 0.503; the PTAS at
+21 / 211 / 1 351 / 6 196 subsets for k = 1 to 4; weight scaling at 6 931 with weight 5 631 against
+a capacity of 5 465 (over by 166); density greedy at 2 of 100 on the trap. Derandomisation: 37
+edges so |E|/2 = 18.5, random mean 18.67 with 232 of 500 below the bound and a best of 26, the
+conditional walk at 25, a 32-point pairwise-independent family averaging exactly 18.5000 with a
+best of 24 against a full space of 65 536, an exact maximum of 28 from 32 768 assignments, and an
+independence profile of 0.0000 pairwise and 0.1250 at the triple (0, 1, 2). MAX-SAT the same way:
+expectation 35.00, random mean 35.10 with 178 of 500 below and a worst at 70.0%, the walk at 39
+against an exact 40 from 16 384 assignments.
+
+
 ## Next
 
-**M19 — randomised and approximation algorithms**, then onward through
+**M20 — NP-completeness, reductions and metaheuristics**, then onward through
 `doc/milestones/` in the order `doc/ROADMAP.md` gives.
 
-M11 through M15, M17 and M18 are complete apart from a human browser pass, which needs the Chrome
+M11 through M15 and M17 through M19 are complete apart from a human browser pass, which needs the Chrome
 extension connected; M16 has had one (see above, and the chart defect it found). `tools/section-dump.js` covers everything else the browser used to be needed for — it
 prints every metric, table and note a section renders, at any control setting, and since the
 `input`-event fix above that is finally true of slider settings too.

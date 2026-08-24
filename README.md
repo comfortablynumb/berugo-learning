@@ -279,8 +279,43 @@ faithfully in a browser, the section models it, says so plainly, and states what
   Newton takes 2 throughout, with a pure 45° rotation costing coordinate descent a factor of 34 on
   a surface whose eigenvalues did not move. 10 sections live.
 
-`npm test` is green — wiring audit, 3 237 unit tests, and a **render audit** that boots the whole
-app headlessly and activates all 176 sections, failing on anything that throws while rendering, any
+- ✅ **M19 — randomised and approximation algorithms**: the smallest Carmichael number fooling the
+  Fermat test on 318 of 558 bases — 57.0% — and Miller–Rabin on 8 of them, so one extra square-root
+  check takes a bound of 0.57ᵏ, which never reaches 10⁻¹⁰, to 0.0143ᵏ, which reaches it in five
+  rounds; a Las Vegas mean of 5.074 attempts beside a 99th percentile of 21 and a worst run of 36,
+  where a budget of "twice the average" kills 11.3% of runs; Karger's bound of 1.52% measuring
+  34.55% on a graph with one minimum cut and 1.65% on a cycle where it is exact — the same 2 000
+  runs supporting "sixty-six times too pessimistic" and "correct to a tenth of a percent" depending
+  on which event is counted — with all 66 of C₁₂'s minimum cuts turning up, which is the counting
+  corollary attained; antithetic sampling cutting the variance 61.87× on a monotone integrand and
+  making the measured error 2.5 times *worse* on an oscillating one, and a stratified estimator
+  reporting no variance reduction at all while its error falls by a factor of 3 445 — because the
+  sample-variance formula assumes draws that stratification deliberately makes non-identical; a grid
+  beating sampling by 2.48e-9 against 3.19e-3 at one dimension and losing from six onwards at the
+  identical 4 096-point budget; P(Z > 4) estimated as **exactly zero with a standard error of exactly
+  zero** by 20 000 plain draws, and an over-shifted importance proposal putting 19 982 of 20 000
+  draws past the threshold — the best hit count in the table — while being 15.7% wrong, caught only
+  by a weight ESS of 75.4; an MCMC chain accepting 92.7% of its moves, which reads as perfect health,
+  worth 74.9 independent draws out of 20 000 and reporting an answer 249 of its own standard errors
+  from the truth, with R̂ = 1.5081 across four dispersed chains the only diagnostic that sees it;
+  Freivalds catching one wrong entry in 3 600 at 0.50850, 0.24550, 0.12300 down the round counts
+  with **zero** false alarms in 32 000 tests; a fingerprint pair differing in one position colliding
+  0 times of 4 000 at every field size — so quoting that against the n/p bound would be a demo
+  validating a theory it never tested — against a constructed pair landing on 0.08575 versus a bound
+  of 0.0792; the vertex-cover algorithm with a proven factor of 2 measuring 1.5161 and attaining
+  exactly 2.0000, while highest-degree greedy, which has no bound at all, measures 1.0321 on random
+  graphs and 3.82 on the family built to defeat it; greedy set cover paying *exactly* H(n) —
+  5.4331 at n = 128 — on Vazirani's instance and 1.2330 on instances that arose by accident; 150 of
+  150 LP basic solutions half-integral and the integrality gap matching 2 − 2/n to every digit on
+  the complete graphs, which is a ceiling no rounding can pass; a knapsack FPTAS asked for half the
+  optimum returning 99.6452% of it from a table 25.6× smaller, and at ε = 0.01 costing 514 000 cells
+  against the exact DP's 258 640 for the identical answer, because the scaling divisor has fallen to
+  0.503; and 232 of 500 random assignments falling below the |E|/2 they meet in expectation, against
+  a conditional-expectation walk that cannot and a pairwise-independent family of 32 assignments
+  whose average is exactly 18.5000. 9 sections live.
+
+`npm test` is green — wiring audit, 3 392 unit tests, and a **render audit** that boots the whole
+app headlessly and activates all 185 sections, failing on anything that throws while rendering, any
 table left with an empty body, and any metric tile still showing a placeholder without a note
 explaining it. `npm run lint:size` reports no offenders.
 
@@ -294,7 +329,7 @@ The render audit is not a substitute for opening the page, and M16's browser pas
   opens to milestones, then sections. Tracks that are planned and not built are listed with their
   milestones and section counts, marked as planned, so the map shows what the platform teaches
   rather than only what happens to be finished. One track and one milestone stay open at a time, so
-  the nav is the same height at 166 sections and at 634.
+  the nav is the same height at 185 sections and at 634.
 - **Search across everything.** The header search indexes concepts, worked examples, reference
   entries and exercises as well as section titles, so "tombstone", "Little's law" or "round half to
   even" lands on the section that explains it. Ctrl/Cmd+K focuses it; arrows and Enter drive it.

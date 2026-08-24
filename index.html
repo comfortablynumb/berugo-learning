@@ -239,6 +239,15 @@
       <section data-section="differential-equations" hidden><div class="section-body"><div id="differential-equations-content"></div></div></section>
       <section data-section="fourier-transforms" hidden><div class="section-body"><div id="fourier-transforms-content"></div></div></section>
       <section data-section="optimisation" hidden><div class="section-body"><div id="optimisation-content"></div></div></section>
+      <section data-section="randomised-design" hidden><div class="section-body"><div id="randomised-design-content"></div></div></section>
+      <section data-section="random-contraction" hidden><div class="section-body"><div id="random-contraction-content"></div></div></section>
+      <section data-section="monte-carlo-estimation" hidden><div class="section-body"><div id="monte-carlo-estimation-content"></div></div></section>
+      <section data-section="markov-chain-monte-carlo" hidden><div class="section-body"><div id="markov-chain-monte-carlo-content"></div></div></section>
+      <section data-section="fingerprinting" hidden><div class="section-body"><div id="fingerprinting-content"></div></div></section>
+      <section data-section="approximation-ratios" hidden><div class="section-body"><div id="approximation-ratios-content"></div></div></section>
+      <section data-section="lp-relaxation" hidden><div class="section-body"><div id="lp-relaxation-content"></div></div></section>
+      <section data-section="approximation-schemes" hidden><div class="section-body"><div id="approximation-schemes-content"></div></div></section>
+      <section data-section="derandomisation" hidden><div class="section-body"><div id="derandomisation-content"></div></div></section>
     </main>
   </div>
 
@@ -468,6 +477,14 @@
   <script src="src/js/algorithms/ode-solvers.js"></script>
   <script src="src/js/algorithms/fft.js"></script>
   <script src="src/js/algorithms/optimization.js"></script>
+  <script src="src/js/algorithms/karger.js"></script>
+  <script src="src/js/algorithms/monte-carlo.js"></script>
+  <script src="src/js/algorithms/mcmc.js"></script>
+  <script src="src/js/algorithms/fingerprinting.js"></script>
+  <script src="src/js/algorithms/approximation.js"></script>
+  <script src="src/js/algorithms/lp-rounding.js"></script>
+  <script src="src/js/algorithms/fptas.js"></script>
+  <script src="src/js/algorithms/derandomize.js"></script>
   <script src="src/js/machines/search-tree-lab.js"></script>
   <script src="src/js/machines/dp-lab.js"></script>
   <script src="src/js/machines/graph-lab.js"></script>
@@ -484,6 +501,8 @@
   <script src="src/js/machines/entropy-lab.js"></script>
   <script src="src/js/machines/numeric-lab.js"></script>
   <script src="src/js/machines/analysis-lab.js"></script>
+  <script src="src/js/machines/randomized-lab.js"></script>
+  <script src="src/js/machines/approx-lab.js"></script>
 
   <script src="src/js/viz/chart-base.js"></script>
   <script src="src/js/viz/canvas.js"></script>
@@ -682,6 +701,9 @@
   <script src="src/js/content/concepts-numerics-linear.js"></script>
   <script src="src/js/content/concepts-numerics-calculus.js"></script>
   <script src="src/js/content/concepts-numerics-transforms.js"></script>
+  <script src="src/js/content/concepts-randomized.js"></script>
+  <script src="src/js/content/concepts-randomized-chains.js"></script>
+  <script src="src/js/content/concepts-approximation.js"></script>
   <script src="src/js/content/examples-graphs.js"></script>
   <script src="src/js/content/examples-graphs-paths.js"></script>
   <script src="src/js/content/examples-graphs-routes.js"></script>
@@ -706,6 +728,9 @@
   <script src="src/js/content/examples-numerics-linear.js"></script>
   <script src="src/js/content/examples-numerics-calculus.js"></script>
   <script src="src/js/content/examples-numerics-transforms.js"></script>
+  <script src="src/js/content/examples-randomized.js"></script>
+  <script src="src/js/content/examples-randomized-chains.js"></script>
+  <script src="src/js/content/examples-approximation.js"></script>
   <script src="src/js/content/reference-graphs.js"></script>
   <script src="src/js/content/reference-graphs-paths.js"></script>
   <script src="src/js/content/reference-graphs-routes.js"></script>
@@ -730,6 +755,9 @@
   <script src="src/js/content/reference-numerics-linear.js"></script>
   <script src="src/js/content/reference-numerics-calculus.js"></script>
   <script src="src/js/content/reference-numerics-transforms.js"></script>
+  <script src="src/js/content/reference-randomized.js"></script>
+  <script src="src/js/content/reference-randomized-chains.js"></script>
+  <script src="src/js/content/reference-approximation.js"></script>
   <script src="src/js/content/exercises-graphs.js"></script>
   <script src="src/js/content/exercises-graphs-paths.js"></script>
   <script src="src/js/content/exercises-graphs-routes.js"></script>
@@ -754,6 +782,9 @@
   <script src="src/js/content/exercises-numerics-linear.js"></script>
   <script src="src/js/content/exercises-numerics-calculus.js"></script>
   <script src="src/js/content/exercises-numerics-transforms.js"></script>
+  <script src="src/js/content/exercises-randomized.js"></script>
+  <script src="src/js/content/exercises-randomized-chains.js"></script>
+  <script src="src/js/content/exercises-approximation.js"></script>
 
   <!-- Views -->
   <script src="src/js/views/sidebar-view.js"></script>
@@ -1113,6 +1144,24 @@
   <script src="src/js/sections/fourier-transforms-section.js"></script>
   <script src="src/js/sections/optimisation-template.js"></script>
   <script src="src/js/sections/optimisation-section.js"></script>
+  <script src="src/js/sections/randomised-design-template.js"></script>
+  <script src="src/js/sections/randomised-design-section.js"></script>
+  <script src="src/js/sections/random-contraction-template.js"></script>
+  <script src="src/js/sections/random-contraction-section.js"></script>
+  <script src="src/js/sections/monte-carlo-estimation-template.js"></script>
+  <script src="src/js/sections/monte-carlo-estimation-section.js"></script>
+  <script src="src/js/sections/markov-chain-monte-carlo-template.js"></script>
+  <script src="src/js/sections/markov-chain-monte-carlo-section.js"></script>
+  <script src="src/js/sections/fingerprinting-template.js"></script>
+  <script src="src/js/sections/fingerprinting-section.js"></script>
+  <script src="src/js/sections/approximation-ratios-template.js"></script>
+  <script src="src/js/sections/approximation-ratios-section.js"></script>
+  <script src="src/js/sections/lp-relaxation-template.js"></script>
+  <script src="src/js/sections/lp-relaxation-section.js"></script>
+  <script src="src/js/sections/approximation-schemes-template.js"></script>
+  <script src="src/js/sections/approximation-schemes-section.js"></script>
+  <script src="src/js/sections/derandomisation-template.js"></script>
+  <script src="src/js/sections/derandomisation-section.js"></script>
   <script src="src/js/app.js"></script>
 </body>
 </html>

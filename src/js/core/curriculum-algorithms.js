@@ -684,10 +684,70 @@
               summary: 'Gradient descent goes from two iterations to nine thousand as the conditioning worsens, and Newton takes two at every point on that range.',
               tags: ['convexity', 'gradient descent', 'step size', 'stability limit', 'momentum', 'line search', 'armijo', 'bfgs', 'newton method', 'coordinate descent', 'affine invariance', 'conditioning']
             }]
+        },
+
+        {
+          id: 'M19',
+          title: 'Randomised and approximation algorithms',
+          summary: 'Two ways past a problem you cannot solve exactly and quickly - flip coins, or settle for provably close - and the guarantee is the content in both.',
+          sections: [
+            {
+              id: 'randomised-design',
+              title: 'Randomised algorithm design',
+              summary: 'The smallest Carmichael number fools the Fermat test on 57 percent of bases and Miller-Rabin on 1.43 percent, and only one of those amplifies to anything usable.',
+              tags: ['monte carlo', 'las vegas', 'one sided error', 'amplification', 'miller rabin', 'carmichael', 'geometric distribution', 'expectation', 'concentration', 'random input']
+            },
+            {
+              id: 'random-contraction',
+              title: 'Random contraction and Karger min cut',
+              summary: 'A cycle on twelve vertices has exactly sixty-six minimum cuts, contraction finds every one of them, and each turns up at the bound to within a percent.',
+              tags: ['karger', 'contraction', 'min cut', 'supernode', 'repetition', 'karger stein', 'success probability', 'counting bound', 'cycle graph', 'brute force oracle']
+            },
+            {
+              id: 'monte-carlo-estimation',
+              title: 'Monte Carlo estimation and variance reduction',
+              summary: 'A grid beats sampling by nine orders of magnitude in one dimension and loses from six onwards, at the identical point budget.',
+              tags: ['sampling', 'confidence interval', 'antithetic', 'control variate', 'stratified', 'importance sampling', 'quasi monte carlo', 'van der corput', 'discrepancy', 'dimension independence']
+            },
+            {
+              id: 'markov-chain-monte-carlo',
+              title: 'Markov chain Monte Carlo',
+              summary: 'A chain accepting 93 percent of its proposals is the worst one in the table, and it reports an answer two hundred and fifty of its own standard errors from the truth.',
+              tags: ['metropolis hastings', 'detailed balance', 'gibbs', 'burn in', 'autocorrelation', 'effective sample size', 'mixing time', 'proposal width', 'gelman rubin', 'multimodal']
+            },
+            {
+              id: 'fingerprinting',
+              title: 'Fingerprinting and identity testing',
+              summary: 'Checking a claimed matrix product costs a tenth of computing it, catches a single wrong entry half the time per round, and never once raises a false alarm.',
+              tags: ['freivalds', 'schwartz zippel', 'polynomial identity', 'one sided error', 'fingerprint', 'rolling hash', 'merkle tree', 'verification', 'finite field', 'trust but verify']
+            },
+            {
+              id: 'approximation-ratios',
+              title: 'Approximation algorithms and ratios',
+              summary: 'The algorithm with a proven factor of two averages 1.52 and the one with no bound at all averages 1.03, and both facts matter.',
+              tags: ['approximation ratio', 'vertex cover', 'maximal matching', 'set cover', 'harmonic bound', 'metric tsp', 'christofides', 'k centre', 'list scheduling', 'tight instance']
+            },
+            {
+              id: 'lp-relaxation',
+              title: 'LP relaxation and rounding',
+              summary: 'Every basic solution of the vertex-cover relaxation came back with each coordinate at zero, one half or one, over a hundred and fifty instances.',
+              tags: ['integer program', 'linear relaxation', 'simplex', 'half integral', 'integrality gap', 'randomised rounding', 'max sat', 'primal dual', 'duality', 'lower bound']
+            },
+            {
+              id: 'approximation-schemes',
+              title: 'PTAS, FPTAS and the limits of approximation',
+              summary: 'Asked for half the optimum the scheme returns 99.6 percent of it from a table twenty-six times smaller, and asked for 99 percent it costs twice the exact algorithm.',
+              tags: ['ptas', 'fptas', 'profit scaling', 'pseudo polynomial', 'knapsack', 'epsilon', 'apx hard', 'pcp theorem', 'hardness of approximation', 'greedy trap']
+            },
+            {
+              id: 'derandomisation',
+              title: 'Derandomisation',
+              summary: 'Half of five hundred random assignments fall below the bound they satisfy in expectation, and thirty-two carefully chosen ones cannot.',
+              tags: ['conditional expectations', 'probabilistic method', 'max cut', 'pairwise independence', 'small sample space', 'k wise independent', 'parity', 'max sat', 'deterministic', 'reproducibility']
+            }]
         }
       ],
       planned: [
-        { id: 'M19', title: 'Randomised and approximation algorithms', sections: 9 },
         { id: 'M20', title: 'NP-completeness, reductions and metaheuristics', sections: 9 },
         { id: 'M21', title: 'Online, external-memory and cache-oblivious algorithms', sections: 9 },
         { id: 'M22', title: 'Compression, information theory and error correction', sections: 11 },
