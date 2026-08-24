@@ -2477,15 +2477,126 @@ exhausted at 40 000, then feasible at 6 327, 247 and 33.
 
 """
 
+## M21 — online, external-memory and cache-oblivious algorithms (complete)
+
+Nine sections, 203 in the tree. Eight new algorithm modules, four harnesses, no new viz renderer —
+`ErrorBandView`, `GraphView` and `MetricGrid` covered every chart — nine template + section pairs,
+twelve content files, two property suites and three figure suites.
+
+### The shape of the milestone
+
+Every section is arranged around one discipline: **a ratio means nothing until its denominator is
+named.** A competitive ratio measured against a lower bound flatters; measured against a weaker
+reference it under-states; measured as a mean rather than a maximum it inverts the ranking outright.
+So every study in this milestone states what it is dividing by — an exact optimum where one is
+computable, an LP bound where it is not, the best *static* order where the true offline optimum is
+NP-hard — and reports the worst case with the mean beside it rather than instead of it.
+
+### Modules
+
+`algorithms/`: `replacement-policies.js` (FIFO, LRU, LFU, CLOCK, Belady), `adaptive-caches.js`
+(ARC, 2Q, W-TinyLFU with a frequency sketch), `online-decisions.js` (ski rental, list update),
+`online-scheduling.js` (Graham, LPT, balls-in-bins, consistent hashing), `bin-packing.js`
+(five policies, 1-D and 2-D, exact branch and bound), `external-algorithms.js` (a DAM simulator
+that *throws* when the live record count exceeds M), `cache-oblivious.js` (transpose, multiply and
+the van Emde Boas layout), `parallel-primitives.js` (Blelloch, Hillis–Steele, greedy scheduling,
+Amdahl and Gustafson).
+`machines/`: `online-lab.js` (21.1, 21.3, 21.4), `cache-lab.js` (21.2), `dam-lab.js` (21.5, 21.6),
+`model-lab.js` (21.7–21.9).
+
+### What the measurements found
+
+Three real defects, each caught by insisting the number be recomputed rather than quoted:
+
+- **`vebOrder` recursed over array offsets rather than heap indices.** A subtree of a complete
+  binary tree does not occupy a contiguous index range, so laying the bottom trees out by adding a
+  base offset produced a permutation that measured *identically* to level order — a silent null
+  result that looks like "the technique does not help" rather than a bug. `cost-model-modules`
+  now asserts the layout is not level order and that its top subtree is a contiguous prefix.
+- **The first-fit trap perturbed sixths UP.** A sixth, a third and a half sum to exactly one, so
+  adding epsilon to each makes one of each overflow the bin — the family's stated optimum of one
+  bin per group is then unreachable, and the measured 1.7083 was a ratio against a number no
+  packing attains. Johnson's actual family is *sevenths*, thirds and halves, which sum to 0.977 and
+  survive the perturbation: first-fit now measures 1.6667 at every size and the sorted version is
+  exactly optimal. The exact solver confirms the optimum at six groups.
+- **`schedulingStudy` mixed exact and lower-bound denominators**, producing an apparently violated
+  LPT theorem. Filtering to the exactly-solved rows fixed it; the bound holds at 1.0455 against
+  1.2500.
+
+Two more were narrowly avoided by dumping the section at its shipped defaults: the loop-trace hit
+rates in 21.2 were drafted from a development probe (81.1 / 81.9) and ship as 81.9 / 82.7, and the
+two-dimensional worst-fit ratio was drafted as 1.2182 and measures 1.2143.
+
+### The figures
+
+Ski rental attaining 2 − 1/B at B = 2, 4, 10, 25, 100 — 1.5000, 1.7500, 1.9000, 1.9600, 1.9900 —
+each on day B, against a mean of 1.6300 where "buy immediately" means 1.6430 and is 5× worse at its
+maximum. Randomised: 1.5625 oblivious, 3.1428 adaptive. List update against the best static order,
+on three families: do-nothing 1.2850, transpose 1.0679, move-to-front 1.2399 and frequency-count
+1.0177 on Zipf; move-to-front **0.3113** on a moving working set and 1.8964 on the reverse sweep.
+
+Page replacement on 20 000 requests over 5 480 distinct keys at 100 entries: Belady 72.6%,
+W-TinyLFU / LFU / ARC 72.5%, 2Q 67.8%, FIFO / LRU / CLOCK 58.7%. On a loop of 120 keys: everything
+0.0% except W-TinyLFU at 81.9%, with Belady at 82.7%. Scan resistance: LRU keeps 45% of its Zipf
+hit rate once a sweep is added; W-TinyLFU 58%.
+
+Scheduling: online worst 1.5000 against a bound of 1.7500, LPT worst 1.0455 against 1.2500, and the
+trap attaining 1.7500 exactly on 13 jobs across 4 machines while sorted it is 1.0000. Two choices
+holding the maximum load at 3.08 where one choice reaches 6.83 at 25 600 bins. A consistent ring's
+imbalance falling 4.4696 to 1.0848 from 1 to 256 virtual nodes, moving 6.16% of keys against an
+ideal 6.25%.
+
+Bin packing on 200 uniform items with an LP bound of 63: next-fit 80 bins at 78.4% utilisation,
+worst-fit 72, first-fit and best-fit 65 at 96.5%, FFD 64 at 98.0%. Against *exact* optima on 25
+instances of twelve items: first-fit 1.2500, FFD 1.2000 against 11/9 = 1.2222. The tight family at
+6, 12, 24 and 48 groups: 1.6667 every time, 1.0000 sorted. Two dimensions on anti-correlated jobs:
+every policy worse and the spread collapsed — FFD 1.1154 to 1.1964, worst-fit 1.1795 to 1.2143,
+with 20 of 68 bins full on one axis only.
+
+External memory: the sort matching its closed form at 1.0000 across (64, 16), (128, 16), (256, 32)
+and (1 024, 64) — 6 144, 4 096, 1 536 and 512 transfers — with peak-held equal to M in every row
+and the fan-out 3, 7, 7, 15 giving 5, 3, 2, 1 merge passes. The bounds table at M = 4 096, B = 64:
+a scan of 1 562 500 and a sort of 12 500 000 at 10^8 records, a search of 4.43, and
+naive-over-scan 64× in every row. Joins at 128 000 rows a side: 128 000 transfers against 20 000,
+of which 16 000 is sorting.
+
+Cache-obliviousness: the best tile **retuned at every cache size** is 8, 16, 32, 4 at 2, 4, 16 and
+64 KB, measuring 8 704, 6 144, 3 072 and 1 536 misses against the parameterless recursion's 10 240,
+8 192, 4 096 and 2 048 — penalties of 1.176, 1.333, 1.333, 1.333, against an unblocked loop's
+295 424 at 2 KB. The transpose at 256 × 256 and 16 KB: 73 728 misses row-major against 16 384 for
+both blocked versions. Three layouts of one tree at height 18: 11.95, 12.00 and 6.65 misses per
+search on 18.0 comparisons each — and at height 10 the vEB order is *worse* (2.36 against 1.97),
+which is what the theory says and is not what a small benchmark would report.
+
+Streaming: the exact set killed at item 345 of 200 000 at 8 208 bytes against a budget of 8 192,
+where the complete answer needs 479 760; HyperLogLog at 11.30%, 8.38%, 4.33% and 0.73% for 16, 256,
+4 096 and 16 384 bytes, the last of which is killed too; p=8 measuring 8.38% against a predicted
+6.50% because the raw estimator's bias band is uncorrected, reported rather than dropped. Quantiles
+as **ranks**: t-digest 0.5001 / 0.8995 / 0.9897 at 928 bytes with a worst rank error of 0.050%,
+against a 1 000-item reservoir's 1.045% at 8 000 bytes. Two of five questions with no one-pass
+answer at all.
+
+Work and span at n = 256: sequential 256 / 256, Blelloch 511 / 17 (parallelism 30.1×, 2.00× the
+work), Hillis–Steele 1 793 / 8 (224.1×, 7.00×). Greedy schedules of the Blelloch graph measuring
+511, 39, 19 and 17 steps at 1, 16, 64 and 256 processors against Brent bounds of 528, 49, 25 and 19,
+with utilisation falling 100.0% to 11.7% and the span attained exactly. Amdahl ceilings 1000×,
+100×, 20× and 5× against Gustafson's 1023×, 1014×, 973× and 819× on the same four serial fractions.
+
+Cost models: one sort of 65 536 records predicted as 1 048 576 comparisons, 10 240 cache misses,
+4 096 block transfers and 256 dependent steps — a spread of 4 096× in four incomparable units, of
+which only the DAM row can be validated, and it matches its simulator at 1 024 against 1 024. Four
+access patterns over one 4 096-element array: a sequential scan at 12.5% misses and 1.0 bytes
+fetched per byte used, strides of 8 and 64 doubles both at 100% and 8.0×, a random probe at 88.0%
+and 7.0× — three of the four memory-bound on identical arithmetic.
+
 ## Next
 
-**M21 — Online, external-memory and cache-oblivious algorithms.** Nothing of it exists yet: no
-modules, no sections, and `curriculum-algorithms.js` still carries it in `planned`. The spec is
-`doc/milestones/M21-online-and-external.md`; it depends on M10 (sorting) and M37 (memory hierarchy,
-not yet built), so the cache model it needs is `machines/cache-sim.js` from M02 rather than
-anything from M37. After it, onward through `doc/milestones/` in the order `doc/ROADMAP.md` gives.
+**M22 — compression, information theory and error correction (11 sections).** Nothing of it
+exists yet: no modules, no sections, and its track file still carries it in `planned`. The spec is
+`doc/milestones/M22-compression-and-coding.md`; it depends on M05 and M15, both built. After it,
+onward through `doc/milestones/` in the order `doc/ROADMAP.md` gives.
 
-M11 through M15 and M17 through M20 are complete apart from a human browser pass, which needs the
+M11 through M15 and M17 through M21 are complete apart from a human browser pass, which needs the
 Chrome extension connected; M16 has had one (see above, and the chart defect it found).
 `tools/section-dump.js` covers everything else the browser used to be needed for — it prints every
 metric, table and note a section renders, at any control setting, and since the `input`-event fix
@@ -2521,3 +2632,15 @@ Two things M20 added to the shape and worth keeping:
   Dump the section at its shipped defaults and align the prose to *that*, not to the probe you ran
   while developing the module. Five figures in M20 were written from a different graph and caught
   by the figure suite.
+
+Three things M21 added to the shape and worth keeping:
+
+- **A ratio's denominator is part of the measurement.** Name it in the table header and in the
+  prose: exact optimum, LP bound, or a weaker reference. M21's scheduling suite reported an
+  apparently violated theorem purely by mixing two denominators in one column.
+- **When a demo constructs an adversarial family, solve a small case exactly.** The first-fit trap
+  claimed an optimum its own items could not reach for as long as nobody checked; one call to the
+  exact solver at six groups would have caught it on the day it was written.
+- **A null result is a bug until proved otherwise.** The vEB layout measuring exactly level order
+  looked like an honest negative finding and was an off-by-a-recursion. Where a technique is
+  *supposed* to win, assert that it does, and let the assertion fail.

@@ -14,14 +14,14 @@ faithfully in a browser, the section models it, says so plainly, and states what
 
 ## Status
 
-**M00–M20 shipped (194 sections). Building the curriculum, milestone by milestone.**
+**M00–M21 shipped (203 sections). Building the curriculum, milestone by milestone.**
 
 - ✅ Curriculum designed: 65 milestones, 634 sections, 11 tracks — one file per milestone in
   [`doc/milestones/`](doc/milestones/)
 - ✅ Architecture and conventions fixed — [`doc/architecture.md`](doc/architecture.md)
 - ✅ Build order and dependency graph — [`doc/ROADMAP.md`](doc/ROADMAP.md)
 - ✅ Scope decisions recorded — [`doc/topic-suggestions.md`](doc/topic-suggestions.md)
-- ✅ **Notation decoder across all 194 sections**: every mathematical symbol carries how to say it
+- ✅ **Notation decoder across all 203 sections**: every mathematical symbol carries how to say it
   and what it does, revealed on hover, tap or keyboard focus, and every formal statement whose
   notation a reader cannot pronounce carries an "In words" translation beneath it. The audience is
   a senior engineer with little or no mathematics, so the Description tab explains the idea before
@@ -344,8 +344,34 @@ faithfully in a browser, the section models it, says so plainly, and states what
   the encoder never touched — while giving five nurses five shifts and three of them two, because
   fairness is an objective and a clause cannot carry one. 9 sections live.
 
-`npm test` is green — wiring audit, 3 555 unit tests, and a **render audit** that boots the whole
-app headlessly and activates all 194 sections, failing on anything that throws while rendering, any
+- ✅ **M21 — online, external-memory and cache-oblivious algorithms**: the break-even ski-rental
+  rule attaining 2 − 1/B *exactly* at all five purchase prices while the mean column makes a
+  strategy 5× worse in the worst case look 1% worse, and a randomised strategy measuring 1.5625
+  against an oblivious adversary and 3.1428 against an adaptive one; move-to-front scoring 0.3113 on
+  a moving working set — an online policy beating the best offline STATIC order — and 1.8964 on the
+  sweep built to defeat it; seven replacement policies against Belady on a mixed trace at 72.5% to
+  58.7% against a ceiling of 72.6%, and a loop of 120 keys through a cache of 100 where six of the
+  seven measure **0.0%** and W-TinyLFU measures 81.9%, because a tie in its admission contest goes
+  to the incumbent; list scheduling measuring 1.5000 against exact optima and its trap attaining
+  2 − 1/m to the digit, with two choices holding the maximum bin load at 3.08 where one choice
+  reaches 6.83; Johnson's sevenths-thirds-halves family holding first-fit at 1.6667 at every size
+  while the same items sorted pack *exactly* optimally — and the epsilon direction is the finding,
+  since nudging sixths up instead makes one of each overflow the bin and the stated optimum
+  unreachable; an external merge sort matching its closed form at 1.0000 across four (M, B) settings
+  under a budget the simulator *enforces by throwing*, with peak-held equal to M in every row, and a
+  nested-loop join costing one transfer per row against a sort-merge's 20 000 at 128 000 rows; a
+  recursive matrix multiply staying within 1.176–1.333× of a tile **retuned at every cache size**,
+  where that best tile is 8, 16, 32 and 4 — and the van Emde Boas layout measuring 6.65 misses per
+  search against 12.00 on *identical* comparison counts at height 18, while being slightly worse at
+  height 10 where the tree fits; an exact distinct-value set killed at item 345 of 200 000 against
+  HyperLogLog's 4.33% error in 4 096 bytes, with the p=8 row measuring 8.38% against a predicted
+  6.50% for a documented reason; a prefix sum with work 511 and span 17 scheduled greedily under
+  Brent's bound at every processor count and flooring at 17 steps; and one sort predicted as
+  1 048 576 comparisons, 10 240 misses, 4 096 transfers and 256 dependent steps — four numbers in
+  four units, of which exactly one can be checked against a simulator, and is. 9 sections live.
+
+`npm test` is green — wiring audit, 3 713 unit tests, and a **render audit** that boots the whole
+app headlessly and activates all 203 sections, failing on anything that throws while rendering, any
 table left with an empty body, and any metric tile still showing a placeholder without a note
 explaining it. `npm run lint:size` reports no offenders.
 
@@ -359,7 +385,7 @@ The render audit is not a substitute for opening the page, and M16's browser pas
   opens to milestones, then sections. Tracks that are planned and not built are listed with their
   milestones and section counts, marked as planned, so the map shows what the platform teaches
   rather than only what happens to be finished. One track and one milestone stay open at a time, so
-  the nav is the same height at 185 sections and at 634.
+  the nav is the same height at 203 sections and at 634.
 - **Search across everything.** The header search indexes concepts, worked examples, reference
   entries and exercises as well as section titles, so "tombstone", "Little's law" or "round half to
   even" lands on the section that explains it. Ctrl/Cmd+K focuses it; arrows and Enter drive it.

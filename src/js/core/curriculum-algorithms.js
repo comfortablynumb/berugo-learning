@@ -805,10 +805,69 @@
               summary: 'A roster that satisfies every hard constraint and gives one nurse five shifts and another two, because fairness is an objective and a clause cannot carry one.',
               tags: ['modelling', 'nurse rostering', 'validation', 'soft constraint', 'hard constraint', 'infeasibility', 'unsat versus timeout', 'formulation catalogue', 'assumptions', 'ship the validator']
             }]
+        },
+        {
+          id: 'M21',
+          title: 'Online, external-memory and cache-oblivious algorithms',
+          summary: 'Cost models other than the RAM model - what changes when the future is unknown, the data does not fit, or the cache is real.',
+          sections: [
+            {
+              id: 'competitive-analysis',
+              title: 'Online algorithms and competitive analysis',
+              summary: 'Rent until you have spent what buying costs and you never pay more than 2 - 1/B times the best decision hindsight could make, at every purchase price, exactly.',
+              tags: ['online algorithm', 'competitive ratio', 'ski rental', 'adversary model', 'oblivious', 'adaptive', 'randomised strategy', 'list update', 'move to front', 'offline optimum']
+            },
+            {
+              id: 'page-replacement',
+              title: 'Caching and page-replacement policies',
+              summary: 'A loop one entry larger than the cache takes LRU, FIFO and CLOCK to zero hits while the offline optimum gets four in five.',
+              tags: ['belady', 'lru', 'lfu', 'clock', 'arc', 'two queue', 'w tinylfu', 'scan resistance', 'working set curve', 'admission policy']
+            },
+            {
+              id: 'online-scheduling',
+              title: 'Online scheduling and load balancing',
+              summary: 'Sampling two machines instead of one is a one-line change and it takes the maximum load from climbing with n to nearly flat.',
+              tags: ['list scheduling', 'graham bound', 'lpt', 'power of two choices', 'balls in bins', 'consistent hashing', 'virtual nodes', 'makespan', 'load balancing', 'tail load']
+            },
+            {
+              id: 'bin-packing',
+              title: 'Bin packing and resource allocation',
+              summary: 'The same jobs packed on one axis and on two: the offline advantage disappears with the second axis, and the bins full on one axis only are what a cluster reports as spare.',
+              tags: ['first fit', 'best fit', 'next fit', 'first fit decreasing', 'fragmentation', 'two dimensional packing', 'vm placement', 'cluster scheduling', 'stranded capacity', 'lower bound']
+            },
+            {
+              id: 'external-memory',
+              title: 'The external-memory model',
+              summary: 'External merge sort matches its closed form to four decimal places at every memory and block size, and the peak held equals the budget exactly.',
+              tags: ['dam model', 'block transfers', 'external merge sort', 'scan bound', 'sorting bound', 'b tree', 'fan out', 'sort merge join', 'nested loop join', 'query planner']
+            },
+            {
+              id: 'cache-oblivious',
+              title: 'Cache-oblivious algorithms',
+              summary: 'The best tile changes four times across four cache sizes; the recursive version has no tile at all and stays within a third of the retuned reference everywhere.',
+              tags: ['cache oblivious', 'recursive subdivision', 'van emde boas layout', 'matrix transpose', 'matrix multiplication', 'tiling', 'tall cache', 'tuned versus portable', 'implicit blocking', 'layout']
+            },
+            {
+              id: 'streaming-model',
+              title: 'The streaming model',
+              summary: 'An exact distinct count dies four hundred items into a stream of two hundred thousand; a sketch answers to a per cent in sixteen bytes.',
+              tags: ['one pass', 'sublinear space', 'hyperloglog', 'quantile sketch', 'rank error', 'space budget', 'impossibility', 'two passes', 'turnstile', 'cash register']
+            },
+            {
+              id: 'work-and-span',
+              title: 'Parallel models and work-span analysis',
+              summary: 'The measured schedule stops shortening at seventeen steps and the processor count keeps rising: the span is a floor no hardware moves.',
+              tags: ['work and span', 'brent theorem', 'prefix scan', 'blelloch', 'hillis steele', 'work efficiency', 'greedy schedule', 'amdahl', 'gustafson', 'utilisation']
+            },
+            {
+              id: 'choosing-a-cost-model',
+              title: 'Choosing a cost model',
+              summary: 'Four predictions of one sort, four orders of magnitude apart, all of them correct arithmetic and at most one of them about the runtime.',
+              tags: ['cost model', 'ram model', 'cache aware', 'external memory', 'parallel model', 'binding resource', 'bytes fetched', 'access pattern', 'model validation', 'measure first']
+            }]
         }
       ],
       planned: [
-        { id: 'M21', title: 'Online, external-memory and cache-oblivious algorithms', sections: 9 },
         { id: 'M22', title: 'Compression, information theory and error correction', sections: 11 },
         { id: 'M23', title: 'Applied cryptography and constant-time programming', sections: 11 }
       ]

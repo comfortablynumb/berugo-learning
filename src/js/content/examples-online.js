@@ -1,0 +1,264 @@
+/** Worked examples for competitive analysis, page replacement and scheduling (M21.1-M21.3). */
+(function (root) {
+  'use strict';
+
+  const registry = root ? root.ExampleRegistry : require('./registries.js').ExampleRegistry;
+
+  registry.register({
+    'competitive-analysis': [
+      {
+        title: 'Attain the bound rather than quote it, at five purchase prices',
+        goal: 'Show that 2 − 1/B is tight by finding the season length that produces it at every ' +
+          'price, and that the mean ratio would have told a different story.',
+        setup: 'Ski rental at purchase prices of 2, 4, 10, 25 and 100, with every season length ' +
+          'from 1 to three times the price.',
+        steps: [
+          {
+            do: 'Run the break-even rule at a purchase price of 10 and find the worst season.',
+            why: 'A competitive ratio is a maximum, so the input that produces it is the answer.',
+            work: 'the season ending on day 10: 9 days of rent plus 10 to buy, against an optimum of 10',
+            result: '19/10 = 1.9000, exactly 2 − 1/10'
+          },
+          {
+            do: 'Repeat at 2, 4, 25 and 100.',
+            why: 'One price could be a coincidence of the arithmetic.',
+            work: '1.5000, 1.7500, 1.9600 and 1.9900',
+            result: '2 − 1/B in every row, and the worst season is always day B'
+          },
+          {
+            do: 'Compare the two mistakes against it.',
+            why: 'The rule is the lower envelope of them, and the numbers say by how much.',
+            work: '"never buy" reaches 3.0000 at day 30 and grows without bound; "buy ' +
+              'immediately" reaches 10.0000 on a one-day season',
+            result: 'both are unbounded in one direction; the break-even rule is bounded in both'
+          },
+          {
+            do: 'Read the MEAN ratio column instead.',
+            why: 'This is the number a careless comparison would report.',
+            work: 'break-even 1.6300, buy-immediately 1.6430, never-buy 1.7000',
+            result: 'buy-immediately is within 1% of the optimal rule on the mean and 5× worse on ' +
+              'the maximum'
+          }
+        ],
+        answer: 'The bound is attained rather than approached: at every purchase price the worst ' +
+          'season is the purchase day and the ratio is exactly 2 − 1/B. The mean column is the ' +
+          'warning. Averaged over season lengths nobody chose, a strategy that pays ten times the ' +
+          'optimum on a one-day season reads 1.6430 against the optimal rule’s 1.6300 — a 1% ' +
+          'difference that hides a factor of five. That is why competitive analysis reports the ' +
+          'maximum, and why a benchmark that averages over an arbitrary input distribution is ' +
+          'measuring the distribution.'
+      },
+      {
+        title: 'The inverted case: randomisation, and the adversary that makes it worthless',
+        goal: 'Measure the same randomised strategy against two adversary models and read the ' +
+          'gap.',
+        setup: 'The randomised buy-day distribution at a purchase price of 10, over 2 000 trials, ' +
+          'against an oblivious adversary and an adaptive one.',
+        steps: [
+          {
+            do: 'Fix each season length first, then draw the coin, and average the cost.',
+            why: 'That is exactly what an oblivious adversary can do.',
+            work: 'the worst season length gives a mean cost of 1.5625 times its optimum',
+            result: '1.5625, inside the bound of e/(e − 1) = 1.5820'
+          },
+          {
+            do: 'Compare against the best deterministic rule.',
+            why: 'The improvement is the whole reason to accept a randomised algorithm.',
+            work: '1.5625 against 1.9000',
+            result: 'randomisation is worth about 18% of the worst case here'
+          },
+          {
+            do: 'Now let the adversary see the coin and end the season on the buy day.',
+            why: 'An adaptive adversary chooses each request after seeing what the algorithm did.',
+            work: 'every trial pays (d − 1) + 10 against an optimum of min(d, 10)',
+            result: 'a mean ratio of 3.1428'
+          },
+          {
+            do: 'Compare that against the deterministic rule again.',
+            why: 'This is the number that decides whether the randomisation is an improvement.',
+            work: '3.1428 against a deterministic worst case of 1.9000',
+            result: 'randomisation is 65% WORSE than the deterministic rule under this adversary'
+          }
+        ],
+        answer: 'The same strategy is 1.5625 against one opponent and 3.1428 against another, and ' +
+          'nothing about the code changed. Randomisation is not a free improvement — it is a ' +
+          'payment for an assumption, and the assumption is that the input was fixed before the ' +
+          'coins were flipped. That assumption holds for a workload generated by users and fails ' +
+          'for one generated by anything that observes your behaviour, which includes an ' +
+          'attacker, an autoscaler reacting to your own load, and a retry loop.'
+      }
+    ],
+
+    'page-replacement': [
+      {
+        title: 'Seven policies with a ceiling, and the trace that separates them',
+        goal: 'Measure every policy against Belady on the same trace, then find the trace where ' +
+          'the difference is total rather than incremental.',
+        setup: 'A mixed trace of 20 000 requests over 5 480 distinct keys — a hot set with ' +
+          'periodic sweeps through cold data — at a cache of 100 entries.',
+        steps: [
+          {
+            do: 'Compute Belady’s optimum on the trace.',
+            why: 'Without it a hit rate is a property of the trace as much as of the policy.',
+            work: '14 520 hits of 20 000',
+            result: '72.6%, and nothing can be above it'
+          },
+          {
+            do: 'Run the three recency policies.',
+            why: 'They should behave identically, because they are the same idea three ways.',
+            work: 'FIFO, LRU and CLOCK all measure 11 745 hits',
+            result: '58.7%, which is 80.9% of the ceiling'
+          },
+          {
+            do: 'Run the frequency and adaptive policies.',
+            why: 'They differ from the recency group in exactly one respect: admission.',
+            work: 'W-TinyLFU 14 507 hits, LFU 14 499, ARC 14 499, 2Q 13 556',
+            result: '72.5%, 72.5%, 72.5% and 67.8% — the first three at 99.9% of the ceiling'
+          },
+          {
+            do: 'Switch to a loop of 120 keys through a cache of 100.',
+            why: 'This is LRU’s k-competitive bound, and it should be attained.',
+            work: 'each of the 120 keys is evicted exactly one step before it is needed again',
+            result: 'FIFO, LRU, CLOCK, LFU, ARC and 2Q all measure 0.0%; Belady measures 82.7%'
+          },
+          {
+            do: 'Read W-TinyLFU on the same loop.',
+            why: 'It is the only policy in the table with an admission contest.',
+            work: 'a tie goes to the incumbent, so the main cache freezes with 98 of the 120 keys',
+            result: '81.9% against Belady’s 82.7%'
+          }
+        ],
+        answer: 'On the mixed trace the spread is 13.8 percentage points and every policy is ' +
+          'recognisably working. On the loop it is total: six of the seven get nothing at all and ' +
+          'the seventh gets almost everything, and the difference is one rule — a tie in the ' +
+          'admission contest goes to the incumbent, so a cyclic sweep cannot displace a resident ' +
+          'set. That is the same mechanism that makes it scan-resistant, and it is why the ' +
+          'measurement is worth having: an argument about which policy is better is settled by ' +
+          'the trace, and the traces disagree.'
+      },
+      {
+        title: 'The inverted case: a target that never moves, which is the adaptation',
+        goal: 'Read ARC’s dial on two traces and resist the obvious conclusion about the one ' +
+          'where it does not move.',
+        setup: 'ARC at a cache of 100, on the Zipf trace and on the mixed trace, with the target ' +
+          'p sampled as the trace runs.',
+        steps: [
+          {
+            do: 'Run ARC on the Zipf trace and count the adjustments.',
+            why: 'Ghost hits are the only thing that moves the target.',
+            work: '2 926 adjustments over 20 000 requests, settling near p = 6.3',
+            result: 'the recency half is worth something and ARC has found out how much'
+          },
+          {
+            do: 'Run the same code on the mixed trace.',
+            why: 'It has a hot set too, so the target should move.',
+            work: '0 adjustments, p stays at 0.0, T1 holds 20 items and T2 holds 80',
+            result: 'the dial never moves at all'
+          },
+          {
+            do: 'Ask why, before calling it a bug.',
+            why: 'A measurement that looks wrong needs a mechanism, not a caveat.',
+            work: 'the 150 cold keys per round are swept once and never requested again, so a ' +
+              'key evicted from the recency list never returns to be found in the ghost list',
+            result: 'ARC is never told recency was starved, so it values recency at zero'
+          },
+          {
+            do: 'Check what that costs.',
+            why: 'If the adaptation had failed, the hit rate would show it.',
+            work: '72.5% against Belady’s 72.6% on the same trace',
+            result: '99.9% of the ceiling — p = 0 is the correct answer, not a stuck dial'
+          }
+        ],
+        answer: 'The two traces produce 2 926 adjustments and zero, and both are the policy ' +
+          'working. On a trace whose evictions come back, the ghost lists carry information and ' +
+          'the target moves; on one whose cold keys are seen once, they carry none and the ' +
+          'target correctly stays where it started. The general lesson is about reading adaptive ' +
+          'systems: a parameter that has not moved is either a system with nothing to learn or a ' +
+          'system that is not learning, and the way to tell them apart is the outcome column ' +
+          'rather than the parameter.'
+      }
+    ],
+
+    'online-scheduling': [
+      {
+        title: 'Attain Graham’s bound, and measure what the future is worth',
+        goal: 'Score the online rule and its offline twin against exact optima, then find the ' +
+          'family where the online bound is reached exactly.',
+        setup: 'Forty random instances of eight jobs on four machines, each solved exactly by ' +
+          'exhaustive assignment, plus the tight family at four machines.',
+        steps: [
+          {
+            do: 'Run list scheduling on the random instances.',
+            why: 'Ratios against a lower bound are over-estimates, so the optimum is computed.',
+            work: 'worst ratio 1.5000, mean 1.1625, against a bound of 2 − 1/4 = 1.7500',
+            result: 'comfortably inside, and nowhere near the bound'
+          },
+          {
+            do: 'Run LPT on the same instances.',
+            why: 'It is the identical rule with the jobs sorted, so the difference is the future.',
+            work: 'worst ratio 1.0455, mean 1.0032, against a bound of 4/3 − 1/12 = 1.2500',
+            result: 'nearly optimal on every instance'
+          },
+          {
+            do: 'Build the tight family: 12 jobs of size 1 then one of size 4.',
+            why: 'Random instances never reach a worst case; the family is constructed to.',
+            work: 'the small jobs fill every machine to 3, and the big job lands on top of one',
+            result: 'makespan 7 against an optimum of 4 — a ratio of 1.7500, the bound exactly'
+          },
+          {
+            do: 'Run LPT on the same 13 jobs.',
+            why: 'The instance is only hard because of the arrival order.',
+            work: 'the size-4 job is placed first, alone, and the twelve small ones fill the rest',
+            result: 'makespan 4 — optimal'
+          }
+        ],
+        answer: 'Random instances put the online rule at 1.5000 and the offline one at 1.0455, ' +
+          'which understates the gap; the constructed family puts them at 1.7500 and 1.0000. The ' +
+          'shape that produces it — many small jobs and then one large one — is an ordinary ' +
+          'arrival pattern rather than a curiosity, and the fix is the same one LPT applies: ' +
+          'place the awkward item while there is still room. Where a scheduler can see even part ' +
+          'of its queue, sorting that part is most of the benefit of being offline.'
+      },
+      {
+        title: 'The inverted case: one extra sample, and where the benefit stops',
+        goal: 'Measure the power of two choices against both asymptotic predictions, and check ' +
+          'whether a third sample repeats the trick.',
+        setup: 'n balls into n bins for n from 100 to 25 600, averaged over 12 runs at each size, ' +
+          'with one, two and three samples per ball.',
+        steps: [
+          {
+            do: 'Measure the maximum load with one sample.',
+            why: 'This is what a random load balancer does, and it is the baseline.',
+            work: '4.33 at 100 bins rising to 6.83 at 25 600, with a mean load of exactly 1',
+            result: 'the maximum keeps climbing across a 256-fold change in size'
+          },
+          {
+            do: 'Measure it with two samples.',
+            why: 'The change to the code is one extra draw and a comparison.',
+            work: '2.50 at 100 bins and 3.08 at 25 600',
+            result: 'nearly flat — the maximum has almost stopped growing'
+          },
+          {
+            do: 'Take the ratio between the two columns at each size.',
+            why: 'A growing ratio is what an exponential separation looks like over a finite range.',
+            work: '1.73, 1.64, 2.00, 2.08, 2.22',
+            result: 'the advantage grows with n rather than being a constant factor'
+          },
+          {
+            do: 'Add a third sample.',
+            why: 'If two is good, three should be better in the same way.',
+            work: '2.00, 2.25, 2.67, 2.92, 3.00 — below two choices by a small margin',
+            result: 'a constant improvement, not another exponent'
+          }
+        ],
+        answer: 'The second sample changes the growth rate and the third changes a constant, ' +
+          'which is why the result is named after two. The mechanism explains both: a bin passes ' +
+          'height h only when every sample was already at h, so the probability is raised to the ' +
+          'power d at each level — going from d = 1 to d = 2 turns a logarithm into a ' +
+          'log-logarithm, and going from 2 to 3 only changes the log-logarithm’s base. The ' +
+          'engineering conclusion is settled by that: sample two, and spend any further effort ' +
+          'on the freshness of the load signal rather than on more samples.'
+      }
+    ]
+  });
+}(typeof window !== 'undefined' ? window : null));
