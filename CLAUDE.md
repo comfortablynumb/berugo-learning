@@ -9,9 +9,9 @@ explained in full, diagram, insight), **Examples** (runnable demo with charts, w
 graded code lab) and **References** (the structured reference block).
 
 ## Status
-**M00–M25 are built** (248 sections; M00–M10 and M16 also verified in a browser), each carrying 8+ concepts
+**M00–M26 are built** (258 sections; M00–M10 and M16 also verified in a browser), each carrying 8+ concepts
 with full explanations, two worked examples, a reference entry and a graded exercise. The tree is
-green. **M26 — computability and complexity theory is next**, and nothing of it
+green. **M27 — lambda calculus, type systems and semantics is next**, and nothing of it
 exists yet. Read `doc/BUILD-STATE.md`
 first, its "Next" section at the end carries the nine-step shape to copy. The rest of the curriculum follows
 the order in `doc/ROADMAP.md` (65 milestones in `doc/milestones/`). Keep `npm test` and `npm run lint:size`

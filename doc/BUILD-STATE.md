@@ -3,7 +3,7 @@
 Where the implementation stands, and exactly what the next session should pick up.
 Update this file at the end of any session that leaves work unfinished.
 
-**Last updated:** 2026-08-24 (M25 complete — twelve sections, 248 in the tree. The tree is GREEN.)
+**Last updated:** 2026-08-24 (M26 complete — ten sections, 258 in the tree. The tree is GREEN.)
 
 ---
 
@@ -37,11 +37,12 @@ Update this file at the end of any session that leaves work unfinished.
 | M23 — applied cryptography and constant-time programming | 11 | ✅ built, tested, render-audited |
 | M24 — regular languages and finite automata | 11 | ✅ built, tested, render-audited |
 | M25 — context-free languages and parsing | 12 | ✅ built, tested, render-audited |
+| M26 — computability and complexity theory | 10 | ✅ built, tested, render-audited |
 
-**The tree is GREEN.** `npm test` reports 4 376 unit tests with 0 failures (6 skipped — the
-wall-clock-budget starters the inline sandbox cannot fail); the wiring audit passes at 248 sections
-and 1 178 modules, the render audit activates all 248 with no exception and no empty table,
-`npm run lint:size` passes across 1 301 files, and `npm run build:css` is up to date.
+**The tree is GREEN.** `npm test` reports 4 520 unit tests with 0 failures (6 skipped — the
+wall-clock-budget starters the inline sandbox cannot fail); the wiring audit passes at 258 sections
+and 1 219 modules, the render audit activates all 258 with no exception and no empty table,
+`npm run lint:size` passes across 1 345 files, and `npm run build:css` is up to date.
 
 All nine M07 sections were opened in Chrome on `npm start`: the three tabs render, every demo
 figure matches the prose *exactly* (see "aligning the demo with the prose" below), the references
@@ -2833,14 +2834,132 @@ tables as scrolling HTML with conflicted cells marked and their reason on hover)
 
 ---
 
+## M26 notes worth keeping
+
+Ten sections: Turing machines, equivalent models, undecidability and diagonalisation, reductions
+and the Rice theorem, time complexity classes, space-bounded computation, randomised and
+interactive classes, circuits and non-uniform computation, Kolmogorov complexity, and quantum
+computation.
+
+### The rule that shaped the milestone
+
+**A limit is only worth stating once the thing it limits has been run.** Every machine is checked
+against a definition written from the LANGUAGE rather than from the machine; every model
+equivalence is demonstrated by executing the same function in each and comparing the answers; the
+halting construction is run against 200 arbitrary candidate deciders; the interactive proof's
+soundness is measured over thousands of runs against 2^-k; every Grover amplitude is compared to
+sin²((2k+1)θ); and the Kolmogorov counting bound is verified by brute force over every string up
+to sixteen bits.
+
+That discipline found the two real bugs below, both of which pass any spot check.
+
+### Modules
+
+`machines/`: `turing-machine.js` (sparse two-way tape, three outcomes with `budget` distinct from
+`rejected`, encode/decode, five programs), `model-zoo.js` (counter machine, RAM, elementary
+cellular automata, 2-tag systems, SKI reduction — one interface each).
+
+`algorithms/`: `undecidability.js` (diagonal table and machine, `defeat` against a live candidate
+oracle, five mapping reductions as printable program transformations, Rice classification, the
+decidability tower), `space-bounded.js` (a memory meter with hold/release so the peak is a real
+high-water mark, BFS and Savitch, three graph families), `interactive-proofs.js` (graph
+non-isomorphism with honest, guessing and stubborn provers, and a `soundness` sweep with a
+binomial tolerance), `circuits.js` (size, depth, layers, exhaustive truth tables, seven families
+including both adders), `kolmogorov.js` (four codecs, `upperBound`, `countingBound`, `verifyBound`,
+`incompressibleFraction`), `quantum-sim.js` (state vector, six single-qubit gates, CNOT, phase
+oracle, Grover with the analytic comparison built in, Deutsch–Jozsa).
+
+`content/complexity-atlas.js`: fifteen problems with class, best algorithm, best lower bound and
+open questions in four separate columns, and an `unconditional` flag.
+
+### What was wrong before it was right
+
+- **I overwrote an existing M01 section.** The M26 space section was written to
+  `sections/space-complexity-{template,section}.js`, which is M01's "Space complexity and working
+  set". Both files were restored from git with no diff and the M26 section became
+  `space-bounded-computation`. **Check `git ls-files` for a section id before writing to it** —
+  the id check I ran covered the four remaining sections and not the six already written.
+- **The aⁿbⁿcⁿ machine accepted `abcabc`.** Crossing off one a, one b and one c per sweep gets the
+  counts right and says nothing about the ORDER. A separate verification phase that the input
+  matches `a* b* c*` fixed it, taking the machine from 15 transitions to 29. Only the exhaustive
+  check over 3 280 strings found it; every hand-picked case passed.
+- **The unary doubler grew its tape until the budget stopped it.** It marked its own output as
+  input, so each pass doubled again. Two distinct mark symbols — one for consumed input, one for
+  produced output — fixed it, and the machine is now 2n² + 4n + 2 steps.
+- **`ComplexityAtlas.byClass` matched substrings.** Graph isomorphism carries the class label "not
+  known to be NP-complete", and a substring test listed it UNDER NP-complete — the exact opposite
+  of what the entry says. Exact match now.
+- **The diagonal table had constant rows.** The first behaviour function depended only on the row
+  index, so half the rows were all-H or all-L and the diagonal looked like a coincidence rather
+  than a construction. A proper mixing hash gives every row and every column both outcomes.
+- **The Grover "peak" was the maximum over the run.** Grover is a rotation, so at three qubits an
+  iteration well past the optimum edges ahead of the first peak — reporting that made the formula
+  look wrong when it is exactly right. The demo reports the probability AT the predicted
+  iteration, which is what the formula claims.
+- **Two exercises were vacuous.** The interactive-proof starter leaked the verifier's secret
+  choice and the test's prover ignored it; and the Kolmogorov starter omitted the literal codec,
+  which turns out never to change the compressed COUNT at these lengths. The first was fixed by
+  making the prover exploit a leak when offered one; the second by having `verifyBound` also
+  report the worst case over all strings, which the literal codec bounds at exactly n.
+
+### Three things M26 added to the shape and worth keeping
+
+- **Check that a section id is free before writing the file, not after.** `git ls-files
+  --error-unmatch src/js/sections/<id>-template.js` answers it in one command, and the prefix
+  check I did run (`grep` for the control-id prefix) would never have caught a whole-section
+  collision.
+- **A simulator for a model that may not terminate needs three outcomes, not two.** `halted`,
+  `rejected` and `budget` are different facts, and collapsing the third into the second makes a
+  computability demo teach the opposite of the truth. This is the same lesson as M25's "a harness
+  must not swallow its own errors", one level up.
+- **When a formula predicts a curve, compare against the formula at the point it predicts.**
+  Reporting a run maximum instead of the value at the predicted iteration made a correct
+  implementation look wrong. Ask what the closed form actually claims before deciding what to
+  measure.
+
+### Measured figures quoted in the M26 examples
+
+- aⁿbⁿcⁿ: 16, 37, 66, 103, 148 steps for one to five triples, using 5, 8, 11, 14, 17 tape cells;
+  29 transitions over 9 states; 3 280 strings checked with 0 disagreements.
+- Palindromes: 511 strings up to length 8, 0 disagreements. Increment on `1011`: 8 steps.
+  The machine encoding is 116 characters and round-trips.
+- Doubling in three models: RAM 2 steps at every input, counter machine 3n + 1, Turing machine
+  2n² + 4n + 2 — 2, 31 and 242 at n = 10, all answering 20.
+- SKI: `SIIx` to `xx` in 3 steps, `S(K(SI))Kxy` to `yx` in 5. The 2-tag system halts in 24.
+- Undecidability: 200 of 200 arbitrary deciders defeated by a 6-line construction. Bounded
+  halting over five machines decides 1 of 5 at a budget of 10 and 4 of 5 at 200 and at 2 000.
+- Rice: 4 of 10 properties undecidable, 4 syntactic, 2 trivially semantic; 5 reductions.
+- Time: at n = 40, n log n is 213 operations, n² is 1 600, n¹⁰ is 1.05 × 10^16 and 2ⁿ is
+  1.10 × 10^12; 2^60 is 1.15 × 10^18, about 36 years at a billion per second. A thousandfold
+  faster machine buys ten more inputs: n = 44, 54, 64, 74 at 10^6, 10^9, 10^12, 10^15 ops/s.
+  The atlas has 15 problems, 8 with unconditional bounds and 8 with a genuine open question.
+- Space: BFS against Savitch on paths — 8/4 against 12/18 at n = 4, 24/8 against 27/417 at 8,
+  48/12 against 48/9 325 at 12, a time ratio of 777.1×. BFS memory against the Savitch bound:
+  24/27, 384/108, 2 048/192, 10 240/300 at 8, 64, 256, 1 024 vertices.
+- Interactive proofs: measured 0.50500, 0.25400, 0.06600, 0.01350 against 2^-k of 0.5, 0.25,
+  0.0625, 0.015625 over 2 000 trials per row, all within three sigma. The honest prover is
+  accepted 500 of 500 at eight rounds.
+- Circuits: ripple carry 5/3, 13/7, 21/11, 29/15 at widths 2, 4, 6, 8; lookahead 6/3, 15/3, 28/3,
+  45/3. OR over 16 bits: chain 15 gates/depth 15, tree 15/4, unbounded fan-in 1/1.
+- Kolmogorov: the counting bound at (10,1) allows 511 and 2 compress; at (12,2) allows 1 023 and
+  26 compress; at (16,2) allows 16 383 and 136; at (16,4) allows 4 095 and 52. Over 99% of strings
+  resist every codec — 65 064 of 65 536 at n = 16. All zeros compresses to 9 bits, alternating to
+  10, and the perfect-squares string to 32 (the literal).
+- Quantum: Grover peaks at 1.0000, 0.9613, 0.9992, 0.9966 at the predicted iterations 1, 3, 4, 6
+  for 2 to 6 qubits, matching sin²((2k+1)θ) to within 1.7 × 10^-15. Past the optimum at four
+  qubits it falls 0.961 → 0.582 → 0.125. Deutsch–Jozsa gives exactly 1.000000 and exactly
+  0.000000 in one query against a classical worst case of 2^(n−1) + 1.
+
+---
+
 ## Next
 
-**M26 — computability and complexity theory (10 sections).** Nothing of it exists yet: no
-modules, no sections, and its track file still carries it in `planned`. The spec is
-`doc/milestones/M26-computability.md`, and it depends on M25, which is now built —
-`machines/grammar.js`, `machines/parse-lab.js` and the automaton machinery from M24 are all
-available to it, and `viz/parse-tree-view.js` and `viz/parse-table-view.js` are new this
-milestone. After it, onward through `doc/milestones/` in the order `doc/ROADMAP.md` gives.
+**M27 — lambda calculus, type systems and semantics (11 sections).** Nothing of it exists yet:
+no modules, no sections, and its track file still carries it in `planned`. The spec is
+`doc/milestones/M27-lambda-and-types.md`, and it depends on M26, which is now built —
+`machines/model-zoo.js` already has an SKI reducer, and the section on equivalent models sets up
+the lambda calculus as the one model developed later. After it, onward through `doc/milestones/`
+in the order `doc/ROADMAP.md` gives.
 
 M11 through M15 and M17 through M24 are complete apart from a human browser pass, which needs the
 Chrome extension connected; M16 has had one (see above, and the chart defect it found).
@@ -2890,6 +3009,19 @@ Three things M21 added to the shape and worth keeping:
 - **A null result is a bug until proved otherwise.** The vEB layout measuring exactly level order
   looked like an honest negative finding and was an off-by-a-recursion. Where a technique is
   *supposed* to win, assert that it does, and let the assertion fail.
+
+Three things M26 added to the shape and worth keeping:
+
+- **Check that a section id is free before writing the file, not after.** M26 overwrote an M01
+  section by reusing `space-complexity`; the prefix check I did run would never have caught it.
+  `git ls-files --error-unmatch src/js/sections/<id>-template.js` answers it in one command, and
+  it belongs at step 4 of the shape below.
+- **A simulator for a model that may not terminate needs three outcomes, not two.** `halted`,
+  `rejected` and `budget` are different facts, and collapsing the third into the second makes a
+  computability demo teach the opposite of the truth.
+- **When a formula predicts a curve, measure at the point the formula predicts.** Reporting a run
+  maximum instead of the value at the predicted iteration made a correct Grover implementation
+  look wrong for an afternoon.
 
 Three things M25 added to the shape and worth keeping:
 

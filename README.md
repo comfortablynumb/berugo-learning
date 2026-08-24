@@ -14,14 +14,14 @@ faithfully in a browser, the section models it, says so plainly, and states what
 
 ## Status
 
-**M00–M25 shipped (248 sections). Building the curriculum, milestone by milestone.**
+**M00–M26 shipped (258 sections). Building the curriculum, milestone by milestone.**
 
 - ✅ Curriculum designed: 65 milestones, 634 sections, 11 tracks — one file per milestone in
   [`doc/milestones/`](doc/milestones/)
 - ✅ Architecture and conventions fixed — [`doc/architecture.md`](doc/architecture.md)
 - ✅ Build order and dependency graph — [`doc/ROADMAP.md`](doc/ROADMAP.md)
 - ✅ Scope decisions recorded — [`doc/topic-suggestions.md`](doc/topic-suggestions.md)
-- ✅ **Notation decoder across all 248 sections**: every mathematical symbol carries how to say it
+- ✅ **Notation decoder across all 258 sections**: every mathematical symbol carries how to say it
   and what it does, revealed on hover, tap or keyboard focus, and every formal statement whose
   notation a reader cannot pronounce carries an "In words" translation beneath it. The audience is
   a senior engineer with little or no mathematics, so the Description tab explains the idea before
@@ -487,9 +487,35 @@ faithfully in a browser, the section models it, says so plainly, and states what
   published grammar is not the language, each with a runnable failing input and the fix that
   shipped — including **6 of 6** automatic-semicolon-insertion cases asserted against the
   ECMAScript rules. 12 sections live.
+- ✅ **M26 — computability and complexity theory**: the limits, with every claim separated into
+  proved, believed and best-known-algorithm; a Turing machine for aⁿbⁿcⁿ checked against an
+  independent definition over all **3 280 strings** up to length 7 — which is what caught the
+  version that accepted `abcabc`, because crossing off one of each per sweep gets the counts right
+  and says nothing about the order; a simulator with **three outcomes rather than two**, so a step
+  budget expiring is never reported as a rejection; one function run in three models with the
+  answers compared and the costs printed — **2 steps for a RAM, 3n + 1 for a counter machine and
+  2n² + 4n + 2 for a Turing machine**, all answering 20 at n = 10; a halting-oracle contradiction
+  produced against **200 of 200** arbitrary candidate deciders by a six-line construction that
+  never looks inside the oracle, with bounded halting decided completely beside it; Rice’s
+  theorem applied mechanically to ten properties — **4 undecidable, 4 decidable because
+  syntactic, 2 because trivial** — and five reductions printed as readable program
+  transformations; fifteen problems with class, best algorithm, best lower bound and open question
+  in **four separate columns**, only **8 of 15** proved unconditionally, beside a cost table
+  showing that a thousandfold faster machine buys **ten more inputs** against 2ⁿ; a memory meter
+  that counts bits as they are taken and released, so log space is a number — **10 240 bits for
+  breadth-first search against a Savitch bound of 300** at a thousand vertices, with the honest
+  caveat that Savitch is unrunnable there; the graph-non-isomorphism protocol’s soundness error
+  measured over 2 000 runs per round count and landing **within three sigma of 2^-k at every one**,
+  with an honest prover accepted 500 of 500; circuits measured as **21 gates and 11 deep against
+  28 gates and 3 deep** for the same carry-out, correctness checked over every input at every
+  width; the Kolmogorov counting bound verified by brute force — **26 strings compress where the
+  ceiling allows 1 023**, and over **99%** resist every codec, including one with a one-line rule
+  that all of them call random; and Grover amplitudes matching **sin²((2k+1)θ) to within 1.7 ×
+  10^-15** at every iteration, peaking at the predicted round and then falling again, because it
+  is a rotation. 10 sections live.
 
-`npm test` is green — wiring audit, 4 376 unit tests, and a **render audit** that boots the whole
-app headlessly and activates all 248 sections, failing on anything that throws while rendering, any
+`npm test` is green — wiring audit, 4 520 unit tests, and a **render audit** that boots the whole
+app headlessly and activates all 258 sections, failing on anything that throws while rendering, any
 table left with an empty body, and any metric tile still showing a placeholder without a note
 explaining it. `npm run lint:size` reports no offenders.
 

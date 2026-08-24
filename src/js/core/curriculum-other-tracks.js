@@ -240,10 +240,75 @@
               summary: 'Eight constructs where the published grammar is not the language, each with a runnable failing input and the fix that shipped, including six ASI cases asserted against the specification.',
               tags: ['lexer hack', 'typedef ambiguity', 'template angle brackets', 'most vexing parse', 'automatic semicolon insertion', 'restricted productions', 'soft keywords', 'yaml', 'scannerless parsing', 'semantic filters']
             }]
+        },
+        {
+          id: 'M26',
+          title: 'Computability and complexity theory',
+          summary: 'The limits: what no program can do, and what no efficient program can do — with every claim separated into proved, believed, and best-known-algorithm.',
+          sections: [
+            {
+              id: 'turing-machines',
+              title: 'Turing machines',
+              summary: 'The a-to-the-n b-to-the-n c-to-the-n machine checked against an independent definition over every string up to length seven, and a budget that expires as a third outcome rather than as a rejection.',
+              tags: ['turing machine', 'configuration', 'transition function', 'acceptance', 'halting', 'multi-tape', 'nondeterminism', 'universal machine', 'church turing thesis', 'step budget']
+            },
+            {
+              id: 'equivalent-models-of-computation',
+              title: 'Equivalent models of computation',
+              summary: 'One function run in three models with the answers compared and the costs printed: two steps for a RAM, linear for a counter machine, quadratic for a Turing machine.',
+              tags: ['simulation', 'counter machine', 'minsky', 'ram model', 'cellular automaton', 'rule 110', 'tag system', 'ski combinators', 'lambda calculus', 'cost model']
+            },
+            {
+              id: 'undecidability-and-diagonalisation',
+              title: 'Undecidability and diagonalisation',
+              summary: 'A contradiction produced against every candidate oracle including one that flips a coin, with two hundred arbitrary deciders defeated in the test suite and bounded halting decided beside it.',
+              tags: ['decidable', 'recognisable', 'co-recognisable', 'diagonalisation', 'halting problem', 'cantor', 'acceptance problem', 'bounded halting', 'enumeration', 'semi-decision']
+            },
+            {
+              id: 'reductions-and-the-rice-theorem',
+              title: 'Reductions and the Rice theorem',
+              summary: 'A reduction builder that prints the transformed program, and ten properties classified where four are undecidable and six are decidable for two quite different reasons.',
+              tags: ['mapping reduction', 'program transformation', 'rice theorem', 'semantic property', 'syntactic property', 'static analysis', 'soundness', 'completeness', 'dead code', 'program equivalence']
+            },
+            {
+              id: 'time-complexity-classes',
+              title: 'Time complexity classes',
+              summary: 'Fifteen problems with their class, best algorithm, best lower bound and open questions kept in four separate columns, and only eight of the bounds proved unconditionally.',
+              tags: ['time class', 'p versus np', 'exptime', 'time hierarchy theorem', 'padding argument', 'certificate', 'polynomial church turing', 'galactic algorithm', 'lower bound', 'relativisation']
+            },
+            {
+              id: 'space-bounded-computation',
+              title: 'Space-bounded computation',
+              summary: 'A memory meter counting bits as they are taken and released, so log space is a number: ten thousand bits for breadth-first search against a bound of three hundred at a thousand vertices.',
+              tags: ['space complexity', 'log space', 'nl complete', 'savitch theorem', 'reachability', 'pspace', 'immerman szelepcsenyi', 'recomputation', 'working memory', 'space time tradeoff']
+            },
+            {
+              id: 'randomised-and-interactive-classes',
+              title: 'Randomised and interactive classes',
+              summary: 'The soundness error of the graph-non-isomorphism protocol measured over thousands of runs and matching two to the minus k within three sigma at every round count.',
+              tags: ['bpp', 'rp', 'zpp', 'amplification', 'interactive proof', 'graph non isomorphism', 'soundness', 'completeness', 'arthur merlin', 'pcp theorem']
+            },
+            {
+              id: 'circuits-and-non-uniform-computation',
+              title: 'Circuits and non-uniform computation',
+              summary: 'Size against depth with correctness checked over every input: twenty-one gates eleven deep for a ripple carry, twenty-eight gates three deep for lookahead.',
+              tags: ['boolean circuit', 'size', 'depth', 'parallel time', 'non uniform', 'p poly', 'ac0', 'nc', 'parity lower bound', 'natural proofs']
+            },
+            {
+              id: 'kolmogorov-complexity-and-randomness',
+              title: 'Kolmogorov complexity and randomness',
+              summary: 'The counting bound checked by brute force over every string up to sixteen bits, with over ninety-nine per cent resisting every codec and one string whose one-line rule none of them finds.',
+              tags: ['kolmogorov complexity', 'invariance theorem', 'incompressibility', 'counting argument', 'berry paradox', 'entropy', 'minimum description length', 'occam razor', 'upper bound', 'uncomputable']
+            },
+            {
+              id: 'quantum-computation',
+              title: 'Quantum computation',
+              summary: 'Grover amplitudes matching sin squared of two k plus one theta to fifteen decimal places, with the peak at the predicted iteration and the over-rotation past it visible.',
+              tags: ['qubit', 'superposition', 'entanglement', 'unitary gate', 'measurement', 'deutsch jozsa', 'grover', 'shor', 'bqp', 'post quantum']
+            }]
         }
       ],
       planned: [
-        { id: 'M26', title: 'Computability and complexity theory', sections: 10 },
         { id: 'M27', title: 'Lambda calculus, type systems and semantics', sections: 11 },
         { id: 'M28', title: 'Compiler front end — build a language', sections: 9 },
         { id: 'M29', title: 'IR, SSA and optimisation', sections: 10 },
