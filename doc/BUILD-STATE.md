@@ -2589,14 +2589,137 @@ access patterns over one 4 096-element array: a sequential scan at 12.5% misses 
 fetched per byte used, strides of 8 and 64 doubles both at 100% and 8.0×, a random probe at 88.0%
 and 7.0× — three of the four memory-bound on identical arithmetic.
 
+## M22 — compression, information theory and error correction (complete)
+
+Eleven sections, 214 in the tree. Eleven new algorithm modules, five harnesses, one new viz
+renderer (`bitstream-view.js`), eleven template + section pairs, sixteen content files, two
+property suites and two figure suites.
+
+### The shape of the milestone
+
+Every section is arranged around one discipline: **a compressed size is never reported without the
+entropy of a stated model beside it.** "Three times compression" is a claim with no unit, because
+the ratio is a property of the data rather than of the codec — the same codec measures 24.79× on
+JSON logs and 0.889× on random bytes in this milestone's own tables. So every study names its
+corpus, prints the entropy in the next column, reports expansion rather than dropping the row, and
+verifies the round-trip before the size is allowed to mean anything.
+
+### Modules
+
+`algorithms/`: `entropy.js` (order-k estimation with the reliability of each estimate reported),
+`huffman.js` (classic, canonical, adaptive, and three costings of the table), `arithmetic-coder.js`
+(integer arithmetic coding with the underflow counter, plus rANS), `lz.js` (LZ77/LZSS with hash
+chains and a configurable search depth, plus LZW), `deflate.js` (a full RFC 1951 decoder — stored,
+fixed and dynamic blocks — and a fixed-Huffman encoder), `context-model.js` (order-k, PPM with
+escapes and exclusion, an adaptive linear mixer), `bwt-pipeline.js` (BWT, MTF, RLE and the
+inverses), `lossy-codec.js` (DCT, quantisation, PSNR, SSIM, generation loss), `integer-codecs.js`
+(delta, zigzag, varint, bit-packing, frame-of-reference, Simple-8b, Gorilla), `checksums.js`
+(parity, Internet checksum, Fletcher, Adler, CRC-32 two ways, and a CRC forgery), `ecc.js`
+(Hamming, SECDED, Reed–Solomon over GF(256), erasure repair).
+`machines/`: `codec-lab.js` (seven corpora, the bake-off, the Pareto sweep, the edge cases),
+`coding-lab.js` (22.1–22.4, 22.6, 22.7), `lossy-lab.js` (22.8), `columnar-lab.js` (22.9),
+`integrity-lab.js` (22.10, 22.11).
+`viz/`: `bitstream-view.js` — a coded bitstream with per-symbol attribution, plus the arithmetic
+coder's interval strip.
+
+### What the measurements found
+
+Four claims the measurements corrected, three of them received wisdom:
+
+- **Canonical Huffman is not simply smaller than an explicit tree.** At 11.7% alphabet density the
+  plain canonical table costs 1 024 bits against the tree's 299 — it pays four bits each for 226
+  symbols that never appear. What actually makes the sparse case cheap is DEFLATE's run-length
+  layer over the length array, at 178 bits, and a first implementation leaves that out.
+- **Generation loss is conditional.** Re-encoding a JPEG at the same quality on the same 8×8 grid
+  reaches a fixed point after ONE round — zero pixels change on every subsequent round, because
+  every coefficient is already a multiple of its quantisation step. It is a crop, a resize or a
+  different block alignment that keeps the damage accumulating: shifted three pixels per round, the
+  PSNR falls 34.16 → 30.67 dB over five rounds. The rule is not "never re-encode" but "never
+  re-encode after anything has moved".
+- **A bare LZSS loses to LZW on prose.** 2.134× against 1.922×, because LZSS spends 21 bits on
+  every match (a flag, a 12-bit distance, an 8-bit length) and LZW spends 12 on everything. The
+  prose says so rather than explaining it away, and points at the entropy stage — which is exactly
+  what DEFLATE adds and what reverses the ranking.
+- **A bigger LZ window is not automatically better**, because every match pays the wider distance
+  field. The window sweep prints which size won rather than asserting one.
+
+And one defect the search caught: the burst study's pattern count used `1 << (length - 2)`, which
+goes negative at length 33, so the row silently ran zero trials and reported a 0% catch rate for
+CRC-32 — a number that looks like a catastrophic failure and was an empty loop.
+
+### The figures
+
+Entropy of 3 000 bytes of English at orders 0–4: 4.5623, 1.9578, 0.6345, 0.2235, 0.1225 bits per
+byte, with floors of 1 711 and 238 bytes at orders 0 and 2. The estimator checked against six
+closed forms over 20 000 symbols each — worst error 0.0110 bits, on an 8-state Markov chain. And
+the row the reliability columns exist for: random bytes measure 0.036 bits per byte at order 2 over
+2 944 contexts seen 1.0 times each, which would mean random data is 99.5% predictable. Three of
+seven corpora fail that check and their redundancy column is left blank.
+
+Huffman at 4.6173 bits per symbol against an entropy of 4.5623 — 1.0121×, Kraft sum exactly 1.0000
+— with a per-symbol waste column that goes both ways (space +0.53, "e" −0.31). The two-symbol
+sweep pins Huffman at exactly 1.0000 bits at every skew while the entropy falls to 0.0114: waste
+1.00× at an even split, 12.38× at 99:1, **87.66× at 999:1**, with the arithmetic coder inside
+1.052× of the floor in the same row.
+
+Arithmetic coding at 13 688 bits against an information content of 13 687.0 — **+1.03 bits over the
+whole message** — where Huffman on the same frequencies is +165.0 and rANS +25.0 (of which 32 is
+the state flush). The pending-underflow counter reached 10, which is the field that is easy to omit
+and produces a coder that passes short tests and corrupts real files.
+
+LZ77's level ladder on 6 000 bytes of prose: 3 985 → 3 245 bytes and 0.22 → 2.28 chain links per
+byte from depth 1 to 64 — **10.5× the work for 22.8% better compression**, with the decoder reading
+1 435 tokens instead of 1 694. Lazy matching worth 4.61%. The window sweep at 64/256/1 024/4 096
+bytes: 1.163, 1.426, 1.728, 1.838.
+
+The bake-off: six codecs over seven corpora, with **two different winners** — DEFLATE at 24.79× on
+JSON logs and the BWT chain at 2.841× on mixed prose, where LZSS is last at 1.740×. Every codec
+expands random bytes, and DEFLATE's 0.998 against a bare entropy coder's 0.893 is entirely the
+stored block, at five bytes of overhead. 66 of 66 round-trips verified, including empty input, one
+byte, and a thousand identical bytes where Huffman spends 1 026 bits and the arithmetic coder 14.
+
+Context modelling: the plain order-k model bottoms out at 3.0088 bits at order 2 and rises to
+3.1418 by order 4 — sparsity, at 8.3 observations per context — while PPM with escapes keeps
+falling to 1.1009 at 0.1027 escapes per symbol, which is 0.350× the plain model at the same order.
+An adaptive mixture of four orders reaches 2.996 with the weights migrating from order 1 (0.7528 at
+symbol 373) to order 2 (0.766 at the end), having never been told which order to use.
+
+The BWT chain: 4.5612 bits per byte before the transform and **4.5612 after it** — identical,
+because a permutation cannot change symbol counts — then 0.7405 after move-to-front, at 92.6%
+zeros. Floors of 1 141, 1 141, 186 and 151 bytes. The block sweep at 64/256/1 024/4 096 bytes gives
+ratios of 1.739, 2.079, 6.024 and 10.753, with the zero share explaining every one of them.
+
+Lossy: quality 10 to 100 giving 225 to 1 820 bytes, PSNR 27.21 to 66.62 dB and SSIM 0.8207 to
+1.0000 — with SSIM saturating at 0.9936 by quality 90 while PSNR climbs another 25 dB, and quality
+100 measuring a finite 66.62 dB because the transform is floating point rounded back to integers.
+
+Columnar: a sorted timestamp column at 1 080 bytes with delta plus Simple-8b against 16 000 raw,
+and the same values shuffled at 3 880 — **sorting is worth 3.59×, more than any encoding choice on
+the row**. Gorilla on the same random walk measures 1.32× at full double precision and 9.23×
+rounded to one decimal place, 59.93× rounded to whole units, 62.02× on a constant and 1.34× on
+uniform noise — every series round-tripping bit for bit.
+
+Detection: all six detectors catch 100.0% of single-bit flips and 0.0% to 100.0% of byte swaps, a
+plain sum being blind to permutation by construction. CRC-32 against five published vectors on two
+implementations, and bursts searched at every position — exhaustively to 9 bits, sampled to 34 —
+with the byte sum failing at 9, the 16-bit detectors at 17 and CRC-32 not at all. Then a forged
+CRC: four appended bytes solved as a 32×32 GF(2) system, hitting a chosen target exactly.
+
+Correction: **112 of 112** single-bit errors corrected with the syndrome equal to the flipped
+position every time, and **448 of 448** double-bit errors detected rather than miscorrected. RS(16,
+10) correcting 1, 2 and 3 errors and reporting beyond-limit at 4; repairing 6 erasures and refusing
+the 7th — exactly twice the error limit from identical parity. And the durability table: RS(14, 10)
+at 1.40× storage tolerating 4 losses against 3× replication at 3.00× tolerating 2, with the column
+nobody quotes — 10 fragment reads to rebuild one loss, against 1.
+
 ## Next
 
-**M22 — compression, information theory and error correction (11 sections).** Nothing of it
-exists yet: no modules, no sections, and its track file still carries it in `planned`. The spec is
-`doc/milestones/M22-compression-and-coding.md`; it depends on M05 and M15, both built. After it,
-onward through `doc/milestones/` in the order `doc/ROADMAP.md` gives.
+**M23 — applied cryptography and constant-time programming (11 sections).** Nothing of it
+exists yet: no modules, no sections, and its track file still carries it in `planned`. The
+spec is `doc/milestones/M23-cryptography.md`; it depends on M17 and M22, both now built.
+After it, onward through `doc/milestones/` in the order `doc/ROADMAP.md` gives.
 
-M11 through M15 and M17 through M21 are complete apart from a human browser pass, which needs the
+M11 through M15 and M17 through M22 are complete apart from a human browser pass, which needs the
 Chrome extension connected; M16 has had one (see above, and the chart defect it found).
 `tools/section-dump.js` covers everything else the browser used to be needed for — it prints every
 metric, table and note a section renders, at any control setting, and since the `input`-event fix
@@ -2644,3 +2767,16 @@ Three things M21 added to the shape and worth keeping:
 - **A null result is a bug until proved otherwise.** The vEB layout measuring exactly level order
   looked like an honest negative finding and was an off-by-a-recursion. Where a technique is
   *supposed* to win, assert that it does, and let the assertion fail.
+
+Three things M22 added to the shape and worth keeping:
+
+- **A size is not a measurement until the floor is beside it.** Every compression table in this
+  milestone carries the entropy of a stated model in the next column, because a ratio hides its
+  denominator and a bits-per-symbol figure invites the question. It is the same discipline M21
+  applied to competitive ratios, in a different unit.
+- **A left-shift by a variable is a 32-bit trap.** `1 << (length - 2)` goes negative at length 33,
+  so the burst search ran zero trials and reported a 0% catch rate — a number that reads as a
+  catastrophic failure and was an empty loop. Use `Math.pow(2, n)` where n can reach 31.
+- **When a demo contradicts the folklore, run the loop before rewriting the prose.** Generation
+  loss, canonical Huffman's table size and LZW's ratio against LZSS were all written from received
+  wisdom and all three measured differently. The prose now says what the demo prints.

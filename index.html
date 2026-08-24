@@ -266,6 +266,17 @@
       <section data-section="streaming-model" hidden><div class="section-body"><div id="streaming-model-content"></div></div></section>
       <section data-section="work-and-span" hidden><div class="section-body"><div id="work-and-span-content"></div></div></section>
       <section data-section="choosing-a-cost-model" hidden><div class="section-body"><div id="choosing-a-cost-model-content"></div></div></section>
+      <section data-section="information-and-entropy" hidden><div class="section-body"><div id="information-and-entropy-content"></div></div></section>
+      <section data-section="prefix-codes-and-huffman" hidden><div class="section-body"><div id="prefix-codes-and-huffman-content"></div></div></section>
+      <section data-section="arithmetic-coding-and-ans" hidden><div class="section-body"><div id="arithmetic-coding-and-ans-content"></div></div></section>
+      <section data-section="dictionary-compression" hidden><div class="section-body"><div id="dictionary-compression-content"></div></div></section>
+      <section data-section="general-purpose-codecs" hidden><div class="section-body"><div id="general-purpose-codecs-content"></div></div></section>
+      <section data-section="context-modelling" hidden><div class="section-body"><div id="context-modelling-content"></div></div></section>
+      <section data-section="transform-compression" hidden><div class="section-body"><div id="transform-compression-content"></div></div></section>
+      <section data-section="lossy-compression" hidden><div class="section-body"><div id="lossy-compression-content"></div></div></section>
+      <section data-section="domain-specific-compression" hidden><div class="section-body"><div id="domain-specific-compression-content"></div></div></section>
+      <section data-section="checksums-and-crc" hidden><div class="section-body"><div id="checksums-and-crc-content"></div></div></section>
+      <section data-section="error-correction" hidden><div class="section-body"><div id="error-correction-content"></div></div></section>
     </main>
   </div>
 
@@ -356,6 +367,17 @@
   <script src="src/js/algorithms/suffix-array.js"></script>
   <script src="src/js/algorithms/suffix-automaton.js"></script>
   <script src="src/js/algorithms/bwt.js"></script>
+  <script src="src/js/algorithms/entropy.js"></script>
+  <script src="src/js/algorithms/huffman.js"></script>
+  <script src="src/js/algorithms/arithmetic-coder.js"></script>
+  <script src="src/js/algorithms/lz.js"></script>
+  <script src="src/js/algorithms/deflate.js"></script>
+  <script src="src/js/algorithms/context-model.js"></script>
+  <script src="src/js/algorithms/bwt-pipeline.js"></script>
+  <script src="src/js/algorithms/lossy-codec.js"></script>
+  <script src="src/js/algorithms/integer-codecs.js"></script>
+  <script src="src/js/algorithms/checksums.js"></script>
+  <script src="src/js/algorithms/ecc.js"></script>
   <script src="src/js/algorithms/inverted-index.js"></script>
   <script src="src/js/algorithms/fuzzy-search.js"></script>
   <script src="src/js/machines/text-corpus.js"></script>
@@ -544,6 +566,11 @@
   <script src="src/js/machines/online-lab.js"></script>
   <script src="src/js/machines/cache-lab.js"></script>
   <script src="src/js/machines/dam-lab.js"></script>
+  <script src="src/js/machines/codec-lab.js"></script>
+  <script src="src/js/machines/coding-lab.js"></script>
+  <script src="src/js/machines/lossy-lab.js"></script>
+  <script src="src/js/machines/columnar-lab.js"></script>
+  <script src="src/js/machines/integrity-lab.js"></script>
   <script src="src/js/machines/model-lab.js"></script>
 
   <script src="src/js/viz/chart-base.js"></script>
@@ -570,6 +597,7 @@
   <script src="src/js/viz/alignment-view.js"></script>
   <script src="src/js/viz/geometry-view.js"></script>
   <script src="src/js/viz/bit-view.js"></script>
+  <script src="src/js/viz/bitstream-view.js"></script>
   <script src="src/js/viz/function-plot.js"></script>
 
   <!-- Components -->
@@ -770,6 +798,22 @@
   <script src="src/js/content/examples-models.js"></script>
   <script src="src/js/content/reference-models.js"></script>
   <script src="src/js/content/exercises-models.js"></script>
+  <script src="src/js/content/concepts-coding.js"></script>
+  <script src="src/js/content/examples-coding.js"></script>
+  <script src="src/js/content/reference-coding.js"></script>
+  <script src="src/js/content/exercises-coding.js"></script>
+  <script src="src/js/content/concepts-dictionaries.js"></script>
+  <script src="src/js/content/examples-dictionaries.js"></script>
+  <script src="src/js/content/reference-dictionaries.js"></script>
+  <script src="src/js/content/exercises-dictionaries.js"></script>
+  <script src="src/js/content/concepts-media.js"></script>
+  <script src="src/js/content/examples-media.js"></script>
+  <script src="src/js/content/reference-media.js"></script>
+  <script src="src/js/content/exercises-media.js"></script>
+  <script src="src/js/content/concepts-integrity.js"></script>
+  <script src="src/js/content/examples-integrity.js"></script>
+  <script src="src/js/content/reference-integrity.js"></script>
+  <script src="src/js/content/exercises-integrity.js"></script>
   <script src="src/js/content/examples-graphs.js"></script>
   <script src="src/js/content/examples-graphs-paths.js"></script>
   <script src="src/js/content/examples-graphs-routes.js"></script>
@@ -1264,6 +1308,28 @@
   <script src="src/js/sections/work-and-span-section.js"></script>
   <script src="src/js/sections/choosing-a-cost-model-template.js"></script>
   <script src="src/js/sections/choosing-a-cost-model-section.js"></script>
+  <script src="src/js/sections/information-and-entropy-template.js"></script>
+  <script src="src/js/sections/information-and-entropy-section.js"></script>
+  <script src="src/js/sections/prefix-codes-and-huffman-template.js"></script>
+  <script src="src/js/sections/prefix-codes-and-huffman-section.js"></script>
+  <script src="src/js/sections/arithmetic-coding-and-ans-template.js"></script>
+  <script src="src/js/sections/arithmetic-coding-and-ans-section.js"></script>
+  <script src="src/js/sections/dictionary-compression-template.js"></script>
+  <script src="src/js/sections/dictionary-compression-section.js"></script>
+  <script src="src/js/sections/general-purpose-codecs-template.js"></script>
+  <script src="src/js/sections/general-purpose-codecs-section.js"></script>
+  <script src="src/js/sections/context-modelling-template.js"></script>
+  <script src="src/js/sections/context-modelling-section.js"></script>
+  <script src="src/js/sections/transform-compression-template.js"></script>
+  <script src="src/js/sections/transform-compression-section.js"></script>
+  <script src="src/js/sections/lossy-compression-template.js"></script>
+  <script src="src/js/sections/lossy-compression-section.js"></script>
+  <script src="src/js/sections/domain-specific-compression-template.js"></script>
+  <script src="src/js/sections/domain-specific-compression-section.js"></script>
+  <script src="src/js/sections/checksums-and-crc-template.js"></script>
+  <script src="src/js/sections/checksums-and-crc-section.js"></script>
+  <script src="src/js/sections/error-correction-template.js"></script>
+  <script src="src/js/sections/error-correction-section.js"></script>
   <script src="src/js/app.js"></script>
 </body>
 </html>

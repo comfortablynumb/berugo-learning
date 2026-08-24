@@ -136,6 +136,12 @@
       means: 'The number that gives this one when multiplied by itself twice. It shrinks even more slowly than a square root: the cube root of a millionth is a hundredth.' },
     { token: '∞', reads: 'infinity',
       means: 'Unbounded. In code it is normally a sentinel - `Infinity`, or a number chosen large enough that nothing can beat it.' },
+    { token: '¼', reads: 'one quarter',
+      means: 'The fraction one over four. Written as one character where a formula needs it ' +
+        'inline - ¼ of the interval is the same as 0.25 of it.' },
+    { token: '¾', reads: 'three quarters',
+      means: 'The fraction three over four, or 0.75. It pairs with ¼: the two mark the points ' +
+        'either side of the midpoint of an interval.' },
     { token: '⌈', reads: 'ceiling, open',
       means: 'Opens a round-up. ⌈7/2⌉ is 4 - the whole number at or above the value.' },
     { token: '⌉', reads: 'ceiling, close',

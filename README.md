@@ -14,14 +14,14 @@ faithfully in a browser, the section models it, says so plainly, and states what
 
 ## Status
 
-**M00–M21 shipped (203 sections). Building the curriculum, milestone by milestone.**
+**M00–M22 shipped (214 sections). Building the curriculum, milestone by milestone.**
 
 - ✅ Curriculum designed: 65 milestones, 634 sections, 11 tracks — one file per milestone in
   [`doc/milestones/`](doc/milestones/)
 - ✅ Architecture and conventions fixed — [`doc/architecture.md`](doc/architecture.md)
 - ✅ Build order and dependency graph — [`doc/ROADMAP.md`](doc/ROADMAP.md)
 - ✅ Scope decisions recorded — [`doc/topic-suggestions.md`](doc/topic-suggestions.md)
-- ✅ **Notation decoder across all 203 sections**: every mathematical symbol carries how to say it
+- ✅ **Notation decoder across all 214 sections**: every mathematical symbol carries how to say it
   and what it does, revealed on hover, tap or keyboard focus, and every formal statement whose
   notation a reader cannot pronounce carries an "In words" translation beneath it. The audience is
   a senior engineer with little or no mathematics, so the Description tab explains the idea before
@@ -370,8 +370,38 @@ faithfully in a browser, the section models it, says so plainly, and states what
   1 048 576 comparisons, 10 240 misses, 4 096 transfers and 256 dependent steps — four numbers in
   four units, of which exactly one can be checked against a simulator, and is. 9 sections live.
 
-`npm test` is green — wiring audit, 3 713 unit tests, and a **render audit** that boots the whole
-app headlessly and activates all 203 sections, failing on anything that throws while rendering, any
+- ✅ **M22 — compression, information theory and error correction**: an entropy estimator checked
+  against six closed forms to within 0.0110 bits, and then used to expose its own worst failure —
+  random bytes measuring 0.036 bits per byte at order 2 over 2 944 contexts seen once each, a
+  number that would mean random data is 99.5% predictable and is left blank in the redundancy
+  column rather than printed; Huffman pinned at *exactly* 1.0000 bits at every skew while the
+  entropy falls to 0.0114, wasting **87.66×** at 999:1 where an arithmetic coder stays inside
+  1.052×; that same arithmetic coder landing **+1.03 bits above the information content of a
+  3 000-byte message** against Huffman's +165.0, with the pending-underflow counter reaching 10 —
+  the field whose omission produces a coder that passes short tests and corrupts real files; a
+  compression-level ladder that is one parameter, measuring 10.5× the search work for 22.8% better
+  compression while the decoder reads *fewer* tokens; a bare LZSS **losing** to a 1984 algorithm on
+  prose, because 21 bits of fixed fields per match beat 12 bits of dictionary code only once the
+  tokens are entropy-coded; six codecs over seven corpora producing **two different winners** and
+  66 of 66 verified round-trips, with every codec expanding random bytes and DEFLATE's 0.998
+  against a bare coder's 0.893 being entirely the five-byte stored block; a plain order-k model
+  getting *worse* past order 2 at 8.3 observations per context while PPM with escapes keeps falling
+  to 0.350× of it, and a four-model mixture finding the best order without being told; a transform
+  whose output has the entropy of its input to *every decimal place* — 4.5612 before and 4.5612
+  after — followed by a stage that takes it to 0.7405; a JPEG re-encode loop that reaches a fixed
+  point after **one** round when the grid is aligned and never stops losing when it is shifted three
+  pixels, which turns "never re-save a JPEG" into "never re-save one after anything has moved";
+  sorting a column being worth 3.59× where the encoding choice is worth 1.5×, and the same metric
+  compressing 1.32× at full double precision and 9.23× rounded to the precision it was actually
+  measured at; a byte sum catching 100% of single-bit flips and **0%** of byte swaps, CRC-32 missing
+  no burst up to 34 bits at any position, and then a forged CRC — four appended bytes solved as a
+  32×32 linear system; and Hamming corrected on **112 of 112** single-bit errors with the syndrome
+  equal to the flipped position every time, 448 of 448 double errors detected rather than
+  miscorrected, and an erasure code giving more durability than 3× replication at 47% of the
+  storage and ten times the rebuild traffic. 11 sections live.
+
+`npm test` is green — wiring audit, 3 878 unit tests, and a **render audit** that boots the whole
+app headlessly and activates all 214 sections, failing on anything that throws while rendering, any
 table left with an empty body, and any metric tile still showing a placeholder without a note
 explaining it. `npm run lint:size` reports no offenders.
 
@@ -385,7 +415,7 @@ The render audit is not a substitute for opening the page, and M16's browser pas
   opens to milestones, then sections. Tracks that are planned and not built are listed with their
   milestones and section counts, marked as planned, so the map shows what the platform teaches
   rather than only what happens to be finished. One track and one milestone stay open at a time, so
-  the nav is the same height at 203 sections and at 634.
+  the nav is the same height at 214 sections and at 634.
 - **Search across everything.** The header search indexes concepts, worked examples, reference
   entries and exercises as well as section titles, so "tombstone", "Little's law" or "round half to
   even" lands on the section that explains it. Ctrl/Cmd+K focuses it; arrows and Enter drive it.

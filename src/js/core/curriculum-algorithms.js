@@ -865,10 +865,81 @@
               summary: 'Four predictions of one sort, four orders of magnitude apart, all of them correct arithmetic and at most one of them about the runtime.',
               tags: ['cost model', 'ram model', 'cache aware', 'external memory', 'parallel model', 'binding resource', 'bytes fetched', 'access pattern', 'model validation', 'measure first']
             }]
+        },
+        {
+          id: 'M22',
+          title: 'Compression, information theory and error correction',
+          summary: 'Why data compresses at all, every major family measured on one set of corpora, and the coding theory that keeps bits intact.',
+          sections: [
+            {
+              id: 'information-and-entropy',
+              title: 'Information and entropy',
+              summary: 'There is no single entropy of a file - there is one number per model, and a compression ratio without one is a claim with no denominator.',
+              tags: ['entropy', 'shannon', 'source coding theorem', 'conditional entropy', 'cross entropy', 'kl divergence', 'mutual information', 'order-k model', 'estimator bias', 'incompressible']
+            },
+            {
+              id: 'prefix-codes-and-huffman',
+              title: 'Prefix codes and Huffman coding',
+              summary: 'Optimal among codes that spend whole bits - which on a 99/1 source means spending twelve times the entropy and being unable to do better.',
+              tags: ['prefix code', 'kraft inequality', 'huffman', 'canonical huffman', 'code lengths', 'adaptive huffman', 'table transmission', 'whole bit penalty', 'greedy merge', 'optimality']
+            },
+            {
+              id: 'arithmetic-coding-and-ans',
+              title: 'Arithmetic coding and ANS',
+              summary: 'The whole message as one number: an overhead of about one bit per message rather than one bit per symbol, and the counter that is fatal to omit.',
+              tags: ['arithmetic coding', 'interval subdivision', 'renormalisation', 'underflow', 'adaptive model', 'range coder', 'rans', 'tans', 'fractional bits', 'state machine']
+            },
+            {
+              id: 'dictionary-compression',
+              title: 'Dictionary compression: LZ77 and friends',
+              summary: 'Level nine is not a different algorithm - it is the same one walking more of the hash chain, at eleven times the work for a fifth better ratio.',
+              tags: ['lz77', 'lzss', 'sliding window', 'hash chains', 'match finding', 'lazy matching', 'search depth', 'lz78', 'lzw', 'compression level']
+            },
+            {
+              id: 'general-purpose-codecs',
+              title: 'Real-world general-purpose codecs',
+              summary: 'Six codecs on six corpora and the ranking changes on every one - which is why a benchmark with a single corpus produces a winner and no information.',
+              tags: ['deflate', 'gzip', 'zlib', 'zstd', 'brotli', 'block types', 'stored block', 'pareto frontier', 'decode speed', 'round trip']
+            },
+            {
+              id: 'context-modelling',
+              title: 'Context modelling and prediction',
+              summary: 'A plain order-k model gets worse after order two and PPM keeps improving: same input, same orders, and the only difference is what happens on a miss.',
+              tags: ['context model', 'order-k', 'ppm', 'escape', 'exclusion', 'context mixing', 'paq', 'sparsity', 'cross entropy', 'compression as prediction']
+            },
+            {
+              id: 'transform-compression',
+              title: 'Transform-based compression: BWT and friends',
+              summary: 'The transform outputs exactly the entropy of its input to four decimal places, and the stage after it halves the file.',
+              tags: ['burrows wheeler', 'permutation', 'move to front', 'run length', 'bzip2', 'block size', 'lf mapping', 'preprocessing', 'weak model', 'reversible']
+            },
+            {
+              id: 'lossy-compression',
+              title: 'Lossy compression and the rate-distortion trade',
+              summary: 'Re-saving at the same quality on the same grid costs nothing after one round; shift the grid three pixels and the damage never stops.',
+              tags: ['rate distortion', 'quantisation', 'dct', 'jpeg', 'energy compaction', 'psnr', 'ssim', 'generation loss', 'perceptual model', 'quality factor']
+            },
+            {
+              id: 'domain-specific-compression',
+              title: 'Domain-specific compression',
+              summary: 'Sorting the column is worth more than the encoding choice, and a metric held at full double precision throws away nine tenths of its own compressibility.',
+              tags: ['delta coding', 'zigzag', 'varint', 'bit packing', 'frame of reference', 'simple-8b', 'dictionary encoding', 'run length', 'gorilla', 'columnar']
+            },
+            {
+              id: 'checksums-and-crc',
+              title: 'Error detection: checksums and CRC',
+              summary: 'A byte sum catches every single-bit flip and no byte swap at all, and four appended bytes make any CRC come out to any value you choose.',
+              tags: ['checksum', 'parity', 'internet checksum', 'fletcher', 'adler-32', 'crc', 'polynomial division', 'burst errors', 'detection guarantee', 'not integrity']
+            },
+            {
+              id: 'error-correction',
+              title: 'Error correction: Hamming, Reed-Solomon and erasure coding',
+              summary: 'The same parity repairs twice as many erasures as errors, and an erasure code buys 3x durability at 1.5x storage by reading k fragments to rebuild one.',
+              tags: ['hamming code', 'syndrome', 'secded', 'ecc memory', 'reed solomon', 'finite field', 'erasure coding', 'replication', 'read amplification', 'correction limit']
+            }]
         }
       ],
       planned: [
-        { id: 'M22', title: 'Compression, information theory and error correction', sections: 11 },
         { id: 'M23', title: 'Applied cryptography and constant-time programming', sections: 11 }
       ]
     },
