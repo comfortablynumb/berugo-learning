@@ -14,14 +14,14 @@ faithfully in a browser, the section models it, says so plainly, and states what
 
 ## Status
 
-**M00–M23 shipped (225 sections). Building the curriculum, milestone by milestone.**
+**M00–M24 shipped (236 sections). Building the curriculum, milestone by milestone.**
 
 - ✅ Curriculum designed: 65 milestones, 634 sections, 11 tracks — one file per milestone in
   [`doc/milestones/`](doc/milestones/)
 - ✅ Architecture and conventions fixed — [`doc/architecture.md`](doc/architecture.md)
 - ✅ Build order and dependency graph — [`doc/ROADMAP.md`](doc/ROADMAP.md)
 - ✅ Scope decisions recorded — [`doc/topic-suggestions.md`](doc/topic-suggestions.md)
-- ✅ **Notation decoder across all 225 sections**: every mathematical symbol carries how to say it
+- ✅ **Notation decoder across all 236 sections**: every mathematical symbol carries how to say it
   and what it does, revealed on hover, tap or keyboard focus, and every formal statement whose
   notation a reader cannot pronounce carries an "In words" translation beneath it. The audience is
   a senior engineer with little or no mathematics, so the Description tab explains the idea before
@@ -429,9 +429,38 @@ faithfully in a browser, the section models it, says so plainly, and states what
   reconstructing exactly while two shares silently return 446 296 622 and rule out **none** of the
   candidates, next to a Merkle proof of one entry in a billion at 30 hashes and 960 bytes against
   34.4 GB. Every attack executes; nothing is narrated. 11 sections live.
+- ✅ **M24 — regular languages and finite automata** (the automata track opens): eight languages
+  each run against the weakest machine that recognises them, with a finite automaton checked
+  string by string wherever one exists — **15 of 127** strings for "ends in abb" and a 4-state
+  machine agreeing on all of them, against **4 of 127** for aⁿbⁿ and no automaton offered because
+  none exists; five DFAs checked against arithmetic rather than against themselves, with
+  divisibility by 7 built from `r → (2r + b) mod 7` and agreeing on **511 of 511** binary strings
+  up to length 8; the exponential family measured at **256 minimal states for 18 positions** —
+  exactly the predicted 2⁸ — with the subset construction landing one state above the bound at
+  every n and minimisation removing precisely that one; three constructions on one pattern at
+  **14, 6 and 4 states**, all cross-checked over 511 strings, and the derivative DFA reaching the
+  minimal machine with no minimisation pass; Moore, Hopcroft and Brzozowski all returning 4 states
+  and a brute-force Myhill–Nerode count that never builds a machine agreeing with them, with the
+  witness suffix printed for every pair of classes; the same regex read back off the machine at
+  **40 characters in one elimination order and 44 in another**, both round-tripping — because the
+  minimal automaton is unique and the minimal expression is not; one product construction with
+  four accepting rules deciding containment and returning **"b"** as the shortest string one
+  language admits and the other refuses, confirmed by re-running both originals on it; the pumping
+  lemma played as the adversary game with all **10 decompositions enumerated and 0 surviving** for
+  aⁿbⁿ — and **4 of 10 surviving** on a language that is regular, where it correctly proves
+  nothing; two text transducers composed into a single pass and checked against chaining on **204
+  of 204** inputs, with a 1-state Mealy case folder growing to **29 states** in Moore form; a
+  generated lexer reporting **3 of its 7 decisions** as positions where a shorter match had
+  already succeeded and was passed over, and a structural ReDoS analyser getting **9 of 9**
+  verdicts right — including one pattern that looks dangerous and is not — before exploding the
+  flagged ones at **425 979 backtracking steps against 100 simulation steps**; Viterbi checked
+  against every enumerated path with plain probabilities measured to reach **exactly zero at 619
+  steps** for one symbol and never within 2 000 for another; and a server that may wait forever
+  **passing the safety check and failing the liveness one**, with a lasso no finite test could
+  find. 11 sections live.
 
-`npm test` is green — wiring audit, 4 058 unit tests, and a **render audit** that boots the whole
-app headlessly and activates all 225 sections, failing on anything that throws while rendering, any
+`npm test` is green — wiring audit, 4 213 unit tests, and a **render audit** that boots the whole
+app headlessly and activates all 236 sections, failing on anything that throws while rendering, any
 table left with an empty body, and any metric tile still showing a placeholder without a note
 explaining it. `npm run lint:size` reports no offenders.
 

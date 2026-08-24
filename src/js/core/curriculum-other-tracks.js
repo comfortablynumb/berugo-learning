@@ -90,9 +90,81 @@
       id: 'automata-and-compilers',
       title: 'Automata, languages and compilers',
       summary: 'Regular and context-free languages, computability, types, and a compiler you build.',
-      groups: [],
+      groups: [
+        {
+          id: 'M24',
+          title: 'Regular languages and finite automata',
+          summary: 'Every regex, tokeniser and protocol state machine is a finite automaton; this milestone builds the whole toolkit and runs it.',
+          sections: [
+            {
+              id: 'languages-and-the-hierarchy',
+              title: 'Languages and the hierarchy',
+              summary: 'Eight languages, each run against the weakest machine that recognises it, with a finite automaton checked string by string wherever one exists.',
+              tags: ['alphabet', 'kleene star', 'language class', 'chomsky hierarchy', 'finite automaton', 'pushdown automaton', 'linear bounded', 'turing machine', 'undecidable', 'closure properties']
+            },
+            {
+              id: 'deterministic-finite-automata',
+              title: 'Deterministic finite automata',
+              summary: 'Five machines run against an independent definition over every string up to length 8, with divisibility by 7 built from arithmetic rather than drawn by hand.',
+              tags: ['five-tuple', 'transition function', 'trap state', 'state design', 'counting modulo k', 'suffix tracking', 'batch testing', 'minimality', 'myhill nerode', 'protocol state']
+            },
+            {
+              id: 'nondeterminism-and-subsets',
+              title: 'Nondeterminism and the subset construction',
+              summary: 'The set of active states advancing per character, then determinised — with the exponential family measured at 256 minimal states for 18 positions, exactly the predicted bound.',
+              tags: ['nfa', 'epsilon closure', 'subset construction', 'state explosion', 'lazy determinisation', 'thompson simulation', 'equivalence', 're2', 'linear matching', 'state sets']
+            },
+            {
+              id: 'regular-expressions-and-constructions',
+              title: 'Regular expressions and their constructions',
+              summary: 'Thompson, Glushkov and Brzozowski built in parallel on one pattern with their state counts compared, then the regex read back off the minimal machine and checked.',
+              tags: ['kleene theorem', 'thompson construction', 'glushkov automaton', 'position sets', 'brzozowski derivatives', 'similarity rules', 'state elimination', 'backreferences', 'lookaround', 'np-hard matching']
+            },
+            {
+              id: 'minimisation-and-canonical-forms',
+              title: 'Minimisation and canonical forms',
+              summary: 'Moore, Hopcroft and Brzozowski minimise the same machine and a brute-force Myhill-Nerode count checks all three, with the witness suffix printed for every pair of classes.',
+              tags: ['myhill nerode', 'partition refinement', 'moore algorithm', 'hopcroft', 'brzozowski double reversal', 'canonical form', 'equivalence testing', 'distinguishing suffix', 'trim', 'total machine']
+            },
+            {
+              id: 'closure-and-the-product',
+              title: 'Closure properties and the product construction',
+              summary: 'One product construction, four accepting rules, and a containment check that returns the shortest string one language admits and the other refuses.',
+              tags: ['closure', 'product construction', 'intersection', 'complement', 'total machine', 'emptiness', 'containment', 'counter-example', 'equivalence', 'policy comparison']
+            },
+            {
+              id: 'proving-non-regularity',
+              title: 'Proving a language is not regular',
+              summary: 'The pumping lemma played as the game it is, with every decomposition the adversary may choose enumerated, beside a Myhill-Nerode family that also builds the machine when there is one.',
+              tags: ['pumping lemma', 'quantifier alternation', 'adversary game', 'myhill nerode', 'distinguishing suffix', 'infinite family', 'non-regular languages', 'closure reduction', 'necessary condition', 'proof technique']
+            },
+            {
+              id: 'transducers',
+              title: 'Transducers',
+              summary: 'Two text machines composed into one, checked against running them in sequence over 204 inputs, with a one-state case folder growing to 29 as a Moore machine.',
+              tags: ['mealy', 'moore', 'finite state transducer', 'composition', 'epsilon output', 'deletion', 'weighted transducer', 'text normalisation', 'position information', 'single pass']
+            },
+            {
+              id: 'automata-in-production',
+              title: 'Automata in production',
+              summary: 'A generated lexer showing every maximal-munch decision it passed over, and a structural ReDoS analyser that gets nine verdicts right and then explodes the flagged patterns.',
+              tags: ['lexer generation', 'maximal munch', 'rule priority', 'keyword shadowing', 'statechart', 'orthogonal regions', 'history state', 'redos', 'ambiguity detection', 'backtracking blowup']
+            },
+            {
+              id: 'weighted-and-probabilistic',
+              title: 'Weighted and probabilistic automata',
+              summary: 'Viterbi checked against every enumerated path, the posterior disagreeing with the best path, and plain probabilities reaching exactly zero at length 619.',
+              tags: ['semiring', 'weighted automaton', 'hidden markov model', 'viterbi', 'trellis', 'forward backward', 'posterior', 'log domain', 'underflow', 'shortest path decoding']
+            },
+            {
+              id: 'automata-over-infinite-words',
+              title: 'Automata over infinite words',
+              summary: 'Three systems checked against two properties, where the server that may wait forever passes safety and fails liveness with a lasso no finite test could find.',
+              tags: ['buchi automaton', 'infinite words', 'lasso trace', 'nested depth first search', 'emptiness', 'safety', 'liveness', 'fairness', 'ltl', 'parity condition']
+            }]
+        }
+      ],
       planned: [
-        { id: 'M24', title: 'Regular languages and finite automata', sections: 11 },
         { id: 'M25', title: 'Context-free languages and parsing', sections: 12 },
         { id: 'M26', title: 'Computability and complexity theory', sections: 10 },
         { id: 'M27', title: 'Lambda calculus, type systems and semantics', sections: 11 },

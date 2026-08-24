@@ -211,7 +211,10 @@ function auditSection(app, window, consoleErrors, sectionId) {
   try {
     activate(app, window, sectionId);
   } catch (error) {
-    fail(sectionId, 'threw-on-activation', error && error.stack ? error.stack.split('\n')[0] : error);
+    /* Four frames rather than one: the message alone rarely says which of a
+       section's dozen measurement calls threw. */
+    fail(sectionId, 'threw-on-activation', error && error.stack
+      ? error.stack.split('\n').slice(0, 4).join(' | ') : error);
     return;
   }
 

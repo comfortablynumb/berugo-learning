@@ -288,6 +288,17 @@
       <section data-section="protocol-construction" hidden><div class="section-body"><div id="protocol-construction-content"></div></div></section>
       <section data-section="constant-time-programming" hidden><div class="section-body"><div id="constant-time-programming-content"></div></div></section>
       <section data-section="applied-constructions" hidden><div class="section-body"><div id="applied-constructions-content"></div></div></section>
+      <section data-section="languages-and-the-hierarchy" hidden><div class="section-body"><div id="languages-and-the-hierarchy-content"></div></div></section>
+      <section data-section="deterministic-finite-automata" hidden><div class="section-body"><div id="deterministic-finite-automata-content"></div></div></section>
+      <section data-section="nondeterminism-and-subsets" hidden><div class="section-body"><div id="nondeterminism-and-subsets-content"></div></div></section>
+      <section data-section="regular-expressions-and-constructions" hidden><div class="section-body"><div id="regular-expressions-and-constructions-content"></div></div></section>
+      <section data-section="minimisation-and-canonical-forms" hidden><div class="section-body"><div id="minimisation-and-canonical-forms-content"></div></div></section>
+      <section data-section="closure-and-the-product" hidden><div class="section-body"><div id="closure-and-the-product-content"></div></div></section>
+      <section data-section="proving-non-regularity" hidden><div class="section-body"><div id="proving-non-regularity-content"></div></div></section>
+      <section data-section="transducers" hidden><div class="section-body"><div id="transducers-content"></div></div></section>
+      <section data-section="automata-in-production" hidden><div class="section-body"><div id="automata-in-production-content"></div></div></section>
+      <section data-section="weighted-and-probabilistic" hidden><div class="section-body"><div id="weighted-and-probabilistic-content"></div></div></section>
+      <section data-section="automata-over-infinite-words" hidden><div class="section-body"><div id="automata-over-infinite-words-content"></div></div></section>
     </main>
   </div>
 
@@ -593,6 +604,17 @@
   <script src="src/js/machines/columnar-lab.js"></script>
   <script src="src/js/machines/integrity-lab.js"></script>
   <script src="src/js/machines/crypto-lab.js"></script>
+  <script src="src/js/machines/automaton.js"></script>
+  <script src="src/js/algorithms/regex-compile.js"></script>
+  <script src="src/js/algorithms/derivatives.js"></script>
+  <script src="src/js/algorithms/minimization.js"></script>
+  <script src="src/js/algorithms/automaton-ops.js"></script>
+  <script src="src/js/algorithms/transducer.js"></script>
+  <script src="src/js/algorithms/lexer-gen.js"></script>
+  <script src="src/js/algorithms/redos-analysis.js"></script>
+  <script src="src/js/algorithms/hmm.js"></script>
+  <script src="src/js/algorithms/buchi.js"></script>
+  <script src="src/js/machines/language-lab.js"></script>
   <script src="src/js/machines/model-lab.js"></script>
 
   <script src="src/js/viz/chart-base.js"></script>
@@ -621,6 +643,7 @@
   <script src="src/js/viz/bit-view.js"></script>
   <script src="src/js/viz/bitstream-view.js"></script>
   <script src="src/js/viz/block-image-view.js"></script>
+  <script src="src/js/viz/automaton-view.js"></script>
   <script src="src/js/viz/function-plot.js"></script>
 
   <!-- Components -->
@@ -853,6 +876,18 @@
   <script src="src/js/content/examples-crypto-applied.js"></script>
   <script src="src/js/content/reference-crypto-applied.js"></script>
   <script src="src/js/content/exercises-crypto-applied.js"></script>
+  <script src="src/js/content/concepts-automata-basics.js"></script>
+  <script src="src/js/content/examples-automata-basics.js"></script>
+  <script src="src/js/content/reference-automata-basics.js"></script>
+  <script src="src/js/content/exercises-automata-basics.js"></script>
+  <script src="src/js/content/concepts-automata-structure.js"></script>
+  <script src="src/js/content/examples-automata-structure.js"></script>
+  <script src="src/js/content/reference-automata-structure.js"></script>
+  <script src="src/js/content/exercises-automata-structure.js"></script>
+  <script src="src/js/content/concepts-automata-applied.js"></script>
+  <script src="src/js/content/examples-automata-applied.js"></script>
+  <script src="src/js/content/reference-automata-applied.js"></script>
+  <script src="src/js/content/exercises-automata-applied.js"></script>
   <script src="src/js/content/examples-graphs.js"></script>
   <script src="src/js/content/examples-graphs-paths.js"></script>
   <script src="src/js/content/examples-graphs-routes.js"></script>
@@ -1391,6 +1426,28 @@
   <script src="src/js/sections/constant-time-programming-section.js"></script>
   <script src="src/js/sections/applied-constructions-template.js"></script>
   <script src="src/js/sections/applied-constructions-section.js"></script>
+  <script src="src/js/sections/languages-and-the-hierarchy-template.js"></script>
+  <script src="src/js/sections/languages-and-the-hierarchy-section.js"></script>
+  <script src="src/js/sections/deterministic-finite-automata-template.js"></script>
+  <script src="src/js/sections/deterministic-finite-automata-section.js"></script>
+  <script src="src/js/sections/nondeterminism-and-subsets-template.js"></script>
+  <script src="src/js/sections/nondeterminism-and-subsets-section.js"></script>
+  <script src="src/js/sections/regular-expressions-and-constructions-template.js"></script>
+  <script src="src/js/sections/regular-expressions-and-constructions-section.js"></script>
+  <script src="src/js/sections/minimisation-and-canonical-forms-template.js"></script>
+  <script src="src/js/sections/minimisation-and-canonical-forms-section.js"></script>
+  <script src="src/js/sections/closure-and-the-product-template.js"></script>
+  <script src="src/js/sections/closure-and-the-product-section.js"></script>
+  <script src="src/js/sections/proving-non-regularity-template.js"></script>
+  <script src="src/js/sections/proving-non-regularity-section.js"></script>
+  <script src="src/js/sections/transducers-template.js"></script>
+  <script src="src/js/sections/transducers-section.js"></script>
+  <script src="src/js/sections/automata-in-production-template.js"></script>
+  <script src="src/js/sections/automata-in-production-section.js"></script>
+  <script src="src/js/sections/weighted-and-probabilistic-template.js"></script>
+  <script src="src/js/sections/weighted-and-probabilistic-section.js"></script>
+  <script src="src/js/sections/automata-over-infinite-words-template.js"></script>
+  <script src="src/js/sections/automata-over-infinite-words-section.js"></script>
   <script src="src/js/app.js"></script>
 </body>
 </html>

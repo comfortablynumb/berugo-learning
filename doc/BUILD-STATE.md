@@ -3,7 +3,7 @@
 Where the implementation stands, and exactly what the next session should pick up.
 Update this file at the end of any session that leaves work unfinished.
 
-**Last updated:** 2026-08-24 (M23 complete — eleven sections, 225 in the tree. The tree is GREEN.)
+**Last updated:** 2026-08-24 (M24 complete — eleven sections, 236 in the tree. The tree is GREEN.)
 
 ---
 
@@ -35,11 +35,12 @@ Update this file at the end of any session that leaves work unfinished.
 | M21 — online, external-memory and cache-oblivious algorithms | 9 | ✅ built, tested, render-audited |
 | M22 — compression, information theory and error correction | 11 | ✅ built, tested, render-audited |
 | M23 — applied cryptography and constant-time programming | 11 | ✅ built, tested, render-audited |
+| M24 — regular languages and finite automata | 11 | ✅ built, tested, render-audited |
 
-**The tree is GREEN.** `npm test` reports 4 058 unit tests with 0 failures (6 skipped — the
-wall-clock-budget starters the inline sandbox cannot fail); the wiring audit passes at 225 sections
-and 1 079 modules, the render audit activates all 225 with no exception and no empty table,
-`npm run lint:size` passes across 1 196 files, and `npm run build:css` is up to date.
+**The tree is GREEN.** `npm test` reports 4 213 unit tests with 0 failures (6 skipped — the
+wall-clock-budget starters the inline sandbox cannot fail); the wiring audit passes at 236 sections
+and 1 125 modules, the render audit activates all 236 with no exception and no empty table,
+`npm run lint:size` passes across 1 245 files, and `npm run build:css` is up to date.
 
 All nine M07 sections were opened in Chrome on `npm start`: the three tabs render, every demo
 figure matches the prose *exactly* (see "aligning the demo with the prose" below), the references
@@ -2717,12 +2718,13 @@ nobody quotes — 10 fragment reads to rebuild one loss, against 1.
 
 ## Next
 
-**M24 — regular languages, automata and lexing (the automata track opens).** Nothing of it
-exists yet: no modules, no sections, and its track file still carries it in `planned`. The spec
-is `doc/milestones/M24-regular-languages.md`. After it, onward through `doc/milestones/` in the
-order `doc/ROADMAP.md` gives.
+**M25 — context-free languages and parsing (12 sections).** Nothing of it exists yet: no
+modules, no sections, and its track file still carries it in `planned`. The spec is
+`doc/milestones/M25-context-free-parsing.md`, and it depends on M24, which is now built — the shared
+`machines/automaton.js` representation and `viz/automaton-view.js` are both meant to be reused
+by it. After it, onward through `doc/milestones/` in the order `doc/ROADMAP.md` gives.
 
-M11 through M15 and M17 through M23 are complete apart from a human browser pass, which needs the
+M11 through M15 and M17 through M24 are complete apart from a human browser pass, which needs the
 Chrome extension connected; M16 has had one (see above, and the chart defect it found).
 `tools/section-dump.js` covers everything else the browser used to be needed for — it prints every
 metric, table and note a section renders, at any control setting, and since the `input`-event fix
@@ -2866,3 +2868,88 @@ CSPRNG, the requirement-to-primitive chooser and the standing disclaimer).
 - **A curriculum file will cross 1 000 lines mid-milestone.** `curriculum-algorithms.js` did, at
   M23. The split is `curriculum-algorithms-later.js` holding M17 onward, spliced on with
   `.concat(later)` — a milestone boundary, so nothing but the line count moves.
+
+---
+
+## M24 — regular languages and finite automata (complete)
+
+Eleven sections, 236 in the tree, and the automata track opens. Nine algorithm modules, two
+harnesses (`machines/automaton.js` and `machines/language-lab.js`), one new viz renderer
+(`viz/automaton-view.js`), eleven template + section pairs, twelve content files, two property
+suites and one figure suite.
+
+### The shape of the milestone
+
+Every conversion in this milestone is a theorem with an algorithm attached, and the discipline is
+that **an implementation of a theorem is checked by exhaustive string testing, not by reading**.
+Thompson and Glushkov are checked against JavaScript's own `RegExp` over every string up to length
+9. The subset construction, ε-removal, trimming, completing and relabelling are each checked
+against the machine they came from. Three minimisation algorithms are checked against a
+brute-force Myhill–Nerode count that never builds a machine at all. State elimination is checked
+by compiling the expression back. Containment returns a counter-example, and the counter-example
+is re-run through both original machines.
+
+The second discipline is that **a "no" arrives with a witness**. Containment, equivalence,
+emptiness and Büchi model checking all return the shortest string or lasso that proves the answer,
+and every one of those is confirmed against the sources rather than trusted.
+
+### Modules
+
+`machines/`: `automaton.js` (one representation for DFA, NFA, ε-NFA and their conversions, with
+execution traces, ε-closure, subset construction, trim, complete, reverse, ε-removal, relabel and
+exhaustive equivalence), `language-lab.js` (the eight-language catalogue with a real recogniser
+each, the exponential subset family, the pumping game and Myhill–Nerode families).
+
+`algorithms/`: `regex-compile.js` (parser, Thompson, Glushkov positions, and state elimination
+back to a pattern), `derivatives.js` (Brzozowski with the similarity rules that make it
+terminate), `minimization.js` (Moore, Hopcroft, Brzozowski and the brute-force oracle),
+`automaton-ops.js` (product with four accepting rules, complement, emptiness, containment,
+equivalence, concatenation, star), `transducer.js` (Mealy, Moore, composition, weighted best
+path), `lexer-gen.js` (maximal munch with priority, and shadowing analysis), `redos-analysis.js`
+(two structural detectors, attack-string generation, and a counted backtracking matcher),
+`hmm.js` (Viterbi, forward, forward–backward, brute-force reference, and the underflow
+measurement), `buchi.js` (Büchi acceptance, lassos, nested depth-first emptiness, safety and
+liveness monitors).
+
+`viz/`: `automaton-view.js` (state graphs with the active states lit, circle or BFS-layer layout).
+
+### What was wrong before it was right
+
+- **The ReDoS detector found nothing, then found everything.** The first version tracked state
+  SETS in both components of the product, so the two runs it needed to compare had already merged
+  and `off-diagonal` never fired. Tracking single states over the ε-free machine then flagged
+  every pattern, because ε-removal turns one run into several parallel targets. The fix is two
+  detectors on two different objects: overlap on the Glushkov position automaton, which is
+  ε-free and position-faithful, and nested quantifiers on the syntax tree, because `(a*)*` and
+  `a*` have identical position automata and only the shape separates them. Nine fixtures, nine
+  correct verdicts, including `(a|ab)*c` which looks dangerous and is not.
+- **Three correct minimisation algorithms appeared to disagree.** Moore and Hopcroft returned the
+  minimal TOTAL machine and Brzozowski the minimal trimmed one, and the oracle counted classes
+  over reachable prefixes only. All three were right; the conventions were not the same. Every
+  path now completes, and the oracle partitions all of Σ*.
+- **A memoise key was joined with a pipe, and the pattern contained one.** `'(a|b)*abb' + '|' +
+  order` split back into `(a` — an unclosed group — and took the whole section down at render. The
+  key is joined with a newline now.
+- **The three-state divisibility machine accepts the empty string.** The definition rejected it,
+  so the batch tester reported 510 of 511. The machine is right and the definition was: the empty
+  numeral reads as zero, and excluding it needs a fourth state that is a copy of the first and not
+  accepting — which is the whole difference between "k states" and "k + 1".
+- **`underdetermined()` asserted its own conclusion.** It marked every candidate consistent by
+  comparing array lengths. It now interpolates the polynomial through each candidate and checks it
+  reproduces every held share.
+- **A derivative starter exhausted 4 GB of heap.** Its guard capped the STATE count, and without
+  simplification each derivative tree is about twice the size of the last, so sixty states is
+  billions of nodes. The guard is on the iteration count now.
+
+### Three things M24 added to the shape and worth keeping
+
+- **A memoise key must not be joined with a character the values contain.** The pipe was a
+  reasonable default until a milestone whose data is regular expressions. A newline is a better
+  one, and the failure it caused was a whole section rendering zero characters.
+- **When a detector reports on structure, it needs a fixture list with known verdicts — including
+  the safe-looking-dangerous and the dangerous-looking-safe.** The ReDoS analyser was wrong in
+  both directions before the fixtures existed, and each wrong direction looked plausible on its
+  own.
+- **`tests/render-audit.js` now reports four stack frames rather than one.** The message alone
+  rarely says which of a section's dozen measurement calls threw; four frames named the parser
+  immediately.
