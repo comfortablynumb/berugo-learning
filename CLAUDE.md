@@ -9,10 +9,10 @@ explained in full, diagram, insight), **Examples** (runnable demo with charts, w
 graded code lab) and **References** (the structured reference block).
 
 ## Status
-**M00–M19 are built** (185 sections; M00–M10 and M16 also verified in a browser), each carrying 8+ concepts
+**M00–M20 are built** (194 sections; M00–M10 and M16 also verified in a browser), each carrying 8+ concepts
 with full explanations, two worked examples, a reference entry and a graded exercise. The tree is
-green. **M20 — NP-completeness, reductions and metaheuristics is part-built**: its four algorithm
-modules are written and wired, no sections yet. Read `doc/BUILD-STATE.md`
+green. **M21 — online, external-memory and cache-oblivious algorithms is next**, and nothing of it
+exists yet. Read `doc/BUILD-STATE.md`
 first, its "Next" section at the end carries the nine-step shape to copy. The rest of the curriculum follows
 the order in `doc/ROADMAP.md` (65 milestones in `doc/milestones/`). Keep `npm test` and `npm run lint:size`
 green at every step, and update the README status block and `doc/BUILD-STATE.md` as milestones

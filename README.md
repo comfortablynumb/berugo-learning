@@ -14,14 +14,14 @@ faithfully in a browser, the section models it, says so plainly, and states what
 
 ## Status
 
-**M00–M18 shipped (176 sections). Building the curriculum, milestone by milestone.**
+**M00–M20 shipped (194 sections). Building the curriculum, milestone by milestone.**
 
 - ✅ Curriculum designed: 65 milestones, 634 sections, 11 tracks — one file per milestone in
   [`doc/milestones/`](doc/milestones/)
 - ✅ Architecture and conventions fixed — [`doc/architecture.md`](doc/architecture.md)
 - ✅ Build order and dependency graph — [`doc/ROADMAP.md`](doc/ROADMAP.md)
 - ✅ Scope decisions recorded — [`doc/topic-suggestions.md`](doc/topic-suggestions.md)
-- ✅ **Notation decoder across all 166 sections**: every mathematical symbol carries how to say it
+- ✅ **Notation decoder across all 194 sections**: every mathematical symbol carries how to say it
   and what it does, revealed on hover, tap or keyboard focus, and every formal statement whose
   notation a reader cannot pronounce carries an "In words" translation beneath it. The audience is
   a senior engineer with little or no mathematics, so the Description tab explains the idea before
@@ -314,8 +314,38 @@ faithfully in a browser, the section models it, says so plainly, and states what
   a conditional-expectation walk that cannot and a pairwise-independent family of 32 assignments
   whose average is exactly 18.5000. 9 sections live.
 
-`npm test` is green — wiring audit, 3 392 unit tests, and a **render audit** that boots the whole
-app headlessly and activates all 185 sections, failing on anything that throws while rendering, any
+- ✅ **M20 — NP-completeness, reductions and metaheuristics**: verifying a 12-vertex Hamiltonian
+  certificate in 24 steps at every size while refuting an obstructed instance costs 4 794 and grows
+  by a factor of 1.96 per vertex — and a *planted* instance where the search finds the answer in 13
+  steps against 20 to check it, which is why a benchmark of generated YES instances measures its own
+  generator; five reductions round-tripped forward, solved, mapped back and then **validated against
+  the source**, with the same nine-clause formula costing 10 target-solve steps satisfiable and
+  127 382 unsatisfiable through 3-colouring; six clause families of 42 variables whose DPLL node
+  column spans 1 to 1 439, where the two Horn rows never branch at all and PHP(6) branches 1 439
+  times on fewer clauses than the random row beside it — and the pigeonhole family measuring
+  *exactly* 2·h! − 1 nodes and h! conflicts from three holes to eight, which is Haken's theorem
+  observed rather than cited; one matrix under five quantifier prefixes where a SAT solver calls
+  every one satisfiable and three of the five sentences are false, beside ∀x∃y and ∃y∀x on
+  byte-identical clauses with opposite answers at every size; edge branching measuring a base of
+  2.0030 and 2^(k+1) − 1 nodes exactly, degree branching 1.4991, and the reduction rules cutting
+  every node count from 127 to 1 while *raising* the fitted base to 3.0163 — because a growth rate
+  fitted where preprocessing is still engaging measures the preprocessing disengaging; a Buss kernel
+  holding at 14 edges while its instance grows from 137 to 1 953; eight metaheuristics under one
+  40 000-evaluation budget where plain 2-opt reaches the best tour in the table using 2 430 of it and
+  four sophisticated methods spend all of it to arrive at the same place or worse, with the ranking
+  reversing at 2 000 and at 160 000; pairwise at-most-one costing 1 999 000 clauses against a
+  sequential counter's 5 996 at 2 000 literals, while six unit clauses of symmetry breaking take an
+  unsatisfiable colouring from 1 439 search nodes to 1 — and the three encodings giving *identical*
+  node counts on this DPLL, which is a fact about the solver and is reported as one; a phase
+  transition whose satisfiability crossover measures 4.38 and whose cost peak measures 4.50 at 44
+  variables rather than the asymptotic 4.27, with a restart cutoff of 1 000 flips cutting the mean
+  from 1 582 to 1 314 and a cutoff of 100 making it 4.3 times *worse* than no restarts at all; and a
+  nurse roster satisfying all five encoded requirements — checked against the produced grid by code
+  the encoder never touched — while giving five nurses five shifts and three of them two, because
+  fairness is an objective and a clause cannot carry one. 9 sections live.
+
+`npm test` is green — wiring audit, 3 555 unit tests, and a **render audit** that boots the whole
+app headlessly and activates all 194 sections, failing on anything that throws while rendering, any
 table left with an empty body, and any metric tile still showing a placeholder without a note
 explaining it. `npm run lint:size` reports no offenders.
 

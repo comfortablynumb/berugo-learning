@@ -745,10 +745,69 @@
               summary: 'Half of five hundred random assignments fall below the bound they satisfy in expectation, and thirty-two carefully chosen ones cannot.',
               tags: ['conditional expectations', 'probabilistic method', 'max cut', 'pairwise independence', 'small sample space', 'k wise independent', 'parity', 'max sat', 'deterministic', 'reproducibility']
             }]
+        },
+        {
+          id: 'M20',
+          title: 'NP-completeness, reductions and metaheuristics',
+          summary: 'How to recognise a hard problem, prove it hard, and then ship something anyway - with the certificate, the round trip and the budget all measured.',
+          sections: [
+            {
+              id: 'decision-problems',
+              title: 'Decision problems, P, NP and certificates',
+              summary: 'Checking a Hamiltonian certificate costs thirty steps at every size; proving there is none costs twenty-eight thousand.',
+              tags: ['decision problem', 'certificate', 'verifier', 'p vs np', 'co np', 'np hard', 'np complete', 'proof of work', 'easy to check', 'search versus verify']
+            },
+            {
+              id: 'reductions',
+              title: 'Reductions',
+              summary: 'Forward, solve, backward — and the fourth step nobody writes, which is the only one that catches a gadget of the wrong shape.',
+              tags: ['many one reduction', 'gadget', 'clause triangle', 'independent set', 'clique', 'set cover', 'partition', 'turing reduction', 'round trip', 'direction of the arrow']
+            },
+            {
+              id: 'sat-zoo',
+              title: 'SAT and the NP-complete zoo',
+              summary: 'A Horn formula of forty-two variables never branches at all, and a pigeonhole formula of the same size branches exactly two times six factorial minus one.',
+              tags: ['cook levin', '3 sat', 'karp chain', 'horn sat', '2 sat', 'xor sat', 'pigeonhole', 'schaefer dichotomy', 'unit propagation', 'dependency resolution']
+            },
+            {
+              id: 'beyond-np',
+              title: 'Beyond NP',
+              summary: 'The same clauses under five prefixes: a SAT solver calls every one satisfiable and three of the five sentences are false.',
+              tags: ['pspace', 'qbf', 'quantifier alternation', 'two player game', 'polynomial hierarchy', 'sigma two', 'counting class', 'exptime', 'strategy', 'certificate size']
+            },
+            {
+              id: 'parameterised-algorithms',
+              title: 'Exact exponential and parameterised algorithms',
+              summary: 'Edge branching measures a base of 2.0030, degree branching measures 1.4991, and kernelisation makes a graph fourteen times bigger shrink to the same fourteen edges.',
+              tags: ['fixed parameter tractable', 'branch and reduce', 'branching factor', 'kernelisation', 'buss kernel', 'vertex cover', 'treewidth', 'tree decomposition', 'w hierarchy', 'safe reduction rule']
+            },
+            {
+              id: 'metaheuristics',
+              title: 'Heuristics and metaheuristics',
+              summary: 'Eight methods, one budget, and plain 2-opt reaches the best tour in the table using six per cent of it.',
+              tags: ['local search', 'two opt', 'or opt', 'simulated annealing', 'tabu search', 'genetic algorithm', 'ant colony', 'grasp', 'evaluation budget', 'best so far curve']
+            },
+            {
+              id: 'using-solvers',
+              title: 'Using solvers instead of algorithms',
+              summary: 'Six unit clauses take the search from one thousand four hundred and thirty-nine nodes to one.',
+              tags: ['encoding', 'at most one', 'pairwise', 'commander', 'sequential counter', 'symmetry breaking', 'cardinality constraint', 'model then solve', 'clause count', 'dpll statistics']
+            },
+            {
+              id: 'hardness-in-practice',
+              title: 'Hardness in practice',
+              summary: 'The hardness peak is measured rather than quoted, and the shortest restart cutoff in the table makes the mean four times worse than no restarts at all.',
+              tags: ['phase transition', 'clause ratio', 'typical case', 'heavy tailed runtime', 'restarts', 'cutoff', 'walksat', 'backdoor', 'industrial instances', 'median not mean']
+            },
+            {
+              id: 'reduction-workshop',
+              title: 'Reduction workshop',
+              summary: 'A roster that satisfies every hard constraint and gives one nurse five shifts and another two, because fairness is an objective and a clause cannot carry one.',
+              tags: ['modelling', 'nurse rostering', 'validation', 'soft constraint', 'hard constraint', 'infeasibility', 'unsat versus timeout', 'formulation catalogue', 'assumptions', 'ship the validator']
+            }]
         }
       ],
       planned: [
-        { id: 'M20', title: 'NP-completeness, reductions and metaheuristics', sections: 9 },
         { id: 'M21', title: 'Online, external-memory and cache-oblivious algorithms', sections: 9 },
         { id: 'M22', title: 'Compression, information theory and error correction', sections: 11 },
         { id: 'M23', title: 'Applied cryptography and constant-time programming', sections: 11 }

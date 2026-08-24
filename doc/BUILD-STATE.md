@@ -3,7 +3,7 @@
 Where the implementation stands, and exactly what the next session should pick up.
 Update this file at the end of any session that leaves work unfinished.
 
-**Last updated:** 2026-08-24 (M19 complete; M20 started — four algorithm modules landed and wired, no sections yet. The tree is GREEN.)
+**Last updated:** 2026-08-24 (M20 complete — nine sections, 194 in the tree. The tree is GREEN.)
 
 ---
 
@@ -31,11 +31,12 @@ Update this file at the end of any session that leaves work unfinished.
 | M17 — numbers, bits and floating point | 10 | ✅ built, tested, render-audited |
 | M18 — numerical methods, transforms and optimisation | 10 | ✅ built, tested, render-audited |
 | M19 — randomised and approximation algorithms | 9 | ✅ built, tested, render-audited |
+| M20 — NP-completeness, reductions and metaheuristics | 9 | ✅ built, tested, render-audited |
 
-**The tree is GREEN.** `npm test` reports 3 392 unit tests with 0 failures (6 skipped — the
-wall-clock-budget starters the inline sandbox cannot fail); the wiring audit passes at 185 sections
-and 890 modules, the render audit activates all 185 with no exception and no empty table,
-`npm run lint:size` passes across 988 files, and `npm run build:css` is up to date.
+**The tree is GREEN.** `npm test` reports 3 555 unit tests with 0 failures (6 skipped — the
+wall-clock-budget starters the inline sandbox cannot fail); the wiring audit passes at 194 sections
+and 932 modules, the render audit activates all 194 with no exception and no empty table,
+`npm run lint:size` passes across 1 035 files, and `npm run build:css` is up to date.
 
 All nine M07 sections were opened in Chrome on `npm start`: the three tabs render, every demo
 figure matches the prose *exactly* (see "aligning the demo with the prose" below), the references
@@ -2305,85 +2306,195 @@ expectation 35.00, random mean 35.10 with 178 of 500 below and a worst at 70.0%,
 against an exact 40 from 16 384 assignments.
 
 
-## M20 — NP-completeness, reductions and metaheuristics (IN PROGRESS)
+## M20 — NP-completeness, reductions and metaheuristics (complete)
 
-Spec: `doc/milestones/M20-np-completeness.md`. Nine sections planned, **none wired yet** — the
-curriculum still has M20 in `planned`, and no section, template or content file exists. What is
-done is the bottom of the stack.
+Nine sections, 194 in the tree. Nine algorithm modules (four pre-existing, five new), three
+harnesses, no new viz renderer — `ErrorBandView` and `GraphView` covered every chart — nine
+template + section pairs, twelve content files, two property suites and three figure suites.
 
-**The tree is green.** The four modules below are committed, loaded from `index.html` and covered
-by nothing except the ad-hoc checks recorded here, so the first job of the next session is a
-`tests/unit/np-modules.test.js` that pins them.
+### The shape of the milestone
 
-### Done: four algorithm modules, measured but not yet unit-tested
+Every section is arranged around one discipline and it is what makes the whole thing measurable:
+**a hardness claim is a claim about the NO side.** A backtracking search on a planted YES instance
+often finds the answer faster than the verifier checks it — the demo has a row where it does — and
+nothing about the complexity class is visible there. So every comparison runs an instance with a
+planted answer and an instance with a *stated structural obstruction* side by side, and the column
+that carries the lesson is always the second one.
 
-| Module | State |
-|---|---|
-| `algorithms/sat-basics.js` | CNF shape, DPLL (unit propagation + pure literal, with decision/propagation/conflict/node counters and a node budget), Horn-SAT by propagation, brute-force SAT and MAX-SAT oracles, `toThreeCnf`. |
-| `algorithms/np-verifiers.js` | Step-counting verifiers and searches for Hamiltonian cycle, subset sum, 3-colouring, clique; verifiers for vertex cover and SAT; a `PROBLEMS` table of certificate shapes and costs. |
-| `algorithms/instance-generators.js` | `randomKSat` (ratio dial), `plantedKSat`, `pigeonhole`, `hornInstance`, planted/obstructed graph and subset-sum generators. |
-| `algorithms/reductions.js` | 3-SAT → independent set / clique / 3-colouring, vertex cover → set cover, subset sum → partition, each with forward, solve, backward and **validate against the source**. |
+### Modules
 
-### Measurements already taken, and what they settled
+`algorithms/`: `sat-basics.js`, `np-verifiers.js`, `instance-generators.js`, `reductions.js`
+(all four pre-existing, now pinned by tests), plus `qbf.js`, `fpt.js`, `metaheuristics.js`,
+`encodings.js` and `rostering.js`.
+`machines/`: `np-lab.js` (20.1–20.5), `heuristic-lab.js` (20.6 and 20.8), `solver-lab.js`
+(20.7 and 20.9).
 
-- **DPLL agrees with the brute-force oracle on 800 random 3-SAT instances** across ratios 2, 3,
-  4.27 and 6 at n = 12, and every satisfiable answer satisfies every clause.
-- **Pigeonhole is the exponential family it is advertised as.** PHP(4) through PHP(8) cost 47, 239,
-  1 439, 10 079 and 80 639 DPLL nodes while the clause count grows only 45 → 297. That is the
-  counter-example to "SAT solvers are fast now" and it belongs in 20.8.
-- **The verifier/search contrast has to be built on NO instances, not YES ones.** A backtracking
-  search on a planted YES instance is often *faster* than the verifier — Hamiltonian at 14 steps
-  against a 28-step verify — because it stumbles onto the planted answer. The honest framing, and
-  the one the demo must use, is that the verifier's cost is the same either way while the search
-  explodes on the NO side: 10 617 steps for non-Hamiltonian, 1 048 576 for unsolvable subset sum,
-  977 for non-3-colourable. That is the co-NP asymmetry, and it is what 20.1 is really about.
-- **Two generators had to be fixed before they measured anything.** The planted Hamiltonian cycle
-  was originally 0, 1, 2, … so the search walked straight down it; it is now a random permutation.
-  The K₄ obstruction in `nonColourableGraph` was on vertices 0–3, which a search that assigns
-  vertices in order hits in six steps; it is now on the last four, and the search costs 977.
+**Three harnesses rather than the spec's two.** `heuristic-lab` answers "which search wins under a
+budget" and `solver-lab` answers "what does an encoding cost and does the model say what you meant";
+they share nothing, and one file would pass 1 000 lines. `rostering.js` is a separate algorithm
+module for the same reason — the size limit wins over the spec's table.
 
-### Still to do, in order
+Content is split per third of the milestone — `-np`, `-np-beyond`, `-np-solvers`.
 
-1. **Unit tests for the four modules** — `tests/unit/np-modules.test.js`. DPLL against brute force,
-   Horn-SAT against brute force, every verifier rejecting malformed as well as wrong certificates,
-   and every reduction round-tripping on both satisfiable and unsatisfiable sources. The last one
-   was mid-run when the session stopped: `Reductions.run(name, formula)` over 40 seeds × 4 ratios ×
-   3 SAT reductions, asserting `agrees` and `valid`. **That run has not completed once**, so treat
-   the three SAT reductions as unverified.
-2. **Four more algorithm modules**: `qbf.js` (quantifier expansion, game-tree trace),
-   `fpt.js` (brute force / branch-and-reduce / Buss kernelisation for vertex cover),
-   `metaheuristics.js` (nearest neighbour, 2-opt, or-opt, annealing, tabu, genetic, ACO, GRASP on a
-   shared TSP evaluation budget), `encodings.js` (pairwise / commander / sequential at-most-one,
-   colouring → CNF, symmetry breaking).
-3. **Two harnesses**: `machines/np-lab.js` (20.1–20.5) and `machines/heuristic-lab.js` (20.6–20.9,
-   budgeted tournament with best-so-far curves). `machines/reduction-lab.js` already exists from
-   M14 and already round-trips; M20's reductions go in `np-lab.js` rather than being bolted on,
-   because reduction-lab is at 372 lines and the size limit wins over the spec's table.
-4. Then the usual: nine template + section pairs, `template-ids.test.js` FIRST, wiring, section
-   dumps, twelve content files, figure suites, docs.
+### Eight defects and false claims the measurements found
 
-### Section ids and prefixes to use (none are taken)
+1. **`Qbf.expandUniversals` was wrong for any prefix with more than one quantifier block.** It gave
+   every existential a fresh copy per expansion, which is correct only when every ∃ follows every ∀.
+   For `∃a ∀b ∃c`, `a` is chosen *before* `b` and must be SHARED across copies; giving it a fresh
+   copy makes the expansion strictly weaker. On pattern `EAE` at seed 14 a FALSE sentence expanded
+   to a satisfiable formula. Each existential now gets one copy per assignment of the universals
+   that *precede* it in the prefix. Only the round-trip test caught this — the answer was plausible
+   on most instances.
 
-`decision-problems` (`dcp-`), `reductions` (`rdx-`), `sat-zoo` (`saz-`), `beyond-np` (`bnp-`),
-`parameterised-algorithms` (`fpt-`), `metaheuristics` (`mth-`), `using-solvers` (`slv-`),
-`hardness-in-practice` (`hip-`), `reduction-workshop` (`rwk-`).
+2. **`Rostering.checkNoDayAfterNight` reported a violation for every rest day** in a scenario with
+   no night shift. `indexOf('night')` returns −1, which is also the rest-day marker, so
+   `row[day] === night` was true on every rest day. The encoder had already been guarded; the
+   *validator* had not, which is exactly the asymmetry the two-implementations discipline exists to
+   surface.
 
+3. **The reduction round-trip suite had never once completed**, and the reason is structural: the
+   target solvers are exhaustive searches, so an unsatisfiable source makes them enumerate. At
+   eighteen random clauses over three variables that is ~30 s per reduction. The suite now uses the
+   cheapest unsatisfiable 3-CNF there is — the eight clauses that rule out all eight assignments of
+   three variables — and finishes in milliseconds. **The demo is limited by the target solve, not by
+   the reduction**, and both the section and the module header say so.
+
+4. **The clique row's NO instance was measuring the sparsity, not the problem.** A sparse graph
+   asked for a clique three sizes above what it has is refuted in a few dozen steps: the row read
+   2.4× search-to-verify where the other three read 110× to 819×. A graph at density 0.5 asked the
+   same question reads 19.1×.
+
+5. **`hornStudy` compared Horn against Horn and showed nothing.** DPLL solves both in 1 node. It
+   became `islandStudy`: six clause families of the same variable count, where the node column spans
+   1 to 1 439 and the differences are structural rather than size.
+
+6. **`kernelSweep` grew random graphs, which never demonstrates the kernel.** At k = 12 a dense
+   random graph is decided by the rules or not shrunk at all. `Generators.hubInstance` builds the
+   fixture kernelisation is *for* — a few hubs joined to a great many leaves plus a scatter among the
+   leaves — and the kernel then holds at 13–14 edges while the instance grows from 137 edges to
+   1 953.
+
+7. **Annealing returned its own starting tour**, at every budget under a few thousand. The cooling
+   rate was a fixed 0.9995, which is a random walk when the budget is 1 500: the temperature never
+   falls far enough to settle. `Meta.coolingFor` now derives the rate from the *remaining budget* so
+   the temperature falls a thousandfold across whatever it is given.
+
+8. **`or-opt` was charged a full tour costing per candidate move** while 2-opt was charged a
+   four-lookup delta, so the same budget bought or-opt n times less search. Both now use an O(1)
+   delta. This is the commonest way a budgeted comparison is rigged without anybody intending it,
+   and it was in this milestone's own code first.
+
+Also: five `config()` functions passed the 50-line limit once the eight-bullet orientation arrays
+were written; hoisting the array into its own `orientation()` fixed all of them without touching a
+byte of prose. Two template id collisions (`rdx-steps` against its own `-note`, `saz-php` against a
+metric) were caught by `template-ids.test.js` before the render audit ran, which is why step 4 of
+the shape says to run it first.
+
+### Design decisions that are easy to undo by accident
+
+- **The bundled solver is DPLL and the encoding column cannot show what it is supposed to.** It
+  branches on the first unassigned variable, so the auxiliary variables an encoding introduces are
+  numbered after every decision variable and never change the search order: all three at-most-one
+  encodings give *identical* node counts. That is a fact about this solver rather than about
+  encodings, and 20.7 states it rather than printing the column and letting a reader draw the
+  obvious wrong conclusion. The propagation column is where the difference is visible.
+- **`largestIndependentSet` stays a plain enumeration.** It is the oracle the gadget constructions
+  are checked against, and a fast-but-subtly-wrong solver would produce a plausible answer on most
+  instances. The cost is the demo's instance size, and the section says so.
+- **The metaheuristic tournament reports evaluations OFFERED and evaluations USED.** Three of the
+  eight methods converge and cannot spend the rest of the budget. Dropping either column turns the
+  table into an overclaim in one direction or the other.
+- **The cooling sweep keeps a setting that is worse than both its neighbours** (13.06 against 2.61
+  and 52.23). A monotone sweep would be tidier and would hide the fact that tuning a proposal
+  distribution is a search rather than a direction — the same note M19's MCMC width sweep carries.
+- **`restartStudy` shares its random stream with the baseline.** The first attempt of every trial
+  uses the same seed the no-restart run used, so the difference between the columns is the strategy
+  rather than the seeds.
+- **The feasibility frontier keeps a row the solver cannot decide.** At 5 nurses the instance is
+  infeasible by a one-line counting argument and the solver exhausts its budget without a proof,
+  next to a row at 4 nurses that it *does* refute. Those two rows look identical to a caller, and
+  that is the section's whole point.
+- **`rostering.js` holds the requirement twice, in code that shares nothing.** `encode` builds
+  clauses; `validate` reads a finished grid and checks each requirement in the requirement's own
+  terms. A checker derived from the encoder checks the encoder against itself.
+
+### Measured figures quoted in the M20 examples
+
+`worked-examples-np.test.js`, `-np-beyond` and `-np-solvers` recompute every one *and* assert the
+prose still quotes it. Landmarks:
+
+Verification 24 steps against 4 794 to refute at 12 vertices, 2n exactly across a sweep from 8 to 15
+where refutation goes 369 → 28 378 at about 1.96× per vertex; 3-colouring's YES search at 13 steps
+against 20 to verify, and 2 213 to refute. Nine clauses becoming 27 vertices and 54 edges, solved in
+10 steps satisfiable and 4 662 unsatisfiable through independent set, 5 279 through clique and
+127 382 through 3-colouring; all five reductions agreeing and validating on both answers.
+
+Six families at 42 variables: Horn 85 clauses / 170 propagation steps / 1 node, Horn with a
+contradiction 87 / 86 / 1, random 3-SAT at ratios 2, 4.27 and 8 giving 15, 30 and 53 nodes, and
+PHP(6) giving 1 439 on 133 clauses. The pigeonhole family measuring **exactly** 2·h! − 1 nodes and
+h! conflicts from h = 3 to 8: 11, 47, 239, 1 439, 10 079, 80 639 against 22 to 297 clauses.
+
+Five prefixes on one 14-clause matrix: TRUE, FALSE, FALSE, TRUE, FALSE with 37, 223, 546, 277 and 46
+evaluation nodes and expansions of 14, 152, 208, 78 and 264 clauses; every row satisfiable as plain
+SAT. The two games at 6/19/51/127 and 6/14/30/62 nodes, TRUE and FALSE at every size on identical
+clauses, with strategies of 2, 4, 8 and 16 entries.
+
+Vertex cover on 20 vertices and 45 edges at k = 12: brute force 1 048 576 subsets, edge branching
+925 nodes, degree branching 13, all returning a valid cover of 12. Fitted bases 2.0030 / 3.0163 /
+1.4991 / 1.6712 across the four rule combinations, with edge branching at 127 nodes at the smallest
+budget and 4 095 at the largest refutable one against degree branching's 7 and 53. The kernel at 13,
+14, 14, 14, 14 edges while the instance grows 46 → 646 vertices and 137 → 1 953 edges, with 6 hubs
+forced every time. Treewidth 3, 4, 6, 7, 10 giving 16 to 2 048 states per bag.
+
+Eight metaheuristics on 30 cities at 40 000 evaluations: nearest neighbour 588.75 in 30, 2-opt
+481.52 in 2 430 (6.1% of the budget), or-opt 521.42 in 9 282, annealing 486.03, tabu 489.00, genetic
+552.96, ant colony 486.03, GRASP 481.52, against an MST bound of 403.41 and Christofides at 499.40.
+The winner at 2 000 is 2-opt at 489.02 and at 160 000 it is annealing, with four methods tied at
+481.52. Cooling at 0.00 / 2.61 / 13.06 / 52.23 giving 513.39 / 486.03 / 489.28 / 486.03, and 7
+accepted moves with 0 worsening at temperature zero. Fifteen cities against an exact optimum of
+327.51: five of eight optimal at a budget of 1 500, nearest neighbour 1.1646, genetic 1.0088, ant
+colony 1.0604.
+
+At-most-one priced exactly: 10 / 12 / 11 clauses at n = 5, 4 950 / 350 / 296 at n = 100, and
+1 999 000 / 6 999 / 5 996 at n = 2 000 — a factor of 333. Six models of an 18-task 6-slot instance,
+all agreeing with a 327-step hand-written colourer: 108 / 144 / 198 variables, 720 / 720 / 702
+clauses, 1 439 nodes each, 18 010 / 21 923 / 21 150 propagations, and 1 node each with six unit
+clauses of symmetry breaking. The slot sweep at 11, 47, 239, 1 439 nodes — 2·c! − 1 exactly — and 1
+with symmetry breaking, collapsing to 17/19 against 12 once the answer is YES.
+
+The phase transition at 44 variables over 60 instances per ratio: satisfiable fraction 100% down to
+0%, crossing one half at 4.38; medians 10, 14, 20, 36, 134, 256, 313, 247, 137, 53 with the peak at
+ratio 4.50 and a worst of 931 there; ratio 3 showing a median of 20 against a worst of 255. WalkSAT
+on one instance over 40 seeds: median 1 125, mean 1 582, p90 3 724, worst 6 060; a cutoff of 1 000
+giving mean 1 314 and p90 2 836 with 37 restarts, a cutoff of 3 000 doing almost nothing, and a
+cutoff of 100 taking 2 666 restarts to make the mean 6 747 — **4.3× worse than no restarts**.
+
+The roster: 8 013 clauses over 3 789 variables of which 3 600 are counters, solved in 4 707 nodes,
+with 189 / 3 171 / 54 / 1 935 / 2 664 clauses carrying the five requirements and all five holding in
+the produced grid. Shifts per nurse 5, 5, 5, 5, 5, 4, 2, 2, 2 — a spread of 3 the model does not
+constrain. The frontier at 4 / 5 / 6 / 7 / 8 nurses: proved infeasible in 14 663 nodes, budget
+exhausted at 40 000, then feasible at 6 327, 247 and 33.
+
+"""
 
 ## Next
 
-**Finish M20 — NP-completeness, reductions and metaheuristics.** Its four algorithm modules are
-already written, wired and green; the section immediately above lists exactly what remains and in
-what order. After it, onward through `doc/milestones/` in the order `doc/ROADMAP.md` gives.
+**M21 — Online, external-memory and cache-oblivious algorithms.** Nothing of it exists yet: no
+modules, no sections, and `curriculum-algorithms.js` still carries it in `planned`. The spec is
+`doc/milestones/M21-online-and-external.md`; it depends on M10 (sorting) and M37 (memory hierarchy,
+not yet built), so the cache model it needs is `machines/cache-sim.js` from M02 rather than
+anything from M37. After it, onward through `doc/milestones/` in the order `doc/ROADMAP.md` gives.
 
-M11 through M15 and M17 through M19 are complete apart from a human browser pass, which needs the Chrome
-extension connected; M16 has had one (see above, and the chart defect it found). `tools/section-dump.js` covers everything else the browser used to be needed for — it
-prints every metric, table and note a section renders, at any control setting, and since the
-`input`-event fix above that is finally true of slider settings too.
+M11 through M15 and M17 through M20 are complete apart from a human browser pass, which needs the
+Chrome extension connected; M16 has had one (see above, and the chart defect it found).
+`tools/section-dump.js` covers everything else the browser used to be needed for — it prints every
+metric, table and note a section renders, at any control setting, and since the `input`-event fix
+above that is finally true of slider settings too.
 
 A shared helper exists for the figure tests: `tests/support/worked-example-prose.js` exports
 `proseFor`, `quotes`, `fixed` and `grouped`.
 
-The shape to copy, unchanged through M18:
+The shape to copy, unchanged through M20:
 
 1. pure modules in `algorithms/` first, behind one shared interface;
 2. a `machines/` harness that drives every implementation through that interface, carrying a
@@ -2395,9 +2506,18 @@ The shape to copy, unchanged through M18:
    (or `group:<milestone>` to seed an empty group), then `node tests/render-audit.js <id>`;
 6. **dump every section with `node tools/section-dump.js <id>` and write the content from what it
    prints.** Measure first, then write the sentence that quotes the measurement — this is where
-   four of M13's six bugs and all four of M14's false claims were found;
-7. the four content files, split per quarter of the milestone to stay under 1 000 lines;
+   four of M13's six bugs, all four of M14's false claims and six of M20's eight were found;
+7. the four content files, split per third or quarter of the milestone to stay under 1 000 lines;
 8. `<topic>-modules.test.js` (property tests against a brute-force reference) and
    `worked-examples-<topic>*.test.js` (recompute every quoted figure *and* assert the prose still
    quotes it);
 9. `npm test && npm run lint:size && npm run build:css`, then the doc updates.
+
+Two things M20 added to the shape and worth keeping:
+
+- **An eight-bullet orientation array pushes `config()` over the 50-line limit.** Hoist it into its
+  own `orientation()` function; it costs nothing and preserves every string.
+- **When a demo's default settings are chosen after the prose is drafted, the figures disagree.**
+  Dump the section at its shipped defaults and align the prose to *that*, not to the probe you ran
+  while developing the module. Five figures in M20 were written from a different graph and caught
+  by the figure suite.

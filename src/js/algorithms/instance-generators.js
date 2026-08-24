@@ -279,6 +279,38 @@
       reason: 'vertices ' + clique.join(', ') + ' are mutually adjacent, and a K₄ needs four colours' };
   }
 
+  /* --------------------------------------------------------- vertex cover */
+
+  /**
+   * A few hubs joined to a great many leaves, plus a handful of edges among
+   * the leaves. This is the fixture kernelisation is *for*: every hub has
+   * degree far above k so the high-degree rule commits it, every leaf is then
+   * isolated and the isolated-vertex rule deletes it, and what survives is the
+   * scatter among the leaves — a graph whose size depends on `extra` and not
+   * on n. Growing the leaf count by a factor of sixteen must leave the kernel
+   * where it was, and if it does not, a rule is not firing.
+   */
+  function hubInstance(options) {
+    const settings = options || {};
+    const rng = Random.seeded(settings.seed === undefined ? 5 : settings.seed);
+    const hubs = settings.hubs === undefined ? 6 : settings.hubs;
+    const leaves = settings.leaves === undefined ? 80 : settings.leaves;
+    const extra = settings.extra === undefined ? 14 : settings.extra;
+    const attach = settings.attach === undefined ? 0.5 : settings.attach;
+    const graph = emptyGraph(hubs + leaves, 'hub-and-leaves');
+    const seen = new Set();
+
+    for (let h = 0; h < hubs; h += 1) {
+      for (let l = 0; l < leaves; l += 1) {
+        if (rng.next() < attach) addEdge(graph, h, hubs + l, seen);
+      }
+    }
+    for (let e = 0; e < extra; e += 1) {
+      addEdge(graph, hubs + rng.int(leaves), hubs + rng.int(leaves), seen);
+    }
+    return { graph: graph, hubs: hubs, leaves: leaves, extra: extra };
+  }
+
   /* ------------------------------------------------------------ subset sum */
 
   /** A planted subset: the target is the sum of a hidden selection. */
@@ -319,7 +351,7 @@
     hornInstance: hornInstance,
     hamiltonianGraph: hamiltonianGraph, nonHamiltonianGraph: nonHamiltonianGraph,
     cliqueGraph: cliqueGraph, colourableGraph: colourableGraph,
-    nonColourableGraph: nonColourableGraph,
+    nonColourableGraph: nonColourableGraph, hubInstance: hubInstance,
     subsetSumInstance: subsetSumInstance, unsolvableSubsetSum: unsolvableSubsetSum,
     rangeOf: rangeOf
   };
