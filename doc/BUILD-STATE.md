@@ -3,7 +3,7 @@
 Where the implementation stands, and exactly what the next session should pick up.
 Update this file at the end of any session that leaves work unfinished.
 
-**Last updated:** 2026-08-24 (M26 complete — ten sections, 258 in the tree. The tree is GREEN.)
+**Last updated:** 2026-08-24 (M27 complete — eleven sections, 269 in the tree. The tree is GREEN.)
 
 ---
 
@@ -38,11 +38,12 @@ Update this file at the end of any session that leaves work unfinished.
 | M24 — regular languages and finite automata | 11 | ✅ built, tested, render-audited |
 | M25 — context-free languages and parsing | 12 | ✅ built, tested, render-audited |
 | M26 — computability and complexity theory | 10 | ✅ built, tested, render-audited |
+| M27 — lambda calculus, type systems and semantics | 11 | ✅ built, tested, render-audited |
 
-**The tree is GREEN.** `npm test` reports 4 520 unit tests with 0 failures (6 skipped — the
-wall-clock-budget starters the inline sandbox cannot fail); the wiring audit passes at 258 sections
-and 1 219 modules, the render audit activates all 258 with no exception and no empty table,
-`npm run lint:size` passes across 1 345 files, and `npm run build:css` is up to date.
+**The tree is GREEN.** `npm test` reports 4 691 unit tests with 0 failures (6 skipped — the
+wall-clock-budget starters the inline sandbox cannot fail); the wiring audit passes at 269 sections
+and 1 271 modules, the render audit activates all 269 with no exception and no empty table,
+`npm run lint:size` passes, and `npm run build:css` is up to date.
 
 All nine M07 sections were opened in Chrome on `npm start`: the three tabs render, every demo
 figure matches the prose *exactly* (see "aligning the demo with the prose" below), the references
@@ -2952,14 +2953,94 @@ open questions in four separate columns, and an `unconditional` flag.
 
 ---
 
+## M27 notes worth keeping
+
+**The measurements the sections turn on.** Every one is produced by the module and asserted by
+`tests/unit/worked-examples-lambda.test.js`, which recomputes it *and* checks the prose still
+quotes it.
+
+- **27.1** `(λx. λy. x) y` reduces to `λy'. y` with the rename logged; the naive answer `λy. y` is
+  the identity and the right answer is a constant function. Five strategies on `(λx. λy. y) Ω`:
+  normal, call-by-name and head reduction finish in **1 step**, applicative and call-by-value
+  spend the whole budget at 50, 200 and 2 000 with the term unchanged. Factorial through Y:
+  9, 34, 159, 838, 5 057, 34 938 β-steps for 1, 1, 2, 6, 24, 120.
+- **27.2** Bracket abstraction sizes, plain against optimised: `λx y. x` 3 → 7 → 1;
+  `λf x. f (f x)` 7 → 35 → 11; `λx y z. x z (y z)` 10 → 61 → 1; `λa b c d. a b c d` 11 → 107 → 1.
+  All 7 fixtures agree with their lambda terms by α-equivalence.
+- **27.3** `(1 + 2) * (3 + 4)` gives 21 in 3 steps under both orders with different middle terms.
+  The eager-`if` variant gets stuck after 2 steps on `if iszero 0 then 1 + 1 else true + 1` and
+  has **2 applicable rules** there. Small step and big step agree on 8 of 8 fixtures.
+- **27.4** The exhaustive sweep: 215 terms of depth one, 64 well-typed, 0 stuck, 24 rejected that
+  would have run. With 2 000 sampled deeper terms: 224 / 0 / 99 of 1 991, 400 preservation steps
+  and 0 type changes.
+- **27.5** The let-polymorphism fixture: 13 rule applications, 12 equations, 9 fresh variables,
+  `Pair Number Boolean`. The lambda-bound version is rejected with a clash.
+- **27.6** Inhabitants: 1, 1, 2, 0, 0 for `∀α. α → α`, `∀α β. α → β → α`, `∀α. α → α → α`,
+  `∀α. α`, `∀α β. α → β`. Erasure: 12 → 5, 20 → 5 (identical erasures), 51 → 27, 23 → 9.
+- **27.7** 2 unsound pairs found by search, storing a Double and an Integer respectively; the
+  invariant declaration rejects both.
+- **27.8** `Eq (List (List Int))` → `dEqLista(dEqLista(dEqInt))`, 3 dictionaries at depth 3;
+  `Ord (List Int)` with superclasses → 5. 6 of 9 goals resolve.
+- **27.9** Witnesses `cons(false, nil)`, `blue`, `true , false`. Heuristic sizes 13, 9, 9, 13 on
+  the four-clause three-column matrix, all reaching 4 clauses.
+- **27.10** 3 correct programs with proofs that fail, 0 proofs that pass while execution fails.
+  wp blow-up 20, 58, 142, 326, 726, 1 590, 3 446.
+- **27.11** 12 programs × 4 disciplines, separating on exactly 2 rows: `leak` on weakening and
+  `useTwice` on contraction.
+
+### Bugs the process caught, and what found them
+
+- **GLR-style silent loss, again in a new place: the number-first read-back.** `λt. λf. f` is
+  Church FALSE *and* Church ZERO — the two encodings picked the same term — so reading numerals
+  first reported three booleans as `0`. Found by `tools/section-dump.js`, not by a test. The fix
+  reads each result at the kind its encoding claims and *marks the overloaded rows* rather than
+  hiding them, which turned a bug into the section's argument for types.
+- **The evaluation context was not value-gated.** `E ::= E + e | v + E` is the textbook
+  definition, and the `v` is load-bearing: without it, enumerating every permitted step finds two
+  at any term with two reducible operands, so the standard rules were non-deterministic *as
+  rules* while the implementation happened to be deterministic. The dump reported
+  "Deterministic = NO" at the default setting. Determinism is now checked by `allSteps`, which
+  enumerates rather than trusting the stepper.
+- **`divisionNoBound` verified over the naturals.** Restricting the bounded checker's domain to
+  `[0, 6]` silently proves invariants that hold only because nothing could go below zero. The
+  default domain is now `[-2, 5]`, and both results are shown in the section as the honest limit
+  of a bounded check.
+- **The default control setting made the heuristic table uniform.** The pattern-matching demo
+  opened on a two-clause match where all four column heuristics give 3 nodes, so the section's
+  central claim had no visible support. Changed to the four-clause three-column matrix, where
+  they give 13, 9, 9 and 13.
+- **Two exercises were vacuous and one solution was wrong.** The instance-resolution starter's
+  "two-way match" bug was never exercised by any test (the constructor names differed first), so
+  the starter passed; the exhaustiveness solution produced a legitimate witness that was not the
+  one the test named. Both were found by `tests/unit/exercises.test.js`, which asserts the
+  reference solution passes *and* the starter does not.
+
+### Three things M27 added to the shape and worth keeping
+
+- **The sandbox hands a graded test exactly one value.** There is no `helpers` argument. An
+  exercise that needs several functions must expose them through one entry — `function lab() {
+  return { … }; }` with `entry: 'lab'` — and the tests unpack it. Writing tests against a
+  `helpers` parameter that does not exist costs a rewrite of every assertion.
+- **A search's witnesses are the thing to test, not its count.** `unsoundWitnesses` and the
+  exhaustiveness checker both return values; the module tests verify each one independently
+  (the stored value really is accepted by the wide view and refused by the narrow one; the
+  pattern witness really matches no clause). A count is not evidence that the search works.
+- **When a claim is only true under a side condition, compute the side condition.** The
+  inhabitant enumerator builds abstractions and variables and never applications, so its count is
+  complete exactly when every argument position of the type is a bare type variable.
+  `enumerable(type)` says so, the metric prints it, and the test asserts it — rather than the
+  section quietly claiming five counts of which two would have been wrong on a different type.
+
+---
+
 ## Next
 
-**M27 — lambda calculus, type systems and semantics (11 sections).** Nothing of it exists yet:
-no modules, no sections, and its track file still carries it in `planned`. The spec is
-`doc/milestones/M27-lambda-and-types.md`, and it depends on M26, which is now built —
-`machines/model-zoo.js` already has an SKI reducer, and the section on equivalent models sets up
-the lambda calculus as the one model developed later. After it, onward through `doc/milestones/`
-in the order `doc/ROADMAP.md` gives.
+**M28 — compiler front end: build a language (9 sections).** Nothing of it exists yet: no
+modules, no sections, and its track file still carries it in `planned`. The spec is
+`doc/milestones/M28-compiler-frontend.md`, and everything it needs is now built — M25 supplies the
+parsers, M27 supplies the type checker, the derivation viewer and the operational semantics to
+define the language against. After it, onward through `doc/milestones/` in the order
+`doc/ROADMAP.md` gives.
 
 M11 through M15 and M17 through M24 are complete apart from a human browser pass, which needs the
 Chrome extension connected; M16 has had one (see above, and the chart defect it found).
@@ -3022,6 +3103,16 @@ Three things M26 added to the shape and worth keeping:
 - **When a formula predicts a curve, measure at the point the formula predicts.** Reporting a run
   maximum instead of the value at the predicted iteration made a correct Grover implementation
   look wrong for an afternoon.
+
+Three things M27 added to the shape and worth keeping:
+
+- **The sandbox hands a graded test exactly one value — there is no `helpers` argument.** An
+  exercise needing several functions exposes them through one `lab()` entry.
+- **Test a search's witnesses, not its count.** Verify independently that each one really has the
+  property the search claims to have found.
+- **When a claim holds only under a side condition, compute the side condition and print it.**
+  `SystemF.enumerable` is the pattern: the metric says whether the enumeration it just reported
+  is complete.
 
 Three things M25 added to the shape and worth keeping:
 

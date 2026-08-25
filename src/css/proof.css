@@ -1,0 +1,164 @@
+/*
+ * Proof trees, decision trees and reduction traces.
+ *
+ * Three renderers that draw an argument rather than a measurement, so they
+ * live apart from the chart styles: a derivation in the natural-deduction
+ * shape, a decision tree as an indented list of tests, and a reduction trace
+ * as numbered rows.
+ */
+/* ---------------------------------------------------------------------------
+   Proof trees. Premises sit in a row above a rule bar; the conclusion sits
+   below it. Flexbox does the whole layout, so a wide derivation scrolls inside
+   its own box instead of pushing the page sideways.
+   --------------------------------------------------------------------------- */
+
+.derivation {
+  overflow-x: auto;
+  padding: 0.5rem 0.25rem;
+  font-size: 0.8rem;
+}
+
+.derivation-step {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 0.5rem;
+  vertical-align: bottom;
+}
+
+.derivation-premises {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.derivation-axiom {
+  min-height: 0.6rem;
+  opacity: 0.5;
+}
+
+.derivation-bar {
+  position: relative;
+  width: 100%;
+  border-top: 1px solid color-mix(in srgb, var(--hue-gray) 55%, transparent);
+  margin: 0.15rem 0 0.15rem 0;
+}
+
+.derivation-rule {
+  position: absolute;
+  left: calc(100% + 0.3rem);
+  top: -0.55rem;
+  font-size: 0.66rem;
+  white-space: nowrap;
+  opacity: 0.8;
+  color: var(--hue-blue);
+}
+
+.derivation-conclusion {
+  white-space: nowrap;
+  font-family: var(--font-mono, monospace);
+}
+
+.derivation-note {
+  display: block;
+  font-family: inherit;
+  font-size: 0.68rem;
+  opacity: 0.85;
+  color: var(--hue-red);
+  white-space: normal;
+  max-width: 22rem;
+}
+
+.derivation-bad > .derivation-bar {
+  border-top-color: var(--hue-red);
+}
+
+.derivation-bad > .derivation-bar > .derivation-rule {
+  color: var(--hue-red);
+}
+
+.derivation-truncated {
+  font-size: 0.72rem;
+  opacity: 0.75;
+  margin-top: 0.4rem;
+}
+
+/* --------------------------------------------------------------------------
+   Decision trees: an indented list, because the question is "what is tested
+   next", not "what justifies this".
+   -------------------------------------------------------------------------- */
+
+.decision-tree,
+.decision-branches {
+  list-style: none;
+  margin: 0;
+  padding-left: 0.9rem;
+  font-size: 0.78rem;
+}
+
+.decision-node {
+  padding: 0.08rem 0;
+  border-left: 1px solid color-mix(in srgb, var(--hue-gray) 25%, transparent);
+  padding-left: 0.5rem;
+}
+
+.decision-label {
+  display: inline-block;
+  min-width: 5.5rem;
+  font-weight: 600;
+  color: var(--hue-purple);
+}
+
+.decision-test {
+  font-family: var(--font-mono, monospace);
+}
+
+.decision-leaf {
+  color: var(--hue-green);
+  font-weight: 600;
+}
+
+.decision-fail {
+  color: var(--hue-red);
+}
+
+/* Reduction traces: index, term, rule. */
+
+.trace-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.78rem;
+}
+
+.trace-step {
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+  padding: 0.1rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--hue-gray) 12%, transparent);
+}
+
+.trace-index {
+  min-width: 1.6rem;
+  text-align: right;
+  opacity: 0.6;
+}
+
+.trace-term {
+  flex: 1 1 auto;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.trace-rule {
+  color: var(--hue-blue);
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+
+.trace-more {
+  opacity: 0.7;
+  justify-content: center;
+}

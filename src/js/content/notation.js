@@ -91,7 +91,17 @@
     { token: '¬', reads: 'not',
       means: 'The negation of what follows - logical NOT.' },
     { token: '⊥', reads: 'bottom',
-      means: '"No value" - a distinguished element meaning undefined or unreachable, deliberately kept incomparable with real values so it can never win a minimum by accident.' }
+      means: '"No value" - a distinguished element meaning undefined or unreachable, deliberately kept incomparable with real values so it can never win a minimum by accident. In denotational semantics it is the meaning of a program that never finishes.' },
+    { token: '⊢', reads: 'proves, or entails',
+      means: 'The turnstile. What is on the left is what you are allowed to assume; what is on the right follows from it. In a typing judgement `Γ ⊢ e : τ`, Γ lists the assumptions about free variables and the rest says what the expression\'s type is under them.' },
+    { token: '⇓', reads: 'evaluates to',
+      means: 'A big-step evaluation: `e ⇓ v` says the expression e finishes and produces the value v, in one derivation with no intermediate terms. When no derivation exists the expression either goes wrong or never finishes, and the notation cannot tell you which.' },
+    { token: '⊔', reads: 'join, or least upper bound',
+      means: 'The most specific type that both operands can be used as - what a language must infer for a conditional whose two branches have different types. Its mirror image is ⊓, the meet.' },
+    { token: '⊓', reads: 'meet, or greatest lower bound',
+      means: 'The most general type that is usable as both operands. When no such type exists the answer is ⊥, which is why an intersection of two conflicting types is either rejected or uninhabited.' },
+    { token: '∘', reads: 'composed with',
+      means: 'Apply the right-hand one first, then the left. `S₂ ∘ S₁` applied to something means substitute with S₁ and then with S₂ - the order that looks backwards and is not.' }
   ];
 
   /* Relations and arithmetic. */
@@ -217,6 +227,12 @@
       means: 'The condition number: how much a small relative wobble in the input can be magnified on the way to the output. It is a property of the problem rather than of any code, and log10 of it is roughly how many decimal digits you should expect to lose.' },
     { token: 'λ', reads: 'lambda',
       means: 'An anonymous function in the lambda calculus, an arrival rate in queueing, or an eigenvalue in linear algebra. ' + CONTEXT },
+    { token: 'Λ', reads: 'capital lambda',
+      means: 'A type abstraction in System F: `Λα. e` is a term parameterised by a TYPE, and `e [T]` supplies one. Hindley-Milner hides both operations; writing them down is what buys higher-rank polymorphism and costs decidable inference. Not the same as lowercase λ, which abstracts over a value.' },
+    { token: 'η', reads: 'eta',
+      means: 'The rule that a wrapper which only forwards is the thing it wraps: `λx. f x` is `f` when x is not free in f. It is what justifies point-free style, and it turns up in combinator compilation as the optimisation `S (K a) I → a`.' },
+    { token: 'ᾱ', reads: 'alpha-bar, meaning a list of type variables',
+      means: 'A whole sequence of type variables at once, written with a bar rather than spelled out. `∀ᾱ. τ` quantifies over all of them.' },
     { token: 'μ', reads: 'mu',
       means: 'The mean of a distribution, or a service rate in queueing - how many items a server finishes per unit time. ' + CONTEXT },
     { token: 'µ', reads: 'mu',

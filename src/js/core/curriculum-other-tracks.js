@@ -307,9 +307,81 @@
               tags: ['qubit', 'superposition', 'entanglement', 'unitary gate', 'measurement', 'deutsch jozsa', 'grover', 'shor', 'bqp', 'post quantum']
             }]
         }
+        ,
+        {
+          id: 'M27',
+          title: 'Lambda calculus, type systems and semantics',
+          summary: 'The theory behind every language feature engineers argue about, with each type system implemented as a checker that shows its work.',
+          sections: [
+            {
+              id: 'the-untyped-lambda-calculus',
+              title: 'The untyped lambda calculus',
+              summary: 'Five strategies on one term where three finish in a step and two spend the whole budget, and a capture fixture whose naive answer is the identity and whose right answer is not.',
+              tags: ['lambda calculus', 'free variables', 'capture avoiding substitution', 'alpha equivalence', 'beta reduction', 'eta', 'church encoding', 'y combinator', 'normal order', 'call by value']
+            },
+            {
+              id: 'combinatory-logic-and-compilation',
+              title: 'Combinatory logic and compilation',
+              summary: 'Eleven nodes compiled to one hundred and seven by the plain algorithm and to one by the optimised one, with every fixture checked to compute the same function either way.',
+              tags: ['combinator', 'ski', 'bckw', 'bracket abstraction', 'point free', 'graph reduction', 'schonfinkel', 'closure conversion', 'sharing', 'size blowup']
+            },
+            {
+              id: 'operational-semantics',
+              title: 'Operational semantics',
+              summary: 'Three rule sets over one language: two agree on every answer and differ in every trace, and the third gets stuck on a branch that was never going to run.',
+              tags: ['small step', 'big step', 'evaluation context', 'congruence rule', 'computation rule', 'stuck term', 'determinism', 'confluence', 'inference rules', 'interpreter']
+            },
+            {
+              id: 'the-simply-typed-lambda-calculus',
+              title: 'The simply typed lambda calculus',
+              summary: 'All two hundred and fifteen terms of depth one typed and run: zero well-typed terms get stuck, and twenty-four rejected ones would have worked.',
+              tags: ['typing judgement', 'context', 't-app', 'type checking', 'progress', 'preservation', 'soundness', 'strong normalisation', 'curry howard', 'conservatism']
+            },
+            {
+              id: 'type-inference-and-hindley-milner',
+              title: 'Type inference and Hindley-Milner',
+              summary: 'The same body typed and rejected depending on one generalisation step, with every equation unification was asked to solve printed in the order it was asked.',
+              tags: ['algorithm w', 'unification', 'occurs check', 'substitution composition', 'generalisation', 'instantiation', 'principal type', 'let polymorphism', 'value restriction', 'error messages']
+            },
+            {
+              id: 'polymorphism-and-system-f',
+              title: 'Polymorphism and System F',
+              summary: 'The inhabitants of a polymorphic type counted by enumeration: exactly one for the identity type, exactly two for the next, and none at all for two others.',
+              tags: ['system f', 'type abstraction', 'type application', 'rank 2', 'undecidable inference', 'parametricity', 'free theorem', 'existential type', 'erasure', 'turbofish']
+            },
+            {
+              id: 'subtyping-and-variance',
+              title: 'Subtyping and variance',
+              summary: 'The covariant-array hole found by search rather than recalled, with the value that breaks each admitted pair and a check that the invariant version rejects both.',
+              tags: ['subsumption', 'width subtyping', 'depth subtyping', 'contravariance', 'covariance', 'invariance', 'declaration site variance', 'array store exception', 'bounded quantification', 'join and meet']
+            },
+            {
+              id: 'beyond-plain-generics',
+              title: 'Beyond plain generics',
+              summary: 'A constraint elaborated into the dictionary expression a compiler inserts, and the same goal resolving to a different dictionary once two instances overlap.',
+              tags: ['type class', 'dictionary passing', 'instance resolution', 'superclass', 'coherence', 'overlapping instances', 'orphan instance', 'ambiguity', 'higher kinded', 'trait']
+            },
+            {
+              id: 'algebraic-data-types-and-pattern-matching',
+              title: 'Algebraic data types and pattern matching',
+              summary: 'Incomplete matches answered with a value you could paste into a test, and four column heuristics compiling the same matrix to thirteen nodes or to nine.',
+              tags: ['sum type', 'product type', 'recursive type', 'decision tree', 'maranget', 'usefulness', 'exhaustiveness', 'redundancy', 'witness', 'sealed types']
+            },
+            {
+              id: 'denotational-and-axiomatic-semantics',
+              title: 'Denotational and axiomatic semantics',
+              summary: 'Nine annotated programs proved and separately executed, with two correct programs whose invariants are too weak and a formula that doubles per nested branch.',
+              tags: ['hoare triple', 'weakest precondition', 'loop invariant', 'verification condition', 'partial correctness', 'denotational', 'least fixed point', 'bottom', 'bounded check', 'counterexample']
+            },
+            {
+              id: 'substructural-types-and-ownership',
+              title: 'Substructural types and ownership',
+              summary: 'Twelve programs against four disciplines where the columns separate on exactly two structural rules, and every borrow error names the earlier line responsible.',
+              tags: ['weakening', 'contraction', 'linear types', 'affine types', 'ownership', 'borrowing', 'move semantics', 'aliasing xor mutation', 'lifetime', 'session types']
+            }]
+        }
       ],
       planned: [
-        { id: 'M27', title: 'Lambda calculus, type systems and semantics', sections: 11 },
         { id: 'M28', title: 'Compiler front end — build a language', sections: 9 },
         { id: 'M29', title: 'IR, SSA and optimisation', sections: 10 },
         { id: 'M30', title: 'Code generation, bytecode VMs and JIT', sections: 10 },

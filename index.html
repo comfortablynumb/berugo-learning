@@ -321,6 +321,17 @@
       <section data-section="circuits-and-non-uniform-computation" hidden><div class="section-body"><div id="circuits-and-non-uniform-computation-content"></div></div></section>
       <section data-section="kolmogorov-complexity-and-randomness" hidden><div class="section-body"><div id="kolmogorov-complexity-and-randomness-content"></div></div></section>
       <section data-section="quantum-computation" hidden><div class="section-body"><div id="quantum-computation-content"></div></div></section>
+      <section data-section="the-untyped-lambda-calculus" hidden><div class="section-body"><div id="the-untyped-lambda-calculus-content"></div></div></section>
+      <section data-section="combinatory-logic-and-compilation" hidden><div class="section-body"><div id="combinatory-logic-and-compilation-content"></div></div></section>
+      <section data-section="operational-semantics" hidden><div class="section-body"><div id="operational-semantics-content"></div></div></section>
+      <section data-section="the-simply-typed-lambda-calculus" hidden><div class="section-body"><div id="the-simply-typed-lambda-calculus-content"></div></div></section>
+      <section data-section="type-inference-and-hindley-milner" hidden><div class="section-body"><div id="type-inference-and-hindley-milner-content"></div></div></section>
+      <section data-section="polymorphism-and-system-f" hidden><div class="section-body"><div id="polymorphism-and-system-f-content"></div></div></section>
+      <section data-section="subtyping-and-variance" hidden><div class="section-body"><div id="subtyping-and-variance-content"></div></div></section>
+      <section data-section="beyond-plain-generics" hidden><div class="section-body"><div id="beyond-plain-generics-content"></div></div></section>
+      <section data-section="algebraic-data-types-and-pattern-matching" hidden><div class="section-body"><div id="algebraic-data-types-and-pattern-matching-content"></div></div></section>
+      <section data-section="denotational-and-axiomatic-semantics" hidden><div class="section-body"><div id="denotational-and-axiomatic-semantics-content"></div></div></section>
+      <section data-section="substructural-types-and-ownership" hidden><div class="section-body"><div id="substructural-types-and-ownership-content"></div></div></section>
     </main>
   </div>
 
@@ -661,6 +672,21 @@
   <script src="src/js/algorithms/quantum-sim.js"></script>
   <script src="src/js/machines/language-lab.js"></script>
   <script src="src/js/machines/model-lab.js"></script>
+  <script src="src/js/machines/lambda-engine.js"></script>
+  <script src="src/js/machines/type-engine.js"></script>
+  <script src="src/js/algorithms/combinators.js"></script>
+  <script src="src/js/algorithms/small-step.js"></script>
+  <script src="src/js/algorithms/arith-types.js"></script>
+  <script src="src/js/algorithms/hm-inference.js"></script>
+  <script src="src/js/machines/hm-lab.js"></script>
+  <script src="src/js/algorithms/system-f.js"></script>
+  <script src="src/js/machines/system-f-lab.js"></script>
+  <script src="src/js/algorithms/subtyping.js"></script>
+  <script src="src/js/algorithms/typeclasses.js"></script>
+  <script src="src/js/algorithms/pattern-compile.js"></script>
+  <script src="src/js/algorithms/hoare.js"></script>
+  <script src="src/js/machines/verify-lab.js"></script>
+  <script src="src/js/algorithms/ownership.js"></script>
 
   <script src="src/js/viz/chart-base.js"></script>
   <script src="src/js/viz/canvas.js"></script>
@@ -692,6 +718,7 @@
   <script src="src/js/viz/parse-tree-view.js"></script>
   <script src="src/js/viz/parse-table-view.js"></script>
   <script src="src/js/viz/function-plot.js"></script>
+  <script src="src/js/viz/derivation-view.js"></script>
 
   <!-- Components -->
   <script src="src/js/components/tab-controller.js"></script>
@@ -948,14 +975,28 @@
   <script src="src/js/content/concepts-computability.js"></script>
   <script src="src/js/content/concepts-complexity.js"></script>
   <script src="src/js/content/concepts-limits.js"></script>
+  <script src="src/js/content/concepts-lambda.js"></script>
+  <script src="src/js/content/concepts-types.js"></script>
+  <script src="src/js/content/concepts-semantics.js"></script>
   <script src="src/js/content/examples-computability.js"></script>
   <script src="src/js/content/examples-complexity.js"></script>
   <script src="src/js/content/examples-limits.js"></script>
+  <script src="src/js/content/examples-lambda.js"></script>
+  <script src="src/js/content/examples-types.js"></script>
+  <script src="src/js/content/examples-semantics.js"></script>
   <script src="src/js/content/reference-computability.js"></script>
   <script src="src/js/content/reference-complexity.js"></script>
   <script src="src/js/content/reference-limits.js"></script>
+  <script src="src/js/content/reference-lambda.js"></script>
+  <script src="src/js/content/reference-types.js"></script>
+  <script src="src/js/content/reference-semantics.js"></script>
   <script src="src/js/content/exercises-computability.js"></script>
   <script src="src/js/content/exercises-complexity.js"></script>
+  <script src="src/js/content/exercises-lambda.js"></script>
+  <script src="src/js/content/exercises-types.js"></script>
+  <script src="src/js/content/exercises-variance.js"></script>
+  <script src="src/js/content/exercises-semantics.js"></script>
+  <script src="src/js/content/exercises-ownership.js"></script>
   <script src="src/js/content/exercises-limits.js"></script>
   <script src="src/js/content/examples-automata-applied.js"></script>
   <script src="src/js/content/reference-automata-applied.js"></script>
@@ -1564,6 +1605,28 @@
   <script src="src/js/sections/kolmogorov-complexity-and-randomness-section.js"></script>
   <script src="src/js/sections/quantum-computation-template.js"></script>
   <script src="src/js/sections/quantum-computation-section.js"></script>
+  <script src="src/js/sections/the-untyped-lambda-calculus-template.js"></script>
+  <script src="src/js/sections/the-untyped-lambda-calculus-section.js"></script>
+  <script src="src/js/sections/combinatory-logic-and-compilation-template.js"></script>
+  <script src="src/js/sections/combinatory-logic-and-compilation-section.js"></script>
+  <script src="src/js/sections/operational-semantics-template.js"></script>
+  <script src="src/js/sections/operational-semantics-section.js"></script>
+  <script src="src/js/sections/the-simply-typed-lambda-calculus-template.js"></script>
+  <script src="src/js/sections/the-simply-typed-lambda-calculus-section.js"></script>
+  <script src="src/js/sections/type-inference-and-hindley-milner-template.js"></script>
+  <script src="src/js/sections/type-inference-and-hindley-milner-section.js"></script>
+  <script src="src/js/sections/polymorphism-and-system-f-template.js"></script>
+  <script src="src/js/sections/polymorphism-and-system-f-section.js"></script>
+  <script src="src/js/sections/subtyping-and-variance-template.js"></script>
+  <script src="src/js/sections/subtyping-and-variance-section.js"></script>
+  <script src="src/js/sections/beyond-plain-generics-template.js"></script>
+  <script src="src/js/sections/beyond-plain-generics-section.js"></script>
+  <script src="src/js/sections/algebraic-data-types-and-pattern-matching-template.js"></script>
+  <script src="src/js/sections/algebraic-data-types-and-pattern-matching-section.js"></script>
+  <script src="src/js/sections/denotational-and-axiomatic-semantics-template.js"></script>
+  <script src="src/js/sections/denotational-and-axiomatic-semantics-section.js"></script>
+  <script src="src/js/sections/substructural-types-and-ownership-template.js"></script>
+  <script src="src/js/sections/substructural-types-and-ownership-section.js"></script>
   <script src="src/js/app.js"></script>
 </body>
 </html>

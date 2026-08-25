@@ -14,14 +14,14 @@ faithfully in a browser, the section models it, says so plainly, and states what
 
 ## Status
 
-**M00–M26 shipped (258 sections). Building the curriculum, milestone by milestone.**
+**M00–M27 shipped (269 sections). Building the curriculum, milestone by milestone.**
 
 - ✅ Curriculum designed: 65 milestones, 634 sections, 11 tracks — one file per milestone in
   [`doc/milestones/`](doc/milestones/)
 - ✅ Architecture and conventions fixed — [`doc/architecture.md`](doc/architecture.md)
 - ✅ Build order and dependency graph — [`doc/ROADMAP.md`](doc/ROADMAP.md)
 - ✅ Scope decisions recorded — [`doc/topic-suggestions.md`](doc/topic-suggestions.md)
-- ✅ **Notation decoder across all 258 sections**: every mathematical symbol carries how to say it
+- ✅ **Notation decoder across all 269 sections**: every mathematical symbol carries how to say it
   and what it does, revealed on hover, tap or keyboard focus, and every formal statement whose
   notation a reader cannot pronounce carries an "In words" translation beneath it. The audience is
   a senior engineer with little or no mathematics, so the Description tab explains the idea before
@@ -515,7 +515,7 @@ faithfully in a browser, the section models it, says so plainly, and states what
   is a rotation. 10 sections live.
 
 `npm test` is green — wiring audit, 4 520 unit tests, and a **render audit** that boots the whole
-app headlessly and activates all 258 sections, failing on anything that throws while rendering, any
+app headlessly and activates all 269 sections, failing on anything that throws while rendering, any
 table left with an empty body, and any metric tile still showing a placeholder without a note
 explaining it. `npm run lint:size` reports no offenders.
 
@@ -523,6 +523,34 @@ The render audit is not a substitute for opening the page, and M16's browser pas
 
 ### The shell
 
+- ✅ **M27 — lambda calculus, type systems and semantics**: the theory behind every language
+  feature engineers argue about, with each type system implemented as a checker that shows its
+  work. Capture-avoiding substitution shown doing the rename — `(λx. λy. x) y` gives **λy'. y**,
+  a constant function, where the naive answer is the identity; five reduction strategies on
+  `(λx. λy. y) Ω` where **three finish in one step and two spend the entire budget** at 50, 200
+  and 2 000; factorial through the Y combinator correct at every n and costing **34 938 β-steps
+  by 5!**, growing about 5–7× per row. Bracket abstraction measured rather than described:
+  `λa b c d. a b c d` is 11 nodes as a lambda term, **107 after the plain four-case algorithm and
+  1 after Schönfinkel's two rewrite rules**, with every compilation checked to reduce to the same
+  normal form as the original by α-equivalence. Three rule sets over one small language, where
+  left-to-right and right-to-left **agree on all 8 fixtures and differ on every trace**, and a
+  plausible eager-`if` rule turns a terminating program into a stuck one and finds **2 applicable
+  rules at once**. Soundness measured instead of quoted: all **215 terms of depth one** typed and
+  run, **0 well-typed terms stuck**, **0 of 400 steps changing a type**, and **99 of 1 991
+  rejections that would have run fine** — the price of static checking, counted. Hindley–Milner
+  with the same body typed and rejected depending on one generalisation step, every equation
+  printed in the order the traversal produced it. Parametricity by enumeration: **exactly one
+  inhabitant of ∀α. α → α, exactly two of ∀α. α → α → α, none of ∀α. α** — and the count claimed
+  only where the enumeration is provably complete. The covariant-array hole **found by search**
+  rather than recalled, with the value that breaks each of the 2 admitted pairs and a check that
+  the invariant declaration rejects both. Type classes elaborated into the dictionary a compiler
+  inserts, and the same goal resolving to a **different dictionary** once two instances overlap.
+  Incomplete matches answered with a value you could paste into a test (**cons(false, nil)**), and
+  four column heuristics compiling one matrix to **13 nodes or to 9**. Nine annotated programs
+  proved and separately executed, where **3 are correct programs whose invariants are too weak** —
+  and a weakest precondition that reaches **3 446 nodes at seven nested branches**. Twelve
+  programs against four substructural disciplines, separating on **exactly 2 rows**, one per
+  structural rule. 11 sections live.
 - **The whole syllabus in the nav.** The sidebar lists all eleven tracks — *How to use this site*,
   Algorithms, Data structures, Computer architecture, Operating systems, Automata/languages/compilers,
   Networking, Data systems, Distributed systems, Engineering practice, Practice and mastery — and
