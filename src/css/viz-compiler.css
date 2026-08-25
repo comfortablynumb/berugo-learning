@@ -1,0 +1,166 @@
+/*
+ * Compiler-section styles (M28 onward).
+ *
+ * Split out of `viz.css`, which reached the thousand-line limit exactly at this
+ * milestone. A milestone boundary is the right seam: nothing here is shared
+ * with the chart renderers, and both files stay readable.
+ */
+
+/* ---------------------------------------------------------- M28: the compiler
+
+   The AST explorer is text, not a drawing: what the section teaches is the
+   correspondence between a node and a range of characters, and that wants
+   selectable text and a scrollbar rather than eighty circles. */
+
+.ast-tree {
+  max-height: 22rem;
+  overflow: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 0.35rem;
+  background: var(--surface-sunken);
+  padding: 0.2rem 0;
+}
+
+.ast-node {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  line-height: 1.5;
+  padding: 0.05rem 0.4rem;
+  cursor: pointer;
+}
+
+.ast-node:hover {
+  background: color-mix(in srgb, var(--hue-blue) 10%, transparent);
+}
+
+.ast-node.is-selected {
+  background: color-mix(in srgb, var(--hue-amber) 24%, transparent);
+}
+
+/* A synthesised node carries a span it did not create, so it is marked —
+   otherwise the desugaring viewer looks like it invented source positions. */
+.ast-node.is-synthetic .ast-kind {
+  font-style: italic;
+  color: var(--hue-purple);
+}
+
+.ast-kind {
+  font-weight: 600;
+}
+
+.ast-detail {
+  color: var(--text-muted);
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ast-span {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  flex: 0 0 auto;
+}
+
+.ast-source {
+  margin: 0;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.35rem;
+  background: var(--surface-sunken);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  overflow-x: auto;
+  max-height: 22rem;
+}
+
+.ast-mark {
+  background: color-mix(in srgb, var(--hue-amber) 38%, transparent);
+  color: inherit;
+  border-radius: 0.15rem;
+}
+
+/* Trivia is shown rather than dropped, because "one lexer serves the compiler,
+   the formatter and the language server" is a claim the reader should be able
+   to check by looking. */
+.token-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+  max-height: 16rem;
+  overflow: auto;
+}
+
+.token-chip {
+  display: inline-flex;
+  flex-direction: column;
+  padding: 0.12rem 0.32rem;
+  border-radius: 0.25rem;
+  background: color-mix(in srgb, var(--hue-gray) 14%, transparent);
+  font-family: var(--font-mono);
+  line-height: 1.25;
+}
+
+.token-kind {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.token-text {
+  font-size: 0.76rem;
+}
+
+.token-keyword { background: color-mix(in srgb, var(--hue-purple) 20%, transparent); }
+.token-name { background: color-mix(in srgb, var(--hue-blue) 16%, transparent); }
+.token-number { background: color-mix(in srgb, var(--hue-green) 16%, transparent); }
+.token-string { background: color-mix(in srgb, var(--hue-teal) 18%, transparent); }
+.token-operator { background: color-mix(in srgb, var(--hue-amber) 18%, transparent); }
+.token-error { background: color-mix(in srgb, var(--hue-red) 28%, transparent); }
+
+.token-trivia {
+  background: transparent;
+  border: 1px dashed var(--border-color);
+  color: var(--text-muted);
+}
+
+.diagnostic-block {
+  border: 1px solid var(--border-color);
+  border-left: 3px solid var(--hue-red);
+  border-radius: 0.35rem;
+  padding: 0.5rem 0.7rem;
+  margin-bottom: 0.5rem;
+  background: var(--surface-sunken);
+}
+
+.diagnostic-head {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--hue-red);
+}
+
+.diagnostic-code {
+  margin: 0.3rem 0;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.4;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.diagnostic-message {
+  margin: 0.2rem 0 0;
+  font-size: 0.82rem;
+}

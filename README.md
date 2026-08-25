@@ -14,14 +14,14 @@ faithfully in a browser, the section models it, says so plainly, and states what
 
 ## Status
 
-**M00–M27 shipped (269 sections). Building the curriculum, milestone by milestone.**
+**M00–M28 shipped (278 sections). Building the curriculum, milestone by milestone.**
 
 - ✅ Curriculum designed: 65 milestones, 634 sections, 11 tracks — one file per milestone in
   [`doc/milestones/`](doc/milestones/)
 - ✅ Architecture and conventions fixed — [`doc/architecture.md`](doc/architecture.md)
 - ✅ Build order and dependency graph — [`doc/ROADMAP.md`](doc/ROADMAP.md)
 - ✅ Scope decisions recorded — [`doc/topic-suggestions.md`](doc/topic-suggestions.md)
-- ✅ **Notation decoder across all 269 sections**: every mathematical symbol carries how to say it
+- ✅ **Notation decoder across all 278 sections**: every mathematical symbol carries how to say it
   and what it does, revealed on hover, tap or keyboard focus, and every formal statement whose
   notation a reader cannot pronounce carries an "In words" translation beneath it. The audience is
   a senior engineer with little or no mathematics, so the Description tab explains the idea before
@@ -515,13 +515,35 @@ faithfully in a browser, the section models it, says so plainly, and states what
   is a rotation. 10 sections live.
 
 `npm test` is green — wiring audit, 4 520 unit tests, and a **render audit** that boots the whole
-app headlessly and activates all 269 sections, failing on anything that throws while rendering, any
+app headlessly and activates all 278 sections, failing on anything that throws while rendering, any
 table left with an empty body, and any metric tile still showing a placeholder without a note
 explaining it. `npm run lint:size` reports no offenders.
 
 The render audit is not a substitute for opening the page, and M16's browser pass proved it: every chart in the platform drawn on a **logarithmic y axis** was rendering its axes, its grid and its legend with no data in them at all. A d3 log scale handed a domain floor of zero does not throw — `nice()` rounds the floor down to the power of ten below it, that underflows to zero, and every point then maps to NaN. Twenty-eight sections across M01–M16 were affected. `viz/growth-plot.js` now forces a positive floor for any logarithmic axis, and `tests/unit/growth-plot.test.js` pins the invariant.
 
 ### The shell
+
+- ✅ **M28 — compiler front end: build a language**: Berugo, designed and implemented front to
+  back, with every stage a pure function of the last and every claim checked by running something.
+  Eleven features scored twice — **21 units of parser work against 25 after it** — where the two
+  rankings disagree at both ends: `match` costs 4 to parse and 5 afterwards, while arrays and
+  modules cost 1 and 3, the worst ratio in the table at **3.00×**, and neither is visible while
+  writing the grammar. The coverage column found a real gap on its first page load: modules were
+  implemented in the resolver and the checker and exercised by **zero** conformance programs. A
+  scanner where **every one of 138 characters is reachable** from a stream of 26 tokens carrying 23
+  pieces of trivia, and where three malformed literals become three error tokens with a real token
+  after each — including the numeral that used to split into two perfectly valid tokens for a
+  program nobody wrote. A parser that returns **13 nodes and 1 error node** for a file with two
+  broken statements and parses the third cleanly. **10 000 generated programs** round-tripping with
+  zero failures, and the same corpus through a printer with one line changed failing **106 of
+  2 000** — the number that makes the zero mean anything. A rename that applies its edits,
+  re-resolves, and refuses on two different grounds: one that changes what a name refers to, and
+  one that binds a name twice in a scope, neither of which implies the other. Twelve mistakes
+  producing **15 true diagnostics cut to 12** by three switchable, separately counted rules. And
+  the differential interpreter, which found **five defects nobody caught by reading**: four name
+  captures — a conformance program's own `fn add` recursing forever once `a + b` lowered to a call
+  to `add` — a `for` loop reading one element past the end, and `d != 0 && 10 / d > 1` dividing by
+  zero because a call evaluates both arguments. Every one of those is runnable in the section.
 
 - ✅ **M27 — lambda calculus, type systems and semantics**: the theory behind every language
   feature engineers argue about, with each type system implemented as a checker that shows its

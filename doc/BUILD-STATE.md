@@ -3,7 +3,7 @@
 Where the implementation stands, and exactly what the next session should pick up.
 Update this file at the end of any session that leaves work unfinished.
 
-**Last updated:** 2026-08-24 (M27 complete — eleven sections, 269 in the tree. The tree is GREEN.)
+**Last updated:** 2026-08-25 (M28 complete — nine sections, 278 in the tree. The tree is GREEN.)
 
 ---
 
@@ -39,11 +39,12 @@ Update this file at the end of any session that leaves work unfinished.
 | M25 — context-free languages and parsing | 12 | ✅ built, tested, render-audited |
 | M26 — computability and complexity theory | 10 | ✅ built, tested, render-audited |
 | M27 — lambda calculus, type systems and semantics | 11 | ✅ built, tested, render-audited |
+| M28 — compiler front end: build a language | 9 | ✅ built, tested, render-audited |
 
-**The tree is GREEN.** `npm test` reports 4 691 unit tests with 0 failures (6 skipped — the
-wall-clock-budget starters the inline sandbox cannot fail); the wiring audit passes at 269 sections
-and 1 271 modules, the render audit activates all 269 with no exception and no empty table,
-`npm run lint:size` passes, and `npm run build:css` is up to date.
+**The tree is GREEN.** `npm test` reports 4 833 unit tests with 0 failures (6 skipped — the
+wall-clock-budget starters the inline sandbox cannot fail); the wiring audit passes at 278 sections
+and 1 314 modules, the render audit activates all 278 with no exception and no empty table,
+`npm run lint:size` passes at 1 445 files, and `npm run build:css` is up to date.
 
 All nine M07 sections were opened in Chrome on `npm start`: the three tabs render, every demo
 figure matches the prose *exactly* (see "aligning the demo with the prose" below), the references
@@ -3033,14 +3034,166 @@ quotes it.
 
 ---
 
+## M28 — compiler front end: build a language (complete)
+
+Nine sections, 278 in the tree, and the compiler track opens. Twelve modules in
+`machines/berugo/`, one new viz renderer (`viz/ast-view.js`) with its own stylesheet
+(`src/css/viz-compiler.css`), nine template + section pairs, twelve content files, one property
+suite and one figure suite.
+
+### The shape of the milestone
+
+Every stage is a pure function of the one before it, and that is asserted rather than intended: the
+whole pipeline runs twice on every conformance program and five artefact fingerprints are compared.
+Comparison is by fingerprint rather than deep equality because the artefacts are cyclic — a binding
+points at its scope, a scope at its bindings, a reference at the node it came from — and a
+structural comparison either loops or has to be told which edges to ignore, which is how it stops
+seeing the change it was written to find.
+
+The second discipline is the one that earned its place: **a claim about a stage is checked by
+running it.** Five defects in this milestone looked correct in the source, two carried comments
+arguing they were right, and every one was found by execution.
+
+### Modules
+
+`machines/berugo/`: `spec.js` (the machine-readable language: 11 features with four rules each, 17
+conformance programs, a 12-program error suite, 5 non-goals, and the cost table), `lexer.js`
+(spans, trivia, error tokens, interpolation modes, incremental relex), `ast.js` (30 node kinds, one
+children table, the shared precedence table, the minimal-parenthesis printer and its deliberately
+broken variant), `parser.js` (recursive descent plus Pratt, total, error nodes), `resolve.js`
+(scope tree, occurrence-keyed binding table, capture analysis, suggestions), `typecheck.js`
+(bidirectional over Hindley–Milner, both spans on every mismatch, a type per node), `desugar.js`
+(four switchable lowerings with hygiene by construction), `diagnostics.js` (catalogue, three
+suppression rules, machine-applicable fixes), `interp.js` (the reference interpreter over surface
+AND core, with three outcomes), `ide.js` (hover, definition, references, completion, a rename that
+verifies itself), `fuzz.js` (grammar-driven generator, four properties, the sabotage runner),
+`pipeline.js` (stage runner, fingerprints, purity, and the three suites).
+
+`viz/ast-view.js` renders trees, source with marked ranges, token chips and diagnostics as HTML —
+the useful thing is the correspondence between a node and a range of characters, which wants
+selectable text and a `data-span` per row rather than eighty circles.
+
+### What was wrong before it was right
+
+Every one of these was found by running something, and none by review.
+
+- **A conformance program made itself recurse forever.** `a + b` lowered to a call named `add`, and
+  the conformance suite contains `fn add(a, b) { return a + b; }`. The core called the user's
+  function until the stack ran out. Three more captures of the same family followed once the first
+  was found — `len`, `is_some`/`payload0`, and `unmatched` — and the fix is not a longer prefix but
+  a character the lexer will not accept at the start of an identifier: every generated name now
+  begins with `$`, so collision is impossible rather than unlikely.
+- **The `for` lowering read one element past the end.** It advanced the index at the top of the
+  body behind a first-iteration flag, so the guard `i < len(xs)` was tested against the index from
+  *before* the advance. There is exactly one safe placement: bind the element, advance, then run
+  the body. Nothing between those two points can be skipped by any control flow the language has,
+  and no flag is needed — which is the usual sign a placement is right.
+- **`&&` and `||` lowered to strict calls.** A call evaluates its arguments, so
+  `d != 0 && 10 / d > 1` — the idiom written precisely because the right side is unsafe when the
+  left is false — divided by zero in the core and not on the surface. They lower to `if`, the only
+  core form that does not evaluate one of its branches. The first fix only repaired `||`, because
+  membership was tested with `if (SHORT_CIRCUIT[op])` and `&&`'s value in that table is `false`.
+- **The type checker crashed on every function containing a `let`.** `checkFunctionBody` stored a
+  sentinel in the type ENVIRONMENT under a reserved key, and generalisation walks every key and
+  reads a scheme off each value. Fifteen conformance programs were green because not one of them
+  had a `let` inside a function. The fix was the sentinel, and the *other* fix was a sixteenth
+  program: a coverage gap cannot be closed by a better assertion.
+- **Ten nodes per conformance run carried a span with no end.** `spanFrom(start, end)` read
+  `end.end`, and several call sites pass a NODE, which carries its end inside `span`. The nodes
+  looked fine in the tree and underlined nothing. A crash gets fixed the day it appears; this needs
+  its own assertion, and it now has one over every conformance program and every mutated file.
+- **The type table stated something false on the error path.** `check` recorded the EXPECTED type
+  whether or not the constraint solved, so hovering the `Bool` in `n + flag` reported `Number`. On
+  success the two are the same type after substitution, so the bug only exists on the path nobody
+  exercises while building the happy case.
+- **A numeral running into an identifier scanned as two valid tokens.** `0x1` was the number `0`
+  followed by the name `x1` — a perfectly well-formed stream for a program nobody wrote — and the
+  parser then reported a missing semicolon several tokens to the right.
+- **Rename accepted a rename that introduced a name clash.** Comparing the reference-to-binding
+  structure catches a rename that changes what a name refers to and does NOT catch one that binds
+  a name twice in a scope: the references still resolve by position, so the shape is identical.
+  Comparing the resolver's errors as well closes it, and neither check implies the other.
+
+### Design decisions that are easy to undo by accident
+
+- **The differential comparison includes the bindings a program leaves behind.** Every conformance
+  program is a list of `let`s, so its value is `unit`, and a comparison of values alone passes
+  whatever the core computed — seventeen green rows proving nothing. With bindings it makes 31
+  observations. This is the M22 lesson in a new unit: a ratio hides its denominator, and a
+  differential suite hides its observation count.
+- **Generated names are excluded from that comparison by their `$` prefix.** They have no surface
+  counterpart, so the exclusion has to be exact rather than a heuristic — which is the second thing
+  the hygiene prefix buys.
+- **The round-trip property is always reported beside its sabotage.** A printer with one line
+  changed loses 106 of 2 000; the real one loses 0. Publishing only the second is publishing a
+  number whose meaning has not been established, and the rate is a few per cent rather than most
+  because a sabotage that fails everything is too coarse to locate anything.
+- **`brokenPrinter` lives in `ast.js` behind a `noRightParens` option**, not in the test, so both
+  printers walk exactly the same code.
+- **Mutation fuzzing has the weakest oracle on purpose.** It asks only that a tree came back and
+  that every span lies inside the file, and that weakness is what lets it be pointed at truncated
+  and corrupted files — the population an editor deals with all day and every other property
+  excludes by construction.
+- **The interpreter's three outcomes are `ok`, `runtime` and `budget`**, and a JavaScript
+  `RangeError` from runaway recursion is classified as `budget`. Collapsing it into `runtime` would
+  report a non-terminating program as a broken one, which is the M26 lesson arriving again.
+- **A memoise key that contains source code is JSON, not a delimited string.** There is no
+  separator a program cannot contain; a newline appears in every one. Two of the three section keys
+  used `'\n \n'` and the third had acquired an invisible character in the same position.
+
+### Three things M28 adds to the shape and worth keeping
+
+- **A green suite is a statement about the oracles, not about the code.** After it passes, the
+  useful question is not "what else could I assert" but "what is every oracle I have blind to".
+  Each of the six defects above sat in some oracle's blind spot and was caught by adding a property
+  that could see it — running the core, writing down a shape nobody had, comparing the bindings a
+  program leaves behind — never by asserting harder with the ones already there. `testing-a-front-end`
+  ships that question as a table.
+- **A coverage column is worth its cost even when the gap is harmless.** Modules were implemented
+  twice and run by nothing, which turned out to be fine; a `let` inside a function was also run by
+  nothing, and the checker crashed on every such program. Nothing distinguishes the two from
+  reading, and closing the gap is the only way to find out which you have.
+- **Presence in a lookup table is `hasOwnProperty`, not truthiness.** `SHORT_CIRCUIT['&&']` is
+  `false` because `false` is what `&&` yields without evaluating its right side, so the natural
+  membership test sent one of the two operators down the wrong path while the source read
+  identically for both.
+
+### Measured figures quoted in the M28 examples
+
+`tests/unit/worked-examples-compiler.test.js` recomputes every one *and* asserts the prose still
+quotes it; `tests/unit/compiler-modules.test.js` carries the property tests. Landmarks: 21 units of
+parser work against 25 after it, with `match` at 4 and 5 and arrays and modules at 1 and 3 for the
+worst ratio of 3.00; a 138-character sample giving 26 tokens, 23 pieces of trivia and 3 error
+tokens each followed by a real one; 24 of 27 tokens reused after an edit near the end of a file;
+13 nodes and 1 error node for a file with two broken statements; 9 of 11 grouping fixtures printing
+back unchanged and 2 losing brackets the tree never needed; 2 000 round trips with 0 failures
+against 106 for the broken printer; one tree printing to 88, 100 and 82 characters and reparsing
+identically all three times; 4 scopes, 7 bindings and 1 capture where `a` has 3 occurrences and 2
+bindings; three mistakes checked twice where 2 of 3 move their diagnostic code and the third does
+not, because the call was already where the two types met; 23 nodes lowering to 44 with the same
+`total = 8` either way; 15 raw diagnostics cut to 12, all three suppressions by stage gating; 3 of
+12 error programs getting a fix, 3 removing their own diagnostic and 2 leaving the file clean; and
+2 000 mutants producing 0 crashes, 0 lost spans and about 71% diagnostics.
+
+Two figures were corrected against measurement during the build, both written from the shape of the
+argument rather than from the table: "operators and literals lead the parser ranking" (they are
+joint second; `match` leads that one too, at 4) and "32 observations" (31).
+
+---
+
 ## Next
 
-**M28 — compiler front end: build a language (9 sections).** Nothing of it exists yet: no
-modules, no sections, and its track file still carries it in `planned`. The spec is
-`doc/milestones/M28-compiler-frontend.md`, and everything it needs is now built — M25 supplies the
-parsers, M27 supplies the type checker, the derivation viewer and the operational semantics to
-define the language against. After it, onward through `doc/milestones/` in the order
-`doc/ROADMAP.md` gives.
+**M29 — IR, SSA and optimisation (10 sections).** Nothing of it exists yet: no modules, no
+sections, and its track file still carries it in `planned`. The spec is
+`doc/milestones/M29-ir-and-optimization.md`, and its input is already built: `machines/berugo/`
+produces a core language with `Desugar.desugar`, `Pipeline.run` hands back every intermediate, and
+`Interp.compareWithCore` is a ready-made differential oracle — an optimisation pass is correct
+exactly when the optimised program computes what the unoptimised one computed, which is the same
+harness M28 used and the one that found all five of its lowering defects. M29 also collects two
+debts M28 deliberately deferred: mutation of captured variables (which is why `resolve.js` already
+records captures per function) and a decision-tree compilation for `match` (which `desugar.js`
+lowers to nested tests on purpose, noting that the tree belongs where there is an IR to emit it
+into). After it, onward through `doc/milestones/` in the order `doc/ROADMAP.md` gives.
 
 M11 through M15 and M17 through M24 are complete apart from a human browser pass, which needs the
 Chrome extension connected; M16 has had one (see above, and the chart defect it found).

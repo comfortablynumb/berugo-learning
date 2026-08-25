@@ -379,10 +379,69 @@
               summary: 'Twelve programs against four disciplines where the columns separate on exactly two structural rules, and every borrow error names the earlier line responsible.',
               tags: ['weakening', 'contraction', 'linear types', 'affine types', 'ownership', 'borrowing', 'move semantics', 'aliasing xor mutation', 'lifetime', 'session types']
             }]
+        },
+        {
+          id: 'M28',
+          title: 'Compiler front end — build a language',
+          summary: 'Berugo, front to back: a scanner that survives malformed input, a parser that always returns a tree, and a differential interpreter that found four name captures and an off-by-one nobody had noticed.',
+          sections: [
+            {
+              id: 'designing-a-language',
+              title: 'Designing the language',
+              summary: 'Eleven features scored twice — work in the parser and work in every stage after it — where the two rankings disagree and pattern matching costs five units nobody sees while writing the grammar.',
+              tags: ['language design', 'specification', 'grammar production', 'typing rule', 'evaluation rule', 'non goals', 'conformance suite', 'pipeline', 'versioning', 'feature cost']
+            },
+            {
+              id: 'the-lexer',
+              title: 'The lexer',
+              summary: 'A scanner that keeps every character reachable and turns three malformed literals into three error tokens without stopping, including the numeral that used to split silently into two valid tokens.',
+              tags: ['scanner', 'token', 'span', 'trivia', 'error token', 'maximal munch', 'string interpolation', 'lexer modes', 'numeric literals', 'incremental relex']
+            },
+            {
+              id: 'the-parser',
+              title: 'The parser',
+              summary: 'A tree that exists even for input the parser could not read, with error nodes exactly where the file broke and the statement after them parsed normally.',
+              tags: ['recursive descent', 'pratt parsing', 'binding power', 'associativity', 'error node', 'recovery', 'resynchronisation', 'parse then validate', 'span', 'totality']
+            },
+            {
+              id: 'ast-infrastructure',
+              title: 'AST infrastructure',
+              summary: 'Ten thousand generated programs parsed, printed and reparsed with no tree changing, and the same corpus through a printer with one line broken to show what the property is worth.',
+              tags: ['visitor', 'traversal', 'pretty printer', 'minimal parentheses', 'round trip', 'property test', 'immutable rewriting', 'source map', 'node identity', 'ast versus cst']
+            },
+            {
+              id: 'names-and-scopes',
+              title: 'Names, scopes and resolution',
+              summary: 'Four occurrences of one spelling resolving to two different bindings, and a rename that applies its edits, re-resolves, and refuses when anything changed meaning.',
+              tags: ['lexical scope', 'scope tree', 'shadowing', 'binding table', 'occurrence keyed', 'capture analysis', 'closure', 'rename', 'did you mean', 'module resolution']
+            },
+            {
+              id: 'type-checking-in-practice',
+              title: 'Type checking and inference',
+              summary: 'The same mistake checked twice, with and without an annotation, where both the diagnostic code and the underlined span move because the annotation is what gave the message somewhere to point.',
+              tags: ['bidirectional checking', 'check mode', 'infer mode', 'unification', 'constraint order', 'generalisation', 'instantiation', 'type table', 'two spans', 'exhaustiveness']
+            },
+            {
+              id: 'desugaring-to-a-core',
+              title: 'Semantic analysis and desugaring',
+              summary: 'Three lowerings that shipped wrong and were found by running the surface program beside its core: a function that called itself forever, a loop that read one element past the end, and a guard that divided by zero.',
+              tags: ['desugaring', 'core language', 'lowering', 'hygiene', 'name capture', 'short circuit', 'span preservation', 'constant folding', 'differential testing', 'continue']
+            },
+            {
+              id: 'diagnostics-as-a-product',
+              title: 'Diagnostics as a product',
+              summary: 'Twelve mistakes producing fifteen true messages, cut to twelve by three rules that are each switchable and each counted, plus quick fixes verified by applying them and rechecking.',
+              tags: ['diagnostic model', 'severity', 'primary span', 'secondary span', 'cascade suppression', 'stage gating', 'quick fix', 'machine applicable', 'language server', 'incremental recheck']
+            },
+            {
+              id: 'testing-a-front-end',
+              title: 'Testing the front end',
+              summary: 'Four properties over ten thousand generated programs, each reported beside the number of failures a deliberately broken implementation produces, and a table of what every oracle is blind to.',
+              tags: ['property testing', 'round trip', 'grammar driven generation', 'fuzzing', 'mutation', 'differential testing', 'golden files', 'conformance', 'purity', 'oracle blind spots']
+            }]
         }
       ],
       planned: [
-        { id: 'M28', title: 'Compiler front end — build a language', sections: 9 },
         { id: 'M29', title: 'IR, SSA and optimisation', sections: 10 },
         { id: 'M30', title: 'Code generation, bytecode VMs and JIT', sections: 10 },
         { id: 'M31', title: 'Garbage collection and runtime memory', sections: 9 },

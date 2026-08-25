@@ -332,6 +332,15 @@
       <section data-section="algebraic-data-types-and-pattern-matching" hidden><div class="section-body"><div id="algebraic-data-types-and-pattern-matching-content"></div></div></section>
       <section data-section="denotational-and-axiomatic-semantics" hidden><div class="section-body"><div id="denotational-and-axiomatic-semantics-content"></div></div></section>
       <section data-section="substructural-types-and-ownership" hidden><div class="section-body"><div id="substructural-types-and-ownership-content"></div></div></section>
+      <section data-section="designing-a-language" hidden><div class="section-body"><div id="designing-a-language-content"></div></div></section>
+      <section data-section="the-lexer" hidden><div class="section-body"><div id="the-lexer-content"></div></div></section>
+      <section data-section="the-parser" hidden><div class="section-body"><div id="the-parser-content"></div></div></section>
+      <section data-section="ast-infrastructure" hidden><div class="section-body"><div id="ast-infrastructure-content"></div></div></section>
+      <section data-section="names-and-scopes" hidden><div class="section-body"><div id="names-and-scopes-content"></div></div></section>
+      <section data-section="type-checking-in-practice" hidden><div class="section-body"><div id="type-checking-in-practice-content"></div></div></section>
+      <section data-section="desugaring-to-a-core" hidden><div class="section-body"><div id="desugaring-to-a-core-content"></div></div></section>
+      <section data-section="diagnostics-as-a-product" hidden><div class="section-body"><div id="diagnostics-as-a-product-content"></div></div></section>
+      <section data-section="testing-a-front-end" hidden><div class="section-body"><div id="testing-a-front-end-content"></div></div></section>
     </main>
   </div>
 
@@ -688,6 +697,21 @@
   <script src="src/js/machines/verify-lab.js"></script>
   <script src="src/js/algorithms/ownership.js"></script>
 
+  <!-- The Berugo compiler (M28 onward). Order matters: each module reads the
+       ones above it off `window.Berugo`, and there is no loader. -->
+  <script src="src/js/machines/berugo/spec.js"></script>
+  <script src="src/js/machines/berugo/lexer.js"></script>
+  <script src="src/js/machines/berugo/ast.js"></script>
+  <script src="src/js/machines/berugo/parser.js"></script>
+  <script src="src/js/machines/berugo/resolve.js"></script>
+  <script src="src/js/machines/berugo/typecheck.js"></script>
+  <script src="src/js/machines/berugo/desugar.js"></script>
+  <script src="src/js/machines/berugo/diagnostics.js"></script>
+  <script src="src/js/machines/berugo/interp.js"></script>
+  <script src="src/js/machines/berugo/ide.js"></script>
+  <script src="src/js/machines/berugo/fuzz.js"></script>
+  <script src="src/js/machines/berugo/pipeline.js"></script>
+
   <script src="src/js/viz/chart-base.js"></script>
   <script src="src/js/viz/canvas.js"></script>
   <script src="src/js/viz/legend.js"></script>
@@ -719,6 +743,7 @@
   <script src="src/js/viz/parse-table-view.js"></script>
   <script src="src/js/viz/function-plot.js"></script>
   <script src="src/js/viz/derivation-view.js"></script>
+  <script src="src/js/viz/ast-view.js"></script>
 
   <!-- Components -->
   <script src="src/js/components/tab-controller.js"></script>
@@ -977,23 +1002,35 @@
   <script src="src/js/content/concepts-limits.js"></script>
   <script src="src/js/content/concepts-lambda.js"></script>
   <script src="src/js/content/concepts-types.js"></script>
+  <script src="src/js/content/concepts-compiler.js"></script>
+  <script src="src/js/content/concepts-compiler-analysis.js"></script>
+  <script src="src/js/content/concepts-compiler-tooling.js"></script>
   <script src="src/js/content/concepts-semantics.js"></script>
   <script src="src/js/content/examples-computability.js"></script>
   <script src="src/js/content/examples-complexity.js"></script>
   <script src="src/js/content/examples-limits.js"></script>
   <script src="src/js/content/examples-lambda.js"></script>
   <script src="src/js/content/examples-types.js"></script>
+  <script src="src/js/content/examples-compiler.js"></script>
+  <script src="src/js/content/examples-compiler-analysis.js"></script>
+  <script src="src/js/content/examples-compiler-tooling.js"></script>
   <script src="src/js/content/examples-semantics.js"></script>
   <script src="src/js/content/reference-computability.js"></script>
   <script src="src/js/content/reference-complexity.js"></script>
   <script src="src/js/content/reference-limits.js"></script>
   <script src="src/js/content/reference-lambda.js"></script>
   <script src="src/js/content/reference-types.js"></script>
+  <script src="src/js/content/reference-compiler.js"></script>
+  <script src="src/js/content/reference-compiler-analysis.js"></script>
+  <script src="src/js/content/reference-compiler-tooling.js"></script>
   <script src="src/js/content/reference-semantics.js"></script>
   <script src="src/js/content/exercises-computability.js"></script>
   <script src="src/js/content/exercises-complexity.js"></script>
   <script src="src/js/content/exercises-lambda.js"></script>
   <script src="src/js/content/exercises-types.js"></script>
+  <script src="src/js/content/exercises-compiler.js"></script>
+  <script src="src/js/content/exercises-compiler-analysis.js"></script>
+  <script src="src/js/content/exercises-compiler-tooling.js"></script>
   <script src="src/js/content/exercises-variance.js"></script>
   <script src="src/js/content/exercises-semantics.js"></script>
   <script src="src/js/content/exercises-ownership.js"></script>
@@ -1627,6 +1664,24 @@
   <script src="src/js/sections/denotational-and-axiomatic-semantics-section.js"></script>
   <script src="src/js/sections/substructural-types-and-ownership-template.js"></script>
   <script src="src/js/sections/substructural-types-and-ownership-section.js"></script>
+  <script src="src/js/sections/designing-a-language-template.js"></script>
+  <script src="src/js/sections/designing-a-language-section.js"></script>
+  <script src="src/js/sections/the-lexer-template.js"></script>
+  <script src="src/js/sections/the-lexer-section.js"></script>
+  <script src="src/js/sections/the-parser-template.js"></script>
+  <script src="src/js/sections/the-parser-section.js"></script>
+  <script src="src/js/sections/ast-infrastructure-template.js"></script>
+  <script src="src/js/sections/ast-infrastructure-section.js"></script>
+  <script src="src/js/sections/names-and-scopes-template.js"></script>
+  <script src="src/js/sections/names-and-scopes-section.js"></script>
+  <script src="src/js/sections/type-checking-in-practice-template.js"></script>
+  <script src="src/js/sections/type-checking-in-practice-section.js"></script>
+  <script src="src/js/sections/desugaring-to-a-core-template.js"></script>
+  <script src="src/js/sections/desugaring-to-a-core-section.js"></script>
+  <script src="src/js/sections/diagnostics-as-a-product-template.js"></script>
+  <script src="src/js/sections/diagnostics-as-a-product-section.js"></script>
+  <script src="src/js/sections/testing-a-front-end-template.js"></script>
+  <script src="src/js/sections/testing-a-front-end-section.js"></script>
   <script src="src/js/app.js"></script>
 </body>
 </html>
