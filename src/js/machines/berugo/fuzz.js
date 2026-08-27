@@ -164,13 +164,29 @@
       + counter + ' = ' + counter + ' + 1; }';
   }
 
+  /**
+   * The loop variable is generated but NOT put in scope, because Berugo scopes
+   * it to the body. Leaking it let later statements reference an unbound name,
+   * so the program did not resolve, the lowering turned the name into a global
+   * constant, and the optimised run faulted where the unoptimised one had not
+   * — reported as a miscompilation. The middle end was innocent; the generator
+   * was emitting programs the language does not accept.
+   */
   function forStatement(gen) {
     const total = freshName(gen);
-    const item = freshName(gen);
+    const item = localName(gen);
     const items = [gen.rng.int(9), gen.rng.int(9), gen.rng.int(9)].join(', ');
 
     return 'let ' + total + ' = 0; for ' + item + ' in [' + items + '] { '
       + total + ' = ' + total + ' + ' + item + '; }';
+  }
+
+  /** A name for use inside one construct: allocated, never added to the scope. */
+  function localName(gen) {
+    const name = freshName(gen);
+
+    gen.scope.pop();
+    return name;
   }
 
   function generate(seed, options) {

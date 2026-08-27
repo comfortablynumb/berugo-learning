@@ -56,7 +56,7 @@
             work: '1 scan of the global scope per run, excluding the names beginning with a dollar' },
           { do: 'Read the growth column beside it.',
             why: 'The honest price of lowering.',
-            work: 'for grows 2.43 times and match 2.15, while folding shrinks arithmetic to 0.43' }
+            work: 'for grows 2.57 times and match 2.15, while folding shrinks arithmetic to 0.43' }
         ],
         answer: 'A suite that agrees on zero observations agrees about nothing, and seventeen ' +
           'green rows looked exactly like seventeen green rows either way. The generated names ' +

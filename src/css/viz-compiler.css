@@ -164,3 +164,49 @@
   margin: 0.2rem 0 0;
   font-size: 0.82rem;
 }
+
+/* --------------------------------------------------------- M29: the middle end
+
+   IR listings are text and stay text: a pass is read as a diff between two
+   listings, and a diff wants selectable, monospaced, line-oriented output. */
+
+.ir-listing {
+  margin: 0;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.35rem;
+  background: var(--surface-sunken);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  line-height: 1.5;
+  white-space: pre;
+  overflow: auto;
+  max-height: 24rem;
+}
+
+.ir-block {
+  font-weight: 600;
+  color: var(--hue-blue);
+}
+
+.ir-block.is-marked {
+  background: color-mix(in srgb, var(--hue-amber) 30%, transparent);
+  border-radius: 0.15rem;
+}
+
+.ir-note {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+
+/* A line the pass added, and one it removed. Both are shown because a pass
+   report that only lists removals hides the ones that grow the program. */
+.ir-added {
+  background: color-mix(in srgb, var(--hue-green) 16%, transparent);
+}
+
+.ir-removed {
+  background: color-mix(in srgb, var(--hue-red) 14%, transparent);
+  text-decoration: line-through;
+  opacity: 0.75;
+}

@@ -14,14 +14,14 @@ faithfully in a browser, the section models it, says so plainly, and states what
 
 ## Status
 
-**M00–M28 shipped (278 sections). Building the curriculum, milestone by milestone.**
+**M00–M29 shipped (288 sections). Building the curriculum, milestone by milestone.**
 
 - ✅ Curriculum designed: 65 milestones, 634 sections, 11 tracks — one file per milestone in
   [`doc/milestones/`](doc/milestones/)
 - ✅ Architecture and conventions fixed — [`doc/architecture.md`](doc/architecture.md)
 - ✅ Build order and dependency graph — [`doc/ROADMAP.md`](doc/ROADMAP.md)
 - ✅ Scope decisions recorded — [`doc/topic-suggestions.md`](doc/topic-suggestions.md)
-- ✅ **Notation decoder across all 278 sections**: every mathematical symbol carries how to say it
+- ✅ **Notation decoder across all 288 sections**: every mathematical symbol carries how to say it
   and what it does, revealed on hover, tap or keyboard focus, and every formal statement whose
   notation a reader cannot pronounce carries an "In words" translation beneath it. The audience is
   a senior engineer with little or no mathematics, so the Description tab explains the idea before
@@ -514,14 +514,36 @@ faithfully in a browser, the section models it, says so plainly, and states what
   10^-15** at every iteration, peaking at the predicted round and then falling again, because it
   is a rotation. 10 sections live.
 
-`npm test` is green — wiring audit, 4 520 unit tests, and a **render audit** that boots the whole
-app headlessly and activates all 278 sections, failing on anything that throws while rendering, any
+`npm test` is green — wiring audit, 5 015 unit tests, and a **render audit** that boots the whole
+app headlessly and activates all 288 sections, failing on anything that throws while rendering, any
 table left with an empty body, and any metric tile still showing a placeholder without a note
 explaining it. `npm run lint:size` reports no offenders.
 
 The render audit is not a substitute for opening the page, and M16's browser pass proved it: every chart in the platform drawn on a **logarithmic y axis** was rendering its axes, its grid and its legend with no data in them at all. A d3 log scale handed a domain floor of zero does not throw — `nice()` rounds the floor down to the power of ten below it, that underflows to zero, and every point then maps to NaN. Twenty-eight sections across M01–M16 were affected. `viz/growth-plot.js` now forces a positive floor for any logarithmic axis, and `tests/unit/growth-plot.test.js` pins the invariant.
 
 ### The shell
+
+- ✅ **M29 — IR, SSA and optimisation**: the middle end of the same compiler, where every pass is
+  gated after every pass by three checks that see three different things — a verifier with **ten
+  named invariants**, an SSA check that is the two the verifier cannot state without a dominator
+  tree, and a differential run that is the only one able to see a pass producing perfectly valid
+  IR and the wrong answer. Three statements of source become a **4-block graph of 32 instructions**
+  with every row naming the construct it came from; **17 of 17** conformance programs verify and
+  **17 of 17** compute exactly what the core language computed. Every analysis is checked against a
+  second implementation of its own definition: dominance against removing a block and asking what
+  became unreachable (**7 of 7**), loop membership against a path enumeration, liveness against a
+  path enumeration (**5 of 5**), aliasing against a record of which registers really held the same
+  object (**16 observed, 22 and 28 reported, 0 missed**). LICM is demonstrated by removing its
+  safety condition: the safe pass hoists **4 and refuses 1**, the naive one hoists **5**, and the
+  program that finished now faults — on IR both versions' verifier accepts. SCCP reaches **7
+  instructions where folding without reachability stops at 12**, and phase ordering differs on
+  **3 of 5** fixtures by one instruction each. The fuzzing campaign is reported with its limit
+  stated: **400 generated programs, 0 failures — under the broken pipeline too**, because the
+  generator cannot write the one shape naive LICM breaks, so that shape is seeded by hand and
+  shrunk from **15 lines to 6** over 11 rounds and 51 compiles. Four defects were found only by
+  running things: a `twoLatches` fixture with one latch, an SSA cycle breaker that saved the wrong
+  register, an IR interpreter that ran a block's phis one at a time, and a call graph in which no
+  recursive call was ever an edge.
 
 - ✅ **M28 — compiler front end: build a language**: Berugo, designed and implemented front to
   back, with every stage a pure function of the last and every claim checked by running something.

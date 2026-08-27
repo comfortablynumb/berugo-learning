@@ -341,6 +341,16 @@
       <section data-section="desugaring-to-a-core" hidden><div class="section-body"><div id="desugaring-to-a-core-content"></div></div></section>
       <section data-section="diagnostics-as-a-product" hidden><div class="section-body"><div id="diagnostics-as-a-product-content"></div></div></section>
       <section data-section="testing-a-front-end" hidden><div class="section-body"><div id="testing-a-front-end-content"></div></div></section>
+      <section data-section="designing-an-ir" hidden><div class="section-body"><div id="designing-an-ir-content"></div></div></section>
+      <section data-section="control-flow-graphs" hidden><div class="section-body"><div id="control-flow-graphs-content"></div></div></section>
+      <section data-section="dominators" hidden><div class="section-body"><div id="dominators-content"></div></div></section>
+      <section data-section="ssa-form" hidden><div class="section-body"><div id="ssa-form-content"></div></div></section>
+      <section data-section="dataflow-analysis" hidden><div class="section-body"><div id="dataflow-analysis-content"></div></div></section>
+      <section data-section="scalar-optimisations" hidden><div class="section-body"><div id="scalar-optimisations-content"></div></div></section>
+      <section data-section="loop-optimisations" hidden><div class="section-body"><div id="loop-optimisations-content"></div></div></section>
+      <section data-section="interprocedural-optimisation" hidden><div class="section-body"><div id="interprocedural-optimisation-content"></div></div></section>
+      <section data-section="alias-analysis" hidden><div class="section-body"><div id="alias-analysis-content"></div></div></section>
+      <section data-section="verifying-the-optimiser" hidden><div class="section-body"><div id="verifying-the-optimiser-content"></div></div></section>
     </main>
   </div>
 
@@ -712,6 +722,21 @@
   <script src="src/js/machines/berugo/fuzz.js"></script>
   <script src="src/js/machines/berugo/pipeline.js"></script>
 
+  <!-- The Berugo middle end (M29). `dominators` before `cfg` because the loop
+       finder consumes the dominator tree. -->
+  <script src="src/js/machines/berugo/ir.js"></script>
+  <script src="src/js/machines/berugo/ir-lower.js"></script>
+  <script src="src/js/machines/berugo/ir-interp.js"></script>
+  <script src="src/js/machines/berugo/dominators.js"></script>
+  <script src="src/js/machines/berugo/cfg.js"></script>
+  <script src="src/js/machines/berugo/ssa.js"></script>
+  <script src="src/js/machines/berugo/dataflow.js"></script>
+  <script src="src/js/machines/berugo/passes-scalar.js"></script>
+  <script src="src/js/machines/berugo/passes-loop.js"></script>
+  <script src="src/js/machines/berugo/interproc.js"></script>
+  <script src="src/js/machines/berugo/alias.js"></script>
+  <script src="src/js/machines/pass-lab.js"></script>
+
   <script src="src/js/viz/chart-base.js"></script>
   <script src="src/js/viz/canvas.js"></script>
   <script src="src/js/viz/legend.js"></script>
@@ -744,6 +769,7 @@
   <script src="src/js/viz/function-plot.js"></script>
   <script src="src/js/viz/derivation-view.js"></script>
   <script src="src/js/viz/ast-view.js"></script>
+  <script src="src/js/viz/cfg-view.js"></script>
 
   <!-- Components -->
   <script src="src/js/components/tab-controller.js"></script>
@@ -1005,6 +1031,9 @@
   <script src="src/js/content/concepts-compiler.js"></script>
   <script src="src/js/content/concepts-compiler-analysis.js"></script>
   <script src="src/js/content/concepts-compiler-tooling.js"></script>
+  <script src="src/js/content/concepts-middle-end.js"></script>
+  <script src="src/js/content/concepts-middle-end-passes.js"></script>
+  <script src="src/js/content/concepts-middle-end-opt.js"></script>
   <script src="src/js/content/concepts-semantics.js"></script>
   <script src="src/js/content/examples-computability.js"></script>
   <script src="src/js/content/examples-complexity.js"></script>
@@ -1014,6 +1043,9 @@
   <script src="src/js/content/examples-compiler.js"></script>
   <script src="src/js/content/examples-compiler-analysis.js"></script>
   <script src="src/js/content/examples-compiler-tooling.js"></script>
+  <script src="src/js/content/examples-middle-end.js"></script>
+  <script src="src/js/content/examples-middle-end-passes.js"></script>
+  <script src="src/js/content/examples-middle-end-opt.js"></script>
   <script src="src/js/content/examples-semantics.js"></script>
   <script src="src/js/content/reference-computability.js"></script>
   <script src="src/js/content/reference-complexity.js"></script>
@@ -1023,6 +1055,9 @@
   <script src="src/js/content/reference-compiler.js"></script>
   <script src="src/js/content/reference-compiler-analysis.js"></script>
   <script src="src/js/content/reference-compiler-tooling.js"></script>
+  <script src="src/js/content/reference-middle-end.js"></script>
+  <script src="src/js/content/reference-middle-end-passes.js"></script>
+  <script src="src/js/content/reference-middle-end-opt.js"></script>
   <script src="src/js/content/reference-semantics.js"></script>
   <script src="src/js/content/exercises-computability.js"></script>
   <script src="src/js/content/exercises-complexity.js"></script>
@@ -1031,6 +1066,9 @@
   <script src="src/js/content/exercises-compiler.js"></script>
   <script src="src/js/content/exercises-compiler-analysis.js"></script>
   <script src="src/js/content/exercises-compiler-tooling.js"></script>
+  <script src="src/js/content/exercises-middle-end.js"></script>
+  <script src="src/js/content/exercises-middle-end-passes.js"></script>
+  <script src="src/js/content/exercises-middle-end-opt.js"></script>
   <script src="src/js/content/exercises-variance.js"></script>
   <script src="src/js/content/exercises-semantics.js"></script>
   <script src="src/js/content/exercises-ownership.js"></script>
@@ -1682,6 +1720,26 @@
   <script src="src/js/sections/diagnostics-as-a-product-section.js"></script>
   <script src="src/js/sections/testing-a-front-end-template.js"></script>
   <script src="src/js/sections/testing-a-front-end-section.js"></script>
+  <script src="src/js/sections/designing-an-ir-template.js"></script>
+  <script src="src/js/sections/designing-an-ir-section.js"></script>
+  <script src="src/js/sections/control-flow-graphs-template.js"></script>
+  <script src="src/js/sections/control-flow-graphs-section.js"></script>
+  <script src="src/js/sections/dominators-template.js"></script>
+  <script src="src/js/sections/dominators-section.js"></script>
+  <script src="src/js/sections/ssa-form-template.js"></script>
+  <script src="src/js/sections/ssa-form-section.js"></script>
+  <script src="src/js/sections/dataflow-analysis-template.js"></script>
+  <script src="src/js/sections/dataflow-analysis-section.js"></script>
+  <script src="src/js/sections/scalar-optimisations-template.js"></script>
+  <script src="src/js/sections/scalar-optimisations-section.js"></script>
+  <script src="src/js/sections/loop-optimisations-template.js"></script>
+  <script src="src/js/sections/loop-optimisations-section.js"></script>
+  <script src="src/js/sections/interprocedural-optimisation-template.js"></script>
+  <script src="src/js/sections/interprocedural-optimisation-section.js"></script>
+  <script src="src/js/sections/alias-analysis-template.js"></script>
+  <script src="src/js/sections/alias-analysis-section.js"></script>
+  <script src="src/js/sections/verifying-the-optimiser-template.js"></script>
+  <script src="src/js/sections/verifying-the-optimiser-section.js"></script>
   <script src="src/js/app.js"></script>
 </body>
 </html>

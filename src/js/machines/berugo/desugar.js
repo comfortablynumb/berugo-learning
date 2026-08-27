@@ -194,12 +194,29 @@
     ];
   }
 
+  /**
+   * A lowering that emits an operator has to emit it in whichever form the
+   * chosen passes produce, or the core contains a node kind the core language
+   * says it does not have. The for lowering built its guard and its increment
+   * with `binary` nodes and returned them without going through `lower`, so
+   * every desugared loop carried two operators the operator pass never saw —
+   * and the next stage would have had to handle both forms for no reason.
+   */
+  function arith(state, node, op, left, right) {
+    if (!on(state, 'operators')) {
+      return from(state, node, 'binary', { op: op, left: left, right: right });
+    }
+    return from(state, node, 'call', {
+      callee: from(state, node, 'name', { name: OPERATOR_CALLS[op] }),
+      args: [left, right] });
+  }
+
   function lengthTest(state, node, names) {
-    return from(state, node, 'binary', { op: '<',
-      left: from(state, node, 'name', { name: names.index }),
-      right: from(state, node, 'call', {
+    return arith(state, node, '<',
+      from(state, node, 'name', { name: names.index }),
+      from(state, node, 'call', {
         callee: from(state, node, 'name', { name: RUNTIME + 'len' }),
-        args: [from(state, node, 'name', { name: names.source })] }) });
+        args: [from(state, node, 'name', { name: names.source })] }));
   }
 
   /** Bind the element, advance the index, then run the body. */
@@ -214,9 +231,9 @@
   function increment(state, node, names) {
     return from(state, node, 'assign', {
       target: from(state, node, 'name', { name: names.index }),
-      value: from(state, node, 'binary', { op: '+',
-        left: from(state, node, 'name', { name: names.index }),
-        right: from(state, node, 'num', { value: 1 }) }) });
+      value: arith(state, node, '+',
+        from(state, node, 'name', { name: names.index }),
+        from(state, node, 'num', { value: 1 })) });
   }
 
   function bindElement(state, node, names) {

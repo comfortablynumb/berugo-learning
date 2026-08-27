@@ -416,12 +416,12 @@ test('figures: the desugaring default sample', function () {
   assert.strictEqual(lowered.passes.for, 1);
   assert.strictEqual(lowered.passes.operators, 2);
   assert.strictEqual(Ast.countNodes(parsed.tree), 23);
-  assert.strictEqual(Ast.countNodes(lowered.core), 44);
-  assert.strictEqual(support.fixed(44 / 23, 2), '1.91');
+  assert.strictEqual(Ast.countNodes(lowered.core), 46);
+  assert.strictEqual(support.fixed(46 / 23, 2), '2.00');
   assert.ok(behaviour.agree);
   assert.deepStrictEqual(behaviour.surface.bindings, ['total = 8']);
   assert.strictEqual(behaviour.surfaceSteps, 53);
-  assert.strictEqual(behaviour.coreSteps, 125);
+  assert.strictEqual(behaviour.coreSteps, 134);
 
   support.quotes('desugaring-to-a-core', ['total = 8 either way']);
 });
@@ -439,13 +439,13 @@ test('figures: node growth across the conformance suite', function () {
     observations += Interp.compareWithCore(program.source).observed;
   });
 
-  assert.strictEqual(growth.for, '2.43');
+  assert.strictEqual(growth.for, '2.57');
   assert.strictEqual(growth.match, '2.15');
   assert.strictEqual(growth.arithmetic, '0.43');
   assert.strictEqual(observations, 31);
 
   support.quotes('desugaring-to-a-core',
-    ['for grows 2.43 times and match 2.15, while folding shrinks arithmetic to 0.43',
+    ['for grows 2.57 times and match 2.15, while folding shrinks arithmetic to 0.43',
       '31 observations across 17 programs',
       '17 of 17 agree — every value is unit']);
 });

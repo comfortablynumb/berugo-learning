@@ -3,7 +3,7 @@
 Where the implementation stands, and exactly what the next session should pick up.
 Update this file at the end of any session that leaves work unfinished.
 
-**Last updated:** 2026-08-25 (M28 complete — nine sections, 278 in the tree. The tree is GREEN.)
+**Last updated:** 2026-08-26 (M29 complete — ten sections, 288 in the tree. The tree is GREEN.)
 
 ---
 
@@ -40,11 +40,12 @@ Update this file at the end of any session that leaves work unfinished.
 | M26 — computability and complexity theory | 10 | ✅ built, tested, render-audited |
 | M27 — lambda calculus, type systems and semantics | 11 | ✅ built, tested, render-audited |
 | M28 — compiler front end: build a language | 9 | ✅ built, tested, render-audited |
+| M29 — IR, SSA and optimisation | 10 | ✅ built, tested, render-audited |
 
-**The tree is GREEN.** `npm test` reports 4 833 unit tests with 0 failures (6 skipped — the
-wall-clock-budget starters the inline sandbox cannot fail); the wiring audit passes at 278 sections
-and 1 314 modules, the render audit activates all 278 with no exception and no empty table,
-`npm run lint:size` passes at 1 445 files, and `npm run build:css` is up to date.
+**The tree is GREEN.** `npm test` reports 5 015 unit tests with 0 failures (6 skipped — the
+wall-clock-budget starters the inline sandbox cannot fail); the wiring audit passes at 288 sections
+and 1 359 modules, the render audit activates all 288 with no exception and no empty table,
+`npm run lint:size` passes at 1 494 files, and `npm run build:css` is up to date.
 
 All nine M07 sections were opened in Chrome on `npm start`: the three tabs render, every demo
 figure matches the prose *exactly* (see "aligning the demo with the prose" below), the references
@@ -3183,17 +3184,19 @@ joint second; `match` leads that one too, at 4) and "32 observations" (31).
 
 ## Next
 
-**M29 — IR, SSA and optimisation (10 sections).** Nothing of it exists yet: no modules, no
-sections, and its track file still carries it in `planned`. The spec is
-`doc/milestones/M29-ir-and-optimization.md`, and its input is already built: `machines/berugo/`
-produces a core language with `Desugar.desugar`, `Pipeline.run` hands back every intermediate, and
-`Interp.compareWithCore` is a ready-made differential oracle — an optimisation pass is correct
-exactly when the optimised program computes what the unoptimised one computed, which is the same
-harness M28 used and the one that found all five of its lowering defects. M29 also collects two
-debts M28 deliberately deferred: mutation of captured variables (which is why `resolve.js` already
-records captures per function) and a decision-tree compilation for `match` (which `desugar.js`
-lowers to nested tests on purpose, noting that the tree belongs where there is an IR to emit it
-into). After it, onward through `doc/milestones/` in the order `doc/ROADMAP.md` gives.
+**M30 — Code generation, bytecode VMs and JIT (10 sections).** Nothing of it exists yet, and its
+track file still carries it in `planned`. The spec is `doc/milestones/M30-codegen-vm-jit.md`, and
+its input is built: `machines/berugo/ir.js` is a typed, verified three-address IR;
+`machines/pass-lab.js` runs any pipeline over any program with three gates after every pass; and
+`Ssa.destruct` already puts the copies back, which is the last thing that has to happen before a
+register allocator sees the function. `Dataflow.run(fn, 'liveness')` is the analysis the allocator
+needs and is already checked against a path enumeration on every fixture. The
+stack-versus-register argument 29.1 makes on purpose — a stack IR is smaller and gives a value no
+name — is the one M30 gets to settle with a measurement rather than an assertion. Two debts M28
+deferred are still open and now have somewhere to go: mutation of captured variables (which is why
+`resolve.js` records captures per function) and a decision-tree compilation for `match` (which
+`desugar.js` lowers to nested tests on purpose). After it, onward through `doc/milestones/` in the
+order `doc/ROADMAP.md` gives.
 
 M11 through M15 and M17 through M24 are complete apart from a human browser pass, which needs the
 Chrome extension connected; M16 has had one (see above, and the chart defect it found).
@@ -3461,3 +3464,144 @@ liveness monitors).
 - **`tests/render-audit.js` now reports four stack frames rather than one.** The message alone
   rarely says which of a section's dozen measurement calls threw; four frames named the parser
   immediately.
+
+---
+
+## M29 — IR, SSA and optimisation (complete)
+
+Ten sections, 288 in the tree. Eleven modules under `machines/berugo/`, one harness
+(`machines/pass-lab.js`), one new viz renderer (`viz/cfg-view.js`), ten template + section pairs,
+twelve content files, one property suite and three figure suites.
+
+### The shape of the milestone
+
+Every pass in this milestone is **gated after every pass by three checks that see three different
+things**, and the third is the only one that matters:
+
+- the **IR verifier**, ten named invariants, which catches structural damage and names the pass
+  that caused it rather than leaving eleven passes to bisect;
+- the **SSA check**, which is the two invariants the verifier cannot state without a dominator
+  tree — one definition per register, every use dominated by it, with a phi's operands judged on
+  the EDGE;
+- the **differential run**, which is the only gate that can see a pass producing perfectly valid
+  IR that computes the wrong answer.
+
+The second discipline is that **every analysis is checked against a second implementation of its
+own definition**, never against itself: dominance against removing a block and asking what became
+unreachable, loop membership against a path enumeration, liveness against a path enumeration,
+aliasing against a replay of which registers really held the same object. Each oracle is
+exponential, useless at scale, and cannot be subtly wrong, which is the whole reason to have it.
+
+### Modules
+
+`machines/berugo/`: `ir.js` (18 opcodes, blocks, the ten invariants, verify, clone),
+`ir-lower.js` (core tree to blocks, with the origin of every instruction), `ir-interp.js` (the
+reference interpreter over the IR, phis included), `cfg.js` (blocks, back edges, natural loops,
+nesting, critical edges and their splitting, reducibility), `dominators.js` (Cooper-Harvey-Kennedy
+plus frontiers, post-dominance and the brute-force oracle), `ssa.js` (placement, renaming, pruning,
+destruction, the parallel-copy sequencer and the checker), `dataflow.js` (one worklist solver with
+four parameterisations plus the liveness oracle), `passes-scalar.js` (copy propagation, dead code,
+value numbering, SCCP, peephole), `passes-loop.js` (LICM safe and naive, induction variables,
+unswitching opportunities, the cost model), `interproc.js` (call graph, inlining plan, escape
+analysis, tail calls), `alias.js` (Andersen, Steensgaard, alias pairs, the dynamic oracle,
+redundant loads). `machines/pass-lab.js` (run any pipeline, gate after every pass, phase ordering,
+the conformance suite, the shrinker). `viz/cfg-view.js`.
+
+Content is split per third of the milestone — `-middle-end`, `-middle-end-passes`,
+`-middle-end-opt`.
+
+### Four defects found only by running things
+
+Every one of these produced output that read as correct, and three of them were in the code the
+section is *about*.
+
+1. **The `twoLatches` fixture had one latch.** Berugo lowers both arms of an `if` into a join
+   before the latch, so a `while` containing a conditional has exactly one back edge. The fixture
+   was named for a shape it did not have, the concept said "a `continue` produces exactly that"
+   beside a program with no `continue`, and the worked example claimed "1 loop from 2 back edges"
+   where the count was 1 and 1. `Cfg.mergeLoop` was therefore never once executed. The fixture now
+   says `continue`, which really does produce two back edges to one header.
+2. **The SSA cycle breaker saved the wrong register.** `breakCycle` copied `pair.from` into the
+   temporary and redirected everybody reading the source; the value that has to be saved is the one
+   the copy is about to DESTROY, its destination. `a = b; b = a` became `t = b; a = t; b = a`, so
+   both registers ended up holding `b` — which is precisely the failure the temporary exists to
+   prevent, in the routine whose only purpose is preventing it.
+3. **The IR interpreter ran a block's phis one at a time.** The phis at the top of a block happen
+   simultaneously, all reading the registers as the predecessor left them. Sequentially,
+   `a = phi(b)` assigns the new `a` and the next phi reads it. That is the same swap problem one
+   level down, and it meant a *correctly* destructed program disagreed with the SSA program it came
+   from. `runPhis` now reads every value before committing any.
+4. **No recursive call was ever an edge in the call graph.** A self-call lowers to
+   `const "!down"` and a `call` through it, not to a `makeClosure`, so `closureMap` did not see it
+   and the call was filed as indirect. `graph.recursive` was therefore always empty, the rule that
+   excludes recursion from inlining outright had never run, and the concept "a self-recursive
+   function is detected as a cycle in the call graph and never inlined" was false. A `!name` that
+   names a function of this program is now a direct edge; one that names a runtime native still is
+   not.
+
+And one stub that asserted its own conclusion: `swapCycle()` in `ssa-form-section.js` returned
+`agrees: true` as a literal. It could not have measured anything — it branched on a Number, which
+`IrInterp.truth` rejects, and would have looped forever if it had not. It now builds a terminating
+loop with a counter, returns `a - b` so a collapsed cycle reports 0 where the swap reports 1, and
+runs the function before and after destruction. That is what turned defects 2 and 3 up.
+
+### Design decisions that are easy to undo by accident
+
+- **The naive LICM pass ships and has to fail.** `licm-naive` hoists anything invariant, and on the
+  trap fixture — a division whose only guard is the loop condition — it turns a program that
+  finished into one that faults. The safe pass's refusal proves nothing unless the unsafe one is
+  runnable and demonstrably wrong, so the figure suite asserts `after === 'runtime'`.
+- **The fuzzing sweep's headline is a zero under a broken pipeline.** 400 generated programs find
+  nothing with naive LICM enabled, because the grammar cannot write a division guarded by its own
+  loop condition. Coverage is a property of the generator, not of the number of programs, and the
+  section says so and seeds the shape by hand rather than reporting 400/0 as reassurance.
+- **`Loop.report`'s weighted column names its assumption in the table.** Ten iterations per nesting
+  level is made up; it cancels when comparing two loops in one function and means nothing in a
+  report, and the caption says which use is which.
+- **Escape analysis reports the reason, not the verdict.** "Returned" is exact and "passed to a
+  call" is conservative, and only the second could be recovered by an interprocedural summary.
+  Collapsing them gives a number nobody can act on.
+- **The dynamic alias oracle under-approximates by construction** — one input, one path — so it can
+  prove an analysis unsound and can never prove one correct. The tests assert `missed` is empty and
+  never that the reported set is minimal.
+- **`Cfg.criticalEdges` returns the edges and `splitCriticalEdges` returns `{ split, edges }`.**
+  Two different shapes for two different questions; a test that calls `.split` on the first gets
+  `undefined`, which is falsy, and passes.
+
+### Measured figures quoted in the M29 examples
+
+`tests/unit/worked-examples-middle-end.test.js`, `-passes` and `-opt` recompute every one *and*
+assert the prose still quotes it; `tests/unit/middle-end-modules.test.js` carries the property
+tests and every oracle. Landmarks: three statements of source giving 4 blocks, 32 instructions,
+22 registers and 4 slots with all 10 invariants holding; 17 of 17 conformance programs verifying
+and 17 of 17 agreeing with the core; 7 blocks and 8 edges with 2 nested loops, and 0 critical edges
+and 0 irreducible graphs across every lowered fixture against 6 of 7 and irreducible for the
+hand-built one, which splitting takes from 5 blocks to 11; 2 dominator rounds over 7 blocks, 6
+changes then 0, agreeing with the removal oracle on all 7; 9 phis placed, 3 pruned, 6 kept, and a
+hand-built swap needing 3 phis, 7 copies and 1 temporary; four analyses at 1.50, 1.75, 1.00 and
+2.00 visits per block and liveness agreeing with the enumeration on 5 of 5; SCCP at 7 instructions
+against folding-without-reachability's 12 and the full pipeline's 6, from 19, and 100 of 229
+instructions removed across the suite; 3 of 5 fixtures sensitive to phase order, each by one
+instruction in the same direction; LICM hoisting 4 and refusing 1 against a naive 5 and 0; 2 direct
+calls at ratios 1.00 and 1.67 spending 6 of 40, and 9 of 11 allocations across the suite living on
+the stack; 22 Andersen pairs in 2 rounds against 28 Steensgaard from 7 merges, both supersets of
+the 16 that really happened; and 400 programs with 0 failures beside a seeded program shrunk from
+15 lines to 6 over 11 rounds and 51 compiles.
+
+Two figures were corrected against measurement during the build, both written from the shape of
+the argument: "1 of 5 fixtures has an eliminable load" (it is 2, and the fixture where the two
+analyses differ is not one of them) and the hand-built swap's "2 phis, 5 copies" (3 and 7, once the
+fixture could actually be run).
+
+### Three things M29 adds to the shape and worth keeping
+
+- **A fixture named for a property must be asserted to have it.** `twoLatches` had one latch for as
+  long as nobody counted, and the merge path it existed to exercise was dead. Assert the shape, not
+  just the result computed from it.
+- **A hardcoded `true` in a results row is a stub, whatever it is called.** `agrees: true` passed
+  every test in the suite and every render audit. Anything a table reports as a check must be the
+  return value of running the check.
+- **An interpreter is part of the oracle and can be the thing that is wrong.** The differential run
+  compares two runs of the same interpreter, so a defect in it is invisible to every program where
+  both sides hit it — and visible only where one side has phis and the other does not. The swap is
+  that program, which is why the milestone needed one that could actually execute.

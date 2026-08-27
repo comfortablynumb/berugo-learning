@@ -439,10 +439,75 @@
               summary: 'Four properties over ten thousand generated programs, each reported beside the number of failures a deliberately broken implementation produces, and a table of what every oracle is blind to.',
               tags: ['property testing', 'round trip', 'grammar driven generation', 'fuzzing', 'mutation', 'differential testing', 'golden files', 'conformance', 'purity', 'oracle blind spots']
             }]
+        },
+        {
+          id: 'M29',
+          title: 'IR, SSA and optimisation',
+          summary: 'The middle end of the Berugo compiler, where every pass is gated by a verifier that names the invariant it broke and a differential run that catches the ones producing perfectly valid IR and the wrong answer.',
+          sections: [
+            {
+              id: 'designing-an-ir',
+              title: 'Designing an intermediate representation',
+              summary: 'A verifier with nine named invariants and five ways to break it on purpose, beside seventeen programs that lower, verify, and compute exactly what the core language computed.',
+              tags: ['three address code', 'virtual registers', 'typed ir', 'basic blocks', 'verifier', 'invariants', 'lowering', 'slots', 'spans', 'differential testing']
+            },
+            {
+              id: 'control-flow-graphs',
+              title: 'Control-flow graphs',
+              summary: 'Loop membership checked against a brute-force path enumeration, including the fixture where a continue gives one loop two latches and a naive finder reports two loops sharing every block.',
+              tags: ['basic block', 'back edge', 'natural loop', 'loop nesting', 'critical edge', 'reducibility', 'unreachable blocks', 'join', 'split', 'cfg simplification']
+            },
+            {
+              id: 'dominators',
+              title: 'Dominators',
+              summary: 'The whole dominator tree checked against removing each block and asking what became unreachable, plus the six different questions six different passes all reduce to a walk up it.',
+              tags: ['dominance', 'immediate dominator', 'dominator tree', 'cooper harvey kennedy', 'reverse postorder', 'dominance frontier', 'post dominance', 'fixpoint', 'virtual exit', 'brute force oracle']
+            },
+            {
+              id: 'ssa-form',
+              title: 'SSA form',
+              summary: 'Every phi shown beside the dominance frontier that justified it, the placed and pruned counts that are the whole of minimal versus pruned, and a swap fixture where destruction needs a temporary.',
+              tags: ['single assignment', 'phi function', 'cytron', 'dominance frontier', 'renaming', 'dominator tree walk', 'pruned ssa', 'destruction', 'swap problem', 'parallel copies']
+            },
+            {
+              id: 'dataflow-analysis',
+              title: 'Dataflow analysis',
+              summary: 'Four analyses that look different running through one worklist loop with four settings, and liveness checked against a path enumeration on every fixture.',
+              tags: ['lattice', 'transfer function', 'meet', 'worklist', 'fixpoint', 'monotonicity', 'liveness', 'reaching definitions', 'available expressions', 'very busy expressions']
+            },
+            {
+              id: 'scalar-optimisations',
+              title: 'Scalar optimisations',
+              summary: 'A division by zero on a branch that cannot be taken, which constant propagation must leave and SCCP removes along with the branch, and the same two passes run both ways round with the counts.',
+              tags: ['copy propagation', 'dead code elimination', 'global value numbering', 'sccp', 'peephole', 'algebraic identities', 'constant folding', 'phase ordering', 'dominator scoping', 'faulting folds']
+            },
+            {
+              id: 'loop-optimisations',
+              title: 'Loop optimisations',
+              summary: 'A division whose guard is the loop condition, hoisted by the naive pass into a program that then divides by zero, and refused by the safe one with the dominance reason named.',
+              tags: ['loop invariant code motion', 'preheader', 'fault safety', 'dominance of exits', 'induction variables', 'strength reduction', 'unswitching', 'loop nesting cost', 'speculation', 'aliasing precondition']
+            },
+            {
+              id: 'interprocedural-optimisation',
+              title: 'Interprocedural optimisation',
+              summary: 'Two records in one program separated by an escape analysis that gives a reason rather than a verdict, and a call graph whose indirect column is the precision a whole-program pass must not assume away.',
+              tags: ['call graph', 'indirect call', 'inlining', 'cost benefit', 'budget', 'recursion', 'escape analysis', 'stack allocation', 'tail call', 'devirtualisation']
+            },
+            {
+              id: 'alias-analysis',
+              title: 'Memory and alias analysis',
+              summary: 'Two records merged at a join where inclusion keeps them apart and unification merges them permanently, with both checked against a record of which registers really held the same object.',
+              tags: ['points to analysis', 'andersen', 'steensgaard', 'may alias', 'soundness', 'dynamic oracle', 'load forwarding', 'memory ssa', 'restrict', 'ownership']
+            },
+            {
+              id: 'verifying-the-optimiser',
+              title: 'Verifying the optimiser',
+              summary: 'The Csmith loop at page scale: generate, compile, compare, and shrink a twenty-line failure to four lines while keeping it a valid program that fails at the same pass in the same way.',
+              tags: ['ir verifier', 'differential testing', 'random program generation', 'fuzzing', 'shrinking', 'minimal repro', 'translation validation', 'gates', 'oracle blind spots', 'csmith']
+            }]
         }
       ],
       planned: [
-        { id: 'M29', title: 'IR, SSA and optimisation', sections: 10 },
         { id: 'M30', title: 'Code generation, bytecode VMs and JIT', sections: 10 },
         { id: 'M31', title: 'Garbage collection and runtime memory', sections: 9 },
         { id: 'M32', title: 'Program analysis, SAT/SMT and verification', sections: 11 }

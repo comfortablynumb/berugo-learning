@@ -85,7 +85,7 @@
       {
         term: 'Lowering usually grows the tree',
         plain: 'The core is simpler per node and larger in total.',
-        formal: 'match grows 2.15 times, for grows 2.43 times, folding shrinks',
+        formal: 'match grows 2.15 times, for grows 2.57 times, folding shrinks',
         detail: 'That growth is the honest price of the simplification, and reporting it stops ' +
           '"lower to a smaller core" from sounding like a free win. It also predicts where the ' +
           'work went: the two constructs that grow most are exactly the two the cost table in ' +
