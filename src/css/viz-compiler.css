@@ -210,3 +210,64 @@
   text-decoration: line-through;
   opacity: 0.75;
 }
+
+/* ------------------------------------------------------------ the back end */
+
+/* One disassembled instruction. The program counter is marked rather than
+   coloured, because a debugger's current line has to be findable at a glance
+   in a listing of a hundred rows. */
+.ir-line {
+  display: block;
+}
+
+.ir-line.is-marked {
+  background: color-mix(in srgb, var(--hue-blue) 22%, transparent);
+  border-radius: 0.15rem;
+}
+
+/* A frame: the operand stack beside the named locals. Two columns rather than
+   one list, because they are two different things and a learner reading a
+   stack machine has to keep them apart. */
+.frame-view {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+}
+
+.frame-column h4 {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin: 0 0 0.3rem;
+  text-transform: uppercase;
+}
+
+/* The operand stack is drawn top-down with the top of the stack first, which
+   is the order every debugger prints it and the opposite of the array. */
+.frame-stack,
+.frame-locals {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.frame-stack li,
+.frame-locals li {
+  border-bottom: 1px solid var(--border);
+  padding: 0.15rem 0;
+}
+
+.frame-stack li.is-empty,
+.frame-locals li.is-empty {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.frame-slot {
+  color: var(--text-muted);
+  display: inline-block;
+  min-width: 2.2rem;
+}

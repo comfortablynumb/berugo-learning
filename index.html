@@ -351,6 +351,16 @@
       <section data-section="interprocedural-optimisation" hidden><div class="section-body"><div id="interprocedural-optimisation-content"></div></div></section>
       <section data-section="alias-analysis" hidden><div class="section-body"><div id="alias-analysis-content"></div></div></section>
       <section data-section="verifying-the-optimiser" hidden><div class="section-body"><div id="verifying-the-optimiser-content"></div></div></section>
+      <section data-section="bytecode-design" hidden><div class="section-body"><div id="bytecode-design-content"></div></div></section>
+      <section data-section="building-the-interpreter" hidden><div class="section-body"><div id="building-the-interpreter-content"></div></div></section>
+      <section data-section="instruction-selection" hidden><div class="section-body"><div id="instruction-selection-content"></div></div></section>
+      <section data-section="register-allocation" hidden><div class="section-body"><div id="register-allocation-content"></div></div></section>
+      <section data-section="machine-scheduling" hidden><div class="section-body"><div id="machine-scheduling-content"></div></div></section>
+      <section data-section="targeting-webassembly" hidden><div class="section-body"><div id="targeting-webassembly-content"></div></div></section>
+      <section data-section="jit-compilation" hidden><div class="section-body"><div id="jit-compilation-content"></div></div></section>
+      <section data-section="inline-caches" hidden><div class="section-body"><div id="inline-caches-content"></div></div></section>
+      <section data-section="runtime-support" hidden><div class="section-body"><div id="runtime-support-content"></div></div></section>
+      <section data-section="measuring-a-runtime" hidden><div class="section-body"><div id="measuring-a-runtime-content"></div></div></section>
     </main>
   </div>
 
@@ -736,6 +746,18 @@
   <script src="src/js/machines/berugo/interproc.js"></script>
   <script src="src/js/machines/berugo/alias.js"></script>
   <script src="src/js/machines/pass-lab.js"></script>
+  <!-- The Berugo back end (M30). `bytecode` before `vm` because the VM
+       reads the instruction-set tables; `jit` after `vm` for the same reason. -->
+  <script src="src/js/machines/berugo/bytecode.js"></script>
+  <script src="src/js/machines/berugo/vm.js"></script>
+  <script src="src/js/machines/berugo/isel.js"></script>
+  <script src="src/js/machines/berugo/regalloc.js"></script>
+  <script src="src/js/machines/berugo/schedule.js"></script>
+  <script src="src/js/machines/berugo/wasm-emit.js"></script>
+  <script src="src/js/machines/berugo/shapes.js"></script>
+  <script src="src/js/machines/berugo/jit.js"></script>
+  <script src="src/js/machines/berugo/runtime.js"></script>
+  <script src="src/js/machines/exec-lab.js"></script>
 
   <script src="src/js/viz/chart-base.js"></script>
   <script src="src/js/viz/canvas.js"></script>
@@ -770,6 +792,7 @@
   <script src="src/js/viz/derivation-view.js"></script>
   <script src="src/js/viz/ast-view.js"></script>
   <script src="src/js/viz/cfg-view.js"></script>
+  <script src="src/js/viz/bytecode-view.js"></script>
 
   <!-- Components -->
   <script src="src/js/components/tab-controller.js"></script>
@@ -1034,6 +1057,9 @@
   <script src="src/js/content/concepts-middle-end.js"></script>
   <script src="src/js/content/concepts-middle-end-passes.js"></script>
   <script src="src/js/content/concepts-middle-end-opt.js"></script>
+  <script src="src/js/content/concepts-back-end.js"></script>
+  <script src="src/js/content/concepts-back-end-target.js"></script>
+  <script src="src/js/content/concepts-back-end-runtime.js"></script>
   <script src="src/js/content/concepts-semantics.js"></script>
   <script src="src/js/content/examples-computability.js"></script>
   <script src="src/js/content/examples-complexity.js"></script>
@@ -1046,6 +1072,9 @@
   <script src="src/js/content/examples-middle-end.js"></script>
   <script src="src/js/content/examples-middle-end-passes.js"></script>
   <script src="src/js/content/examples-middle-end-opt.js"></script>
+  <script src="src/js/content/examples-back-end.js"></script>
+  <script src="src/js/content/examples-back-end-target.js"></script>
+  <script src="src/js/content/examples-back-end-runtime.js"></script>
   <script src="src/js/content/examples-semantics.js"></script>
   <script src="src/js/content/reference-computability.js"></script>
   <script src="src/js/content/reference-complexity.js"></script>
@@ -1058,6 +1087,9 @@
   <script src="src/js/content/reference-middle-end.js"></script>
   <script src="src/js/content/reference-middle-end-passes.js"></script>
   <script src="src/js/content/reference-middle-end-opt.js"></script>
+  <script src="src/js/content/reference-back-end.js"></script>
+  <script src="src/js/content/reference-back-end-target.js"></script>
+  <script src="src/js/content/reference-back-end-runtime.js"></script>
   <script src="src/js/content/reference-semantics.js"></script>
   <script src="src/js/content/exercises-computability.js"></script>
   <script src="src/js/content/exercises-complexity.js"></script>
@@ -1069,6 +1101,9 @@
   <script src="src/js/content/exercises-middle-end.js"></script>
   <script src="src/js/content/exercises-middle-end-passes.js"></script>
   <script src="src/js/content/exercises-middle-end-opt.js"></script>
+  <script src="src/js/content/exercises-back-end.js"></script>
+  <script src="src/js/content/exercises-back-end-target.js"></script>
+  <script src="src/js/content/exercises-back-end-runtime.js"></script>
   <script src="src/js/content/exercises-variance.js"></script>
   <script src="src/js/content/exercises-semantics.js"></script>
   <script src="src/js/content/exercises-ownership.js"></script>
@@ -1740,6 +1775,26 @@
   <script src="src/js/sections/alias-analysis-section.js"></script>
   <script src="src/js/sections/verifying-the-optimiser-template.js"></script>
   <script src="src/js/sections/verifying-the-optimiser-section.js"></script>
+  <script src="src/js/sections/bytecode-design-template.js"></script>
+  <script src="src/js/sections/bytecode-design-section.js"></script>
+  <script src="src/js/sections/building-the-interpreter-template.js"></script>
+  <script src="src/js/sections/building-the-interpreter-section.js"></script>
+  <script src="src/js/sections/instruction-selection-template.js"></script>
+  <script src="src/js/sections/instruction-selection-section.js"></script>
+  <script src="src/js/sections/register-allocation-template.js"></script>
+  <script src="src/js/sections/register-allocation-section.js"></script>
+  <script src="src/js/sections/machine-scheduling-template.js"></script>
+  <script src="src/js/sections/machine-scheduling-section.js"></script>
+  <script src="src/js/sections/targeting-webassembly-template.js"></script>
+  <script src="src/js/sections/targeting-webassembly-section.js"></script>
+  <script src="src/js/sections/jit-compilation-template.js"></script>
+  <script src="src/js/sections/jit-compilation-section.js"></script>
+  <script src="src/js/sections/inline-caches-template.js"></script>
+  <script src="src/js/sections/inline-caches-section.js"></script>
+  <script src="src/js/sections/runtime-support-template.js"></script>
+  <script src="src/js/sections/runtime-support-section.js"></script>
+  <script src="src/js/sections/measuring-a-runtime-template.js"></script>
+  <script src="src/js/sections/measuring-a-runtime-section.js"></script>
   <script src="src/js/app.js"></script>
 </body>
 </html>

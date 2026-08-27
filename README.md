@@ -14,14 +14,14 @@ faithfully in a browser, the section models it, says so plainly, and states what
 
 ## Status
 
-**M00–M29 shipped (288 sections). Building the curriculum, milestone by milestone.**
+**M00–M30 shipped (298 sections). Building the curriculum, milestone by milestone.**
 
 - ✅ Curriculum designed: 65 milestones, 634 sections, 11 tracks — one file per milestone in
   [`doc/milestones/`](doc/milestones/)
 - ✅ Architecture and conventions fixed — [`doc/architecture.md`](doc/architecture.md)
 - ✅ Build order and dependency graph — [`doc/ROADMAP.md`](doc/ROADMAP.md)
 - ✅ Scope decisions recorded — [`doc/topic-suggestions.md`](doc/topic-suggestions.md)
-- ✅ **Notation decoder across all 288 sections**: every mathematical symbol carries how to say it
+- ✅ **Notation decoder across all 298 sections**: every mathematical symbol carries how to say it
   and what it does, revealed on hover, tap or keyboard focus, and every formal statement whose
   notation a reader cannot pronounce carries an "In words" translation beneath it. The audience is
   a senior engineer with little or no mathematics, so the Description tab explains the idea before
@@ -514,14 +514,44 @@ faithfully in a browser, the section models it, says so plainly, and states what
   10^-15** at every iteration, peaking at the predicted round and then falling again, because it
   is a rotation. 10 sections live.
 
-`npm test` is green — wiring audit, 5 015 unit tests, and a **render audit** that boots the whole
-app headlessly and activates all 288 sections, failing on anything that throws while rendering, any
+`npm test` is green — wiring audit, 5 173 unit tests, and a **render audit** that boots the whole
+app headlessly and activates all 298 sections, failing on anything that throws while rendering, any
 table left with an empty body, and any metric tile still showing a placeholder without a note
 explaining it. `npm run lint:size` reports no offenders.
 
 The render audit is not a substitute for opening the page, and M16's browser pass proved it: every chart in the platform drawn on a **logarithmic y axis** was rendering its axes, its grid and its legend with no data in them at all. A d3 log scale handed a domain floor of zero does not throw — `nice()` rounds the floor down to the power of ten below it, that underflows to zero, and every point then maps to NaN. Twenty-eight sections across M01–M16 were affected. `viz/growth-plot.js` now forces a positive floor for any logarithmic axis, and `tests/unit/growth-plot.test.js` pins the invariant.
 
 ### The shell
+
+- ✅ **M30 — code generation, bytecode VMs and JIT**: the back end of the same compiler, and five
+  ways to run one program compared against the front end that produced it. Two code generators
+  over one IR: **383 stack instructions against 262 register ones** and **503 dispatches against
+  319**, reaching **2.00×** on a hot loop — with the honest caveat that a third of the apparent
+  gap was one missing peephole, since the naive stack expansion is 517. A VM written as a step
+  function over an explicit frame stack, so the operand stack, the locals, the upvalues and the
+  frames are objects you can stop between instructions and read; the loop-capture question every
+  language answers differently turns out to be **three lines** of that frame layout. Instruction
+  selection as a covering problem, checked against an **exhaustive search of every possible
+  cover** on **7 of 7** trees, with a cost slider that moves the selection and nothing
+  recompiled. Register allocation by graph colouring and by linear scan, both **verified at
+  every program point against a liveness pass neither produced** — and the textbook claim does
+  not survive: with real interval splitting, linear scan **beats** colouring at three and four
+  registers and loses at one and two. A real **WebAssembly module built byte by byte**, validated
+  by the browser rather than by this compiler, with a stackifier that reads the nesting off the
+  dominator tree and refuses an irreducible graph outright; **8 of 17** conformance programs are
+  in the numeric subset, all 8 agree, and the other **9 each carry the reason** they are not. A
+  tiered JIT with hotness counters, on-stack replacement, guarded fast paths and
+  **deoptimisation** that returns to the interpreter mid-instruction — demonstrated by a function
+  speculated on numbers 300 times and then handed two strings. Hidden classes priced: the same
+  fields written in two orders cost **1.50×** per access, and past four shapes it is a **cliff to
+  7.98** rather than a gradient. Stack maps checked against **what the program reads next**
+  rather than what the frame holds, which is the direction that makes precision a feature instead
+  of a failure. And a benchmark protocol that refuses to print a single sample. Four defects were
+  found only by running things: a scratch register released before the arguments were laid out,
+  so a call invoked its own first argument; interval splitting that queued the tail under a name
+  nothing read; the same splitting resumed one point later, where nothing had expired; and a
+  stack-map check written backwards that reported fifteen failures which were the collector being
+  precise.
 
 - ✅ **M29 — IR, SSA and optimisation**: the middle end of the same compiler, where every pass is
   gated after every pass by three checks that see three different things — a verifier with **ten

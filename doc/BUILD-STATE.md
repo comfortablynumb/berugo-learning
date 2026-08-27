@@ -3,7 +3,7 @@
 Where the implementation stands, and exactly what the next session should pick up.
 Update this file at the end of any session that leaves work unfinished.
 
-**Last updated:** 2026-08-26 (M29 complete — ten sections, 288 in the tree. The tree is GREEN.)
+**Last updated:** 2026-08-27 (M30 complete — ten sections, 298 in the tree. The tree is GREEN.)
 
 ---
 
@@ -41,11 +41,12 @@ Update this file at the end of any session that leaves work unfinished.
 | M27 — lambda calculus, type systems and semantics | 11 | ✅ built, tested, render-audited |
 | M28 — compiler front end: build a language | 9 | ✅ built, tested, render-audited |
 | M29 — IR, SSA and optimisation | 10 | ✅ built, tested, render-audited |
+| M30 — code generation, bytecode VMs and JIT | 10 | ✅ built, tested, render-audited |
 
-**The tree is GREEN.** `npm test` reports 5 015 unit tests with 0 failures (6 skipped — the
-wall-clock-budget starters the inline sandbox cannot fail); the wiring audit passes at 288 sections
-and 1 359 modules, the render audit activates all 288 with no exception and no empty table,
-`npm run lint:size` passes at 1 494 files, and `npm run build:css` is up to date.
+**The tree is GREEN.** `npm test` reports 5 173 unit tests with 0 failures (6 skipped — the
+wall-clock-budget starters the inline sandbox cannot fail); the wiring audit passes at 298 sections
+and 1 402 modules, the render audit activates all 298 with no exception and no empty table,
+`npm run lint:size` passes at 1 541 files, and `npm run build:css` is up to date.
 
 All nine M07 sections were opened in Chrome on `npm start`: the three tabs render, every demo
 figure matches the prose *exactly* (see "aligning the demo with the prose" below), the references
@@ -3184,17 +3185,20 @@ joint second; `match` leads that one too, at 4) and "32 observations" (31).
 
 ## Next
 
-**M30 — Code generation, bytecode VMs and JIT (10 sections).** Nothing of it exists yet, and its
-track file still carries it in `planned`. The spec is `doc/milestones/M30-codegen-vm-jit.md`, and
-its input is built: `machines/berugo/ir.js` is a typed, verified three-address IR;
-`machines/pass-lab.js` runs any pipeline over any program with three gates after every pass; and
-`Ssa.destruct` already puts the copies back, which is the last thing that has to happen before a
-register allocator sees the function. `Dataflow.run(fn, 'liveness')` is the analysis the allocator
-needs and is already checked against a path enumeration on every fixture. The
-stack-versus-register argument 29.1 makes on purpose — a stack IR is smaller and gives a value no
-name — is the one M30 gets to settle with a measurement rather than an assertion. Two debts M28
-deferred are still open and now have somewhere to go: mutation of captured variables (which is why
-`resolve.js` records captures per function) and a decision-tree compilation for `match` (which
+**M31 — Garbage collection and runtime memory (9 sections).** Nothing of it exists yet, and its
+track file still carries it in `planned`. The spec is `doc/milestones/M31-garbage-collection.md`,
+and the thing a collector needs most is already built and already checked: `runtime.js` produces a
+**precise stack map** at every safepoint and `checkSafepoints` verifies it against what the program
+goes on to read, so a root set here is a real root set rather than a conservative scan. `vm.js`
+keeps its frames in an explicit array, which is what makes the roots enumerable at all, and every
+allocation in the language goes through four opcodes — `makeArray`, `makeRecord`, `makeClosure`
+and the `store` pair — so a heap can be interposed without touching the front end. The natural
+first move is to give the VM a real heap with addresses instead of JavaScript object references,
+because a collector that cannot move an object can only demonstrate half the subject.
+
+Two debts M28 deferred are still open and now have somewhere to go: mutation of captured variables
+(which is why `resolve.js` records captures per function, and which a by-reference upvalue in
+`vm.js` would finally make expressible) and a decision-tree compilation for `match` (which
 `desugar.js` lowers to nested tests on purpose). After it, onward through `doc/milestones/` in the
 order `doc/ROADMAP.md` gives.
 
@@ -3605,3 +3609,148 @@ fixture could actually be run).
   compares two runs of the same interpreter, so a defect in it is invisible to every program where
   both sides hit it — and visible only where one side has phis and the other does not. The swap is
   that program, which is why the milestone needed one that could actually execute.
+
+---
+
+## M30 — code generation, bytecode VMs and JIT (complete)
+
+Ten sections, 298 in the tree. Nine modules under `machines/berugo/`, one harness
+(`machines/exec-lab.js`), one new viz renderer (`viz/bytecode-view.js`), ten template + section
+pairs, twelve content files, one property suite and three figure suites.
+
+### The shape of the milestone
+
+Five back ends now exist for one language — the IR interpreter, a stack VM, a register VM, a
+tiered JIT and a WebAssembly module — and the only claim worth making about any of them is that
+it computes what the front end computed. So the differential from M29 is reused verbatim rather
+than reimplemented: value, output, outcome and every binding, with the first difference named.
+`ExecLab.suite()` runs 59 comparisons across 17 programs and four back ends and reports 0
+disagreements, with 9 programs outside the WebAssembly subset and each one carrying its reason.
+
+The second discipline is that **the unit a measurement is denominated in is part of the
+measurement**. Three of this milestone's four defects were invisible in the obvious unit and
+obvious in the right one: a spill count that rose when splitting improved the code, a split count
+that rose when the split did nothing at all, and a stack-map check that reported precision as
+failure because it asked about the present rather than the future.
+
+### Modules
+
+`machines/berugo/`: `bytecode.js` (two instruction sets, a constant pool, two encodings, a
+block-local virtual register allocator, superinstruction analysis, a disassembler), `vm.js` (a
+resumable step machine over an explicit frame stack, closures, open and closed upvalues, a step
+debugger, both instruction sets through one loop), `isel.js` (tree regions, a data-driven tile
+table, dynamic-programming cover, an exhaustive oracle, a cost sweep), `regalloc.js`
+(Chaitin-Briggs colouring, conservative coalescing, Poletto-Sarkar linear scan with real interval
+splitting, placements over spans, an independent verifier), `schedule.js` (a dependence DAG with
+true, memory and effect edges, critical paths, list scheduling, an in-order pipeline model,
+register pressure, a legality check), `wasm-emit.js` (LEB128, sections, Ramsey's stackifier, a
+stated numeric subset with a whole-program type fixpoint, a trapping divide), `jit.js` (closure
+compilation, profiling, guarded fast paths, deoptimisation, on-stack replacement, a deopt
+blacklist), `shapes.js` (transition trees, inline caches with four states, cost studies),
+`runtime.js` (a written-down calling convention, bytecode liveness, stack maps, a dynamic
+safepoint oracle, source maps, stack traces). `machines/exec-lab.js` (every mode, one
+comparison, and the benchmark protocol). `viz/bytecode-view.js`.
+
+Content is split per third of the milestone — `-back-end`, `-back-end-target`,
+`-back-end-runtime`.
+
+### Four defects found only by running things
+
+1. **A call invoked its own first argument.** The register code generator released a scratch
+   register as soon as each operand was placed, so the callee's register was free again before
+   the argument run was laid out and the first argument reused it. The symptom is "41 is not a
+   function" rather than a wrong number, and it is invisible on every program with no direct
+   call. The fix is two regions: permanent registers recycled at each value's last use, and
+   scratch taken strictly above them and dropped only when the whole IR instruction is emitted.
+2. **Interval splitting was decorative.** The allocator kept one register per value and re-queued
+   a spilled interval's tail under an invented name, so nothing ever read the tail: the split
+   counter rose, the code was unchanged, and the spilled-points measure got WORSE (28 against 18)
+   because the same value was counted twice. The allocation is now a list of placements —
+   register, span, colour — and the verifier reads the colour at a point.
+3. **Splitting still saved nothing, for a second reason.** With placements fixed, the tail
+   resumed one point after the eviction, which is a position where nothing has expired, so it
+   spilled again immediately for the rest of its life. Resuming at the first point some active
+   interval has ended took it from 15 points to 9 and made the feature real.
+4. **The stack-map check was written backwards.** It compared the map against what the frame
+   HELD and reported 15 failures across the suite, every one of them a register still holding an
+   object the program would never read again — which is precisely what a precise collector is
+   entitled to ignore. The question is about the future, so the check now opens an observation at
+   each safepoint and records what that frame reads before writing until it returns.
+
+### Where the textbook claim did not survive
+
+**"Graph colouring produces better code than linear scan" is false on this function once
+splitting is real.** Points spent in memory, at 1 / 2 / 3 / 4 / 6 registers: colouring 25 / 22 /
+18 / 13 / 0, linear scan 30 / 23 / 17 / 9 / 1. Colouring is ahead at 1, 2 and 6 and behind at 3
+and 4. The reason is stated rather than hidden: splitting expresses a value that holds a register
+for part of its life and sits in memory for the rest, which an interference graph built from
+whole live ranges cannot represent at all. The section says what the sweep shows and names the
+conditions — small functions, short live ranges, no spill-cost heuristic — under which it is
+saying it.
+
+A second, smaller one: the register instruction set was expected to pay for its speed in bytes
+and does not. On the loop sample it is 196 bytes against the stack set's 204, because the stack
+generator spends so many instructions moving values through scratch slots that its one-byte
+opcodes add up.
+
+### Design decisions that are easy to undo by accident
+
+- **The stack generator's peephole is a switch, and the honest ratio is the one with it on.**
+  Without it the suite is 517 stack instructions instead of 383, and the stack-against-register
+  ratio reads 1.97 instead of 1.46. Leaving it out would have supported the section's conclusion
+  more strongly while being wrong about why.
+- **Every bytecode instruction carries the origin and span of the IR instruction it came from.**
+  30.9's source map, its stack trace and its stack maps are one field read three ways, and the
+  obligation is on the code generator rather than on a later pass.
+- **The WebAssembly subset is reported per program with a reason.** 8 of 17 compile. A back end
+  that silently skipped the rest would show a perfect agreement column that means nothing, and
+  the reasons are the shape of the work a real wasm back end for a dynamic language has to do.
+- **A polymorphic binding is outside the subset, not printed wrong.** Erasing every value into an
+  f64 costs the observables: a Bool survives only because the declared type is carried across,
+  and a value whose type the checker could not pin down cannot be printed back at all.
+- **A JIT guard is checked BEFORE the instruction consumes anything.** That single ordering is
+  the whole correctness argument for deoptimisation, and getting it wrong produces a wrong answer
+  only on the rare input the guard rejects.
+- **A function that deoptimises twice stops being speculated on.** Without it a genuinely
+  polymorphic function recompiles and falls back on every pass through a loop, and the program
+  gets slower the longer it runs.
+- **The safepoint set is calls and allocations only.** A map at every instruction would be larger
+  than the code it describes, and nothing else can trigger a collection.
+
+### Measured figures quoted in the M30 examples
+
+`tests/unit/worked-examples-back-end.test.js`, `-target` and `-runtime` recompute every one *and*
+assert the prose still quotes it; `tests/unit/back-end-modules.test.js` carries the property
+tests and every oracle. Landmarks: 74 stack instructions against 43 register on the loop sample,
+244 dispatches against 125 for 1.95 times, and 204 bytes against 196; 383 against 262 and 503
+against 319 across the suite, with 517 when the peephole is off; 20 adjacent pairs of which the
+top two are worth 18 of 74 dispatches; a session stopped at main:6 after 6 dispatches with 1
+frame live, and 9 native calls across the suite; 7 expression trees covered by 17 tiles at 24
+cycles, agreeing with an exhaustive search on 7 of 7, with the fused tile chosen at a price of 4
+and abandoned at 5; 13 points in memory for colouring against 9 for linear scan at 4 registers,
+25 against 30 at 1, and 11 live ranges with a highest degree of 9 over 25 edges; 34 cycles to 32
+with the peak rising from 2 to 3, and a saving fixed at 2 cycles across latencies from 1 to 16;
+a 237-byte wasm module over 5 sections of which 168 are code, 8 of 17 programs in the subset
+totalling 1 177 bytes and all 8 agreeing; a JIT reaching the optimising tier at dispatch 3 204
+with 4 guarded fast paths and 0 failures, and a deopt fixture failing 1 guard at dispatch 6 922
+and still agreeing; 1.00, 1.50 and 5.99 units per property access for one, two and every field
+order, with the cliff between 2.50 at four shapes and 7.98 at five; 5 safepoints of 31
+instructions with 27 carrying a span, 26 safepoints across the suite covering all 44 observed
+reads with 0 missed; and 4 810 dispatches against 9 614 with the cost per iteration flat at 16.40
+down to 16.02 across a sixteenfold input.
+
+### Four things M30 adds to the shape and worth keeping
+
+- **Choose the unit before choosing the measurement.** A spill count, a split count and a
+  "registers holding a reference" count all moved in a direction that made a defect look like a
+  feature or a feature look like a defect. Points spent in memory, and reads observed after a
+  safepoint, are the units those questions are actually paid in.
+- **A demonstration that has never failed has not been demonstrated.** The naive stack generator,
+  the unsplit allocator, the naive benchmark and the broken LICM pipeline from M29 are all
+  shipped and all asserted to be worse. A switch nobody has turned is a switch nobody believes.
+- **When the measurement contradicts the textbook, print the measurement.** The register
+  allocation section now says linear scan wins at three and four registers on this function,
+  names the mechanism, and names the conditions under which that is true — rather than quietly
+  choosing a fixture where the expected answer appears.
+- **A subset stated per program is a result; a subset hidden is a lie.** The wasm section reports
+  8 of 17 with nine reasons, and the nine reasons are more instructive than the eight agreements.

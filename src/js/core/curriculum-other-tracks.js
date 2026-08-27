@@ -505,10 +505,75 @@
               summary: 'The Csmith loop at page scale: generate, compile, compare, and shrink a twenty-line failure to four lines while keeping it a valid program that fails at the same pass in the same way.',
               tags: ['ir verifier', 'differential testing', 'random program generation', 'fuzzing', 'shrinking', 'minimal repro', 'translation validation', 'gates', 'oracle blind spots', 'csmith']
             }]
+        },
+        {
+          id: 'M30',
+          title: 'Code generation, bytecode VMs and JIT',
+          summary: 'The back end of the Berugo compiler: two bytecodes, a stepping VM, instruction selection, register allocation, scheduling, a real WebAssembly module, a tiered JIT with deoptimisation, and a benchmark protocol that refuses to print a single sample.',
+          sections: [
+            {
+              id: 'bytecode-design',
+              title: 'Bytecode design',
+              summary: 'Two code generators over one IR, with instructions, encoded bytes and executed dispatches measured side by side and a differential column so a smaller number can never be a wrong one.',
+              tags: ['stack machine', 'register machine', 'dispatch', 'instruction encoding', 'constant pool', 'superinstructions', 'jump patching', 'virtual registers', 'disassembly', 'jvm lua cpython v8']
+            },
+            {
+              id: 'building-the-interpreter',
+              title: 'Building the interpreter',
+              summary: 'A machine stopped between two instructions, with its operand stack, locals, upvalues and frames all objects you can look at, and the one switch that decides what a loop-captured variable means.',
+              tags: ['dispatch loop', 'call frames', 'calling convention', 'closures', 'upvalues', 'open and closed', 'step debugger', 'breakpoints', 'unwinding', 'stack trace']
+            },
+            {
+              id: 'instruction-selection',
+              title: 'Instruction selection',
+              summary: 'A cost slider that moves the selection with nothing recompiled, and every chosen cover checked against an exhaustive search of every possible cover.',
+              tags: ['tree tiling', 'dynamic programming', 'burs', 'cost model', 'addressing modes', 'complex instructions', 'commutativity', 'retargeting', 'covering problem', 'optimal cover']
+            },
+            {
+              id: 'register-allocation',
+              title: 'Register allocation',
+              summary: 'Graph colouring against linear scan on the same function, with spills plotted against the register count and both allocations verified against a liveness pass neither produced.',
+              tags: ['live ranges', 'interference graph', 'graph colouring', 'chaitin briggs', 'coalescing', 'spilling', 'linear scan', 'interval splitting', 'precolouring', 'verification']
+            },
+            {
+              id: 'machine-scheduling',
+              title: 'Scheduling and peephole at the machine level',
+              summary: 'One block through two orders and one pipeline model, with register pressure reported beside the cycle count so the trade between the two passes is visible rather than argued.',
+              tags: ['dependence dag', 'list scheduling', 'critical path', 'latency', 'stalls', 'register pressure', 'memory edges', 'block layout', 'delay slots', 'phase ordering']
+            },
+            {
+              id: 'targeting-webassembly',
+              title: 'Targeting WebAssembly',
+              summary: 'A module built byte by byte, validated by the browser rather than by this compiler, instantiated and compared against the interpreter — with the numeric subset stated per program rather than hidden.',
+              tags: ['wasm module', 'leb128', 'sections', 'structured control flow', 'stackifier', 'relooper', 'reducibility', 'linear memory', 'traps', 'subset']
+            },
+            {
+              id: 'jit-compilation',
+              title: 'JIT compilation',
+              summary: 'A function crossing a hotness threshold, being recompiled with guards the profile justified, and falling back to the interpreter mid-instruction when one of them does not hold.',
+              tags: ['tiering', 'hotness counters', 'profiling', 'speculation', 'guards', 'deoptimisation', 'on-stack replacement', 'warm-up', 'closure compilation', 'deopt blacklist']
+            },
+            {
+              id: 'inline-caches',
+              title: 'Inline caches and object shapes',
+              summary: 'The same fields written in two orders, costing a site its monomorphic state, with the cliff past the polymorphic limit measured rather than described.',
+              tags: ['hidden classes', 'shapes', 'transition tree', 'inline cache', 'monomorphic', 'polymorphic', 'megamorphic', 'dictionary mode', 'property offsets', 'method dispatch']
+            },
+            {
+              id: 'runtime-support',
+              title: 'Runtime support',
+              summary: 'A stack map checked against what the program actually reads next, and a source-level stack trace out of the same metadata, from a fault two calls deep.',
+              tags: ['calling convention', 'stack maps', 'safepoints', 'precise collection', 'conservative collection', 'stack traces', 'source maps', 'spans', 'inlining metadata', 'runtime boundary']
+            },
+            {
+              id: 'measuring-a-runtime',
+              title: 'Measuring a language runtime',
+              summary: 'A bake-off across every execution mode with warm-up separated and the run count attached, beside the same work measured the way people actually measure it.',
+              tags: ['benchmarking', 'warm-up', 'steady state', 'median and spread', 'compile time', 'dead code elimination', 'constant folding', 'microbenchmark pathologies', 'deterministic units', 'honest reporting']
+            }]
         }
       ],
       planned: [
-        { id: 'M30', title: 'Code generation, bytecode VMs and JIT', sections: 10 },
         { id: 'M31', title: 'Garbage collection and runtime memory', sections: 9 },
         { id: 'M32', title: 'Program analysis, SAT/SMT and verification', sections: 11 }
       ]
