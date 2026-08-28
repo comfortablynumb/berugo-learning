@@ -165,14 +165,33 @@
     return true;
   }
 
+  /**
+   * `limits[L]` is the trail length just BEFORE level L's decision, so
+   * everything assigned at levels 0..level is kept by popping back to
+   * `limits[level + 1]`.
+   *
+   * Popping back to `limits[level]` instead is off by one level and it is
+   * catastrophic at level 0, where `limits[0]` is never set: backtracking to
+   * the root emptied the entire trail, including the assignments made by the
+   * formula's UNIT clauses. A unit clause carries no watches — it is an
+   * assignment, not a clause to revisit — so nothing ever re-derived them, and
+   * the solver went on to assign those variables the other way and returned a
+   * model that did not satisfy the formula it was given. Random 3-CNF has no
+   * unit clauses, so the differential against brute force never saw it; the
+   * bounded model checker, whose encoding pins the initial state with one unit
+   * clause per variable, saw it immediately.
+   */
   function backtrack(state, level) {
-    while (state.trail.length > (state.limits[level] === undefined ? 0 : state.limits[level])) {
+    const keep = state.limits[level + 1] === undefined
+      ? state.trail.length : state.limits[level + 1];
+
+    while (state.trail.length > keep) {
       const literal = state.trail.pop();
 
       state.value[varOf(literal)] = UNASSIGNED;
       state.reason[varOf(literal)] = null;
     }
-    state.limits.length = level;
+    state.limits.length = level + 1;
     state.head = state.trail.length;
     state.decisionLevel = level;
   }

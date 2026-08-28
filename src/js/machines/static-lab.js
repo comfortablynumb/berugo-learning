@@ -77,6 +77,16 @@
       steps: 0, budget: settings.budget || 20000, observations: [],
       gaveUp: null };
 
+    /* Parameters arrive in registers and are moved into slots by the first
+       instructions of the entry block, so an input for a parameter has to be
+       seeded there rather than in the slot it will end up in. */
+    (fn.params || []).forEach(function (register, at) {
+      const name = (settings.names || [])[at] || ('p' + at);
+
+      if (settings.params && settings.params[name] !== undefined) {
+        run.regs[register] = settings.params[name];
+      }
+    });
     fn.blocks.forEach(function (block) { blocks[block.id] = block; });
     let current = fn.blocks[0];
 
@@ -321,6 +331,35 @@
         : checked + ' observed values, ' + violations.length + ' outside the claim' };
   }
 
+  /**
+   * Run each generated input and check it reaches the path it was generated
+   * for. This is the acceptance criterion for symbolic execution and it is the
+   * only thing that distinguishes a solver answer from a claim: the input is
+   * executed, the blocks it visits are recorded, and the path's block list has
+   * to be a prefix-consistent subset of them.
+   */
+  function verifyPaths(fn, paths, options) {
+    const settings = options || {};
+    const rows = paths.filter(function (path) { return path.verdict === 'sat'; })
+      .map(function (path) { return verifyOne(fn, path, settings); });
+
+    return { rows: rows, checked: rows.length,
+      reached: rows.filter(function (row) { return row.reached; }).length,
+      missed: rows.filter(function (row) { return !row.reached; }) };
+  }
+
+  function verifyOne(fn, path, settings) {
+    const run = observe(fn, { params: path.model, names: settings.names || [] });
+    const visited = run.observations.map(function (row) { return row.block; });
+    const reached = path.blocks.every(function (id) {
+      return visited.indexOf(id) !== -1;
+    });
+
+    return { model: path.model, wanted: path.blocks, visited: visited,
+      reached: reached, condition: path.condition };
+  }
+
   return { compile: compile, observe: observe, analyse: analyse,
-    soundness: soundness, loopHeaders: loopHeaders, BINARY: BINARY };
+    soundness: soundness, loopHeaders: loopHeaders, BINARY: BINARY,
+    verifyPaths: verifyPaths };
 }));
