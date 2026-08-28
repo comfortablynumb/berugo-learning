@@ -3367,31 +3367,69 @@ written. `ChartBase` now accepts either, which removes the trap for every future
 
 ## Next
 
-**M32 — Program analysis, SAT/SMT and verification (11 sections).** Nothing of it exists yet, and
-its track file still carries it in `planned`. The spec is `doc/milestones/M32-program-analysis.md`,
-and it is the last milestone of the compilers track, after which `doc/ROADMAP.md` moves to computer
-architecture (M33). Most of what it needs is already built: `machines/berugo/dataflow.js` carries
-the lattice framework and four analyses, `cfg.js` and `dominators.js` carry the graph machinery,
-`alias.js` carries Andersen and Steensgaard with a dynamic oracle, `interproc.js` carries the call
-graph and escape analysis, and `fuzz.js` carries generation and shrinking. M27's type checker and
-M26's decidability results are the theory side. The natural first move is the SAT solver, because
-DPLL with clause learning is a self-contained module with an obvious oracle (a brute-force truth
-table up to about twenty variables), and everything above it — bounded model checking, symbolic
-execution, an SMT core over difference logic — is a translation into it.
+**M32 — Program analysis, SAT/SMT and verification (11 sections) is IN PROGRESS.** Ten of its
+twelve modules are built, wired into `index.html`, and committed green; nothing of its sections,
+content or tests exists yet. The spec is `doc/milestones/M32-program-analysis.md`.
 
-Two debts M28 deferred are still open and now have somewhere to go: mutation of captured variables
-(which is why `resolve.js` records captures per function, and which a by-reference upvalue in
-`vm.js` would finally make expressible) and a decision-tree compilation for `match` (which
-`desugar.js` lowers to nested tests on purpose). M31 added a third: the VM still holds JavaScript
-object references rather than addresses into `HeapSim`, so the collectors run against a recorded
-trace of the program rather than against the program itself. Interposing the heap under
-`makeArray`, `makeRecord`, `makeClosure` and the `store` pair is the move that would close it.
+### What is built and what it is verified against
+
+| Module | State | Oracle it passes |
+|---|---|---|
+| `machines/solver/sat.js` | done | 400 random formulas, 0 mismatches against brute force; pigeonhole 4/3, 5/4, 6/5 UNSAT at 7, 28 and 145 conflicts with DRAT proofs verified |
+| `machines/solver/check.js` | done | is the oracle: model checking, RUP proof checking, brute force, model counting |
+| `machines/solver/smt.js` | done | 150 random EUF problems, 0 mismatches, every sat answer independently checked |
+| `machines/solver/theories/euf.js` | done | congruence closure, minimal unsat cores by deletion |
+| `machines/solver/theories/difference.js` | done | 300 random systems, 0 mismatches against brute force |
+| `machines/solver/theories/linear.js` | done | 400 random systems, 0 false unsats against a fine grid |
+| `algorithms/abstract-interp.js` | done | interval / sign / parity domains, widen and narrow |
+| `machines/static-lab.js` | done | the dynamic soundness oracle, plus `verifyPaths` |
+| `algorithms/taint.js` | done | six fixtures, plus a policy sweep pricing both failure directions |
+| `algorithms/symbolic-exec.js` | done | every generated input executed and asserted to reach its path |
+| `algorithms/model-check.js` | done | explicit search and BMC required to agree on the violation depth |
+| `algorithms/verify-vc.js` | done | the binary-search overflow fails, the fixed version discharges 3 of 3 |
+| `algorithms/race-detect.js` | done | happens-before against locksets on five fixtures |
+| `algorithms/fuzzer.js` | done | found two real front-end crashes in 3 000 mutations |
+| `machines/spec-dsl.js` | **not started** | — |
+
+### Section ids and prefixes, all checked free
+
+`static-analysis-foundations` (saf), `abstract-interpretation` (abs), `taint-analysis` (tnt),
+`symbolic-execution` (sye), `sat-solving` (sat), `smt-solving` (smt), `model-checking` (mck),
+`deductive-verification` (dvf), `dynamic-analysis` (dya), `coverage-guided-fuzzing` (cgf),
+`specifying-systems` (spy).
+
+### Findings to build the content around
+
+- The SAT solver's backtracking was off by one decision level, which at level 0 emptied the trail
+  including the assignments made by UNIT clauses. Random 3-CNF has no unit clauses, so 400
+  differentials never saw it; the BMC encoding, which pins the initial state with one unit clause
+  per variable, saw it immediately. Fixing it also cut pigeonhole 6/5 from 388 conflicts to 145.
+- The BMC encoding let a selector be true without its premise, so the trace teleported and reported
+  a mutual-exclusion violation at depth 1 that the search puts at depth 4.
+- EUF term keys built from ids do not re-parse, so the unsat-core minimisation was silently a
+  no-op; and terms interned after the merges never trigger congruence.
+- An SMT blocking clause matched back to the first atom with the same terms, which is the wrong one
+  when two atoms share them.
+- The fuzzer found `let:` and `{=` — four and two characters — crashing `Pipeline.run`, whose
+  contract is to report errors rather than raise them. Guarding the two nodes moved the failure one
+  node along; the fix that holds is a boundary at the stage runner.
+- Widening and narrowing recover `[0, 11]` from `[0, +∞]` on a counting loop and do NOT recover the
+  outer bound of a nested loop, which is a real limitation of the classic scheme and is worth
+  reporting rather than chasing.
+
+### Then
+
+M33 — digital logic — starts the computer-architecture track. After M32 the compilers track is
+complete and `doc/ROADMAP.md` gives the order.
+
+Two debts M28 deferred are still open: mutation of captured variables (which is why `resolve.js`
+records captures per function) and a decision-tree compilation for `match`. M31 added a third: the
+VM still holds JavaScript object references rather than addresses into `HeapSim`, so the collectors
+run against a recorded trace of a program rather than against the program itself.
 
 M11 through M15 and M17 through M24 are complete apart from a human browser pass, which needs the
-Chrome extension connected; M16 and M31 have had one (see above, and the chart defects each found).
-`tools/section-dump.js` covers everything else the browser used to be needed for — it prints every
-metric, table and note a section renders, at any control setting, and since the `input`-event fix
-above that is finally true of slider settings too.
+Chrome extension connected; M16 and M31 have had one. `tools/section-dump.js` covers everything
+else the browser used to be needed for.
 
 A shared helper exists for the figure tests: `tests/support/worked-example-prose.js` exports
 `proseFor`, `quotes`, `fixed` and `grouped`.
@@ -3415,6 +3453,11 @@ The shape to copy, unchanged through M31:
    `worked-examples-<topic>*.test.js` (recompute every quoted figure *and* assert the prose still
    quotes it);
 9. `npm test && npm run lint:size && npm run build:css`, then the doc updates.
+
+**Check every new file path is free before writing it** — `git ls-files --error-unmatch <path>`.
+M26 destroyed a section this way and M32 destroyed M18's `machines/analysis-lab.js`; the new
+harness is `machines/static-lab.js`. The milestone specs name files without knowing what other
+milestones took.
 
 Two things M20 added to the shape and worth keeping:
 
