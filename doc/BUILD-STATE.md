@@ -3391,6 +3391,17 @@ content or tests exists yet. The spec is `doc/milestones/M32-program-analysis.md
 | `algorithms/fuzzer.js` | done | found two real front-end crashes in 3 000 mutations |
 | `machines/spec-dsl.js` | **not started** | — |
 
+### Where the work is parked
+
+The curriculum group and the first section (`static-analysis-foundations`, complete and dumping
+correctly) are committed on the branch **`wip/m32-sections`**, which is deliberately RED: the
+curriculum names eleven sections and only one has files, so the audits report ten `no-container`
+problems. `feat/m10-sorting-and-selection` is green and has none of it.
+
+To resume: `git checkout wip/m32-sections`, write the remaining ten template + section pairs, add
+the `<section data-section=...>` containers and the script tags to `index.html`, then the twelve
+content files and the tests. Merge back only once `npm test` is green.
+
 ### Section ids and prefixes, all checked free
 
 `static-analysis-foundations` (saf), `abstract-interpretation` (abs), `taint-analysis` (tnt),
