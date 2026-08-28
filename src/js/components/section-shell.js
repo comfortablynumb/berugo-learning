@@ -48,7 +48,9 @@
     if (!paragraphs || !paragraphs.length) return '';
     const annotate = mark(sectionId);
     return '<div class="section-orientation">' +
-      paragraphs.map(function (text) { return '<p>' + annotate.annotate(text) + '</p>'; }).join('') +
+      paragraphs.map(function (text) {
+        return '<p>' + annotate.annotateRich(text) + '</p>';
+      }).join('') +
       '</div>';
   }
 
@@ -82,7 +84,7 @@
   function insight(text, sectionId) {
     if (!text) return '';
     return '<div class="insight"><strong>Senior insight.</strong> ' +
-      mark(sectionId).annotate(text) + '</div>';
+      mark(sectionId).annotateRich(text) + '</div>';
   }
 
   function navLinks(sectionId) {

@@ -359,7 +359,71 @@
       reached: reached, condition: path.condition };
   }
 
+  /**
+   * Precision, measured as the gap between what the analyser said was possible
+   * and what actually happened. A sound analyser's claim always contains the
+   * observed values; the interesting number is how much MORE it contains,
+   * because that is where the false positives come from.
+   *
+   * The two numbers are kept apart deliberately. Soundness is a property
+   * ("nothing observed fell outside") and precision is a quantity ("the claim
+   * was this much wider"), and a tool that reported one number for both would
+   * let a useless analyser — everything is possible — look perfectly correct.
+   */
+  function precision(analysis, run, domain) {
+    const chosen = domain || Abstract.domainFor(analysis.domain);
+    const observed = {};
+
+    run.observations.forEach(function (row) {
+      Object.keys(row.slots).forEach(function (slot) {
+        const value = row.slots[slot];
+
+        if (typeof value !== 'number') return;
+        const key = row.block + '/' + slot;
+
+        observed[key] = observed[key] || { block: row.block, slot: slot,
+          lo: value, hi: value, count: 0, values: {} };
+        observed[key].lo = Math.min(observed[key].lo, value);
+        observed[key].hi = Math.max(observed[key].hi, value);
+        observed[key].values[value] = true;
+        observed[key].count += 1;
+      });
+    });
+    return summarise(analysis, chosen, observed);
+  }
+
+  function summarise(analysis, domain, observed) {
+    const rows = Object.keys(observed).sort().map(function (key) {
+      const row = observed[key];
+      const claim = Abstract.readSlot(domain, analysis.entry[row.block] || {}, row.slot);
+
+      return { block: row.block, slot: row.slot, claim: domain.show(claim),
+        observedLo: row.lo, observedHi: row.hi,
+        distinct: Object.keys(row.values).length,
+        width: widthOf(domain, claim),
+        observedWidth: row.hi - row.lo + 1,
+        contains: domain.contains(claim, row.lo) && domain.contains(claim, row.hi) };
+    });
+
+    return { rows: rows,
+      exact: rows.filter(function (row) {
+        return row.width === row.observedWidth;
+      }).length,
+      unbounded: rows.filter(function (row) { return row.width === Infinity; }).length,
+      unsound: rows.filter(function (row) { return !row.contains; }).length,
+      total: rows.length };
+  }
+
+  /** An interval has a width; a sign or a parity has a size in the domain. */
+  function widthOf(domain, claim) {
+    if (domain.name !== 'interval') {
+      return claim === domain.top() ? Infinity : 1;
+    }
+    if (claim === null) return 0;
+    return claim.hi - claim.lo + 1;
+  }
+
   return { compile: compile, observe: observe, analyse: analyse,
-    soundness: soundness, loopHeaders: loopHeaders, BINARY: BINARY,
-    verifyPaths: verifyPaths };
+    soundness: soundness, precision: precision, loopHeaders: loopHeaders,
+    BINARY: BINARY, verifyPaths: verifyPaths, widthOf: widthOf };
 }));

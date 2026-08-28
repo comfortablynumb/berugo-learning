@@ -84,10 +84,58 @@
       return out + esc(source.slice(last));
     }
 
+    /**
+     * The same annotation, plus the two pieces of inline markup the
+     * orientation and insight prose is written in: `**` around the claim a
+     * paragraph is making, and backticks around an identifier.
+     *
+     * It is a separate entry point rather than part of `annotate` on purpose.
+     * Concept and reference text uses `**` as EXPONENTIATION — `2**53` — and
+     * rendering that as bold would corrupt it, so only the two blocks whose
+     * authors write markdown get the markdown.
+     *
+     * Bold is split first so that a backticked identifier inside a bold claim
+     * still works, and the notation annotator runs on the inner text of a bold
+     * span so a symbol first met there is still decoded. Code spans are
+     * escaped and never annotated: a backticked name is an identifier, not
+     * notation.
+     */
+    function annotateRich(text, options) {
+      if (text === undefined || text === null || text === '') return '';
+      return splitOn(String(text), BOLD, function (inner) {
+        return '<strong>' + withCode(inner, options) + '</strong>';
+      }, function (plain) { return withCode(plain, options); });
+    }
+
+    function withCode(text, options) {
+      return splitOn(text, CODE, function (inner) {
+        return '<code>' + esc(inner) + '</code>';
+      }, function (plain) { return annotate(plain, options); });
+    }
+
     return {
       annotate: annotate,
+      annotateRich: annotateRich,
       decoded: function () { return Array.from(seen); }
     };
+  }
+
+  /* One capture group each, so `String.split` hands back the delimiters at the
+     odd indices and the surrounding prose at the even ones. An unclosed marker
+     simply never matches, and falls through to be escaped and shown as it was
+     written. */
+  const BOLD = /\*\*([\s\S]+?)\*\*/g;
+  const CODE = /`([^`]+)`/g;
+
+  function splitOn(text, pattern, onMatch, onPlain) {
+    const parts = String(text).split(pattern);
+    let out = '';
+
+    parts.forEach(function (part, at) {
+      if (part === undefined || part === '') return;
+      out += at % 2 === 1 ? onMatch(part) : onPlain(part);
+    });
+    return out;
   }
 
   /** One-shot annotation for a standalone string. */
@@ -95,9 +143,14 @@
     return createAnnotator(options || {}).annotate(text, options);
   }
 
+  function annotateRich(text, options) {
+    return createAnnotator(options || {}).annotateRich(text, options);
+  }
+
   return {
     createAnnotator: createAnnotator,
     annotate: annotate,
+    annotateRich: annotateRich,
     noteFor: noteFor
   };
 }));

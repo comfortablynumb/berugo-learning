@@ -305,3 +305,18 @@ table.ref-table td.mono {
 .map-track-note {
   margin-bottom: 0.75rem;
 }
+
+/* Inline code in the orientation and the insight. The prose there is written
+   with two pieces of markup - `**` for the claim a paragraph makes and
+   backticks for an identifier - and both were being escaped and shown raw
+   until the annotator learned to render them. A tint as well as the monospace
+   face, because an identifier in a paragraph of prose has to survive being
+   skimmed. */
+.section-orientation code,
+.insight code {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  padding: 0.05rem 0.28rem;
+  border-radius: 0.2rem;
+  background: color-mix(in srgb, var(--hue-gray) 16%, transparent);
+}

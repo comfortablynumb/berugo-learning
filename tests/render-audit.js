@@ -182,6 +182,44 @@ function checkMetrics(sectionId, container) {
   });
 }
 
+/**
+ * The orientation and the insight are written with two pieces of inline
+ * markup - `**` around the claim a paragraph is making and backticks around an
+ * identifier - and for the whole life of the project both were escaped and
+ * shown to the learner raw, in 204 of 306 sections. Nothing caught it, because
+ * every check here was about structure and none about the text.
+ *
+ * So this is the text check: after rendering, no marker may survive in either
+ * block. It runs against the real DOM the app produced rather than against the
+ * source, which is what makes it robust - the prose is assembled by
+ * concatenating string fragments, so a pair of markers routinely straddles two
+ * literals and no scan of the source can pair them reliably.
+ */
+const MARKERS = [
+  { pattern: /\*\*/, name: 'bold' },
+  { pattern: /`/, name: 'code' }
+];
+
+function checkProse(sectionId, container) {
+  ['.section-orientation', '.insight'].forEach(function (selector) {
+    Array.prototype.forEach.call(container.querySelectorAll(selector), function (block) {
+      const text = block.textContent || '';
+
+      MARKERS.forEach(function (marker) {
+        if (!marker.pattern.test(text)) return;
+        fail(sectionId, 'raw-markup', selector + ' shows a raw ' + marker.name +
+          ' marker: ' + snippet(text, marker.pattern));
+      });
+    });
+  });
+}
+
+function snippet(text, pattern) {
+  const at = text.search(pattern);
+
+  return JSON.stringify(text.slice(Math.max(0, at - 30), at + 30));
+}
+
 function checkContainer(sectionId, container) {
   if (!container) {
     fail(sectionId, 'no-container', 'index.html has no #' + sectionId + '-content');
@@ -227,6 +265,7 @@ function auditSection(app, window, consoleErrors, sectionId) {
   if (!checkContainer(sectionId, container)) return;
   checkTables(sectionId, container);
   checkMetrics(sectionId, container);
+  checkProse(sectionId, container);
 }
 
 /* -------------------------------------------------- the run */
@@ -265,4 +304,4 @@ if (failures.length > 0) {
   process.exit(1);
 }
 
-console.log('render audit passed — every section rendered, no empty table or metric');
+console.log('render audit passed \u2014 every section rendered, no empty table, metric or raw marker');
