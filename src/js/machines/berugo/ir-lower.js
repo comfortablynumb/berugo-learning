@@ -104,7 +104,15 @@
     block: lowerBlockExpr
   };
 
+  /**
+   * A missing node is lowered to unit, exactly as an unknown one is. The
+   * parser's error recovery can leave a hole - `{=` leaves an assignment with
+   * no target object - and lowering a tree that carries diagnostics is a
+   * normal thing to do, because the later stages produce diagnostics of their
+   * own. Reading `.kind` off the hole threw a TypeError instead.
+   */
   function lowerExpr(node, ctx) {
+    if (!node) return literal(ctx, null, 'Unit', null);
     const handler = EXPR[node.kind];
 
     if (!handler) return literal(ctx, null, 'Unit', node);

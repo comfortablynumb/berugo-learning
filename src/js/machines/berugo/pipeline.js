@@ -82,12 +82,35 @@
     desugar: function () { return []; }
   };
 
+  /**
+   * The stage boundary, and the reason it is a boundary rather than a guard.
+   *
+   * Every stage after `parse` is handed a tree that may carry syntax errors,
+   * because the point of error recovery is that later stages go on to produce
+   * diagnostics of their own. A recovered tree has holes in it, and a
+   * consumer that reads a field off a hole raises a TypeError out of an entry
+   * point whose whole contract is to REPORT errors rather than raise them.
+   *
+   * M32's fuzzer found two of those in four characters (`let:` and `{=`), and
+   * guarding the two nodes it happened to reach just moved the failure one
+   * node along. The fix that holds is here: a stage that throws is recorded as
+   * a stage that failed, with the exception as its diagnostic, and the
+   * pipeline carries on with whatever it has. `crashed` is a reported field so
+   * that a stage falling over can never be mistaken for a stage that found
+   * nothing.
+   */
   function runStage(state, id, settings) {
-    const out = RUNNERS[id](state, settings);
+    try {
+      const out = RUNNERS[id](state, settings);
 
-    state.artefacts[id] = out;
-    state.stages.push({ id: id, label: LABELS[id], errors: ERRORS[id](out).length,
-      size: sizeOf(id, out) });
+      state.artefacts[id] = out;
+      state.stages.push({ id: id, label: LABELS[id], errors: ERRORS[id](out).length,
+        size: sizeOf(id, out) });
+    } catch (problem) {
+      state.artefacts[id] = state.artefacts[id] || null;
+      state.stages.push({ id: id, label: LABELS[id], errors: 1, size: 0,
+        crashed: String(problem && problem.message || problem) });
+    }
   }
 
   function sizeOf(id, out) {

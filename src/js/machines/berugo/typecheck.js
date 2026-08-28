@@ -275,6 +275,13 @@
     if (node.kind === 'typeArrow') {
       return arrow([fromAnnotation(node.from, state)], fromAnnotation(node.to, state));
     }
+    /* Anything else is a record annotation - or a node the parser could not
+       complete. `let:` produces the second, and assuming the `fields` array is
+       there threw a TypeError out of an entry point whose whole contract is to
+       REPORT errors rather than raise them. A tree that failed to parse is
+       still handed to the checker so that later diagnostics can be produced,
+       so every consumer of a node has to survive the incomplete shape. */
+    if (!node.fields || typeof node.fields.forEach !== 'function') return null;
     const fields = {};
 
     node.fields.forEach(function (entry) {
