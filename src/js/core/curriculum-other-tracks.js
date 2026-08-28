@@ -571,10 +571,69 @@
               summary: 'A bake-off across every execution mode with warm-up separated and the run count attached, beside the same work measured the way people actually measure it.',
               tags: ['benchmarking', 'warm-up', 'steady state', 'median and spread', 'compile time', 'dead code elimination', 'constant folding', 'microbenchmark pathologies', 'deterministic units', 'honest reporting']
             }]
+        },
+        {
+          id: 'M31',
+          title: 'Garbage collection and runtime memory',
+          summary: 'Eight collectors over one recorded heap, every collection checked against a liveness oracle that shares no code with any of them: counting, tracing, copying, generational, incremental, region evacuation, and the three defects the oracle caught.',
+          sections: [
+            {
+              id: 'memory-management-landscape',
+              title: 'The memory-management landscape',
+              summary: 'Five seeded faults in a manual allocator, four of them named and one that became a plausible wrong answer, beside the throughput-latency-footprint triangle measured on one trace.',
+              tags: ['manual memory', 'use after free', 'double free', 'quarantine', 'poison pattern', 'object header', 'throughput', 'latency', 'footprint', 'liveness oracle']
+            },
+            {
+              id: 'reference-counting',
+              title: 'Reference counting',
+              summary: 'The counting traffic on every pointer store priced against a zero pause, with the cycles it leaks counted and then reclaimed by trial deletion.',
+              tags: ['retain and release', 'immediate reclamation', 'counting traffic', 'reference cycle', 'trial deletion', 'deferred counting', 'weak references', 'arc', 'cpython', 'cascading free']
+            },
+            {
+              id: 'mark-sweep-and-compact',
+              title: 'Mark-sweep and mark-compact',
+              summary: 'Tri-colour marking stepped one slice at a time over a real heap map, a mark stack made to overflow, and the free space after a sweep drawn to scale beside the same bytes after a compaction.',
+              tags: ['tri-colour', 'mark stack', 'stack overflow', 'rescan', 'sweep', 'free list', 'fragmentation', 'compaction', 'forwarding pointers', 'conservative scanning']
+            },
+            {
+              id: 'generational-collection',
+              title: 'Copying and generational collection',
+              summary: 'Cheney at cost proportional to survivors, shown by a heap-size sweep where mark-sweep goes from 218 to 1 270 units per collection and copying stays flat, plus the write barrier without which the nursery loses live objects.',
+              tags: ['cheney', 'semi-space', 'pointer bump', 'generational hypothesis', 'nursery', 'promotion', 'write barrier', 'remembered set', 'card table', 'survival rate']
+            },
+            {
+              id: 'incremental-collection',
+              title: 'Incremental and concurrent collection',
+              summary: 'The black-to-white pointer built deliberately, the object watched being freed while live without a barrier, and each barrier preventing it — with the floating garbage each one leaves behind counted.',
+              tags: ['incremental marking', 'lost object', 'black to white', 'dijkstra barrier', 'satb', 'yuasa', 'floating garbage', 'safepoints', 'read barrier', 'allocate black']
+            },
+            {
+              id: 'modern-collectors',
+              title: 'Modern collector designs',
+              summary: 'Eight designs over one trace with pause distributions rather than averages, and garbage-first ranked against the knapsack optimum it is a heuristic for.',
+              tags: ['region heap', 'g1', 'garbage first', 'evacuation', 'pause budget', 'shenandoah', 'zgc', 'coloured pointers', 'orinoco', 'p99 pause']
+            },
+            {
+              id: 'weak-references',
+              title: 'Finalisation and weak references',
+              summary: 'A handle limit exhausted while the heap is nearly empty, so no collection is triggered and nothing is ever finalised — beside the explicit-close version that never leaks.',
+              tags: ['finalisers', 'resurrection', 'weak reference', 'soft reference', 'phantom reference', 'weak map', 'raii', 'cleanup actions', 'resource exhaustion', 'reference strength']
+            },
+            {
+              id: 'avoiding-the-collector',
+              title: 'Avoiding the collector',
+              summary: 'The same result computed two ways, with allocation rate as the lever and the escape analysis from M29 toggled to show what the compiler removes without being asked.',
+              tags: ['allocation rate', 'escape analysis', 'scalar replacement', 'stack allocation', 'object pooling', 'arenas', 'off-heap buffers', 'value types', 'allocation sites', 'churn']
+            },
+            {
+              id: 'diagnosing-gc',
+              title: 'Diagnosing GC in production',
+              summary: 'A heap that grows, a snapshot, the dominator tree over the object graph computed with the M13 dominator pass, and the retaining path from a root to the leak.',
+              tags: ['gc logs', 'allocation rate', 'promotion rate', 'pause distribution', 'heap sizing', 'managed leak', 'retained size', 'dominator tree', 'retaining path', 'heap dump']
+            }]
         }
       ],
       planned: [
-        { id: 'M31', title: 'Garbage collection and runtime memory', sections: 9 },
         { id: 'M32', title: 'Program analysis, SAT/SMT and verification', sections: 11 }
       ]
     },

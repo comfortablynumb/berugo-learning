@@ -36,6 +36,20 @@
     return repainted;
   }
 
+  /**
+   * `summary` may be a function or a plain string. It was function-only, and
+   * a string silently threw on every repaint — the chart still drew, so the
+   * failure was invisible to the render audit and showed up only as a console
+   * exception in a browser. Accepting both is one line and removes the trap.
+   */
+  function summaryFnFor(summary) {
+    if (typeof summary === 'function') return summary;
+    if (typeof summary === 'string' && summary) {
+      return function () { return summary; };
+    }
+    return null;
+  }
+
   function configure(options) {
     const settings = options || {};
     return {
@@ -43,7 +57,7 @@
       lazyLib: settings.lazyLib || (typeof window !== 'undefined' ? window.BerugoApp && window.BerugoApp.lazyLib : null),
       height: settings.height || 240,
       margin: Object.assign({}, DEFAULT_MARGIN, settings.margin || {}),
-      summaryFn: settings.summary || null
+      summaryFn: summaryFnFor(settings.summary)
     };
   }
 

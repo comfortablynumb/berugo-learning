@@ -14,14 +14,14 @@ faithfully in a browser, the section models it, says so plainly, and states what
 
 ## Status
 
-**M00–M30 shipped (298 sections). Building the curriculum, milestone by milestone.**
+**M00–M31 shipped (307 sections). Building the curriculum, milestone by milestone.**
 
 - ✅ Curriculum designed: 65 milestones, 634 sections, 11 tracks — one file per milestone in
   [`doc/milestones/`](doc/milestones/)
 - ✅ Architecture and conventions fixed — [`doc/architecture.md`](doc/architecture.md)
 - ✅ Build order and dependency graph — [`doc/ROADMAP.md`](doc/ROADMAP.md)
 - ✅ Scope decisions recorded — [`doc/topic-suggestions.md`](doc/topic-suggestions.md)
-- ✅ **Notation decoder across all 298 sections**: every mathematical symbol carries how to say it
+- ✅ **Notation decoder across all 307 sections**: every mathematical symbol carries how to say it
   and what it does, revealed on hover, tap or keyboard focus, and every formal statement whose
   notation a reader cannot pronounce carries an "In words" translation beneath it. The audience is
   a senior engineer with little or no mathematics, so the Description tab explains the idea before
@@ -515,13 +515,44 @@ faithfully in a browser, the section models it, says so plainly, and states what
   is a rotation. 10 sections live.
 
 `npm test` is green — wiring audit, 5 173 unit tests, and a **render audit** that boots the whole
-app headlessly and activates all 298 sections, failing on anything that throws while rendering, any
+app headlessly and activates all 307 sections, failing on anything that throws while rendering, any
 table left with an empty body, and any metric tile still showing a placeholder without a note
 explaining it. `npm run lint:size` reports no offenders.
 
 The render audit is not a substitute for opening the page, and M16's browser pass proved it: every chart in the platform drawn on a **logarithmic y axis** was rendering its axes, its grid and its legend with no data in them at all. A d3 log scale handed a domain floor of zero does not throw — `nice()` rounds the floor down to the power of ten below it, that underflows to zero, and every point then maps to NaN. Twenty-eight sections across M01–M16 were affected. `viz/growth-plot.js` now forces a positive floor for any logarithmic axis, and `tests/unit/growth-plot.test.js` pins the invariant.
 
 ### The shell
+
+- ✅ **M31 — garbage collection and runtime memory**: eight collectors over one recorded heap,
+  and a **liveness oracle that shares no code with any of them**, run at every collection rather
+  than at the end. The oracle is the milestone: it found three defects that were all reporting
+  healthy statistics while they lost live objects — a generational collector that ran its own
+  roots through the young filter and so never scanned the long-lived container (**16 objects**,
+  with all three barrier settings producing the identical failure, which is what said the barrier
+  was not the problem); a mark-stack overflow recovery that shaded the dropped children grey and
+  handed the grey ids to a marker that only accepts white ones (**26 objects**, with the rescan
+  counter reporting success); and the same mark loop pushing the whole root set at once, so a
+  stack smaller than the root set dropped **roots**, which nothing can recover because the
+  recovery looks for a black object with a white child and a root has no parent (**6 objects**).
+  The headline measurement is the one the generational design rests on: hold the workload fixed,
+  grow the heap eightfold, and a mark-sweep collection goes from **218.0 to 1 270.0** units while
+  a copying collection goes from **162.2 to 178.0** — cost proportional to survivors, as a flat
+  line beside a rising one. Every barrier is demonstrated by turning it off: with no write
+  barrier the nursery collection frees **208 reachable objects** and is faster on every other
+  column, which is what a broken collector looks like from the outside. The black-to-white
+  pointer is built by hand and then searched for over **10 000 randomised interleavings** of
+  pointer stores with marking slices, where the barrier-free variant fails **76 of 10 000** runs
+  — the rate at which a bug reaches production rather than a test — and snapshot-at-the-beginning
+  is shown to be correct at **2.34×** the floating garbage. Fragmentation is drawn to scale: the
+  same **23 080 free bytes** are 57 pieces with a largest of 5 160 after a sweep and one run of
+  23 080 after a compaction. Reference counting posts a maximum pause of **0** and the worst
+  throughput in the set, leaks **154 cycles**, and frees **200 objects at one store** when a
+  chain's head is dropped. Garbage-first is measured against the **exact knapsack optimum** and
+  lands on it — which demonstrates nothing about the heuristic, so a region set built to defeat
+  it ships alongside, where the same policy returns **73.0 per cent**. And the two sections that
+  are not about collectors at all: a process that dies of file descriptors at **iteration 17**
+  with **6.6 per cent** of its heap in use, and three programs computing 820 at **84, 3 and 1**
+  allocations with the collector work behind them going to zero.
 
 - ✅ **M30 — code generation, bytecode VMs and JIT**: the back end of the same compiler, and five
   ways to run one program compared against the front end that produced it. Two code generators

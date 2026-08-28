@@ -3,7 +3,7 @@
 Where the implementation stands, and exactly what the next session should pick up.
 Update this file at the end of any session that leaves work unfinished.
 
-**Last updated:** 2026-08-27 (M30 complete — ten sections, 298 in the tree. The tree is GREEN.)
+**Last updated:** 2026-08-27 (M31 complete — nine sections, 307 in the tree. The tree is GREEN.)
 
 ---
 
@@ -42,11 +42,12 @@ Update this file at the end of any session that leaves work unfinished.
 | M28 — compiler front end: build a language | 9 | ✅ built, tested, render-audited |
 | M29 — IR, SSA and optimisation | 10 | ✅ built, tested, render-audited |
 | M30 — code generation, bytecode VMs and JIT | 10 | ✅ built, tested, render-audited |
+| M31 — garbage collection and runtime memory | 9 | ✅ built, tested, verified in Chrome |
 
-**The tree is GREEN.** `npm test` reports 5 173 unit tests with 0 failures (6 skipped — the
-wall-clock-budget starters the inline sandbox cannot fail); the wiring audit passes at 298 sections
-and 1 402 modules, the render audit activates all 298 with no exception and no empty table,
-`npm run lint:size` passes at 1 541 files, and `npm run build:css` is up to date.
+**The tree is GREEN.** `npm test` reports 5 323 unit tests with 0 failures (6 skipped — the
+wall-clock-budget starters the inline sandbox cannot fail); the wiring audit passes at 307 sections
+and 1 444 modules, the render audit activates all 307 with no exception and no empty table,
+`npm run lint:size` passes at 1 587 files, and `npm run build:css` is up to date.
 
 All nine M07 sections were opened in Chrome on `npm start`: the three tabs render, every demo
 figure matches the prose *exactly* (see "aligning the demo with the prose" below), the references
@@ -3183,27 +3184,211 @@ joint second; `match` leads that one too, at 4) and "32 observations" (31).
 
 ---
 
+## M31 — garbage collection and runtime memory (complete)
+
+Nine sections, 307 in the tree. Ten algorithm modules, two machines
+(`machines/heap-sim.js`, `machines/gc-lab.js`), one new viz renderer
+(`viz/heap-map-view.js`), nine template + section pairs, twelve content files, one property
+suite and three figure suites.
+
+### The shape of the milestone
+
+**One oracle, run at every collection.** `HeapSim.reachable` is a plain breadth-first walk that
+shares no code with any collector, and the rule for every design in the milestone is that the set
+it reclaims must contain no reachable object. `GcLab.replay` brackets each collection with it and
+reports `wrong` as a field rather than throwing, so a broken collector shows up as a column in the
+comparison table rather than as a crash. That check found **three real defects**, and all three
+were reporting healthy statistics while they lost live objects.
+
+The second discipline is **turn the mechanism off and check that it fails**. The barrier-free
+generational collector, the barrier-free incremental marker, the one-entry mark stack and the
+zero-depth quarantine all ship, and every one of them is asserted to be worse. A demonstration
+that has never failed has not been demonstrated.
+
+### Modules
+
+`algorithms/`: `gc-manual.js` (quarantine, poison, the four failures and a seeded fixture whose
+last fault the default depth misses), `gc-refcount.js` (retain/release, trial deletion, the cascade
+and the cycle fixtures), `gc-mark-sweep.js` (tri-colour, a bounded mark stack, overflow recovery,
+sweep, compaction, fragmentation), `gc-copying.js` (Cheney with an external-root scan, generational
+minor collection, promotion, the survival curve at two horizons), `gc-barriers.js` (none /
+remembered set / card table, the fast-path filter, and the post-collection refresh),
+`gc-incremental.js` (incremental marking, Dijkstra and Yuasa barriers, the hand-built lost-object
+fixture and the randomised interleaving harness), `gc-regions.js` (partition, census, garbage-first,
+emptiest-first, an exact knapsack optimum and an adversarial region set), `gc-weak.js` (four
+strengths, an object-keyed cache, two-cycle finalisation with resurrection, the handle-exhaustion
+scenario), `heap-analysis.js` (retained size and the dominator tree over the object graph, using
+M13's pass unchanged). `machines/heap-sim.js` (a recorded trace from M30's VM, a synthetic
+generator, the heap and the oracle), `machines/gc-lab.js` (eight drivers behind one five-call
+interface, pause distributions, throughput, sweeps). `viz/heap-map-view.js`.
+
+Content is split per third of the milestone — `-memory`, `-memory-generational`,
+`-memory-practice`.
+
+### Six defects found by running things
+
+1. **The generational collector never scanned an old root.** `cheney` ran every root through the
+   same young filter as every other object, so an old root — the long-lived container, or an entry
+   from the remembered set — was rejected and therefore never scanned. Its young children were
+   unreachable to the collector and were freed while live: **16 objects**, with all three barrier
+   settings producing the identical failure, which is what said the barrier was not the problem.
+2. **The barrier record was cleared after every minor collection.** An old object pointing at a
+   young one that SURVIVED still points at a young one, and no further store re-records it.
+   `GcBarriers.refresh` rebuilds the record from the objects the collection already scanned and
+   the ones it promoted, which costs no scan the pause had not already paid for.
+3. **Overflow recovery left objects grey forever.** It shaded the dropped children grey itself and
+   then handed the grey ids to `markFrom`, which pushes only WHITE objects — so they were never
+   scanned, their own children stayed white, and **26 live objects** were swept, with `overflows`
+   and `rescans` both reporting that the recovery had run.
+4. **The same mark loop dropped ROOTS.** It pushed the whole root set before scanning anything, so
+   a stack smaller than the root set dropped roots — and a dropped root is unrecoverable, because
+   the recovery looks for a black object with a white child and a root has no parent. **Six live
+   objects** at a stack limit of 2, while the rescan counter reported eleven successful passes.
+   Roots are now entered one at a time and drained: the stack bound belongs to the traversal, not
+   to the enumeration of the roots.
+5. **The synthetic trace was not a possible program.** New objects were unrooted between their
+   allocation and the store that linked them, and the sixteen-holder retained spine was built
+   before any roots event at all — so a collector with a small nursery collected during the
+   construction, found an empty root set, and freed the whole structure. Every later store into the
+   deleted spine was then silently dropped, and the run ended with a third of the live set while
+   passing the oracle at every collection. A frame holds a new value in a register, and a register
+   is a root: `hold()` publishes it immediately.
+6. **A finaliser ran on every cycle.** A resurrected object stayed in the queue, so its cleanup was
+   called again and again. Real runtimes mark it finalised at the first call and never look again —
+   which means a resurrected object is never cleaned up at all, and that is a worse outcome than a
+   leak. Two related fixes: finalisation now costs two cycles (queue in one, run and free in the
+   next) and everything reachable from the queue is kept, because a finaliser running against
+   freed objects would be reading freed memory inside a managed runtime.
+
+### Two dials that did nothing, and how they were caught
+
+- **`survival` measured 0.000 at every setting from 0 to 0.5.** Survivors were linked into objects
+  that were themselves rotating root slots, so the holder was overwritten a few steps later and
+  took the whole subtree with it. A generational-hypothesis demo that cannot show the hypothesis
+  holding cannot show it failing either. The fix is a bounded set of retained slots — a cache, a
+  session table, a registry — which also gives the trace a steady state.
+- **The barrier's throughput cost read 0.000 for every barrier.** The lab charged a flat unit per
+  store while marking, which is the same for all three designs. It now charges the check plus the
+  objects the barrier actually shades, and the honest finding is that on a trace with 262 stores
+  out of 3 285 steps the barrier costs one unit — the note says so rather than hiding it.
+
+### Where the folklore did not survive
+
+- **"Reference counting has no pause" means "it has no COLLECTION".** Dropping the head of a
+  200-node chain frees all 200 objects at that one store. The pause is still there; it has moved
+  into a specific write, and which write depends on the shape of your data rather than on the size
+  of your heap — which is arguably worse, because it correlates with nothing a monitor watches.
+- **Incremental marking bounds the median pause and not the tail.** The p50 is the slice exactly
+  (1, 8 and 64 at slices of 1, 8 and 64); the p99 is 76, 100 and 121, because the sweep at the end
+  of each cycle is still one pass over the heap. "Concurrent marking" tells you which half was
+  fixed.
+- **Garbage-first is exactly optimal on a real heap**, which says the heuristic is fine and
+  demonstrates nothing about it — most of its choices were free, because a wholly dead region costs
+  nothing to take. The constructed set where it returns 73.0 per cent is what makes the comparison
+  mean anything, and both optima are solved by dynamic programming rather than assumed.
+
+### Design decisions that are easy to undo by accident
+
+- **The stress harness draws both ends of every store from the currently reachable set.** A mutator
+  cannot store into an object it cannot reach, nor publish a reference it does not hold. Drawing
+  from the whole heap failed SATB on 329 of 2 000 runs with failures that were real given the
+  stores and impossible in any program — SATB's correctness rests on exactly that precondition, and
+  allocation is the single exception, which is why SATB collectors allocate black.
+- **`survivalCurve` reports two horizons.** "Still live at the end of the window" is what a minor
+  collection over a nursery of that size copies; "still live a window later" is always smaller.
+  Quoting one while meaning the other is how a survival rate ends up disagreeing with the collector
+  measured beside it.
+- **Addresses come from a bump pointer, not from the object id.** An id-derived address overlaps as
+  soon as an object is larger than the stride, and a heap whose objects overlap has no
+  fragmentation to measure and no coherent card table.
+- **`floatingPeak` and `uncollected` are different numbers.** One is the worst case of dead objects
+  a COLLECTION left behind; the other is what is dead at the end of the run, which for a reference
+  counter is its leaked cycles and for a tracing collector is mostly garbage the next collection
+  has not reached.
+- **The cycle collector is triggered by the candidate count, not the heap size.** A counting runtime
+  never notices the memory is gone, so waiting for the heap to fill waits for a signal that may
+  never arrive. CPython counts allocations for the same reason.
+
+### Measured figures quoted in the M31 examples
+
+`tests/unit/worked-examples-memory.test.js`, `-memory-generational` and `-memory-practice`
+recompute every one *and* assert the prose still quotes it; `tests/unit/gc-modules.test.js` carries
+the property tests and a regression for each of the six defects. Landmarks: a quarantine sweep at
+0, 2, 2, 4 and 5 of 5 caught for 0, 8, 16, 32 and 36 bytes held; a triangle of 0 / 0.576 / 7 240
+against 381 / 0.666 / 8 192 against 90 / 0.619 / 7 792, with an 8-byte header costing 12 792 of
+44 608 bytes; 3 757 count adjustments over 5 101 steps reclaiming 1 354 objects and leaking 154,
+taken to 8 by cycle collection at 11 pauses; 922 objects of which 89 are reachable, collected at
+2 775 units with a stack of 1 against 1 011 with 64 and the same 833 reclaimed at every limit;
+23 080 free bytes in 57 pieces with a largest of 5 160 against one run of 23 080; 218.0 / 367.3 /
+669.0 / 1 270.0 against 162.2 / 163.7 / 165.0 / 178.0 across four heap sizes; a measured survival of
+17.2 per cent; three barriers at 0 / 786 / 262 units of store cost, 0 / 349 / 655 scanned, 0 / 1 880
+/ 332 bytes of table and 208 / 0 / 0 live objects freed; 15 of 2 000 and 76 of 10 000 interleavings
+lost with no barrier against 650 and 1 521 floating for the two that work; a p50 of 1, 8 and 64 with
+a p99 of 76, 100 and 121; eight designs where the best p99, best throughput and smallest peak are
+three different rows; garbage-first at 37 760 of 37 776 on the real heap and 73 of 100 on the
+constructed one; a handle limit exhausted at iteration 17 with 0.27 KB of 4 KB in use and 0
+collections; a cache holding 600 bytes strong and 312 weak; 84, 3 and 1 allocations all computing
+820 with 70, 6 and 0 units of collector work; and a retained set flat at 2 128 bytes with a slope of
+0.0 against one climbing 7 120 to 12 432 at 1 040.0 a sample, with one object retaining 12 248 of
+12 432 through a 368-hop path.
+
+### The browser pass, again
+
+All nine sections were opened in Chrome on `npm start`: three tabs each, a rendered mermaid diagram
+in every Description (4 to 8 nodes, no syntax errors), a full reference block in every References,
+every chart at a real 1 030px rather than the 220px fallback, and the heap map and fragmentation
+strips measured — 10 x 10 tiles over a 1 030px map, and a swept strip whose widest free run is 260px
+against a compacted one at 1 167px, which is the fragmentation result as a picture.
+
+It found a defect the render audit cannot see. `ChartBase` takes `summary` as a FUNCTION, and all
+nine sections passed a string: the chart still drew, so nothing failed, and every repaint threw
+`config.summaryFn is not a function` into the console while the accessibility summary was never
+written. `ChartBase` now accepts either, which removes the trap for every future section.
+
+### Four things M31 adds to the shape and worth keeping
+
+- **An oracle that runs at the end is not an oracle.** A collector that frees a reachable object
+  produces a completely plausible run: the program carries on until it touches the object, which
+  may be much later or never. Three of this milestone's defects were only visible at the moment of
+  collection, and two of them were reporting success while they happened.
+- **A generator is part of the fixture and can be the thing that is wrong.** Two dials measured
+  nothing and one trace was not a possible program. The test that caught the last one asserts a
+  property of the TRACE — every allocation is followed by a roots event that includes it — rather
+  than a property of any collector.
+- **Turn the mechanism off and assert that it fails.** Every barrier, every bound and every
+  quarantine depth in this milestone has a setting that breaks it, and the broken setting is a row
+  in the table. The barrier-free generational run is faster on every column except the one that
+  matters.
+- **Report the unit and the horizon.** "Survival rate", "floating garbage" and "pause" each name
+  two different numbers in this milestone, and each pair is reported separately rather than
+  averaged into something that describes neither.
+
+---
+
 ## Next
 
-**M31 — Garbage collection and runtime memory (9 sections).** Nothing of it exists yet, and its
-track file still carries it in `planned`. The spec is `doc/milestones/M31-garbage-collection.md`,
-and the thing a collector needs most is already built and already checked: `runtime.js` produces a
-**precise stack map** at every safepoint and `checkSafepoints` verifies it against what the program
-goes on to read, so a root set here is a real root set rather than a conservative scan. `vm.js`
-keeps its frames in an explicit array, which is what makes the roots enumerable at all, and every
-allocation in the language goes through four opcodes — `makeArray`, `makeRecord`, `makeClosure`
-and the `store` pair — so a heap can be interposed without touching the front end. The natural
-first move is to give the VM a real heap with addresses instead of JavaScript object references,
-because a collector that cannot move an object can only demonstrate half the subject.
+**M32 — Program analysis, SAT/SMT and verification (11 sections).** Nothing of it exists yet, and
+its track file still carries it in `planned`. The spec is `doc/milestones/M32-program-analysis.md`,
+and it is the last milestone of the compilers track, after which `doc/ROADMAP.md` moves to computer
+architecture (M33). Most of what it needs is already built: `machines/berugo/dataflow.js` carries
+the lattice framework and four analyses, `cfg.js` and `dominators.js` carry the graph machinery,
+`alias.js` carries Andersen and Steensgaard with a dynamic oracle, `interproc.js` carries the call
+graph and escape analysis, and `fuzz.js` carries generation and shrinking. M27's type checker and
+M26's decidability results are the theory side. The natural first move is the SAT solver, because
+DPLL with clause learning is a self-contained module with an obvious oracle (a brute-force truth
+table up to about twenty variables), and everything above it — bounded model checking, symbolic
+execution, an SMT core over difference logic — is a translation into it.
 
 Two debts M28 deferred are still open and now have somewhere to go: mutation of captured variables
 (which is why `resolve.js` records captures per function, and which a by-reference upvalue in
 `vm.js` would finally make expressible) and a decision-tree compilation for `match` (which
-`desugar.js` lowers to nested tests on purpose). After it, onward through `doc/milestones/` in the
-order `doc/ROADMAP.md` gives.
+`desugar.js` lowers to nested tests on purpose). M31 added a third: the VM still holds JavaScript
+object references rather than addresses into `HeapSim`, so the collectors run against a recorded
+trace of the program rather than against the program itself. Interposing the heap under
+`makeArray`, `makeRecord`, `makeClosure` and the `store` pair is the move that would close it.
 
 M11 through M15 and M17 through M24 are complete apart from a human browser pass, which needs the
-Chrome extension connected; M16 has had one (see above, and the chart defect it found).
+Chrome extension connected; M16 and M31 have had one (see above, and the chart defects each found).
 `tools/section-dump.js` covers everything else the browser used to be needed for — it prints every
 metric, table and note a section renders, at any control setting, and since the `input`-event fix
 above that is finally true of slider settings too.
@@ -3211,7 +3396,7 @@ above that is finally true of slider settings too.
 A shared helper exists for the figure tests: `tests/support/worked-example-prose.js` exports
 `proseFor`, `quotes`, `fixed` and `grouped`.
 
-The shape to copy, unchanged through M20:
+The shape to copy, unchanged through M31:
 
 1. pure modules in `algorithms/` first, behind one shared interface;
 2. a `machines/` harness that drives every implementation through that interface, carrying a
@@ -3223,7 +3408,8 @@ The shape to copy, unchanged through M20:
    (or `group:<milestone>` to seed an empty group), then `node tests/render-audit.js <id>`;
 6. **dump every section with `node tools/section-dump.js <id>` and write the content from what it
    prints.** Measure first, then write the sentence that quotes the measurement — this is where
-   four of M13's six bugs, all four of M14's false claims and six of M20's eight were found;
+   four of M13's six bugs, all four of M14's false claims, six of M20's eight and two of M31's six
+   were found;
 7. the four content files, split per third or quarter of the milestone to stay under 1 000 lines;
 8. `<topic>-modules.test.js` (property tests against a brute-force reference) and
    `worked-examples-<topic>*.test.js` (recompute every quoted figure *and* assert the prose still
