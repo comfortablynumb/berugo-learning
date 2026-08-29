@@ -161,6 +161,17 @@
       },
       {
         term: 'DGIM buckets, timestamped by their newest one',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["buckets of size 1, 2, 4, 8 …"] --> B["each stamped with the position<br/>of its most recent 1"]',
+            '    B --> C["buckets entirely inside the window:<br/>counted in full"]',
+            '    B --> D["the one straddling the edge:<br/>count half of it"]',
+            '    D --> E["only that oldest bucket<br/>is ever uncertain"]',
+            '    E --> F["which is exactly where<br/>the error bound comes from"]'
+          ].join('\n'),
+          caption: 'Every bucket but one is known exactly. The whole error analysis reduces to how large that single straddling bucket can be.'
+        },
         plain: 'Buckets of size 1, 2, 4, … each stamped with the position of its most recent one.',
         formal: 'at most r buckets of any size, so there are O(log N) buckets',
         readAs: 'Bucket sizes double as they age and only r of each size are kept, so the whole window is ' +
@@ -272,6 +283,15 @@
       },
       {
         term: 'Price exactness first',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["before reaching for a sketch"] --> B{"how much would a hash set<br/>of the actual keys cost?"}',
+            '    B -->|"affordable"| C["use it — it is always right,<br/>and it needs no error analysis"]',
+            '    B -->|"far too much"| D["now a sketch is justified,<br/>and you know by how much"]'
+          ].join('\n'),
+          caption: 'Sketches are interesting enough to reach for too early. The exact structure is the baseline, and the sketch only earns its error once that baseline is priced and rejected.'
+        },
         plain: 'A hash set of the keys is often affordable, and it is always right.',
         formal: 'exact memory = Θ(distinct keys × key size)',
         readAs: 'Counting exactly costs one entry per distinct key. Every sketch in this milestone is a way ' +

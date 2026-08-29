@@ -8,6 +8,17 @@
     'range-structures': [
       {
         term: 'Prefix sums, and the limit that motivates everything else',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["precompute every prefix sum"] --> B["a range sum is two reads —<br/>as fast as it can be"]',
+            '    B --> C["then one element changes"]',
+            '    C --> D["every prefix after it is wrong"]',
+            '    D --> E["O(n) to repair"]',
+            '    E --> F["so every structure in this section<br/>exists to buy updates back"]'
+          ].join('\n'),
+          caption: 'Prefix sums are unbeatable on queries and hopeless on updates. Fenwick trees and segment trees are both answers to that one sentence.'
+        },
         plain: 'Precompute every prefix and a range sum is two reads; but one changed element invalidates every prefix after it.',
         formal: 'query O(1), point update O(n)',
         detail: 'This is the right structure far more often than people admit - analytics tables that are ' +
@@ -111,6 +122,16 @@
     'vector-search': [
       {
         term: 'Exact search stops working, and the number says when',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a k-d tree in 2 dimensions"] --> B["prunes almost everything —<br/>logarithmic in practice"]',
+            '    C["the same tree past<br/>about 10 dimensions"] --> D["the pruning bound almost<br/>never fires"]',
+            '    D --> E["it touches essentially every point"]',
+            '    E --> F["a linear scan, with tree overhead"]'
+          ].join('\n'),
+          caption: 'The structure does not degrade gracefully into something merely slower — it becomes worse than the brute-force scan it replaced, which is why approximate search exists.'
+        },
         plain: 'Past about ten dimensions a k-d tree touches essentially every point, so it is a scan with pointer chasing added.',
         formal: 'vol(ball)/vol(cube) → 0, so almost every subtree intersects the search radius',
         detail: 'This is not a gradual slope with a usable middle. On the same 4 000 points a k-d tree touches ' +
@@ -214,6 +235,17 @@
     'broad-phase': [
       {
         term: 'The broad phase may be wrong in one direction only',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["proposes a pair that<br/>does not actually touch"] --> B["harmless — the narrow phase<br/>rejects it"]',
+            '    C["misses a pair that DOES touch"] --> D["objects pass through each other"]',
+            '    D --> E["and nothing downstream<br/>can recover it"]',
+            '    B --> F["so the contract is: over-report<br/>freely, never under-report"]',
+            '    E --> F'
+          ].join('\n'),
+          caption: 'One direction of error costs a little time and the other breaks the simulation. Every broad-phase structure is tuned against that asymmetry.'
+        },
         plain: 'It may propose pairs that do not touch; it may never miss a pair that does.',
         formal: 'proposed ⊇ actual; the narrow phase computes actual from proposed',
         readAs: 'The broad phase must return a superset of the real collisions — never missing one — and the ' +

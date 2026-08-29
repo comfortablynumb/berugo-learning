@@ -141,6 +141,16 @@
     'combinatory-logic-and-compilation': [
       {
         term: 'A combinator is a closed term',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["no free variables anywhere"] --> B["so nothing can be captured"]',
+            '    B --> C["so substitution needs no renaming"]',
+            '    C --> D["so the whole capture-avoidance<br/>machinery disappears"]',
+            '    D --> E["which is why combinators are<br/>a compilation target and<br/>lambda terms are not"]'
+          ].join('\n'),
+          caption: 'Removing variables removes the one genuinely fiddly operation in the calculus. That is the trade combinatory logic makes, and the reason implementations use it.'
+        },
         plain: 'No free variables, so nothing can be captured.',
         formal: 'S = λx y z. x z (y z);  K = λx y. x;  I = λx. x',
         readAs: 'S hands its third argument to both of the first two and applies the results; ' +

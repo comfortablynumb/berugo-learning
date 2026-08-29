@@ -8,6 +8,18 @@
     'memory-management-landscape': [
       {
         term: 'The allocator and the collector are two questions',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the allocator:<br/>where does this object go?"] --> C["two independent decisions"]',
+            '    B["the collector:<br/>when may that space be reused?"] --> C',
+            '    C --> D["a bump allocator with a<br/>copying collector"]',
+            '    C --> E["a free-list allocator with<br/>mark-and-sweep"]',
+            '    D --> F["and the pairing is a design choice,<br/>not a package deal"]',
+            '    E --> F'
+          ].join('\n'),
+          caption: 'Conflating them is why memory management looks like a small number of monolithic options. They are two axes, and most real systems mix and match along both.'
+        },
         plain: 'Where does this object go, and when may that space be used again.',
         formal: 'placement is the allocator\'s problem; reclamation is the collector\'s',
         detail: 'Separating them is what lets a runtime change collector without changing how ' +

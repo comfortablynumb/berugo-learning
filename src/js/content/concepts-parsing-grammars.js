@@ -253,6 +253,16 @@
       },
       {
         term: 'Acceptance by final state and by empty stack are equivalent',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["accept by final state"] --> B["push a bottom marker first;<br/>on reaching a final state,<br/>pop everything"]',
+            '    C["accept by empty stack"] --> D["add one state entered<br/>when the marker surfaces"]',
+            '    B --> E["each simulates the other with<br/>a marker and one extra state"]',
+            '    D --> E'
+          ].join('\n'),
+          caption: 'Two definitions that look like different machines describe the same language class, so a textbook using either one is describing yours.'
+        },
         plain: 'Either can simulate the other with a bottom marker and one extra state.',
         formal: 'L(M) by final state = L(M′) by empty stack, for a mechanically built M′',
         detail: 'The choice is therefore presentational, and this section uses empty stack ' +

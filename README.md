@@ -683,7 +683,7 @@ The render audit is not a substitute for opening the page, and M16's browser pas
 | Concern | Choice | Why |
 |---|---|---|
 | UI | jQuery + Tailwind CSS | No framework; every section reads as plain DOM code |
-| Structural diagrams | mermaid.js | One per teaching section — state machines, pipelines, protocols, memory layouts. `tests/unit/mermaid-syntax.test.js` loads mermaid under jsdom and parses all 305 definitions, so a diagram that would render as an error block fails the build instead |
+| Structural diagrams | mermaid.js | One per teaching section, plus 401 concept diagrams — every section has both, and a concept's diagram sits between its formal line and its explanation so the picture arrives before the paragraph. `tests/unit/mermaid-syntax.test.js` loads mermaid under jsdom and parses all 706 definitions, so a diagram that would render as an error block fails the build instead |
 | Charts and data-driven visuals | D3 v7 via `viz/chart-base.js` | Scales, axes, transitions and the layout algorithms (force, hierarchy, quadtree, contour); Canvas past a few thousand elements |
 | Code execution | Web Worker sandbox with hard timeouts | Learner code never touches the page |
 | Storage | `localStorage` behind an adapter interface | Theme, progress, lab state — all local, all exportable |

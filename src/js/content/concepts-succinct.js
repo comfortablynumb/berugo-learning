@@ -118,6 +118,17 @@
     'succinct-trees': [
       {
         term: 'Two bits per node, against forty-eight bytes',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a pointer tree: an object per node,<br/>with child references"] --> B["tens of bytes each"]',
+            '    C["a succinct tree: about<br/>2 bits per node"] --> D["the shape encoded as a bit string"]',
+            '    B --> E["a factor of a hundred or more"]',
+            '    D --> E',
+            '    E --> F["and navigation is still O(1),<br/>via rank and select"]'
+          ].join('\n'),
+          caption: 'The structure stops being pointers and becomes a bit string with an index on it. That is what lets a tree of billions of nodes stay in memory.'
+        },
         plain: 'An ordinal tree of n nodes needs about 2n bits; a pointer tree costs a node object per node.',
         formal: 'the number of ordinal trees on n nodes is the Catalan number, so log₂ C(n) ≈ 2n bits',
         readAs: 'Count how many distinct trees of n nodes exist, take the log base 2, and you have the fewest ' +
@@ -231,6 +242,16 @@
       },
       {
         term: 'Run-length coding, and its pathology',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["long runs of 0s or 1s"] --> B["packed into fill words —<br/>excellent compression"]',
+            '    C["bits scattered evenly,<br/>one every few words"] --> D["no run ever forms"]',
+            '    D --> E["every word stays literal,<br/>plus per-word overhead"]',
+            '    E --> F["so the index is LARGER<br/>than the raw bitmap"]'
+          ].join('\n'),
+          caption: 'Compression that depends on clustering has a distribution that defeats it, and moderately sparse scattered data is exactly that distribution.'
+        },
         plain: 'WAH and EWAH pack runs of identical words into fill words and leave the rest literal.',
         formal: 'a 32-bit word is either 31 data bits or a run length of identical words',
         detail: 'On long uniform stretches this is close to optimal and beats everything else here. The ' +

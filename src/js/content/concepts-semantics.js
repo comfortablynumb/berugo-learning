@@ -8,6 +8,16 @@
     'beyond-plain-generics': [
       {
         term: 'A constraint is an argument',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a function with a constraint"] --> B["compiled to a function taking<br/>one extra parameter"]',
+            '    B --> C["that parameter is a record<br/>of the method implementations"]',
+            '    C --> D["the call site chooses which<br/>record to pass"]',
+            '    D --> E["so a type-class constraint is<br/>an ordinary argument you<br/>did not have to write"]'
+          ].join('\n'),
+          caption: 'Once the dictionary is visible the magic goes away: constraint resolution is the compiler working out which record to pass, and an ambiguous constraint is it failing to.'
+        },
         plain: 'Eq a => becomes a record of method implementations passed at every call site.',
         formal: 'equals :: Eq a => a → a → Bool elaborates to equals :: EqDict a → a → a → Bool',
         detail: 'Once you see that, "what does a type class cost at run time" has a concrete ' +
@@ -231,6 +241,17 @@
     'denotational-and-axiomatic-semantics': [
       {
         term: 'A Hoare triple claims partial correctness',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["start in a state satisfying P"] --> B["run the command"]',
+            '    B --> C{"does it terminate?"}',
+            '    C -->|yes| D["the result satisfies Q"]',
+            '    C -->|no| E["the triple says NOTHING —<br/>and is still true"]',
+            '    E --> F["termination is a separate<br/>obligation, proved separately"]'
+          ].join('\n'),
+          caption: 'A program that loops forever satisfies every partial-correctness specification there is. Total correctness is the triple plus a termination argument, and they are proved apart.'
+        },
         plain: 'Start in P, run c, and IF it stops you land in Q.',
         formal: '{P} c {Q}',
         readAs: 'If the precondition holds before the command runs, and the command finishes ' +

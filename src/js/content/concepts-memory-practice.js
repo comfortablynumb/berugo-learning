@@ -238,6 +238,17 @@
     'diagnosing-gc': [
       {
         term: 'A managed leak is a reference you forgot you were holding',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["memory grows without bound"] --> B{"is the collector broken?"}',
+            '    B -->|no| C["every object in the dump<br/>is genuinely reachable"]',
+            '    C --> D["the collector is exactly right"]',
+            '    D --> E["so the question is never<br/>why was this not collected"]',
+            '    E --> F["it is: what is still<br/>pointing at it, and why"]'
+          ].join('\n'),
+          caption: 'Reframing the question is most of the diagnosis. The retention path is the bug report, and every heap tool exists to print it.'
+        },
         plain: 'Every object in the dump is genuinely reachable and the collector is right.',
         formal: 'the live set is growing, so no collector setting can change it',
         detail: 'This is why no flag, no heap size and no collector choice will fix it, and why ' +

@@ -134,6 +134,18 @@
       },
       {
         term: 'The monoid annotation is the idea worth stealing',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["cache a summary of everything<br/>below each node"] --> B["size → indexing by position"]',
+            '    A --> C["sum → range sums"]',
+            '    A --> D["max → priority queue"]',
+            '    B --> E["one structure, and the annotation<br/>decides what it is"]',
+            '    C --> E',
+            '    D --> E'
+          ].join('\n'),
+          caption: 'The requirement is only that the summary combines associatively. Change the monoid and the same tree becomes a different data structure with no other edits.'
+        },
         plain: 'Cache the product of everything below each node, and a predicate on that cache answers a family of queries.',
         formal: 'measure(node) = combine(measure(children)); split walks down using only the cache',
         detail: 'This is the part to take away even if you never write a finger tree. The structure does not ' +
@@ -217,6 +229,18 @@
     zippers: [
       {
         term: 'A focus plus a context',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the subtree you are looking at"] --> C["a zipper"]',
+            '    B["a stack of crumbs: at each step,<br/>which way you went and what<br/>you left behind"] --> C',
+            '    C --> D["move down: push a crumb"]',
+            '    C --> E["move up: pop one and rebuild"]',
+            '    D --> F["local edits are O(1), with no<br/>parent pointers anywhere"]',
+            '    E --> F'
+          ].join('\n'),
+          caption: 'It gives an immutable tree a movable cursor. Nothing points upward, so the structure stays shareable while still supporting cheap local navigation.'
+        },
         plain: 'Keep the subtree you are looking at, and a stack of crumbs recording how you got there.',
         formal: 'Zipper = (focus, [Crumb]) where a crumb holds the parent value and the siblings on each side',
         detail: 'The crumb is what makes going back up possible without a parent pointer, which is the thing an ' +

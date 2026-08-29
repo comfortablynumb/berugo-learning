@@ -116,6 +116,16 @@
     'interprocedural-optimisation': [
       {
         term: 'A call is a wall, and inlining removes it',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the optimiser reaches a call"] --> B["it cannot see what the callee does"]',
+            '    B --> C["so it assumes the worst:<br/>memory clobbered, anything<br/>could happen"]',
+            '    D["inline the callee"] --> E["one body, one CFG"]',
+            '    E --> F["and every other optimisation<br/>suddenly applies across<br/>what was a boundary"]'
+          ].join('\n'),
+          caption: 'Inlining is rarely valuable for the call overhead it removes. It is valuable because it is what enables constant propagation, dead code and everything else to cross the boundary.'
+        },
         plain: 'The optimiser cannot see across a call in either direction.',
         formal: 'inlining is the enabling transformation for everything else',
         detail: 'It cannot fold a constant argument into the body, cannot value-number across ' +
@@ -331,6 +341,17 @@
       },
       {
         term: 'A verifier cannot see the failure that matters most',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a pass runs"] --> B["the verifier checks the IR<br/>is well formed"]',
+            '    B --> C["it passes — every rule holds"]',
+            '    C --> D["and the program now<br/>computes the wrong answer"]',
+            '    D --> E["well-formedness is not correctness"]',
+            '    E --> F["only running it against the<br/>unoptimised version finds this"]'
+          ].join('\n'),
+          caption: 'A verifier catches a pass that produced nonsense. It cannot catch a pass that produced a valid program with different behaviour, which is the failure that ships.'
+        },
         plain: 'A pass can produce perfectly valid IR that computes the wrong thing.',
         formal: 'no structural check will ever notice',
         detail: 'That is why the differential comparison is a gate rather than a test-suite ' +

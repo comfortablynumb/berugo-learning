@@ -4146,14 +4146,22 @@ each carrying a 240-character explanation, and one diagram after all of them.
 - **Two of the 305 section diagrams did not parse.** Fixed in the previous round
   and now guarded; the guard grew to cover concept diagrams too.
 
-### Coverage, stated honestly
+### Coverage
 
-18 concept diagrams are authored, covering all nine sections of M01 — the
-milestone a learner opens first. The capability is section-wide and the guard
-parses every diagram in the repo with the real mermaid parser, so the remaining
-milestones are an authoring job rather than an engineering one. There are 2 461
-concepts; a diagram belongs on the ones where a picture replaces a paragraph,
-not on all of them, and choosing which is the work.
+**401 concept diagrams, and every one of the 305 teaching sections has at least
+one.** With the section diagram that is 706 diagrams across the curriculum.
+
+They are chosen rather than generated. A diagram earns its place where it
+replaces a paragraph, and a good number of them earn it by showing a *failure*
+rather than a mechanism: the three Newton failures that all return a number, the
+concave clip that comes back plausible and two-thirds too small, the PRNG
+histogram that passes for RANDU, the small pivot no check catches, the greedy
+flow that terminates and reports success below the maximum, and the object-keyed
+map where every leaked entry is genuinely reachable.
+
+There are 2 461 concepts, so this is roughly one diagram for every six. That
+ratio is the point: a diagram on every concept would be a diagram nobody looks
+at.
 
 ### Two things this round adds to the shape and worth keeping
 

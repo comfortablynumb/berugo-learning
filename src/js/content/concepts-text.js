@@ -272,6 +272,16 @@
     'dictionary-automata': [
       {
         term: 'Three pointers, whatever the alphabet',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["an array-mapped trie node"] --> B["one slot per alphabet symbol —<br/>mostly empty"]',
+            '    C["a ternary node: one symbol,<br/>and lo / eq / hi"] --> D["three pointers, always"]',
+            '    D --> E["the alphabet size stops<br/>appearing in the memory cost"]',
+            '    E --> F["which is what makes it usable<br/>on Unicode"]'
+          ].join('\n'),
+          caption: 'A 256-way node wastes almost all its slots on real text, and a Unicode-wide one is not affordable at all. Three pointers is the price regardless.'
+        },
         plain: 'A ternary node holds one symbol and lo/eq/hi pointers, so the alphabet costs nothing.',
         formal: 'node = { symbol, terminal, lo, eq, hi }',
         readAs: 'A ternary trie node holds one character and three pointers: go to lo if the query character ' +

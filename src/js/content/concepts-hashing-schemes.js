@@ -547,6 +547,16 @@
     'hash-in-practice': [
       {
         term: 'Map versus object',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["an object used as a map"] --> B["every key is coerced<br/>to a string"]',
+            '    B --> C["so 1 and \'1\' are the same key"]',
+            '    D["a Map"] --> E["keys compared by SameValueZero"]',
+            '    E --> F["1 and \'1\' are different keys,<br/>and an object can BE a key"]'
+          ].join('\n'),
+          caption: 'They look interchangeable and have different key semantics. Using an object as a dictionary silently merges keys that the language considers distinct everywhere else.'
+        },
         plain: 'Object keys are coerced to strings; Map keys are values compared by SameValueZero.',
         formal: 'obj[1] === obj["1"]; map.get(1) !== map.get("1")',
         detail: 'A plain object is not a hash map with a nicer syntax. Its keys are strings and ' +

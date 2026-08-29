@@ -139,6 +139,16 @@
       },
       {
         term: 'Persistence destroys amortised analysis',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["an expensive operation<br/>pays off saved credit"] --> B["in a normal structure that<br/>version is gone — it cannot recur"]',
+            '    C["in a PERSISTENT structure the old<br/>version is still there"] --> D["trigger the expensive step<br/>again from it"]',
+            '    D --> C',
+            '    D --> E["the same credit is spent<br/>over and over"]'
+          ].join('\n'),
+          caption: 'Amortised bounds assume the past cannot be revisited. Persistence makes that assumption false, which is why persistent structures need worst-case bounds or lazy evaluation.'
+        },
         plain: 'An expensive operation can be paid for once and then re-triggered from the same old version forever.',
         formal: 'the credit argument assumes each version is used once; persistence removes that assumption',
         detail: 'This is the most important idea in the section and it is not a subtlety. A two-list queue ' +
@@ -232,6 +242,16 @@
       },
       {
         term: 'Keeping every version is cheap; copying every version is not',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["snapshot the whole array<br/>on every update"] --> B["n bytes per version"]',
+            '    C["path-copy on every update"] --> D["log n nodes per version"]',
+            '    B --> E["500 versions of 1 024 elements:<br/>megabytes"]',
+            '    D --> F["the same history: kilobytes"]'
+          ].join('\n'),
+          caption: 'Every version stays queryable either way. The difference is entirely whether the parts that did not change are shared or duplicated.'
+        },
         plain: 'The whole history costs the initial tree plus one path per update.',
         formal: 'O(n + u log n) against O(u · n) for snapshots',
         readAs: 'Persistence costs one build plus a log per update. Taking a full snapshot per update costs a ' +

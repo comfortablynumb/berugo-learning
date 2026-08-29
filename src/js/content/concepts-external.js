@@ -124,6 +124,16 @@
     'external-memory': [
       {
         term: 'The DAM model keeps two parameters and throws the rest away',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["M — how many records<br/>fit in fast memory"] --> C["cost = number of transfers"]',
+            '    B["B — how many move<br/>per transfer"] --> C',
+            '    C --> D["computation on resident data<br/>is free"]',
+            '    D --> E["a crude model that predicts<br/>extremely well, because past<br/>memory the transfers dominate<br/>everything else"]'
+          ].join('\n'),
+          caption: 'Two numbers describe a cache against L1, a page against RAM and a disk block against a buffer pool. Only the values change, which is why one model covers all three.'
+        },
         plain: 'M records fit in memory, B move per transfer, and cost is the transfer count.',
         formal: 'the cost of an algorithm is the number of block transfers between fast and slow memory; computation on resident data is free',
         detail: 'It is a crude model and it predicts extremely well, because once the data ' +

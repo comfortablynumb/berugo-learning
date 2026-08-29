@@ -19,6 +19,17 @@
       },
       {
         term: 'Maximal munch means scanning past a match that succeeded',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["reading >="] --> B["after > the machine<br/>is in an accepting state"]',
+            '    B --> C{"stop here?"}',
+            '    C -->|yes| D["you emit > and = —<br/>two wrong tokens"]',
+            '    C -->|no| E["keep going while any machine<br/>is still alive"]',
+            '    E --> F["remember the last accept,<br/>and back up to it at the end"]'
+          ].join('\n'),
+          caption: 'The lexer must run past a perfectly good match to find a longer one. Stopping at the first success is the bug that turns >= into two operators.'
+        },
         plain: 'Stopping at the first success produces the wrong tokens.',
         formal: 'remember the last accepting length and keep advancing until every rule has died',
         detail: '`>>` matches after two characters and `>>=` after three, so a scanner that ' +
@@ -107,6 +118,18 @@
     'weighted-and-probabilistic': [
       {
         term: 'Weights turn running a machine into searching it',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["unweighted: does any path accept?"] --> B["a yes or no"]',
+            '    C["weighted: combine along a path,<br/>combine between paths"] --> D["a value"]',
+            '    D --> E["min and plus: the shortest path"]',
+            '    D --> F["plus and times: the total probability"]',
+            '    E --> G["same machine, same traversal —<br/>the semiring decides what<br/>you computed"]',
+            '    F --> G'
+          ].join('\n'),
+          caption: 'Two operators are the whole configuration. Viterbi and forward probability are the same code with a different pair plugged in.'
+        },
         plain: 'Combine along a path, combine between paths, and the semiring decides what you computed.',
         formal: 'a semiring gives ⊗ along a path and ⊕ between paths; the algorithm never changes',
         readAs: 'One operation combines weights along a single path and another combines the ' +
@@ -223,6 +246,15 @@
       },
       {
         term: 'Safety fails on a finite prefix; liveness never does',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a safety property:<br/>nothing bad happens"] --> B["broken by a finite trace —<br/>point at the moment"]',
+            '    C["a liveness property:<br/>something good eventually happens"] --> D["no finite trace can refute it —<br/>it might still happen next"]',
+            '    D --> E["the counter-example is an<br/>infinite loop that never does"]'
+          ].join('\n'),
+          caption: 'The distinction decides the tool. A test can catch a safety violation; a liveness violation needs something that reasons about infinite behaviour.'
+        },
         plain: 'That is the mechanical distinction, and it decides which tool finds the bug.',
         formal: 'a safety violation has a bad prefix with no good continuation; a liveness violation has none',
         detail: 'A test can catch a safety violation because there is a finite trace to catch, ' +

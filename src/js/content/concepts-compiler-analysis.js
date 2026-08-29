@@ -8,6 +8,17 @@
     'ast-infrastructure': [
       {
         term: 'The round-trip property',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["parse the source"] --> B["print the tree back out"]',
+            '    B --> C["parse THAT"]',
+            '    C --> D{"do the two trees match?"}',
+            '    D -->|yes| E["the printer and parser agree"]',
+            '    D -->|no| F["one of them is wrong,<br/>and the test names the node"]'
+          ].join('\n'),
+          caption: 'One property test covers the printer, the parser and their agreement, on every input you can generate — and it needs no expected output written by hand.'
+        },
         plain: 'Parse, print, reparse, and the two trees must match.',
         formal: 'equal ignoring spans, over 2 000 generated programs with 0 failures',
         detail: 'It needs no expected output, so it can be run over generated programs by the ' +
@@ -230,6 +241,18 @@
       },
       {
         term: 'Two modes, and knowing which one you are in is most of the design',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["INFER: I have a term,<br/>what type does it have?"] --> C["the checker alternates<br/>between the two"]',
+            '    B["CHECK: I have a term and an<br/>expected type — does it fit?"] --> C',
+            '    C --> D["a lambda with no annotation<br/>can only be CHECKED"]',
+            '    C --> E["a variable can be INFERRED"]',
+            '    D --> F["and confusing the two is where<br/>bidirectional checkers go wrong"]',
+            '    E --> F'
+          ].join('\n'),
+          caption: 'Most of the structure of a modern type checker is deciding, for each syntax form, which of the two modes it belongs in — and the annotations a language requires follow from that.'
+        },
         plain: 'Infer derives a type from a term; check pushes an expected type inward.',
         formal: 'an annotation is the switch from infer to check',
         detail: 'The point of an annotation is not that the algorithm needs it — inference can ' +

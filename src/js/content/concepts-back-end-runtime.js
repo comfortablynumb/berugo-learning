@@ -230,6 +230,18 @@
     'measuring-a-runtime': [
       {
         term: 'A single timing is not a measurement',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["run it once, report the number"] --> B["one sample from a distribution<br/>nobody looked at"]',
+            '    B --> C["it may be the median"]',
+            '    B --> D["or the one run that hit a GC pause"]',
+            '    C --> E["and nothing in the number<br/>says which"]',
+            '    D --> E',
+            '    E --> F["report a median, a spread<br/>and a run count, or report nothing"]'
+          ].join('\n'),
+          caption: 'A single figure has no error bar and cannot be argued with, which is exactly what makes it useless. The distribution is the measurement; one draw from it is an anecdote.'
+        },
         plain: 'One number from a distribution nobody looked at.',
         formal: 'report the median with the spread and the number of runs',
         detail: 'The figure has variance behind it — scheduler noise, cache state, which tier ' +

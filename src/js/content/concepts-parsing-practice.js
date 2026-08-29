@@ -342,6 +342,18 @@
       },
       {
         term: 'The lexer hack feeds the symbol table backwards',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the text: x * y;"] --> B{"is x a typedef name?"}',
+            '    B -->|yes| C["a declaration of a pointer"]',
+            '    B -->|no| D["a multiplication, discarded"]',
+            '    C --> E["only the symbol table knows"]',
+            '    D --> E',
+            '    E --> F["so the parser must tell the lexer<br/>what it has learned"]'
+          ].join('\n'),
+          caption: 'The same characters are two different parses and nothing local decides between them. It is the standard example of the lexer/parser split not surviving contact with a real language.'
+        },
         plain: 'x * y; is a declaration if x is a typedef name and a multiplication otherwise.',
         formal: 'the parser marks typedef names and the lexer then emits TYPE_NAME rather than IDENTIFIER',
         detail: 'Nothing in the token stream distinguishes the two readings, and no context-free ' +

@@ -8,6 +8,16 @@
     'burrows-wheeler': [
       {
         term: 'The last column of the sorted rotations',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["write every rotation<br/>of the text"] --> B["sort them"]',
+            '    B --> C["take the LAST character<br/>of each row"]',
+            '    C --> D["that column is the transform"]',
+            '    D --> E["rows sharing a prefix are adjacent,<br/>so their preceding characters<br/>end up next to each other"]'
+          ].join('\n'),
+          caption: 'Sorting by what FOLLOWS a character groups the characters that PRECEDE similar contexts — which is why the output has long runs and the input did not.'
+        },
         plain: 'Sort every rotation of the text and take the final character of each.',
         formal: 'bwt[i] = T[(sa[i] − 1) mod n]',
         readAs: 'Row i of the transform is the character just before the i-th smallest suffix, wrapping round ' +

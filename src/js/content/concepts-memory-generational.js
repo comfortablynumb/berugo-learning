@@ -256,6 +256,17 @@
       },
       {
         term: 'The price is a remembered set per region',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["collect one region on its own"] --> B["you must find every pointer<br/>INTO it from outside"]',
+            '    B --> C["scanning the whole heap<br/>defeats the point"]',
+            '    C --> D["so record those pointers as<br/>they are created"]',
+            '    D --> E["a write barrier on every<br/>pointer store"]',
+            '    E --> F["paid by the program,<br/>continuously, to make the<br/>collector\'s pauses short"]'
+          ].join('\n'),
+          caption: 'Independent collection of a region is bought with a running tax on the mutator. The pause time improves because the cost moved, not because it went away.'
+        },
         plain: 'Evacuating a region means finding every pointer into it.',
         formal: 'per-region records replace the single old-to-young record of 31.4',
         detail: 'The alternative to a record is scanning the whole heap, which is exactly what ' +

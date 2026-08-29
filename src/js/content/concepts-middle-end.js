@@ -8,6 +8,17 @@
     'designing-an-ir': [
       {
         term: 'An AST is a tree and control flow is a graph',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["an AST: nesting"] --> B["a node has one parent,<br/>and there are no paths"]',
+            '    C["a CFG: blocks and edges"] --> D["a block has many predecessors,<br/>and there ARE paths"]',
+            '    D --> E["which is what makes questions like<br/>does this value reach here<br/>askable at all"]',
+            '    B --> F["so optimisation does not<br/>happen on the AST"]',
+            '    E --> F'
+          ].join('\n'),
+          caption: 'Almost every optimisation is a question about paths, and a tree does not have any. That is the whole reason a compiler builds a second representation.'
+        },
         plain: 'Optimisation does not happen on the AST because a tree has no paths.',
         formal: 'is this value available here is a question about paths',
         detail: 'Every analysis in a middle end asks something about the routes control can ' +

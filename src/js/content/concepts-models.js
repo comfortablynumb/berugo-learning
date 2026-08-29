@@ -268,6 +268,18 @@
       },
       {
         term: 'The four predictions are in different units and cannot be compared',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["RAM model: comparisons"] --> E["four numbers"]',
+            '    B["cache model: misses"] --> E',
+            '    C["external model: block transfers"] --> E',
+            '    D["work-span: dependent steps"] --> E',
+            '    E --> F["none of them converts<br/>into another"]',
+            '    F --> G["so the model is chosen by which<br/>resource is actually scarce"]'
+          ].join('\n'),
+          caption: 'Arguing that one algorithm has fewer comparisons and another has fewer misses is not a comparison. Choosing the model is choosing what the machine is charging you for.'
+        },
         plain: 'Comparisons, misses, transfers and dependent steps are four different things.',
         formal: 'the numbers are counts of distinct events; only their proxy for runtime is shared',
         detail: 'The bar chart in the demo is only meaningful because all four are being used as ' +

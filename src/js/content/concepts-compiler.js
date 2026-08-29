@@ -22,6 +22,16 @@
       },
       {
         term: 'A feature costs twice, and the two costs are unrelated',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a new syntax form"] --> B["cost in the parser:<br/>maybe a few lines"]',
+            '    A --> C["cost afterwards: name resolution,<br/>type checking, desugaring,<br/>diagnostics, tooling"]',
+            '    B --> D["and the first number tells you<br/>nothing about the second"]',
+            '    C --> D'
+          ].join('\n'),
+          caption: 'Syntax is the cheap half and the one everybody argues about. A form that parses in an afternoon can cost a year everywhere downstream of the parser.'
+        },
         plain: 'What a feature costs in the parser says nothing about what it costs afterwards.',
         formal: 'match: 4 units of parser work, 5 units after it; operators: 3 and 1',
         detail: 'Scoring the two separately is the only way to compare features honestly, ' +
@@ -129,6 +139,17 @@
       },
       {
         term: 'Trivia is attached, not discarded',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["whitespace and comments"] --> B{"throw them away?"}',
+            '    B -->|yes| C["the compiler is fine"]',
+            '    C --> D["and no formatter, no refactoring<br/>tool and no doc extractor<br/>can be built on it"]',
+            '    B -->|no| E["attach them to the token<br/>that follows"]',
+            '    E --> F["and the tree can be printed<br/>back exactly"]'
+          ].join('\n'),
+          caption: 'A compiler front end and a tooling front end differ mostly in this decision, and it is very hard to add afterwards.'
+        },
         plain: 'Whitespace and comments become a list on the token that follows them.',
         formal: '26 real tokens carrying 23 pieces of trivia over 138 characters',
         detail: 'That one decision is what lets a single lexer serve the compiler, the formatter ' +
@@ -221,6 +242,16 @@
     'the-parser': [
       {
         term: 'The parser is total',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["any input at all,<br/>however broken"] --> B["the parser returns a tree"]',
+            '    B --> C["with error nodes where<br/>it could not make sense of things"]',
+            '    C --> D["so every later pass has<br/>something to work on"]',
+            '    D --> E["and an editor keeps highlighting,<br/>completing and type-checking<br/>the parts that are fine"]'
+          ].join('\n'),
+          caption: 'Returning nothing on a syntax error makes every downstream feature conditional on the file being valid — which, in an editor, it usually is not.'
+        },
         plain: 'It always returns a tree, whatever the input.',
         formal: 'malformed input yields error nodes carrying the span of what could not be read',
         detail: 'Nothing throws. That single property is what makes an editor possible, because ' +

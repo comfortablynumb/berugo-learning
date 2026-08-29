@@ -23,6 +23,16 @@
       },
       {
         term: 'QBF is a two-player game, which is why it is PSPACE-complete',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["∃x: I choose x, trying<br/>to make it true"] --> B["∀y: you choose y, trying<br/>to make it false"]',
+            '    B --> C["∃z: I choose again"]',
+            '    C --> D["is there a strategy that<br/>wins for me whatever you do?"]',
+            '    D --> E["SAT is this game with<br/>only one player"]'
+          ].join('\n'),
+          caption: 'Alternating quantifiers are alternating turns, which is why QBF captures games and planning where plain SAT captures puzzles.'
+        },
         plain: 'The existential player picks the ∃ variables, the universal player picks the ∀ ones, alternating.',
         formal: 'the sentence is true exactly when the existential player has a winning strategy in the move order the prefix names',
         detail: 'Deciding who wins a game is the canonical shape of a PSPACE-complete problem, ' +

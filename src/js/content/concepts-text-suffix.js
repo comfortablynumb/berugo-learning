@@ -282,6 +282,16 @@
       },
       {
         term: 'A state is an endpos class',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["substrings of the text"] --> B["group them by WHERE they end"]',
+            '    B --> C["two substrings ending at exactly<br/>the same set of positions"]',
+            '    C --> D["become one state"]',
+            '    D --> E["so the automaton stays linear<br/>in size, not quadratic"]'
+          ].join('\n'),
+          caption: 'There are quadratically many substrings and only linearly many distinct ending-position sets. Collapsing by that equivalence is what makes the structure affordable.'
+        },
         plain: 'One state stands for every substring that ends at exactly the same set of positions.',
         formal: 'endpos(P) = { i : T[i − |P| … i) = P }',
         readAs: 'The end-position set of a pattern is every index where an occurrence finishes. Two patterns ' +

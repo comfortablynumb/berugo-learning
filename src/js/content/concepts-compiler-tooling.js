@@ -8,6 +8,18 @@
     'desugaring-to-a-core': [
       {
         term: 'The core is what every later stage sees',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["surface language:<br/>for, while, unless, ?:, string<br/>interpolation, default arguments"] --> B["desugar"]',
+            '    B --> C["core: a handful of forms"]',
+            '    C --> D["the type checker sees the core"]',
+            '    C --> E["the optimiser sees the core"]',
+            '    C --> F["the back end sees the core"]',
+            '    D --> G["so a construct removed here is<br/>removed from three passes at once"]'
+          ].join('\n'),
+          caption: 'Every form left in the core is paid for by every later stage. Shrinking it is the highest-leverage decision in a front end, and it can only be made early.'
+        },
         plain: 'Remove constructs here so nothing downstream has to handle them.',
         formal: 'no for, no match, no operators, no interpolation',
         detail: 'Four constructs disappear and every pass in M29, M30 and M31 is written against ' +
@@ -110,6 +122,17 @@
     'diagnostics-as-a-product': [
       {
         term: 'Reporting every consequence is worse than reporting nothing',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["one missing semicolon"] --> B["the parser desynchronises"]',
+            '    B --> C["forty follow-on errors"]',
+            '    C --> D["the real one is somewhere<br/>in the list"]',
+            '    D --> E["the reader scrolls, gives up,<br/>and fixes something at random"]',
+            '    E --> F["one mistake should<br/>produce one message"]'
+          ].join('\n'),
+          caption: 'A cascade is not thoroughness. It buries the one message that would have helped, which makes the output worse than a single unhelpful error.'
+        },
         plain: 'One mistake should produce one message.',
         formal: 'twelve error programs produced fifteen diagnostics before suppression',
         detail: 'The reader\'s job when a compiler reports eleven messages is to work out which ' +
@@ -211,6 +234,16 @@
     'testing-a-front-end': [
       {
         term: 'The generator is the grammar read backwards',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a production: Expr → Expr + Term"] --> B["a function: emit an Expr,<br/>a plus, and a Term"]',
+            '    B --> C["do that for every production"]',
+            '    C --> D["and you can generate programs<br/>the parser must accept"]',
+            '    D --> E["for free, endlessly, from the<br/>specification you already wrote"]'
+          ].join('\n'),
+          caption: 'The grammar is already a description of every valid program. Reading it in the other direction turns it into a corpus, which no hand-written test suite can match for coverage.'
+        },
         plain: 'Turn each production into a function that emits one.',
         formal: 'four statement forms and two expression families, driven by a seeded generator',
         detail: 'The grammar is already written down, so the generator is nearly free, and that ' +

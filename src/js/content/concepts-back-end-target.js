@@ -132,6 +132,16 @@
       },
       {
         term: 'wasm has no jumps',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a CFG has arbitrary edges"] --> B["wasm has nested blocks<br/>and loops"]',
+            '    B --> C["a branch targets an<br/>ENCLOSING label only"]',
+            '    C --> D["so arbitrary control flow has to be<br/>restructured before it can be emitted"]',
+            '    D --> E["which is a real pass,<br/>not a formatting detail"]'
+          ].join('\n'),
+          caption: 'Structured control flow is what makes wasm verifiable in one pass. The cost lands on the compiler, which must turn a graph back into nested blocks.'
+        },
         plain: 'Control flow is nested blocks and loops, with a branch to an enclosing label.',
         formal: 'br N leaves the Nth enclosing construct; there is no branch to an arbitrary address',
         detail: 'That single restriction is what makes a module cheap to validate and cheap to ' +

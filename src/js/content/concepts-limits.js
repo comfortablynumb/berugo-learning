@@ -121,6 +121,17 @@
       },
       {
         term: 'Superposition is a vector, and measurement is the only way to look at it',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["n qubits: 2^n amplitudes,<br/>all present at once"] --> B["gates transform the whole vector"]',
+            '    B --> C["measure"]',
+            '    C --> D["you get ONE basis state,<br/>with probability equal to<br/>its amplitude squared"]',
+            '    D --> E["the rest of the vector is gone"]',
+            '    E --> F["so the algorithm must make the<br/>answer likely BEFORE you look"]'
+          ].join('\n'),
+          caption: 'The parallelism is real and almost entirely unreadable. Every quantum algorithm is a way of arranging interference so that the wanted state has most of the amplitude.'
+        },
         plain: 'You get one basis state, with probability equal to the amplitude squared.',
         formal: 'P(i) = |amplitude_i|²',
         detail: 'You cannot read amplitudes, cannot copy the state (the no-cloning theorem ' +

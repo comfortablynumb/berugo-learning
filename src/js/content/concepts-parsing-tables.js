@@ -138,6 +138,16 @@
       },
       {
         term: 'LALR merges states whose CORES are equal and unions the lookaheads',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["canonical LR(1): thousands of states"] --> B["many differ only<br/>in their lookaheads"]',
+            '    B --> C["merge those, union the lookaheads"]',
+            '    C --> D["exactly as many states as LR(0)"]',
+            '    D --> E["and the merge can invent a<br/>reduce-reduce conflict that<br/>canonical LR(1) did not have"]'
+          ].join('\n'),
+          caption: 'The table gets small enough to ship and the merge is not free: a conflict report from a generator may be an artefact of the merge rather than of your grammar.'
+        },
         plain: 'The cores are the LR(0) states, so LALR always has exactly as many.',
         formal: 'core(I) = I with lookaheads stripped; merge every group with equal cores',
         detail: 'That is the deal LALR offers: LR(1) precision at LR(0) size. In 1975 the ' +
