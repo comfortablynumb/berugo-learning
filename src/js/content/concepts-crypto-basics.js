@@ -130,6 +130,17 @@
     'randomness-for-cryptography': [
       {
         term: 'A statistical PRNG and a CSPRNG differ in KIND',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["statistical PRNG"] --> B["promise: the outputs<br/>are well distributed"]',
+            '    C["CSPRNG"] --> D["promise: seeing outputs tells you<br/>nothing about the next one"]',
+            '    B --> E["passes every histogram"]',
+            '    D --> F["and only this one is<br/>safe for a key"]',
+            '    E --> F'
+          ].join('\n'),
+          caption: 'Both look random and only one resists an adversary who is watching. A generator can be statistically excellent and completely predictable at the same time.'
+        },
         plain: 'One promises good distribution; the other promises unpredictability.',
         formal: 'a statistical generator guarantees distribution tests pass; a CSPRNG guarantees output reveals nothing about future output',
         detail: 'These are not two grades of the same property. A statistical generator is ' +

@@ -129,6 +129,16 @@
     'rolling-hashes': [
       {
         term: 'The window hash is a polynomial, so sliding it is arithmetic',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the current window\'s hash"] --> B["subtract the leading<br/>character\'s contribution"]',
+            '    B --> C["multiply by the base"]',
+            '    C --> D["add the new character"]',
+            '    D --> E["constant time, whatever<br/>the window length"]'
+          ].join('\n'),
+          caption: 'Three operations move the window one place, regardless of how long it is. That constant is the whole reason a rolling hash beats rehashing each window.'
+        },
         plain: 'Subtract the leading term, multiply by the base, add the new character.',
         formal: 'h′ = (h − c₀·bᵐ⁻¹)·b + cₘ, all modulo M — constant time whatever the window length',
         readAs: 'Rolling the hash forward: subtract the departing character\'s contribution, multiply ' +

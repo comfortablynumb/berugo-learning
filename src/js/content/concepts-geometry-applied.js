@@ -8,6 +8,18 @@
     'transforms-and-3d': [
       {
         term: 'Homogeneous coordinates exist so that translation is a matrix',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["rotation, scale, shear"] --> B["all are matrix multiplications"]',
+            '    C["translation"] --> D["is an addition — the odd one out"]',
+            '    D --> E["add a fourth coordinate, fixed at 1"]',
+            '    E --> F["now translation is a<br/>multiplication too"]',
+            '    B --> G["so any chain of transforms<br/>composes into a single matrix"]',
+            '    F --> G'
+          ].join('\n'),
+          caption: 'The extra coordinate is not about geometry, it is about uniformity: with it, an entire transform pipeline collapses into one multiply per vertex.'
+        },
         plain: 'Add a fourth coordinate fixed at one, and moving a point becomes multiplication like everything else.',
         formal: 'a 4×4 matrix composes rotation, scale, shear, translation and projection uniformly',
         detail: 'A rotation or a scale is linear and fits in a 3×3 matrix; a translation is not, ' +
@@ -131,6 +143,18 @@
       },
       {
         term: 'Anti-aliasing is coverage, and coverage must be unbiased',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a pixel the shape<br/>partly covers"] --> B["shade it by the fraction<br/>that falls inside"]',
+            '    B --> C["the fractions along an edge<br/>must sum to the true area"]',
+            '    C --> D["biased high: the shape looks fat"]',
+            '    C --> E["biased low: it looks thin"]',
+            '    D --> F["and the error is systematic,<br/>so it never averages out"]',
+            '    E --> F'
+          ].join('\n'),
+          caption: 'A coverage estimate that is wrong by a constant fraction changes the apparent weight of every line in the image, which is why the sum has to be checked against the area.'
+        },
         plain: 'Shade each pixel by the fraction of it that falls inside the shape, and the fractions must sum to the area.',
         formal: 'the summed coverage equals the polygon\'s area, or the filter is adding or removing ink',
         detail: 'This is the check that separates a real coverage computation from a plausible ' +

@@ -131,6 +131,16 @@
       },
       {
         term: 'The stored block is the guarantee that bounds expansion',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a block of already-compressed<br/>or random data"] --> B{"did compressing it<br/>make it bigger?"}',
+            '    B -->|yes| C["emit it raw, with a short header"]',
+            '    B -->|no| D["emit the compressed form"]',
+            '    C --> E["so the worst case is the input<br/>plus a few bytes per block"]'
+          ].join('\n'),
+          caption: 'Without this escape a compressor can expand its input without limit, which matters because the caller has usually already allocated a buffer.'
+        },
         plain: 'A block that does not compress is emitted raw.',
         formal: 'type 00: five bytes of header, then the bytes; so the format expands by at most that per block',
         detail: 'This is the design decision that makes DEFLATE safe to apply blindly. An entropy ' +
@@ -229,6 +239,16 @@
       },
       {
         term: 'More context is not automatically better',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["order 1: few contexts,<br/>each well estimated"] --> B["order 3: better predictions"]',
+            '    B --> C["order 6: most contexts<br/>seen once or twice"]',
+            '    C --> D["the probabilities are noise"]',
+            '    D --> E["and the model costs more<br/>than it saves"]'
+          ].join('\n'),
+          caption: 'A longer context is a better predictor only while there is enough data to estimate it. Past that point the model is memorising the input rather than learning it.'
+        },
         plain: 'The plain order-k model bottoms out and then gets worse.',
         formal: 'each context reserves probability for every unseen symbol, so a sparse model spends most of its mass on nothing',
         detail: 'With add-one smoothing over an alphabet of thirty, a context that has seen two ' +
@@ -320,6 +340,17 @@
     'transform-compression': [
       {
         term: 'The Burrows–Wheeler transform compresses nothing',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["input: n bytes"] --> B["the transform"]',
+            '    B --> C["output: the same n bytes,<br/>in a different order"]',
+            '    C --> D["identical order-0 entropy"]',
+            '    D --> E["what changed is that similar<br/>characters are now adjacent"]',
+            '    E --> F["which is what the NEXT stage exploits"]'
+          ].join('\n'),
+          caption: 'It is a permutation, and measuring it on its own shows exactly zero gain. Its whole value is making the following move-to-front and entropy stages effective.'
+        },
         plain: 'It is a permutation: same length, same bytes, same order-0 entropy.',
         formal: 'the output is a rearrangement of the input, so its symbol counts — and therefore its entropy — are identical',
         detail: 'This is the measurement the whole section is arranged around, and it is exact ' +

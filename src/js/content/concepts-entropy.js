@@ -141,6 +141,17 @@
       },
       {
         term: 'Randomness in the high bits is what destroys insert locality',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a B-tree inserts where<br/>the key sorts"] --> B{"where do the high bits<br/>of the key come from?"}',
+            '    B -->|"a timestamp"| C["consecutive keys land<br/>on the same page"]',
+            '    B -->|"randomness"| D["every insert lands<br/>on a different page"]',
+            '    C --> E["one page dirtied per batch"]',
+            '    D --> F["one page dirtied per ROW"]'
+          ].join('\n'),
+          caption: 'UUIDv4 and a time-ordered id are the same size and the same uniqueness. Which end the randomness sits in decides whether the index writes one page or thousands.'
+        },
         plain: 'A B-tree inserts where the key sorts, so a random key lands on a random page.',
         formal: 'measured: a random UUID touches 64 distinct index pages in a 64-insert window; a time-ordered one touches 15',
         detail: 'The number that matters is the working set — how many distinct pages the recent ' +

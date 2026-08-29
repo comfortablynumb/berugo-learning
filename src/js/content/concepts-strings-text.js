@@ -144,6 +144,17 @@
       },
       {
         term: 'Byte-pair encoding learns the vocabulary from the corpus',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["start with single characters"] --> B["find the commonest<br/>adjacent pair"]',
+            '    B --> C["merge it into one new symbol"]',
+            '    C --> B',
+            '    C --> D["common words end up as one token,<br/>rare ones as several pieces"]',
+            '    D --> E["and nothing is ever out of vocabulary"]'
+          ].join('\n'),
+          caption: 'The vocabulary is discovered rather than designed, which is why the same algorithm works across languages without anybody writing rules for them.'
+        },
         plain: 'Repeatedly merge the commonest adjacent pair into a new symbol.',
         formal: 'merge count trades vocabulary size against sequence length',
         detail: 'At zero merges it is a character tokeniser: a tiny vocabulary and very long ' +

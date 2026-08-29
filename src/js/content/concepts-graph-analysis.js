@@ -131,6 +131,16 @@
     'graph-layout': [
       {
         term: 'Euler\'s formula rules out planarity and never rules it in',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a simple planar graph has<br/>at most 3V − 6 edges"] --> B{"does this graph exceed that?"}',
+            '    B -->|yes| C["definitely NOT planar"]',
+            '    B -->|no| D["tells you nothing —<br/>it might be planar, it might not"]',
+            '    D --> E["K3,3 has 9 edges and a bound of 12,<br/>and is not planar"]'
+          ].join('\n'),
+          caption: 'A counting bound can only refute. K3,3 passes the general count comfortably, which is exactly why the tighter bipartite bound exists.'
+        },
         plain: 'A simple planar graph on three or more vertices has at most 3V − 6 edges.',
         formal: 'V − E + F = 2, and every face has at least three edges, so 2E >= 3F',
         readAs: 'Euler\'s formula for a planar drawing: vertices minus edges plus faces is always 2. Since ' +
@@ -254,6 +264,16 @@
       },
       {
         term: 'The Fiedler vector orders the vertices, and splitting it is a partition',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["take the second-smallest<br/>eigenvector of the Laplacian"] --> B["every vertex gets one number"]',
+            '    B --> C["sort by that number"]',
+            '    C --> D["cut at the median"]',
+            '    D --> E["two halves, with few edges<br/>crossing between them"]'
+          ].join('\n'),
+          caption: 'A combinatorial question about cuts has become a sort of a list of real numbers. That is what spectral methods buy: graph structure expressed as arithmetic.'
+        },
         plain: 'Each vertex gets a number; cut at the median and you have two halves.',
         formal: 'spectral bisection minimises a continuous relaxation of the balanced-cut objective',
         detail: 'The relaxation is the reason this works and the reason it is not exact: the ' +

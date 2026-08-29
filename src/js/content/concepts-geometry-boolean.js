@@ -128,6 +128,16 @@
     'rotating-calipers': [
       {
         term: 'The minimum-area rectangle has a side flush with a hull edge',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["infinitely many possible angles"] --> B["the minimum-area rectangle must<br/>have a side lying along a hull edge"]',
+            '    B --> C["so only h angles can win,<br/>one per hull edge"]',
+            '    C --> D["try each, keep the smallest"]',
+            '    D --> E["a continuous search became<br/>a finite one"]'
+          ].join('\n'),
+          caption: 'The theorem is what makes the problem tractable: without it you are optimising over a continuum, and with it you are checking a list.'
+        },
         plain: 'So there are only h candidate angles, one per hull edge, and every other angle is provably worse.',
         formal: 'a continuous optimisation collapses to an O(h) scan',
         detail: 'The proof is a rotation argument. Suppose the minimum rectangle touched the hull ' +

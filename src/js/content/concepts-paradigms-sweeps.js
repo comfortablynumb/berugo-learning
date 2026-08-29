@@ -270,6 +270,15 @@
     'offline-processing': [
       {
         term: 'Offline is a different problem from online',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["online: answer each query<br/>before seeing the next"] --> B["you must be ready<br/>for anything"]',
+            '    C["offline: read every query first,<br/>then answer them all"] --> D["you may reorder them<br/>into a convenient sweep"]',
+            '    D --> E["which is what makes<br/>Mo\'s algorithm possible at all"]'
+          ].join('\n'),
+          caption: 'Being allowed to see the questions before answering is a genuine change of problem, not a convenience. Almost every technique here is unavailable online.'
+        },
         plain: 'Seeing every query before answering any of them changes what is achievable.',
         formal: 'an offline algorithm may permute the query sequence; an online one must answer each before seeing the next',
         detail: 'The distinction is worth making explicitly because it is usually left implicit in a system ' +

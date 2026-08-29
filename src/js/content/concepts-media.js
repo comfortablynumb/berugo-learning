@@ -134,6 +134,17 @@
       },
       {
         term: 'Sorting the column is usually worth more than the encoding choice',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the same values, the same encoder"] --> B["unsorted: runs of length 1,<br/>deltas all over the place"]',
+            '    A --> C["sorted: long runs,<br/>small deltas"]',
+            '    B --> D["a modest saving"]',
+            '    C --> E["often several times better"]',
+            '    E --> F["and the sort is a one-line change"]'
+          ].join('\n'),
+          caption: 'Effort usually goes into picking between encodings. The order the rows are written in tends to dominate all of them, and it is the cheaper thing to change.'
+        },
         plain: 'The same encoder, the same values, a different order.',
         formal: 'delta coding a sorted column gives small gaps; delta coding a shuffled one gives large signed ones',
         detail: 'This is the finding the whole section is arranged around, and it is measured as ' +

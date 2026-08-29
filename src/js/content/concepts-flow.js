@@ -280,6 +280,16 @@
     'push-relabel': [
       {
         term: 'A preflow lets vertices hold excess',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a flow: inflow equals outflow<br/>at every vertex"] --> B["true at all times,<br/>so progress is a whole path"]',
+            '    C["a preflow: inflow may EXCEED outflow"] --> D["a vertex can hold a puddle<br/>of unsent flow"]',
+            '    D --> E["so progress is one edge at a time"]',
+            '    E --> F["and the excess is drained<br/>back out at the end"]'
+          ].join('\n'),
+          caption: 'Relaxing conservation is what frees the algorithm from finding whole augmenting paths, which is why push-relabel is local and parallelises where Ford-Fulkerson does not.'
+        },
         plain: 'Conservation is relaxed to "inflow is at least outflow", and the excess is drained later.',
         formal: 'excess(v) = inflow − outflow >= 0 for every v other than s; a flow is a preflow with every excess zero',
         readAs: 'A preflow lets water pile up at a junction rather than balancing immediately. Push-relabel ' +

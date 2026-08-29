@@ -186,6 +186,17 @@
       },
       {
         term: 'Contraction: remove a node and preserve every distance through it',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["pick a node to remove"] --> B["for each pair of neighbours whose<br/>shortest path went through it"]',
+            '    B --> C["add a shortcut edge<br/>with the combined weight"]',
+            '    C --> D["delete the node"]',
+            '    D --> E["every distance in the graph<br/>is unchanged"]',
+            '    E --> A'
+          ].join('\n'),
+          caption: 'Repeat over the whole graph and a continental road network becomes a small overlay that answers queries in milliseconds — with exact distances, not estimates.'
+        },
         plain: 'Delete the node; wherever a shortest path went through it, add an edge that replaces it.',
         formal: 'for each surviving pair (u, w): if the only u→w route within cost(u→v→w) went through v, add that shortcut',
         detail: 'Contraction is a preprocessing step, not a query-time one: nodes are removed one at a ' +

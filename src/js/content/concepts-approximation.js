@@ -8,6 +8,16 @@
     'lp-relaxation': [
       {
         term: 'Relaxation turns a modelling problem into a solved one',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["write the integer program honestly"] --> B["delete the sentence saying<br/>the variables are integers"]',
+            '    B --> C["what is left is a linear program —<br/>solvable in polynomial time"]',
+            '    C --> D["its optimum is a bound on the<br/>integer optimum"]',
+            '    D --> E["and rounding its answer<br/>gives a real solution"]'
+          ].join('\n'),
+          caption: 'Removing one constraint converts an NP-hard problem into one with a polynomial algorithm, and the gap between the two optima is where every approximation ratio here comes from.'
+        },
         plain: 'Write the integer program honestly, delete the sentence that says the variables are integers, and solve what is left.',
         formal: 'min c·x subject to Ax ≥ b, x ∈ {0,1}ⁿ becomes the same with 0 ≤ x ≤ 1',
         readAs: 'Minimise c dotted with x subject to A times x being at least b, with x ' +
@@ -150,6 +160,17 @@
       },
       {
         term: 'The knapsack FPTAS is one idea: scale the profits and round down',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["profits up to a huge number"] --> B["divide every profit by K<br/>and floor it"]',
+            '    B --> C["the DP table is now small"]',
+            '    C --> D["solve it exactly"]',
+            '    D --> E["each item lost less than K,<br/>so the total lost is bounded"]',
+            '    E --> F["pick K from the error<br/>you are willing to accept"]'
+          ].join('\n'),
+          caption: 'The accuracy becomes a dial with a price attached: name the error you can tolerate and K follows, along with exactly how much work it costs.'
+        },
         plain: 'Divide every profit by K, floor it, solve exactly on the smaller numbers.',
         formal: 'K = ε·P_max/n; each item loses < K, so the solution loses < nK = ε·P_max ≤ ε·OPT',
         readAs: 'Set K to epsilon times the largest profit divided by the item count; each item ' +
@@ -263,6 +284,16 @@
     'derandomisation': [
       {
         term: '"In expectation" means about half your runs are below it',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the expected cut is 18.5"] --> B["one run: could be 12,<br/>could be 24"]',
+            '    B --> C["the average over many runs<br/>is 18.5"]',
+            '    C --> D["and a single run is a<br/>sample, not a promise"]',
+            '    D --> E["so an expectation guarantee<br/>needs either repetition<br/>or derandomisation"]'
+          ].join('\n'),
+          caption: 'An expectation says nothing about any particular run. Treating it as a floor is the mistake that makes randomised guarantees sound stronger than they are.'
+        },
         plain: 'An average says nothing about how often a single run is near it.',
         formal: 'E[cut] = |E|/2 for a uniform random assignment, and Pr[cut < |E|/2] is around a half',
         readAs: 'The expected cut is half the edge count, and the chance that one particular ' +

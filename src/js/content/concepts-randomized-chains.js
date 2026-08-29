@@ -8,6 +8,16 @@
     'markov-chain-monte-carlo': [
       {
         term: 'The normalising constant cancels, which is why the method exists',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a density you can only<br/>evaluate up to a constant"] --> B["the acceptance test is a RATIO<br/>of two densities"]',
+            '    B --> C["the unknown constant appears<br/>in both, top and bottom"]',
+            '    C --> D["so it cancels"]',
+            '    D --> E["you sample from a distribution<br/>you cannot even write down"]'
+          ].join('\n'),
+          caption: 'Almost every interesting posterior is known only up to a constant nobody can compute. Working with ratios is what makes them sampleable anyway.'
+        },
         plain: 'You can sample from a density you can only evaluate up to an unknown factor.',
         formal: 'the acceptance ratio π(y)/π(x) is unchanged by rescaling π',
         readAs: 'The ratio of the target density at the proposed point to its value at the ' +

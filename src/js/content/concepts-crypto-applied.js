@@ -21,6 +21,16 @@
       },
       {
         term: '=== on a token is a remote timing oracle',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["compare byte by byte,<br/>return on the first mismatch"] --> B["a wrong first byte:<br/>returns immediately"]',
+            '    A --> C["the first five right:<br/>takes slightly longer"]',
+            '    C --> D["so the duration leaks<br/>how much you got right"]',
+            '    D --> E["guess one byte at a time —<br/>256 tries per byte, not 256^n"]'
+          ].join('\n'),
+          caption: 'An exponential search becomes a linear one, from across a network, against code that is functionally perfect. The fix is comparing every byte, every time.'
+        },
         plain: 'A comparison that exits on the first difference takes longer for a better guess.',
         formal: 'time ∝ length of the shared prefix, so averaging enough samples reveals each byte in turn',
         readAs: 'The time taken is proportional to how many leading bytes match, so an attacker ' +
@@ -130,6 +140,16 @@
       },
       {
         term: 'k − 1 shares constrain nothing at all',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a secret hidden in a<br/>degree k−1 polynomial"] --> B["k shares: exactly one<br/>polynomial fits — recover it"]',
+            '    A --> C["k−1 shares: for EVERY possible<br/>secret, a polynomial fits"]',
+            '    C --> D["so the attacker has<br/>learned nothing whatsoever"]',
+            '    D --> E["not hard to break —<br/>information-theoretically empty"]'
+          ].join('\n'),
+          caption: 'This is not a computational assumption. One share below the threshold leaves every candidate secret exactly as likely as before, no matter how much computing power is applied.'
+        },
         plain: 'Every candidate secret is still consistent with what the attacker holds.',
         formal: 'for each candidate constant term there is exactly one polynomial of degree k−1 through the held shares',
         detail: 'This is information-theoretic rather than computational: the shares eliminate no ' +

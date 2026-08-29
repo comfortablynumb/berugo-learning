@@ -166,6 +166,17 @@
     'random-contraction': [
       {
         term: 'Contraction merges two vertices and keeps every other edge',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["pick a random edge"] --> B["fuse its two endpoints<br/>into one supernode"]',
+            '    B --> C["discard the loops that creates"]',
+            '    C --> D["keep every other edge,<br/>including parallel ones"]',
+            '    D --> E["repeat until two vertices remain"]',
+            '    E --> F["the edges between them<br/>are a cut"]'
+          ].join('\n'),
+          caption: 'Keeping parallel edges is the part people drop, and it is what makes the count at the end a real cut size rather than a number of distinct neighbours.'
+        },
         plain: 'Pick an edge, fuse its endpoints into one supernode, throw away the loops that makes.',
         formal: 'edges between u and v become self-loops and are deleted; every other edge survives with its multiplicity',
         detail: 'The multiplicity is the part that does the work. When both endpoints were joined ' +
@@ -290,6 +301,17 @@
     'monte-carlo-estimation': [
       {
         term: 'The error falls like 1/√N and nothing changes that',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["N samples"] --> B["error proportional to 1/√N"]',
+            '    B --> C["4× the samples: half the error"]',
+            '    B --> D["100× the samples:<br/>one more decimal digit"]',
+            '    C --> E["no cleverness moves the exponent —<br/>only the constant in front"]',
+            '    D --> E'
+          ].join('\n'),
+          caption: 'Variance reduction is worth real factors and cannot change the rate. Budgeting a Monte Carlo run means accepting that a digit costs a hundredfold.'
+        },
         plain: 'Four times the samples halves the error; a hundred times the samples gives one more digit.',
         formal: 'the standard error of a sample mean is σ/√N, whatever the integrand',
         readAs: 'Sigma divided by the square root of N — the spread of one sample divided by the ' +
@@ -307,6 +329,17 @@
       },
       {
         term: 'The rate does not depend on the dimension, and that is the whole point',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a grid: m points per axis"] --> B["m^d points in d dimensions"]',
+            '    B --> C["unusable past a handful<br/>of dimensions"]',
+            '    D["sampling: N points, anywhere"] --> E["error 1/√N in ONE dimension"]',
+            '    E --> F["and 1/√N in fifty"]',
+            '    F --> G["so high dimension is where<br/>sampling stops being a<br/>compromise and starts being<br/>the only option"]'
+          ].join('\n'),
+          caption: 'In two dimensions a grid beats sampling easily. The crossover arrives fast, and past it the grid is not merely worse — it is impossible.'
+        },
         plain: 'A grid needs m points per axis and therefore mᵈ in total; sampling needs the same N in every dimension.',
         formal: 'product quadrature error is O(m⁻²) per axis at mᵈ points; Monte Carlo is O(1/√N) at N points',
         readAs: 'The grid rule’s error falls like one over m squared per axis but needs m to the ' +

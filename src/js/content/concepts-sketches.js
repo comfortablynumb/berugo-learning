@@ -156,6 +156,17 @@
       },
       {
         term: 'A saturated counter is permanent',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a counting Bloom cell<br/>hits its ceiling"] --> B{"decrement it on removal?"}',
+            '    B -->|yes| C["it may have been incremented<br/>more times than it recorded"]',
+            '    C --> D["a key that IS present<br/>now reads as absent"]',
+            '    B -->|no| E["leave it stuck high forever"]',
+            '    E --> F["the safe choice, and it<br/>slowly degrades the filter"]'
+          ].join('\n'),
+          caption: 'A false negative destroys the one guarantee a Bloom filter offers, so the only safe response to saturation is to stop counting that cell and accept the drift.'
+        },
         plain: 'A counter at its ceiling can never be decremented again without risking a false negative.',
         formal: 'c = 2^b − 1 ⇒ c is frozen for the life of the filter',
         readAs: 'A counter with b bits saturates at its maximum value, and once there it can never be ' +

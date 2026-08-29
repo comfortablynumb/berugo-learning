@@ -129,6 +129,17 @@
     'differentiation-and-autodiff': [
       {
         term: 'A finite difference has two errors pulling opposite ways',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["shrink the step h"] --> B["truncation error falls —<br/>the approximation improves"]',
+            '    A --> C["rounding error rises —<br/>you subtract two nearly equal numbers"]',
+            '    B --> D["the total has a minimum<br/>somewhere in between"]',
+            '    C --> D',
+            '    D --> E["so smaller is better,<br/>right up until it is much worse"]'
+          ].join('\n'),
+          caption: 'The instinct that a smaller step is always more accurate is exactly wrong past the optimum, and the failure is a loss of significant digits rather than a warning.'
+        },
         plain: 'Shrinking the step reduces the truncation error and increases the rounding error, and the best step is where they cross.',
         formal: 'the forward difference has truncation O(h) and rounding O(ε/h), which balance at h ≈ √ε',
         readAs: 'The part you left out of the Taylor series shrinks in proportion to the step, and ' +
@@ -243,6 +254,17 @@
     'differential-equations': [
       {
         term: 'A solver’s order is measurable, and measuring it catches implementation bugs',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["halve the step size"] --> B["an order-p method divides<br/>its error by 2^p"]',
+            '    B --> C["RK4 should divide it by 16"]',
+            '    C --> D{"does it?"}',
+            '    D -->|yes| E["the implementation is<br/>doing what it claims"]',
+            '    D -->|no| F["a coefficient is wrong —<br/>and the answers still look plausible"]'
+          ].join('\n'),
+          caption: 'A mistyped Runge-Kutta coefficient gives sensible-looking output at every step. The convergence order is the one measurement that notices.'
+        },
         plain: 'Halve the step and an order-p method divides its error by 2ᵖ.',
         formal: 'error ∝ hᵖ, so log₂ of the ratio between consecutive halvings estimates p',
         readAs: 'The error is proportional to the step raised to the power p, so taking the log ' +

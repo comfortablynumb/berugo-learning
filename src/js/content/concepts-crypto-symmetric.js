@@ -8,6 +8,16 @@
     'password-hashing': [
       {
         term: 'A password hash is deliberately slow',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["SHA-256: billions per second"] --> B["exactly what you want<br/>for a checksum"]',
+            '    A --> C["and exactly what an attacker<br/>wants for a password file"]',
+            '    D["Argon2 or bcrypt: tuned to take<br/>a noticeable fraction of a second"] --> E["one login is unaffected"]',
+            '    E --> F["and a billion guesses becomes<br/>thirty years"]'
+          ].join('\n'),
+          caption: 'Speed is a virtue in every other hash and a defect here. The cost is paid once per login and multiplied by every guess an attacker makes.'
+        },
         plain: 'Being fast is what makes SHA-256 a good hash and a catastrophic password store.',
         formal: 'a password store is priced by the attacker’s guesses per second, so the defender buys security by spending time',
         detail: 'Every other use of a hash wants it fast, and this one wants the opposite, which ' +
@@ -21,6 +31,16 @@
       },
       {
         term: 'A salt is not a secret and does not need to be',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["no salt: identical passwords<br/>give identical hashes"] --> B["crack one, crack them all"]',
+            '    B --> C["and a precomputed table<br/>works on every database"]',
+            '    D["a unique salt per user,<br/>stored in the clear"] --> E["every stored hash becomes<br/>a separate problem"]',
+            '    E --> F["and no table can be built in advance"]'
+          ].join('\n'),
+          caption: 'Its job is not to hide anything. It is to stop one unit of work from being reused against a second account, which is what makes bulk cracking economic.'
+        },
         plain: 'Its job is to make each stored hash a separate problem.',
         formal: 'a per-user random salt stops one precomputed table covering the database and hides equal passwords',
         detail: 'Storing the salt in plain text alongside the hash is correct and expected — it ' +

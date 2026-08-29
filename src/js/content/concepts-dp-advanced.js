@@ -8,6 +8,17 @@
     'dp-optimisations': [
       {
         term: 'Every optimisation is a narrowing, and every narrowing has a precondition',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the transition considers<br/>every predecessor"] --> B["an optimisation proves most of<br/>them can never win"]',
+            '    B --> C["so it looks at fewer"]',
+            '    C --> D["the arithmetic is unchanged —<br/>the candidate set shrank"]',
+            '    D --> E["and the proof rests on a<br/>precondition: convexity, monotonicity,<br/>a quadrangle inequality"]',
+            '    E --> F["apply it where that fails and<br/>the answer is quietly wrong"]'
+          ].join('\n'),
+          caption: 'None of these make the computation faster. They remove candidates that provably cannot win — and the word provably is carrying a precondition you have to check.'
+        },
         plain: 'These techniques do not compute faster; they look at fewer candidates.',
         formal: 'each replaces argmin over [0, j) with argmin over a subset S(j) ⊆ [0, j)',
         readAs: 'Every optimisation in this section does the same thing: instead of searching all previous ' +
@@ -264,6 +275,17 @@
       },
       {
         term: 'A cycle makes it a linear system, not a hard DP',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A{"can a state reach itself?"} -->|no| B["topological order exists"]',
+            '    B --> C["evaluate in that order —<br/>an ordinary DP"]',
+            '    A -->|yes| D["no order exists,<br/>and the recursion never bottoms out"]',
+            '    D --> E["the equations are still linear"]',
+            '    E --> F["so solve them as a linear system"]'
+          ].join('\n'),
+          caption: 'A cycle looks like it breaks the method and only changes which method applies. The equations were always simultaneous; acyclicity was what let you substitute instead of solve.'
+        },
         plain: 'If a state can reach itself, there is no topological order and no recursion.',
         formal: 'E[s] − Σ p(s→t)·E[t] = cost(s) is one row of a linear system in the transient states',
         readAs: 'The expected cost from a state is its own cost plus the weighted average of the expected ' +

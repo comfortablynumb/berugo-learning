@@ -138,6 +138,16 @@
     'polygon-triangulation': [
       {
         term: 'Every simple polygon has exactly n − 2 triangles, whatever its shape',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a simple polygon with n vertices"] --> B["any triangulation of it"]',
+            '    B --> C["has exactly n − 2 triangles"]',
+            '    C --> D["convex, concave, spiral —<br/>the count does not care"]',
+            '    D --> E["so a run producing any other count<br/>has a bug, and you know it<br/>without inspecting the output"]'
+          ].join('\n'),
+          caption: 'An invariant that costs one comparison and catches a whole class of failures. Triangulation output is hard to eyeball and trivial to count.'
+        },
         plain: 'Twelve vertices always give ten triangles; a run that gives a different number has failed.',
         formal: 'a triangulation of a simple polygon with n vertices has n − 2 triangles and n − 3 diagonals',
         detail: 'This is a theorem rather than a coincidence, and it makes an assertion available ' +

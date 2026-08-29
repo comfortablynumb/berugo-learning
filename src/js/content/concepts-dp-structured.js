@@ -410,6 +410,16 @@
       },
       {
         term: 'The tight flag',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["walking the digits of the bound"] --> B{"has every digit so far<br/>matched the bound exactly?"}',
+            '    B -->|yes: tight| C["the next digit is capped<br/>by the bound\'s digit"]',
+            '    B -->|no: already smaller| D["the next digit is free —<br/>0 to 9"]',
+            '    D --> E["and it stays free forever after"]'
+          ].join('\n'),
+          caption: 'One boolean separates the constrained prefix from the free suffix, and once it flips it never flips back — which is why the state space stays tiny.'
+        },
         plain: 'Tight means every digit so far equals the bound\'s, so the next one is capped.',
         formal: 'tight ∧ digit = bound[i] ⟹ still tight; digit < bound[i] ⟹ free for every later position',
         readAs: 'While you are matching the limit digit for digit you are constrained; the moment you pick ' +

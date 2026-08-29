@@ -162,6 +162,15 @@
       },
       {
         term: 'Random 3-SAT has a phase transition near a ratio of 4.27',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["clauses ÷ variables, well below 4.27"] --> B["almost every instance is satisfiable,<br/>and solvers find it fast"]',
+            '    C["well above 4.27"] --> D["almost none are, and solvers<br/>prove it fast"]',
+            '    E["right at 4.27"] --> F["a coin flip, and the hardest<br/>instances anyone knows"]'
+          ].join('\n'),
+          caption: 'Hardness is not spread evenly over instances; it is concentrated at a threshold. Benchmarks drawn away from it say almost nothing about a solver.'
+        },
         plain: 'Below it almost everything is satisfiable; above it almost nothing is.',
         formal: 'the satisfiable fraction falls from 1 to 0 across a narrowing window around m/n ≈ 4.27',
         readAs: 'The fraction of satisfiable formulas falls from one to zero across a window ' +
@@ -276,6 +285,16 @@
       },
       {
         term: 'Write the requirement down twice, in code that shares nothing',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the encoder: turns the requirement<br/>into clauses"] --> C["a candidate answer"]',
+            '    B["the checker: reads a finished answer<br/>and says yes or no"] --> D["verdict"]',
+            '    C --> B',
+            '    D --> E["they share no code, so the same<br/>misunderstanding cannot be in both"]'
+          ].join('\n'),
+          caption: 'A model that encodes the wrong requirement produces a satisfying assignment to the wrong problem. An independent checker is the only thing that notices.'
+        },
         plain: 'An encoder that produces clauses, and a checker that reads a finished answer.',
         formal: 'encode : requirements → CNF and validate : (requirements, answer) → per-requirement verdicts, with no shared code',
         detail: 'A checker written from the model checks the model, and would agree with a wrong ' +

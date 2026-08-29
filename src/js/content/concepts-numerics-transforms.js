@@ -130,6 +130,16 @@
     'optimisation': [
       {
         term: 'Convexity is what "solved" means, and it is the dividing line',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A{"is the function convex?"} -->|yes| B["every local minimum<br/>IS the global one"]',
+            '    B --> C["so a method that stops<br/>has finished"]',
+            '    A -->|no| D["a local minimum tells you<br/>nothing about the global one"]',
+            '    D --> E["stopping means stopping,<br/>not solving"]'
+          ].join('\n'),
+          caption: 'The line between optimisation that is a solved problem and optimisation that is a research area is this property, not the size or the dimension.'
+        },
         plain: 'On a convex function every local minimum is the global one, so a method that stops has finished.',
         formal: 'f is convex if the segment between any two points on its graph lies on or above the graph',
         detail: 'Off convexity the same algorithm stops somewhere and cannot tell you what it ' +

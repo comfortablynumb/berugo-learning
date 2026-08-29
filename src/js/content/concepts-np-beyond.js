@@ -127,6 +127,16 @@
     'parameterised-algorithms': [
       {
         term: 'Fixed-parameter tractable means exponential in the parameter, polynomial in the data',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["cost 2^k × n"] --> B["n is the input size —<br/>the cost is linear in it"]',
+            '    A --> C["k is the parameter —<br/>the cost explodes in it"]',
+            '    B --> D["so a million rows with k = 20<br/>is easy"]',
+            '    C --> E["and a hundred rows with k = 60<br/>is impossible"]'
+          ].join('\n'),
+          caption: 'NP-hardness is a statement about a family of instances. Finding the number that is genuinely small in yours, and pushing the cost into it, is what parameterised complexity is for.'
+        },
         plain: 'Pick the number that is genuinely small and push all the cost into it.',
         formal: 'a problem is FPT in parameter k when it is solvable in f(k)·n^O(1) for some computable f',
         readAs: 'A problem is fixed-parameter tractable in k when it can be solved in time f of k ' +

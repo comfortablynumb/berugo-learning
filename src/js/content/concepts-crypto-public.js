@@ -131,6 +131,16 @@
     'signatures-and-pki': [
       {
         term: 'A signature convinces a third party; a MAC cannot',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a MAC: the key is SHARED"] --> B["the verifier could have<br/>produced the tag themselves"]',
+            '    B --> C["so it proves nothing<br/>to anyone else"]',
+            '    D["a signature: the private key<br/>belongs to one party"] --> E["only they could have made it"]',
+            '    E --> F["which is what non-repudiation<br/>actually means"]'
+          ].join('\n'),
+          caption: 'They both detect tampering, and only one of them survives being shown to a third party. Choosing between them is choosing whether anyone else has to be convinced.'
+        },
         plain: 'A MAC key is shared, so the verifier could have produced the tag.',
         formal: 'signing uses a private key and verification a public one, so a valid signature identifies the key holder to anyone',
         detail: 'That difference decides where each belongs. Per-packet authentication between ' +
@@ -248,6 +258,16 @@
       },
       {
         term: 'Key agreement without authentication buys nothing against an active attacker',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["you run Diffie-Hellman"] --> B["and agree a key with<br/>whoever answered"]',
+            '    B --> C["an attacker in the middle answers,<br/>and runs it twice"]',
+            '    C --> D["one key with you,<br/>another with the server"]',
+            '    D --> E["perfect encryption, on both legs,<br/>readable throughout"]'
+          ].join('\n'),
+          caption: 'The maths is not broken; the peer was never established. Authentication is what turns a shared secret into a shared secret with somebody in particular.'
+        },
         plain: 'You agree a key with whoever answered.',
         formal: 'unauthenticated Diffie–Hellman is secure against eavesdropping and defenceless against a machine in the middle',
         detail: 'An attacker who can modify traffic runs two exchanges — one with each party — ' +
