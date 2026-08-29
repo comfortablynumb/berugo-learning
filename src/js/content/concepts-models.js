@@ -128,6 +128,17 @@
     'work-and-span': [
       {
         term: 'Work and span are the two numbers, and they answer different questions',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["work — total operations"] --> C["the time on one processor"]',
+            '    B["span — the longest chain<br/>of dependent operations"] --> D["the time on infinitely many"]',
+            '    C --> E["parallelism is work ÷ span"]',
+            '    D --> E',
+            '    E --> F["beyond that many processors,<br/>the extras have nothing to do"]'
+          ].join('\n'),
+          caption: 'Adding processors cannot beat the span, because those operations must happen one after another. The ratio is a ceiling on speedup, not a prediction of it.'
+        },
         plain: 'Total operations, and the longest chain of dependent ones.',
         formal: 'work T₁ = the time on one processor · span T∞ = the time on infinitely many',
         readAs: 'T-one is the total work, the time on a single processor; T-infinity is the span, ' +

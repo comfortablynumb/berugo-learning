@@ -176,6 +176,17 @@
       },
       {
         term: 'Ray casting counts crossings; the winding number counts them with a sign',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["shoot a ray from the point"] --> B["ray casting: is the number<br/>of crossings odd?"]',
+            '    A --> C["winding: add +1 upward,<br/>−1 downward — is the total non-zero?"]',
+            '    B --> D["they agree on simple polygons"]',
+            '    C --> D',
+            '    D --> E["and disagree on self-intersecting ones,<br/>which is why the fill rule is a setting"]'
+          ].join('\n'),
+          caption: 'Two rules that look like the same test give different answers on a self-overlapping shape. Graphics APIs expose both because neither is more correct.'
+        },
         plain: 'Both shoot the same ray. One asks whether the count is odd, the other whether the signed total is non-zero.',
         formal: 'even-odd: crossings mod 2; non-zero: the sum of ±1 over the same crossings',
         readAs: 'Fire a ray from the test point and look at every edge it crosses. The first rule ' +

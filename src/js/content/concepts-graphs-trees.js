@@ -163,6 +163,16 @@
     'tree-path-queries': [
       {
         term: 'Rooting a tree turns every path question into an ancestor question',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the path between u and v"] --> B["pick any root"]',
+            '    B --> C["the path goes up from u to<br/>their lowest common ancestor"]',
+            '    C --> D["and back down to v"]',
+            '    D --> E["so a path query becomes two<br/>root-to-node queries and one LCA"]'
+          ].join('\n'),
+          caption: 'Rooting costs one traversal and converts an awkward question about arbitrary pairs into one about ancestors, which prefix sums and jump tables already answer.'
+        },
         plain: 'Pick a root; the path between two nodes is up to their lowest common ancestor and down again.',
         formal: 'dist(a, b) = depth(a) + depth(b) − 2·depth(lca(a, b))',
         readAs: 'The distance between two nodes is how far each is from the root, less twice the depth of ' +

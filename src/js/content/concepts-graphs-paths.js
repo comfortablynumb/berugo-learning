@@ -8,6 +8,16 @@
     'bridges-and-cuts': [
       {
         term: 'A bridge is an edge whose loss disconnects something',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["remove one edge"] --> B{"did the number of connected<br/>components go up?"}',
+            '    B -->|yes| C["it was a bridge —<br/>the only route between two parts"]',
+            '    B -->|no| D["a cycle offered another way round"]',
+            '    C --> E["in a network, a bridge is<br/>a single point of failure"]'
+          ].join('\n'),
+          caption: 'An edge is a bridge exactly when it lies on no cycle, which is why a depth-first search that tracks how far back a subtree reaches can find them all in one pass.'
+        },
         plain: 'Remove it and the number of connected components goes up.',
         formal: 'e is a bridge iff components(G − e) > components(G); equivalently, e is on no cycle',
         readAs: 'An edge is a bridge exactly when removing it breaks the graph into more pieces — which is ' +
@@ -270,6 +280,16 @@
       },
       {
         term: 'An n-th improving round proves a negative cycle',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a shortest simple path has<br/>at most n − 1 edges"] --> B["so n − 1 relaxation rounds<br/>settle every one of them"]',
+            '    B --> C{"does round n still improve something?"}',
+            '    C -->|no| D["the distances are final"]',
+            '    C -->|yes| E["no simple path is that long —<br/>something is going round a cycle<br/>and getting cheaper each time"]'
+          ].join('\n'),
+          caption: 'The extra round is not a safety margin, it is the detector: an improvement that cannot come from a simple path can only come from a negative cycle.'
+        },
         plain: 'No simple path is that long, so something is going round in circles and getting cheaper.',
         formal: 'if round n still relaxes an edge, some vertex is reachable through a cycle of negative total weight',
         readAs: 'After n−1 passes everything should be settled. If a pass still improves something, the only ' +

@@ -8,6 +8,16 @@
     'min-cost-flow': [
       {
         term: 'Two objectives, and the second one only matters once the first is fixed',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["first: maximise the flow value"] --> B["that fixes how much gets through"]',
+            '    B --> C["second: among all flows of<br/>that value, find the cheapest"]',
+            '    C --> D["the objectives are ordered,<br/>not combined"]',
+            '    D --> E["which is why the algorithm sends<br/>units one at a time, cheapest first"]'
+          ].join('\n'),
+          caption: 'Trying to optimise both at once gives a different, harder problem. The ordering is what lets successive shortest paths work at all.'
+        },
         plain: 'Among all flows of a given value, find the cheapest.',
         formal: 'minimise sum over arcs of cost(e)·f(e) subject to capacity, conservation and |f| = k',
         readAs: 'Send exactly k units from source to sink as cheaply as possible: total cost is each arc\'s ' +

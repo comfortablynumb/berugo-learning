@@ -8,6 +8,18 @@
     'bin-packing': [
       {
         term: 'Bin packing is the shape of every placement problem',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["fixed-size bins"] --> D["how few bins can hold it all?"]',
+            '    B["items of assorted sizes"] --> D',
+            '    D --> E["virtual machines onto hosts"]',
+            '    D --> F["files onto disks"]',
+            '    D --> G["ad breaks into a schedule"]',
+            '    D --> H["and it is NP-hard in all of them"]'
+          ].join('\n'),
+          caption: 'Recognising the shape is most of the value: once a capacity-planning question is bin packing, the known approximation ratios apply directly.'
+        },
         plain: 'Fixed-size machines, items of assorted sizes, and the question of how many machines.',
         formal: 'partition items into the fewest subsets whose sums are at most the capacity; NP-hard offline',
         detail: 'VM placement, container scheduling, memory allocation, disk layout and CDN cache ' +
@@ -218,6 +230,16 @@
     'cache-oblivious': [
       {
         term: 'Cache-oblivious means optimal without knowing M or B',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["recurse, halving the problem"] --> B["keep recursing"]',
+            '    B --> C["at some level, a subproblem<br/>happens to fit in cache"]',
+            '    C --> D["every level below it<br/>is then free"]',
+            '    D --> E["and you never had to know<br/>which level that was"]'
+          ].join('\n'),
+          caption: 'The recursion passes through every size on the way down, so it hits the right one automatically — on this machine, and on the next one, with no retuning.'
+        },
         plain: 'Recurse until the subproblem is small, and some level of the recursion fits.',
         formal: 'an algorithm is cache-oblivious when it achieves the cache-aware bound without B or M as parameters',
         detail: 'The mechanism is that a recursion produces subproblems at every scale at once, ' +

@@ -8,6 +8,16 @@
     'using-solvers': [
       {
         term: 'The model is the engineering and the solver is a library call',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["your problem"] --> B["write it down as variables<br/>and constraints"]',
+            '    B --> C["hand it to a solver"]',
+            '    C --> D["decades of somebody else\'s<br/>search heuristics"]',
+            '    D --> E["the work you do is the encoding;<br/>the search is not yours to write"]'
+          ].join('\n'),
+          caption: 'Almost every practical use of NP-hardness has this shape. Time spent on a bespoke search is usually time that belonged in the model.'
+        },
         plain: 'Write the problem down as constraints and hand it to somebody else’s search.',
         formal: 'model → encode → solve → decode → validate, with the solver as the only step you do not write',
         detail: 'Decades of engineering have gone into CDCL SAT solvers, MIP solvers and CP ' +
@@ -21,6 +31,18 @@
       },
       {
         term: 'At most one of these is true is the workhorse, and there are three ways to write it',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["at most one of n variables"] --> B["pairwise: one clause per pair —<br/>n² clauses, no new variables"]',
+            '    A --> C["commander: a tree of<br/>helper variables"]',
+            '    A --> D["sequential: a chain of carries —<br/>linear clauses, linear variables"]',
+            '    B --> E["same constraint, wildly different<br/>solver behaviour"]',
+            '    C --> E',
+            '    D --> E'
+          ].join('\n'),
+          caption: 'The encoding is not a detail. The same logical constraint written three ways gives the solver three different search spaces, and the difference is often orders of magnitude.'
+        },
         plain: 'One clause per pair, a tree of commander variables, or a chain of carries.',
         formal: 'pairwise: n(n − 1)/2 clauses, 0 new variables. commander: O(n) clauses, O(n) variables. sequential: 3n − 4 clauses, n − 1 variables',
         readAs: 'Pairwise costs n times n minus one over two clauses and no new variables; the ' +

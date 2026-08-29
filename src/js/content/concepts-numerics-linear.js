@@ -24,6 +24,17 @@
       },
       {
         term: 'The normal equations square the condition number, exactly',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["solve via AᵀA"] --> B["the condition number is multiplied<br/>by itself"]',
+            '    B --> C["so you lose half your digits<br/>before any solving starts"]',
+            '    D["solve via a QR factorisation"] --> E["the condition number is unchanged"]',
+            '    C --> F["same answer in exact arithmetic,<br/>very different in floating point"]',
+            '    E --> F'
+          ].join('\n'),
+          caption: 'The normal equations are the version everyone derives on paper, and forming AᵀA is exactly where the precision goes. This is why libraries use QR.'
+        },
         plain: 'AᵀA has κ(A) multiplied by itself, so you lose half your digits before any solving happens.',
         formal: 'κ(AᵀA) = κ(A)², so a design matrix at 10⁸ becomes a system at 10¹⁶',
         readAs: 'The condition number of A-transpose-A is the condition number of A squared, so a ' +
@@ -132,6 +143,16 @@
     'eigenvalues': [
       {
         term: 'An eigenvector is a direction the matrix only scales',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["take a vector, apply the matrix"] --> B{"did the direction change?"}',
+            '    B -->|yes| C["an ordinary vector —<br/>rotated and stretched"]',
+            '    B -->|no| D["an eigenvector — it points<br/>exactly where it went in"]',
+            '    D --> E["and the factor it grew by<br/>is the eigenvalue"]'
+          ].join('\n'),
+          caption: 'Almost every vector gets turned. The special directions that only stretch are what the matrix does when you strip away the choice of coordinates.'
+        },
         plain: 'Most vectors get rotated; a few come out pointing exactly where they went in, just longer or shorter.',
         formal: 'Av = λv with v non-zero; λ is the factor and v the direction',
         readAs: 'A times v equals lambda times v: applying the matrix to that particular direction ' +

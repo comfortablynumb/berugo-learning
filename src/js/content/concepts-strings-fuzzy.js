@@ -8,6 +8,16 @@
     'palindromes': [
       {
         term: 'Interleaving a separator removes the odd/even problem',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["abba — an even palindrome"] --> B["no single centre character"]',
+            '    B --> C["so the algorithm needs two cases"]',
+            '    D["insert separators: #a#b#b#a#"] --> E["the centre is now the # in the middle"]',
+            '    E --> F["every palindrome is odd,<br/>and one case handles them all"]'
+          ].join('\n'),
+          caption: 'A transformation of the input replaces a branch in the code. The two cases were never different ideas — only different parities.'
+        },
         plain: 'abc becomes #a#b#c#, and every even palindrome of the original becomes an odd one.',
         formal: 'a radius in the transformed string is exactly a LENGTH in the original',
         detail: 'A palindrome with a centre and one with a gap need two implementations, two sets ' +
@@ -110,6 +120,16 @@
     'approximate-matching': [
       {
         term: 'Bitap keeps the whole match state in the bits of a register',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["one bit per pattern position"] --> B["bit j set means: the first j+1<br/>characters match, ending here"]',
+            '    B --> C["read the next character"]',
+            '    C --> D["shift the register and mask —<br/>every position advances at once"]',
+            '    D --> E["the whole inner loop is<br/>two instructions"]'
+          ].join('\n'),
+          caption: 'The pattern positions are updated in parallel because they are bits of one word. That is why the word size, not the alphabet or the text, is the cliff in the cost.'
+        },
         plain: 'Bit j is set when the first j+1 pattern characters match ending here.',
         formal: 'Shift-Or: state = (state << 1) | mask[c], where a ZERO bit means a match',
         readAs: 'Keep the whole search state in one machine word, one bit per pattern position. Shifting left ' +

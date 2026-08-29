@@ -21,6 +21,16 @@
       },
       {
         term: 'The failure has two shapes, and the silent one is the common one',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["clip against a concave region"] --> B["the algorithm cuts against<br/>each edge as an infinite line"]',
+            '    B --> C["loud failure: the result<br/>collapses to nothing"]',
+            '    B --> D["quiet failure: a plausible polygon,<br/>a third of the right size"]',
+            '    D --> E["and nothing in the output<br/>says which one you got"]'
+          ].join('\n'),
+          caption: 'An empty result gets noticed in testing. A polygon that is merely too small looks like a polygon, which is why the concavity precondition has to be checked rather than hoped for.'
+        },
         plain: 'Either the result collapses to nothing, or it comes back plausible and two-thirds too small.',
         formal: 'of 5 concave clips, 2 return an empty polygon and 3 return a wrong area',
         detail: 'An empty result is at least obvious: something downstream renders nothing and ' +

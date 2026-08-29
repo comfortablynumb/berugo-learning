@@ -23,6 +23,16 @@
       },
       {
         term: 'The exchange property',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a larger independent set"] --> B["can always donate one element<br/>to a smaller one"]',
+            '    B --> C["and the smaller one<br/>stays independent"]',
+            '    C --> D["so a small set is never stuck"]',
+            '    D --> E["which is exactly why greedy<br/>cannot paint itself into a corner"]'
+          ].join('\n'),
+          caption: 'This one property is what makes greedy provably optimal. Where it fails, greedy fails — and the failure is a valid answer that is simply not the best one.'
+        },
         plain: 'A larger independent set can always donate an element to a smaller one.',
         formal: 'A, B ∈ I with |A| < |B| implies there is x ∈ B \\ A with A ∪ {x} ∈ I',
         readAs: 'The exchange property. If one independent set is smaller than another, you can always find ' +

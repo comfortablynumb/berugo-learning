@@ -22,6 +22,16 @@
       },
       {
         term: 'A blossom is an odd cycle the search enters on one side and must leave on the other',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["an alternating search reaches<br/>the same vertex twice"] --> B["once at even parity,<br/>once at odd"]',
+            '    B --> C["a bipartite search marks it visited<br/>and refuses the second arrival"]',
+            '    C --> D["so it misses augmenting paths"]',
+            '    D --> E["contract the odd cycle to one vertex,<br/>search on, then expand it back"]'
+          ].join('\n'),
+          caption: 'Two-colourability is what let the bipartite search mark a vertex once. An odd cycle destroys it, and contracting the cycle is how the guarantee is restored.'
+        },
         plain: 'The search reaches the same vertex at both parities, and a marking search refuses to go back in.',
         formal: 'an edge joining two vertices at even distance from the root closes an odd cycle',
         readAs: 'In the alternating search tree, an edge between two even-depth vertices completes a cycle of ' +

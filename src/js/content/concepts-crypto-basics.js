@@ -255,6 +255,16 @@
       },
       {
         term: 'The birthday bound halves your digest',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a 256-bit hash"] --> B["preimage: about 2²⁵⁶ work"]',
+            '    A --> C["collision: about 2¹²⁸ work"]',
+            '    C --> D["because you only need ANY two<br/>inputs to agree, not a specific one"]',
+            '    D --> E["so collision resistance is<br/>half the output length"]'
+          ].join('\n'),
+          caption: 'Two of the three resistances cost the full digest and one costs half it. Sizing a hash for collision resistance and quoting the full length is the common error.'
+        },
         plain: 'Collision resistance is half the output length, not all of it.',
         formal: 'a collision becomes even money at about √(2·ln 2·2ⁿ) samples, so SHA-256 gives 128-bit collision resistance',
         readAs: 'Even odds of a collision arrive after roughly the square root of the size of ' +

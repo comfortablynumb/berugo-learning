@@ -21,6 +21,16 @@
       },
       {
         term: 'The test everybody runs separates nothing',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a histogram of single outputs"] --> B["flat for every generator here"]',
+            '    B --> C["including RANDU, which is famously broken"]',
+            '    C --> D["the structure is in the RELATIONS<br/>between successive outputs"]',
+            '    D --> E["so test triples in space,<br/>not values in a bar chart"]'
+          ].join('\n'),
+          caption: 'A uniform histogram is necessary and nowhere near sufficient. RANDU\'s triples lie on fifteen planes, and no single-output test can see that.'
+        },
         plain: 'A histogram of single outputs passes for every generator here, RANDU included.',
         formal: 'over 200 000 samples into 64 buckets, every generator sits inside the plausible chi-squared range on its high bits',
         detail: 'A one-dimensional uniformity test asks the easiest possible question, and any ' +

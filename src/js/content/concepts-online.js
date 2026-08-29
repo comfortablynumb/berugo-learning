@@ -245,6 +245,16 @@
     'online-scheduling': [
       {
         term: 'List scheduling is the whole online algorithm',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a job arrives"] --> B["put it on the<br/>least-loaded machine"]',
+            '    B --> C["decide now, never revisit"]',
+            '    C --> A',
+            '    C --> D["never worse than 2 − 1/m<br/>times the best offline schedule"]'
+          ].join('\n'),
+          caption: 'One rule, no lookahead and no rebalancing, and it is within a factor of two of a scheduler that knew every job in advance.'
+        },
         plain: 'Put the arriving job on the least-loaded machine, now.',
         formal: 'Graham (1966): the makespan is at most (2 − 1/m) times the optimal makespan',
         readAs: 'The finish time is at most two minus one over m times the best possible finish ' +

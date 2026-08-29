@@ -8,6 +8,17 @@
     'arbitrary-precision': [
       {
         term: 'The base is chosen by arithmetic, not by taste',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a limb times a limb"] --> B["plus the running column total"]',
+            '    B --> C{"does that stay exactly<br/>representable?"}',
+            '    C -->|no| D["silent loss of low bits,<br/>and a wrong product"]',
+            '    C -->|yes| E["the base is legal"]',
+            '    E --> F["which is why 2²⁶ and not 2³²<br/>when the accumulator is a double"]'
+          ].join('\n'),
+          caption: 'The limb size is not a tuning parameter. It is whatever keeps the widest intermediate exact, and picking a rounder number breaks multiplication quietly.'
+        },
         plain: 'A limb product plus the running column total has to stay exactly representable.',
         formal: 'at a base of 2¹⁶ a limb product is at most 2³², leaving 21 bits of headroom below 2⁵³',
         detail: 'Schoolbook multiplication forms products of two limbs and adds a column of them ' +

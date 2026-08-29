@@ -8,6 +8,16 @@
     'dictionary-compression': [
       {
         term: 'LZ77 replaces a repeat with a pointer backwards',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["…the cat sat on the mat…"] --> B["the second the has<br/>appeared 12 bytes back"]',
+            '    B --> C["emit: go back 12, copy 4"]',
+            '    C --> D["instead of four literal bytes"]',
+            '    D --> E["the dictionary is the text itself,<br/>so nothing has to be shipped with it"]'
+          ].join('\n'),
+          caption: 'There is no dictionary to build or transmit. The window of text already sent is the dictionary, which is why the decoder needs nothing but the stream.'
+        },
         plain: 'A distance saying how far back, a length saying how much.',
         formal: 'a token is (distance, length) into the already-decoded output, or a literal byte',
         detail: 'Everything before the cursor is the dictionary, and none of it is transmitted — ' +

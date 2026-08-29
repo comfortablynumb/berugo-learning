@@ -8,6 +8,17 @@
     'interpolation': [
       {
         term: 'More data can make a polynomial fit dramatically worse',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a perfectly smooth function"] --> B["fit a polynomial through<br/>equally spaced samples"]',
+            '    B --> C["add more samples"]',
+            '    C --> D["the fit gets worse near the ends,<br/>and the error grows without bound"]',
+            '    D --> C',
+            '    E["cluster the samples toward the ends"] --> F["the same degree now converges"]'
+          ].join('\n'),
+          caption: 'The intuition that more data helps is simply false here, and the fix is where you sample rather than how much. It is the clearest counter-example in numerical work.'
+        },
         plain: 'Runge’s function is perfectly smooth, and the polynomial through more of its equally spaced samples oscillates more wildly.',
         formal: 'for f(x) = 1/(1 + 25x²) on [−1, 1] the equally spaced interpolant’s maximum error grows without bound as the node count rises',
         detail: 'This is not a rounding problem and it does not go away in exact arithmetic — it is ' +

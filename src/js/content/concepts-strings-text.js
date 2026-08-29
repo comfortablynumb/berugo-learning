@@ -20,6 +20,18 @@
       },
       {
         term: 'The split state is where the non-determinism lives',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    S["split state"] --> A["branch one"]',
+            '    S --> B["branch two"]',
+            '    S --> C["consumes no character"]',
+            '    A --> D["a simulation follows BOTH,<br/>keeping a set of states"]',
+            '    B --> D',
+            '    D --> E["no backtracking, so no input<br/>can make it explode"]'
+          ].join('\n'),
+          caption: 'Every alternation and every star in the pattern becomes one of these. Following both successors at once, rather than trying one and backing up, is the whole difference from a backtracking engine.'
+        },
         plain: 'It consumes no character and has two successors.',
         formal: 'an epsilon transition with two targets, and no rule for choosing between them',
         detail: 'Every difference between the two engines reduces to what they do at a split. A ' +

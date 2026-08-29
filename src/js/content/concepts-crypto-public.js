@@ -21,6 +21,16 @@
       },
       {
         term: 'Diffie–Hellman agrees a secret that was never sent',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["Alice picks a, sends g^a"] --> C["each raises what they received<br/>to their own private number"]',
+            '    B["Bob picks b, sends g^b"] --> C',
+            '    C --> D["both reach g^(ab)"]',
+            '    D --> E["an eavesdropper saw g^a and g^b<br/>and cannot get there"]'
+          ].join('\n'),
+          caption: 'The shared secret never crosses the wire in any form. It is computed independently at both ends from things that were public, which is the whole surprise.'
+        },
         plain: 'Both sides exponentiate the other’s public value with their own private one.',
         formal: 'Alice computes B^a mod p and Bob computes A^b mod p, and both equal g^(ab) mod p',
         readAs: 'Alice raises the value Bob sent to her secret exponent and Bob raises the value ' +

@@ -21,6 +21,18 @@
       },
       {
         term: 'Only one step in the pipeline loses anything',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["transform"] --> B["reversible — nothing lost"]',
+            '    C["quantise"] --> D["THIS is the loss,<br/>all of it, on purpose"]',
+            '    E["entropy-code"] --> F["reversible — nothing lost"]',
+            '    B --> G["so quality is one dial,<br/>in one place"]',
+            '    D --> G',
+            '    F --> G'
+          ].join('\n'),
+          caption: 'Knowing that the transform and the coder are both lossless tells you where every quality question is decided, and it is not where people usually look.'
+        },
         plain: 'Transform, quantise, entropy-code — and the middle one is the whole loss.',
         formal: 'the DCT is reversible arithmetic and the entropy stage is lossless; quantisation is divide-and-round',
         detail: 'Knowing which box is lossy is what makes the pipeline analysable. The colour ' +

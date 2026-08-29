@@ -258,6 +258,16 @@
     'bitsets-and-swar': [
       {
         term: 'A bitset costs the universe; a hash set costs the population',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["bitset: one bit per possible value"] --> B["cost depends on the RANGE"]',
+            '    C["hash set: one entry per value present"] --> D["cost depends on the COUNT"]',
+            '    B --> E["10 elements from 0 to a million:<br/>the bitset is wasteful"]',
+            '    D --> F["800 000 elements from 0 to a million:<br/>the bitset wins by an order of magnitude"]'
+          ].join('\n'),
+          caption: 'They are priced on different quantities, so neither is generally better. Density is the whole question, and it is the one people forget to ask.'
+        },
         plain: 'One is flat in the number of elements present and the other is proportional to it, so they cross exactly once.',
         formal: 'bitset bytes = ⌈universe / 8⌉ regardless of contents; Set bytes grow with the count',
         readAs: 'The bitset needs one bit for every value that could be in it, rounded up to whole ' +

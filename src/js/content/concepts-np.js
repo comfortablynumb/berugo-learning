@@ -284,6 +284,19 @@
       },
       {
         term: '3-CNF is not weaker than CNF',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a wide clause:<br/>a OR b OR c OR d OR e"] --> B["introduce fresh variables"]',
+            '    B --> C["a OR b OR y₁"]',
+            '    B --> D["NOT y₁ OR c OR y₂"]',
+            '    B --> E["NOT y₂ OR d OR e"]',
+            '    C --> F["same satisfiability,<br/>three literals per clause"]',
+            '    D --> F',
+            '    E --> F'
+          ].join('\n'),
+          caption: 'Restricting to three literals looks like it should lose something and loses nothing. That is why 3-SAT, not SAT, is the problem everything else reduces from.'
+        },
         plain: 'Any wide clause becomes a chain of three-literal clauses linked by fresh variables.',
         formal: '(l₁ ∨ … ∨ lₖ) becomes (l₁ ∨ l₂ ∨ y₁) ∧ (¬y₁ ∨ l₃ ∨ y₂) ∧ … , adding k − 3 variables',
         readAs: 'A clause of k literals becomes a chain of three-literal clauses linked by k ' +

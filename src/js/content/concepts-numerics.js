@@ -278,6 +278,17 @@
     'linear-systems': [
       {
         term: 'Pivoting is about stability, not about zeros',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a zero pivot"] --> B["division by zero —<br/>impossible to miss"]',
+            '    C["a merely SMALL pivot"] --> D["a huge multiplier"]',
+            '    D --> E["the intermediate entries blow up"]',
+            '    E --> F["and the answer is destroyed,<br/>with nothing raising an error"]',
+            '    F --> G["so pivot on the largest available,<br/>not on the first non-zero"]'
+          ].join('\n'),
+          caption: 'Textbooks introduce pivoting as a way to avoid dividing by zero, which makes it look like an edge case. The real reason is the small pivot that no check catches.'
+        },
         plain: 'A pivot that is merely small is enough to destroy the answer, and nothing checks for small.',
         formal: 'the multiplier is aᵢₖ / aₖₖ, so a small pivot makes it huge and the elimination adds huge numbers to ordinary ones',
         readAs: 'Each row below the pivot is scaled by its own leading entry divided by the pivot ' +

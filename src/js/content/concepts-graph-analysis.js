@@ -8,6 +8,17 @@
     'graph-coloring': [
       {
         term: 'Greedy colouring is a family indexed by an ordering',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["pick an order for the vertices"] --> B["give each the lowest colour<br/>none of its coloured neighbours uses"]',
+            '    B --> C["a good order: near-optimal"]',
+            '    B --> D["a bad order: arbitrarily far off,<br/>on the very same graph"]',
+            '    C --> E["so the ordering IS the algorithm"]',
+            '    D --> E'
+          ].join('\n'),
+          caption: 'There is no single greedy colouring. The rule is fixed and the ordering carries all of the quality, which is why the literature is about orderings.'
+        },
         plain: 'Take the vertices in some order; give each the lowest colour none of its coloured neighbours holds.',
         formal: 'greedy uses at most Δ + 1 colours in any order, and the ordering decides where in that range it lands',
         readAs: 'Δ is the largest number of neighbours any vertex has. However you order the vertices, greedy ' +

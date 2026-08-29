@@ -8,6 +8,16 @@
     'heuristic-search': [
       {
         term: 'A* is Dijkstra with a different queue key',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["Dijkstra orders by:<br/>cost so far"] --> C["the same algorithm otherwise"]',
+            '    B["A* orders by:<br/>cost so far + estimate of the rest"] --> C',
+            '    C --> D["the estimate steers the search<br/>toward the goal"]',
+            '    D --> E["a zero estimate makes A*<br/>exactly Dijkstra again"]'
+          ].join('\n'),
+          caption: 'One line changes. Everything A* is good at, and every way it goes wrong, comes from what that estimate does and whether it ever overestimates.'
+        },
         plain: 'Order by cost so far plus an estimate of what remains, instead of cost so far alone.',
         formal: 'f(v) = g(v) + h(v); Dijkstra is the special case h ≡ 0',
         readAs: 'A* orders its queue by the cost already spent plus an estimate of the cost remaining. Set ' +

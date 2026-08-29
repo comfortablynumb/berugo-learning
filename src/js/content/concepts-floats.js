@@ -287,6 +287,16 @@
       },
       {
         term: 'What a double loses is equality, not accuracy',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["sum a million money amounts<br/>as doubles"] --> B["the total is off by less than<br/>a ten-thousandth of a cent"]',
+            '    B --> C["it formats to exactly<br/>the right cent"]',
+            '    C --> D["and it does not compare<br/>equal to that cent"]',
+            '    D --> E["so the bug is in the ==,<br/>not in the arithmetic"]'
+          ].join('\n'),
+          caption: 'The folk rule says doubles lose money. They do not; they lose the ability to be compared exactly, which is a different problem with a different fix.'
+        },
         plain: 'The total formats to the right cent and does not compare equal to it.',
         formal: 'across 500 independent ledgers of 500 transactions: 442 unequal totals, 0 formatting mismatches',
         detail: 'That combination is the trap. Every display is right, every report is right, and ' +

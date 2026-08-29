@@ -8,6 +8,15 @@
     'checksums-and-crc': [
       {
         term: 'A checksum is a claim about which corruptions it catches',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the wrong question:<br/>is this data correct?"] --> B["no checksum answers that"]',
+            '    C["the right question:<br/>which kinds of damage<br/>would I notice?"] --> D["single-bit flips? bursts?<br/>reordering? truncation?"]',
+            '    D --> E["different checksums answer<br/>different subsets"]'
+          ].join('\n'),
+          caption: 'Choosing a checksum is choosing which failures you will find out about. A sum that cannot see reordering is not weak — it is answering a different question.'
+        },
         plain: 'Not "is this right" but "which kinds of wrong would I notice".',
         formal: 'a detector catches an error exactly when the corrupted message hashes differently',
         detail: 'That framing is what makes the choice tractable. Every function here catches ' +

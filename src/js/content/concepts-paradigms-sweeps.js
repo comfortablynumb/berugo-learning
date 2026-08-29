@@ -137,6 +137,16 @@
     'meet-in-the-middle': [
       {
         term: 'Halving the exponent',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["search all 2ⁿ possibilities"] --> B["split the items into two halves"]',
+            '    B --> C["enumerate each half:<br/>2^(n/2) each"]',
+            '    C --> D["sort one half, then look up<br/>each item of the other"]',
+            '    D --> E["2^(n/2) log — 40 items become<br/>a million, not a trillion"]'
+          ].join('\n'),
+          caption: 'The exponent halves and the base does not change, which is the difference between an intractable search and one that finishes over lunch.'
+        },
         plain: 'Two searches of half the size, combined by a lookup, replace one search of the full size.',
         formal: '2^n becomes 2·2^(n/2) states plus 2^(n/2)·log(2^(n/2)) work to combine',
         readAs: 'Meet in the middle: split the input in half, enumerate each half separately, then match them ' +
@@ -152,6 +162,15 @@
       },
       {
         term: 'The combine step is a search, not a product',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["pair every left half<br/>with every right half"] --> B["that is 2^(n/2) × 2^(n/2)"]',
+            '    B --> C["which is 2ⁿ again —<br/>nothing was gained"]',
+            '    D["sort the right halves, then binary-search<br/>for what each left half needs"] --> E["the saving survives"]'
+          ].join('\n'),
+          caption: 'Splitting the problem is the easy half of the idea. If the two halves are recombined by enumeration, the exponent comes straight back.'
+        },
         plain: 'Pairing every left half with every right half is 2^n again — the point is to look up instead.',
         formal: 'sort the right-half sums, then for each left sum binary-search for the largest partner that fits',
         detail: 'This is the part that is easy to get wrong in the design and it is where the technique ' +

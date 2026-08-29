@@ -24,6 +24,16 @@
       },
       {
         term: 'Iterate by length, not by index',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["best[i][j] depends on<br/>shorter ranges inside it"] --> B{"loop over i then j?"}',
+            '    B -->|yes| C["you read cells that have<br/>not been written yet"]',
+            '    B -->|no| D["loop over length,<br/>then over start position"]',
+            '    D --> E["every shorter range is<br/>already finished"]'
+          ].join('\n'),
+          caption: 'The recurrence is right and the loop order is what makes it wrong. Interval DP is the clearest case of the evaluation order being part of the algorithm.'
+        },
         plain: 'The natural nested loop over i and j reads cells that have not been written.',
         formal: 'any reverse topological order works; increasing interval length is the simplest one',
         detail: 'A cell depends on strictly shorter intervals, so a valid order settles all of length 2, then ' +
@@ -261,6 +271,17 @@
     'bitmask-dp': [
       {
         term: 'A set in the state, written as an integer',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the subset {0, 2, 3}"] --> B["the integer 1101 in binary"]',
+            '    B --> C["union is OR, intersection is AND"]',
+            '    B --> D["add an element is OR with a bit"]',
+            '    B --> E["is it a member? test one bit"]',
+            '    C --> F["so a DP table indexed by subsets<br/>is just an array of size 2ⁿ"]'
+          ].join('\n'),
+          caption: 'Sets become array indices and set operations become single instructions. That is what makes exponential state spaces practical up to about twenty elements.'
+        },
         plain: 'Subsets of n things are the integers below 2ⁿ, and bit operations are the set operations.',
         formal: 'mask ∈ [0, 2ⁿ); union is |, intersection is &, membership is mask & (1 << i)',
         readAs: 'A subset is stored as a number whose bits say which elements are in it. Union is bitwise OR, ' +

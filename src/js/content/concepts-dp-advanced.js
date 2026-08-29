@@ -128,6 +128,18 @@
     'game-dp': [
       {
         term: 'A game is a DP over positions',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the value of a position"] --> B["is the best value its moves lead to"]',
+            '    B --> C{"whose turn is it?"}',
+            '    C -->|mine| D["best means maximum"]',
+            '    C -->|theirs| E["best means minimum"]',
+            '    D --> F["same recurrence as any DP —<br/>only the word best alternates"]',
+            '    E --> F'
+          ].join('\n'),
+          caption: 'Minimax is not a separate algorithm. It is a dynamic program whose combining operation flips with the ply, which is why memoisation applies unchanged.'
+        },
         plain: 'The value of a position is the best value its moves lead to, with "best" alternating.',
         formal: 'v(s) = max over moves of v(s\') at a maximising node, min at a minimising node',
         detail: 'Minimax is that recurrence written out, and treating it as a DP rather than as a separate ' +

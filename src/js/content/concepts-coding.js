@@ -278,6 +278,16 @@
       },
       {
         term: 'The overhead is a constant per MESSAGE, not per symbol',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["Huffman: a whole number<br/>of bits per SYMBOL"] --> B["the rounding is paid<br/>once per symbol"]',
+            '    C["arithmetic coding: the whole message<br/>becomes one number"] --> D["the rounding is paid<br/>once per MESSAGE"]',
+            '    B --> E["a symbol of probability 0.99<br/>still costs a full bit"]',
+            '    D --> F["about two bits in total,<br/>however long the message"]'
+          ].join('\n'),
+          caption: 'This is why arithmetic coding matters on skewed distributions: Huffman cannot spend a fraction of a bit, and on a near-certain symbol the fraction is the whole cost.'
+        },
         plain: 'About two bits, however long the message was.',
         formal: 'the coder emits ⌈−log₂(width)⌉ + 2 bits at most; the +2 terminates the interval',
         readAs: 'The output is at most the ceiling of minus the base-two logarithm of the final ' +
