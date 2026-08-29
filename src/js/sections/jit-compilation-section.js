@@ -52,8 +52,8 @@
         'stateDiagram-v2',
         '[*] --> Interpreter',
         'Interpreter --> Baseline: entry counter crosses',
-        'Interpreter --> Baseline: back edge counter crosses (OSR)',
-        'Baseline --> Optimising: hot, and the profile is monomorphic',
+        'Interpreter --> Baseline: back edge counter<br/>crosses (OSR)',
+        'Baseline --> Optimising: hot, and the profile is<br/>monomorphic',
         'Optimising --> Interpreter: a guard fails',
         'Interpreter --> Baseline: hot again',
         'Optimising --> [*]'

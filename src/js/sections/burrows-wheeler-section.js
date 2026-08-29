@@ -58,7 +58,7 @@
         definition: [
           'flowchart LR',
           '    L["last column<br/>i p s s m $ p i s s i i"] -->|"C[c] + rank(c, row)"| F["first column<br/>$ i i i i m p p s s s s"]',
-          '    F -->|"row of the previous character"| L'
+          '    F -->|"row of the previous<br/>character"| L'
         ].join('\n')
       },
       insight: 'The rotation matrix is a definition, not an implementation — building it is O(n²) ' +

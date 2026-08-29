@@ -173,6 +173,23 @@ test('mermaid: every concept diagram parses', async function () {
   assert.ok(seen > 0, 'no concept diagram was found to check - has the field been renamed?');
 });
 
+/* The renderer's own configuration, because one field in it is load-bearing and
+   invisible. mermaid clips a label wider than `wrappingWidth` rather than
+   wrapping it — the labels are styled `white-space: nowrap` — so at its default
+   of 200px, 908 label lines in this curriculum rendered cut off mid-word. The
+   value here was measured against every label in every diagram; the check is
+   that it is still set and still generous, since the failure it prevents is
+   silent and looks like a diagram nobody proofread. */
+test('mermaid: the renderer caps label width well above the widest label', function () {
+  const renderer = require('../../src/js/core/mermaid-renderer.js');
+  const config = renderer.createRendererConfig({ fontFamily: 'sans-serif' });
+
+  assert.strictEqual(config.flowchart.htmlLabels, true);
+  assert.ok(config.flowchart.wrappingWidth >= 700,
+    'wrappingWidth is ' + config.flowchart.wrappingWidth +
+    '; the widest label measured 678px and anything narrower clips it');
+});
+
 /* A parser that accepts everything would make the test above pass for the wrong
    reason, so both shapes that shipped broken are checked to still be rejected. */
 test('mermaid: the parser still rejects what shipped broken', async function () {

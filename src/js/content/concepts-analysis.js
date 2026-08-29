@@ -20,7 +20,7 @@
             'flowchart LR',
             '    C["claim: f is O(g)"] --> N["name two numbers:<br/>a multiplier c<br/>a size n₀"]',
             '    N --> T{"is f(n) ≤ c·g(n)<br/>for every n from n₀ up?"}',
-            '    T -->|"yes, and it never stops being true"| P["the claim is proved"]',
+            '    T -->|"yes, and it never stops<br/>being true"| P["the claim is proved"]',
             '    T -->|"it fails at even one n"| F["this pair is not a witness<br/>(another pair still might be)"]'
           ].join('\n'),
           caption: 'A witness is the pair you name. The claim is the promise that some pair exists — which is why you refute it by ruling out every pair, not one.'

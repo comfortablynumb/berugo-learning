@@ -39,9 +39,9 @@
       definition: [
         'graph TD',
         'A["allocation site"] --> E{"does the value escape the frame?"}',
-        'E -->|"no, and only fields are read"| S["scalar replacement — registers"]',
-        'E -->|"no, but it is used as an object"| K["stack allocation — the frame"]',
-        'E -->|"returned, captured or stored"| H["the heap — the collector\'s problem"]',
+        'E -->|"no, and only fields are<br/>read"| S["scalar replacement — registers"]',
+        'E -->|"no, but it is used as an<br/>object"| K["stack allocation — the frame"]',
+        'E -->|"returned, captured or<br/>stored"| H["the heap — the collector\'s problem"]',
         'H --> G["a header, a mark, a copy, a barrier"]'
       ].join('\n')
     };

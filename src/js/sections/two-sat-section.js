@@ -40,7 +40,7 @@
       definition: [
         'flowchart LR',
         '    NA["¬a"] -->|"clause (a ∨ b)"| B["b"]',
-        '    NB["¬b"] -->|"the contrapositive of the same clause"| A["a"]',
+        '    NB["¬b"] -->|"the contrapositive of<br/>the same clause"| A["a"]',
         '    A --> S["if a and ¬a land in one component,<br/>the formula is unsatisfiable"]',
         '    B --> S'
       ].join('\n')

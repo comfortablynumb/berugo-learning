@@ -41,10 +41,10 @@
         definition: [
           'stateDiagram-v2',
           '    [*] --> HasRoom',
-          '    HasRoom --> HasRoom: push (cost 1, bank +charge−1)',
+          '    HasRoom --> HasRoom: push (cost 1, bank<br/>+charge−1)',
           '    HasRoom --> Full: size = capacity',
           '    Full --> Copying: push triggers grow',
-          '    Copying --> HasRoom: copy size elements (cost size, spend bank)',
+          '    Copying --> HasRoom: copy size elements<br/>(cost size, spend<br/>bank)',
           '    note right of Copying: Φ = 2·size − capacity drops to pay for the copy'
         ].join('\n')
       },

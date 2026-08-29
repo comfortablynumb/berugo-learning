@@ -47,7 +47,7 @@
           '    A -->|"a is evicted"| B["T2[9] holds b"]',
           '    B -->|"b is evicted"| C["T1[7] holds c"]',
           '    C -->|"c is evicted"| D["T2[9] again"]',
-          '    D -.->|"cycle: rebuild with new seeds"| NEW'
+          '    D -.->|"cycle: rebuild with new<br/>seeds"| NEW'
         ].join('\n')
       },
       insight: 'Robin Hood does not lower the mean probe count — the load factor fixes that, and no ' +

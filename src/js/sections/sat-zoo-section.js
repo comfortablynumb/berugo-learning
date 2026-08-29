@@ -53,7 +53,7 @@
         'to them, and they are the ones you meet at work.',
       definition: [
         'flowchart LR',
-        '    NP["every problem in NP"] -->|"Cook–Levin: encode the computation"| SAT["SAT"]',
+        '    NP["every problem in NP"] -->|"Cook–Levin: encode<br/>the computation"| SAT["SAT"]',
         '    SAT -->|"chain wide clauses"| S3["3-SAT"]',
         '    S3 -->|"triangle per clause"| IS["independent set"]',
         '    IS -->|"complement the graph"| CL["clique"]',

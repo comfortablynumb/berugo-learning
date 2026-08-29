@@ -48,7 +48,7 @@
         'PR --> T2["printed text"]',
         'T2 --> P2["parse again"]',
         'P2 --> A2["tree B"]',
-        'A1 -.->|"must be equal ignoring spans"| A2',
+        'A1 -.->|"must be equal ignoring<br/>spans"| A2',
         'T1 -.->|"need NOT be equal"| T2'
       ].join('\n')
     };

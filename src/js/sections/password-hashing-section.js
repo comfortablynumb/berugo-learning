@@ -42,7 +42,7 @@
         '    V --> C{"constant-time compare"}',
         '    C -->|no| X["reject"]',
         '    C -->|yes| A["accept"]',
-        '    A -. "parameters below current policy?<br/>the password is in hand RIGHT NOW" .-> D'
+        '    A -. "parameters below<br/>current policy?<br/>the password is in<br/>hand RIGHT NOW" .-> D'
       ].join('\n')
     };
   }

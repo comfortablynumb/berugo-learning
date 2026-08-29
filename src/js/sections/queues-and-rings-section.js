@@ -42,9 +42,9 @@
           '    [*] --> Empty',
           '    Empty --> Partial: push',
           '    Partial --> Partial: push / shift',
-          '    Partial --> Full: push fills the last usable slot',
+          '    Partial --> Full: push fills the last<br/>usable slot',
           '    Full --> Partial: shift',
-          '    Full --> Full: push (rejected, or overwrites the oldest)',
+          '    Full --> Full: push (rejected, or<br/>overwrites the oldest)',
           '    Partial --> Empty: shift drains the last item'
         ].join('\n')
       },

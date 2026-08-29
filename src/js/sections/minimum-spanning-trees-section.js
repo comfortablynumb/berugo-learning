@@ -53,7 +53,7 @@
         '    subgraph T["the other side"]',
         '      C["c"] --- D["d"]',
         '    end',
-        '    B ---|"4 — lightest crossing, so it is safe"| C',
+        '    B ---|"4 — lightest crossing,<br/>so it is safe"| C',
         '    A ---|"9 — also crosses, and is not"| D'
       ].join('\n')
     };

@@ -48,7 +48,7 @@
           '    I32 --> N',
           '    U32 --> N',
           '    N -->|"BigInt(x)"| B["BigInt (arbitrary precision)"]',
-          '    B -->|"Number(b) — may lose precision"| N',
+          '    B -->|"Number(b) — may<br/>lose precision"| N',
           '    N -->|"exact while |x| < 2^53"| SAFE["safe integers"]',
           '    N -->|"|x| >= 2^53"| GAP["gap >= 2 — integers skip"]'
         ].join('\n')

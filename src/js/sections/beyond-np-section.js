@@ -78,7 +78,7 @@
         '    PH --> PS',
         '    PS --> EXP',
         '    PS -.- SP',
-        '    P -. "strict, by the time hierarchy theorem" .-> EXP'
+        '    P -. "strict, by the time<br/>hierarchy theorem" .-> EXP'
       ].join('\n')
     };
   }

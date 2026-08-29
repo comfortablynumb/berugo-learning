@@ -43,7 +43,7 @@
         'C["container — BLACK, already scanned"] -->|"2. the program stores this"| V',
         'H["holder — still white or grey"] -.->|"3. the program drops this"| V',
         'V["value — WHITE, never reached"]',
-        'M["the marker"] -->|"1. finished with the container"| C'
+        'M["the marker"] -->|"1. finished with the<br/>container"| C'
       ].join('\n')
     };
   }

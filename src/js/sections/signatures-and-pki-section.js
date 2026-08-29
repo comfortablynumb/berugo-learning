@@ -43,10 +43,10 @@
         '    C1["Issuing CA<br/>CA:TRUE, certSign"] --> C2',
         '    C2["leaf — shop.example.com<br/>CA:FALSE"] --> H["the connection"]',
         '    R -. "check: signature verifies" .-> C1',
-        '    R -. "check: CA:TRUE and certSign" .-> C1',
+        '    R -. "check: CA:TRUE and<br/>certSign" .-> C1',
         '    C1 -. "check: signature verifies" .-> C2',
-        '    C1 -. "check: validity window contains now" .-> C2',
-        '    C2 -. "check: a name covers the host" .-> H'
+        '    C1 -. "check: validity window<br/>contains now" .-> C2',
+        '    C2 -. "check: a name covers<br/>the host" .-> H'
       ].join('\n')
     };
   }

@@ -47,7 +47,7 @@
           '    T["tick"] --> W0["wheel 0: 256 slots<br/>ticks 0…255"]',
           '    W0 -->|"wraps every 256 ticks"| W1["wheel 1: 256 slots<br/>ticks 256…65 535"]',
           '    W1 -->|"wraps every 65 536"| W2["wheel 2<br/>and so on"]',
-          '    W1 -.->|"cascade: refile into wheel 0"| W0',
+          '    W1 -.->|"cascade: refile into<br/>wheel 0"| W0',
           '    W2 -.->|"cascade"| W1'
         ].join('\n')
       },

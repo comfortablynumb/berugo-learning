@@ -39,8 +39,8 @@
       definition: [
         'graph LR',
         '    TM[Turing machine] -->|constant factor| RAM',
-        '    RAM -->|"polynomial (logarithmic cost model)"| TM',
-        '    TM -->|"Gödel numbering, EXPONENTIAL"| CM[2-counter machine]',
+        '    RAM -->|"polynomial<br/>(logarithmic cost<br/>model)"| TM',
+        '    TM -->|"Gödel numbering,<br/>EXPONENTIAL"| CM[2-counter machine]',
         '    CM -->|direct| TM',
         '    TM -->|"Cook 2004, polynomial"| CA[Rule 110]',
         '    CA -->|direct| TM',

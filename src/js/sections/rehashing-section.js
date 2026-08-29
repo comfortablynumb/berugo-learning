@@ -54,7 +54,7 @@
           '        writes go to new',
           '        memory is doubled',
           '    end note',
-          '    Migrating --> Stable: cursor passed the last bucket',
+          '    Migrating --> Stable: cursor passed the last<br/>bucket',
           '    Stable --> [*]'
         ].join('\n')
       },

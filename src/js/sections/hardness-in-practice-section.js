@@ -60,7 +60,7 @@
         'flowchart LR',
         '    A["ratio ≪ 4.27<br/>under-constrained<br/>many solutions"] -->|"greedy descent finds one"| A2["cheap · YES"]',
         '    B["ratio ≈ 4.27<br/>few solutions,<br/>no early contradiction"] -->|"search must go deep"| B2["expensive · either"]',
-        '    C["ratio ≫ 4.27<br/>over-constrained<br/>contradictions everywhere"] -->|"propagation finds one fast"| C2["cheap · NO"]',
+        '    C["ratio ≫ 4.27<br/>over-constrained<br/>contradictions everywhere"] -->|"propagation finds one<br/>fast"| C2["cheap · NO"]',
         '    A --- B --- C'
       ].join('\n')
     };

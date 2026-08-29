@@ -38,6 +38,28 @@
     labelTextColor: '--text-primary'
   };
 
+  /* mermaid caps a node's width at `wrappingWidth` and then styles the label
+     `white-space: nowrap`, so a label wider than the cap is not wrapped - it is
+     clipped, silently, mid-word. At mermaid's default of 200px that was
+     happening to 908 label lines across this curriculum: "what do you know
+     about the input?" rendered as "what do you know about the".
+
+     720 is measured rather than guessed. Every label line in every diagram here
+     was rendered at the 16px mermaid gives them and the widest came to 678px,
+     in the simply-typed lambda calculus. This clears it with room to spare. */
+  const WRAPPING_WIDTH = 720;
+
+  function createRendererConfig(themeVariables) {
+    return {
+      startOnLoad: false,
+      securityLevel: 'strict',
+      theme: 'base',
+      themeVariables: themeVariables,
+      flowchart: { curve: 'basis', htmlLabels: true, wrappingWidth: WRAPPING_WIDTH },
+      sequence: { useMaxWidth: true, wrap: true }
+    };
+  }
+
   function createMermaidRenderer(options) {
     const settings = options || {};
     const lazy = settings.lazyLib;
@@ -55,14 +77,7 @@
     }
 
     function configure(mermaid) {
-      mermaid.initialize({
-        startOnLoad: false,
-        securityLevel: 'strict',
-        theme: 'base',
-        themeVariables: readVariables(),
-        flowchart: { curve: 'basis', htmlLabels: true },
-        sequence: { useMaxWidth: true }
-      });
+      mermaid.initialize(createRendererConfig(readVariables()));
       return mermaid;
     }
 
@@ -103,5 +118,9 @@
     return { render: render, refreshAll: refreshAll, trackedCount: function () { return hosts.size; } };
   }
 
-  return { createMermaidRenderer: createMermaidRenderer };
+  return {
+    createMermaidRenderer: createMermaidRenderer,
+    createRendererConfig: createRendererConfig,
+    wrappingWidth: WRAPPING_WIDTH
+  };
 }));

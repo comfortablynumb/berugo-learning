@@ -12,7 +12,7 @@
           definition: [
             'flowchart LR',
             '    P["the page<br/>DOM · storage · network"] -->|"source and input"| W["Web Worker<br/>your code runs here"]',
-            '    W -->|"results and operation counts"| P',
+            '    W -->|"results and operation<br/>counts"| P',
             '    W --> N["what it cannot reach from inside:<br/>the DOM, storage, the network"]'
           ].join('\n'),
           caption: 'The only channel is messages. Code that hangs, loops forever or throws cannot take the page down with it, which is what makes running a stranger\'s code safe.'

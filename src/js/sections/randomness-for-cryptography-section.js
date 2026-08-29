@@ -40,8 +40,8 @@
         '    P --> S["seed"]',
         '    S --> G["DRBG — a keyed generator"]',
         '    G --> O["getrandom / crypto.getRandomValues"]',
-        '    G -. "reseed, so a state compromise expires" .-> P',
-        '    B["boot, VM clone, container start"] -. "the pool may be EMPTY here" .-> P'
+        '    G -. "reseed, so a state<br/>compromise expires" .-> P',
+        '    B["boot, VM clone, container start"] -. "the pool may be EMPTY<br/>here" .-> P'
       ].join('\n')
     };
   }

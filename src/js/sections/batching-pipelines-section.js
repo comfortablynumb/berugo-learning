@@ -41,7 +41,7 @@
         definition: [
           'flowchart LR',
           '    S["source"] --> B1["batch buffer<br/>size N"] --> T1["stage 1"] --> B2["batch buffer"] --> T2["stage 2"] --> O["output"]',
-          '    B1 -.->|"N large: fewer overheads,<br/>more memory, later first result"| T1',
+          '    B1 -.->|"N large: fewer<br/>overheads,<br/>more memory, later<br/>first result"| T1',
           '    B1 -.->|"N = 1: instant first result,<br/>overhead on every item"| T1'
         ].join('\n')
       },

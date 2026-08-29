@@ -36,9 +36,9 @@
       definition: [
         'flowchart LR',
         '    A[characters] --> B[lexer]',
-        '    B -->|IDENTIFIER or TYPE_NAME| C[parser]',
+        '    B -->|"IDENTIFIER or<br/>TYPE_NAME"| C[parser]',
         '    C --> D[symbol table]',
-        '    D -.->|these spellings are type names now| B',
+        '    D -.->|"these spellings are type<br/>names now"| B',
         '    C --> E[parse tree]'
       ].join('\n')
     };

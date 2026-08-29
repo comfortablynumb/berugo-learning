@@ -48,7 +48,7 @@
         '    end',
         '    B ==>|"capacity 4, saturated"| C',
         '    A ==>|"capacity 3, saturated"| D',
-        '    C -.->|"backwards: does not count"| B'
+        '    C -.->|"backwards: does not<br/>count"| B'
       ].join('\n')
     };
   }

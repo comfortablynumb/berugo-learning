@@ -306,6 +306,17 @@ input[type="range"] {
   padding: 0.5rem 0;
 }
 
+/* mermaid puts every label in a `foreignObject` with `overflow: hidden`, sized
+   from its own measurement of the text. That measurement runs a few pixels
+   under what the browser finally paints, so the last character of a label is
+   quietly sliced off - "one transfer moves B records" rendered as "…B record".
+   Nothing about it looks like a bug; it reads as a typo. Letting the label
+   paint outside its box costs a couple of pixels of overhang and never a
+   letter. */
+.mermaid-host foreignObject {
+  overflow: visible;
+}
+
 /* Centred, because mermaid caps the svg at its own natural width and a
    top-down diagram is narrow - left-aligned in a full-width column it sat in
    the corner with the rest of the row empty.

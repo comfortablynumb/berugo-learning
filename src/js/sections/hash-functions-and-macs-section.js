@@ -37,7 +37,7 @@
         '    C1 --> C2["compress<br/>block 2"]',
         '    C2 --> C3["compress<br/>block 3 + padding"]',
         '    C3 --> T["digest = the final state<br/>PUBLISHED"]',
-        '    T -. "the attacker resumes from here" .-> A["compress<br/>attacker blocks"]',
+        '    T -. "the attacker resumes<br/>from here" .-> A["compress<br/>attacker blocks"]',
         '    A --> F["a tag the verifier accepts"]'
       ].join('\n')
     };

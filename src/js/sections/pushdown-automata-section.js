@@ -39,8 +39,8 @@
         'graph LR',
         '    A["state: push<br/>stack top: A<br/>input: a"] -->|"read a, pop A, push A A"| ' +
           'B["state: push<br/>stack: A A<br/>one symbol deeper"]',
-        '    B -->|"read b, pop A, push nothing"| C["state: pop<br/>stack: A<br/>one symbol shallower"]',
-        '    C -->|"read nothing, pop Z, push nothing"| D["stack empty<br/>accept"]'
+        '    B -->|"read b, pop A, push<br/>nothing"| C["state: pop<br/>stack: A<br/>one symbol shallower"]',
+        '    C -->|"read nothing, pop Z,<br/>push nothing"| D["stack empty<br/>accept"]'
       ].join('\n')
     };
   }

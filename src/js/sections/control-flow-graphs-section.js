@@ -43,7 +43,7 @@
         'E["entry"] --> H["header — tests the guard"]',
         'H -->|"true"| B["body"]',
         'B --> L["latch"]',
-        'L -->|"back edge: header dominates latch"| H',
+        'L -->|"back edge: header<br/>dominates latch"| H',
         'H -->|"false"| X["exit"]',
         'classDef loop fill:#ede9fe,stroke:#7e22ce,stroke-width:2px;',
         'class H,B,L loop;'

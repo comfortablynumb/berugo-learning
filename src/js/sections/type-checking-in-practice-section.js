@@ -54,7 +54,7 @@
         'graph TD',
         'S["a node to type"] --> Q{"is there an expected type?"}',
         'Q -->|"no"| I["INFER — derive a type from the term"]',
-        'Q -->|"yes, from an annotation or a parameter"| C["CHECK — push the type inward"]',
+        'Q -->|"yes, from an annotation<br/>or a parameter"| C["CHECK — push the type inward"]',
         'I --> U["unify what the sub-terms produced"]',
         'C --> U',
         'U --> OK["record the type in the table"]',

@@ -44,7 +44,7 @@
         '    k --> c1 : dot before T',
         '    c1 --> c2 : dot before T again',
         '    c2 --> c3 : dot before F',
-        '    c3 --> [*] : nothing new — the set is closed'
+        '    c3 --> [*] : nothing new — the set<br/>is closed'
       ].join('\n')
     };
   }

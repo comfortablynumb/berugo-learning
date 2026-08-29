@@ -40,9 +40,9 @@
       definition: [
         'graph LR',
         'R["root"] -->|"strong — always followed"| A["object A: lives"]',
-        'R -->|"soft — followed unless memory is tight"| B["object B: lives, usually"]',
+        'R -->|"soft — followed unless<br/>memory is tight"| B["object B: lives, usually"]',
         'R -->|"weak — never followed"| C["object C: dies, slot cleared"]',
-        'R -->|"phantom — never followed, no access"| D["object D: dies, you are told"]'
+        'R -->|"phantom — never<br/>followed, no access"| D["object D: dies, you are told"]'
       ].join('\n')
     };
   }

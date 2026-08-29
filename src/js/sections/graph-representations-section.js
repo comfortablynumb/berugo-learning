@@ -37,10 +37,10 @@
         'flowchart TD',
         '    A["A"] -->|tree| B["B"]',
         '    B -->|tree| C["C"]',
-        '    C -->|"back — C reaches an ancestor, so there is a cycle"| A',
-        '    A -->|"forward — a shortcut into A\'s own subtree"| C',
+        '    C -->|"back — C reaches an<br/>ancestor, so there is a<br/>cycle"| A',
+        '    A -->|"forward — a shortcut<br/>into A\'s own subtree"| C',
         '    A -->|tree| D["D"]',
-        '    D -->|"cross — B is finished and elsewhere"| B'
+        '    D -->|"cross — B is finished<br/>and elsewhere"| B'
       ].join('\n')
     };
   }

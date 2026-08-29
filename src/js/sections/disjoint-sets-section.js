@@ -60,7 +60,7 @@
           '        A2 --> C2(("c"))',
           '        A2 --> D2(("d"))',
           '    end',
-          '    before -->|"3 pointer writes, none recorded by any union"| after'
+          '    before -->|"3 pointer writes, none<br/>recorded by any union"| after'
         ].join('\n')
       },
       insight: 'Path compression and rollback are incompatible — offline dynamic connectivity needs ' +

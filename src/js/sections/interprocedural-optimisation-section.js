@@ -45,7 +45,7 @@
         'graph LR',
         'A["let r = inc(5)"] --> W["the call: a wall"]',
         'W --> B["fn inc(n) { return n + 1; }"]',
-        'A -.->|"cannot fold: n is unknown here"| X["nothing"]',
+        'A -.->|"cannot fold: n is<br/>unknown here"| X["nothing"]',
         'I["after inlining"] --> C["let r = 5 + 1"]',
         'C --> F["SCCP folds it to 6"]',
         'F --> D["dead-code removes the rest"]'

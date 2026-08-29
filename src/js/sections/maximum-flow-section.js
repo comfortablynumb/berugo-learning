@@ -38,7 +38,7 @@
       definition: [
         'flowchart LR',
         '    U["u"] -->|"capacity 7, flow 4<br/>residual forward 3"| V["v"]',
-        '    V -.->|"residual backward 4<br/>(does not exist in the input)"| U',
+        '    V -.->|"residual backward 4<br/>(does not exist in the<br/>input)"| U',
         '    V --> W["a later path may take the backward arc<br/>and reroute the earlier 4 units"]'
       ].join('\n')
     };

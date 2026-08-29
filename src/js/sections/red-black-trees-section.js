@@ -54,7 +54,7 @@
           '        B(("b — black")) --> A(("a — red"))',
           '        B --> C(("c — red"))',
           '    end',
-          '    four -->|"the black node is the middle key"| rb'
+          '    four -->|"the black node is the<br/>middle key"| rb'
         ].join('\n')
       },
       insight: 'Red-black wins in libraries because the deletion cost is bounded by O(1) rotations, ' +

@@ -42,9 +42,9 @@
         + 'stops holding the moment the program does, which is 31.5.',
       definition: [
         'graph LR',
-        'W["white — not reached"] -->|"a root, or a reference from a grey object"| G',
-        'G["grey — on the mark stack"] -->|"its references have been followed"| B["black — done"]',
-        'W -->|"still white when the mark ends"| S["swept"]',
+        'W["white — not reached"] -->|"a root, or a reference<br/>from a grey object"| G',
+        'G["grey — on the mark stack"] -->|"its references have<br/>been followed"| B["black — done"]',
+        'W -->|"still white when the<br/>mark ends"| S["swept"]',
         'B -->|"never"| W'
       ].join('\n')
     };

@@ -52,7 +52,7 @@
         '    V -->|"5"| W["w"]',
         '    U -->|"3"| X["x"]',
         '    X -->|"4"| W',
-        '    U -.->|"shortcut 9, only if no witness"| W'
+        '    U -.->|"shortcut 9, only if no<br/>witness"| W'
       ].join('\n')
     };
   }

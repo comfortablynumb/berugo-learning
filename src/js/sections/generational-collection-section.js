@@ -40,8 +40,8 @@
       definition: [
         'graph LR',
         'O["old object"] -->|"store: old.field = young"| Y["young object"]',
-        'O -.->|"the barrier notices old to young"| R["remembered set / dirty card"]',
-        'R -->|"handed to the minor collection as an extra root"| Y',
+        'O -.->|"the barrier notices old<br/>to young"| R["remembered set / dirty card"]',
+        'R -->|"handed to the minor<br/>collection as an extra<br/>root"| Y',
         'N["nursery trace"] --> Y',
         'N -.->|"never scanned"| O'
       ].join('\n')

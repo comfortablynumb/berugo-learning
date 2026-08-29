@@ -43,7 +43,7 @@
         '    B --> C["E′ → + T E′ | ε"]',
         '    A --> D["tree: left spine"]',
         '    C --> E["tree: right spine"]',
-        '    D -.->|associativity must be re-imposed| E'
+        '    D -.->|"associativity must be<br/>re-imposed"| E'
       ].join('\n')
     };
   }

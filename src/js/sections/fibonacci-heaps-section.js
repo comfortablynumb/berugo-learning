@@ -49,9 +49,9 @@
           '    R["root list"] --- A["a (degree 3)"]',
           '    A --> B["b — marked:<br/>already lost one child"]',
           '    B --> C["c — key decreased below b"]',
-          '    C -->|"cut c, move to the root list"| R',
-          '    B -->|"b was marked, so cut b too"| R',
-          '    A -->|"and the cascade continues at a"| R'
+          '    C -->|"cut c, move to the root<br/>list"| R',
+          '    B -->|"b was marked, so cut b<br/>too"| R',
+          '    A -->|"and the cascade<br/>continues at a"| R'
         ].join('\n')
       },
       insight: 'Fibonacci heaps are the canonical example of an asymptotic win that loses in ' +

@@ -44,8 +44,8 @@
         '    NP --> PSPACE',
         '    PSPACE --> EXPTIME',
         '    EXPTIME --> EXPSPACE',
-        '    P -.->|"PROVED strict (time hierarchy)"| EXPTIME',
-        '    L -.->|"PROVED strict (space hierarchy)"| PSPACE'
+        '    P -.->|"PROVED strict (time<br/>hierarchy)"| EXPTIME',
+        '    L -.->|"PROVED strict (space<br/>hierarchy)"| PSPACE'
       ].join('\n')
     };
   }

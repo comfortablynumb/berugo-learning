@@ -70,10 +70,10 @@
       definition: [
         'flowchart TD',
         '    R1["at most one shift per nurse per day"] -->|"exact"| C1["at-most-one over 3 literals"]',
-        '    R2["each shift needs its headcount"] -->|"assumes demand is hard, not a target"| C2["cardinality, at-least-k and at-most-k"]',
+        '    R2["each shift needs its headcount"] -->|"assumes demand is<br/>hard, not a target"| C2["cardinality, at-least-k and at-most-k"]',
         '    R3["no day shift after a night shift"] -->|"exact"| C3["one binary clause per nurse per day"]',
         '    R4["at most k shifts per nurse"] -->|"exact"| C4["sequential counter"]',
-        '    R5["a rest day in every window"] -->|"assumes worked shifts = worked days"| C5["at-most-(w−1) per window"]',
+        '    R5["a rest day in every window"] -->|"assumes worked shifts<br/>= worked days"| C5["at-most-(w−1) per window"]',
         '    R6["shifts should be shared fairly"] -->|"NO CLAUSE CAN SAY THIS"| X["needs MaxSAT or ILP"]',
         '    C1 --> F["one CNF"]',
         '    C2 --> F',
@@ -82,7 +82,7 @@
         '    C5 --> F',
         '    F --> S["solver"] --> D["decode to a schedule"]',
         '    D --> V["validate against R1..R5 directly"]',
-        '    V -->|"any failure is an ENCODING bug"| C1'
+        '    V -->|"any failure is an<br/>ENCODING bug"| C1'
       ].join('\n')
     };
   }

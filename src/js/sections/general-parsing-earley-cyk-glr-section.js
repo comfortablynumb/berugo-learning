@@ -42,8 +42,8 @@
         '    A["column 2, item: E → E + • E, origin 0"] -->|predict| B["E → • E + E, origin 2"]',
         '    A -->|predict| C["E → • a, origin 2"]',
         '    C -->|scan a| D["column 3: E → a •, origin 2"]',
-        '    D -->|complete, return to origin 2| E["column 3: E → E + E •, origin 0"]',
-        '    E -->|complete, return to origin 0| F["the start symbol spans the whole input"]'
+        '    D -->|"complete, return to<br/>origin 2"| E["column 3: E → E + E •, origin 0"]',
+        '    E -->|"complete, return to<br/>origin 0"| F["the start symbol spans the whole input"]'
       ].join('\n')
     };
   }

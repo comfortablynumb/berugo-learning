@@ -4166,3 +4166,41 @@ not on all of them, and choosing which is the work.
   with the terms. It would have looked like full coverage and taught nobody.
   Eighteen diagrams that replace a paragraph each are worth more than 305 that
   restate a heading.
+
+## Diagram labels were being cut off, in three different ways (complete)
+
+Reported from the browser: nodes in "The sorting contract" showed text that
+stopped mid-phrase. Three separate causes, all silent, all of which read as a
+typo rather than as a rendering fault.
+
+- **Node labels were capped at mermaid's default `wrappingWidth` of 200px**,
+  and mermaid styles labels `white-space: nowrap` — so a wider label is not
+  wrapped, it is clipped. "what do you know about the input?" rendered as "what
+  do you know about the". Measuring every label line in every diagram at the
+  16px mermaid gives them, **908 lines were over that cap**. The widest is 678px
+  (the simply-typed lambda calculus), so `wrappingWidth` is now 720.
+- **Edge labels do not honour `wrappingWidth` at all.** Their background div is
+  hard-coded `max-width: 200px`, so raising the flowchart setting fixed the
+  nodes and left 15 edge labels clipped. Those are wrapped in the content with
+  an explicit `<br/>`, which is the only thing that breaks them — including
+  labels that already had a `<br/>` but whose *second* line was still too long.
+  Three label syntaxes carry edge text and the first fix only handled one:
+  `-->|label|`, `-. "label" .->`, and a state diagram's `A --> B: label`.
+- **Every remaining label lost its last character or two.** mermaid sizes the
+  `foreignObject` from its own measurement, that measurement runs a few pixels
+  under what the browser paints, and the `foreignObject` clips. "one transfer
+  moves B records" rendered as "one transfer moves B record". The label now
+  paints outside its measured box.
+
+### Two things worth keeping
+
+- **A screenshot found what four hundred measurements had explained away.** 95
+  labels overflowed by 4 to 17 pixels, a spread that looked exactly like a
+  padding artifact in `scrollWidth`, and the labels' `textContent` was complete
+  — `textContent` says nothing about what is painted. One zoomed screenshot
+  showed the missing "s".
+- **The measurement has to happen where the rendering happens.** mermaid cannot
+  be measured in jsdom, so the widths behind `wrappingWidth = 720` and behind
+  the wrapping script were taken in a real browser, with the app's own font at
+  the size mermaid actually uses. A guess would have been wrong in both
+  directions.

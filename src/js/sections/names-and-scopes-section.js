@@ -48,8 +48,8 @@
         'G["global scope — a, f, b, c"] --> F["fn f — parameter a"]',
         'F --> FB["body of f — b"]',
         'G --> L["a lambda inside f"]',
-        'FB -.->|"a resolves here, not in global"| F',
-        'L -.->|"capture: uses a binding it does not own"| FB',
+        'FB -.->|"a resolves here, not in<br/>global"| F',
+        'L -.->|"capture: uses a binding<br/>it does not own"| FB',
         'G --> BI["builtins — print, len, some, none"]'
       ].join('\n')
     };

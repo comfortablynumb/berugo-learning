@@ -56,8 +56,8 @@
         '    T2 --> T2: seen again',
         '    T1 --> B1: evicted (ghost, key only)',
         '    T2 --> B2: evicted (ghost, key only)',
-        '    B1 --> T2: hit in a ghost — p grows, recency was starved',
-        '    B2 --> T2: hit in a ghost — p shrinks, frequency was starved',
+        '    B1 --> T2: hit in a ghost — p<br/>grows, recency was<br/>starved',
+        '    B2 --> T2: hit in a ghost — p<br/>shrinks, frequency was<br/>starved',
         '    B1 --> [*]: forgotten',
         '    B2 --> [*]: forgotten'
       ].join('\n')

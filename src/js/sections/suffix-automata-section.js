@@ -34,7 +34,7 @@
       definition: [
         'flowchart TD',
         '    Q["state q reached by the new character<br/>len(q) &gt; len(p) + 1<br/>it mixes two endpos classes"]',
-        '    Q -->|"copy with len = len(p) + 1"| C["clone<br/>same transitions<br/>the larger endpos set"]',
+        '    Q -->|"copy with len = len(p)<br/>+ 1"| C["clone<br/>same transitions<br/>the larger endpos set"]',
         '    Q -->|"keep, endpos shrinks"| O["original q<br/>len unchanged<br/>the smaller endpos set"]',
         '    O -.->|"suffix link"| C',
         '    N["the new state"] -.->|"suffix link"| C'
