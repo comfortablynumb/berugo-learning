@@ -8,6 +8,17 @@
     'skip-lists': [
       {
         term: 'Probabilistic levels',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["insert a node at level 1"] --> B{"flip a coin"}',
+            '    B -->|heads| C["promote it one level<br/>and flip again"]',
+            '    C --> B',
+            '    B -->|tails| D["stop"]',
+            '    D --> E["tall towers are rare,<br/>short ones are common —<br/>the shape of a balanced tree,<br/>with no balancing code"]'
+          ].join('\n'),
+          caption: 'Nothing here rebalances and nothing rotates. The distribution of tower heights does the work that an AVL tree does with rotations.'
+        },
         plain: 'Each node is promoted to the next level with probability p, so tower heights are geometric.',
         formal: 'P(height = k) = p^(k−1)(1 − p)',
         readAs: 'The chance a node gets exactly k levels: it has to win the coin k−1 times running, at ' +
@@ -132,6 +143,16 @@
       },
       {
         term: 'Union by rank',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A{"which tree is taller?"} --> B["attach the shorter one<br/>under the taller one"]',
+            '    B --> C["the height does not change"]',
+            '    A -->|equal heights| D["attach either, and the<br/>height grows by exactly one"]',
+            '    D --> E["so reaching height h needs<br/>at least 2^h elements"]'
+          ].join('\n'),
+          caption: 'Attaching the taller tree under the shorter one is the same union and grows the height every time. The rule costs one integer per root and bounds the height at log n on its own.'
+        },
         plain: 'Attach the shorter tree under the taller one, so the height only grows when two equal trees meet.',
         formal: 'rank is an upper bound on height; it increments only on a tie',
         detail: 'Left alone, unions can build a chain: attach each new element under the last and the ' +
@@ -144,6 +165,16 @@
       },
       {
         term: 'Path compression',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["find walks a chain:<br/>a → b → c → root"] --> B["it now knows the root"]',
+            '    B --> C["so point a, b and c<br/>straight at the root"]',
+            '    C --> D["the next find on any of them<br/>is a single step"]',
+            '    D --> E["the work of walking is reused<br/>rather than repeated"]'
+          ].join('\n'),
+          caption: 'The walk had to happen anyway. Rewriting the pointers on the way back costs nothing extra and means the same walk never happens twice.'
+        },
         plain: 'A find rewrites every node on the path to point straight at the root.',
         formal: 'a second pass sets parent[node] = root',
         detail: 'The insight is that a find already walked the path, so it knows the root and can ' +

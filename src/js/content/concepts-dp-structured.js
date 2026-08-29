@@ -127,6 +127,15 @@
     'tree-dp': [
       {
         term: 'Children before parents',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a parent\'s answer depends on<br/>its children\'s answers"] --> B["so children must be settled first"]',
+            '    B --> C["which is exactly post-order"]',
+            '    C --> D["the traversal order is not a choice —<br/>the dependencies fix it"]'
+          ].join('\n'),
+          caption: 'On a tree the subproblem graph is the tree itself, so the evaluation order is decided for you. That is why tree DP has no ordering step to get wrong.'
+        },
         plain: 'A rooted tree DP is a post-order traversal, and that settles the evaluation order.',
         formal: 'any reverse of a pre-order is a valid order; a node reads only its children',
         detail: 'The evaluation-order question that dominates interval DP is trivial on a tree: a node ' +
@@ -140,6 +149,16 @@
       },
       {
         term: 'Every traversal is iterative',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a tree of 20 000 nodes"] --> B{"is it bushy or is it a path?"}',
+            '    B -->|bushy| C["recursion depth about log n"]',
+            '    B -->|a path| D["recursion depth 20 000"]',
+            '    D --> E["and the engine\'s stack<br/>gives out long before that"]'
+          ].join('\n'),
+          caption: 'Trees in test data are bushy and trees in production are sometimes a path. The explicit stack is not defensive programming here, it is the only version that works.'
+        },
         plain: 'A path of 20 000 nodes is a recursion 20 000 deep.',
         formal: 'replace the call stack with an explicit stack; depth is Θ(n) in the worst case',
         readAs: 'A path-shaped tree is n deep, and n recursive calls will overflow the engine stack. Keeping ' +

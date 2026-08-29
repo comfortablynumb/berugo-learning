@@ -8,6 +8,18 @@
     'binary-search': [
       {
         term: 'Write the invariant, and the code follows',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["invariant: the answer lies from low<br/>up to but not including high"] --> B["look at the midpoint"]',
+            '    B --> C["discard the half that cannot<br/>contain the answer"]',
+            '    C --> D{"is the range now empty?"}',
+            '    D -->|no| B',
+            '    D -->|yes| E["low is the answer"]',
+            '    E --> F["every line of the loop is forced<br/>by the invariant, not chosen"]'
+          ].join('\n'),
+          caption: 'Write the invariant first and the two branches stop being a guess: each is simply whichever update keeps the invariant true.'
+        },
         plain: 'The half-open interval [low, high) always contains the answer.',
         formal: 'low <= answer <= high is maintained by every branch; the loop ends when low = high',
         readAs: 'The answer is always somewhere between the two bounds, and every iteration keeps that true ' +
@@ -36,6 +48,15 @@
       },
       {
         term: 'Lower bound and upper bound, not "find"',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["lower bound —<br/>first index whose value is ≥ the target"] --> C["their difference is how many<br/>times the target occurs"]',
+            '    B["upper bound —<br/>first index whose value is > the target"] --> C',
+            '    C --> D["a plain find answers neither of those<br/>questions once there are duplicates"]'
+          ].join('\n'),
+          caption: 'Two boundaries answer counting, insertion and range queries. A search that returns any matching index answers none of them.'
+        },
         plain: 'First index >= target, and first index > target - and their difference is the count.',
         formal: 'upperBound(x) - lowerBound(x) is the number of occurrences of x',
         readAs: 'The first position where x could go and the first position after every x, subtracted, give ' +
@@ -115,6 +136,15 @@
     'searching-the-answer': [
       {
         term: 'The array being searched is the predicate\'s output',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["candidate answers: 1 2 3 4 5 6 7 8"] --> B["run the feasibility check on each"]',
+            '    B --> C["no no no yes yes yes yes yes"]',
+            '    C --> D["that sequence is the sorted array —<br/>binary-search it for the first yes"]'
+          ].join('\n'),
+          caption: 'Nothing in the input is sorted. What is sorted is the sequence of yes/no answers the feasibility check produces, and that is what the search actually runs on.'
+        },
         plain: 'Nothing is sorted except the trues and falses the feasibility check produces.',
         formal: 'feasible: [lo, hi] -> bool, monotone false-then-true; find the first true',
         readAs: 'Binary search does not need a sorted array — it needs a yes/no test that is false for a ' +
@@ -128,6 +158,14 @@
       },
       {
         term: 'Monotonicity is the precondition, and it must be checked',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A{"does one answer being yes guarantee<br/>the next one is yes too?"} -->|yes| B["no no no yes yes yes —<br/>the search is licensed"]',
+            '    A -->|no| C["yes no yes no —<br/>binary search still returns something,<br/>confidently, and it is wrong"]'
+          ].join('\n'),
+          caption: 'Binary search does not fail loudly on a predicate that is not monotone. It returns an answer, and nothing about that answer says it is meaningless.'
+        },
         plain: 'If feasible(x) implies feasible(x+1), the search is licensed. Otherwise it is not.',
         formal: 'a monotone predicate flips exactly once across the range',
         detail: 'This is the step people skip, and skipping it does not produce an error. A binary search ' +
@@ -219,6 +257,15 @@
     'external-sorting': [
       {
         term: 'The unit of cost changes when the data leaves memory',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["in memory:<br/>count comparisons"] --> B["they are what dominates"]',
+            '    C["on disk:<br/>count passes over the data"] --> D["a single pass costs more time than<br/>millions of comparisons"]',
+            '    D --> E["so an algorithm doing more comparisons<br/>in fewer passes is the faster one"]'
+          ].join('\n'),
+          caption: 'Optimising comparisons on data that does not fit in memory means optimising the term that stopped mattering.'
+        },
         plain: 'Count passes over the data, not comparisons.',
         formal: 'Aggarwal-Vitter: (N/B) log_{M/B}(N/B) block transfers',
         readAs: 'External sorting costs block reads and writes rather than comparisons: N items in blocks of ' +
@@ -284,6 +331,15 @@
       },
       {
         term: 'The zero-one principle',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A{"does the network sort every<br/>input made only of 0s and 1s?"} -->|yes| B["then it sorts every input,<br/>of any values whatsoever"]',
+            '    A -->|no| C["a counter-example exists that is<br/>made only of 0s and 1s"]',
+            '    B --> D["so checking 2ⁿ binary inputs replaces<br/>checking n! permutations"]'
+          ].join('\n'),
+          caption: 'It turns an impossible test into a finite one: verifying a 16-wire network takes 65 536 checks instead of twenty trillion permutations.'
+        },
         plain: 'A network sorts everything if and only if it sorts every input of zeros and ones.',
         formal: 'if a comparator network sorts all 2^n binary inputs, it sorts all inputs',
         readAs: 'The zero-one principle: to verify a sorting network you only need to test it on inputs of ' +
@@ -345,6 +401,15 @@
       },
       {
         term: 'The default comparator sorts numbers as strings',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["sort a numeric array with no comparator"] --> B["every element is converted<br/>to a string first"]',
+            '    B --> C["then compared as text,<br/>so 1 comes before 10 comes before 2"]',
+            '    C --> D["no error, and the output still<br/>looks like a sorted array"]'
+          ].join('\n'),
+          caption: 'The specification really does say this. It is wrong for numbers every time, and the plausible-looking output is why it survives review.'
+        },
         plain: '`[1, 2, 10].sort()` returns `[1, 10, 2]`.',
         formal: 'the default comparator converts elements to strings and compares UTF-16 code units',
         detail: 'This is still one of the most common bugs in JavaScript, and its persistence is a lesson in ' +
@@ -356,6 +421,15 @@
       },
       {
         term: 'The comparator runs O(n log n) times',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a lowercase, a parse or a property<br/>lookup inside the comparator"] --> B["multiplied by every one of the<br/>n log n comparisons"]',
+            '    B --> C["compute the key once per element<br/>instead — n times, not n log n"]',
+            '    C --> D["then sort on the precomputed key"]'
+          ].join('\n'),
+          caption: 'The comparator is the innermost loop of the sort. Work moved out of it is divided by a log factor; work left in it is multiplied by one.'
+        },
         plain: 'Any work inside it - lowercasing, parsing, property lookup - is multiplied by the comparison count.',
         formal: 'the Schwartzian transform moves key computation from O(n log n) to O(n)',
         readAs: 'Compute each element\'s sort key once up front, sort the pairs, then throw the keys away. ' +

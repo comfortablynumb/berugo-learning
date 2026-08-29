@@ -8,6 +8,16 @@
     'minimum-spanning-trees': [
       {
         term: 'The cut property is the correctness engine for all three algorithms',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["split the vertices into<br/>any two groups"] --> B["look at the edges crossing the split"]',
+            '    B --> C["the lightest one is in<br/>some minimum spanning tree"]',
+            '    C --> D["Kruskal, Prim and Borůvka each<br/>choose a different cut"]',
+            '    D --> E["and all three are correct<br/>for this one reason"]'
+          ].join('\n'),
+          caption: 'The three algorithms are not three ideas. They are three orders of applying one theorem, which is why they always agree on total weight.'
+        },
         plain: 'Split the vertices any way you like; the lightest edge across the split is in some MST.',
         formal: 'for any cut (S, V∖S), a minimum-weight crossing edge belongs to some minimum spanning tree',
         readAs: 'Split the vertices into any two groups — V∖S is "everything not in S" — and the cheapest ' +
@@ -56,6 +66,16 @@
       },
       {
         term: 'They agree on weight, not on the tree',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["several edges share a weight"] --> B["different tie-breaks pick<br/>different edges"]',
+            '    B --> C["three algorithms, three<br/>different edge sets"]',
+            '    C --> D["and identical total weight"]',
+            '    D --> E["so a test asserting a specific<br/>edge list is testing the tie-break"]'
+          ].join('\n'),
+          caption: 'A minimum spanning tree is minimum, not unique. Tests in this area should compare weights, or the tie-break becomes the specification by accident.'
+        },
         plain: 'With duplicate weights, the three return three different edge sets of identical cost.',
         formal: 'the MST is unique if all weights are distinct; equal weights admit several optimal trees',
         detail: 'This is the difference between a test that means something and a test that fails every ' +

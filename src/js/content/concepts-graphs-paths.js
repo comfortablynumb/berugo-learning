@@ -119,6 +119,17 @@
     'shortest-paths-basics': [
       {
         term: 'Relaxation is the whole of shortest paths',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["I know a route to v costing 9"] --> B{"is dist(u) + weight(u,v)<br/>cheaper than 9?"}',
+            '    B -->|yes| C["take it — dist(v) improves"]',
+            '    B -->|no| D["keep what I had"]',
+            '    C --> E["Dijkstra, Bellman-Ford and DAG<br/>shortest paths differ only in the<br/>order they do this"]',
+            '    D --> E'
+          ].join('\n'),
+          caption: 'There is one operation in this entire area. Every algorithm is a different answer to the question of what order to apply it in, and when you may stop.'
+        },
         plain: 'If going through u is cheaper than what I have, take it.',
         formal: 'if d[u] + w(u, v) < d[v] then d[v] = d[u] + w(u, v), parent[v] = u',
         readAs: 'Relaxation, the single operation behind every shortest-path algorithm here: if going via u ' +
@@ -162,6 +173,16 @@
       },
       {
         term: 'A lazy heap trades duplicates for handles',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a shorter route to v is found"] --> B["do not decrease the key —<br/>push a second entry for v"]',
+            '    B --> C["the queue now holds stale entries"]',
+            '    C --> D["when one pops, v is already<br/>settled, so skip it"]',
+            '    D --> E["no handle map, no position tracking,<br/>and usually faster in practice"]'
+          ].join('\n'),
+          caption: 'The queue gets bigger and the code gets smaller. The position map it removes was costing a write on every swap, which is the trade that usually pays.'
+        },
         plain: 'Push a new entry instead of decreasing a key, and skip stale entries on the way out.',
         formal: 'heap holds up to m entries rather than n; a pop whose key exceeds d[v] is discarded',
         detail: 'Decrease-key needs a handle per vertex and a heap that can find and sift an arbitrary ' +

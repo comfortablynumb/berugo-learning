@@ -131,6 +131,17 @@
     backtracking: [
       {
         term: 'Choose, explore, unchoose',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["choose — make the assignment"] --> B["explore — recurse"]',
+            '    B --> C["unchoose — undo the assignment"]',
+            '    C --> D["try the next option"]',
+            '    D --> A',
+            '    C --> E["forget this line and every<br/>sibling branch sees corrupted state"]'
+          ].join('\n'),
+          caption: 'The third line is the one that gets left out, and its absence does not crash — it silently leaks one branch\'s decisions into the next.'
+        },
         plain: 'The whole paradigm is three lines, and the third is where the bugs are.',
         formal: 'for each value v of variable x: assign(x, v); if consistent then recurse; unassign(x, v)',
         detail: 'Backtracking is exhaustive search that reuses one mutable state instead of building a new ' +
@@ -144,6 +155,16 @@
       },
       {
         term: 'Minimum remaining values',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["which variable should<br/>we branch on next?"] --> B["the one with the fewest<br/>legal values left"]',
+            '    B --> C["fewest branches to try"]',
+            '    B --> D["and the soonest to hit a<br/>contradiction if there is one"]',
+            '    D --> E["fail early, fail small"]'
+          ].join('\n'),
+          caption: 'Branching on the most constrained variable finds the dead ends while the subtree beneath them is still tiny. It is the cheapest ordering heuristic there is.'
+        },
         plain: 'Branch on the variable with the fewest legal values left.',
         formal: 'select argmin over unassigned x of |domain(x)|; ties broken by degree or by index',
         readAs: '"argmin" means "the variable that minimises this". Pick whichever unassigned variable has ' +
@@ -241,6 +262,17 @@
     'branch-and-bound': [
       {
         term: 'The incumbent',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the best complete solution<br/>found so far"] --> B["every subtree\'s bound<br/>is compared against it"]',
+            '    B --> C{"can this subtree beat it?"}',
+            '    C -->|no| D["prune the whole subtree"]',
+            '    C -->|yes| E["explore it"]',
+            '    E --> A'
+          ].join('\n'),
+          caption: 'Finding a good solution early is not a nice side effect, it is the mechanism: a strong incumbent prunes more, which finds better solutions sooner.'
+        },
         plain: 'The best complete solution found so far, and the thing every bound is compared against.',
         formal: 'a lower bound on the optimum for a maximisation, updated whenever a leaf improves on it',
         detail: 'Branch and bound needs a solution before it can prune anything, so the order in which the ' +
@@ -254,6 +286,15 @@
       },
       {
         term: 'Admissibility is one-sided',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the bound is too optimistic"] --> B["you explore subtrees you<br/>did not have to — slow, still correct"]',
+            '    C["the bound is too pessimistic"] --> D["you prune a subtree that held<br/>the optimum — fast, and wrong"]',
+            '    D --> E["and nothing tells you"]'
+          ].join('\n'),
+          caption: 'The two errors are not symmetric. One costs time and the other costs the answer, which is why an admissible bound must never understate what a subtree can reach.'
+        },
         plain: 'A bound may overestimate what a subtree can reach; it may never underestimate.',
         formal: 'for maximisation, bound(s) >= max{value(t) : t is a completion of s}',
         readAs: 'The bound must be optimistic: never lower than the best any completion could actually reach. ' +

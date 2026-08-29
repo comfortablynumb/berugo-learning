@@ -8,6 +8,18 @@
     treaps: [
       {
         term: 'Two orders at once',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the same set of nodes"] --> B["a search tree by key —<br/>left smaller, right larger"]',
+            '    A --> C["a heap by a random priority —<br/>parent outranks both children"]',
+            '    B --> D["the key order fixes<br/>what is left and what is right"]',
+            '    C --> E["the random priority fixes<br/>what is above what"]',
+            '    D --> F["together they pin down exactly one shape"]',
+            '    E --> F'
+          ].join('\n'),
+          caption: 'The shape is the tree you would have got by inserting the keys in priority order — and since those are random, it is a random binary search tree, whatever order you actually inserted in.'
+        },
         plain: 'A search tree by key and a heap by a random priority, in the same nodes.',
         formal: 'key order left-to-right, priority order top-to-bottom',
         detail: 'Each node carries a key and a priority. The keys obey the search-tree invariant and ' +
@@ -33,6 +45,17 @@
       },
       {
         term: 'Split',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["one treap, and a key k"] --> B["everything below k"]',
+            '    A --> C["everything at or above k"]',
+            '    B --> D["both are still valid treaps"]',
+            '    C --> D',
+            '    D --> E["and it costs one root-to-leaf walk"]'
+          ].join('\n'),
+          caption: 'Split and merge are the primitives; insert and delete are one line each on top of them. That is why range operations are easy here and awkward in an AVL tree.'
+        },
         plain: 'Cut the treap into everything below a key and everything at or above it, in O(log n).',
         formal: 'split(t, k) → (L, R), both valid treaps',
         readAs: 'Splitting a treap at key k hands back two treaps — everything below k and everything above — ' +
@@ -113,6 +136,16 @@
     'splay-trees': [
       {
         term: 'Splaying',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["access any node"] --> B["rotate it to the root —<br/>in pairs, never one step at a time"]',
+            '    B --> C["the path it came along<br/>gets roughly halved in depth"]',
+            '    C --> D["so the next access to anything<br/>near it is cheap"]',
+            '    D --> E["no balance field is stored at all"]'
+          ].join('\n'),
+          caption: 'Rotating in pairs rather than singly is the whole difference between an amortised bound and none: single rotations move the node up without shortening the path.'
+        },
         plain: 'Every access rotates the touched node to the root, in pairs rather than one step at a time.',
         formal: 'zig; zig-zig; zig-zag',
         detail: 'The operation is not "rotate the node up until it is the root" — that version, ' +
@@ -152,6 +185,15 @@
       },
       {
         term: 'The working-set property',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["how many distinct keys were touched<br/>since this one was last touched?"] --> B["the access costs about<br/>the log of that number"]',
+            '    B --> C["a key you keep using<br/>stays near the root"]',
+            '    C --> D["so a skewed workload runs faster<br/>than log n per access"]'
+          ].join('\n'),
+          caption: 'No balanced tree can do this: their bound is log n whatever you ask for. A splay tree charges by how recently you asked, which is what real access patterns look like.'
+        },
         plain: 'Accessing a key costs O(log of how many distinct keys were touched since it was last accessed).',
         formal: 'cost = O(log t(x)), t = distinct keys touched since',
         detail: 'This is the property no balanced tree has, and it is stronger than "hot keys are ' +

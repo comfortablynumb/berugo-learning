@@ -59,6 +59,16 @@
       },
       {
         term: 'Backpressure',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["producer faster than consumer"] --> B{"is the buffer bounded?"}',
+            '    B -->|no| C["the queue grows until<br/>memory runs out"]',
+            '    B -->|yes| D["the producer blocks and slows<br/>to the consumer\'s rate"]',
+            '    D --> E["the mismatch becomes visible<br/>instead of becoming a leak"]'
+          ].join('\n'),
+          caption: 'An unbounded queue does not absorb a rate mismatch, it hides one — until the process dies of it. Bounding the buffer turns a leak into a signal.'
+        },
         plain: 'A bounded buffer forces the producer to slow to the consumer\'s rate rather than accumulating.',
         formal: 'producer blocks when the buffer is full',
         detail: 'When a consumer is slower than its producer, the difference has to go somewhere. A ' +
@@ -85,6 +95,16 @@
       },
       {
         term: 'Amortising a fixed cost',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["one round trip per batch"] --> B["batch of 1: the whole cost<br/>lands on one item"]',
+            '    A --> C["batch of 10: a tenth each"]',
+            '    A --> D["batch of 100: a hundredth each"]',
+            '    D --> E["the per-item overhead falls<br/>as fast as the batch grows"]'
+          ].join('\n'),
+          caption: 'Doubling the batch halves the per-item overhead, and does nothing at all to the per-item work. Only one of the two terms is on the dial.'
+        },
         plain: 'A per-batch cost divided by the batch size. Doubling the batch halves it, and nothing else changes.',
         formal: 'per item = perItem + fixed/batch',
         readAs: 'Divide the whole cost by n and the fixed cost per batch is spread across the items in it, so ' +
@@ -132,6 +152,16 @@
     'pools-and-arenas': [
       {
         term: 'Bump allocation',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["allocate: add the size<br/>to one pointer"] --> B["allocate again: add again"]',
+            '    B --> C["and again"]',
+            '    C --> D["free: there is no free —<br/>reset the pointer to the start"]',
+            '    D --> E["the whole arena is released at once"]'
+          ].join('\n'),
+          caption: 'Allocation becomes one addition because the freeing problem was removed rather than solved. It works exactly when everything dies at the same time.'
+        },
         plain: 'Allocation is one pointer addition; there is no individual free, only a reset.',
         formal: 'top ← align(top) + size',
         readAs: 'Allocating from a bump allocator is: round the current top up to the alignment the type ' +
@@ -163,6 +193,15 @@
       },
       {
         term: 'External fragmentation',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["free: 40 bytes here, 30 there,<br/>50 over there — 120 in total"] --> B["a request for 100 contiguous bytes"]',
+            '    B --> C["fails, with plenty of<br/>free memory available"]',
+            '    C --> D["the bytes exist;<br/>they are just not adjacent"]'
+          ].join('\n'),
+          caption: 'Out of memory with memory to spare. This is the failure that makes long-running allocators hard, and the reason coalescing exists.'
+        },
         plain: 'Enough free bytes in total, none of them contiguous enough to serve the request.',
         formal: '1 − largest free run / total free',
         readAs: 'Fragmentation is what fraction of your free space you cannot use in one piece: take the ' +
@@ -249,6 +288,16 @@
     'text-buffers': [
       {
         term: 'Gap buffer',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["text before the cursor"] --> G["the gap — free space,<br/>held right at the cursor"]',
+            '    G --> B["text after the cursor"]',
+            '    G --> C["typing here: free,<br/>the gap just shrinks"]',
+            '    G --> D["moving the cursor: copies the text<br/>you moved across the gap"]'
+          ].join('\n'),
+          caption: 'An editor\'s cost is measured in cursor movement, not in keystrokes — which is why this structure is fast for typing and slow for jumping around.'
+        },
         plain: 'Free space held at the cursor, so typing there costs nothing and moving the cursor costs the distance.',
         formal: 'text = prefix + gap + suffix',
         detail: 'A gap buffer is one contiguous array with a run of unused space parked at the ' +
@@ -263,6 +312,16 @@
       },
       {
         term: 'Piece table',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the original file — never modified"] --> C["a list of pieces:<br/>span, span, span"]',
+            '    B["an add buffer — append only"] --> C',
+            '    C --> D["the document is what you get<br/>by reading the spans in order"]',
+            '    D --> E["nothing is ever moved or overwritten"]'
+          ].join('\n'),
+          caption: 'Because no byte is ever overwritten, an older list of pieces is still a valid document — which is undo, for free, with no separate history to keep.'
+        },
         plain: 'An immutable original, an append-only added buffer and a list of pieces. Text is never moved.',
         formal: 'document = concat(pieces)',
         detail: 'A piece table never edits text at all. The loaded file is immutable, new text is ' +
@@ -361,6 +420,15 @@
     'cache-layouts': [
       {
         term: 'Eytzinger layout',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["sorted array:<br/>the first probe is in the middle,<br/>the next is far away"] --> B["one cache line per probe"]',
+            '    C["Eytzinger: the tree stored<br/>level by level, root first"] --> D["the first several levels<br/>share one cache line"]',
+            '    D --> E["same comparisons, far fewer lines"]'
+          ].join('\n'),
+          caption: 'The comparisons do not change at all. Only where the keys sit changes, and that is the part the memory system charges for.'
+        },
         plain: 'The search tree stored breadth-first, so the first levels share a cache line.',
         formal: 'children of i are 2i and 2i+1',
         readAs: 'In an array-backed binary tree, node i keeps its children at positions 2i and 2i+1, so no ' +
@@ -445,6 +513,15 @@
       },
       {
         term: 'The crossover is the cache size',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["structure fits in cache"] --> B["a cache-conscious layout<br/>is worth nothing"]',
+            '    C["structure larger than cache"] --> D["it is worth almost everything"]',
+            '    D --> E["so a benchmark on small inputs<br/>reports the opposite conclusion"]'
+          ].join('\n'),
+          caption: 'This is the trap in benchmarking layout work: the sizes that fit on a laptop are exactly the sizes where the optimisation cannot show up.'
+        },
         plain: 'A cache-conscious layout is worth nothing while the structure fits in cache, and everything once it does not.',
         formal: 'advantage appears at structure bytes > cache bytes',
         detail: 'While the whole structure is resident, every layout hits in cache and they are ' +

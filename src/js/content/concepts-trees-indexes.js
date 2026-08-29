@@ -8,6 +8,16 @@
     'b-trees': [
       {
         term: 'The node is a page',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["one node = one disk page = one read"] --> B["so make the node as big<br/>as a page allows"]',
+            '    B --> C["hundreds of keys per node"]',
+            '    C --> D["height becomes log base hundreds,<br/>not log base 2"]',
+            '    D --> E["a million keys sit three reads deep"]'
+          ].join('\n'),
+          caption: 'The branching factor is not chosen by the algorithm. It is chosen by the storage, which is why a B-tree is shaped the way it is and a binary tree is not.'
+        },
         plain: 'A B-tree node is one unit of I/O, so the branching factor is decided by the storage rather than chosen.',
         formal: 'order = ⌊(page + key) / (key + pointer)⌋',
         readAs: 'How many children fit in a node: the page size plus one key\'s worth, divided by the space a ' +
@@ -38,6 +48,15 @@
       },
       {
         term: 'B+ against B',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["B-tree: values live in every node"] --> B["a point lookup can stop early"]',
+            '    C["B+ tree: values live only in leaves,<br/>internal nodes hold separators"] --> D["more keys fit per internal node,<br/>so the tree is shorter"]',
+            '    D --> E["and the leaves are chained,<br/>so a range scan is sequential"]'
+          ].join('\n'),
+          caption: 'Almost every database picks B+, because range scans matter more than the occasional early exit, and a chained leaf level scans without touching the tree at all.'
+        },
         plain: 'A B+ tree keeps every value in a leaf and only separators above, and chains the leaves.',
         formal: 'internal nodes hold keys, leaves hold key-value pairs and a next pointer',
         detail: 'A plain B-tree stores values alongside keys at every level, so an internal node ' +
@@ -116,6 +135,14 @@
     'augmented-trees': [
       {
         term: 'The augmentation rule',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A{"can this field be computed from<br/>the node plus the same field<br/>in its two children?"} -->|yes| B["it can be maintained through<br/>every insert, delete and rotation"]',
+            '    A -->|no| C["it cannot be maintained at all —<br/>a rotation would need information<br/>that is not local"]'
+          ].join('\n'),
+          caption: 'One test decides whether an augmentation is possible. Subtree size passes it, maximum endpoint passes it, and median does not.'
+        },
         plain: 'A field can be maintained if and only if it is computable from the node and the same field on its two children.',
         formal: 'field(node) = f(node, field(left), field(right))',
         detail: 'This one sentence is the entire theory, and it is a decision procedure rather than a ' +
@@ -142,6 +169,17 @@
       },
       {
         term: 'Order-statistic trees',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["store the subtree size in every node"] --> B["how many keys are below x?"]',
+            '    A --> C["what is the k-th smallest?"]',
+            '    B --> D["both answered in one<br/>root-to-leaf walk"]',
+            '    C --> D',
+            '    D --> E["one extra integer per node<br/>buys a rank query"]'
+          ].join('\n'),
+          caption: 'A sorted array answers rank in O(1) and cannot be updated; a search tree updates in log n and could not answer rank. One integer per node gives you both.'
+        },
         plain: 'Store the subtree size and the tree answers "the k-th smallest" and "how many are below this" in one descent.',
         formal: 'select(k) and rank(key), both O(log n)',
         detail: 'With sizes on hand, select descends by comparison rather than by counting: if the ' +

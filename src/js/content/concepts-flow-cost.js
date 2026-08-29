@@ -121,6 +121,16 @@
     'bipartite-matching': [
       {
         term: 'An augmenting path alternates, and flipping it gains exactly one',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["free — matched — free — matched — free"] --> B["it starts and ends unmatched"]',
+            '    B --> C["so it has one more free edge<br/>than matched ones"]',
+            '    C --> D["flip every edge along it"]',
+            '    D --> E["still a valid matching,<br/>and exactly one larger"]'
+          ].join('\n'),
+          caption: 'The whole of matching theory rests on this: a matching is maximum exactly when no such path exists, so the algorithm is just a search for one.'
+        },
         plain: 'Free, matched, free, matched, free — one more free edge than matched ones.',
         formal: 'Berge: a matching is maximum exactly when no augmenting path exists',
         detail: 'Everything in this section is that one idea. The path starts and ends at unmatched ' +

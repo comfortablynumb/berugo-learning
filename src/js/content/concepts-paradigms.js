@@ -8,6 +8,18 @@
     'exhaustive-search': [
       {
         term: 'The state space is a tree, not a set',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    R["no decisions made yet"] --> A["first choice = a"]',
+            '    R --> B["first choice = b"]',
+            '    A --> A1["then c"]',
+            '    A --> A2["then d"]',
+            '    B --> B1["then c"]',
+            '    A1 --> L["a complete candidate<br/>sits at a leaf"]'
+          ].join('\n'),
+          caption: 'Seeing the search as a tree of partial decisions rather than a bag of finished candidates is what makes pruning possible: you can delete a branch, but you cannot delete a bag.'
+        },
         plain: 'Every partial decision is a node; every way of extending it is a child.',
         formal: 'a search space (S, root, successors, isGoal), explored depth-first with an explicit or implicit stack',
         detail: 'Writing a problem as a state space is usually a five-minute job and it is the step that makes ' +
@@ -35,6 +47,15 @@
       },
       {
         term: 'Where the check happens is the whole difference',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["test at the leaf"] --> B["rejects one finished candidate"]',
+            '    C["the same test at the moment<br/>the choice is made"] --> D["rejects every candidate<br/>below that node at once"]',
+            '    D --> E["identical logic, and the<br/>difference is a subtree"]'
+          ].join('\n'),
+          caption: 'The test is not stronger and the code is barely different. Moving it earlier is what turns an exponential enumeration into a search that finishes.'
+        },
         plain: 'The same test at the placement instead of the leaf removes a subtree instead of a candidate.',
         formal: 'moving a feasibility test from depth n to depth k removes b^(n−k) descendants per rejection',
         readAs: 'Rejecting a bad partial answer early kills everything below it — b branches per level, for ' +
@@ -117,6 +138,16 @@
     'divide-and-conquer': [
       {
         term: 'The combine step is the algorithm',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["split in half"] --> B["trivial — an index calculation"]',
+            '    C["solve each half"] --> D["the same problem, smaller"]',
+            '    E["combine the answers"] --> F["this is the only part that<br/>carries an idea"]',
+            '    F --> G["merge sort merges; Karatsuba subtracts;<br/>closest-pair scans a strip"]'
+          ].join('\n'),
+          caption: 'Every divide-and-conquer algorithm splits the same way. What distinguishes them, and what the recurrence is measuring, is what happens on the way back up.'
+        },
         plain: 'Splitting is trivial; what happens when the halves come back is where the idea lives.',
         formal: 'T(n) = a·T(n/b) + f(n), where f is the combine cost and the master theorem reads off the answer',
         readAs: 'A problem of size n splits into a pieces of size n/b, plus f(n) to divide and recombine. ' +
@@ -132,6 +163,16 @@
       },
       {
         term: 'Karatsuba: three products instead of four',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the schoolbook way:<br/>four half-size products"] --> B["ac, ad, bc, bd"]',
+            '    C["compute ac, bd, and (a+b)(c+d)"] --> D["subtract ac and bd from the third"]',
+            '    D --> E["what is left is ad + bc,<br/>the middle term"]',
+            '    E --> F["three products, and one<br/>multiplication has disappeared"]'
+          ].join('\n'),
+          caption: 'The middle term was never needed separately — only its sum. Recovering a sum by subtraction rather than computing both halves is the entire trick.'
+        },
         plain: 'The middle term of a product is recoverable by subtraction, so one multiplication disappears.',
         formal: '(aB + b)(cB + d) = acB² + ((a+b)(c+d) − ac − bd)B + bd, giving T(n) = 3T(n/2) + O(n)',
         readAs: 'Karatsuba\'s trick: the middle term of the product can be recovered from the other two plus ' +
@@ -250,6 +291,17 @@
       },
       {
         term: 'Exchange arguments',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["take any optimal solution"] --> B["find the first place it<br/>differs from the greedy one"]',
+            '    B --> C["swap in the greedy choice there"]',
+            '    C --> D{"is it still optimal?"}',
+            '    D -->|yes| B',
+            '    D -->|no| E["the greedy rule is wrong,<br/>and this is the counter-example"]'
+          ].join('\n'),
+          caption: 'You never prove greedy is optimal directly. You prove nothing is lost by moving any optimal solution toward it, one choice at a time.'
+        },
         plain: 'Transform any optimal solution into the greedy one, one step at a time, without making it worse.',
         formal: 'given OPT differing from greedy at position k, construct OPT\' agreeing at k with value(OPT\') >= value(OPT)',
         detail: 'The exchange argument is the workhorse proof for greedy algorithms and it has a fixed shape ' +
@@ -275,6 +327,16 @@
       },
       {
         term: 'The failure is silent',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a wrong greedy rule"] --> B["still returns a valid solution"]',
+            '    B --> C["it satisfies every constraint"]',
+            '    C --> D["it is simply not the best one"]',
+            '    D --> E["nothing throws, no test fails,<br/>and the answer looks right"]'
+          ].join('\n'),
+          caption: 'This is why greedy needs a proof rather than a test suite. A bug here produces plausible output forever, and only a counter-example or an exchange argument finds it.'
+        },
         plain: 'A wrong greedy rule returns a valid, sub-optimal answer, and nothing raises.',
         formal: 'the output is feasible but not optimal; detection requires computing the optimum independently',
         detail: 'This is the reason greedy is the most dangerous paradigm in the milestone. A wrong ' +

@@ -8,6 +8,16 @@
     'what-dp-is': [
       {
         term: 'Optimal substructure',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the best answer for n"] --> B["is built out of the best<br/>answers for smaller n"]',
+            '    B --> C["so a smaller answer, once found,<br/>is never revised"]',
+            '    C --> D["which is what licenses<br/>storing it and moving on"]',
+            '    D --> E["without this property, a table<br/>would be caching wrong answers"]'
+          ].join('\n'),
+          caption: 'This is the precondition, not a description. If a better global answer could be built from a worse local one, the whole method quietly returns nonsense.'
+        },
         plain: 'An optimal answer is built out of optimal answers to smaller versions of the same problem.',
         formal: 'opt(s) = best over transitions t of combine(cost(t), opt(child(s, t)))',
         readAs: 'The best answer at a state is the best you can do over every move available from it: the ' +
@@ -38,6 +48,16 @@
       },
       {
         term: 'The subproblem DAG',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["each subproblem is a node"] --> B["each dependency is an edge"]',
+            '    B --> C["no cycles, or nothing<br/>could ever be computed first"]',
+            '    C --> D["top-down = walk it lazily<br/>and memoise"]',
+            '    C --> E["bottom-up = walk it in<br/>topological order"]'
+          ].join('\n'),
+          caption: 'Memoisation and tabulation are not two techniques. They are two traversal orders over the same graph, and which one is cheaper depends on how much of it you actually need.'
+        },
         plain: 'A DP is a walk over a directed acyclic graph whose nodes are subproblems.',
         formal: 'nodes are states, edges are transitions, and the evaluation order is any reverse topological order',
         detail: 'Drawing the DAG turns three separate questions into one picture. Is there overlap? Count the ' +
@@ -50,6 +70,16 @@
       },
       {
         term: 'States × transitions is the complexity',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["how many subproblems are there?"] --> C["multiply the two"]',
+            '    B["how many predecessors<br/>does each one read?"] --> C',
+            '    C --> D["that is the running time,<br/>before writing any code"]',
+            '    D --> E["so a DP is designed by counting,<br/>not by measuring afterwards"]'
+          ].join('\n'),
+          caption: 'You can price a dynamic program from its state definition alone. If the number is too big, the fix is a different state — not a faster inner loop.'
+        },
         plain: 'Multiply how many subproblems there are by how many predecessors each looks at.',
         formal: 'time = Θ(|S| · b) where b is the branching factor of the transition relation',
         readAs: 'The running time is the number of distinct states times the moves available from each. The ' +
@@ -127,6 +157,16 @@
     'one-dimensional-dp': [
       {
         term: 'dp[i] needs a sentence before it needs code',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["write the sentence:<br/>dp[i] is the best answer for<br/>the prefix ending at i"] --> B["the transitions are now forced"]',
+            '    B --> C["and so is the base case"]',
+            '    B --> D["and so is what the answer is<br/>at the end"]',
+            '    E["skip the sentence"] --> F["and every one of the three<br/>becomes a guess"]'
+          ].join('\n'),
+          caption: 'Almost every dynamic programming bug is a state definition that was never written down in words, so the transitions were fitted to the examples instead.'
+        },
         plain: 'Write down exactly what dp[i] means, and the transitions become forced.',
         formal: 'define dp: index → value, then derive transitions from the definition rather than from intuition',
         detail: 'Every recurrence in this section is immediate once its state sentence is precise, and ' +
@@ -252,6 +292,16 @@
       },
       {
         term: 'The loop direction chooses the problem',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["iterate capacity downward"] --> B["each item is read from the<br/>row before it was updated"]',
+            '    B --> C["so each item is used at most once —<br/>this is 0/1 knapsack"]',
+            '    D["iterate capacity upward"] --> E["an item can be read from a cell<br/>it already updated this pass"]',
+            '    E --> F["so items may repeat —<br/>this is unbounded knapsack"]'
+          ].join('\n'),
+          caption: 'One character of difference between two different problems, with no error either way. It is the clearest example on the platform of why the state definition has to be explicit.'
+        },
         plain: 'Descending capacity is 0/1; ascending is unbounded. One character apart.',
         formal: 'descending reads best[c − w] from the previous row; ascending reads it from the row being written',
         detail: 'Once the table is collapsed to one row, the iteration direction decides whether an item can ' +
@@ -355,6 +405,16 @@
     'sequence-alignment': [
       {
         term: 'Three predecessors, three operations',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the cell above — a deletion"] --> D["take the cheapest of the three"]',
+            '    B["the cell to the left — an insertion"] --> D',
+            '    C["the diagonal — a match<br/>or a substitution"] --> D',
+            '    D --> E["every cell in the table<br/>is that one decision"]'
+          ].join('\n'),
+          caption: 'The whole algorithm is one three-way minimum. The edit operations are not implemented anywhere — they are just the names of the three directions.'
+        },
         plain: 'Each cell is the cheapest of substitute, insert and remove.',
         formal: 'd[i][j] = min(d[i−1][j−1] + sub, d[i−1][j] + del, d[i][j−1] + ins)',
         readAs: 'Each cell of the edit table is the cheapest of three moves: substitute (diagonal), delete ' +
@@ -383,6 +443,16 @@
       },
       {
         term: 'Two rows keep the distance and lose the alignment',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the recurrence only ever reads<br/>the previous row"] --> B["so two rows compute the<br/>distance exactly"]',
+            '    B --> C["and the traceback needs<br/>the whole table"]',
+            '    C --> D["which was thrown away<br/>one row at a time"]',
+            '    D --> E["the number survives;<br/>the alignment does not"]'
+          ].join('\n'),
+          caption: 'Space reduction is not free even when the answer is unchanged: it deletes exactly the information a traceback walks, which is why Hirschberg exists.'
+        },
         plain: 'The recurrence only reads the previous row, so one row is enough - for the number only.',
         formal: 'Θ(min(m, n)) space computes d, but the traceback needs the full Θ(mn) table',
         readAs: 'You can find the distance while holding only one row, but recovering the actual alignment ' +

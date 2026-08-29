@@ -8,6 +8,16 @@
     'avl-trees': [
       {
         term: 'The height-balance invariant',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["at every node: the two subtree<br/>heights differ by at most 1"] --> B["checked after every insert and delete"]',
+            '    B --> C["violated: rotate to restore it"]',
+            '    C --> D["the height stays within about<br/>1.44 · log₂ n, always"]',
+            '    D --> E["the tightest bound here, and the<br/>most rebalancing work to keep it"]'
+          ].join('\n'),
+          caption: 'AVL buys the shortest tree of any scheme in this milestone, and pays for it on every write. Which side of that trade you want is the whole choice.'
+        },
         plain: 'The two subtrees of every node differ in height by at most one.',
         formal: 'balance(node) = h(left) − h(right) ∈ {−1, 0, +1}',
         readAs: 'A node\'s balance is the height of its left subtree minus the height of its right, and AVL ' +
@@ -39,6 +49,16 @@
       },
       {
         term: 'The four rebalance cases',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["which way does the<br/>heavy path bend?"] --> B["LL — straight left:<br/>one rotation"]',
+            '    A --> C["RR — straight right:<br/>one rotation"]',
+            '    A --> D["LR — left then right:<br/>rotate the child first, then two"]',
+            '    A --> E["RL — right then left:<br/>same, mirrored"]'
+          ].join('\n'),
+          caption: 'A straight path straightens with one rotation. A kinked path has to be straightened first, which is the only reason there are four cases rather than two.'
+        },
         plain: 'LL and RR need one rotation; LR and RL need an inner rotation first, so they cost two.',
         formal: 'LL; LR; RL; RR, keyed by the heavy side and its heavy side',
         detail: 'When a node goes to ±2 the fix depends on where the extra height came from. If the ' +
@@ -133,6 +153,16 @@
       },
       {
         term: 'Black height',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["count the black nodes on any path<br/>from a node down to a leaf"] --> B["every path gives the same number"]',
+            '    B --> C["and no red node has a red child"]',
+            '    C --> D["so the longest path is at most<br/>twice the shortest"]',
+            '    D --> E["which is the height bound,<br/>with no heights ever stored"]'
+          ].join('\n'),
+          caption: 'The balance is enforced by a colour rule rather than by measuring anything, which is why a red-black node carries one bit where an AVL node carries an integer.'
+        },
         plain: 'The number of black nodes on any path from a node down to a leaf. Every path gives the same answer.',
         formal: 'bh(node), identical on every descending path',
         detail: 'Black height is the quantity the structure actually balances — the tree is exactly ' +
@@ -145,6 +175,16 @@
       },
       {
         term: 'The 2-3-4 isomorphism',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a black node with no red children"] --> B["a 2-node"]',
+            '    C["a black node with one red child"] --> D["a 3-node"]',
+            '    E["a black node with two red children"] --> F["a 4-node"]',
+            '    F --> G["red is not a node —<br/>it is glue holding one 2-3-4 node together"]'
+          ].join('\n'),
+          caption: 'Once you see red as glue rather than as a node, every insert case stops being arbitrary: they are the 2-3-4 splits, written in a binary tree.'
+        },
         plain: 'A black node with its red children is one node of a 2-3-4 tree. Red is not a node, it is a second key.',
         formal: 'black alone = 2-node; one red child = 3-node; two red children = 4-node',
         detail: 'This mapping is what makes the colour rules stop being arbitrary. A 2-3-4 tree keeps ' +

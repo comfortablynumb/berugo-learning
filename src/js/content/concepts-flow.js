@@ -24,6 +24,16 @@
       },
       {
         term: 'The residual graph is the algorithm',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["an arc with capacity 10,<br/>carrying 4"] --> B["forward residual: 6 still free"]',
+            '    A --> C["backward residual: 4,<br/>meaning 4 can be undone"]',
+            '    C --> D["a later path may push back<br/>along that arc"]',
+            '    D --> E["which is how a bad early choice<br/>gets corrected without backtracking"]'
+          ].join('\n'),
+          caption: 'The back edge is not bookkeeping. It is the only mechanism by which the algorithm can change its mind, and removing it makes the answer wrong rather than slow.'
+        },
         plain: 'Pushing f along an arc leaves capacity − f forward and adds f backward.',
         formal: 'residual capacity c_f(u,v) = c(u,v) − f(u,v) forward, and f(u,v) backward on the reverse arc',
         readAs: 'The residual graph records what you could still do: how much spare room each pipe has, and — ' +
@@ -41,6 +51,16 @@
       },
       {
         term: 'Path filling without a back edge is wrong, not slow',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["greedily fill any path<br/>you can find"] --> B["an early path uses the<br/>middle arc the wrong way"]',
+            '    B --> C["no back edge, so it cannot be undone"]',
+            '    C --> D["the algorithm stops and reports success"]',
+            '    D --> E["with an answer below the maximum,<br/>and no indication of it"]'
+          ].join('\n'),
+          caption: 'This is the failure worth internalising: it terminates, it returns a valid flow, and it is not the maximum. Only the residual back edge fixes it.'
+        },
         plain: 'On four vertices with two arcs of 1 000 and one of 1, greedy stops at 1 999 and reports success.',
         formal: 'the greedy is not an approximation algorithm; its answer has no ratio bound',
         detail: 'This is the failure that matters, because the shortfall is one unit in two thousand ' +
@@ -132,6 +152,16 @@
     'minimum-cut': [
       {
         term: 'The cut and the flow are one number seen twice',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["maximise what gets<br/>from source to sink"] --> C["the same number"]',
+            '    B["minimise the capacity you must<br/>sever to disconnect them"] --> C',
+            '    C --> D["so solving either one<br/>solves the other"]',
+            '    D --> E["and the saturated arcs of a<br/>maximum flow are the cut"]'
+          ].join('\n'),
+          caption: 'Two questions that sound unrelated have the same answer, which is why a segmentation problem can be solved by a flow algorithm without ever mentioning flow.'
+        },
         plain: 'Maximise what gets through, or minimise what has to be severed — the answers are equal.',
         formal: 'max over flows of |f| = min over s-t cuts of c(S, V∖S)',
         readAs: 'The largest possible flow equals the cheapest way to sever the source from the sink. Two ' +

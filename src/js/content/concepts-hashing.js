@@ -15,6 +15,16 @@
     'hash-functions': [
       {
         term: 'Avalanche',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["flip one bit of the input"] --> B["about half the output bits change"]',
+            '    B --> C["and which half looks random"]',
+            '    C --> D["without it, similar keys<br/>land in nearby buckets"]',
+            '    D --> E["and the table clusters for reasons<br/>no load factor explains"]'
+          ].join('\n'),
+          caption: 'Avalanche is not about the output looking random. It is about similar keys — which is what real key sets are almost entirely made of — not landing together.'
+        },
         plain: 'Flipping one input bit should flip about half the output bits, and which half should look random.',
         formal: 'P(output bit j flips | input bit i flips) ≈ 0.5',
         readAs: 'Given that you flipped one bit of the input, the chance that any particular output bit flips ' +
@@ -48,6 +58,16 @@
       },
       {
         term: 'Low bits matter most',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a 32-bit hash value"] --> B["the table masks it with capacity − 1"]',
+            '    B --> C["only the lowest bits choose the bucket"]',
+            '    C --> D["every other bit is discarded"]',
+            '    D --> E["so a hash with weak low bits is broken here,<br/>however good its high bits are"]'
+          ].join('\n'),
+          caption: 'Which end the consumer reads decides which end has to be good. A masking table reads the low bits and throws the rest away without telling anyone.'
+        },
         plain: 'A table masks with capacity − 1, so it uses the *low* bits and throws the rest away.',
         formal: 'slot = h & (m − 1)',
         readAs: 'When the table size m is a power of two, m − 1 is a run of 1 bits, so ANDing against it ' +
@@ -192,6 +212,15 @@
       },
       {
         term: 'Hash flooding',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the attacker sends keys that<br/>all hash to one bucket"] --> B["every insert walks the same chain"]',
+            '    B --> C["n inserts now cost about n² comparisons"]',
+            '    C --> D["one request holds a core<br/>for as long as it likes"]'
+          ].join('\n'),
+          caption: 'Nothing crashes and nothing is corrupted. The complexity simply moves from the average case to the worst case, on demand, from outside.'
+        },
         plain: 'Send keys that all collide. Insertion becomes quadratic and one request eats a core.',
         formal: 'n keys in one bucket ⇒ Θ(n²) work',
         readAs: 'Land every key in the same bucket and each insert scans everything already there, so n ' +
@@ -207,6 +236,15 @@
       },
       {
         term: 'Per-process seed',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a fixed hash function"] --> B["colliding keys can be<br/>precomputed once, offline, for everyone"]',
+            '    C["the function chosen at start-up<br/>from a random seed"] --> D["that precomputation is worthless —<br/>it was for a different function"]',
+            '    D --> E["an attacker would have to break<br/>each process separately, while it runs"]'
+          ].join('\n'),
+          caption: 'The defence is not a stronger hash. It is that nobody outside can know which hash you are using until you are already running.'
+        },
         plain: 'Choosing the function at start-up is what makes the attacker\'s precomputation useless.',
         formal: 'seed drawn once from a CSPRNG',
         detail: 'Universality is only worth something if the function is genuinely drawn at random, ' +
@@ -269,6 +307,16 @@
     'separate-chaining': [
       {
         term: 'Load factor α',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["keys ÷ buckets = α"] --> B["chaining: α is the<br/>expected chain length"]',
+            '    B --> C["α may exceed 1 — nothing breaks,<br/>the chains simply lengthen"]',
+            '    A --> D["open addressing: α cannot reach 1"]',
+            '    D --> E["at α = 1 there is no free slot<br/>to put the key in"]'
+          ].join('\n'),
+          caption: 'One number, two entirely different meanings. For chaining it is a length; for open addressing it is how close the table is to having nowhere left to go.'
+        },
         plain: 'Keys divided by buckets. For chaining it is the expected chain length, and it may exceed 1.',
         formal: 'α = n / m',
         readAs: 'The load factor is the number of entries divided by the number of slots. At 0.75 the table ' +
@@ -317,6 +365,15 @@
       },
       {
         term: 'Treeification',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a bucket grows past its threshold"] --> B["convert that one bucket from<br/>a list into a search structure"]',
+            '    B --> C["walking it now costs log k, not k"]',
+            '    C --> D["the flooded bucket is still just as full —<br/>only the walk through it got shorter"]'
+          ].join('\n'),
+          caption: 'It bounds the damage rather than preventing it. The attacker still fills a bucket; what they no longer get is quadratic behaviour for doing so.'
+        },
         plain: 'Convert a bucket to a search structure once it gets long, bounding the damage at O(log k).',
         formal: 'list → tree at k ≥ 8',
         detail: 'Once a bucket exceeds a threshold, the JDK replaces its linked list with a red-black ' +
@@ -404,6 +461,16 @@
       },
       {
         term: 'Primary clustering',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["linear probing leaves<br/>runs of occupied slots"] --> B["a longer run covers<br/>more home positions"]',
+            '    B --> C["so it captures more new keys"]',
+            '    C --> D["which makes it longer still"]',
+            '    D --> B'
+          ].join('\n'),
+          caption: 'The runs feed themselves: length attracts keys and keys add length. That loop, not the load factor on its own, is why the collapse is so sudden.'
+        },
         plain: 'Linear probing makes occupied runs, and a long run captures more keys, making it longer.',
         formal: 'runs grow superlinearly in α',
         readAs: 'Occupied stretches do not lengthen in step with the load — they lengthen faster, because a ' +
@@ -436,6 +503,16 @@
       },
       {
         term: 'Tombstone',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["delete a key from the middle<br/>of a probe run"] --> B{"leave the slot empty?"}',
+            '    B -->|yes| C["a later probe stops there,<br/>and every key past it is unfindable"]',
+            '    B -->|no| D["mark it: something was here,<br/>keep probing"]',
+            '    D --> E["lookups keep working, and the table<br/>slowly fills with markers"]'
+          ].join('\n'),
+          caption: 'Emptying a slot is what breaks open addressing, because a probe stops at the first empty lane. The marker keeps the run intact and never shrinks it.'
+        },
         plain: 'A marker meaning "something was here, keep probing". Needed because emptying a slot breaks probe sequences.',
         formal: 'state ∈ {empty, full, deleted}',
         readAs: 'Every slot is in exactly one of three states — the ∈ means "is one of". Two states are not ' +

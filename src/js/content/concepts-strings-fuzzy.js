@@ -223,6 +223,18 @@
     'diff-and-merge': [
       {
         term: 'A diff is a shortest path in an edit graph',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a grid: file A across,<br/>file B down"] --> B["right = delete a line of A"]',
+            '    A --> C["down = insert a line of B"]',
+            '    A --> D["diagonal = the lines match,<br/>and it costs nothing"]',
+            '    B --> E["the cheapest path from<br/>corner to corner is the diff"]',
+            '    C --> E',
+            '    D --> E'
+          ].join('\n'),
+          caption: 'Once diff is a shortest-path problem, the whole of graph search is available to it — which is exactly what Myers uses to avoid filling the grid.'
+        },
         plain: 'Right deletes a line of A, down inserts a line of B, and the diagonal is free when the lines match.',
         formal: 'the shortest edit script is the shortest path from (0,0) to (N,M) in that graph',
         readAs: 'Lay the two files out as the axes of a grid. Moving right deletes, moving down inserts, ' +
@@ -252,6 +264,17 @@
       },
       {
         term: 'The snake is free, and that is why the greedy works',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["you are on a diagonal"] --> B["the next lines match"]',
+            '    B --> C["slide along them —<br/>it costs nothing"]',
+            '    C --> B',
+            '    C --> D["only when they stop matching<br/>do you spend an edit"]',
+            '    D --> E["so taking every free step first<br/>can never be wrong"]'
+          ].join('\n'),
+          caption: 'Because a matching run costs zero, there is never a reason to stop early. That is what turns a search over a huge grid into a walk along a handful of diagonals.'
+        },
         plain: 'Sliding along matching lines costs nothing, so take as many as possible before spending an edit.',
         formal: 'the diagonal edges have weight 0; every furthest-reaching path extends greedily along them',
         detail: 'Because matching lines are free, the furthest-reaching point on a diagonal at cost ' +

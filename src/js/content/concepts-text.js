@@ -8,6 +8,17 @@
     tries: [
       {
         term: 'One node per distinct prefix',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    R["root — the empty prefix"] --> C["c"]',
+            '    C --> CA["ca"]',
+            '    CA --> CAT["cat ✓"]',
+            '    CA --> CAR["car ✓"]',
+            '    CAR --> CART["cart ✓"]'
+          ].join('\n'),
+          caption: 'The shared prefix is stored once, not once per key. Everything a trie is good at follows from that, and so does everything it is bad at.'
+        },
         plain: 'Every node is a prefix of at least one key, and every prefix of a key is a node.',
         formal: 'nodes = |{ p : p is a prefix of some key }|',
         readAs: 'The trie holds one node per distinct prefix of any key. The outer bars mean "how many", the ' +
@@ -54,6 +65,15 @@
       },
       {
         term: 'Not a faster hash table',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["is this exact key present?"] --> B["hash table: one hash,<br/>one probe, less memory"]',
+            '    C["which keys start with this?"] --> D["trie: walk the prefix,<br/>then read the subtree"]',
+            '    D --> E["a hash table cannot answer<br/>this question at all"]'
+          ].join('\n'),
+          caption: 'On membership alone the hash table wins on every axis. Reach for a trie when the question is about prefixes, and never as a general-purpose replacement.'
+        },
         plain: 'On membership alone a hash table wins on memory and on steps per lookup.',
         formal: 'trie: |query| character steps; hash: one hash, one probe',
         detail: 'The trie costs 92.8 bytes per key with map nodes against roughly 40 for an ' +
@@ -122,6 +142,15 @@
     'compressed-tries': [
       {
         term: 'A node only where the keys branch',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["plain trie:<br/>r → o → m → a → n → e"] --> B["six nodes for one chain"]',
+            '    C["compressed:<br/>one edge labelled romane"] --> D["one node, one substring"]',
+            '    D --> E["a node exists only where<br/>two keys actually diverge"]'
+          ].join('\n'),
+          caption: 'The node count stops depending on how long the keys are and starts depending on how many of them there are — which is usually a far smaller number.'
+        },
         plain: 'Collapse every non-branching chain into one edge carrying a substring.',
         formal: 'nodes ≤ 2k − 1 for k keys, whatever the key length',
         readAs: 'A compressed trie over k keys has at most 2k − 1 nodes, no matter how long the keys are — ' +
@@ -152,6 +181,15 @@
       },
       {
         term: 'The split is the whole algorithm',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["inserting romulus against<br/>an edge labelled romane"] --> B["they agree on rom,<br/>then differ"]',
+            '    B --> C["cut the edge at the agreement point"]',
+            '    C --> D["rom becomes a node with<br/>two children: ane and ulus"]'
+          ].join('\n'),
+          caption: 'Every insertion is either a walk that fits an existing edge or one split. There is no rebalancing and no third case.'
+        },
         plain: 'When a key and an edge agree for a while and then differ, the edge becomes two.',
         formal: 'edge → head(shared) + tail(rest), new leaf under head',
         readAs: 'Splitting an edge means cutting it into the part the new key shares and the part it does ' +

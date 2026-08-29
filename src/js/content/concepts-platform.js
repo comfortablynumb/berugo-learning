@@ -8,6 +8,15 @@
     'code-engine': [
       {
         term: 'Sandbox',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    P["the page<br/>DOM · storage · network"] -->|"source and input"| W["Web Worker<br/>your code runs here"]',
+            '    W -->|"results and operation counts"| P',
+            '    W --> N["what it cannot reach from inside:<br/>the DOM, storage, the network"]'
+          ].join('\n'),
+          caption: 'The only channel is messages. Code that hangs, loops forever or throws cannot take the page down with it, which is what makes running a stranger\'s code safe.'
+        },
         plain: 'Your code runs in a Web Worker with no access to the page, storage or the network.',
         formal: 'new Function(capabilities…, code) inside a dedicated worker',
         detail: 'Isolation here is structural rather than a blacklist someone has to keep up to date. ' +
@@ -135,6 +144,15 @@
       },
       {
         term: 'Counted, not timed',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["grade on elapsed time"] --> B["a fast laptop passes<br/>a slow one fails<br/>the same code"]',
+            '    C["grade on operation counts"] --> D["the same verdict on every machine"]',
+            '    D --> E["because a count is a property of<br/>the algorithm, not of the hardware"]'
+          ].join('\n'),
+          caption: 'A timing measures your machine as much as your code. A count measures only the code, which is the thing being graded.'
+        },
         plain: 'Grading asserts operation counts rather than elapsed time, because a count is a ' +
           'property of the algorithm and a time is a property of the machine that ran it.',
         formal: 'assert on ops.snapshot(), not on durationMs',
@@ -154,6 +172,16 @@
     'js-systems': [
       {
         term: 'ArrayBuffer and views',
+        diagram: {
+          definition: [
+            'flowchart TD',
+            '    B["ArrayBuffer — 8 raw bytes"] --> U8["Uint8Array<br/>8 elements"]',
+            '    B --> U32["Uint32Array<br/>2 elements"]',
+            '    B --> F64["Float64Array<br/>1 element"]',
+            '    U32 --> W["all three read the same bytes —<br/>write through one and<br/>the others see it immediately"]'
+          ].join('\n'),
+          caption: 'The buffer is storage. A view is an opinion about what those bytes mean, and several opinions can share one buffer.'
+        },
         plain: 'A buffer is raw bytes; a typed array or DataView is an interpretation of those bytes. ' +
           'Several views can share one buffer.',
         formal: 'new Float64Array(buffer) aliases the same memory as new Uint8Array(buffer)',
@@ -183,6 +211,15 @@
       },
       {
         term: 'Number is a float64',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["integers up to 2⁵³"] --> B["every one exactly representable"]',
+            '    C["integers above 2⁵³"] --> D["the gap between neighbouring<br/>doubles is now larger than 1"]',
+            '    D --> E["so n and n + 1 can be<br/>the very same number"]'
+          ].join('\n'),
+          caption: 'There is no integer type here. Past 2⁵³ the doubles run out of room and counting silently stops working — no error, just a value that will not move.'
+        },
         plain: 'Every JavaScript number is an IEEE 754 double, so integers are exact only up to 2⁵³.',
         formal: 'Number.MAX_SAFE_INTEGER = 2⁵³ − 1 = 9007199254740991',
         readAs: 'Two multiplied by itself 53 times, minus one: 9 007 199 254 740 991, a little over ' +

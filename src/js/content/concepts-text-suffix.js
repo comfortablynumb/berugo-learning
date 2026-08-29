@@ -136,6 +136,16 @@
       },
       {
         term: 'A pattern occupies one contiguous range',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["every suffix beginning with P"] --> B["sorts together, because they<br/>share their first characters"]',
+            '    B --> C["so the matches are one block<br/>of the suffix array"]',
+            '    C --> D["two binary searches find<br/>its first and last position"]',
+            '    D --> E["and the block size is<br/>the number of occurrences"]'
+          ].join('\n'),
+          caption: 'Sorting the suffixes turns pattern matching into a range query, which is why one array and two binary searches replace a whole matching algorithm.'
+        },
         plain: 'Every suffix beginning with P sorts together, so a search is two binary searches.',
         formal: 'occurrences(P) = sa[first … last), found in O(m log n)',
         readAs: 'Every occurrence of a pattern sits in one contiguous stretch of the suffix array, because ' +
@@ -150,6 +160,16 @@
       },
       {
         term: 'The LCP array',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["suffix at position i in the array"] --> B["how many leading characters does it<br/>share with the one before it?"]',
+            '    B --> C["that number is lcp[i]"]',
+            '    C --> D["the smallest lcp in a range is the<br/>longest prefix all of them share"]',
+            '    D --> E["which turns range-minimum queries<br/>into string questions"]'
+          ].join('\n'),
+          caption: 'The suffix array says where the matches are. The LCP array says how much they have in common, and most advanced suffix-array algorithms are built on it rather than on the array itself.'
+        },
         plain: 'lcp[i] is how many characters suffix sa[i] shares with sa[i − 1].',
         formal: 'lcp[i] = |longest common prefix of sa[i − 1] and sa[i]|',
         readAs: 'How many characters each sorted suffix shares with the one before it. The bars are length. ' +

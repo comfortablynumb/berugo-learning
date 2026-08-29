@@ -8,6 +8,18 @@
     'fibonacci-heaps': [
       {
         term: 'Do nothing until forced',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["insert"] --> B["drop the node in a root list. done."]',
+            '    C["meld"] --> D["concatenate two root lists. done."]',
+            '    E["decrease-key"] --> F["cut the node out, drop it<br/>in the root list. done."]',
+            '    B --> G["extract-min is the only operation<br/>that ever tidies up"]',
+            '    D --> G',
+            '    F --> G'
+          ].join('\n'),
+          caption: 'Every cheap operation defers its work onto extract-min, which is the only one that pays. That is the whole design, and the reason decrease-key is O(1) amortised.'
+        },
         plain: 'Insert drops a node in a root list. Meld concatenates two lists. Decrease-key cuts and drops. None of them tidies up.',
         formal: 'O(1) worst case for insert, meld and decrease-key',
         detail: 'The design principle is deferral. Every operation that can avoid restructuring does ' +
@@ -50,6 +62,17 @@
       },
       {
         term: 'Cascading cuts',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a node loses a child"] --> B{"was it already marked?"}',
+            '    B -->|no| C["mark it, and stop"]',
+            '    B -->|yes| D["cut it to the root list too"]',
+            '    D --> E["and now its parent has<br/>lost a child"]',
+            '    E --> A'
+          ].join('\n'),
+          caption: 'A node may lose one child quietly. Losing a second means its subtree has thinned too far, so it is cut out — and the cascade is what keeps the trees fat enough for the bound.'
+        },
         plain: 'Cutting a marked node cuts its parent too, and the parent\'s parent if that was marked, up the tree.',
         formal: 'a node of degree d keeps at least F(d + 2) descendants',
         readAs: 'A node with d children is guaranteed at least the (d+2)-th Fibonacci number of descendants ' +
@@ -220,6 +243,15 @@
     'indexed-priority-queues': [
       {
         term: 'The handle problem',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["decrease-key needs to find<br/>the element first"] --> B["a heap is an array in<br/>no order you can search"]',
+            '    B --> C["scanning it is O(n),<br/>which loses the whole point"]',
+            '    C --> D["so keep a map from handle to slot,<br/>updated on every swap"]'
+          ].join('\n'),
+          caption: 'Decrease-key is why an indexed heap exists. Without a handle map the find dominates, and the O(log n) decrease is O(n) in practice.'
+        },
         plain: 'decrease-key needs to find the element first, and a heap is an array in no useful order.',
         formal: 'locating an arbitrary key is Θ(n) without an index',
         readAs: 'A heap can find its minimum instantly and any other element not at all. Changing a specific ' +
@@ -248,6 +280,15 @@
       },
       {
         term: 'Lazy insertion',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a better key arrives for<br/>something already in the queue"] --> B["do not decrease anything —<br/>just push a second entry"]',
+            '    B --> C["when a stale entry pops,<br/>recognise it and skip it"]',
+            '    C --> D["no position map, no handles,<br/>and a larger queue"]'
+          ].join('\n'),
+          caption: 'It does more total work and usually still wins on the clock, because the position map it removes was costing a write on every single swap the heap made.'
+        },
         plain: 'Do not decrease anything: push a second entry with the better key and ignore the stale one when it surfaces.',
         formal: 'push on improvement, skip on pop if already settled',
         detail: 'The alternative removes the handle map entirely. When a shorter path is found, push a ' +
@@ -323,6 +364,15 @@
     'timers-and-events': [
       {
         term: 'Timers are not a heap problem',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a heap answers:<br/>what is the smallest key?"] --> B["exactly, and in log n"]',
+            '    C["a timer only needs:<br/>what is due this tick?"] --> D["a bucket per tick answers it<br/>in constant time"]',
+            '    D --> E["exactness was never required,<br/>so it was never worth paying for"]'
+          ].join('\n'),
+          caption: 'The heap is solving a harder question than the one being asked. Dropping the ordering you do not need is what turns log n into O(1).'
+        },
         plain: 'A heap answers "what is the smallest key" exactly. A timeout only needs "what is due this tick".',
         formal: 'quantised time turns a search into an array index',
         detail: 'The whole insight is that a timeout can afford to be imprecise. Once time is ' +
@@ -350,6 +400,16 @@
       },
       {
         term: 'Hierarchical wheels',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["wheel 1 — one bucket per tick"] --> B["wheel 2 — one bucket per<br/>full turn of wheel 1"]',
+            '    B --> C["wheel 3 — one bucket per<br/>full turn of wheel 2"]',
+            '    C --> D["a far-future timer waits in<br/>a coarse wheel"]',
+            '    D --> E["and cascades down as its time nears"]'
+          ].join('\n'),
+          caption: 'The same trick as positional notation: a few wheels of modest width cover an enormous range, and each timer is only handled once per level.'
+        },
         plain: 'Several wheels, each covering the span of the one below times its width. Entries cascade down as time passes.',
         formal: 'level L spans slots^(L+1) ticks',
         readAs: 'Each level of a hierarchical timer wheel covers the number of slots raised to one more ' +

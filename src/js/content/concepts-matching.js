@@ -125,6 +125,17 @@
     'two-sat': [
       {
         term: 'A two-literal clause is an implication in both directions',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the clause a OR b"] --> B["if a is false, b must hold"]',
+            '    A --> C["if b is false, a must hold"]',
+            '    B --> D["draw both as edges"]',
+            '    C --> D',
+            '    D --> E["the formula has become a graph,<br/>and satisfiability a<br/>reachability question"]'
+          ].join('\n'),
+          caption: 'Two literals per clause is exactly the width at which a clause becomes two implications. At three literals it does not, which is why 3-SAT is hard and this is not.'
+        },
         plain: '(a OR b) says that if a is false then b must hold, and if b is false then a must hold.',
         formal: '(a ∨ b) ≡ (¬a → b) ∧ (¬b → a)',
         readAs: '"a or b" is the same statement as "if not a then b, and if not b then a". The ∨ is or, ¬ is ' +
@@ -140,6 +151,17 @@
       },
       {
         term: 'One vertex per literal, so a variable is two vertices',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["variable x"] --> B["vertex for x"]',
+            '    A --> C["vertex for not-x"]',
+            '    B --> D["every edge has a mirror image<br/>with both ends negated"]',
+            '    C --> D',
+            '    D --> E["so the graph is symmetric,<br/>and that symmetry is what<br/>the final assignment reads"]'
+          ].join('\n'),
+          caption: 'Keeping a literal and its negation as separate vertices is what lets one graph hold both the implication and its contrapositive, which the algorithm needs equally.'
+        },
         plain: 'x and not-x are separate vertices, and the graph is skew-symmetric.',
         formal: 'reversing every arc and negating every literal maps the implication graph to itself',
         detail: 'The doubling is what makes the method work, and the skew symmetry is what makes it ' +

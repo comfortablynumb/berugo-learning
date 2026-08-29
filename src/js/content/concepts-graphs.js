@@ -8,6 +8,17 @@
     'graph-representations': [
       {
         term: 'A graph is an input format, not a working format',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the input: a list of edges"] --> B["convert once"]',
+            '    B --> C["adjacency lists — for traversal"]',
+            '    B --> D["CSR arrays — for scale"]',
+            '    B --> E["a matrix — only if you need<br/>constant-time edge tests"]',
+            '    C --> F["the algorithm picks the format,<br/>and conversion is one linear pass"]'
+          ].join('\n'),
+          caption: 'Arguing about which representation is best is arguing about which algorithm you are running. Convert on the way in and the question dissolves.'
+        },
         plain: 'Store it as a list of edges and convert to whatever the algorithm needs.',
         formal: '{ n, edges: [{ from, to, weight }], directed } converts to adjacency list, matrix or CSR',
         detail: 'Every representation is good at something and hopeless at something else, so a library ' +
@@ -50,6 +61,17 @@
       },
       {
         term: 'BFS and DFS do identical work and differ in what they hold',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["both visit every vertex once<br/>and every edge once"] --> B["same O(V + E)"]',
+            '    C["BFS holds a frontier —<br/>can be the whole width of the graph"] --> D["peak memory is the widest level"]',
+            '    E["DFS holds a path —<br/>at most the depth"] --> F["peak memory is the longest path"]',
+            '    D --> G["same time, and the memory<br/>can differ by orders of magnitude"]',
+            '    F --> G'
+          ].join('\n'),
+          caption: 'The choice between them is almost never about speed. It is about which of the two shapes your graph has, and therefore which peak you can afford.'
+        },
         plain: 'Same vertices, same edges — the peak memory is the whole difference.',
         formal: 'both are Θ(n + m); BFS peaks at the widest level, DFS at the longest root-to-node path',
         readAs: 'The two traversals cost the same — one visit per vertex and one per edge — and differ only ' +
@@ -123,6 +145,15 @@
     'topological-order': [
       {
         term: 'A topological order is a promise about predecessors',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["every edge points forwards<br/>in the order"] --> B["so when you reach a vertex,<br/>everything it depends on<br/>is already computed"]',
+            '    B --> C["which is why a DAG DP<br/>needs no memoisation"]',
+            '    B --> D["and why a build system<br/>can run in one pass"]'
+          ].join('\n'),
+          caption: 'The order is not the goal; the guarantee is. Everything built on top of it — DAG shortest paths, dependency resolution, DP evaluation — uses only that one promise.'
+        },
         plain: 'Every edge points forwards, so everything a vertex depends on is already settled.',
         formal: 'an ordering v1..vn such that every edge (vi, vj) has i < j; exists iff the graph is acyclic',
         readAs: 'Line the vertices up so every edge points forwards. Such an ordering exists exactly when ' +
@@ -138,6 +169,18 @@
       },
       {
         term: 'Kahn: repeatedly take a vertex with no unmet dependency',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["count incoming edges<br/>for every vertex"] --> B["queue everything with a count of 0"]',
+            '    B --> C["take one, output it"]',
+            '    C --> D["decrement its neighbours\' counts"]',
+            '    D --> E["any that reach 0 join the queue"]',
+            '    E --> C',
+            '    C --> F["queue empty but vertices left:<br/>those vertices are a cycle"]'
+          ].join('\n'),
+          caption: 'The cycle detection is not a separate pass. Whatever is left when the queue empties is precisely the part of the graph that can never be ordered.'
+        },
         plain: 'Count incoming edges, start from the zeroes, and decrement as you go.',
         formal: 'maintain in-degrees; a vertex joins the ready set when its count reaches zero; Θ(n + m)',
         readAs: 'Count how many unmet dependencies each vertex has. Every time one is satisfied, decrement; ' +
@@ -166,6 +209,17 @@
       },
       {
         term: 'Returning null on a cycle is a useless error',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["there is a cycle"] --> B["return null"]',
+            '    B --> C["the caller knows something is wrong<br/>and nothing about where"]',
+            '    A --> D["return the cycle itself"]',
+            '    D --> E["costs one parent map"]',
+            '    E --> F["and it is the only output<br/>a human can act on"]'
+          ].join('\n'),
+          caption: 'A dependency cycle in a real build is a bug report, and the report has to name the loop. Detecting it and discarding it is most of the work for none of the value.'
+        },
         plain: 'Return the cycle. It costs one parent map and it is the only thing the caller can act on.',
         formal: 'on detecting a back edge (u, v), walk parents from u to v; the resulting list is the cycle',
         detail: '"Circular dependency detected" in a build log is the difference between a five-minute ' +
@@ -252,6 +306,16 @@
       },
       {
         term: 'Tarjan: one pass, one stack, one number per vertex',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["give each vertex an index<br/>as it is first seen"] --> B["track the lowest index reachable<br/>from its subtree that is still<br/>on the stack"]',
+            '    B --> C{"is that number its own index?"}',
+            '    C -->|yes| D["it is the root of a component —<br/>pop the stack down to it"]',
+            '    C -->|no| E["it belongs to an<br/>ancestor\'s component"]'
+          ].join('\n'),
+          caption: 'One depth-first pass and two integers per vertex. Kosaraju needs two passes and a reversed copy of the graph to reach the same answer.'
+        },
         plain: 'Track the earliest vertex reachable from this subtree that is still on the stack.',
         formal: 'lowlink[v] = min(index[v], lowlink of children, index of stack neighbours); v is a root iff lowlink = index',
         readAs: 'Each vertex records the earliest-discovered vertex reachable from its subtree. When that ' +

@@ -8,6 +8,18 @@
     'binary-heaps': [
       {
         term: 'The implicit representation',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["node at index i"] --> B["left child at 2i + 1"]',
+            '    A --> C["right child at 2i + 2"]',
+            '    A --> D["parent at ⌊(i − 1)/2⌋"]',
+            '    B --> E["no pointers stored at all —<br/>the tree is arithmetic on an array"]',
+            '    C --> E',
+            '    D --> E'
+          ].join('\n'),
+          caption: 'A heap is a complete tree, and a complete tree has no holes — which is exactly what lets the positions be computed instead of stored.'
+        },
         plain: 'The tree is an array. Children of i are at 2i + 1 and 2i + 2; the parent is at ⌊(i − 1)/2⌋.',
         formal: 'no pointers, no nodes, no allocation per element',
         detail: 'This is why a heap is the fastest priority queue for the common case. There is no ' +
@@ -46,6 +58,18 @@
       },
       {
         term: 'Why the build is linear',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["half the nodes are leaves"] --> B["they sink 0 levels"]',
+            '    C["a quarter are one level up"] --> D["they sink at most 1"]',
+            '    E["an eighth are two levels up"] --> F["they sink at most 2"]',
+            '    B --> G["total = n/2·0 + n/4·1 + n/8·2 + …<br/>which sums to less than n"]',
+            '    D --> G',
+            '    F --> G'
+          ].join('\n'),
+          caption: 'The nodes that could sink furthest are the rarest. Inserting one at a time gives n log n; heapifying in place gives n, and the difference is entirely this counting.'
+        },
         plain: 'Heapifying an array is O(n), not O(n log n), because most nodes are leaves and sink nowhere.',
         formal: 'Σ h·⌈n/2^(h+1)⌉ < n',
         readAs: 'Add up, over every level height h, that height times how many nodes sit at it. The node ' +
@@ -327,6 +351,16 @@
     'mergeable-heaps': [
       {
         term: 'Meld as the primitive',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["meld — join two heaps"] --> B["insert = meld with<br/>a one-node heap"]',
+            '    A --> C["pop = remove the root,<br/>then meld its children"]',
+            '    B --> D["two operations, one line each,<br/>and no separate code to get wrong"]',
+            '    C --> D'
+          ].join('\n'),
+          caption: 'A binary heap cannot merge two heaps in less than linear time, which is the one thing it cannot do. Building the structure around meld makes that the easy case instead.'
+        },
         plain: 'Make merging the one operation, and insert and pop fall out of it in a line each.',
         formal: 'insert = meld(h, singleton); pop = meld(left, right)',
         detail: 'An array heap treats insert and extract as primitives and cannot merge at all. The ' +

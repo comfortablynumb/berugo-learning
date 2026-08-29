@@ -30,6 +30,16 @@
       },
       {
         term: 'Robin Hood displacement',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["inserting a key that has<br/>travelled 1 slot from home"] --> B{"the key sitting there<br/>travelled 4"}',
+            '    B --> C["the richer key gives up the slot<br/>to the poorer one"]',
+            '    C --> D["the displaced key carries on probing"]',
+            '    D --> E["the spread of probe distances<br/>collapses toward the mean"]'
+          ].join('\n'),
+          caption: 'The mean probe distance is fixed by the load factor and cannot be improved. What this removes is the variance — the unlucky key that probed forty times.'
+        },
         plain: 'On insertion, a key that has travelled further takes the slot from one that has travelled less.',
         formal: 'swap if d(carry) > d(resident)',
         detail: 'Ordinary linear probing is first-come-first-served, so an unlucky key inserted late ' +
@@ -74,6 +84,16 @@
       },
       {
         term: 'Cuckoo hashing',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a key has exactly two homes,<br/>one per table"] --> B["lookup reads both:<br/>two probes, worst case, always"]',
+            '    A --> C["insert: if both are taken,<br/>evict one and re-home it"]',
+            '    C --> D["that eviction may evict another"]',
+            '    D --> C'
+          ].join('\n'),
+          caption: 'Lookup gets a hard worst-case bound of two probes, which nothing else here offers. Insertion pays for it, and can fail outright and need a full rebuild.'
+        },
         plain: 'Two tables, two hashes, and a key lives in one of exactly two slots. Lookup is two probes, always.',
         formal: 'x ∈ {T₁[h₁(x)], T₂[h₂(x)]}',
         readAs: 'A key is in one of exactly two places: the slot its first hash names in the first table, or ' +
@@ -133,6 +153,16 @@
     'swiss-tables': [
       {
         term: 'Control byte',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["one byte per slot, held in a<br/>separate small array"] --> B["empty"]',
+            '    A --> C["deleted"]',
+            '    A --> D["or a 7-bit tag taken from the hash"]',
+            '    D --> E["16 of them fit in one register,<br/>so a whole group is checked at once"]'
+          ].join('\n'),
+          caption: 'The metadata is small enough to stay in cache while the entries do not, so a group that holds nothing is rejected without touching the large array at all.'
+        },
         plain: 'One byte per slot, stored in a separate array: empty, deleted, or a 7-bit tag from the hash.',
         formal: 'ctrl ∈ {0x80, 0xFE} ∪ [0, 0x7F]',
         readAs: 'Each control byte is either one of two special markers — 0x80 for empty, 0xFE for deleted — ' +
@@ -163,6 +193,16 @@
       },
       {
         term: 'Group probing',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["take the 7-bit tag from the hash"] --> B["compare it against all 16 control<br/>bytes in a single instruction"]',
+            '    B --> C["get back a bitmask of candidate lanes"]',
+            '    C --> D["compare only those candidates<br/>against the real keys"]',
+            '    D --> E["most groups are rejected without<br/>reading a single key"]'
+          ].join('\n'),
+          caption: 'Sixteen comparisons for the price of one, and the false positives a 7-bit tag allows cost exactly one real key comparison each.'
+        },
         plain: 'Compare the tag against all 16 control bytes at once and get a bitmask of candidates.',
         formal: '_mm_cmpeq_epi8 then movemask',
         detail: 'The tag is broadcast across a 16-byte SIMD register and compared against a whole ' +
@@ -247,6 +287,15 @@
     rehashing: [
       {
         term: 'Amortised versus worst case',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["O(1) amortised over a million inserts"] --> B["entirely true"]',
+            '    C["and one of those inserts<br/>moved a million entries"] --> D["also entirely true"]',
+            '    D --> E["a latency target is measured<br/>on the second statement"]'
+          ].join('\n'),
+          caption: 'Amortised analysis answers what the sequence costs. It says nothing at all about the single call — which is the one a p99 target is graded on.'
+        },
         plain: 'O(1) amortised says nothing about the one call that moved a million entries.',
         formal: 'total O(n), single op O(n)',
         detail: 'The amortised bound is true and it is an average over a sequence, so it is silent ' +
@@ -272,6 +321,16 @@
       },
       {
         term: 'Incremental rehash',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["growth triggers"] --> B["allocate the new table,<br/>keep the old one"]',
+            '    B --> C["every operation moves<br/>a few buckets across"]',
+            '    C --> D["lookups consult both tables<br/>until the old one is empty"]',
+            '    D --> E["no single call ever pays<br/>for the whole migration"]'
+          ].join('\n'),
+          caption: 'The total work is unchanged. It is spread so that no one request is the unlucky one, and the price is holding both tables allocated at once.'
+        },
         plain: 'Keep both tables and move k buckets per operation until the old one is empty.',
         formal: 'reads check old then new; writes go to new',
         detail: 'Instead of migrating everything in one call, keep both tables live and move a few ' +

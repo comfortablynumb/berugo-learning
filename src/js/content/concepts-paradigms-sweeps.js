@@ -8,6 +8,15 @@
     'two-pointers': [
       {
         term: 'The amortisation argument',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the loops look nested,<br/>so it looks quadratic"] --> B["but the inner index<br/>never moves backwards"]',
+            '    B --> C["each element enters once<br/>and leaves once"]',
+            '    C --> D["so the total inner work is 2n<br/>across the whole outer loop"]'
+          ].join('\n'),
+          caption: 'Counting the work per outer step gives the wrong answer. Counting it per element gives the right one, and that shift is the whole proof.'
+        },
         plain: 'Each element enters the structure once and leaves once, so the nested loop is linear.',
         formal: 'total work = Σ pushes + Σ pops <= 2n, however the inner loop is distributed',
         readAs: 'Every element enters the window once and leaves once, so the inner loop runs at most 2n ' +
@@ -35,6 +44,16 @@
       },
       {
         term: 'The monotonic deque',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a new element arrives"] --> B["pop everything at the back<br/>that it beats"]',
+            '    B --> C["push it"]',
+            '    C --> D["pop the front if it has<br/>fallen out of the window"]',
+            '    D --> E["the front is now the answer,<br/>with no scan at all"]'
+          ].join('\n'),
+          caption: 'Anything the new element beats can never be the answer again while the new one is in the window, so discarding it costs nothing and it is never reconsidered.'
+        },
         plain: 'Keep the window\'s candidates in decreasing order; the front is always the answer.',
         formal: 'maintain indices i₁ < i₂ < … with a[i₁] > a[i₂] > …, dropping expired fronts and dominated backs',
         readAs: 'Keep a deque of positions whose values decrease left to right. Drop from the front what has ' +

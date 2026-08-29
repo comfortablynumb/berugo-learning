@@ -22,6 +22,17 @@
       },
       {
         term: 'Height is the cost',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["search"] --> P["one root-to-leaf path"]',
+            '    B["insert"] --> P',
+            '    C["delete"] --> P',
+            '    P --> D["so all three cost the height"]',
+            '    D --> E["balanced: log n<br/>degenerate: n, and it is a linked list"]'
+          ].join('\n'),
+          caption: 'Every balancing scheme in this milestone exists for one reason: the height is the cost, and an unbalanced tree has no bound on it.'
+        },
         plain: 'Search, insert and delete all follow one root-to-leaf path, so all three cost the height.',
         formal: 'comparisons ≤ height, for every operation',
         readAs: 'No operation ever does more comparisons than the tree is deep. That is why the whole subject ' +
@@ -37,6 +48,16 @@
       },
       {
         term: 'The three delete cases',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A{"how many children?"} -->|none| B["unlink it"]',
+            '    A -->|one| C["replace it with that child"]',
+            '    A -->|two| D["copy in its successor\'s key,<br/>then delete the successor instead"]',
+            '    D --> E["the successor has at most one child,<br/>so this reduces to a case above"]'
+          ].join('\n'),
+          caption: 'The two-child case is not a third algorithm. It rewrites itself into one of the first two, which is why the recursion terminates in one step.'
+        },
         plain: 'A leaf is unlinked, a node with one child is replaced by it, and a node with two children is replaced by its successor.',
         formal: 'no child; one child; two children',
         detail: 'Deletion is the operation that separates a working tree from a demo, and it has ' +

@@ -20,6 +20,17 @@
       },
       {
         term: 'Run detection and minrun',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["scan for the ascending stretches<br/>already present in the data"] --> B{"is this run shorter<br/>than minrun?"}',
+            '    B -->|yes| C["extend it with an insertion sort<br/>until it reaches minrun"]',
+            '    B -->|no| D["keep it as it is"]',
+            '    C --> E["every run is now at least minrun,<br/>so the merge tree stays balanced"]',
+            '    D --> E'
+          ].join('\n'),
+          caption: 'Padding the short runs is not tidiness. It keeps the run count near a power of two, and a balanced merge tree is the whole reason the bound holds.'
+        },
         plain: 'Find the ascending stretches, and pad short ones up to a computed floor.',
         formal: 'minrun is the top 5 bits of n plus 1 if any lower bit is set, giving 16..32',
         readAs: 'Timsort picks a minimum run length between 16 and 32, chosen so the number of runs is close ' +
@@ -61,6 +72,16 @@
       },
       {
         term: 'Galloping mode',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["one run keeps winning<br/>the head comparison"] --> B{"has it won<br/>seven times in a row?"}',
+            '    B -->|no| C["carry on merging one element at a time"]',
+            '    B -->|yes| D["stop comparing one by one —<br/>binary-search how far it keeps winning"]',
+            '    D --> E["copy that whole stretch in one move"]'
+          ].join('\n'),
+          caption: 'The input that costs a naive merge the most — one run lying entirely below the other — is exactly the one galloping reduces to a handful of comparisons.'
+        },
         plain: 'When one run keeps winning, binary-search for how far it keeps winning.',
         formal: 'switch after MIN_GALLOP consecutive wins; doubling search then binary search',
         readAs: 'When one run keeps winning the comparison, stop comparing element by element and start ' +
@@ -119,6 +140,15 @@
     'non-comparison-sorts': [
       {
         term: 'The bound is about a model, not about sorting',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["Ω(n log n)"] --> B["holds for algorithms that learn<br/>only by comparing pairs of keys"]',
+            '    C["counting and radix sort read<br/>the digits of the key instead"] --> D["they sit outside that model,<br/>so the bound says nothing about them"]',
+            '    D --> E["you did not beat the bound —<br/>you changed the model"]'
+          ].join('\n'),
+          caption: 'A lower bound is always a statement about a model of computation. Naming the model is half of stating the theorem, and the half people drop.'
+        },
         plain: 'Ω(n log n) applies to algorithms that only compare pairs. These do not.',
         formal: 'counting and radix read the key as an index or a digit sequence, never as a comparand',
         detail: 'The decision-tree argument bounds any algorithm whose only information about the input comes ' +
@@ -146,6 +176,16 @@
       },
       {
         term: 'LSD radix: stable-or-broken',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["pass 1 — sort by the last digit"] --> B["pass 2 — sort by the next digit up"]',
+            '    B --> C["pass 3 — and so on to the top digit"]',
+            '    C --> D["correct only if every pass preserved<br/>the order the previous pass established"]',
+            '    D --> E["one unstable pass and the result is wrong,<br/>while still looking almost sorted"]'
+          ].join('\n'),
+          caption: 'Each pass depends on the one before it. Stability is not a nicety here, it is the mechanism — which is why an unstable scatter is invisible on one-digit keys.'
+        },
         plain: 'Every digit pass must preserve the order the previous passes established.',
         formal: 'sort by digit 0, then digit 1, ...; each pass must be stable or the earlier ones are undone',
         readAs: 'Least-significant-digit radix sort works only because each pass preserves the order the ' +
@@ -228,6 +268,15 @@
     'selection-and-order': [
       {
         term: 'Recursing into one side turns n log n into 2n',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    Q["quicksort:<br/>partition, then recurse into both sides"] --> A["n log n"]',
+            '    S["quickselect:<br/>partition, then recurse into the one side<br/>the answer must be on"] --> B["n + n/2 + n/4 + … which is about 2n"]',
+            '    B --> C["the work halves every time,<br/>so the whole sum stays linear"]'
+          ].join('\n'),
+          caption: 'Throwing away the half you do not need collapses the recursion from a tree into a path, and the geometric series that leaves is linear.'
+        },
         plain: 'Quickselect is quicksort that throws away the half it does not need.',
         formal: 'T(n) = T(n/2) + n sums to 2n; T(n) = 2T(n/2) + n sums to n log n',
         readAs: 'Recursing into one half gives a total of 2n — the work halves every level, so the series ' +
@@ -278,6 +327,15 @@
       },
       {
         term: 'Top-k is a different question with a different answer',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["which element is the k-th?"] --> B["quickselect —<br/>needs the whole array in memory"]',
+            '    C["which are the top k?"] --> D["a heap of size k —<br/>one pass, only k items held"]',
+            '    D --> E["so the input may be a stream<br/>that never fits in memory at all"]'
+          ].join('\n'),
+          caption: 'They sound like the same question. One needs random access to everything at once; the other needs k items of memory and never rewinds.'
+        },
         plain: 'A bounded heap of size k is one streaming pass; quickselect needs the whole array.',
         formal: 'heap: O(n log k) time, O(k) space, streaming. quickselect: O(n) time, O(n) space, in place',
         readAs: 'Two ways to get the top k. The heap is slower in theory but holds only k items and works on ' +

@@ -8,6 +8,16 @@
     'naive-matching': [
       {
         term: 'Character comparisons are the only honest currency',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["milliseconds"] --> B["measures your machine<br/>as much as the algorithm"]',
+            '    C["loop iterations"] --> D["differs by implementation style"]',
+            '    E["character comparisons"] --> F["a property of the algorithm<br/>and the input, and nothing else"]',
+            '    F --> G["so two matchers can be compared<br/>on any machine, by anyone"]'
+          ].join('\n'),
+          caption: 'Pick the unit a cost is actually paid in. For pattern matching that is comparisons, which is why every claim in this milestone is quoted in them.'
+        },
         plain: 'Not milliseconds, not iterations — the count of times two characters were compared.',
         formal: 'the measure every matcher in this milestone is trying to minimise, and the only one comparable across them',
         detail: 'Milliseconds depend on a JIT, a cache and a machine, and they change between two ' +
@@ -21,6 +31,16 @@
       },
       {
         term: 'The naive matcher is the oracle, not the straw man',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the naive scan"] --> B["obviously correct,<br/>and obviously slow"]',
+            '    B --> C["so use it to produce the<br/>true occurrence list"]',
+            '    C --> D["every clever matcher is checked<br/>against that list first"]',
+            '    D --> E["and only then is its<br/>comparison count quoted"]'
+          ].join('\n'),
+          caption: 'A fast matcher that misses an occurrence looks exactly like a fast matcher. The slow one you can read is what makes the fast one\'s numbers mean anything.'
+        },
         plain: 'Every other matcher is checked against its occurrence list before its work is quoted.',
         formal: 'agreement on the full position list, plus a direct substring verification of each position',
         detail: 'Matchers fail by finding *most* of the occurrences, and a comparison count beside a ' +
@@ -116,6 +136,16 @@
     'kmp-prefix-function': [
       {
         term: 'A border is a prefix that is also a suffix',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["ababcabab"] --> B["its longest border is abab"]',
+            '    B --> C["the pattern already matched abab<br/>at the end of the failed attempt"]',
+            '    C --> D["so slide until that abab lines up<br/>with the prefix abab"]',
+            '    D --> E["no text character is re-read"]'
+          ].join('\n'),
+          caption: 'The border is what the failed match already told you. KMP is the observation that this information was there all along and was being thrown away.'
+        },
         plain: 'The longest border of "ababcabab" is "abab", of length 4.',
         formal: 'border(s) = the longest proper prefix of s that is also a suffix of s',
         readAs: 'The longest stretch that appears both at the start and at the end of the string, without ' +
@@ -145,6 +175,16 @@
       },
       {
         term: 'KMP never moves backwards in the text',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["mismatch at text position i"] --> B["the naive matcher restarts at<br/>the next alignment and re-reads"]',
+            '    A --> C["KMP slides the pattern and<br/>leaves i exactly where it is"]',
+            '    C --> D["so every text character is<br/>examined at most twice, ever"]',
+            '    D --> E["which is the linear bound,<br/>and why it can stream"]'
+          ].join('\n'),
+          caption: 'Never re-reading the text is what makes KMP usable on a stream you cannot rewind — a property the comparison count alone does not show.'
+        },
         plain: 'On a mismatch the pattern slides and the text index stays where it is.',
         formal: 'the text index is monotonically non-decreasing, so the matcher works on a stream that cannot be rewound',
         detail: 'That property, not the comparison count, is what KMP is for. A matcher that ' +
@@ -239,6 +279,17 @@
       },
       {
         term: 'The window is the algorithm, and it never moves left',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["keep the interval that reaches<br/>furthest right and is known<br/>to match a prefix"] --> B["a new position inside it"]',
+            '    B --> C["its answer is already known<br/>from the mirrored position"]',
+            '    C --> D["copy it, for free"]',
+            '    B --> E["a position past it"]',
+            '    E --> F["compare directly, and the<br/>window jumps right"]'
+          ].join('\n'),
+          caption: 'The window only ever moves right, so all the direct comparisons across the whole run add up to n. That is the entire linearity argument.'
+        },
         plain: 'Keep the interval that reaches furthest right and is known to equal a prefix.',
         formal: '[l, r] with s[l..r) = s[0..r−l); r is non-decreasing over the whole run',
         readAs: 'The algorithm remembers one window already known to match the string\'s own beginning. Its ' +

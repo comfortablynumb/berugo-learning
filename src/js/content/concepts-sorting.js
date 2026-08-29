@@ -8,6 +8,20 @@
     'sorting-contract': [
       {
         term: 'A sort is a contract, not an operation',
+        diagram: {
+          definition: [
+            'flowchart TD',
+            '    S["choosing a sort"] --> A["stable?"]',
+            '    S --> B["in place?"]',
+            '    S --> C["adaptive?"]',
+            '    S --> D["safe on a broken comparator?"]',
+            '    A --> E["four independent promises —<br/>and no algorithm makes all four"]',
+            '    B --> E',
+            '    C --> E',
+            '    D --> E'
+          ].join('\n'),
+          caption: 'Picking a sort is picking which of the four you actually need. Asking for all of them is asking for an algorithm that does not exist.'
+        },
         plain: 'Stable, in place, adaptive and comparator-safe are four separate promises, and no sort makes all of them.',
         formal: 'stability × space × adaptivity × comparison model',
         detail: 'Asking "which sort is fastest" is the wrong question because the answer depends on four ' +
@@ -20,6 +34,16 @@
       },
       {
         term: 'Stability, and when it is load-bearing',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    I["rows already ordered by date"] --> S["now sort them by customer"]',
+            '    S --> A["stable: inside each customer<br/>the dates are still in order"]',
+            '    S --> B["unstable: the date order<br/>is silently gone"]',
+            '    A --> C["which is why sorting twice works<br/>only when the sort is stable"]'
+          ].join('\n'),
+          caption: 'Stability is what lets you build a multi-key order out of single-key sorts, applied least-significant key first. Without it the earlier sort is wasted work.'
+        },
         plain: 'A stable sort leaves equal elements in the order it found them.',
         formal: 'i < j and key(a[i]) = key(a[j]) implies a[i] precedes a[j] in the output',
         readAs: 'If two records have equal keys, the one that started earlier finishes earlier. That is the ' +
@@ -119,6 +143,17 @@
     'merge-sort': [
       {
         term: 'The merge is the algorithm',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    L["left run — 1 4 7"] --> M{"which head is smaller?"}',
+            '    R["right run — 2 3 9"] --> M',
+            '    M --> O["write it out,<br/>advance only that run"]',
+            '    O --> M',
+            '    M --> D["one run empty:<br/>copy what is left of the other"]'
+          ].join('\n'),
+          caption: 'Both inputs are read forwards and the output is written forwards. That single access pattern is why merge sort is kind to a cache, and the only reason it survives on disk and over a network.'
+        },
         plain: 'Two sorted runs into one, reading both forwards and writing forwards.',
         formal: 'merge two runs of a and b in a + b - 1 comparisons at worst',
         readAs: 'Merging two sorted runs costs at most one comparison per element, less one — because the ' +
@@ -147,6 +182,15 @@
       },
       {
         term: 'Top-down against bottom-up: the same merges, different bookkeeping',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    T["top-down:<br/>split, recurse,<br/>merge on the way back up"] --> S["exactly the same set of merges"]',
+            '    B["bottom-up:<br/>a loop over widths 1, 2, 4, 8, …"] --> S',
+            '    S --> N["identical comparisons —<br/>what differs is the bookkeeping<br/>and how much gets copied"]'
+          ].join('\n'),
+          caption: 'The recursion is not doing the work; the merges are. Bottom-up performs the same ones from a loop, which is why it can copy half as much.'
+        },
         plain: 'Recursion or a loop over widths 1, 2, 4, 8 - and the loop copies half as much.',
         formal: 'both do ceil(log2 n) passes; bottom-up alternates the buffer instead of copying back',
         readAs: 'Top-down and bottom-up merge sort do the same number of passes — log base 2 of n, rounded ' +
@@ -225,6 +269,16 @@
     quicksort: [
       {
         term: 'Partition, then recurse into both sides',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["pick a pivot"] --> B["rearrange into:<br/>smaller, then the pivot, then larger"]',
+            '    B --> C["the pivot is now in its<br/>final position, permanently"]',
+            '    C --> D["recurse into the left part"]',
+            '    C --> E["recurse into the right part"]'
+          ].join('\n'),
+          caption: 'There is no merge step and no combining. The partition does all the work, and one element reaches its final place on every single call.'
+        },
         plain: 'Put everything below the pivot before it and everything above after it, then repeat.',
         formal: 'T(n) = T(k) + T(n-k-1) + n, which is n log n when k is near n/2 and n^2 when it is not',
         readAs: 'Quicksort\'s cost is the two sides plus the partition. Split near the middle and the ' +
@@ -251,6 +305,18 @@
       },
       {
         term: 'Three-way partitioning: the equal block is finished',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["one pass over the range"] --> B["less than the pivot"]',
+            '    A --> C["equal to the pivot"]',
+            '    A --> D["greater than the pivot"]',
+            '    C --> E["already finished —<br/>never recursed into again"]',
+            '    B --> F["recurse"]',
+            '    D --> F'
+          ].join('\n'),
+          caption: 'On input with few distinct keys this turns the quadratic case into a linear one: the equal block shrinks the problem instead of being sorted over and over.'
+        },
         plain: 'Split into less, equal and greater, and never recurse into the equal part.',
         formal: 'Dijkstra\'s Dutch national flag: one pass, three regions, one invariant',
         detail: 'When duplicates are common - a status column, a category, a rounded score - the equal block ' +

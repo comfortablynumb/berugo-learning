@@ -61,6 +61,16 @@
       },
       {
         term: 'Array of structs (AoS)',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["array of structs<br/>x y z · x y z · x y z"] --> B["one record is contiguous"]',
+            '    B --> C["good when you use most fields<br/>of one record at a time"]',
+            '    D["struct of arrays<br/>x x x · y y y · z z z"] --> E["one field is contiguous"]',
+            '    E --> F["good when you scan one field<br/>across many records"]'
+          ].join('\n'),
+          caption: 'Same data, same total bytes. The layout decides which of the two access patterns gets full cache lines and which gets one useful value per line.'
+        },
         plain: 'Records stored whole, one after another. Good when you use most fields of one record.',
         formal: 'record i occupies [i·stride, (i+1)·stride)',
         readAs: 'Record i runs from i times the stride up to, but not including, the next multiple. The ' +
@@ -93,6 +103,16 @@
       },
       {
         term: 'Cache line',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["you read 1 byte"] --> B["the hardware fetches<br/>the whole 64-byte line"]',
+            '    B --> C{"is the next thing you need<br/>inside that same line?"}',
+            '    C -->|yes| D["free — it is already there"]',
+            '    C -->|no| E["another full line fetched<br/>from scratch"]'
+          ].join('\n'),
+          caption: 'Memory is not sold by the byte. Cost is lines touched, which is why the same number of operations can differ tenfold in time.'
+        },
         plain: 'Memory moves in 64-byte lines, so touching one byte costs the whole line.',
         formal: 'line = ⌊address / 64⌋',
         readAs: 'Which cache line an address falls in is the address divided by 64, rounded down — the floor ' +
@@ -138,6 +158,16 @@
     'dynamic-arrays': [
       {
         term: 'Capacity versus length',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["capacity — what was allocated"] --> C["the gap between them<br/>is the growth headroom"]',
+            '    B["length — what you actually stored"] --> C',
+            '    C --> D["append is free while headroom lasts"]',
+            '    D --> E["headroom runs out:<br/>allocate bigger, copy everything, free"]'
+          ].join('\n'),
+          caption: 'Every append is O(1) except the ones that are not. The gap is what buys the cheap appends, and the price is the memory it wastes.'
+        },
         plain: 'Length is what you stored; capacity is what was allocated. The gap is the growth headroom.',
         formal: 'length ≤ capacity',
         detail: 'A dynamic array is a fixed allocation plus a count of how much of it is in use, and ' +
@@ -240,6 +270,16 @@
       },
       {
         term: 'Reference invalidation',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["you hold a pointer into the array"] --> B["someone appends"]',
+            '    B --> C["the array reallocates and<br/>moves to a new address"]',
+            '    C --> D["your pointer now aims at freed memory"]',
+            '    D --> E["an index survives the move;<br/>a pointer or an iterator does not"]'
+          ].join('\n'),
+          caption: 'This is the cost of contiguity, and it is why growable arrays hand out indices rather than addresses.'
+        },
         plain: 'A reallocation moves the whole array, so every pointer, index-held reference and iterator into it is stale.',
         formal: 'growth invalidates references, not indices',
         detail: 'Growth allocates a new block and copies, which means every element has a new ' +
@@ -270,6 +310,16 @@
       },
       {
         term: 'Pointer chasing',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["read node 1"] --> B["only now is the address<br/>of node 2 known"]',
+            '    B --> C["read node 2"]',
+            '    C --> D["only now is the address<br/>of node 3 known"]',
+            '    D --> E["the machine cannot prefetch<br/>what it cannot predict"]'
+          ].join('\n'),
+          caption: 'An array lets the processor fetch ahead because it knows where the next element is. A list makes every step depend on the answer to the last one.'
+        },
         plain: 'The address of the next element is only known after reading the current one, so nothing can be prefetched.',
         formal: 'load depends on the previous load',
         detail: 'Modern processors hide memory latency by having many loads in flight at once, which ' +
@@ -309,6 +359,15 @@
       },
       {
         term: 'Sentinel node',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["without a sentinel:<br/>is the list empty?<br/>is this the head?<br/>is this the tail?"] --> B["three special cases in every operation"]',
+            '    C["with a dummy node at each end"] --> D["every real node has a<br/>previous and a next, always"]',
+            '    D --> E["insert and remove become<br/>one branchless case"]'
+          ].join('\n'),
+          caption: 'The dummy node costs one allocation and removes the branches where linked-list bugs actually live.'
+        },
         plain: 'A dummy head or tail that removes the empty-list and end-of-list special cases.',
         formal: 'always at least one node',
         detail: 'Most of the bugs in hand-written list code live in the boundary cases: inserting ' +
@@ -392,6 +451,15 @@
       },
       {
         term: 'Recursion depth',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["each call pushes a frame:<br/>return address, saved registers, locals"] --> B["depth × frame size = memory used"]',
+            '    B --> C["charged to the stack, which you<br/>never sized and cannot grow"]',
+            '    C --> D["so this fails on inputs the heap<br/>would have held easily"]'
+          ].join('\n'),
+          caption: 'Recursion depth is memory spent on a region you did not choose the size of, and it is far smaller than the heap you were thinking about.'
+        },
         plain: 'How many frames are live at once. It is memory, on a region you did not size.',
         formal: 'peak frames × frame size',
         detail: 'Depth is the number of frames simultaneously alive, and multiplying it by the frame ' +
@@ -418,6 +486,15 @@
       },
       {
         term: 'Explicit stack',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["recursive version:<br/>frames on the call stack"] --> B["depth limited by the engine"]',
+            '    C["explicit version:<br/>the same frames in a heap array"] --> D["depth limited by memory you control"]',
+            '    D --> E["identical traversal order —<br/>you moved where the frames live"]'
+          ].join('\n'),
+          caption: 'This is not a rewrite of the algorithm. It is the same algorithm with its stack moved somewhere you can size and inspect.'
+        },
         plain: 'Moving the frames to a heap array: same order, and a bound you control.',
         formal: 'push/pop on an array instead of calling',
         detail: 'Any recursion can be rewritten as a loop over an explicit stack of pending work, and ' +
@@ -520,6 +597,16 @@
       },
       {
         term: 'Full versus empty',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["head equals tail"] --> B["the ring is empty"]',
+            '    A --> C["the ring is completely full"]',
+            '    C --> D["the same indices mean<br/>two opposite things"]',
+            '    D --> E["break the tie: keep a count,<br/>or leave one slot always unused"]'
+          ].join('\n'),
+          caption: 'A ring buffer\'s one genuine subtlety. Every correct implementation picks one of those two tie-breaks, and the bug is always in the one that picked neither.'
+        },
         plain: 'Head equals tail in both states, so an implementation must break the tie.',
         formal: 'waste one slot, or keep a count',
         detail: 'With two indices there are capacity + 1 possible occupancies but only capacity ' +
@@ -593,6 +680,15 @@
       },
       {
         term: 'Head-of-line blocking',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["one slow item reaches<br/>the front of the queue"] --> B["every item behind it waits"]',
+            '    B --> C["however much spare capacity<br/>the ring still has"]',
+            '    C --> D["the queue is not full,<br/>and nothing is moving"]'
+          ].join('\n'),
+          caption: 'Capacity does not help here, which is why adding buffer space to a stalled pipeline changes nothing except how much is waiting.'
+        },
         plain: 'One slow item at the front stalls every item behind it, however much capacity the ring has.',
         formal: 'FIFO service, one server',
         detail: 'Strict FIFO order plus a single server means the item at the front owns the queue ' +

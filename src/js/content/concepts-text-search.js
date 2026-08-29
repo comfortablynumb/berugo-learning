@@ -135,6 +135,16 @@
       },
       {
         term: 'Shortest list first',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["intersect: rare term ∩ common term"] --> B{"which one do you walk?"}',
+            '    B --> C["start from the rare list —<br/>the result can only be smaller"]',
+            '    B --> D["start from the common list —<br/>you walk millions of postings<br/>to discard almost all of them"]',
+            '    C --> E["same answer, and the work is<br/>bounded by the smallest list"]'
+          ].join('\n'),
+          caption: 'An intersection can never be larger than its smallest input, so the smallest input is the one that should drive the loop.'
+        },
         plain: 'Intersect the rarest term first, because the result can only shrink.',
         formal: 'order the lists by length before folding',
         detail: 'It is free, it requires nothing from the data structure, and it is the single ' +
@@ -147,6 +157,16 @@
       },
       {
         term: 'Galloping search',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["looking for a target far ahead"] --> B["probe 1, 2, 4, 8, 16 … positions on"]',
+            '    B --> C["the first probe that overshoots<br/>brackets the answer"]',
+            '    C --> D["binary-search inside that bracket"]',
+            '    D --> E["cost depends on how far you jumped,<br/>not on how long the list is"]'
+          ].join('\n'),
+          caption: 'It is the right search when the answer is probably close: a linear scan pays for the distance and a binary search pays for the whole list, while this pays for the log of the distance.'
+        },
         plain: 'Probe 1, 2, 4, 8 … positions ahead, then binary-search the bracket you overshot.',
         formal: 'O(m log(n/m)) for lists of length m ≪ n',
         readAs: 'Intersecting a short list of length m against a much longer one of length n costs about m ' +

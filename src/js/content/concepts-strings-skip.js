@@ -8,6 +8,16 @@
     'boyer-moore': [
       {
         term: 'Comparing right to left is the whole idea',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["align the pattern, compare<br/>from its last character"] --> B["a mismatch there"]',
+            '    B --> C["tells you about a text character<br/>you would not otherwise have read"]',
+            '    C --> D["so the pattern can jump<br/>past several positions at once"]',
+            '    D --> E["sub-linear on average —<br/>most characters never read at all"]'
+          ].join('\n'),
+          caption: 'Every other matcher here reads every character of the text. This one can finish having skipped most of them, which is why it is the one in your editor.'
+        },
         plain: 'A mismatch at the pattern\'s last position tells you about a character you have not otherwise looked at.',
         formal: 'within each alignment, compare pattern[m−1] down to pattern[0]',
         detail: 'Every other matcher in this milestone reads the text left to right and can at best ' +
@@ -234,6 +244,15 @@
     'aho-corasick': [
       {
         term: 'One pass finds every pattern, whatever the set size',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["k patterns, run a single-pattern<br/>matcher k times"] --> B["k passes over the text"]',
+            '    C["k patterns in one automaton"] --> D["one pass over the text"]',
+            '    D --> E["cost depends on the text length<br/>and the number of matches —<br/>not on k"]'
+          ].join('\n'),
+          caption: 'This is the property that matters at scale: adding the ten-thousandth pattern to the set costs build time and nothing at all at match time.'
+        },
         plain: 'Running a single-pattern matcher k times costs k passes; this costs one.',
         formal: 'O(n + total pattern length + occurrences), independent of k for the scan itself',
         detail: 'The automaton is built once from the pattern set and then the text is read once. ' +
@@ -257,6 +276,16 @@
       },
       {
         term: 'A failure link is KMP\'s border, generalised to a set',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a state spells the string she"] --> B["the match fails here"]',
+            '    B --> C["where else could we be?"]',
+            '    C --> D["at the longest proper suffix of she<br/>that is a prefix of some pattern"]',
+            '    D --> E["the state for he — follow the link<br/>and keep going, without re-reading"]'
+          ].join('\n'),
+          caption: 'One pattern has one border chain; a set of patterns has a tree of them. The failure link is the same idea with the trie standing in for the single pattern.'
+        },
         plain: 'Point each state at the state for the longest proper suffix of what it spells that is a prefix of some pattern.',
         formal: 'fail(u) = the deepest state v ≠ u whose string is a suffix of u\'s string',
         detail: 'Exactly the same idea as the border array, with "the pattern" replaced by "any ' +
