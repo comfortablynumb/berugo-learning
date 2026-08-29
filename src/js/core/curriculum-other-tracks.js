@@ -631,10 +631,61 @@
               summary: 'A heap that grows, a snapshot, the dominator tree over the object graph computed with the M13 dominator pass, and the retaining path from a root to the leak.',
               tags: ['gc logs', 'allocation rate', 'promotion rate', 'pause distribution', 'heap sizing', 'managed leak', 'retained size', 'dominator tree', 'retaining path', 'heap dump']
             }]
+        },
+        {
+          id: 'M32',
+          title: 'Program analysis, SAT/SMT and verification',
+          summary: 'The tools that reason about programs without running them and the ones that run them adversarially, built on a CDCL SAT solver whose UNSAT answers carry a proof — with every analyser checked against a dynamic oracle that can prove it unsound and never that it is sound.',
+          sections: [
+            {
+              id: 'static-analysis-foundations',
+              title: 'Foundations of static analysis',
+              summary: 'One program and one property at four precision levels, with the reported answer beside the true one from exhaustive execution, so the false positives and the false negatives are objects rather than adjectives.',
+              tags: ['soundness', 'completeness', 'over-approximation', 'under-approximation', 'false positive', 'false negative', 'rice theorem', 'flow sensitivity', 'path sensitivity', 'precision cost']
+            },
+            {
+              id: 'abstract-interpretation',
+              title: 'Abstract interpretation',
+              summary: 'Interval analysis stepped over a real loop, widening the bound to infinity to terminate and narrowing it back to [0, 11], with every claim checked against the values an actual run produced.',
+              tags: ['abstract domain', 'galois connection', 'transfer function', 'lattice', 'join', 'widening', 'narrowing', 'interval domain', 'sign domain', 'fixpoint']
+            },
+            {
+              id: 'taint-analysis',
+              title: 'Type-based and flow-sensitive analysis',
+              summary: 'Taint carried from source to sink with the whole path kept, sanitisers clearing it, and a policy sweep pricing the two ways the model fails rather than the algorithm.',
+              tags: ['taint analysis', 'source', 'sink', 'sanitiser', 'propagation path', 'flow sensitivity', 'nullability', 'definite assignment', 'annotation burden', 'field insensitivity']
+            },
+            {
+              id: 'symbolic-execution',
+              title: 'Symbolic execution',
+              summary: 'A path tree with a concrete input at every leaf, each one executed and asserted to reach the path it was generated for — a test case with a proof of reachability attached.',
+              tags: ['symbolic value', 'path condition', 'forking', 'path explosion', 'constraint solving', 'concolic execution', 'input generation', 'coverage', 'search heuristics', 'summaries']
+            },
+            {
+              id: 'sat-solving',
+              title: 'SAT solving',
+              summary: 'CDCL with two-watched literals and 1UIP conflict analysis, where every SAT answer carries a checked model and every UNSAT answer a DRAT proof that a checker with no search in it replays.',
+              tags: ['cnf', 'dpll', 'unit propagation', 'two-watched literals', 'clause learning', '1uip', 'backjumping', 'vsids', 'restarts', 'drat proof']
+            },
+            {
+              id: 'smt-solving',
+              title: 'SMT solving',
+              summary: 'DPLL(T) as a division of labour: a SAT core over opaque atoms, a theory that refutes its models, and an explanation coming back as a clause — with congruence closure built on the union-find from M04.',
+              tags: ['dpll(t)', 'theory solver', 'euf', 'congruence closure', 'difference logic', 'linear arithmetic', 'fourier motzkin', 'unsat core', 'theory propagation', 'lazy combination']
+            },
+            {
+              id: 'model-checking',
+              title: 'Model checking',
+              summary: 'A protocol checked twice — explicit-state search and a SAT unrolling — and required to agree on the depth of the first violation, which is how the encoding bug in the second one was found.',
+              tags: ['transition system', 'reachable states', 'safety', 'invariant', 'counter-example', 'bounded model checking', 'unrolling', 'state explosion', 'temporal logic', 'trace replay']
+            },
+            {
+              id: 'deductive-verification',
+              title: 'Deductive verification',
+              summary: 'The binary-search overflow failing its verification condition with a counter-example, the corrected version discharging all three, and a loop whose VC is valid over the integers and not over the rationals.',
+              tags: ['hoare logic', 'weakest precondition', 'verification condition', 'loop invariant', 'annotation', 'smt discharge', 'counter-example', 'frame problem', 'unsat core', 'integrality']
+            }]
         }
-      ],
-      planned: [
-        { id: 'M32', title: 'Program analysis, SAT/SMT and verification', sections: 11 }
       ]
     },
     {

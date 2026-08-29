@@ -45,7 +45,13 @@
     return {
       sources: ['readParam', 'readInput', 'readCookie'],
       sinks: ['query', 'exec', 'render'],
-      sanitisers: ['escape', 'quote', 'validate']
+      sanitisers: ['escape', 'quote', 'validate'],
+      /* 'insensitive' is what nearly every shipping tool does: one abstract
+         location per container, so a tainted field taints its clean siblings.
+         'sensitive' keeps one per field of a record literal and costs a map
+         per allocation. Both are offered because the difference between them
+         is a false-positive count rather than an opinion. */
+      fields: 'insensitive'
     };
   }
 
@@ -78,7 +84,7 @@
   /* ------------------------------------------------------------ propagation */
 
   function emptyFacts() {
-    return { regs: {}, slots: {} };
+    return { regs: {}, slots: {}, fields: {} };
   }
 
   function taintOf(facts, name) {
@@ -114,15 +120,59 @@
     if (inst.op === 'storeLocal') return copy(facts, inst.value, inst.slot, 'store', inst, false);
     if (inst.op === 'binary') return fromOperands(facts, inst, [inst.left, inst.right]);
     if (inst.op === 'unary') return fromOperands(facts, inst, [inst.operand]);
-    if (CONTAINERS[inst.op]) return fromOperands(facts, inst, inst.args || []);
+    if (CONTAINERS[inst.op]) return buildContainer(policy, facts, inst);
+    if (inst.op === 'loadField') return readField(policy, facts, inst);
+    if (inst.op === 'loadIndex') return fromOperands(facts, inst, [inst.object]);
     if (inst.op === 'call') return applyCall(policy, names, facts, report, inst);
     return false;
+  }
+
+  /**
+   * A container is tainted if anything put into it is. Under field
+   * sensitivity the per-field taint is recorded beside that, so a later
+   * `loadField` can be more precise than the container as a whole — and the
+   * container-level fact is still kept, because a read of a field this
+   * literal did not name has nothing else to fall back on.
+   */
+  function buildContainer(policy, facts, inst) {
+    const changed = fromOperands(facts, inst, inst.args || []);
+
+    if (policy.fields !== 'sensitive' || !inst.fields) return changed;
+    const perField = facts.fields[inst.target] || {};
+
+    inst.fields.forEach(function (field, at) {
+      perField[field] = taintOf(facts, (inst.args || [])[at]);
+    });
+    facts.fields[inst.target] = perField;
+    return changed;
+  }
+
+  /**
+   * Reading a field of a tainted record. Field-INSENSITIVELY the answer is the
+   * container's taint, which is the false positive this section measures: a
+   * clean field of a record that also holds a tainted one is reported.
+   */
+  function readField(policy, facts, inst) {
+    const known = policy.fields === 'sensitive' ? facts.fields[inst.object] : null;
+
+    if (!known || !Object.prototype.hasOwnProperty.call(known, inst.field)) {
+      return fromOperands(facts, inst, [inst.object]);
+    }
+    if (!known[inst.field] || facts.regs[inst.target]) return false;
+    mark(facts, inst.target, known[inst.field].origin,
+      { path: known[inst.field].path, label: 'field ' + inst.field }, inst);
+    return true;
   }
 
   function copy(facts, from, to, label, inst, fromSlot) {
     const source = fromSlot ? facts.slots[from] : facts.regs[from];
     const store = fromSlot ? facts.regs : facts.slots;
 
+    /* Per-field taint has to travel with the value. Registers are `%n` and
+       slots are `@n`, so one map holds both without colliding — and this runs
+       before the early return, because a record whose tainted field was
+       cleared still carries a field map worth copying. */
+    if (facts.fields[from]) facts.fields[to] = facts.fields[from];
     if (!source || store[to]) return false;
     store[to] = { origin: source.origin,
       path: source.path.concat([{ why: label, op: inst.op, span: inst.span, target: to }]) };

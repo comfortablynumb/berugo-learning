@@ -92,17 +92,23 @@
 
     while (current && run.steps < run.budget) {
       run.steps += 1;
-      record(run, current.id);
+      record(run, current.id, 'entry');
       const next = runBlock(run, current);
 
+      /* The state at the END of the block as well as at its start. Recording
+         only entries leaves the last block of a run unchecked entirely, and a
+         straight-line function is ONE block - so the oracle had nothing to say
+         about exactly the programmes whose analysis is easiest to get wrong. */
+      record(run, current.id, 'exit');
       if (next === null) break;
       current = blocks[next];
     }
     return finishRun(run, fn);
   }
 
-  function record(run, blockId) {
-    run.observations.push({ block: blockId, slots: Object.assign({}, run.slots) });
+  function record(run, blockId, at) {
+    run.observations.push({ block: blockId, at: at,
+      slots: Object.assign({}, run.slots) });
   }
 
   function runBlock(run, block) {
@@ -168,7 +174,8 @@
     const graph = Cfg.build(fn);
     const headers = loopHeaders(fn, graph);
     const state = { entry: {}, exit: {}, rounds: [], widenings: 0, narrowings: 0,
-      terminators: {} };
+      terminators: {}, trace: [], capped: false,
+      widen: settings.widen !== false, cap: settings.rounds || 200 };
 
     fn.blocks.forEach(function (block) { state.terminators[block.id] = block.terminator; });
     state.entry[fn.blocks[0].id] = Abstract.emptyState();
@@ -190,26 +197,43 @@
     let round = 0;
 
     fn.blocks.forEach(function (block) { blocks[block.id] = block; });
-    while (changed && round < 200) {
+    while (changed && round < state.cap) {
       changed = false;
       round += 1;
       fn.blocks.forEach(function (block) {
         if (visitBlock(graph, domain, headers, state, block, mode)) changed = true;
       });
       state.rounds.push({ pass: mode, round: round, changed: changed });
+      recordRound(domain, headers, state, { pass: mode, round: round });
     }
+    /* A pass that is still changing when it runs out of rounds has NOT reached
+       a fixpoint, and the state it leaves behind is not a sound claim about
+       anything. Saying so is the whole point of offering `widen: false`: an
+       ascending chain that does not stabilise looks exactly like one that has,
+       unless the report carries the flag. */
+    if (changed) state.capped = true;
+  }
+
+  /** The entry state of every loop header, once per round: the ascending chain
+   *  as data, which is what makes a widening step visible rather than told. */
+  function recordRound(domain, headers, state, at) {
+    Object.keys(headers).forEach(function (id) {
+      state.trace.push({ pass: at.pass, round: at.round, block: id,
+        slots: showState(domain, state.entry[id]) });
+    });
   }
 
   function visitBlock(graph, domain, headers, state, block, mode) {
     const incoming = incomingState(graph, domain, state, block);
 
     if (!incoming) return false;
-    const merged = mergeInto(domain, state.entry[block.id], incoming, headers[block.id], mode);
+    const merged = mergeInto(domain, state.entry[block.id], incoming,
+      { header: headers[block.id], mode: mode, widen: state.widen });
 
     if (Abstract.sameState(domain, state.entry[block.id], merged)) {
       if (state.exit[block.id]) return false;
     }
-    if (headers[block.id]) countOperator(state, mode);
+    if (headers[block.id] && (state.widen || mode === 'narrow')) countOperator(state, mode);
     state.entry[block.id] = merged;
     state.exit[block.id] = runTransfer(domain, merged, block);
     return true;
@@ -226,8 +250,16 @@
    * are not part of any cycle — which is a common way to make an interval
    * analysis useless while believing it is standard.
    */
-  function mergeInto(domain, previous, incoming, isHeader, mode) {
+  function mergeInto(domain, previous, incoming, at) {
+    const isHeader = at.header;
+    const mode = at.mode;
+
     if (!previous) return incoming;
+    /* `widen: false` is the demonstration, not a mode anybody should analyse
+       in: the header joins like every other block, so the chain ascends one
+       loop iteration per round and only terminates because the round budget
+       runs out. */
+    if (mode === 'widen' && !at.widen) return Abstract.joinStates(domain, previous, incoming);
     /* The narrowing pass is a DESCENDING iteration: outside a loop header it
        replaces the block's state with the recomputed one rather than joining.
        Joining looks symmetrical with the ascending pass and undoes the whole
@@ -276,7 +308,8 @@
   function report(fn, domain, state, headers) {
     return { domain: domain.name, about: domain.about,
       rounds: state.rounds, widenings: state.widenings, narrowings: state.narrowings,
-      headers: Object.keys(headers),
+      headers: Object.keys(headers), trace: state.trace,
+      converged: !state.capped, cap: state.cap,
       blocks: fn.blocks.map(function (block) {
         return { id: block.id, header: Boolean(headers[block.id]),
           entry: showState(domain, state.entry[block.id]),
@@ -304,13 +337,20 @@
    * the report says how many observations it is based on so that nobody can
    * read it as one.
    */
+  /** An observation taken at the end of a block is a claim about the block's
+   *  EXIT state; checking it against the entry state would report a violation
+   *  every time an instruction changed anything. */
+  function stateFor(analysis, row) {
+    return row.at === 'exit' ? analysis.exit[row.block] : analysis.entry[row.block];
+  }
+
   function soundness(analysis, run, domain) {
     const chosen = domain || Abstract.domainFor(analysis.domain);
     const violations = [];
     let checked = 0;
 
     run.observations.forEach(function (row) {
-      const entry = analysis.entry[row.block];
+      const entry = stateFor(analysis, row);
 
       if (!entry) return;
       Object.keys(row.slots).forEach(function (slot) {
@@ -379,10 +419,14 @@
         const value = row.slots[slot];
 
         if (typeof value !== 'number') return;
-        const key = row.block + '/' + slot;
+        /* Entry and exit observations of the same block are different facts
+           about different states, and grouping them together would compare an
+           exit value against the entry claim - a violation on every block that
+           changes anything. */
+        const key = row.block + '/' + (row.at || 'entry') + '/' + slot;
 
-        observed[key] = observed[key] || { block: row.block, slot: slot,
-          lo: value, hi: value, count: 0, values: {} };
+        observed[key] = observed[key] || { block: row.block, at: row.at || 'entry',
+          slot: slot, lo: value, hi: value, count: 0, values: {} };
         observed[key].lo = Math.min(observed[key].lo, value);
         observed[key].hi = Math.max(observed[key].hi, value);
         observed[key].values[value] = true;
@@ -395,9 +439,10 @@
   function summarise(analysis, domain, observed) {
     const rows = Object.keys(observed).sort().map(function (key) {
       const row = observed[key];
-      const claim = Abstract.readSlot(domain, analysis.entry[row.block] || {}, row.slot);
+      const state = stateFor(analysis, row) || {};
+      const claim = Abstract.readSlot(domain, state, row.slot);
 
-      return { block: row.block, slot: row.slot, claim: domain.show(claim),
+      return { block: row.block, at: row.at, slot: row.slot, claim: domain.show(claim),
         observedLo: row.lo, observedHi: row.hi,
         distinct: Object.keys(row.values).length,
         width: widthOf(domain, claim),

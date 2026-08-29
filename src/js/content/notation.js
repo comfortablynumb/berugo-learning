@@ -97,6 +97,8 @@
       means: 'The negation of what follows - logical NOT.' },
     { token: '⊥', reads: 'bottom',
       means: '"No value" - a distinguished element meaning undefined or unreachable, deliberately kept incomparable with real values so it can never win a minimum by accident. In denotational semantics it is the meaning of a program that never finishes.' },
+    { token: '⊤', reads: 'top',
+      means: '"Any value at all" - the largest element of a lattice, which rules nothing out. An abstract interpreter that has reached ⊤ for a variable is still sound and has stopped saying anything useful about it, so counting the claims that sit at ⊤ is how the precision of such an analysis is measured.' },
     { token: '⊢', reads: 'proves, or entails',
       means: 'The turnstile. What is on the left is what you are allowed to assume; what is on the right follows from it. In a typing judgement `Γ ⊢ e : τ`, Γ lists the assumptions about free variables and the rest says what the expression\'s type is under them.' },
     { token: '⇓', reads: 'evaluates to',

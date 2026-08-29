@@ -370,6 +370,14 @@
       <section data-section="weak-references" hidden><div class="section-body"><div id="weak-references-content"></div></div></section>
       <section data-section="avoiding-the-collector" hidden><div class="section-body"><div id="avoiding-the-collector-content"></div></div></section>
       <section data-section="diagnosing-gc" hidden><div class="section-body"><div id="diagnosing-gc-content"></div></div></section>
+      <section data-section="static-analysis-foundations" hidden><div class="section-body"><div id="static-analysis-foundations-content"></div></div></section>
+      <section data-section="abstract-interpretation" hidden><div class="section-body"><div id="abstract-interpretation-content"></div></div></section>
+      <section data-section="taint-analysis" hidden><div class="section-body"><div id="taint-analysis-content"></div></div></section>
+      <section data-section="symbolic-execution" hidden><div class="section-body"><div id="symbolic-execution-content"></div></div></section>
+      <section data-section="sat-solving" hidden><div class="section-body"><div id="sat-solving-content"></div></div></section>
+      <section data-section="smt-solving" hidden><div class="section-body"><div id="smt-solving-content"></div></div></section>
+      <section data-section="model-checking" hidden><div class="section-body"><div id="model-checking-content"></div></div></section>
+      <section data-section="deductive-verification" hidden><div class="section-body"><div id="deductive-verification-content"></div></div></section>
     </main>
   </div>
 
@@ -781,6 +789,7 @@
   <script src="src/js/algorithms/taint.js"></script>
   <script src="src/js/algorithms/symbolic-exec.js"></script>
   <script src="src/js/algorithms/race-detect.js"></script>
+  <script src="src/js/machines/taint-oracle.js"></script>
   <script src="src/js/algorithms/fuzzer.js"></script>
   <script src="src/js/machines/heap-sim.js"></script>
   <script src="src/js/machines/static-lab.js"></script>
@@ -802,6 +811,7 @@
   <script src="src/js/machines/spec-dsl.js"></script>
 
   <script src="src/js/viz/chart-base.js"></script>
+  <script src="src/js/viz/implication-graph.js"></script>
   <script src="src/js/viz/canvas.js"></script>
   <script src="src/js/viz/legend.js"></script>
   <script src="src/js/viz/tooltip.js"></script>
@@ -1159,6 +1169,22 @@
   <script src="src/js/content/exercises-memory.js"></script>
   <script src="src/js/content/exercises-memory-generational.js"></script>
   <script src="src/js/content/exercises-memory-practice.js"></script>
+  <script src="src/js/content/concepts-program-analysis.js"></script>
+  <script src="src/js/content/concepts-program-taint.js"></script>
+  <script src="src/js/content/examples-program-analysis.js"></script>
+  <script src="src/js/content/examples-program-taint.js"></script>
+  <script src="src/js/content/reference-program-analysis.js"></script>
+  <script src="src/js/content/reference-program-taint.js"></script>
+  <script src="src/js/content/exercises-program-analysis.js"></script>
+  <script src="src/js/content/exercises-program-taint.js"></script>
+  <script src="src/js/content/concepts-program-solvers.js"></script>
+  <script src="src/js/content/examples-program-solvers.js"></script>
+  <script src="src/js/content/reference-program-solvers.js"></script>
+  <script src="src/js/content/exercises-program-solvers.js"></script>
+  <script src="src/js/content/concepts-program-verification.js"></script>
+  <script src="src/js/content/examples-program-verification.js"></script>
+  <script src="src/js/content/reference-program-verification.js"></script>
+  <script src="src/js/content/exercises-program-verification.js"></script>
   <script src="src/js/content/exercises-variance.js"></script>
   <script src="src/js/content/exercises-semantics.js"></script>
   <script src="src/js/content/exercises-ownership.js"></script>
@@ -1868,6 +1894,22 @@
   <script src="src/js/sections/avoiding-the-collector-section.js"></script>
   <script src="src/js/sections/diagnosing-gc-template.js"></script>
   <script src="src/js/sections/diagnosing-gc-section.js"></script>
+  <script src="src/js/sections/static-analysis-foundations-template.js"></script>
+  <script src="src/js/sections/static-analysis-foundations-section.js"></script>
+  <script src="src/js/sections/abstract-interpretation-template.js"></script>
+  <script src="src/js/sections/abstract-interpretation-section.js"></script>
+  <script src="src/js/sections/taint-analysis-template.js"></script>
+  <script src="src/js/sections/taint-analysis-section.js"></script>
+  <script src="src/js/sections/symbolic-execution-template.js"></script>
+  <script src="src/js/sections/symbolic-execution-section.js"></script>
+  <script src="src/js/sections/sat-solving-template.js"></script>
+  <script src="src/js/sections/sat-solving-section.js"></script>
+  <script src="src/js/sections/smt-solving-template.js"></script>
+  <script src="src/js/sections/smt-solving-section.js"></script>
+  <script src="src/js/sections/model-checking-template.js"></script>
+  <script src="src/js/sections/model-checking-section.js"></script>
+  <script src="src/js/sections/deductive-verification-template.js"></script>
+  <script src="src/js/sections/deductive-verification-section.js"></script>
   <script src="src/js/app.js"></script>
 </body>
 </html>

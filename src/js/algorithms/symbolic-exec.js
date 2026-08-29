@@ -28,8 +28,20 @@
   const api = factory(root);
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   if (root) root.SymbolicExec = api;
-}(typeof window !== 'undefined' ? window : null, function () {
+}(typeof window !== 'undefined' ? window : null, function (scope) {
   'use strict';
+
+  /**
+   * The linear theory solver from 32.6, resolved at CALL time rather than at
+   * load time. index.html loads this file before the solver package, and a
+   * module that reads a global the script order has not defined yet does not
+   * fail loudly - it captures `undefined` and the feature is quietly missing.
+   */
+  function linearTheory() {
+    if (scope && scope.Berugo && scope.Berugo.TheoryLinear) return scope.Berugo.TheoryLinear;
+    if (typeof require === 'function') return require('../machines/solver/theories/linear.js');
+    return null;
+  }
 
   const OPPOSITE = { lt: 'ge', le: 'gt', gt: 'le', ge: 'lt', eq: 'ne', ne: 'eq' };
 
@@ -162,9 +174,47 @@
         : { verdict: 'unsat', tried: 1 };
     }
     if (names.length > (settings.variables || 4)) {
-      return { verdict: 'unknown', why: names.length + ' symbols is past the search bound' };
+      return refine({ verdict: 'unknown', tried: 0,
+        why: names.length + ' symbols is past the search bound' }, constraints, settings);
     }
-    return searchBox(constraints, names, span);
+    return refine(searchBox(constraints, names, span), constraints, settings);
+  }
+
+  /**
+   * A bounded search cannot tell "no solution" from "none within the box", so
+   * on its own it reports `unknown` for both - which is the honest answer and
+   * a useless one, because an infeasible path is dead code and worth knowing
+   * about. With `decide: 'linear'` the path condition goes to the theory
+   * solver, which eliminates variables and either PROVES it unsatisfiable or
+   * says the constraints are satisfiable over the rationals and the missing
+   * piece is an integer point.
+   */
+  function refine(answer, constraints, settings) {
+    const theory = settings.decide ? linearTheory() : null;
+
+    if (answer.verdict === 'sat' || !theory) return answer;
+    const out = theory.decide(literalsFor(constraints));
+
+    if (out.verdict === 'unsat') {
+      return { verdict: 'unsat', tried: answer.tried, proof: 'linear elimination',
+        why: out.why, stages: out.stages };
+    }
+    if (out.verdict !== 'sat') return Object.assign({}, answer, { theory: out.why });
+    return Object.assign({}, answer, { rational: out.model,
+      theory: 'satisfiable over the rationals; no integer point inside the box' });
+  }
+
+  /**
+   * Opaque values carry no constraint and are dropped. That keeps the system
+   * WEAKER than the path condition, so an unsat answer about the subset is
+   * still an unsat answer about the whole - the direction that matters.
+   */
+  function literalsFor(constraints) {
+    return constraints.filter(function (row) { return !row.value.opaque; })
+      .map(function (row) {
+        return { left: { terms: row.value.terms, constant: row.value.constant },
+          right: { terms: {}, constant: 0 }, operator: row.operator };
+      });
   }
 
   function searchBox(constraints, names, span) {
@@ -198,7 +248,8 @@
     const run = { paths: [], forks: 0, truncated: 0,
       maxDepth: settings.depth === undefined ? 12 : settings.depth,
       maxPaths: settings.paths === undefined ? 40 : settings.paths,
-      span: settings.span, symbols: [], names: settings.names || [] };
+      span: settings.span, decide: settings.decide, symbols: [],
+      names: settings.names || [] };
 
     fn.blocks.forEach(function (block) { blocks[block.id] = block; });
     walk(run, blocks, fn.blocks[0], initialState(fn, run), [], 0, []);
@@ -302,7 +353,7 @@
 
   function finishPath(run, state, condition, visited) {
     if (run.paths.length >= run.maxPaths) { run.truncated += 1; return; }
-    const answer = solve(condition, { span: run.span });
+    const answer = solve(condition, { span: run.span, decide: run.decide });
 
     run.paths.push({ condition: condition.map(function (row) { return row.text; }),
       constraints: condition, blocks: visited, verdict: answer.verdict,
@@ -310,6 +361,7 @@
   }
 
   return { OPPOSITE: OPPOSITE, constant: constant, symbol: symbol, opaque: opaque,
+    linearTheory: linearTheory, literalsFor: literalsFor, refine: refine,
     combine: combine, multiply: multiply, scale: scale, show: show,
     constraintOf: constraintOf, negateConstraint: negateConstraint, holds: holds,
     variablesOf: variablesOf, solve: solve, execute: execute };

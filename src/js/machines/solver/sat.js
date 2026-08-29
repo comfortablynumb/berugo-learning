@@ -382,6 +382,68 @@
     return search(state);
   }
 
+  /**
+   * The solver stopped at its n-th conflict, with the trail intact.
+   *
+   * Clause learning is the one idea in this milestone that has to be SEEN: the
+   * implication graph, the cut, and the clause that comes out of it. Reporting
+   * it needs a snapshot taken before `handleConflict` backtracks, which is why
+   * this repeats the search loop rather than adding a callback to it — a hook
+   * inside `search` would be one more thing that can be wrong in the solver
+   * every other section depends on.
+   */
+  function firstConflict(formula, options) {
+    const settings = options || {};
+    const wanted = settings.at || 1;
+    const state = loaded(formula, settings);
+
+    if (!state) return { found: false, why: 'the formula is unsatisfiable at level 0' };
+    for (let guard = 0; guard < (settings.budget || 200000); guard += 1) {
+      const conflict = propagate(state);
+
+      if (conflict) {
+        if (state.conflicts + 1 >= wanted && state.decisionLevel > 0) {
+          return snapshot(state, conflict);
+        }
+        if (handleConflict(state, conflict) === 'unsat') {
+          return { found: false, why: 'proved unsatisfiable before conflict ' + wanted };
+        }
+        continue;
+      }
+      if (!decide(state)) return { found: false, why: 'satisfiable with no conflict left' };
+    }
+    return { found: false, why: 'ran out of steps looking for conflict ' + wanted };
+  }
+
+  function loaded(formula, settings) {
+    const state = create(Object.assign({}, settings, { proof: false }));
+    let broken = false;
+
+    ensureVariables(state, formula.variables || 0);
+    formula.clauses.forEach(function (row) {
+      if (row.length === 0) { broken = true; return; }
+      addClause(state, clauseFromDimacs(row));
+    });
+    if (broken || state.rootConflict || propagate(state)) return null;
+    return state;
+  }
+
+  function snapshot(state, conflict) {
+    const learned = analyse(state, conflict);
+
+    return { found: true, at: state.conflicts + 1, level: state.decisionLevel,
+      conflict: conflict.literals.map(toDimacs),
+      learned: learned.literals.map(toDimacs), backjump: learned.level,
+      trail: state.trail.map(function (literal) {
+        const variable = varOf(literal);
+        const reason = state.reason[variable];
+
+        return { literal: toDimacs(literal), level: state.level[variable],
+          decision: !reason,
+          reason: reason ? reason.literals.map(toDimacs) : null };
+      }) };
+  }
+
   /** The empty clause really is derivable, so the proof has to say so. */
   function rootUnsat(state) {
     if (state.keepProof) state.proof.push([]);
@@ -457,5 +519,6 @@
     fromDimacs: fromDimacs, toDimacs: toDimacs, clauseFromDimacs: clauseFromDimacs,
     create: create, ensureVariables: ensureVariables, addClause: addClause,
     valueOf: valueOf, propagate: propagate, analyse: analyse, decide: decide,
-    lubyAt: lubyAt, solve: solve, modelOf: modelOf };
+    lubyAt: lubyAt, solve: solve, modelOf: modelOf,
+    firstConflict: firstConflict };
 }));

@@ -206,3 +206,34 @@ test('mermaid: the parser still rejects what shipped broken', async function () 
 
   await mermaid.parse('flowchart LR\n    H["not LL(1): quoted, so fine"]');
 });
+
+/* The SAT section builds its implication graph at run time from whatever
+   conflict the solver reached, so no static definition exists for the guard
+   above to read. The builder is a module for exactly this reason: the same
+   parser gets the same treatment. */
+test('mermaid: every implication graph the SAT section can draw parses', async function () {
+  const Generators = require('../../src/js/algorithms/instance-generators.js');
+  const Sat = require('../../src/js/machines/solver/sat.js');
+  const Graph = require('../../src/js/viz/implication-graph.js');
+  const broken = [];
+  let drawn = 0;
+
+  for (const holes of [3, 4, 5]) {
+    for (const at of [1, 2, 5]) {
+      const snapshot = Sat.firstConflict(Generators.pigeonhole(holes).formula, { at: at });
+
+      if (!snapshot.found) continue;
+      drawn += 1;
+      try {
+        await mermaid.parse(Graph.definition(snapshot));
+      } catch (error) {
+        broken.push('pigeonhole ' + holes + ' conflict ' + at + ': ' +
+          String(error && error.message).split('\n')[0].slice(0, 110));
+      }
+    }
+  }
+
+  assert.ok(drawn >= 6, 'expected several graphs to check, drew ' + drawn);
+  assert.deepStrictEqual(broken, [], 'these generated diagrams do not parse:\n  ' +
+    broken.join('\n  '));
+});

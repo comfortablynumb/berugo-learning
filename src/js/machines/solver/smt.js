@@ -36,13 +36,14 @@
   const SatCheck = pick('SatCheck', './check.js');
   const Euf = pick('TheoryEuf', './theories/euf.js');
   const Difference = pick('TheoryDifference', './theories/difference.js');
+  const Linear = pick('TheoryLinear', './theories/linear.js');
 
   function pick(name, file) {
     if (root && root.Berugo && root.Berugo[name]) return root.Berugo[name];
     return require(file);
   }
 
-  const THEORIES = { euf: Euf, difference: Difference };
+  const THEORIES = { euf: Euf, difference: Difference, linear: Linear };
 
   function theoryFor(name) {
     return THEORIES[name] || Euf;
@@ -112,22 +113,31 @@
    */
   function solve(problem, options) {
     const settings = options || {};
-    const theory = theoryFor(problem.theory);
-    const atoms = problem.atoms;
-    const clauses = problem.clauses.map(function (row) { return row.slice(); });
-    const trace = [];
     const limit = settings.rounds || 200;
+    /* `explanations: 'full'` is the degenerate lazy solver, offered because
+       the difference is measurable rather than arguable: returning the whole
+       assignment as the explanation blocks exactly one model per round, so the
+       loop becomes an enumeration of the theory-consistent assignments. */
+    const ctx = { theory: theoryFor(problem.theory), atoms: problem.atoms,
+      clauses: problem.clauses.map(function (row) { return row.slice(); }),
+      trace: [], minimal: settings.explanations !== 'full' };
 
     for (let round = 0; round < limit; round += 1) {
-      const outcome = oneRound(theory, atoms, clauses, trace, round);
+      const outcome = oneRound(ctx, round);
 
-      if (outcome) return Object.assign({ rounds: trace.length, trace: trace }, outcome);
+      if (outcome) {
+        return Object.assign({ rounds: ctx.trace.length, trace: ctx.trace }, outcome);
+      }
     }
-    return { verdict: 'unknown', rounds: trace.length, trace: trace,
+    return { verdict: 'unknown', rounds: ctx.trace.length, trace: ctx.trace,
       why: 'the theory refuted ' + limit + ' models without the core running out' };
   }
 
-  function oneRound(theory, atoms, clauses, trace, round) {
+  function oneRound(ctx, round) {
+    const theory = ctx.theory;
+    const atoms = ctx.atoms;
+    const clauses = ctx.clauses;
+    const trace = ctx.trace;
     const boolean = Sat.solve({ variables: atoms.length, clauses: clauses }, {});
 
     if (boolean.verdict !== 'sat') {
@@ -145,7 +155,10 @@
       return { verdict: 'sat', model: boolean.model, literals: literals,
         theoryModel: verdict.model, clauses: clauses };
     }
-    clauses.push(blockingClause(atoms, verdict.explanation, boolean.model));
+    const explanation = ctx.minimal ? verdict.explanation : literals;
+
+    trace[trace.length - 1].explanation = explanation.length;
+    clauses.push(blockingClause(atoms, explanation, boolean.model));
     return null;
   }
 

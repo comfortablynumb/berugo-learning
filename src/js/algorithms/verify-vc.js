@@ -233,6 +233,61 @@
     return invariant.concat([negate(statement.cond)]);
   }
 
+
+  /* ------------------------------------------------- the integer witness */
+
+  /**
+   * The elimination procedure decides the RATIONALS, so a counter-example it
+   * produces may be fractional - and a fractional state is not a state a
+   * program can be in. Rounding each variable both ways and re-checking is a
+   * cheap, one-sided answer to "does this failure survive the integers": a
+   * witness found is a real refutation, and finding none proves nothing beyond
+   * the neighbourhood it looked in, which is exactly what the report says.
+   */
+  function valueAt(expr, model) {
+    let total = expr.constant || 0;
+
+    Object.keys(expr.terms || {}).forEach(function (name) {
+      total += expr.terms[name] * (model[name] === undefined ? 0 : model[name]);
+    });
+    return total;
+  }
+
+  function holdsAt(row, model) {
+    const left = valueAt(row.left, model);
+    const right = valueAt(row.right, model);
+
+    if (row.operator === 'le') return left <= right;
+    if (row.operator === 'lt') return left < right;
+    if (row.operator === 'ge') return left >= right;
+    if (row.operator === 'gt') return left > right;
+    if (row.operator === 'eq') return left === right;
+    return left !== right;
+  }
+
+  function refutes(vc, model) {
+    return vc.assumptions.every(function (row) { return holdsAt(row, model); }) &&
+      !holdsAt(vc.goal, model);
+  }
+
+  function integerWitness(vc, model) {
+    const names = Object.keys(model || {});
+
+    if (!names.length || names.length > 6) return null;
+    const total = Math.pow(2, names.length);
+
+    for (let mask = 0; mask < total; mask += 1) {
+      const candidate = {};
+
+      names.forEach(function (name, at) {
+        candidate[name] = (mask >> at) & 1
+          ? Math.ceil(model[name]) : Math.floor(model[name]);
+      });
+      if (refutes(vc, candidate)) return candidate;
+    }
+    return null;
+  }
+
   /* ------------------------------------------------------ the discharge */
 
   /**
@@ -258,14 +313,27 @@
        loop invariant fails here with n = 0.5. Reporting the counter-example
        as non-integral is the honest form: the VC is not discharged, and the
        reason is the theory rather than the program. */
+    const witness = out.integral && !out.integral.integral
+      ? integerWitness(vc, out.model) : null;
+
     return { name: vc.name, kind: vc.kind, discharged: false,
       goal: showCondition(vc.goal), model: out.model,
-      integral: out.integral,
-      rationalOnly: Boolean(out.integral && !out.integral.integral),
-      why: out.integral && !out.integral.integral
-        ? 'the only counter-example found is fractional (' +
-          out.integral.fractional.join(', ') + '), so the goal may still hold over the integers'
-        : 'a state satisfying the assumptions makes the goal false' };
+      integral: out.integral, witness: witness,
+      rationalOnly: Boolean(out.integral && !out.integral.integral && !witness),
+      why: whyFailed(out, witness) };
+  }
+
+  function whyFailed(out, witness) {
+    if (witness) {
+      return 'a state satisfying the assumptions makes the goal false, and rounding the '
+        + 'counter-example gives an integer one';
+    }
+    if (out.integral && !out.integral.integral) {
+      return 'the only counter-example found is fractional (' +
+        out.integral.fractional.join(', ') + ') and no rounding of it refutes the goal, so the '
+        + 'goal may well hold over the integers';
+    }
+    return 'a state satisfying the assumptions makes the goal false';
   }
 
   function verify(program) {
@@ -286,6 +354,7 @@
   return { OPPOSITE: OPPOSITE, affine: affine, variable: variable, number: number,
     plus: plus, minus: minus, times: times, substitute: substitute, show: show,
     condition: condition, negate: negate, substituteIn: substituteIn,
+    valueAt: valueAt, holdsAt: holdsAt, integerWitness: integerWitness,
     showCondition: showCondition, wp: wp, generate: generate, discharge: discharge,
     verify: verify };
 }));
