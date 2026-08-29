@@ -20,6 +20,16 @@
       },
       {
         term: 'The dependence DAG',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["instruction A produces a value"] --> B["instruction B consumes it"]',
+            '    B --> C["so B must come after A"]',
+            '    C --> D["and the edge carries a weight:<br/>how many cycles A\'s result<br/>takes to arrive"]',
+            '    D --> E["scheduling is a topological order<br/>that minimises the waiting"]'
+          ].join('\n'),
+          caption: 'Program order is one valid schedule among many. The DAG says which orders are legal, and the weights say which of those legal orders is fast.'
+        },
         plain: 'Which instructions must come after which, with a weight for how long each takes.',
         formal: 'an edge from producer to consumer, weighted by the producer\'s latency',
         detail: 'A legal reordering is any topological order of this graph, so the DAG is the ' +
@@ -222,6 +232,18 @@
       },
       {
         term: 'Tiering',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a fast compiler"] --> B["starts running almost immediately,<br/>produces mediocre code"]',
+            '    C["a good compiler"] --> D["produces excellent code,<br/>after a delay"]',
+            '    B --> E["use it for everything"]',
+            '    D --> F["use it only for what<br/>proved to be hot"]',
+            '    E --> G["and promote between them<br/>by counting"]',
+            '    F --> G'
+          ].join('\n'),
+          caption: 'No single compiler can be both quick to start and quick at the end, so the design is to have both and let measurement decide which code gets which.'
+        },
         plain: 'One compiler cannot be both quick to run and quick to produce, so have two.',
         formal: 'a baseline tier that assumes nothing and an optimising tier that speculates',
         detail: 'The baseline compiles in one pass and makes no assumptions, so it is nearly ' +

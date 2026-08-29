@@ -261,6 +261,16 @@
     'scapegoat-trees': [
       {
         term: 'Balance without metadata',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["no balance factor, no colour,<br/>no size on any node"] --> B["insert normally"]',
+            '    B --> C{"did the tree get<br/>deeper than log allows?"}',
+            '    C -->|yes| D["walk up, find the highest<br/>unbalanced node, rebuild<br/>that subtree perfectly"]',
+            '    C -->|no| E["do nothing at all"]'
+          ].join('\n'),
+          caption: 'Rebuilding a subtree from scratch sounds expensive and is amortised cheap, because a subtree only becomes unbalanced after enough insertions to pay for it.'
+        },
         plain: 'Nothing is stored on a node. Balance is two rules about the tree as a whole.',
         formal: 'node = { key, value, left, right }',
         detail: 'Every other family here pays for balance in per-node storage: a height, a colour ' +

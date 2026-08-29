@@ -414,6 +414,16 @@
     'perfect-hashing': [
       {
         term: 'Perfect hash',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a key set that never changes"] --> B["search for a hash function<br/>with no collisions on it"]',
+            '    B --> C["one probe per lookup, always"]',
+            '    C --> D["no chains, no probe sequences,<br/>no load factor"]',
+            '    D --> E["and it works only because<br/>the keys were fixed in advance"]'
+          ].join('\n'),
+          caption: 'Everything a general hash table spends effort on exists because keys arrive unpredictably. Fix the set and all of it disappears.'
+        },
         plain: 'For a fixed key set, a function with no collisions at all — so a lookup is one probe.',
         formal: 'h injective on S',
         readAs: '"Injective" means no two different keys in S get the same output — the function never ' +

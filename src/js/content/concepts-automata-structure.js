@@ -8,6 +8,18 @@
     'minimisation-and-canonical-forms': [
       {
         term: 'Myhill–Nerode: the language decides the states',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["two prefixes, p and q"] --> B{"is there any suffix s where<br/>ps is accepted and qs is not?"}',
+            '    B -->|yes| C["they must be different states"]',
+            '    B -->|no| D["no machine can ever<br/>need to tell them apart"]',
+            '    D --> E["so they ARE the same state"]',
+            '    C --> F["count the classes and you have<br/>the minimum state count"]',
+            '    E --> F'
+          ].join('\n'),
+          caption: 'The minimum machine is not found by optimising a machine. It is read off the language itself, which is why the result is unique up to renaming.'
+        },
         plain: 'Two prefixes are the same state when no suffix tells them apart.',
         formal: 'x ≡ y when for every suffix z, xz ∈ L exactly when yz ∈ L; the classes are the states',
         readAs: 'Two prefixes are equivalent when, for every possible continuation, either both ' +
@@ -130,6 +142,17 @@
       },
       {
         term: 'The product runs both machines at once',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["machine A in state 3"] --> C["product state: the pair (3, 7)"]',
+            '    B["machine B in state 7"] --> C',
+            '    C --> D["read a symbol:<br/>each component moves on its own"]',
+            '    D --> E["accept if BOTH accept:<br/>intersection"]',
+            '    D --> F["accept if EITHER accepts:<br/>union"]'
+          ].join('\n'),
+          caption: 'One construction gives union, intersection and difference — only the accepting set changes. That is why closure properties come as a family rather than one at a time.'
+        },
         plain: 'The state is a pair; each component moves independently.',
         formal: 'δ((p, q), a) = (δ₁(p, a), δ₂(q, a)), with the accepting rule chosen per operation',
         readAs: 'The pair moves to the pair of destinations, and only which pairs count as ' +
@@ -352,6 +375,17 @@
       },
       {
         term: 'An empty output is what makes deletion expressible',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a transition reads a symbol"] --> B["and writes one symbol:<br/>a substitution"]',
+            '    A --> C["and writes several:<br/>an expansion"]',
+            '    A --> D["and writes nothing:<br/>a deletion"]',
+            '    D --> E["so input and output lengths<br/>need not match"]',
+            '    E --> F["which is what makes a transducer<br/>a rewriter rather than a relabeller"]'
+          ].join('\n'),
+          caption: 'Allowing an empty output is a one-word change to the definition and it is the whole difference between renaming symbols and transforming text.'
+        },
         plain: 'A transition can consume a symbol and write nothing.',
         formal: 'the output alphabet includes the empty string, so |output| need not equal |input|',
         detail: 'A plain automaton has no way to express deletion because it has no output to ' +

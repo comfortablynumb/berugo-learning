@@ -120,6 +120,16 @@
       },
       {
         term: 'A back edge is one whose target dominates its source',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["an edge pointing to<br/>an earlier block"] --> B{"does its target DOMINATE<br/>its source?"}',
+            '    B -->|yes| C["a back edge —<br/>this is a real loop"]',
+            '    B -->|no| D["just a jump backwards<br/>in the layout"]',
+            '    D --> E["treating it as a loop finds<br/>loops that are not there"]'
+          ].join('\n'),
+          caption: 'Block order in the CFG is an artefact of how the code was laid out. Dominance is the structural test, and it is the one that survives reordering.'
+        },
         plain: 'Not merely one that points at an earlier block.',
         formal: 'this is the difference between a loop and a jump into the middle of one',
         detail: 'An edge into a loop from outside points backwards and is not a back edge, and ' +
@@ -208,6 +218,17 @@
     'dominators': [
       {
         term: 'A dominates B when every path from the entry to B goes through A',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["can I move this computation<br/>out of the loop?"] --> D["all of them reduce<br/>to dominance"]',
+            '    B["is this value definitely<br/>initialised here?"] --> D',
+            '    C["where does a phi function go?"] --> D',
+            '    D --> E["every path from entry to B<br/>passes through A"]',
+            '    E --> F["so whatever A did<br/>has certainly happened"]'
+          ].join('\n'),
+          caption: 'Most legality questions in an optimiser are really asking whether something is guaranteed to have run. Dominance is that guarantee, computed once and reused everywhere.'
+        },
         plain: 'The one relation most legality questions reduce to.',
         formal: 'computed once after every change to the graph, and consulted everywhere',
         detail: 'Is this definition available here, can this be hoisted there, is this edge a ' +

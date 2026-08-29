@@ -22,6 +22,16 @@
       },
       {
         term: 'A unique terminator',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the suffix \'a\' of \'banana\'"] --> B["is a PREFIX of \'anana\'"]',
+            '    B --> C["so it ends in the middle<br/>of an edge, not at a leaf"]',
+            '    D["append a character that occurs<br/>nowhere else: banana$"] --> E["no suffix is a prefix<br/>of another any more"]',
+            '    E --> F["every suffix now ends<br/>at its own leaf"]'
+          ].join('\n'),
+          caption: 'One extra character removes the whole special case of a suffix ending inside an edge, which is why every construction algorithm assumes it.'
+        },
         plain: 'Appending a character that occurs nowhere else makes every suffix end at its own leaf.',
         formal: 'no suffix is a prefix of another ⇒ leaves = n + 1',
         readAs: 'Append a character that appears nowhere else and no suffix can be a prefix of another, so ' +

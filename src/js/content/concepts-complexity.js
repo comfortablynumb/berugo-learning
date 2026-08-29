@@ -105,6 +105,17 @@
     'space-bounded-computation': [
       {
         term: 'Space can be reused and time cannot',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a cell of the work tape"] --> B["write, overwrite,<br/>write again"]',
+            '    B --> C["the same cell serves<br/>a million steps"]',
+            '    D["a step of time"] --> E["once spent, it is gone"]',
+            '    C --> F["so space classes are far more<br/>forgiving, and every difference<br/>between the two families<br/>comes from this"]',
+            '    E --> F'
+          ].join('\n'),
+          caption: 'It is why PSPACE contains NP, why savings on space collapse nondeterminism, and why the space hierarchy is tighter than the time one.'
+        },
         plain: 'Every difference between the two families of classes comes from that.',
         formal: 'a machine may revisit a cell; it may not revisit a step',
         detail: 'So a space-bounded machine can run for an enormous time in a small amount of ' +

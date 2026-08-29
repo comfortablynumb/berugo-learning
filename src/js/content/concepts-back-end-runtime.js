@@ -131,6 +131,18 @@
       },
       {
         term: 'A safepoint is where a collection may happen',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["where can a collection<br/>possibly start?"] --> B["at a call"]',
+            '    A --> C["at an allocation"]',
+            '    B --> D["and nowhere else"]',
+            '    C --> D',
+            '    D --> E["so only those points need a map<br/>of which registers hold references"]',
+            '    E --> F["a map at every instruction would<br/>be larger than the code"]'
+          ].join('\n'),
+          caption: 'Restricting where a collection may begin is what makes the metadata affordable. It is a design decision that pays for itself in the size of the compiled output.'
+        },
         plain: 'Calls and allocations, and nothing else needs a map.',
         formal: 'restrict the points that need metadata, or the metadata is larger than the code',
         detail: 'A garbage collector cannot run at an arbitrary instruction, because the ' +

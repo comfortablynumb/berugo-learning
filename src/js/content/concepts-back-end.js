@@ -124,6 +124,17 @@
     'building-the-interpreter': [
       {
         term: 'The dispatch loop',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["fetch the opcode at pc"] --> B["advance pc"]',
+            '    B --> C["look up the handler"]',
+            '    C --> D["run it"]',
+            '    D --> A',
+            '    D --> E["everything else in an interpreter<br/>is a table this loop indexes"]'
+          ].join('\n'),
+          caption: 'Four steps, repeated. Interpreter performance work is almost entirely about reducing how many times this loop runs, or what one trip through it costs.'
+        },
         plain: 'Fetch, advance, look up, run — and everything else is a table.',
         formal: 'read the instruction at the program counter, then apply the rule for its opcode',
         detail: 'The loop is four lines and the instruction set is a table of handlers, which ' +
@@ -228,6 +239,16 @@
     'instruction-selection': [
       {
         term: 'Selection is a covering problem',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["an expression tree"] --> B["each target instruction<br/>is a TILE that covers<br/>some shape of nodes"]',
+            '    B --> C["choose tiles that cover<br/>every node, once"]',
+            '    C --> D["a big fused tile may cover four<br/>nodes for the price of two"]',
+            '    D --> E["so the cheapest cover is not<br/>the one with the fewest tiles"]'
+          ].join('\n'),
+          caption: 'Instruction selection is not a translation table. It is a choice among overlapping tilings, which is exactly why dynamic programming applies to it.'
+        },
         plain: 'Choose a set of target instructions that covers every node of the expression.',
         formal: 'each tile matches a shape and leaves holes; a cover fills every node exactly once',
         detail: 'Framing it this way is what makes it tractable. The IR is a forest of ' +

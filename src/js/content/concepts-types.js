@@ -22,6 +22,17 @@
       },
       {
         term: 'T-App demands equality, not compatibility',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a function of type σ → τ"] --> C{"is the argument\'s type<br/>EXACTLY σ?"}',
+            '    B["an argument of some type"] --> C',
+            '    C -->|yes| D["the application has type τ"]',
+            '    C -->|no| E["a type error — even if the types<br/>look close or convertible"]',
+            '    E --> F["subtyping and coercion are what<br/>later systems add to loosen this"]'
+          ].join('\n'),
+          caption: 'The base calculus has no notion of one type being acceptable for another. Every convenience you expect from a real language is an extension to this rule.'
+        },
         plain: 'Applying a σ → τ to a σ gives a τ, and the argument type must match exactly.',
         formal: 'Γ ⊢ f : σ → τ and Γ ⊢ a : σ imply Γ ⊢ f a : τ',
         readAs: 'If the left side is a function from sigma to tau and the right side is a ' +
@@ -266,6 +277,17 @@
       },
       {
         term: 'Inference for System F is undecidable',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["System F: quantifiers anywhere"] --> B["full inference is UNDECIDABLE"]',
+            '    B --> C["a theorem, not a gap<br/>waiting to be closed"]',
+            '    D["Hindley-Milner: quantifiers only<br/>at the outside of a type"] --> E["inference is decidable,<br/>and fast in practice"]',
+            '    C --> F["which is why real languages take<br/>the restriction and ask for<br/>annotations past it"]',
+            '    E --> F'
+          ].join('\n'),
+          caption: 'The restriction that makes ML-style inference work is not an implementation compromise. Lifting it is provably impossible, which is why higher-rank types need annotations.'
+        },
         plain: 'A theorem, not an engineering gap.',
         formal: 'Wells, 1994: typability in System F is undecidable',
         detail: 'That is why no language offers full System F with full inference, and why ' +
@@ -379,6 +401,17 @@
       },
       {
         term: 'Width, depth and permutation for records',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["width: MORE fields<br/>is a subtype"] --> D["three independent rules"]',
+            '    B["depth: each field may itself<br/>be a subtype"] --> D',
+            '    C["permutation: field order<br/>does not matter"] --> D',
+            '    D --> E["a language may adopt any subset"]',
+            '    E --> F["which is why structural typing<br/>differs between languages<br/>that all call it structural"]'
+          ].join('\n'),
+          caption: 'Three separate decisions hide behind one word. TypeScript takes all three; a language with a fixed memory layout cannot take permutation at all.'
+        },
         plain: 'More fields is a subtype; each field may be a subtype; order does not matter.',
         formal: '{x: Integer, y: Integer, c: String} ≤ {x: Number, y: Number}',
         detail: 'All three fall out of one check: every field the supertype names must be ' +

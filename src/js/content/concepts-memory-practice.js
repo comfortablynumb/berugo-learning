@@ -20,6 +20,16 @@
       },
       {
         term: 'A map keyed on objects with strong entries keeps every key forever',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a long-lived cache keyed<br/>by object"] --> B["the map is reachable"]',
+            '    B --> C["so the map reaches its keys"]',
+            '    C --> D["so every key stays live,<br/>however dead the rest<br/>of the program thinks it is"]',
+            '    D --> E["a leak that no reference-counting<br/>bug and no cycle explains"]'
+          ].join('\n'),
+          caption: 'This is the most common leak in a garbage-collected language, and it is not a collector failure: the objects genuinely are reachable, from the cache you forgot.'
+        },
         plain: 'The map is reachable, and the map reaches the keys.',
         formal: 'the cache retains exactly the things it was built to be indexed by',
         detail: 'This is not a cache with a bug in it; it is a map working exactly as ' +
@@ -113,6 +123,18 @@
     'avoiding-the-collector': [
       {
         term: 'The fastest collection is the one with nothing to collect',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["tune the collector"] --> B["moves the cost around"]',
+            '    C["allocate less"] --> D["removes it"]',
+            '    D --> E["fewer objects to trace"]',
+            '    D --> F["fewer collections triggered"]',
+            '    E --> G["so measure the allocation rate<br/>before touching a single flag"]',
+            '    F --> G'
+          ].join('\n'),
+          caption: 'Collector tuning is where the attention goes and allocation rate is where the wins are. One of them changes when the work happens; the other stops it existing.'
+        },
         plain: 'Allocation rate is the first thing to measure and the first thing to attack.',
         formal: 'GC cost is a function of what you allocate, which is a property of your code',
         detail: 'It is measurable long before any tuning flag is worth touching, and unlike ' +

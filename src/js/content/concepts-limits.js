@@ -21,6 +21,16 @@
       },
       {
         term: 'The invariance theorem says the language does not matter, up to a constant',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["shortest program in Python"] --> C["the two differ by at most<br/>a fixed constant"]',
+            '    B["shortest program in C"] --> C',
+            '    C --> D["because an interpreter for one,<br/>written in the other,<br/>is a program of fixed size"]',
+            '    D --> E["so K is a property of the string,<br/>not of your language choice"]'
+          ].join('\n'),
+          caption: 'Without this the whole idea would be arbitrary. The constant is real and does not grow with the string, which is what makes the measure well defined.'
+        },
         plain: 'An interpreter for one language written in another is a fixed-size program.',
         formal: 'K_A(s) is at most K_B(s) plus the size of a B-interpreter written in A',
         detail: 'The constant is real and it does not grow with the string, so K is well defined ' +

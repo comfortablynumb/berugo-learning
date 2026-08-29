@@ -114,6 +114,16 @@
     'equivalent-models-of-computation': [
       {
         term: 'Equivalence is proved by simulation, and simulation is a program',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["claim: model A is as<br/>powerful as model B"] --> B["write an interpreter for B,<br/>inside A"]',
+            '    B --> C["anything B computes,<br/>A computes by running it"]',
+            '    C --> D["do the same in the other direction"]',
+            '    D --> E["and the two models are equivalent"]'
+          ].join('\n'),
+          caption: 'These proofs are not abstract arguments. They are programs, which is why the Church-Turing thesis is supported by decades of people actually writing them.'
+        },
         plain: 'To show A is as powerful as B, write an interpreter for B in A.',
         formal: 'A simulates B if some fixed program in A computes B’s step relation',
         detail: 'That is the entire technique, which is why these proofs read like engineering ' +
@@ -331,6 +341,16 @@
       },
       {
         term: 'The direction matters and is easy to invert',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["reduce HALTING to P"] --> B["if you could decide P,<br/>you could decide halting"]',
+            '    B --> C["so P is undecidable"]',
+            '    D["reduce P to HALTING"] --> E["only says P is no harder<br/>than halting"]',
+            '    E --> F["which almost everything is —<br/>this shows nothing"]'
+          ].join('\n'),
+          caption: 'Both directions are the same construction and only one of them is a proof. Writing the reduction backwards produces a paragraph that argues for nothing at all.'
+        },
         plain: 'Reducing halting TO P shows P is hard; the other way shows nothing.',
         formal: 'HALT ≤m P means P is at least as hard as HALT',
         readAs: 'The halting problem reduces to P by a computable transformation, so any decider for P could be turned into a decider for halting — which means P is at least as hard as halting.',

@@ -246,6 +246,16 @@
     'autocomplete-and-fuzzy': [
       {
         term: 'The triangle inequality does the pruning',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["query is distance d from this node"] --> B["looking for matches<br/>within k of the query"]',
+            '    B --> C["only children keyed between<br/>d − k and d + k can qualify"]',
+            '    C --> D["every other branch is<br/>provably too far"]',
+            '    D --> E["and that proof IS<br/>the triangle inequality"]'
+          ].join('\n'),
+          caption: 'The pruning is not a heuristic, it is a theorem. Swap in a similarity that breaks the inequality and the tree silently stops returning correct answers.'
+        },
         plain: 'If the query is distance d from a node, only children keyed d − k … d + k can match.',
         formal: 'd(q, c) ≥ |d(q, n) − d(n, c)|',
         readAs: 'The triangle inequality, rearranged: the distance from the query to a candidate is at least ' +

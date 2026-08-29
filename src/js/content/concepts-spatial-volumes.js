@@ -23,6 +23,17 @@
       },
       {
         term: 'Overlap governs query cost, not height',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a query rectangle"] --> B{"how many sibling boxes<br/>does it intersect?"}',
+            '    B -->|one| C["one subtree to descend"]',
+            '    B -->|four| D["four subtrees, in parallel,<br/>at every level"]',
+            '    D --> E["the cost multiplies down the tree"]',
+            '    E --> F["so a short tree with overlapping<br/>siblings is slower than a tall<br/>one without"]'
+          ].join('\n'),
+          caption: 'Balancing an R-tree by height misses the point. Insertion and split heuristics are judged on how much sibling overlap they create, because that is what queries pay.'
+        },
         plain: 'Every extra intersecting sibling is another subtree the query has to enter.',
         formal: 'expected paths ≈ Π over levels (1 + overlap fraction at that level)',
         readAs: 'The Π is a product rather than a sum: multiply together, level by level, one plus how much ' +
@@ -114,6 +125,16 @@
     'bounding-volumes': [
       {
         term: 'Partition the primitives, not the space',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a k-d tree splits SPACE:<br/>regions never overlap,<br/>objects may be in several"] --> C["different trade"]',
+            '    B["a BVH splits the OBJECT LIST:<br/>each object is in one node,<br/>boxes may overlap"] --> C',
+            '    C --> D["a BVH never duplicates an object"]',
+            '    C --> E["and pays with overlapping boxes"]'
+          ].join('\n'),
+          caption: 'Which one you want depends on whether duplicating objects or overlapping bounds hurts more — and for ray tracing over triangles, duplication hurts more.'
+        },
         plain: 'A BVH splits the list of objects into two groups and bounds each; the boxes may overlap.',
         formal: 'every primitive appears in exactly one leaf, unlike a k-d tree over the same scene',
         detail: 'A k-d tree splits space, so a triangle crossing the plane must be referenced from both sides and ' +

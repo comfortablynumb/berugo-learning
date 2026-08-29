@@ -22,6 +22,16 @@
       },
       {
         term: 'The hierarchy is about memory, not difficulty',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["regular — finite memory"] --> B["context-free — one stack"]',
+            '    B --> C["context-sensitive — a tape<br/>bounded by the input"]',
+            '    C --> D["recursively enumerable —<br/>an unbounded tape"]',
+            '    D --> E["each level adds one kind<br/>of memory, and nothing else"]'
+          ].join('\n'),
+          caption: 'The levels are not degrees of cleverness. Each one is a machine with strictly more storage, which is why the classification is so stable.'
+        },
         plain: 'Each level up adds one new kind of memory, and nothing else.',
         formal: 'finite automaton: bounded state; pushdown: a stack; linear-bounded: a tape as long as the input; Turing machine: an unbounded tape',
         detail: 'A finite automaton remembers a bounded amount however long the input runs, so ' +
@@ -345,6 +355,17 @@
     'regular-expressions-and-constructions': [
       {
         term: 'Kleene’s theorem, in both directions',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a regular expression"] -->|"Thompson\'s<br/>construction"| B["a finite automaton"]',
+            '    B -->|"state elimination"| A',
+            '    A --> C["so the two notations describe<br/>exactly the same languages"]',
+            '    B --> C',
+            '    C --> D["which is why an engine may<br/>choose either representation"]'
+          ].join('\n'),
+          caption: 'Both directions are constructive, so a regex engine is free to compile to an automaton and an automaton is free to be printed as a regex.'
+        },
         plain: 'Regular expressions and finite automata describe exactly the same languages.',
         formal: 'every regular expression has an equivalent automaton, and every automaton has an equivalent expression',
         detail: 'Both halves are constructive, which is what makes the section runnable rather ' +

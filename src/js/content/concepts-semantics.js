@@ -115,6 +115,17 @@
     'algebraic-data-types-and-pattern-matching': [
       {
         term: 'Sums and products, and the arithmetic is real',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a product: BOTH an A and a B"] --> B["number of values:<br/>|A| × |B|"]',
+            '    C["a sum: EITHER an A or a B"] --> D["number of values:<br/>|A| + |B|"]',
+            '    B --> E["the names are not a metaphor —<br/>the counts really multiply and add"]',
+            '    D --> E',
+            '    E --> F["which is why exhaustive matching<br/>is a finite obligation"]'
+          ].join('\n'),
+          caption: 'Because the value counts are literally products and sums, the compiler can enumerate the cases — and that is what makes exhaustiveness checking decidable.'
+        },
         plain: 'A product is "both"; a sum is "one of".',
         formal: '|Pair A B| = |A| × |B|;  |A + B| = |A| + |B|',
         detail: 'Counting values this way is the fastest check that a type models what you ' +
@@ -331,6 +342,17 @@
     'substructural-types-and-ownership': [
       {
         term: 'Structural rules are permissions granted silently',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["weakening: a value may<br/>go unused"] --> C["ordinary type systems<br/>grant both, invisibly"]',
+            '    B["contraction: a value may<br/>be used twice"] --> C',
+            '    C --> D["drop contraction: affine —<br/>at most one use"]',
+            '    C --> E["drop both: linear —<br/>exactly one use"]',
+            '    D --> F["and a file handle can no longer<br/>be closed twice"]'
+          ].join('\n'),
+          caption: 'Ownership is not a new feature bolted on. It is the removal of a permission that every other type system hands out without ever mentioning it.'
+        },
         plain: 'Weakening lets a value go unused; contraction lets it be used twice.',
         formal: 'a substructural system is defined by which structural rule it removes',
         detail: 'Every mainstream type system grants weakening, contraction and exchange ' +

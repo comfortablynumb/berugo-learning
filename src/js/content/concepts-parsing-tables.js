@@ -224,6 +224,15 @@
     'general-parsing-earley-cyk-glr': [
       {
         term: 'A general parser takes the grammar as data, with no build step',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["LR: grammar → table generator<br/>→ tables → parser"] --> B["a build step, and a conflict<br/>report to appease"]',
+            '    C["Earley or GLR: hand it the<br/>grammar at runtime"] --> D["it parses, ambiguity and all"]',
+            '    D --> E["slower, and it accepts<br/>grammars nothing else will"]'
+          ].join('\n'),
+          caption: 'When the grammar is user-supplied or changes at runtime, a table generator is not an option at all — which is the situation general parsers exist for.'
+        },
         plain: 'You hand it a grammar at runtime and it parses.',
         formal: 'no normal form, no conflict report, no restriction on the grammar',
         detail: 'That is a different product from a parser generator, and it is why anything ' +
@@ -334,6 +343,16 @@
       },
       {
         term: 'Ordered choice commits to the first alternative that succeeds AT ALL',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["rule: A / AB"] --> B["try A — it matches"]',
+            '    B --> C["commit. never try AB"]',
+            '    C --> D["even if committing makes<br/>the whole parse fail"]',
+            '    D --> E["so the second alternative is<br/>unreachable, silently"]'
+          ].join('\n'),
+          caption: 'It looks like a CFG\'s alternation and is not: ordering the alternatives wrongly deletes a branch of the language, with no warning from the tool.'
+        },
         plain: 'Not the first that lets the whole parse finish.',
         formal: 'A / B: try A; if A succeeds, commit, even if the caller then fails',
         detail: 'That distinction is the entire hazard. `("a" / "ab")` on the input `ab` commits ' +

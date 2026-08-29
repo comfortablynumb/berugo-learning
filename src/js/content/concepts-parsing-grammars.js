@@ -120,6 +120,16 @@
     'grammar-transformations': [
       {
         term: 'A transformation keeps the language and changes the tree',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the original grammar"] --> B["left-factor it, remove<br/>left recursion, binarise it"]',
+            '    B --> C["the same set of strings —<br/>the language is preserved"]',
+            '    B --> D["a DIFFERENT parse tree"]',
+            '    D --> E["so anything reading the tree —<br/>the evaluator, the formatter —<br/>has to be updated too"]'
+          ].join('\n'),
+          caption: 'Descriptions of these transformations always state the first half. The second half is where the work is, because the tree is what the rest of the compiler consumes.'
+        },
         plain: 'That second half is the part descriptions leave out.',
         formal: 'L(G) = L(G′) and the parse trees differ',
         detail: 'Every step in this section alters the shape of the tree for at least some ' +
@@ -131,6 +141,16 @@
       },
       {
         term: 'Language preservation is a differential test, not a claim',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["enumerate every string the original<br/>grammar derives, up to length k"] --> C["compare the two sets,<br/>in both directions"]',
+            '    B["enumerate the same for<br/>the transformed grammar"] --> C',
+            '    C --> D["anything in one and not the other<br/>is a concrete counter-example"]',
+            '    D --> E["which beats reading the<br/>transformation and believing it"]'
+          ].join('\n'),
+          caption: 'Transformations are easy to get subtly wrong and the mistakes do not throw. Enumerating both languages is cheap up to a useful length and finds them immediately.'
+        },
         plain: 'Enumerate both languages up to a length and compare in both directions.',
         formal: 'L(G) ∩ Σ^≤k = L(G′) ∩ Σ^≤k, checked exhaustively',
         readAs: 'The two grammars derive exactly the same strings, over every string up to a fixed length, checked exhaustively.',

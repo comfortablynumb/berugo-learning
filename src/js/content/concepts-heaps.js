@@ -153,6 +153,18 @@
       },
       {
         term: 'The two curves',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["raise the arity d"] --> B["tree gets shallower —<br/>fewer levels to sift down"]',
+            '    A --> C["but each level compares<br/>d children instead of 2"]',
+            '    B --> D["swaps fall steadily as d rises"]',
+            '    C --> E["comparisons dip, then climb —<br/>a shallow U near d = 3"]',
+            '    D --> F["so the best d depends on which<br/>of the two you actually pay for"]',
+            '    E --> F'
+          ].join('\n'),
+          caption: 'A binary heap is not the optimum, it is the default. Which arity wins depends on whether your comparisons or your moves are the expensive operation.'
+        },
         plain: 'Comparisons form a shallow U with its minimum near d = 3; swaps fall monotonically as d rises.',
         formal: 'sift-up: log_d n comparisons; sift-down: d·log_d n',
         readAs: 'Raising the branching factor d makes the tree shallower, so sifting up gets cheaper — but ' +
@@ -258,6 +270,18 @@
       },
       {
         term: 'In place, and guaranteed',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["heapsort"] --> B["O(n log n) worst case"]',
+            '    A --> C["O(1) extra space"]',
+            '    D["quicksort"] --> E["O(n²) worst case"]',
+            '    F["merge sort"] --> G["O(n) extra space"]',
+            '    B --> H["heapsort is the only common sort<br/>with both promises at once"]',
+            '    C --> H'
+          ].join('\n'),
+          caption: 'It is rarely the fastest and it is the one you can promise things about, which is why it is the fallback inside introsort rather than the algorithm on top.'
+        },
         plain: 'O(n log n) worst case with O(1) extra space — the only common sort with both.',
         formal: 'no auxiliary array, no recursion',
         detail: 'Merge sort gives the guarantee and needs O(n) scratch. Quicksort needs no scratch ' +

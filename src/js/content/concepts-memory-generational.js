@@ -139,6 +139,17 @@
       },
       {
         term: 'The black-to-white pointer is the one bug',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the marker has finished<br/>an object — it is black"] --> B["the program stores a pointer<br/>into it, to a white object"]',
+            '    B --> C["the marker will never<br/>look at that object again"]',
+            '    C --> D["so the white object is never reached"]',
+            '    D --> E["and gets collected while live"]',
+            '    E --> F["a write barrier exists<br/>to prevent exactly this"]'
+          ].join('\n'),
+          caption: 'Every incremental and concurrent collector is organised around forbidding this one situation. That is what a write barrier costs the mutator, and why.'
+        },
         plain: 'A scanned object acquires a reference the marker will never follow.',
         formal: 'black -> white, with the last other path removed, loses a live object',
         detail: 'The collector will not revisit a black object, so a reference stored into one ' +

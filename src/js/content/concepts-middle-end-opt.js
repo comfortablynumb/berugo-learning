@@ -8,6 +8,17 @@
     'loop-optimisations': [
       {
         term: 'The preheader runs once and the body runs many times',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a computation inside the loop"] --> B["runs n times"]',
+            '    C["the same computation<br/>in the preheader"] --> D["runs once"]',
+            '    D --> E["so moving it is a win<br/>proportional to the trip count"]',
+            '    B --> E',
+            '    E --> F["and the whole difficulty is<br/>proving the move is legal"]'
+          ].join('\n'),
+          caption: 'The economics are never in doubt. Every loop optimisation is an argument about legality, because the payoff was obvious before anyone started.'
+        },
         plain: 'That asymmetry is the entire economic argument.',
         formal: 'moving one instruction out of a thousand-iteration body saves 999 executions',
         detail: 'It is also why the safety conditions are worth being careful about: the payoff ' +
@@ -201,6 +212,15 @@
     'alias-analysis': [
       {
         term: 'Memory breaks SSA',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a register: exactly<br/>one definition"] --> B["the definition is a pointer —<br/>no search needed"]',
+            '    C["a heap location: any store<br/>through any pointer<br/>might have written it"] --> D["the definition is a QUESTION"]',
+            '    D --> E["and answering it is<br/>what alias analysis is for"]'
+          ].join('\n'),
+          caption: 'SSA gives the optimiser exact information about registers and says nothing about memory, which is why the heap is where the imprecision in every compiler lives.'
+        },
         plain: 'A register has one definition; a heap location does not.',
         formal: 'so a load after a store is only the old value if the pointers cannot be equal',
         detail: 'That question is alias analysis, and every load and store elimination in a ' +

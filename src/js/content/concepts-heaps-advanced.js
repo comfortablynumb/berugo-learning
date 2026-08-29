@@ -143,6 +143,19 @@
     'pairing-heaps': [
       {
         term: 'One primitive: link',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["compare two roots"] --> B["the loser becomes the winner\'s<br/>newest child"]',
+            '    B --> C["insert = link with a single node"]',
+            '    B --> D["meld = link two roots"]',
+            '    B --> E["decrease-key = cut out, then link"]',
+            '    C --> F["one operation, and everything<br/>else is a line on top of it"]',
+            '    D --> F',
+            '    E --> F'
+          ].join('\n'),
+          caption: 'A Fibonacci heap needs marks, degrees and cascading cuts to reach its bound. This reaches nearly the same one from a single comparison rule.'
+        },
         plain: 'Compare two roots; the loser becomes the winner\'s newest child. Everything else is built from that.',
         formal: 'insert = link; meld = link; decrease-key = cut then link',
         detail: 'A pairing heap is a single multiway tree in heap order, and its whole structural ' +

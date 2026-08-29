@@ -263,6 +263,17 @@
     'quantile-sketches': [
       {
         term: 'Averages lie about latency',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["most requests: 10 ms"] --> C["mean: about 60 ms"]',
+            '    B["some requests: 500 ms"] --> C',
+            '    C --> D["nobody experiences 60 ms"]',
+            '    D --> E["it is neither the typical case<br/>nor the bad one"]',
+            '    E --> F["which is why latency is<br/>reported in quantiles"]'
+          ].join('\n'),
+          caption: 'On a bimodal distribution the mean describes a request that never happened. It is the one summary statistic guaranteed to describe nobody.'
+        },
         plain: 'On a bimodal distribution the mean is neither the typical experience nor the bad one.',
         formal: 'mean 58 ms, median 21 ms, p99 739 ms on the same stream',
         detail: 'A latency distribution with a fast path and a slow path has a mean that sits in the ' +

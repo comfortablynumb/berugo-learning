@@ -265,6 +265,16 @@
     'fingerprint-filters': [
       {
         term: 'A fingerprint, not a set of bits',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["Bloom: set k bits derived<br/>from the key"] --> B["other keys set the same bits,<br/>so you cannot unset them"]',
+            '    B --> C["deletion is impossible"]',
+            '    D["cuckoo filter: store a short<br/>fingerprint of the key"] --> E["find that fingerprint<br/>and remove it"]',
+            '    E --> F["deletion works"]'
+          ].join('\n'),
+          caption: 'Storing something identifiable rather than anonymous bits is what makes removal possible, and the price is a slightly larger cell and a bounded insert.'
+        },
         plain: 'Store f bits derived from the key, so a delete can remove the fingerprint again.',
         formal: 'fpr ≈ 1 − (1 − 2^−f)^(2b·α) ≈ 2bα/2^f',
         readAs: 'For a cuckoo filter the error rate is set by the fingerprint length f: roughly the number of ' +

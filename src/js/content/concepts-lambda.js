@@ -262,6 +262,18 @@
       },
       {
         term: 'Stuck is the formal definition of a runtime error',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a term"] --> B{"is it a value?"}',
+            '    B -->|yes| C["done — this is the result"]',
+            '    B -->|no| D{"does a step rule apply?"}',
+            '    D -->|yes| E["step, and ask again"]',
+            '    E --> B',
+            '    D -->|no| F["STUCK — not a value,<br/>and nowhere to go"]'
+          ].join('\n'),
+          caption: 'A type system\'s soundness theorem is exactly the claim that a well-typed program never reaches that third box. Stuck is what type safety rules out.'
+        },
         plain: 'Not a value, and no rule applies.',
         formal: 'e is stuck when e is not a value and there is no e′ with e → e′',
         detail: 'That is the whole content of "this program went wrong", and it is the thing a ' +

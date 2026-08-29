@@ -129,6 +129,17 @@
       },
       {
         term: 'Union means on some path; intersection means on every path',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["two paths meet at a block"] --> B{"how do you combine<br/>what each one knew?"}',
+            '    B -->|union| C["true if it holds on<br/>SOME incoming path"]',
+            '    B -->|intersection| D["true only if it holds on<br/>EVERY incoming path"]',
+            '    C --> E["liveness, reaching definitions"]',
+            '    D --> F["available expressions,<br/>dominators"]'
+          ].join('\n'),
+          caption: 'The meet operator is the whole difference between four analyses that otherwise share one worklist loop. Choosing it is choosing what the analysis means.'
+        },
         plain: 'That is the entire content of the choice of meet.',
         formal: 'live if ANY successor reads it; available only if EVERY path computed it',
         detail: 'A register is live if one successor needs it, because the program only has to ' +
@@ -227,6 +238,17 @@
       },
       {
         term: 'Dead code is mark and sweep over uses',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["start from what MUST run:<br/>stores, calls, returns"] --> B["mark everything they read"]',
+            '    B --> C["and everything those read"]',
+            '    C --> B',
+            '    C --> D["sweep away whatever<br/>is still unmarked"]',
+            '    D --> E["the same shape as a<br/>garbage collector, over<br/>instructions instead of objects"]'
+          ].join('\n'),
+          caption: 'Deleting instructions that look unused is wrong in both directions. Marking outward from the effects that must happen is the version that is actually correct.'
+        },
         plain: 'Start from what must run and keep what it transitively reads.',
         formal: 'terminators, stores, calls — and the function\'s results',
         detail: 'The last clause is not a special case, it is the boundary. A program\'s ' +

@@ -23,6 +23,17 @@
       },
       {
         term: 'The cell size is a work minimum, not a rule of thumb',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["cells much smaller than<br/>the query radius"] --> B["scan many nearly empty buckets —<br/>overhead dominates"]',
+            '    C["cells much larger"] --> D["scan few buckets, each full of<br/>objects that are far away"]',
+            '    B --> E["total work has a minimum<br/>in between"]',
+            '    D --> E',
+            '    E --> F["and it is measurable,<br/>not a matter of taste"]'
+          ].join('\n'),
+          caption: 'There is a genuine optimum here and it moves with the data density and the query radius, which means it can be measured rather than argued about.'
+        },
         plain: 'Small cells scan many nearly empty buckets; large cells scan few buckets full of far-away objects.',
         formal: 'work(c) ≈ (⌈2r/c⌉+1)² + ρ·((⌈2r/c⌉+1)·c)²',
         readAs: 'Two costs pulling opposite ways: the number of cells you visit, which grows as cells get ' +

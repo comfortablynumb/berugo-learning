@@ -8,6 +8,16 @@
     'pratt-parsing-and-precedence': [
       {
         term: 'Precedence as data rather than as grammar shape',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["grammar-shaped precedence"] --> B["one nonterminal per level:<br/>expr, term, factor, unary…"]',
+            '    B --> C["a new operator means<br/>a new layer everywhere"]',
+            '    D["Pratt: a binding power per token"] --> E["a new operator is one table row"]',
+            '    E --> F["and the parser code<br/>does not change"]'
+          ].join('\n'),
+          caption: 'The precedence tower is the part of a hand-written parser that is tedious to extend. Turning it into a lookup makes adding an operator a data change.'
+        },
         plain: 'Each token gets a binding power; adding an operator is one table row.',
         formal: 'table[token] = { power, right } for infix; { power } for prefix and postfix',
         detail: 'A classical expression grammar encodes each precedence level as a nonterminal, ' +
@@ -105,6 +115,16 @@
     'lexing-in-context': [
       {
         term: 'The lexer/parser split is a convention, not a law',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the clean split: lexer makes tokens,<br/>parser makes trees"] --> B["works for most languages"]',
+            '    B --> C["then: is / a divide<br/>or the start of a regex?"]',
+            '    C --> D["only the parser knows"]',
+            '    D --> E["so real lexers take feedback,<br/>or carry modes"]'
+          ].join('\n'),
+          caption: 'Every mature language has at least one of these. The split is a very good default and treating it as inviolable is what makes the workaround ugly.'
+        },
         plain: 'It holds until the lexer needs information only the parser has.',
         formal: 'tokenise with a finite automaton, then parse tokens rather than characters',
         detail: 'The split is worth keeping: tokenising with a finite automaton is linear and ' +
@@ -215,6 +235,16 @@
       },
       {
         term: 'A parser that stops at the first error is unusable in an editor',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["in a build: the file is finished"] --> B["one error, one message,<br/>fix it and rerun"]',
+            '    C["in an editor: the file is mid-edit"] --> D["it is broken on almost<br/>every keystroke"]',
+            '    D --> E["stopping at the first error means<br/>no highlighting, no completion,<br/>no types, below that point"]',
+            '    E --> F["so recovery is not a nicety —<br/>it is the normal case"]'
+          ].join('\n'),
+          caption: 'An editor spends most of its life parsing invalid code. What a batch compiler treats as the exceptional path is the only path a language server ever sees.'
+        },
         plain: 'Most parses in an editor are of a file that is mid-edit and therefore broken.',
         formal: 'stopping loses every declaration after the first error',
         detail: 'Completion, go-to-definition and type information all vanish for the rest of ' +
