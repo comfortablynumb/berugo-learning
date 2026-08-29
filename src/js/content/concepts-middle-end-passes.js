@@ -20,6 +20,17 @@
       },
       {
         term: 'A phi function names the edge',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["x = 1 on the then branch"] --> C["the paths join"]',
+            '    B["x = 2 on the else branch"] --> C',
+            '    C --> D["x₃ = φ(x₁ from then,<br/>x₂ from else)"]',
+            '    D --> E["the value now depends on<br/>which edge arrived"]',
+            '    E --> F["and single-assignment survives"]'
+          ].join('\n'),
+          caption: 'Without the phi, a join would need two definitions of one name and the whole guarantee collapses. It is not an instruction so much as a record of which way control came.'
+        },
         plain: 'Two paths define a variable, so a third definition says which arrived.',
         formal: 'not an instruction any machine has; destruction turns it back into copies',
         detail: 'It is easy to read a phi as a trick and it is the opposite: given that every ' +

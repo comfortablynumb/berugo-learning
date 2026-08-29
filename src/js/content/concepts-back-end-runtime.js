@@ -20,6 +20,18 @@
       },
       {
         term: 'A shape is the set of fields, in the order they were added',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["an empty object"] --> B["add x → shape {x}"]',
+            '    B --> C["add y → shape {x, y}"]',
+            '    D["another empty object"] --> E["add x → the SAME shape {x}"]',
+            '    E --> F["add y → the same {x, y}"]',
+            '    C --> G["same history, same shape,<br/>so the cache hits"]',
+            '    F --> G'
+          ].join('\n'),
+          caption: 'Objects built by the same code path share a shape, which is why a constructor is fast and building the same object field-by-field in a different order is not.'
+        },
         plain: 'Give that an identity and objects with the same history share it.',
         formal: 'the offset of a field is a property of the shape, not of the object',
         detail: 'Once the shape is shared, a field\'s position inside the object is fixed for ' +

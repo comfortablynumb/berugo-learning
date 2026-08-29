@@ -259,6 +259,15 @@
       },
       {
         term: 'The evaluation budget is the comparison, and it must be enforced',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["compare two heuristics<br/>by wall-clock time"] --> B["you are measuring the<br/>implementation and the machine"]',
+            '    C["compare them at an equal number<br/>of objective evaluations"] --> D["you are measuring the search"]',
+            '    D --> E["which is the only part<br/>you were choosing between"]'
+          ].join('\n'),
+          caption: 'Without a fixed budget, the better-optimised implementation wins and the better search idea loses. The budget is what makes the comparison mean anything.'
+        },
         plain: 'Fix the number of objective evaluations, or you are measuring patience.',
         formal: 'best-so-far as a function of evaluations spent is the comparison; a final value alone is not',
         detail: 'A method that runs longer will usually find something better, so a table of ' +

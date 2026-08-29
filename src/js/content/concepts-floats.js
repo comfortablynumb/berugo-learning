@@ -8,6 +8,16 @@
     'ieee-754': [
       {
         term: 'A finite double is a rational number, exactly',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["you write 0.1"] --> B["the nearest double is stored"]',
+            '    B --> C["that double is not 0.1 —<br/>it is a different, exact rational"]',
+            '    C --> D["printing shows 0.1 because the<br/>printer picks the shortest decimal<br/>that round-trips"]',
+            '    D --> E["so the error is in the input,<br/>not in the arithmetic"]'
+          ].join('\n'),
+          caption: 'There is no fuzz in a double. Every one of them is an exact number — just not always the one you typed, which is a completely different problem to reason about.'
+        },
         plain: 'Not "0.1 with a bit of error" — a specific other number, with a terminating decimal expansion.',
         formal: '0.1 is exactly 3602879701896397 / 2⁵⁵, which written out is 0.1000000000000000055511151231257827021181583404541015625',
         detail: 'The format is a sign, a 53-bit integer and a power of two, and that is the ' +
@@ -22,6 +32,16 @@
       },
       {
         term: 'The spacing doubles at every power of two',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["between 1 and 2"] --> B["doubles are evenly spaced,<br/>a fixed gap apart"]',
+            '    C["between 2 and 4"] --> D["same count of doubles,<br/>twice the range — so twice the gap"]',
+            '    D --> E["and again at 4, at 8, at 16"]',
+            '    E --> F["precision is relative: big numbers<br/>are coarse, small ones are fine"]'
+          ].join('\n'),
+          caption: 'This is why absolute tolerances fail. A gap that is invisible near 1 is larger than your epsilon near a million, and the same comparison changes meaning.'
+        },
         plain: 'Representable doubles are evenly spaced within a binade and twice as far apart in the next one up.',
         formal: 'the gap is 2.2204e-16 at 1.0, exactly 1 at 2⁵², and 2 at 2⁵³',
         detail: 'This one sentence explains nearly everything people say about floating point. ' +
@@ -120,6 +140,18 @@
     'floating-point-hazards': [
       {
         term: 'Addition is commutative and not associative',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the same four numbers"] --> B["added left to right"]',
+            '    A --> C["added largest first"]',
+            '    A --> D["added in pairs"]',
+            '    B --> E["three different results,<br/>all correctly rounded"]',
+            '    C --> E',
+            '    D --> E'
+          ].join('\n'),
+          caption: 'Reordering a sum is not a refactor. Parallelising a reduction changes the order, which changes the answer — and the answer was never wrong to begin with.'
+        },
         plain: 'Four orderings of one array are four different computations, and they are allowed to disagree.',
         formal: 'the same 200 001 values summed four ways land 0, 41 434 and 50 078 representable doubles from the exact total',
         detail: 'This is the honest answer to "the batch job and the streaming job produce ' +
@@ -147,6 +179,17 @@
       },
       {
         term: 'Absorption is the point at which a value contributes nothing',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a running total of 10 million"] --> B["add 0.001"]',
+            '    B --> C{"is the addend smaller than<br/>half the local gap?"}',
+            '    C -->|yes| D["it rounds away completely —<br/>the total does not move"]',
+            '    C -->|no| E["it registers"]',
+            '    D --> F["add it a million times and<br/>the total still does not move"]'
+          ].join('\n'),
+          caption: 'The failure is not that the sum drifts. It is that a term stops being counted at all, silently, once the total has grown past it.'
+        },
         plain: 'An addend smaller than half the local gap rounds away completely.',
         formal: 'the gap at 10¹⁶ is 2, so 10¹⁶ + 1 is 10¹⁶ and 10¹⁶ + 1.5 is not',
         detail: 'Every individual addition here is correctly rounded and no error is reported, ' +

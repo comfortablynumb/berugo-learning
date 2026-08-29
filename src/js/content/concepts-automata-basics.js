@@ -129,6 +129,16 @@
       },
       {
         term: 'A state is what still matters, not what happened',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the whole prefix read so far"] --> B["almost all of it is<br/>irrelevant to the future"]',
+            '    B --> C["keep only what changes<br/>what happens next"]',
+            '    C --> D["that residue is the state"]',
+            '    D --> E["designing a DFA is deciding<br/>what may safely be forgotten"]'
+          ].join('\n'),
+          caption: 'The hard part is never drawing the machine. It is naming the smallest thing you must remember, and being certain nothing else can matter.'
+        },
         plain: 'Designing a DFA is naming exactly what has to be remembered.',
         formal: 'two prefixes are the same state when no continuation distinguishes them',
         detail: 'That is Myhill–Nerode stated informally, and it is the test for whether a state ' +
@@ -218,6 +228,16 @@
     'nondeterminism-and-subsets': [
       {
         term: 'An NFA does not guess; it is in a SET of states',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["currently in states {1, 4, 7}"] --> B["read the next symbol"]',
+            '    B --> C["advance every one of them"]',
+            '    C --> D["union the results:<br/>now in {2, 5}"]',
+            '    D --> E["nothing was chosen,<br/>so nothing is ever backtracked"]'
+          ].join('\n'),
+          caption: 'Nondeterminism is a description, not an implementation. The machine is not lucky — it tracks every possibility at once, which is exactly what the subset construction writes down.'
+        },
         plain: 'Running it means advancing the set, and nothing is ever backtracked.',
         formal: 'δ: Q × Σ → 2^Q, and a word is accepted when the reachable set meets F',
         readAs: 'The transition function takes a state and a symbol to a SET of states, and a ' +

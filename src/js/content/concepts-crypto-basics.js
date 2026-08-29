@@ -8,6 +8,18 @@
     'threat-models-and-primitives': [
       {
         term: 'Four goals people say "encrypted" for',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["confidentiality"] --> E["four separate properties"]',
+            '    B["integrity"] --> E',
+            '    C["authenticity"] --> E',
+            '    D["non-repudiation"] --> E',
+            '    E --> F["encryption alone gives you<br/>the first one only"]',
+            '    F --> G["so ciphertext nobody authenticated<br/>can still be altered by anyone"]'
+          ].join('\n'),
+          caption: 'Most real failures come from assuming one word covers all four. Naming which of them you actually need makes the primitive choice almost mechanical.'
+        },
         plain: 'Confidentiality, integrity, authenticity and non-repudiation are separate things.',
         formal: 'encryption gives confidentiality only; integrity needs a tag, authenticity needs a keyed tag, non-repudiation needs a signature',
         detail: 'Conflating these is the most common cryptographic mistake in system design, and ' +

@@ -23,6 +23,17 @@
       },
       {
         term: 'Stochastic averaging',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["hash the item"] --> B["the first p bits choose<br/>one of m registers"]',
+            '    B --> C["the rest give a leading-zero count"]',
+            '    C --> D["that register keeps its maximum"]',
+            '    D --> E["m independent estimates instead of one"]',
+            '    E --> F["averaging them cuts the noise<br/>by the square root of m"]'
+          ].join('\n'),
+          caption: 'One leading-zero count is a wildly noisy estimator. Splitting the stream across many registers and averaging is what turns it into a usable one.'
+        },
         plain: 'The first p bits of the hash choose one of m = 2^p registers; each keeps its own maximum.',
         formal: 'm independent estimators over n/m elements each',
         detail: 'Splitting the stream by the leading bits of the hash turns one high-variance estimator ' +
@@ -138,6 +149,16 @@
       },
       {
         term: 'One-sided error is the design decision',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["every counter a key touches<br/>may also be touched by others"] --> B["so every count is<br/>at least the true count"]',
+            '    B --> C["count-min never under-counts"]',
+            '    C --> D["safe: is this below a threshold?<br/>a no is trustworthy"]',
+            '    C --> E["unsafe: is this above a threshold?<br/>a yes may be collisions"]'
+          ].join('\n'),
+          caption: 'Knowing which direction the error can go tells you which questions the sketch may be asked. The same number is trustworthy for one and misleading for the other.'
+        },
         plain: 'Count-min never under-counts. That makes it safe for some uses and unsafe for others.',
         formal: 'est(x) ≥ f(x) always; est(x) ≤ f(x) + εN with probability 1 − δ',
         readAs: 'The estimate is never below the real frequency — collisions can only add — and with ' +

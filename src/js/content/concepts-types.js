@@ -136,6 +136,17 @@
       },
       {
         term: 'The occurs check',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["unify a with (a → b)"] --> B{"does the variable appear<br/>inside the type?"}',
+            '    B -->|yes| C["binding it would build<br/>an infinite type"]',
+            '    C --> D["reject — this is the error"]',
+            '    B -->|no| E["bind it and carry on"]',
+            '    D --> F["skip the check and the inferencer<br/>loops or blows the stack"]'
+          ].join('\n'),
+          caption: 'It is three lines that almost never fire, and without them a self-application makes the compiler hang rather than report a type error.'
+        },
         plain: 'A variable cannot be bound to a type that contains it.',
         formal: 'unify(α, α → β) fails, because no finite type satisfies it',
         readAs: 'Trying to make a variable equal to a type that already contains that variable ' +

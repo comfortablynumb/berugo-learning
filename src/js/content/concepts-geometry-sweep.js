@@ -8,6 +8,16 @@
     'sweep-line-algorithms': [
       {
         term: 'A sweep replaces a two-dimensional problem with a one-dimensional one that changes',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a plane full of segments"] --> B["move an imaginary vertical line<br/>across it, left to right"]',
+            '    B --> C["keep only what the line<br/>touches right now"]',
+            '    C --> D["that is an ordered list,<br/>not a plane"]',
+            '    D --> E["and it changes only at events —<br/>a start, an end, a crossing"]'
+          ].join('\n'),
+          caption: 'The plane never gets searched. What gets searched is a one-dimensional list that is small, ordered, and only changes at a handful of moments.'
+        },
         plain: 'Move an imaginary line across the plane and keep only what it currently touches.',
         formal: 'an event queue ordered by sweep position, and a status structure ordered along the line',
         detail: 'The two structures answer different questions and confusing them is the usual first ' +
@@ -22,6 +32,16 @@
       },
       {
         term: 'Two segments can only cross after they have become neighbours',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["two segments cross somewhere"] --> B["just before they do, nothing<br/>is between them in the sweep order"]',
+            '    B --> C["so they are neighbours in the status list"]',
+            '    C --> D["test only neighbours, on every event"]',
+            '    D --> E["n² pair tests become a handful<br/>per event"]'
+          ].join('\n'),
+          caption: 'This is the observation the whole algorithm is built on: you never have to consider a pair until the sweep has already brought them next to each other.'
+        },
         plain: 'So test neighbours in the status order rather than every pair.',
         formal: 'adjacency in the status structure is a necessary condition for an intersection',
         detail: 'This is the observation the whole of Bentley-Ottmann rests on. Before two segments ' +
@@ -240,6 +260,16 @@
       },
       {
         term: 'The Voronoi diagram is the Delaunay triangulation turned inside out',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a Delaunay triangle"] --> B["its circumcentre is<br/>a Voronoi vertex"]',
+            '    C["a Delaunay edge"] --> D["crosses one Voronoi edge,<br/>at right angles"]',
+            '    B --> E["compute either one and you have<br/>the other, for free"]',
+            '    D --> E'
+          ].join('\n'),
+          caption: 'They are the same information drawn twice: points joined to their neighbours, or regions around each point. Libraries compute one and derive the other.'
+        },
         plain: 'Every Delaunay triangle contributes its circumcentre as a Voronoi vertex, and every Delaunay edge a cell boundary.',
         formal: 'the two are duals: triangles become vertices, edges become edges, vertices become cells',
         detail: 'This is why almost every library builds the triangulation and dualises rather than ' +

@@ -8,6 +8,16 @@
     'competitive-analysis': [
       {
         term: 'The competitive ratio is a maximum, not an average',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["an adversary picks the<br/>worst input it can"] --> B["your cost, against the cost of<br/>someone who knew the future"]',
+            '    B --> C["the ratio on THAT input"]',
+            '    C --> D["c-competitive means no input<br/>pushes it past c"]',
+            '    D --> E["a typical case that is far better<br/>changes the number not at all"]'
+          ].join('\n'),
+          caption: 'It is a worst-case promise, so a good average is not evidence for it and a good benchmark is not evidence against it.'
+        },
         plain: 'An algorithm is c-competitive when no input pushes it past c times the offline optimum.',
         formal: 'ALG is c-competitive when ALG(σ) ≤ c·OPT(σ) + b for every request sequence σ and some constant b',
         readAs: 'The algorithm costs at most c times the offline optimum plus a constant, on ' +
@@ -23,6 +33,17 @@
       },
       {
         term: 'Ski rental is the whole problem in two lines',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["rent for 1 a day,<br/>or buy once for B"] --> B{"how long is the season?"}',
+            '    B -->|"you knew: short"| C["rent throughout"]',
+            '    B -->|"you knew: long"| D["buy on day one"]',
+            '    B -->|"you do not know"| E["rent until you have spent B,<br/>then buy"]',
+            '    E --> F["never worse than twice<br/>the cost of knowing"]'
+          ].join('\n'),
+          caption: 'Every online problem in this milestone is this one wearing a different hat: commit early and risk waste, or commit late and risk paying twice.'
+        },
         plain: 'Rent at 1 a day or buy once for B, and the season ends when the adversary says.',
         formal: 'OPT = min(days, B); renting until day B and then buying costs at most (B − 1) + B',
         detail: 'Every "keep it warm or tear it down" decision is this problem: keep a connection ' +
@@ -115,6 +136,16 @@
     'page-replacement': [
       {
         term: 'Belady’s rule is optimal and needs the future',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["evict the resident item whose<br/>next use is furthest away"] --> B["provably the fewest misses possible"]',
+            '    B --> C["and it needs to know the<br/>rest of the trace"]',
+            '    C --> D["so it can never be implemented"]',
+            '    D --> E["it is the yardstick every real<br/>policy is measured against"]'
+          ].join('\n'),
+          caption: 'An unimplementable algorithm is still useful: without it there is no way to say how much of a policy\'s miss rate was avoidable.'
+        },
         plain: 'Evict the resident item whose next use is furthest away.',
         formal: 'OPT is optimal offline; no online policy matches it, and it is the denominator every hit rate should carry',
         detail: 'It is not an algorithm, it is a ceiling — and having the ceiling is what turns a ' +

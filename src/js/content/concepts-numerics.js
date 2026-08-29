@@ -8,6 +8,18 @@
     'conditioning-and-error': [
       {
         term: 'The residual answers a different question from the error',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the residual"] --> B["does my answer satisfy<br/>the equations?"]',
+            '    C["the error"] --> D["is my answer the right one?"]',
+            '    B --> E["you can compute this"]',
+            '    D --> F["you usually cannot —<br/>it needs the true answer"]',
+            '    E --> G["a tiny residual with a huge error<br/>is exactly what ill-conditioning is"]',
+            '    F --> G'
+          ].join('\n'),
+          caption: 'Reporting a small residual as if it were a small error is the most common numerical mistake there is. Only the condition number connects the two.'
+        },
         plain: 'One asks whether your answer satisfies the equations; the other asks whether it is the answer.',
         formal: 'the residual is ‖Ax − b‖ and the error is ‖x − x*‖, and only the first is computable without x*',
         readAs: 'The residual is how far the equations are from being satisfied by the answer you ' +
@@ -24,6 +36,17 @@
       },
       {
         term: 'The condition number belongs to the problem, not to any algorithm',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a small wobble in the input"] --> B["how much can it be magnified<br/>on the way to the output?"]',
+            '    B --> C["that factor is the condition number"]',
+            '    C --> D["it is a property of the question"]',
+            '    D --> E["a better algorithm cannot lower it"]',
+            '    D --> F["only a better-posed question can"]'
+          ].join('\n'),
+          caption: 'If the problem is ill-conditioned, no implementation rescues it. Chasing precision in the code is answering a question the condition number already settled.'
+        },
         plain: 'It is how much a relative wobble in the input can be magnified on the way to the output.',
         formal: 'κ(A) = σ_max / σ_min, and the relative error is bounded by κ times the relative input perturbation',
         readAs: 'Kappa of A is the largest singular value divided by the smallest, and the ' +
@@ -159,6 +182,18 @@
       },
       {
         term: 'Newton has three failure modes and none of them raises an error',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the derivative is nearly flat"] --> B["the step is enormous —<br/>it lands somewhere unrelated"]',
+            '    C["the function is symmetric<br/>about the guess"] --> D["it cycles between two points<br/>forever"]',
+            '    E["another root is nearer"] --> F["it converges, to the wrong one"]',
+            '    B --> G["all three return a number"]',
+            '    D --> G',
+            '    F --> G'
+          ].join('\n'),
+          caption: 'Bisection is slower and cannot do any of this. Which is why production root-finders bracket first and only use Newton inside a bracket they can fall back from.'
+        },
         plain: 'A flat derivative throws it away, a symmetric function makes it cycle, and a nearby root may not be the one it finds.',
         formal: 'a small f′(x_k) makes the step enormous; some functions admit a 2-cycle; the basin boundary is where f′ = 0',
         detail: 'The third is the one that costs real time, because the returned value is a ' +

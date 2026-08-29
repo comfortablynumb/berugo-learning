@@ -22,6 +22,17 @@
       },
       {
         term: 'A derivation is a sequence; a parse tree is a structure',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["leftmost derivation"] --> C["the same parse tree"]',
+            '    B["rightmost derivation"] --> C',
+            '    C --> D["the tree is the meaning"]',
+            '    D --> E["two derivations, one tree:<br/>no problem at all"]',
+            '    D --> F["two TREES: that is ambiguity,<br/>and that is a bug"]'
+          ].join('\n'),
+          caption: 'Counting derivations catches nothing, because order of expansion is arbitrary. Counting trees is the question, because the tree is what the compiler acts on.'
+        },
         plain: 'Many derivations produce the same tree, and the tree is the meaning.',
         formal: 'leftmost and rightmost derivations of one tree differ only in expansion order',
         detail: 'This distinction carries the whole section. Expanding `E → E + E` left-first ' +
@@ -310,6 +321,17 @@
     'top-down-parsing-and-ll1': [
       {
         term: 'Recursive descent is one function per nonterminal',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["grammar rule for Expr"] --> B["function parseExpr"]',
+            '    C["grammar rule for Term"] --> D["function parseTerm"]',
+            '    B --> E["the body is the right-hand side,<br/>read left to right"]',
+            '    D --> E',
+            '    E --> F["so the parser reads as the grammar,<br/>and a grammar change is a code change<br/>in the obvious place"]'
+          ].join('\n'),
+          caption: 'The reason this style survives in production compilers is not speed. It is that the code and the specification stay legible as the same document.'
+        },
         plain: 'The function body is the right-hand side, and the parser reads as the grammar.',
         formal: 'each production becomes a sequence of calls and token matches',
         detail: 'It is the most readable parser there is, and its structure is literally the ' +

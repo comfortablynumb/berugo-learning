@@ -21,6 +21,17 @@
       },
       {
         term: 'The forwarding address is why a second visit is cheap',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["copy an object to to-space"] --> B["overwrite the old copy<br/>with its new address"]',
+            '    B --> C["another pointer to it arrives"]',
+            '    C --> D["the old header says<br/>already copied, and where"]',
+            '    D --> E["just update the pointer"]',
+            '    E --> F["one field answers two questions<br/>at once, and costs nothing"]'
+          ].join('\n'),
+          caption: 'A shared object is reached many times and copied once. The old body is dead space anyway, so storing the answer there is free.'
+        },
         plain: '"Already copied" and "here is where it went" are one field.',
         formal: 'the vacated object is overwritten with a pointer to its new location',
         detail: 'A copying collector needs no mark bit at all: the old copy of the object holds ' +

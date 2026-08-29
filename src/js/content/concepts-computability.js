@@ -20,6 +20,17 @@
       },
       {
         term: 'A configuration is the state, the tape and the head position',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["current state"] --> D["a configuration"]',
+            '    B["the tape contents"] --> D',
+            '    C["where the head is"] --> D',
+            '    D --> E["nothing else exists —<br/>there is no hidden memory"]',
+            '    E --> F["so a run is a sequence of these,<br/>and each one determines the next"]'
+          ].join('\n'),
+          caption: 'Because the configuration is complete, a machine can be simulated by another machine that just rewrites configurations — which is what makes universality possible.'
+        },
         plain: 'Those three fields are the complete description at any moment.',
         formal: 'a computation is a sequence of configurations related by delta',
         detail: 'There is nowhere else for information to hide, which is what makes the model ' +
@@ -207,6 +218,17 @@
       },
       {
         term: 'Halting is recognisable and the gap is entirely one-sided',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["just run the program"] --> B{"did it halt?"}',
+            '    B -->|yes| C["you now know: it halts"]',
+            '    B -->|not yet| D["keep waiting"]',
+            '    D --> B',
+            '    D --> E["and you never learn that<br/>it will not halt"]'
+          ].join('\n'),
+          caption: 'The yes cases are all discoverable and the no cases are never confirmed. That one-sidedness is the precise shape of undecidability here.'
+        },
         plain: 'Run it: if it halts you find out, and if it does not you wait forever.',
         formal: 'HALT is recursively enumerable; its complement is not',
         detail: 'There is no symmetric procedure and no way to detect that you are waiting ' +
@@ -218,6 +240,16 @@
       },
       {
         term: 'Diagonalisation builds a row that differs from every row',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["machines down the side,<br/>inputs across the top"] --> B["read the diagonal:<br/>machine i on input i"]',
+            '    B --> C["build a new row that does<br/>the opposite at every position"]',
+            '    C --> D["it differs from row i at column i"]',
+            '    D --> E["so it is not in the table —<br/>and the table listed everything"]'
+          ].join('\n'),
+          caption: 'The construction only needs the table to be complete. Anything you can enumerate can be diagonalised out of, which is why this one argument proves so many things.'
+        },
         plain: 'Machines down the side, inputs across the top, and do the opposite of the diagonal.',
         formal: 'D differs from row i at column i, for every i',
         detail: 'It differs from every row, so it is no row of the table — and every machine IS ' +

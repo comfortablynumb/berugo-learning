@@ -8,6 +8,17 @@
     'fourier-transforms': [
       {
         term: 'The DFT is a change of basis, not an approximation',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the samples"] --> C["the same information,<br/>written two ways"]',
+            '    B["the spectrum"] --> C',
+            '    C --> D["the transform is invertible"]',
+            '    D --> E["nothing is lost and<br/>nothing is estimated"]',
+            '    E --> F["so round-tripping returns exactly<br/>what you started with"]'
+          ].join('\n'),
+          caption: 'It is a rotation of the same data, not a model fitted to it. That is why a bug in an FFT shows up as a failed round trip rather than as a slightly worse answer.'
+        },
         plain: 'The signal and its spectrum are the same information written two ways, and the transform is invertible exactly.',
         formal: 'Xₖ = Σⱼ xⱼ e^(−2πijk/n), a matrix–vector product costing n² operations',
         readAs: 'The k-th spectrum entry is the sum over every sample of that sample times a ' +

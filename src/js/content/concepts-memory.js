@@ -116,6 +116,18 @@
     'reference-counting': [
       {
         term: 'One rule, and everything follows from it',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a pointer store"] --> B["increment the new target"]',
+            '    A --> C["decrement the old target"]',
+            '    C --> D{"did it reach zero?"}',
+            '    D -->|yes| E["free it now, and decrement<br/>everything it pointed at"]',
+            '    E --> D',
+            '    D -->|no| F["nothing else happens"]'
+          ].join('\n'),
+          caption: 'There is no collector and no pause: freeing is a consequence of an ordinary assignment. The cost is that every assignment now does bookkeeping.'
+        },
         plain: 'A store increments the new target and decrements the old; zero frees at once.',
         formal: 'retain(new); release(old); a count reaching zero reclaims immediately',
         detail: 'That is the entire design. Its reputation, good and bad, is a consequence of ' +
@@ -237,6 +249,16 @@
       },
       {
         term: 'Tri-colour is three states because two are not enough',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["white — not reached yet"] --> B["grey — reached, but its own<br/>pointers not yet followed"]',
+            '    B --> C["black — reached and fully scanned"]',
+            '    C --> D["the collector is finished when<br/>no grey objects remain"]',
+            '    D --> E["grey IS the work list —<br/>with two colours there is nowhere<br/>to record what is half-done"]'
+          ].join('\n'),
+          caption: 'The middle colour is what lets the collector stop and resume, which is the entire basis of incremental and concurrent collection.'
+        },
         plain: 'White is unreached, black is reached and scanned, grey is the frontier.',
         formal: 'the mark ends when the grey set empties, which is a cheap termination test',
         detail: 'Grey is the useful colour: reached, but its own references have not been ' +

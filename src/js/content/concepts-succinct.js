@@ -22,6 +22,16 @@
       },
       {
         term: 'Rank in three lookups and a popcount',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["how many 1s before position i?"] --> B["add the running count<br/>at the superblock"]',
+            '    B --> C["add the running count<br/>at the block inside it"]',
+            '    C --> D["popcount the partial word"]',
+            '    D --> E["constant time, and the index<br/>costs a fraction of the bits<br/>it indexes"]'
+          ].join('\n'),
+          caption: 'Two levels of precomputed counts plus one hardware instruction. Almost every succinct structure is built on this operation being genuinely O(1).'
+        },
         plain: 'Precompute a running count every superblock and every block, then popcount the partial word.',
         formal: 'rank1(i) = superblock[i/S] + block[i/B] + popcount(word & mask)',
         readAs: 'Counting the 1 bits before position i is three lookups added together: a coarse total, a ' +

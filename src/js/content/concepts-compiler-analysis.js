@@ -121,6 +121,16 @@
       },
       {
         term: 'The table is keyed by occurrence, not by name',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["two references, both spelled x"] --> B["one in an inner scope,<br/>one in an outer"]',
+            '    B --> C["they refer to different variables"]',
+            '    C --> D["so the key must be the<br/>occurrence in the tree"]',
+            '    D --> E["a map keyed by the name<br/>can only hold one of them"]'
+          ].join('\n'),
+          caption: 'Shadowing is legal in nearly every language, so a name is not a unique identifier. Keying the table by the occurrence is what makes resolution total.'
+        },
         plain: 'Two references spelled the same can mean different things.',
         formal: 'a has 3 occurrences and 2 bindings in the default fixture',
         detail: 'Keying by name makes shadowing inexpressible, which is why a find-and-replace ' +

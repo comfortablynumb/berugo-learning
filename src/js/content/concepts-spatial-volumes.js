@@ -234,6 +234,16 @@
       },
       {
         term: 'A rectangle is not one range',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a query rectangle in 2D"] --> B["its cells are scattered along<br/>the curve, not contiguous"]',
+            '    B --> C["so it becomes many separate<br/>ranges on the 1D index"]',
+            '    C --> D["merge adjacent ranges across<br/>the smallest gaps"]',
+            '    D --> E["fewer round trips,<br/>more cells read and discarded"]'
+          ].join('\n'),
+          caption: 'The curve preserves nearness well enough to be useful and not well enough to be exact, and that gap is paid for in either round trips or false positives.'
+        },
         plain: 'The cells of a rectangle are scattered along the curve, so a window query becomes many separate scans.',
         formal: 'ranges(rect) = the number of maximal runs of consecutive indices covering it',
         readAs: 'How many separate contiguous stretches of the curve a query rectangle breaks into. Each run ' +

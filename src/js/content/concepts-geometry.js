@@ -8,6 +8,19 @@
     'geometry-primitives': [
       {
         term: 'One question, asked by every algorithm in the milestone',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["three points: P, Q, R"] --> B{"which side of the line PQ<br/>does R fall on?"}',
+            '    B -->|left| C["positive"]',
+            '    B -->|right| D["negative"]',
+            '    B -->|exactly on it| E["zero"]',
+            '    C --> F["hulls, sweeps, triangulation<br/>and containment are all<br/>built from this one test"]',
+            '    D --> F',
+            '    E --> F'
+          ].join('\n'),
+          caption: 'Almost nothing in computational geometry asks for a distance or an angle. It asks which side, and the whole milestone rests on getting that sign right.'
+        },
         plain: 'Given three points, is the third to the left of the line through the first two, to its right, or on it?',
         formal: 'orient2d(a, b, c) returns the SIGN of (b − a) × (c − a), and only the sign is ever used',
         readAs: 'Take the vector from a to b and the vector from a to c, form their cross product, and ' +
@@ -37,6 +50,16 @@
       },
       {
         term: 'The tolerance test is self-consistent and always wrong',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["treat anything smaller<br/>than epsilon as zero"] --> B["the contradictions disappear"]',
+            '    B --> C["because everything near the line<br/>is now reported as on it"]',
+            '    C --> D["three points in a row are collinear,<br/>and so are three points that are not"]',
+            '    D --> E["consistent, and useless"]'
+          ].join('\n'),
+          caption: 'A tolerance does not make the predicate correct, it makes it agree with itself. The failures stop being visible without stopping.'
+        },
         plain: 'Treating a small value as zero makes the contradictions vanish and makes every answer "collinear".',
         formal: 'over 4 000 near-collinear triples: 0 contradictions, 4 000 wrong answers',
         detail: 'Almost everyone reaches for a tolerance first, and the sweep is the argument against ' +
@@ -257,6 +280,17 @@
     'convex-hulls': [
       {
         term: 'The monotone chain is the practical default because it has no special cases',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["sort the points left to right"] --> B["sweep forward, popping any point<br/>that turns the wrong way"]',
+            '    B --> C["that is the lower hull"]',
+            '    C --> D["sweep backward the same way"]',
+            '    D --> E["that is the upper hull"]',
+            '    E --> F["join them — no angles, no pivot,<br/>no collinear special case"]'
+          ].join('\n'),
+          caption: 'Graham scan needs an angular sort and a tie-break for collinear points. This needs neither, which is why it is the one to write from memory.'
+        },
         plain: 'Sort left to right, sweep forward for the lower hull and backward for the upper, popping right turns.',
         formal: 'O(n log n) dominated by the sort, with no angular comparison anywhere',
         detail: 'Graham\'s scan sorts by angle around an extreme point, which means a trigonometric ' +

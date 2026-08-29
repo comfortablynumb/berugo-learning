@@ -126,6 +126,16 @@
       },
       {
         term: 'ECB preserves structure, visibly',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["two identical plaintext blocks"] --> B["encrypted independently,<br/>with the same key"]',
+            '    B --> C["two identical ciphertext blocks"]',
+            '    C --> D["so every repetition in the input<br/>is a repetition in the output"]',
+            '    D --> E["the shape of the data survives<br/>encryption completely"]'
+          ].join('\n'),
+          caption: 'Nothing is decrypted and the picture is still recognisable. It is the clearest demonstration that a strong cipher used the wrong way protects nothing.'
+        },
         plain: 'Identical plaintext blocks give identical ciphertext blocks.',
         formal: 'ECB is a per-block function with no position input, so equal blocks map to equal blocks',
         detail: 'The consequence is that any repetition in the plaintext survives encryption, ' +
@@ -234,6 +244,18 @@
       },
       {
         term: 'Encrypt-then-MAC is the only order with a general proof',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["encrypt the plaintext"] --> B["tag the CIPHERTEXT"]',
+            '    B --> C["on receipt: check the tag first"]',
+            '    C --> D{"tag valid?"}',
+            '    D -->|no| E["stop — never touch the decryptor"]',
+            '    D -->|yes| F["decrypt"]',
+            '    E --> G["forged input never reaches<br/>the parsing or padding code"]'
+          ].join('\n'),
+          caption: 'The other orders can be secure with the right primitives and have no general proof. This one keeps attacker-chosen bytes out of the decryptor entirely.'
+        },
         plain: 'Tag the ciphertext, verify before decrypting.',
         formal: 'encrypt-then-MAC is secure for any secure cipher and MAC; MAC-then-encrypt and encrypt-and-MAC are not in general',
         detail: 'The distinguishing question is whether the tag can be checked before anything is ' +
@@ -247,6 +269,18 @@
       },
       {
         term: 'Associated data is authenticated but not encrypted',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a message header"] --> B["a router must be able to read it"]',
+            '    B --> C["so it cannot be encrypted"]',
+            '    A --> D["and nobody may alter it"]',
+            '    D --> E["so it must be authenticated"]',
+            '    C --> F["pass it as associated data:<br/>covered by the tag, sent in clear"]',
+            '    E --> F'
+          ].join('\n'),
+          caption: 'It exists because routing metadata has to be readable and unforgeable at once, and leaving it outside the tag is how header-swapping attacks work.'
+        },
         plain: 'Headers a middlebox must read and nobody may alter.',
         formal: 'the AEAD tag covers the associated data, so changing it fails verification even though it travels in clear',
         detail: 'Routing headers, message types, version numbers and sequence numbers belong ' +

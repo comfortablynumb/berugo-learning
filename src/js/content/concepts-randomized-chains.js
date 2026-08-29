@@ -132,6 +132,15 @@
     'fingerprinting': [
       {
         term: 'Verifying an answer can be asymptotically cheaper than producing it',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["produce the matrix product"] --> B["n^2.37 at best,<br/>and hard to implement"]',
+            '    C["check a claimed product:<br/>multiply both sides by<br/>a random vector"] --> D["n² — three matrix-vector products"]',
+            '    D --> E["so the check is cheaper than<br/>any algorithm that could<br/>have produced it"]'
+          ].join('\n'),
+          caption: 'You can trust an untrusted fast implementation without being able to write one. That asymmetry is the whole reason fingerprinting is useful in practice.'
+        },
         plain: 'Checking a claimed matrix product costs n², whatever algorithm produced it.',
         formal: 'Freivalds compares A(Bx) with Cx in 3n² operations, against n^2.807 to multiply',
         readAs: 'Compute B times the vector x, then A times that, and compare with C times x — ' +
@@ -166,6 +175,16 @@
       },
       {
         term: 'One-sided error means repetition has no downside at all',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A{"is the identity true?"} -->|yes| B["it holds at every point —<br/>no random test can ever refute it"]',
+            '    A -->|no| C["it fails almost everywhere —<br/>a random point is very likely<br/>to catch it"]',
+            '    B --> D["so a false alarm is impossible"]',
+            '    C --> E["and each extra round only<br/>shrinks the miss rate"]'
+          ].join('\n'),
+          caption: 'There is no trade-off to tune. Extra rounds cost time and can never turn a correct answer into a wrong one, which is rare enough to be worth noticing.'
+        },
         plain: 'A true identity holds everywhere, so no random point can refute it.',
         formal: 'Pr[reject | the claim is true] = 0 exactly, not approximately',
         detail: 'This is stronger than a small false-positive rate and it changes how the ' +
@@ -258,6 +277,16 @@
     'approximation-ratios': [
       {
         term: 'A ratio is what separates an approximation algorithm from a heuristic',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["approximation algorithm"] --> B["a proved ceiling that holds<br/>on EVERY input"]',
+            '    C["heuristic"] --> D["measurements on the inputs<br/>somebody tried"]',
+            '    B --> E["you can promise something<br/>to a caller you have never met"]',
+            '    D --> F["you can only report what<br/>you have seen"]'
+          ].join('\n'),
+          caption: 'Both may be excellent in practice. Only one of them lets you say anything at all about the input you have not run yet.'
+        },
         plain: 'A guarantee is a statement about every input, not about the ones you tried.',
         formal: 'ALG(x) ≤ ρ · OPT(x) for all x, minimising; ALG(x) ≥ OPT(x)/ρ maximising',
         readAs: 'For every input, the algorithm’s cost is at most rho times the optimal cost — ' +

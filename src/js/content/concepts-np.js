@@ -24,6 +24,16 @@
       },
       {
         term: 'NP is defined by checking, not by searching',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a yes instance"] --> B["has a short certificate"]',
+            '    B --> C["which a fast checker accepts"]',
+            '    C --> D["that is the whole definition of NP"]',
+            '    D --> E["nothing in it says finding<br/>the certificate is hard —<br/>or that it is easy"]'
+          ].join('\n'),
+          caption: 'NP is a statement about verification. The famous open question is whether searching is harder than checking, which the definition deliberately leaves alone.'
+        },
         plain: 'A problem is in NP when every yes instance has a short certificate a fast checker accepts.',
         formal: 'L ∈ NP ⟺ ∃ polynomial-time V and polynomial p with x ∈ L ⟺ ∃c, |c| ≤ p(|x|), V(x, c) accepts',
         readAs: 'A language is in NP exactly when there is a polynomial-time verifier and a ' +
@@ -144,6 +154,17 @@
       },
       {
         term: 'The arrow points from what you want to solve to what you can call',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["reduce YOUR problem to SAT"] --> B["you can now use a SAT solver"]',
+            '    C["reduce SAT to YOUR problem"] --> D["your problem is at least as hard"]',
+            '    B --> E["the direction is the entire claim"]',
+            '    D --> E',
+            '    E --> F["getting it backwards proves<br/>the opposite of what you meant"]'
+          ].join('\n'),
+          caption: 'The same construction read in either direction says two opposite things: one gives you a tool, the other gives you a hardness proof.'
+        },
         plain: 'Reducing your problem to SAT lets you use a solver; reducing SAT to your problem proves yours is hard.',
         formal: 'A ≤ₚ B proves B is at least as hard as A, and lets a B-solver answer A',
         detail: 'This is the mistake everybody makes once, and the code still runs when it is ' +

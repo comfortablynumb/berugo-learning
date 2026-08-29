@@ -8,6 +8,18 @@
     'randomised-design': [
       {
         term: 'Monte Carlo and Las Vegas differ in which thing is random',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["Monte Carlo"] --> B["runtime is fixed"]',
+            '    A --> C["the answer may be wrong"]',
+            '    D["Las Vegas"] --> E["the answer is always right"]',
+            '    D --> F["the runtime may be long"]',
+            '    C --> G["pick by which one your caller<br/>can actually tolerate"]',
+            '    F --> G'
+          ].join('\n'),
+          caption: 'Both are called randomised and they fail in opposite ways. One misses a deadline; the other returns a wrong answer on time.'
+        },
         plain: 'One has a fixed runtime and may be wrong; the other is always right and may take a long time.',
         formal: 'Monte Carlo: fixed time, Pr[wrong] ≤ p. Las Vegas: always correct, E[time] finite.',
         readAs: 'For Monte Carlo the time is fixed and the probability of being wrong is at ' +
@@ -25,6 +37,16 @@
       },
       {
         term: 'One-sided error amplifies by multiplication; two-sided error needs a vote',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["one-sided: it can only err<br/>in one direction"] --> B["a single disagreeing round<br/>settles it outright"]',
+            '    B --> C["k rounds: error falls<br/>like a product"]',
+            '    D["two-sided: it can err either way"] --> E["no single round is decisive"]',
+            '    E --> F["run many and take the majority"]'
+          ].join('\n'),
+          caption: 'Which kind of error the algorithm makes decides how you repeat it. Voting on a one-sided test wastes rounds; multiplying a two-sided one is simply wrong.'
+        },
         plain: 'If the algorithm can only ever err in one direction, any round that disagrees settles the question.',
         formal: 'Pr[k rounds all fail] = pᵏ for one-sided error; two-sided error needs a majority over O(log(1/δ)/γ²) rounds',
         readAs: 'The chance that all k rounds fail is p multiplied by itself k times; a ' +

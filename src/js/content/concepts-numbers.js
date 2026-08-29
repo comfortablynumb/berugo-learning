@@ -8,6 +8,17 @@
     'integer-representation': [
       {
         term: 'A bit pattern is not a number until something agrees how to read it',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the eight bits 11111111"] --> B["read as unsigned: 255"]',
+            '    A --> C["read as two\'s complement: −1"]',
+            '    B --> D["the bits are identical"]',
+            '    C --> D',
+            '    D --> E["the type is the agreement,<br/>and it lives outside the bits"]'
+          ].join('\n'),
+          caption: 'Nothing in memory records which reading was intended. Every signedness bug is two pieces of code disagreeing about a convention neither of them stored.'
+        },
         plain: 'The same eight bits are 255 unsigned and −1 signed, and nothing in the bits settles which.',
         formal: 'pattern 1111 1111 reads as 255 under the unsigned agreement and as −1 under two’s complement',
         detail: 'This is the fact every later confusion grows out of. A width does not store a ' +
@@ -21,6 +32,17 @@
       },
       {
         term: 'Two’s complement exists so one adder serves both readings',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["one adder circuit"] --> B["add two unsigned values"]',
+            '    A --> C["add two signed values"]',
+            '    B --> D["same gates, same walk<br/>around the wheel"]',
+            '    C --> D',
+            '    D --> E["which is why the hardware has<br/>no separate signed addition"]'
+          ].join('\n'),
+          caption: 'It is not a clever encoding of negative numbers. It is the encoding that makes subtraction, comparison and addition reuse one circuit.'
+        },
         plain: 'Adding is the same walk clockwise around the wheel whether you call the values signed or unsigned.',
         formal: 'the signed value of a pattern p at width n is p when p < 2^(n−1), and p − 2^n otherwise',
         readAs: 'Read the bits as an ordinary positive number; if that number reaches the halfway ' +
@@ -117,6 +139,16 @@
     'bit-manipulation': [
       {
         term: 'Two identities carry most of the toolkit',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["x AND (x − 1)"] --> B["clears the lowest set bit"]',
+            '    C["x AND −x"] --> D["isolates the lowest set bit"]',
+            '    B --> E["loop on the first: iterations equal<br/>the number of set bits"]',
+            '    D --> F["use the second to name<br/>which bit that is"]'
+          ].join('\n'),
+          caption: 'Population counts, subset enumeration and bit scans are almost all one of these two in a loop. Learning the pair is most of learning the toolkit.'
+        },
         plain: '`x & (x − 1)` clears the lowest set bit and `x & −x` isolates it.',
         formal: 'x & (x − 1) has popcount(x) − 1 bits set; x & −x is a power of two, or 0 when x is 0',
         detail: 'Subtracting one flips the lowest set bit to zero and turns every zero below it ' +

@@ -8,6 +8,16 @@
     'minhash-and-lsh': [
       {
         term: 'The min-hash identity',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["permute the universe at random"] --> B["take the minimum element<br/>of each set under it"]',
+            '    B --> C{"do the two minima match?"}',
+            '    C --> D["the chance they do is exactly<br/>the Jaccard similarity"]',
+            '    D --> E["so counting matches over many<br/>permutations estimates it"]'
+          ].join('\n'),
+          caption: 'A similarity between two sets has become a coin flip whose bias is that similarity. Everything else in the technique is just flipping it enough times.'
+        },
         plain: 'For a random permutation, the chance two sets share a minimum is exactly their Jaccard similarity.',
         formal: 'P[min h(A) = min h(B)] = |A ∩ B| / |A ∪ B|',
         readAs: 'The chance two sets share their smallest hash equals the fraction of their combined elements ' +
@@ -37,6 +47,17 @@
       },
       {
         term: 'Banding, and the S-curve',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["split the signature into<br/>b bands of r rows"] --> B["a pair is a candidate if<br/>ANY band matches entirely"]',
+            '    B --> C["very similar pairs: almost<br/>certain to share a band"]',
+            '    B --> D["dissimilar pairs: almost<br/>certain to share none"]',
+            '    C --> E["the threshold is sharp,<br/>and b and r are where you put it"]',
+            '    D --> E'
+          ].join('\n'),
+          caption: 'The banding turns a gentle probability into a near step function, and choosing b and r is choosing where the step falls — which is the whole tuning problem.'
+        },
         plain: 'Split the signature into b bands of r rows; a pair is a candidate if any band matches entirely.',
         formal: 'P[candidate] = 1 − (1 − s^r)^b',
         readAs: 'With b bands of r rows each, two items become candidates unless every band misses. The shape ' +

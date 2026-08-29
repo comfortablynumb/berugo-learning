@@ -8,6 +8,16 @@
     'information-and-entropy': [
       {
         term: 'Entropy is the floor, and it is a property of a MODEL',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a model: what do you believe<br/>generates these symbols?"] --> B["entropy of that model"]',
+            '    B --> C["the fewest bits per symbol<br/>any coder can reach"]',
+            '    D["a better model"] --> E["a lower floor"]',
+            '    E --> F["so beating the entropy means<br/>you changed the model,<br/>not that you beat information theory"]'
+          ].join('\n'),
+          caption: 'There is no such thing as the entropy of a file. There is the entropy under a model, and improving compression is almost always improving the model.'
+        },
         plain: 'The average bits a symbol carries, given some belief about what generates them.',
         formal: 'H = −Σ p(x)·log₂ p(x); no lossless code averages fewer bits per symbol',
         readAs: 'Entropy is minus the sum, over every symbol, of its probability times the ' +
@@ -127,6 +137,15 @@
     'prefix-codes-and-huffman': [
       {
         term: 'A prefix code needs no separators',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["no codeword is the start<br/>of another codeword"] --> B["so as soon as the bits read so far<br/>match one, they can match no other"]',
+            '    B --> C["the decoder knows where to stop"]',
+            '    C --> D["no delimiters, no lengths,<br/>no wasted bits between symbols"]'
+          ].join('\n'),
+          caption: 'The property sounds like a technicality and it is what makes the whole scheme work: a self-delimiting code spends nothing on saying where symbols end.'
+        },
         plain: 'No codeword is the beginning of another, so a decoder always knows where to stop.',
         formal: 'Kraft–McMillan: lengths ℓᵢ are achievable by a prefix code iff Σ 2^(−ℓᵢ) ≤ 1',
         readAs: 'A set of codeword lengths can be realised by a prefix code exactly when the sum ' +

@@ -130,6 +130,16 @@
       },
       {
         term: 'Miller-Rabin asks for a square root of one, which is what closes the hole',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["in a prime modulus, the only<br/>square roots of 1 are 1 and −1"] --> B["so square your way up<br/>and watch for others"]',
+            '    B --> C{"did something other than ±1<br/>square to 1?"}',
+            '    C -->|yes| D["that is a proof of compositeness,<br/>not a suspicion"]',
+            '    C -->|no| E["this base found nothing"]'
+          ].join('\n'),
+          caption: 'A Fermat test only checks the final value, which a Carmichael number satisfies for every base. Watching the intermediate squarings is what a Carmichael number cannot survive.'
+        },
         plain: 'In a prime modulus the only square roots of 1 are ±1, so anything else is a proof of compositeness.',
         formal: 'write n − 1 = d × 2ˢ; a prime has a^d ≡ 1 or some a^(d·2ⁱ) ≡ −1',
         readAs: 'Pull all the factors of two out of n minus one; then for a prime, raising the ' +

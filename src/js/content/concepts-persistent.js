@@ -8,6 +8,16 @@
     'persistence-basics': [
       {
         term: 'Immutability is a promise; persistence is a property',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["immutable"] --> B["nobody is allowed<br/>to change this value"]',
+            '    C["persistent"] --> D["every past version still exists<br/>and can still be queried"]',
+            '    B --> E["you can be immutable and keep<br/>no history at all"]',
+            '    D --> F["and persistence is what makes<br/>undo and time travel free"]'
+          ].join('\n'),
+          caption: 'The words get used interchangeably and mean different things. One is a restriction on writers; the other is a guarantee to readers about the past.'
+        },
         plain: 'Immutable means nobody may change it. Persistent means every past version is still there and still answerable.',
         formal: 'partial: query any version, update the latest. full: update any version. confluent: merge two versions.',
         detail: 'The two words get used interchangeably and they are not the same claim. A frozen array is ' +
@@ -20,6 +30,17 @@
       },
       {
         term: 'Path copying: rebuild the path, share everything else',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["change one leaf"] --> B["copy that leaf"]',
+            '    B --> C["copy its parent, pointing at the copy"]',
+            '    C --> D["up to a new root"]',
+            '    D --> E["every subtree hanging off that path<br/>is shared, not copied"]',
+            '    E --> F["so a new version costs the depth,<br/>not the size"]'
+          ].join('\n'),
+          caption: 'The old root still describes the old tree perfectly, because nothing it pointed at was touched. That is what makes the previous version survive for free.'
+        },
         plain: 'An update copies only the nodes from the changed leaf up to the root; every subtree off that path is shared.',
         formal: 'O(depth) new nodes per update, and queries cost exactly what the ephemeral structure costs',
         detail: 'This is the method behind every immutable collection library, and its appeal is that nothing ' +

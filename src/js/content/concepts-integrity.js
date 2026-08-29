@@ -127,6 +127,16 @@
       },
       {
         term: 'Hamming reads the error’s position out of the syndrome',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["each parity bit covers<br/>a fixed set of positions"] --> B["one bit flips"]',
+            '    B --> C["exactly the parity checks covering<br/>that position now fail"]',
+            '    C --> D["write the failures as bits"]',
+            '    D --> E["and they spell the position<br/>of the flipped bit, in binary"]'
+          ].join('\n'),
+          caption: 'The code is arranged so the pattern of failures is the answer. Nothing has to be searched for — the syndrome is the index.'
+        },
         plain: 'The failing parity checks spell the bad bit’s index in binary.',
         formal: 'parity bits at positions 2^i cover every position whose index has bit i set',
         detail: 'That construction is why the code is called elegant rather than merely correct: ' +

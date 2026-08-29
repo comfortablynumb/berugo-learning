@@ -8,6 +8,16 @@
     'bloom-filters': [
       {
         term: 'A clear bit is proof; a set bit is not',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["look up a key:<br/>check its k bits"] --> B{"is any one of them 0?"}',
+            '    B -->|yes| C["definitely absent —<br/>this key was never inserted"]',
+            '    B -->|no| D["probably present"]',
+            '    D --> E["or those bits were set<br/>by other keys, between them"]'
+          ].join('\n'),
+          caption: 'The asymmetry is the whole structure. A negative answer is a proof; a positive one is a hint, which is why a Bloom filter is always a front end for something authoritative.'
+        },
         plain: 'No false negatives ever, because every bit a key sets stays set.',
         formal: 'x ∈ S ⇒ has(x) = true; has(x) = true ⇏ x ∈ S',
         readAs: 'If the key really is in the set the filter always says yes — no false negatives, ever. The ' +
@@ -38,6 +48,17 @@
       },
       {
         term: 'k is a compromise, not a maximum',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["more hash functions"] --> B["more bits to check,<br/>so a miss is caught sooner"]',
+            '    A --> C["but more bits set per insert,<br/>so the filter fills faster"]',
+            '    B --> D["the two effects pull<br/>in opposite directions"]',
+            '    C --> D',
+            '    D --> E["the optimum sits where they balance,<br/>at about 0.7 bits per bit of space"]'
+          ].join('\n'),
+          caption: 'Adding hashes helps until it does not. This is the one parameter in the structure where more is not better, and the formula is where the two curves cross.'
+        },
         plain: 'More hashes set more bits; the optimum balances the two effects.',
         formal: 'k* = (m/n) ln 2, at which exactly half the bits are set',
         readAs: 'The best number of hash functions is the bits-per-key figure times the natural log of 2, ' +

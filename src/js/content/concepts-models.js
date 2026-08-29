@@ -8,6 +8,16 @@
     'streaming-model': [
       {
         term: 'The streaming model is two constraints, and they are the whole subject',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["one pass over the data"] --> C["everything in this milestone<br/>follows from these two"]',
+            '    B["space far smaller than the input"] --> C',
+            '    C --> D["you cannot store it,<br/>so you summarise it"]',
+            '    C --> E["you cannot revisit it,<br/>so you decide as it arrives"]'
+          ].join('\n'),
+          caption: 'Exactness is not one of the constraints, and that is precisely what has to be given up: every structure here trades a known error for fitting in memory.'
+        },
         plain: 'One pass over the data, in an order nobody chose, in sub-linear space.',
         formal: 'space o(n), a single pass, and no control over the arrival order',
         readAs: 'The space used has to grow more slowly than the length of the input, the data ' +

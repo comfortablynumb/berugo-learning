@@ -8,6 +8,15 @@
     'shift-reduce-and-lr0': [
       {
         term: 'Bottom-up parsing decides what a group WAS, after seeing all of it',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["top-down: commit to a rule<br/>from the first token"] --> B["and be wrong when the rest<br/>says otherwise"]',
+            '    C["bottom-up: shift tokens onto a stack<br/>until a complete right-hand side<br/>is sitting there"] --> D["then reduce it"]',
+            '    D --> E["the decision is made with<br/>the whole group in view"]'
+          ].join('\n'),
+          caption: 'Deciding late is a strictly better bet, and it is why LR grammars are a strictly larger class than LL ones.'
+        },
         plain: 'The opposite bet from top-down, and a better one.',
         formal: 'shift pushes a token; reduce pops a right-hand side and pushes its left-hand side',
         detail: 'The parser never has to guess which production it is in before the evidence ' +
@@ -32,6 +41,18 @@
       },
       {
         term: 'An item is a production with a dot; a state is a set of them',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["E → E • + T"] --> B["we are parsing an E"]',
+            '    A --> C["we have already seen an E"]',
+            '    A --> D["and + T is still to come"]',
+            '    B --> E["a state is every item<br/>that could be true at once"]',
+            '    C --> E',
+            '    D --> E'
+          ].join('\n'),
+          caption: 'The dot is a position in a rule, and a state is the set of positions consistent with everything read so far. That set is exactly what the table stores.'
+        },
         plain: 'E -> E • + T means we are parsing an E, we have seen an E, and + T is to come.',
         formal: 'closure: a dot before a nonterminal adds that nonterminal’s rules with the dot at the start',
         detail: 'Closure and goto generate every state from the start item and nothing else is ' +

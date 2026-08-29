@@ -220,6 +220,16 @@
     'proving-non-regularity': [
       {
         term: 'The pumping lemma proves NO and never yes',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the language pumps"] --> B["tells you nothing —<br/>some non-regular languages do too"]',
+            '    C["the language fails to pump"] --> D["it is definitely not regular"]',
+            '    B --> E["so it is a refutation tool only"]',
+            '    D --> E'
+          ].join('\n'),
+          caption: 'Showing a language pumps is not a proof it is regular, and that is the single most common misuse of the lemma.'
+        },
         plain: 'Every regular language pumps; some non-regular ones do too.',
         formal: 'regularity implies pumpability, and the converse is false',
         detail: 'It is a necessary condition, so a successful pumping argument refutes regularity ' +
@@ -246,6 +256,16 @@
       },
       {
         term: 'One surviving split loses the round',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the adversary picks the split"] --> B["you must defeat EVERY<br/>legal decomposition"]',
+            '    B --> C{"did you check them all?"}',
+            '    C -->|no| D["one convenient split checked —<br/>this proves nothing"]',
+            '    C -->|yes| E["the language does not pump"]'
+          ].join('\n'),
+          caption: 'The quantifier is for-all over splits, so the proof is only finished when no decomposition survives. Checking the easy one is the classic bad proof.'
+        },
         plain: 'Checking a convenient decomposition is the most common bad proof.',
         formal: 'the claim quantifies over every split with |xy| ≤ p and |y| ≥ 1',
         detail: 'A written proof compresses the case analysis into "without loss of generality", ' +

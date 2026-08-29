@@ -8,6 +8,17 @@
     'bit-partitioned-tries': [
       {
         term: 'Five bits per level, thirty-two children per node',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a 32-bit hash"] --> B["take 5 bits: which of<br/>32 children?"]',
+            '    B --> C["take the next 5"]',
+            '    C --> D["and the next"]',
+            '    D --> E["32 bits are used up<br/>after seven levels"]',
+            '    E --> F["so a lookup is at most seven<br/>steps, whatever the size"]'
+          ].join('\n'),
+          caption: 'A wide branching factor makes the tree shallow, and shallow is what makes path copying cheap: a new version copies seven nodes rather than thirty.'
+        },
         plain: 'Consume 5 bits of the key at each level, so a 32-bit key is exhausted in seven levels at the very worst.',
         formal: 'depth ≤ ⌈32/5⌉ = 7, and 32^7 = 34 359 738 368',
         readAs: 'Consuming 5 bits of the hash per level, a 32-bit hash runs out after 7 levels — and 7 levels ' +

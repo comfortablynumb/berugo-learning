@@ -8,6 +8,16 @@
     'bytecode-design': [
       {
         term: 'Stack machine against register machine',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["stack: operands are implicit"] --> B["push, push, add —<br/>short instructions, more of them"]',
+            '    C["register: operands are named"] --> D["add r3, r1, r2 —<br/>longer instructions, fewer of them"]',
+            '    B --> E["more trips through<br/>the dispatch loop"]',
+            '    D --> F["fewer dispatches,<br/>bigger bytecode"]'
+          ].join('\n'),
+          caption: 'The choice is not about elegance. It sets how many times the interpreter goes round its loop, and dispatch is what an interpreter actually spends its time on.'
+        },
         plain: 'Either the operands are implicit or they are named, and everything follows.',
         formal: 'a stack instruction pops what it needs; a register instruction names its inputs and its output',
         detail: 'On a stack machine an instruction takes its operands from the top of the ' +
@@ -319,6 +329,17 @@
     'register-allocation': [
       {
         term: 'Live ranges and interference',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["value a is live from here to here"] --> C{"do the two ranges overlap<br/>at any instruction?"}',
+            '    B["value b is live from here to here"] --> C',
+            '    C -->|yes| D["they interfere —<br/>they cannot share a register"]',
+            '    C -->|no| E["one register can hold both,<br/>at different times"]',
+            '    D --> F["draw that as a graph and the<br/>problem is graph colouring"]'
+          ].join('\n'),
+          caption: 'Turning register allocation into colouring is the whole reduction, and the reason it is tractable in practice is that spilling gives the colourer an escape hatch.'
+        },
         plain: 'Two values live at the same moment cannot share a register.',
         formal: 'a live range runs from a definition to its last use; two overlapping ranges interfere',
         detail: 'Every value the program computes needs somewhere to sit between being ' +

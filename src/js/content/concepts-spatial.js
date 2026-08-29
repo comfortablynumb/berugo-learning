@@ -120,6 +120,17 @@
     quadtrees: [
       {
         term: 'Subdivision of space, not of the data',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["a node owns a square of space"] --> B{"too many objects in it?"}',
+            '    B -->|yes| C["split into four equal quarters"]',
+            '    C --> B',
+            '    B -->|no| D["stop"]',
+            '    D --> E["the shape follows the space,<br/>so clustered data makes<br/>a lopsided tree"]'
+          ].join('\n'),
+          caption: 'A k-d tree splits so each side holds half the points; a quadtree splits space evenly and lets the points fall where they may. That difference is the whole comparison.'
+        },
         plain: 'A node owns a square; when it holds too many objects it splits into four children of a quarter the area.',
         formal: 'a node at depth d owns a square of side S/2^d',
         readAs: 'Each level halves the side of the region, so depth d covers the whole space divided by 2 to ' +
@@ -134,6 +145,16 @@
       },
       {
         term: 'The depth cap is a correctness requirement',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["split until one point per leaf"] --> B["two identical points"]',
+            '    B --> C["every split puts both<br/>in the same child"]',
+            '    C --> B',
+            '    C --> D["recursion to the depth limit,<br/>or until memory runs out"]'
+          ].join('\n'),
+          caption: 'Coincident points cannot be separated by any subdivision, so the stopping rule has to be a depth cap and not a count. Duplicate coordinates are common in real data.'
+        },
         plain: 'Coincident points never separate, so "split until one point per leaf" recurses until the stack dies.',
         formal: 'if p₁ = p₂ then every subdivision puts both in the same child, for every depth',
         readAs: 'Two points at identical coordinates can never be separated by splitting, so the tree grows ' +
@@ -238,6 +259,16 @@
       },
       {
         term: 'The descent finds a candidate; the backtrack makes it right',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["walk down to the leaf<br/>the query falls in"] --> B["a nearby point —<br/>often not the nearest"]',
+            '    B --> C["unwind, and at each node ask:<br/>could the far side hold<br/>anything closer?"]',
+            '    C -->|yes| D["search it too"]',
+            '    C -->|no| E["prune the whole subtree"]'
+          ].join('\n'),
+          caption: 'Stopping at the leaf is the classic bug: it gives a plausible answer almost every time and a wrong one often enough to matter. The backtrack is the algorithm.'
+        },
         plain: 'Walking down to the leaf the query falls in gives a nearby point, very often not the nearest one.',
         formal: 'after the near side, revisit the far side whenever |q[axis] − split| < best',
         readAs: 'Search the side the query falls on first, then check whether the splitting plane is closer ' +

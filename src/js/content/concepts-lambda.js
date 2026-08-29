@@ -34,6 +34,16 @@
       },
       {
         term: 'Capture-avoiding substitution',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["substitute a term that<br/>mentions the name y"] --> B{"is there a λy between here<br/>and the target?"}',
+            '    B -->|no| C["substitute directly"]',
+            '    B -->|yes| D["that λy would capture it —<br/>the free y becomes bound"]',
+            '    D --> E["rename the binder first,<br/>then substitute"]'
+          ].join('\n'),
+          caption: 'Capture turns a variable that referred to the outside world into one that refers to a local. It is silent, and it changes what the program means.'
+        },
         plain: 'Rename the binder before substituting a term that mentions its name.',
         formal: '(λy. e)[x := a] renames y to a fresh name when y is free in a',
         readAs: 'Substituting into a lambda whose parameter appears free in the replacement ' +
