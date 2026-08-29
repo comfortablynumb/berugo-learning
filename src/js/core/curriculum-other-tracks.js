@@ -684,6 +684,24 @@
               title: 'Deductive verification',
               summary: 'The binary-search overflow failing its verification condition with a counter-example, the corrected version discharging all three, and a loop whose VC is valid over the integers and not over the rationals.',
               tags: ['hoare logic', 'weakest precondition', 'verification condition', 'loop invariant', 'annotation', 'smt discharge', 'counter-example', 'frame problem', 'unsat core', 'integrality']
+            },
+            {
+              id: 'dynamic-analysis',
+              title: 'Dynamic analysis',
+              summary: 'Vector clocks against locksets on one trace, where happens-before finds every seeded race with no false positives and the lockset reports two that cannot happen.',
+              tags: ['instrumentation', 'coverage', 'happens-before', 'vector clock', 'lockset', 'eraser', 'fasttrack', 'false positive', 'shadow memory', 'overhead']
+            },
+            {
+              id: 'coverage-guided-fuzzing',
+              title: 'Fuzzing',
+              summary: 'A coverage-guided loop against the front end that found two crashes in four and two characters, and the shrinker that reduced them — with the oracle, not the mutation, doing the work.',
+              tags: ['coverage guided', 'corpus', 'mutation operators', 'edge coverage', 'crash triage', 'shrinking', 'corpus minimisation', 'differential fuzzing', 'sanitisers', 'the oracle problem']
+            },
+            {
+              id: 'specifying-systems',
+              title: 'Specifying and verifying systems',
+              summary: 'Two-phase commit written as data rather than code, model-checked in 19 reachable states, and the blocking scenario the protocol is known for produced as a four-step trace.',
+              tags: ['specification', 'tla', 'alloy', 'refinement', 'safety and liveness', 'two-phase commit', 'blocking', 'property-based testing', 'cost and benefit', 'industrial reports']
             }]
         }
       ]

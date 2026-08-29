@@ -14,14 +14,14 @@ faithfully in a browser, the section models it, says so plainly, and states what
 
 ## Status
 
-**M00–M31 shipped (307 sections). Building the curriculum, milestone by milestone.**
+**M00–M32 shipped (318 sections). Building the curriculum, milestone by milestone.**
 
 - ✅ Curriculum designed: 65 milestones, 634 sections, 11 tracks — one file per milestone in
   [`doc/milestones/`](doc/milestones/)
 - ✅ Architecture and conventions fixed — [`doc/architecture.md`](doc/architecture.md)
 - ✅ Build order and dependency graph — [`doc/ROADMAP.md`](doc/ROADMAP.md)
 - ✅ Scope decisions recorded — [`doc/topic-suggestions.md`](doc/topic-suggestions.md)
-- ✅ **Notation decoder across all 307 sections, on all three tabs**: every mathematical symbol
+- ✅ **Notation decoder across all 318 sections, on all three tabs**: every mathematical symbol
   carries how to say it and what it does, revealed on hover, tap or keyboard focus — in the
   concepts and orientation, in the arithmetic of every worked example, in the cost table and
   equations of every reference block, and in the prompt of every graded exercise. Every formal
@@ -557,6 +557,27 @@ The render audit is not a substitute for opening the page, and M16's browser pas
   are not about collectors at all: a process that dies of file descriptors at **iteration 17**
   with **6.6 per cent** of its heap in use, and three programs computing 820 at **84, 3 and 1**
   allocations with the collector work behind them going to zero.
+- ✅ **M32 — program analysis, SAT/SMT and verification**: eleven sections, and every analyser is
+  judged by something that does not share its implementation. The abstract interpreter is checked
+  against a real run at every program point; the taint analysis against a **dynamic taint oracle**
+  that runs the same programme with a bit beside every value; the race detectors against an oracle
+  that **enumerates every schedule** the synchronisation allows; the SAT solver against brute force,
+  a model checker and a **DRAT proof** replayed by a checker with no search in it. Six measurements
+  carry the milestone. A join-only interval analysis that runs out of rounds does not give a weaker
+  answer — on a loop counting to 1 000 it claims **x is in [0, 398]** and one run refutes that
+  **1 207 times**, and it reports the code after the loop as dead. Clause learning wins by **47×**
+  against plain DPLL at the satisfiability threshold and **loses** on a planted instance, and on
+  pigeonhole both are exponential — **7, 28, 145 and 849 conflicts** at three, four, five and six
+  holes. An SMT theory that returns the whole assignment instead of a minimised core turns the
+  DPLL(T) loop into an enumeration: **2 rounds at every size** with a core, **2, 4, 10, 28, 82**
+  without one. A seven-branch ladder has **128 leaves and 8 that an input can reach**, the other
+  **120 proved impossible** by the linear theory solver. Happens-before reports **3 real races and
+  0 false positives** over seven traces where a plain lockset reports **4 impossible ones** and
+  Eraser's state machine leaves **1** — the one a fork made safe, which no lockset can see. And the
+  fuzzer found **two real defects in this repository's own front end** (`let:` and `l = match 1;`,
+  four and twelve characters, both in the printer on the diagnostics path), while the oracle
+  control shows what it is worth: crashes alone find **1** planted defect and a differential
+  reference finds **2**, the extra one being a two-character wrong answer that never throws.
 
 - ✅ **M30 — code generation, bytecode VMs and JIT**: the back end of the same compiler, and five
   ways to run one program compared against the front end that produced it. Two code generators

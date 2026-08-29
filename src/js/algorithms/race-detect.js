@@ -174,12 +174,43 @@
    * before publication and read-only-after-publication all produce false
    * positives.
    */
-  function lockset(trace) {
-    const state = { held: {}, candidates: {}, threads: {}, reports: [], events: 0 };
+  function lockset(trace, options) {
+    const settings = options || {};
+    const state = { held: {}, candidates: {}, threads: {}, reports: [], events: 0,
+      owner: {}, phase: {}, eraser: settings.states === 'eraser' };
 
     trace.forEach(function (event, at) { stepLockset(state, event, at); });
     return { reports: state.reports, events: state.events,
-      candidates: state.candidates };
+      candidates: state.candidates, phase: state.phase,
+      states: state.eraser ? 'eraser' : 'naive' };
+  }
+
+  /**
+   * Eraser's state machine, which is the difference between the algorithm as
+   * it is usually described and the algorithm as it was published. A location
+   * starts VIRGIN, becomes EXCLUSIVE to the first thread that touches it,
+   * moves to SHARED when a second thread READS it, and only reaches
+   * SHARED-MODIFIED when a second thread WRITES it. Reports come from the last
+   * state alone, which is what suppresses the two commonest false positives:
+   * initialisation before publication, and read-only sharing afterwards.
+   *
+   * It does not suppress the third. A location written under a lock and then
+   * handed to another thread through a fork still reaches shared-modified with
+   * an empty lockset, and no lockset algorithm can see the ordering that makes
+   * it safe.
+   */
+  function phaseOf(state, event) {
+    const key = event.target;
+
+    if (state.owner[key] === undefined) {
+      state.owner[key] = event.thread;
+      state.phase[key] = 'exclusive';
+      return state.phase[key];
+    }
+    if (event.thread === state.owner[key]) return state.phase[key];
+    if (state.phase[key] === 'sharedModified') return state.phase[key];
+    state.phase[key] = event.op === 'write' ? 'sharedModified' : 'shared';
+    return state.phase[key];
   }
 
   function stepLockset(state, event, at) {
@@ -199,6 +230,7 @@
   function updateCandidates(state, event, at) {
     const key = event.target;
     const held = state.held[event.thread].slice();
+    const phase = phaseOf(state, event);
 
     state.threads[key] = state.threads[key] || {};
     state.threads[key][event.thread] = true;
@@ -206,6 +238,7 @@
     state.candidates[key] = state.candidates[key].filter(function (name) {
       return held.indexOf(name) !== -1;
     });
+    if (state.eraser && phase !== 'sharedModified') return;
     /* Only report once the location has been touched by more than one thread:
        a single-threaded location with no lock is not a race, and reporting it
        is the false positive Eraser's state machine exists to suppress. */
@@ -224,9 +257,9 @@
    * detector is judged on two numbers rather than one: every seeded race
    * found, and nothing reported on a correctly synchronised location.
    */
-  function compare(trace, seeded) {
+  function compare(trace, seeded, options) {
     const hb = happensBefore(trace);
-    const ls = lockset(trace);
+    const ls = lockset(trace, options);
     const hbLocations = unique(hb.races.map(function (row) { return row.location; }));
     const lsLocations = unique(ls.reports.map(function (row) { return row.location; }));
     const expected = (seeded || []).slice().sort();
@@ -248,7 +281,8 @@
     return rows.filter(function (name, at) { return rows.indexOf(name) === at; }).sort();
   }
 
-  return { zeroClock: zeroClock, copyClock: copyClock, join: join, precedes: precedes,
+  return { phaseOf: phaseOf,
+    zeroClock: zeroClock, copyClock: copyClock, join: join, precedes: precedes,
     threadsOf: threadsOf, happensBefore: happensBefore, lockset: lockset,
     compare: compare };
 }));

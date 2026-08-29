@@ -324,7 +324,7 @@
     if (chart) chart.destroy();
     chart = root.ErrorBandView.bars(host, {
       lazyLib: app.lazyLib, height: 240,
-      xLabel: 'programme', yLabel: 'verification conditions',
+      yLabel: 'verification conditions',
       values: rows.reduce(function (out, row, index) {
         out.push({ label: row.name + ' · all', value: row.total, series: 0 });
         out.push({ label: row.name + ' · proved', value: row.discharged, series: 1 });

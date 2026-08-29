@@ -335,27 +335,41 @@
     }).join(', ');
   }
 
+  /* Same reason as printType below: a pattern the parser could not complete
+     has no `args`, and this printer sits on the diagnostics and fingerprint
+     paths. `match =;` - eight characters from the fuzzer in 32.10 - reached
+     it. */
   function printPattern(pattern) {
+    if (!pattern || !pattern.kind) return '?';
     if (pattern.kind === 'patternWild') return '_';
-    if (pattern.kind === 'patternName') return pattern.name;
+    if (pattern.kind === 'patternName') return pattern.name || '?';
     if (pattern.kind === 'patternLiteral') return JSON.stringify(pattern.value);
     if (pattern.kind === 'patternRecord') {
-      return '{ ' + pattern.fields.map(function (entry) {
+      return '{ ' + (pattern.fields || []).map(function (entry) {
         return entry.name + ': ' + printPattern(entry.pattern);
       }).join(', ') + ' }';
     }
-    if (pattern.args.length === 0) return pattern.name;
+    if (!pattern.args || pattern.args.length === 0) return pattern.name || '?';
     return pattern.name + '(' + pattern.args.map(printPattern).join(', ') + ')';
   }
 
+  /* Error recovery produces type nodes with missing children - `let:` gives a
+     typeArrow whose `from` is undefined - and this printer is on the path of
+     both the diagnostics and the pipeline fingerprint. Printing `?` for a node
+     the parser could not complete keeps those paths total; throwing here made
+     a malformed four-character input crash the purity check, which the fuzzer
+     in 32.10 found and reported as an oracle failure. */
   function printType(type) {
-    if (type.kind === 'typeName') return type.name;
+    if (!type || !type.kind) return '?';
+    if (type.kind === 'typeName') return type.name || '?';
     if (type.kind === 'typeArray') return '[' + printType(type.item) + ']';
     if (type.kind === 'typeRecord') {
       return '{ ' + type.fields.map(function (entry) {
         return entry.name + ': ' + printType(entry.type);
       }).join(', ') + ' }';
     }
+    if (type.kind !== 'typeArrow') return type.kind;
+    if (!type.from || !type.to) return '?';
     const from = type.from.kind === 'typeArrow'
       ? '(' + printType(type.from) + ')' : printType(type.from);
 

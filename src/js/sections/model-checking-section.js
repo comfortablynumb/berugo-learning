@@ -375,7 +375,10 @@
           points: rows.map(function (row) { return { x: row.processes, y: row.toFind }; }) }
       ],
       legendHost: root.jQuery('#mck-legend')[0],
-      summary: function () { return chartNote(rows); }
+      summary: function () {
+        return 'States allowed, states reachable, and states visited before the '
+          + 'counter-example, against the number of processes.';
+      }
     });
     root.Helpers.setText('mck-chart-note', chartNote(rows));
   }

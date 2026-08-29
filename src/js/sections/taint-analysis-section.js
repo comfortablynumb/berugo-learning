@@ -431,31 +431,47 @@
 
     if (!host) return;
     if (chart) chart.destroy();
+    /* Aggregated over the six fixtures rather than one bar each: twelve bars
+       of height 0 or 1 is a table drawn badly, and the comparison the section
+       is about is between the two precisions. */
     chart = root.ErrorBandView.bars(host, {
       lazyLib: app.lazyLib, height: 250,
-      xLabel: 'fixture and container precision', yLabel: 'findings the run refutes',
-      values: rows.reduce(function (out, row, index) {
-        MODES.forEach(function (mode, at) {
-          out.push({ label: row.name + (mode === 'sensitive' ? ' ·fs' : ''),
-            value: row[mode].spurious, series: at });
-        });
+      yLabel: 'findings over all six fixtures',
+      values: MODES.reduce(function (out, mode, at) {
+        const label = mode === 'sensitive' ? 'field-sensitive' : 'field-insensitive';
+
+        out.push({ label: label + ': reported', value: totals(rows, mode, 'findings'),
+          series: at });
+        out.push({ label: label + ': confirmed', value: totals(rows, mode, 'confirmed'),
+          series: at });
+        out.push({ label: label + ': refuted', value: totals(rows, mode, 'spurious'),
+          series: at });
         return out;
       }, [])
     });
     root.Helpers.setText('tnt-chart-note', chartNote(rows));
   }
 
+  function totals(rows, mode, field) {
+    return rows.reduce(function (sum, row) { return sum + row[mode][field]; }, 0);
+  }
+
   function chartNote(rows) {
     const record = rows.filter(function (row) { return row.name === 'record'; })[0];
     const array = rows.filter(function (row) { return row.name === 'array'; })[0];
 
-    return 'Two bars per fixture: field-insensitive, then field-sensitive (·fs). The record '
-      + 'fixture goes from ' + record.insensitive.spurious + ' refuted finding to ' +
+    return 'Six fixtures, both precisions. Field-insensitively the analysis reports ' +
+      totals(rows, 'insensitive', 'findings') + ' findings of which the runs confirm ' +
+      totals(rows, 'insensitive', 'confirmed') + '; field-sensitively it reports ' +
+      totals(rows, 'sensitive', 'findings') + ' and confirms the same ' +
+      totals(rows, 'sensitive', 'confirmed') + '. The difference is one fixture: the record '
+      + 'goes from ' + record.insensitive.spurious + ' refuted finding to ' +
       record.sensitive.spurious + ', because each field gets its own abstract location. The '
-      + 'array fixture stays at ' + array.sensitive.spurious + ' under both, because an array '
-      + 'is one location either way — separating elements is index sensitivity, a different '
-      + 'axis that almost no production tool pays for. The `branchy` bar is the one to '
-      + 'distrust: that finding is real and the run simply took the other path.';
+      + 'array stays at ' + array.sensitive.spurious + ' under both, because an array is one '
+      + 'location either way — separating elements is index sensitivity, a different axis that '
+      + 'almost no production tool pays for. And one of the refuted findings is real: the '
+      + '`branchy` fixture\'s else branch is a genuine vulnerability the observed run did not '
+      + 'take.';
   }
 
   root.SectionRegistry.register({ id: SECTION_ID, init: init });

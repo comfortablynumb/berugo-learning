@@ -469,7 +469,10 @@
           points: scaling.map(function (row) { return { x: row.bound, y: row.widen }; }) }
       ],
       legendHost: root.jQuery('#abs-legend')[0],
-      summary: function () { return chartSummary(scaling); }
+      summary: function () {
+        return 'Rounds of the ascending pass against the loop bound, for the join alone '
+          + 'and for widening.';
+      }
     });
     root.Helpers.setText('abs-chart-note', chartSummary(scaling));
   }

@@ -402,7 +402,10 @@
           points: rows.map(function (row) { return { x: row.branches, y: row.feasible }; }) }
       ],
       legendHost: root.jQuery('#sye-legend')[0],
-      summary: function () { return chartNote(rows); }
+      summary: function () {
+        return 'Leaves of the path tree against the branches in the function, beside the '
+          + 'leaves an input can reach.';
+      }
     });
     root.Helpers.setText('sye-chart-note', chartNote(rows));
   }

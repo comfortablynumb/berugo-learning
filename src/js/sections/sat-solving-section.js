@@ -406,7 +406,10 @@
           points: rows.map(function (row) { return { x: row.n, y: row.nodes }; }) }
       ],
       legendHost: root.jQuery('#sat-legend')[0],
-      summary: function () { return chartNote(rows); }
+      summary: function () {
+        return 'Search tree size against instance size, for CDCL and for plain DPLL, on a '
+          + 'log scale.';
+      }
     });
     root.Helpers.setText('sat-chart-note', chartNote(rows));
   }

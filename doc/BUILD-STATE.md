@@ -3367,85 +3367,11 @@ written. `ChartBase` now accepts either, which removes the trap for every future
 
 ## Next
 
-**M32 — Program analysis, SAT/SMT and verification (11 sections) is IN PROGRESS.** Ten of its
-twelve modules are built, wired into `index.html`, and committed green; nothing of its sections,
-content or tests exists yet. The spec is `doc/milestones/M32-program-analysis.md`.
+**M32 is complete. M33 — digital logic — starts the computer-architecture track, and nothing of
+it exists yet.** The spec is `doc/milestones/M33-digital-logic.md` and `doc/ROADMAP.md` gives the
+order after it. The tree is green: 318 built sections, 316 planned, 634 total.
 
-### What is built and what it is verified against
-
-| Module | State | Oracle it passes |
-|---|---|---|
-| `machines/solver/sat.js` | done | 400 random formulas, 0 mismatches against brute force; pigeonhole 4/3, 5/4, 6/5 UNSAT at 7, 28 and 145 conflicts with DRAT proofs verified |
-| `machines/solver/check.js` | done | is the oracle: model checking, RUP proof checking, brute force, model counting |
-| `machines/solver/smt.js` | done | 150 random EUF problems, 0 mismatches, every sat answer independently checked |
-| `machines/solver/theories/euf.js` | done | congruence closure, minimal unsat cores by deletion |
-| `machines/solver/theories/difference.js` | done | 300 random systems, 0 mismatches against brute force |
-| `machines/solver/theories/linear.js` | done | 400 random systems, 0 false unsats against a fine grid |
-| `algorithms/abstract-interp.js` | done | interval / sign / parity domains, widen and narrow |
-| `machines/static-lab.js` | done | the dynamic soundness oracle, plus `verifyPaths` |
-| `algorithms/taint.js` | done | six fixtures, plus a policy sweep pricing both failure directions |
-| `algorithms/symbolic-exec.js` | done | every generated input executed and asserted to reach its path |
-| `algorithms/model-check.js` | done | explicit search and BMC required to agree on the violation depth |
-| `algorithms/verify-vc.js` | done | the binary-search overflow fails, the fixed version discharges 3 of 3 |
-| `algorithms/race-detect.js` | done | happens-before against locksets on five fixtures |
-| `algorithms/fuzzer.js` | done | found two real front-end crashes in 3 000 mutations |
-| `machines/spec-dsl.js` | **not started** | — |
-
-### Where the work is parked
-
-The curriculum group and the first section (`static-analysis-foundations`, complete and dumping
-correctly) are committed on the branch **`wip/m32-sections`**, which is deliberately RED: the
-curriculum names eleven sections and only one has files, so the audits report ten `no-container`
-problems. `feat/m10-sorting-and-selection` is green and has none of it.
-
-To resume: `git checkout wip/m32-sections`, write the remaining ten template + section pairs, add
-the `<section data-section=...>` containers and the script tags to `index.html`, then the twelve
-content files and the tests. Merge back only once `npm test` is green.
-
-### Section ids and prefixes, all checked free
-
-`static-analysis-foundations` (saf), `abstract-interpretation` (abs), `taint-analysis` (tnt),
-`symbolic-execution` (sye), `sat-solving` (sat), `smt-solving` (smt), `model-checking` (mck),
-`deductive-verification` (dvf), `dynamic-analysis` (dya), `coverage-guided-fuzzing` (cgf),
-`specifying-systems` (spy).
-
-### Findings to build the content around
-
-- The SAT solver's backtracking was off by one decision level, which at level 0 emptied the trail
-  including the assignments made by UNIT clauses. Random 3-CNF has no unit clauses, so 400
-  differentials never saw it; the BMC encoding, which pins the initial state with one unit clause
-  per variable, saw it immediately. Fixing it also cut pigeonhole 6/5 from 388 conflicts to 145.
-- The BMC encoding let a selector be true without its premise, so the trace teleported and reported
-  a mutual-exclusion violation at depth 1 that the search puts at depth 4.
-- EUF term keys built from ids do not re-parse, so the unsat-core minimisation was silently a
-  no-op; and terms interned after the merges never trigger congruence.
-- An SMT blocking clause matched back to the first atom with the same terms, which is the wrong one
-  when two atoms share them.
-- The fuzzer found `let:` and `{=` — four and two characters — crashing `Pipeline.run`, whose
-  contract is to report errors rather than raise them. Guarding the two nodes moved the failure one
-  node along; the fix that holds is a boundary at the stage runner.
-- Widening and narrowing recover `[0, 11]` from `[0, +∞]` on a counting loop and do NOT recover the
-  outer bound of a nested loop, which is a real limitation of the classic scheme and is worth
-  reporting rather than chasing.
-
-### Then
-
-M33 — digital logic — starts the computer-architecture track. After M32 the compilers track is
-complete and `doc/ROADMAP.md` gives the order.
-
-Two debts M28 deferred are still open: mutation of captured variables (which is why `resolve.js`
-records captures per function) and a decision-tree compilation for `match`. M31 added a third: the
-VM still holds JavaScript object references rather than addresses into `HeapSim`, so the collectors
-run against a recorded trace of a program rather than against the program itself.
-
-M11 through M15 and M17 through M24 are complete apart from a human browser pass, which needs the
-Chrome extension connected; M16 and M31 have had one. `tools/section-dump.js` covers everything
-else the browser used to be needed for.
-
-A shared helper exists for the figure tests: `tests/support/worked-example-prose.js` exports
-`proseFor`, `quotes`, `fixed` and `grouped`.
-
-The shape to copy, unchanged through M31:
+The shape to copy, unchanged through M32:
 
 1. pure modules in `algorithms/` first, behind one shared interface;
 2. a `machines/` harness that drives every implementation through that interface, carrying a
@@ -3473,7 +3399,9 @@ milestones took.
 Two things M20 added to the shape and worth keeping:
 
 - **An eight-bullet orientation array pushes `config()` over the 50-line limit.** Hoist it into its
-  own `orientation()` function; it costs nothing and preserves every string.
+  own `orientation()` function; it costs nothing and preserves every string. Past about ten
+  bullets it needs two — `orientation().concat(moreOrientation())` — which is what every M32
+  section does.
 - **When a demo's default settings are chosen after the prose is drafted, the figures disagree.**
   Dump the section at its shipped defaults and align the prose to *that*, not to the probe you ran
   while developing the module. Five figures in M20 were written from a different graph and caught
@@ -3496,7 +3424,7 @@ Three things M26 added to the shape and worth keeping:
 - **Check that a section id is free before writing the file, not after.** M26 overwrote an M01
   section by reusing `space-complexity`; the prefix check I did run would never have caught it.
   `git ls-files --error-unmatch src/js/sections/<id>-template.js` answers it in one command, and
-  it belongs at step 4 of the shape below.
+  it belongs at step 4 of the shape above.
 - **A simulator for a model that may not terminate needs three outcomes, not two.** `halted`,
   `rejected` and `budget` are different facts, and collapsing the third into the second makes a
   computability demo teach the opposite of the truth.
@@ -3530,10 +3458,9 @@ Three things M25 added to the shape and worth keeping:
 
 Three things M22 added to the shape and worth keeping:
 
-- **A size is not a measurement until the floor is beside it.** Every compression table in this
+- **A size is not a measurement until the floor is beside it.** Every compression table in that
   milestone carries the entropy of a stated model in the next column, because a ratio hides its
-  denominator and a bits-per-symbol figure invites the question. It is the same discipline M21
-  applied to competitive ratios, in a different unit.
+  denominator and a bits-per-symbol figure invites the question.
 - **A left-shift by a variable is a 32-bit trap.** `1 << (length - 2)` goes negative at length 33,
   so the burst search ran zero trials and reported a 0% catch rate — a number that reads as a
   catastrophic failure and was an empty loop. Use `Math.pow(2, n)` where n can reach 31.
@@ -3541,7 +3468,22 @@ Three things M22 added to the shape and worth keeping:
   loss, canonical Huffman's table size and LZW's ratio against LZSS were all written from received
   wisdom and all three measured differently. The prose now says what the demo prints.
 
----
+### Debts still open
+
+M28 deferred two: mutation of captured variables (which is why `resolve.js` records captures per
+function) and a decision-tree compilation for `match`. M31 added a third: the VM still holds
+JavaScript object references rather than addresses into `HeapSim`, so the collectors run against a
+recorded trace of a program rather than against the program itself. M32 adds a fourth, and it is
+the smallest: `algorithms/model-check.js` has no partial-order or symmetry reduction, so its state
+counts are an honest upper bound rather than what SPIN would report — the sections say so and the
+chart measures the consequence.
+
+M11 through M15 and M17 through M24 are complete apart from a human browser pass, which needs the
+Chrome extension connected; M16, M31 and M32 have had one. `tools/section-dump.js` covers
+everything else the browser used to be needed for.
+
+A shared helper exists for the figure tests: `tests/support/worked-example-prose.js` exports
+`proseFor`, `quotes`, `fixed` and `grouped`.
 
 ## M23 — applied cryptography and constant-time programming (complete)
 
@@ -4212,3 +4154,89 @@ typo rather than as a rendering fault.
   the wrapping script were taken in a real browser, with the app's own font at
   the size mermaid actually uses. A guess would have been wrong in both
   directions.
+
+## M32 — program analysis, SAT/SMT and verification (complete)
+
+Eleven sections, and the milestone has one rule running through all of them: **an analyser is
+never its own judge**. Every section pairs the thing being taught with something that decides the
+same question by other means, and the two are required to agree — or the disagreement is the
+finding.
+
+### The oracles, and what each one caught
+
+| Section | The analyser | What judges it |
+|---|---|---|
+| 32.1 foundations | four precisions over one property | a concrete run, checked at every program point |
+| 32.2 abstract interpretation | interval/sign/parity with widening | the same run, plus a join-only variant that is refuted |
+| 32.3 taint | the static tracker | **`machines/taint-oracle.js`** — the programme run with a taint bit beside every value |
+| 32.4 symbolic execution | path conditions and generated inputs | every input executed and asserted to reach its path |
+| 32.5 SAT | CDCL | brute force, a model checker, and a DRAT proof replayed |
+| 32.6 SMT | DPLL(T) | brute force over every assignment, and both halves of a sat answer re-checked |
+| 32.7 model checking | explicit search | a SAT unrolling, required to agree on the DEPTH |
+| 32.8 deductive verification | weakest preconditions and the solver | every counter-example rounded to integers and re-checked |
+| 32.9 dynamic analysis | happens-before and lockset | **`machines/race-oracle.js`** — every schedule the synchronisation allows |
+| 32.10 fuzzing | the coverage-guided loop | three oracles, with the oracle set as a control |
+| 32.11 specification | the spec DSL | the checker from 32.7, and every trace replayed |
+
+### Six measurements the milestone rests on
+
+- **An iteration that runs out of rounds is not a weaker answer.** Join-only interval analysis on
+  a loop counting to 1 000, under a 200-round budget, claims `x` is in **[0, 398]** at the loop
+  header and reports the block after the loop as **bottom** — dead code. One run puts **1 207 of
+  4 011** observed values outside the claims. With widening it is 3 rounds, `[0, 1001]`, and zero
+  violations. Everything above the fixpoint is sound and imprecise; everything below it is false.
+- **Clause learning is not universally a win, and the demo says where it is not.** Against M20's
+  DPLL: **47×** fewer decisions at the satisfiability threshold, **1.3×** on pigeonhole where no
+  short resolution proof exists, and a **loss** on a planted satisfiable instance (159 decisions
+  against 43 nodes) because VSIDS chases conflicts rather than solutions.
+- **Explanation quality is the SMT architecture, not a detail.** One real conflict plus k free
+  choices: **2 rounds at every k** with a minimised core, and **2, 4, 10, 28, 82** when the theory
+  returns the whole assignment — one round per theory-consistent model, which is 3^k.
+- **The gap symbolic execution lives in.** A seven-branch ladder has **128 leaves**, **8** an
+  input can reach, and **120 proved impossible** by the linear theory solver. The bounded search
+  alone can only call those 120 `unknown`, which is the honest answer and a useless one.
+- **Vector clocks against locksets, judged by every schedule.** Over seven traces: **3 real
+  races**, found by both; **0** false positives from happens-before; **4** from a plain lockset;
+  **1** after Eraser's state machine — a location a fork made safe, which no lockset algorithm can
+  see because none of them looks at ordering.
+- **The oracle is the hard part, measured.** The same fuzzer, the same executions: crashes alone
+  find **1** planted defect, and a differential reference finds **2** — the extra one is `[)`, two
+  characters, no exception, wrong answer.
+
+### Two real defects the fuzzer found in this repository
+
+Running the M32.10 loop against the Berugo front end found two inputs that made the pipeline's own
+reporting path throw: **`let:`** (four characters) and **`l = match 1;`** (twelve). Both were in
+`machines/berugo/ast.js` — `printType` and `printPattern` assumed error recovery produced complete
+nodes, and both printers sit on the diagnostics and fingerprint paths. Neither would ever be
+reached by a valid programme. Both are fixed, and the inputs are asserted in
+`tests/unit/dynamic-modules.test.js` so they stay fixed.
+
+### Six things this milestone adds to the shape and worth keeping
+
+- **An oracle that reads one execution has blind spots, and the fix is to look at more of it.**
+  `StaticLab.observe` recorded the state at the ENTRY of every block, so a straight-line programme
+  — one block — produced zero observations and every analysis of it passed by default. Recording
+  the exit state too took the counting loop from 24 checked values to 51 and made the
+  straight-line sample say something. The lesson generalises: when a check reports "nothing
+  wrong", find out how many observations it is based on before believing it.
+- **A tree walk needs a visited set even when the structure is called a tree.** The fuzz target's
+  coverage walk hung on `let x = 1;` because AST nodes reference each other, and a depth limit
+  turns that into exponential re-visiting rather than into termination.
+- **A generator whose arithmetic overflows a double stops generating.** A test used the textbook
+  `state * 1103515245 + 12345` LCG; the product exceeds 2^53, the sequence collapses, and a
+  `while (clause.length < 3)` loop spins forever. Use `(state * 1664525 + 1013904223) >>> 0`, or
+  the project's own `Random.seeded`.
+- **A module that reads a global at CALL time still needs the right global name.** `symbolic-exec`
+  looked up `scope.TheoryLinear` where the solver registers `scope.Berugo.TheoryLinear`, so the
+  theory was silently absent in the browser and present under `require` in node — the section
+  reported 120 `unknown` leaves in one and 120 `unsat` in the other. Resolving lazily fixes the
+  ORDER problem and not the NAME one.
+- **A demo control can make the demo unusable at one setting.** The BMC comparison at five
+  processes exhausts the heap: the unrolling grows about sixteen-fold per process. The fix is not
+  a smaller default but a stated limit — the table says the unrolling was not attempted and why,
+  which is itself the lesson about bounded model checking.
+- **Where a fixture set has a declared answer, derive it instead.** `Race.compare` takes the
+  seeded races as an argument, which is a hardcoded verdict. The section does not use it: the
+  oracle enumerates schedules and computes the answer, which is what turned "the lockset has false
+  positives" into "four, and here is which one survives Eraser's state machine".

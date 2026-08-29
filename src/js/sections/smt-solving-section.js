@@ -391,7 +391,10 @@
           points: rows.map(function (row) { return { x: row.pad, y: row.full }; }) }
       ],
       legendHost: root.jQuery('#smt-legend')[0],
-      summary: function () { return chartNote(rows); }
+      summary: function () {
+        return 'Rounds of the DPLL(T) loop against the number of free choices, for a '
+          + 'minimised core and for the whole assignment.';
+      }
     });
     root.Helpers.setText('smt-chart-note', chartNote(rows));
   }
