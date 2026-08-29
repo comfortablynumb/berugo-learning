@@ -381,6 +381,16 @@
       <section data-section="dynamic-analysis" hidden><div class="section-body"><div id="dynamic-analysis-content"></div></div></section>
       <section data-section="coverage-guided-fuzzing" hidden><div class="section-body"><div id="coverage-guided-fuzzing-content"></div></div></section>
       <section data-section="specifying-systems" hidden><div class="section-body"><div id="specifying-systems-content"></div></div></section>
+      <section data-section="boolean-algebra-and-gates" hidden><div class="section-body"><div id="boolean-algebra-and-gates-content"></div></div></section>
+      <section data-section="logic-minimisation" hidden><div class="section-body"><div id="logic-minimisation-content"></div></div></section>
+      <section data-section="combinational-blocks" hidden><div class="section-body"><div id="combinational-blocks-content"></div></div></section>
+      <section data-section="arithmetic-circuits" hidden><div class="section-body"><div id="arithmetic-circuits-content"></div></div></section>
+      <section data-section="arithmetic-logic-unit" hidden><div class="section-body"><div id="arithmetic-logic-unit-content"></div></div></section>
+      <section data-section="sequential-logic-and-state" hidden><div class="section-body"><div id="sequential-logic-and-state-content"></div></div></section>
+      <section data-section="hardware-state-machines" hidden><div class="section-body"><div id="hardware-state-machines-content"></div></div></section>
+      <section data-section="memory-arrays" hidden><div class="section-body"><div id="memory-arrays-content"></div></div></section>
+      <section data-section="timing-clocking-and-power" hidden><div class="section-body"><div id="timing-clocking-and-power-content"></div></div></section>
+      <section data-section="hardware-description-and-verification" hidden><div class="section-body"><div id="hardware-description-and-verification-content"></div></div></section>
     </main>
   </div>
 
@@ -814,9 +824,22 @@
   <script src="src/js/algorithms/model-check.js"></script>
   <script src="src/js/algorithms/verify-vc.js"></script>
   <script src="src/js/machines/spec-dsl.js"></script>
+  <script src="src/js/machines/logic-sim.js"></script>
+  <script src="src/js/algorithms/boolean-min.js"></script>
+  <script src="src/js/machines/blocks/select.js"></script>
+  <script src="src/js/machines/blocks/adder.js"></script>
+  <script src="src/js/machines/blocks/alu.js"></script>
+  <script src="src/js/machines/blocks/memory.js"></script>
+    <script src="src/js/machines/blocks/models.js"></script>
+    <script src="src/js/machines/blocks/two-level.js"></script>
+  <script src="src/js/machines/fsm-synth.js"></script>
+  <script src="src/js/machines/timing.js"></script>
+  <script src="src/js/machines/hdl.js"></script>
 
   <script src="src/js/viz/chart-base.js"></script>
   <script src="src/js/viz/implication-graph.js"></script>
+  <script src="src/js/viz/circuit-graph.js"></script>
+  <script src="src/js/viz/waveform-view.js"></script>
   <script src="src/js/viz/canvas.js"></script>
   <script src="src/js/viz/legend.js"></script>
   <script src="src/js/viz/tooltip.js"></script>
@@ -1194,6 +1217,22 @@
   <script src="src/js/content/examples-program-dynamic.js"></script>
   <script src="src/js/content/reference-program-dynamic.js"></script>
   <script src="src/js/content/exercises-program-dynamic.js"></script>
+  <script src="src/js/content/concepts-logic.js"></script>
+  <script src="src/js/content/concepts-logic-arithmetic.js"></script>
+  <script src="src/js/content/concepts-logic-sequential.js"></script>
+  <script src="src/js/content/concepts-logic-design.js"></script>
+  <script src="src/js/content/examples-logic.js"></script>
+  <script src="src/js/content/examples-logic-arithmetic.js"></script>
+  <script src="src/js/content/examples-logic-sequential.js"></script>
+  <script src="src/js/content/examples-logic-design.js"></script>
+  <script src="src/js/content/reference-logic.js"></script>
+  <script src="src/js/content/reference-logic-arithmetic.js"></script>
+  <script src="src/js/content/reference-logic-sequential.js"></script>
+  <script src="src/js/content/reference-logic-design.js"></script>
+  <script src="src/js/content/exercises-logic.js"></script>
+  <script src="src/js/content/exercises-logic-arithmetic.js"></script>
+  <script src="src/js/content/exercises-logic-sequential.js"></script>
+  <script src="src/js/content/exercises-logic-design.js"></script>
   <script src="src/js/content/exercises-variance.js"></script>
   <script src="src/js/content/exercises-semantics.js"></script>
   <script src="src/js/content/exercises-ownership.js"></script>
@@ -1925,6 +1964,26 @@
   <script src="src/js/sections/coverage-guided-fuzzing-section.js"></script>
   <script src="src/js/sections/specifying-systems-template.js"></script>
   <script src="src/js/sections/specifying-systems-section.js"></script>
+  <script src="src/js/sections/boolean-algebra-and-gates-template.js"></script>
+  <script src="src/js/sections/boolean-algebra-and-gates-section.js"></script>
+  <script src="src/js/sections/logic-minimisation-template.js"></script>
+  <script src="src/js/sections/logic-minimisation-section.js"></script>
+  <script src="src/js/sections/combinational-blocks-template.js"></script>
+  <script src="src/js/sections/combinational-blocks-section.js"></script>
+  <script src="src/js/sections/arithmetic-circuits-template.js"></script>
+  <script src="src/js/sections/arithmetic-circuits-section.js"></script>
+  <script src="src/js/sections/arithmetic-logic-unit-template.js"></script>
+  <script src="src/js/sections/arithmetic-logic-unit-section.js"></script>
+  <script src="src/js/sections/sequential-logic-and-state-template.js"></script>
+  <script src="src/js/sections/sequential-logic-and-state-section.js"></script>
+  <script src="src/js/sections/hardware-state-machines-template.js"></script>
+  <script src="src/js/sections/hardware-state-machines-section.js"></script>
+  <script src="src/js/sections/memory-arrays-template.js"></script>
+  <script src="src/js/sections/memory-arrays-section.js"></script>
+  <script src="src/js/sections/timing-clocking-and-power-template.js"></script>
+  <script src="src/js/sections/timing-clocking-and-power-section.js"></script>
+  <script src="src/js/sections/hardware-description-and-verification-template.js"></script>
+  <script src="src/js/sections/hardware-description-and-verification-section.js"></script>
   <script src="src/js/app.js"></script>
 </body>
 </html>

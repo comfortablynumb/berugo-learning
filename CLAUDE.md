@@ -9,11 +9,12 @@ explained in full, diagram, insight), **Examples** (runnable demo with charts, w
 graded code lab) and **References** (the structured reference block).
 
 ## Status
-**M00–M32 are built** (318 sections; M00–M10, M16, M31 and M32 also verified in a browser), each
+**M00–M33 are built** (328 sections; M00–M10, M16 and M31–M33 also verified in a browser), each
 carrying 8+ concepts with full explanations, two worked examples, a reference entry and a graded
-exercise. The tree is green. **M33 — digital logic is next**, and nothing of it exists yet; it
-starts the computer-architecture track. Read `doc/BUILD-STATE.md` first, its "Next" section at the
-end carries the nine-step shape to copy. The rest of the curriculum follows the order in
+exercise. The tree is green. **M34 — the instruction set, datapath and control unit is next**, and
+nothing of it exists yet; it consumes M33's ALU, register file and state machine
+(`machines/blocks/`, `machines/logic-sim.js`). Read `doc/BUILD-STATE.md` first, its "Next" section
+carries the nine-step shape to copy. The rest of the curriculum follows the order in
 `doc/ROADMAP.md` (65 milestones in `doc/milestones/`). Keep `npm test` and `npm run lint:size`
 green at every step, and update the README status block and `doc/BUILD-STATE.md` as milestones
 land.

@@ -3367,11 +3367,14 @@ written. `ChartBase` now accepts either, which removes the trap for every future
 
 ## Next
 
-**M32 is complete. M33 — digital logic — starts the computer-architecture track, and nothing of
-it exists yet.** The spec is `doc/milestones/M33-digital-logic.md` and `doc/ROADMAP.md` gives the
-order after it. The tree is green: 318 built sections, 316 planned, 634 total.
+**M33 is complete. M34 — the instruction set, the datapath and the control unit — is next, and
+nothing of it exists yet.** It consumes M33's blocks directly: the ALU of 33.5, the register file
+of 33.8 and the state machine of 33.7 are the three pieces a single-cycle datapath is made of, and
+`machines/logic-sim.js` is the simulator it runs on. The spec is
+`doc/milestones/M34-isa-and-datapath.md` and `doc/ROADMAP.md` gives the order after it. The tree is
+green: 328 built sections, 306 planned, 634 total.
 
-The shape to copy, unchanged through M32:
+The shape to copy, unchanged through M33:
 
 1. pure modules in `algorithms/` first, behind one shared interface;
 2. a `machines/` harness that drives every implementation through that interface, carrying a
@@ -4240,3 +4243,95 @@ reached by a valid programme. Both are fixed, and the inputs are asserted in
   seeded races as an argument, which is a hardcoded verdict. The section does not use it: the
   oracle enumerates schedules and computes the answer, which is what turned "the lockset has false
   positives" into "four, and here is which one survives Eraser's state machine".
+
+## M33 — digital logic: gates to a verified design (complete)
+
+Ten sections, and the whole milestone is one event-driven gate-level simulator plus a set of
+builders that emit netlists into it. Nothing is described that is not also built and run:
+`machines/logic-sim.js` evaluates a DAG in one topological pass and relaxes a netlist with
+feedback to a fixed point, carries a per-gate delay model, counts transistors, walks the critical
+path, and reports `before`/`after` readings around a clock edge. Every figure below came out of
+`node tools/section-dump.js`.
+
+### The oracles, and what each one caught
+
+- **Two evaluators over the same netlist.** A zero-delay reference and an event-driven simulation
+  agree on every row of every truth table in 33.1 and say different things about time. That split
+  is the milestone's spine: the table is what a circuit computes, the waveform is what it does on
+  the way there.
+- **A behavioural model per block, written in arithmetic** (`machines/blocks/models.js`): shift,
+  compare, index, priority. `Hdl.equivalent` drives every input vector through both and refuses,
+  with a stated reason, past 14 inputs. Four of the five blocks in 33.3 are checked exhaustively;
+  the 16:1 multiplexer at 20 inputs is declined rather than sampled quietly.
+- **Integer arithmetic as the adder's judge**, exhaustively at 4 bits (512 vectors) and by a
+  seeded sample above it with the count printed.
+- **`Blocks.Alu.reference`,** written from the definitions of the four flags rather than from the
+  circuit — 1 024 exhaustive cases at 4 bits.
+- **The transition table as the state machine's judge**: three encodings, 256 strings of length 8,
+  0 mismatches.
+- **A four-line JavaScript register file** beside the gate-level one, with every cycle read on
+  both sides of the clock edge.
+
+### Ten measurements the milestone rests on
+
+- **Functional completeness, priced.** Exclusive-or is 12 transistors at depth 3 as a library
+  cell and **16 transistors at depth 3** from four NANDs. NOT, AND and OR cost 1, 2 and 3 NANDs.
+- **"Flat is constant depth" is false in a two-input gate library.** At 16:1 the multiplexer tree
+  is **15 gates at depth 12** and the flat decoded form is **83 gates at depth 17** — larger *and*
+  slower, because the wide AND and OR are themselves trees. The claim needs a PLA row or a word
+  line, and the section says so instead of repeating the slogan.
+- **Minimisation is worth a factor of four and it removes something.** The four-variable classic
+  goes from 43 gates at depth 25 to **10 gates at depth 7**; the minimised cover then dips on
+  **4 of its 13** adjacent transitions, and putting the redundant terms back costs **12 gates and
+  8 gate delays** to reach 0 of 13.
+- **Greedy covering loses where nothing is forced.** On minterms 0,1,2,5,6,7 greedy takes 4 terms
+  and 8 literals where an exhaustive walk of **64 subsets of 6 primes** finds 3 terms and 6.
+- **The adder cost curves.** Ripple, lookahead and select at 4/8/16 bits: **20/40/80 gates at
+  depths 19/35/67**, **42/180/1 000 at 16/26/44**, **33/65/129 at 14/22/38**. Lookahead is 2.1×
+  the gates at 4 bits and **12.5× at 16**.
+- **Why multiply is not one cycle.** Array multipliers at 2/3/4 bits are **14/39/76 gates at
+  depths 13/27/41**, every product checked — 3.8× the gates and 2.16× the depth of an adder of
+  the same width.
+- **An ALU is an adder plus multiplexing.** 8-bit: **92 gates at depth 47**, of which the adder is
+  40 gates at depth 35. Three more operations and four flags cost **52 gates and 12 gate delays**.
+- **State, demonstrated rather than asserted.** The SR sequence applies identical inputs at steps
+  2 and 4 and leaves **q = 0 then q = 1**; the D latch follows data falling under a high enable
+  and the flip-flop does not.
+- **The encoding is free and not free.** One machine, three encodings: binary **3 flops, 26 gates,
+  logic depth 11, period 14**; one-hot **5/30/7/10**; gray **3/20/7/10** — and 0 mismatches for
+  all three over 256 strings.
+- **Glitches are a power bill.** Over 32 seeded transitions the 8-bit ALU wastes **41.1%** of its
+  switching (1 296 of 3 157 changes), the ripple adder 22.2%, the lookahead adder 19.8%, and the
+  state machine none at all.
+
+### The demonstration the last section exists for
+
+One gate changed in the full adder — the sum taken from an OR — and the design still elaborates
+(**12 gates instead of 11, at the same depth 7**), still simulates, and still passes a
+hand-written corner-case list that drives **4 vectors, 50.0% of the input space and 80% toggle
+coverage**. Only the exhaustive check against an independently written model catches it, and it
+names the vector: **a=1 b=0 cin=1**. The same typo propagates to the 4-bit adder above it.
+
+### Five things this milestone adds to the shape and worth keeping
+
+- **A guard that never fires is worse than no guard, so fire it once on purpose.** The new
+  `duplicate-global` check in the wiring audit was written, passed, and was *not* detecting
+  anything: a `\b` in the regex had been written into the file as a literal backspace character.
+  Injecting a real collision proved it dead. Every new check earns its keep by failing on a
+  deliberate defect before being trusted.
+- **Two modules must not publish the same global.** `logic-minimisation-template.js` claimed
+  `MinimiseTemplate`, which an automata section already owned; the automata section then rendered
+  with the wrong template and threw inside a regex parser, hundreds of lines from the mistake.
+  The audit now refuses it by name.
+- **`Random.int` takes a bound, not a range.** `random.int(0, limit)` asks for a value in [0, 0)
+  and answers 0 every time, so a "seeded sample of 400 vectors" was 400 copies of 0 + 0 + 0, and a
+  switching-activity measurement over "random" vectors reported no activity at all. Both were
+  green.
+- **A benchmark can measure its own stimulus.** Activity driven by a uniform walk of the low input
+  bits reported **0 glitches of 887 changes** on a circuit that wastes 22.2% of its switching,
+  because consecutive vectors differ in one bit and a glitch needs several inputs moving at once.
+  The section keeps both numbers and says which one is measuring the circuit.
+- **A combinational critical path is not a clock period.** `criticalPath` walks to the *outputs*,
+  so a Moore machine whose output is a wire off the state register reports a delay of 1 — true,
+  and not the number the clock has to accommodate. The register-to-register class from
+  `Timing.frequency` is the one that sets the period: 14 rather than 1.

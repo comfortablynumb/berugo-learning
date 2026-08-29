@@ -198,6 +198,30 @@ function checkSelectors(html, files) {
   });
 }
 
+/**
+ * Two modules that publish the same global name silently overwrite each other,
+ * and the survivor depends on script order. That cost a debugging round when
+ * `logic-minimisation-template.js` claimed `MinimiseTemplate`, which the
+ * automata section already used: the automata section then rendered with the
+ * wrong template and threw inside a regex parser, several hundred lines from
+ * the actual mistake.
+ */
+function checkGlobalNames(files) {
+  const owners = {};
+
+  files.forEach(function (file) {
+    matchAll(read(file), /(?:root|scope)[.]([A-Z][A-Za-z0-9_]*)[ ]*=[ ]*api;/g).forEach(function (match) {
+      const name = match[1];
+
+      if (owners[name] && owners[name] !== file) {
+        fail('duplicate-global', name + ' is published by ' + owners[name] + ' and ' + file);
+        return;
+      }
+      owners[name] = file;
+    });
+  });
+}
+
 function run() {
   const html = read('index.html');
   const files = walk('src/js');
@@ -210,6 +234,7 @@ function run() {
   checkScriptTags(html, files);
   checkEvents(files);
   checkSelectors(html, files);
+  checkGlobalNames(files);
 
   notes.push(curriculum.sections().length + ' sections, ' + files.length + ' modules');
 

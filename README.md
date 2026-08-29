@@ -14,14 +14,14 @@ faithfully in a browser, the section models it, says so plainly, and states what
 
 ## Status
 
-**M00–M32 shipped (318 sections). Building the curriculum, milestone by milestone.**
+**M00–M33 shipped (328 sections). Building the curriculum, milestone by milestone.**
 
 - ✅ Curriculum designed: 65 milestones, 634 sections, 11 tracks — one file per milestone in
   [`doc/milestones/`](doc/milestones/)
 - ✅ Architecture and conventions fixed — [`doc/architecture.md`](doc/architecture.md)
 - ✅ Build order and dependency graph — [`doc/ROADMAP.md`](doc/ROADMAP.md)
 - ✅ Scope decisions recorded — [`doc/topic-suggestions.md`](doc/topic-suggestions.md)
-- ✅ **Notation decoder across all 318 sections, on all three tabs**: every mathematical symbol
+- ✅ **Notation decoder across all 328 sections, on all three tabs**: every mathematical symbol
   carries how to say it and what it does, revealed on hover, tap or keyboard focus — in the
   concepts and orientation, in the arithmetic of every worked example, in the cost table and
   equations of every reference block, and in the prompt of every graded exercise. Every formal
@@ -578,6 +578,22 @@ The render audit is not a substitute for opening the page, and M16's browser pas
   four and twelve characters, both in the printer on the diagnostics path), while the oracle
   control shows what it is worth: crashes alone find **1** planted defect and a differential
   reference finds **2**, the extra one being a two-character wrong answer that never throws.
+
+- ✅ **M33 — digital logic, gates to a verified design**: ten sections built on one event-driven
+  gate-level simulator, and every claim is a netlist that was run. Exclusive-or costs **12
+  transistors as a cell and 16 from four NANDs**; the textbook "flat multiplexers are constant
+  depth" is measured false in a two-input gate library — at 16:1 the tree is **15 gates at depth
+  12** and the flat form **83 at depth 17**, larger *and* slower. Minimisation takes a
+  four-variable function from **43 gates at depth 25 to 10 at depth 7** and leaves a circuit that
+  dips on **4 of its 13** adjacent transitions; buying that back costs **12 gates and 8 gate
+  delays**. Three adders at 4/8/16 bits are **20/40/80 gates at depths 19/35/67** against
+  lookahead's **42/180/1 000 at 16/26/44**, and an array multiplier is **3.8× the gates and 2.16×
+  the depth** of the adder beside it. An 8-bit ALU is **92 gates at depth 47** where its adder is
+  40 at 35. One state machine under three encodings is **3 flops / logic depth 11** binary against
+  **5 flops / depth 7** one-hot, with **0 mismatches over 256 strings** for each. And the last
+  section injects one wrong gate: the design still elaborates, still simulates, and still passes a
+  corner-case list at **80% toggle coverage** — only the exhaustive check against an independent
+  model finds it, naming the vector.
 
 - ✅ **M30 — code generation, bytecode VMs and JIT**: the back end of the same compiler, and five
   ways to run one program compared against the front end that produced it. Two code generators

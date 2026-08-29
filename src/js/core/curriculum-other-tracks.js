@@ -59,9 +59,75 @@
       id: 'architecture',
       title: 'Computer architecture',
       summary: 'From a gate to an out-of-order core, and the memory hierarchy underneath it.',
-      groups: [],
+      groups: [
+        {
+          id: 'M33',
+          title: 'Digital logic and sequential circuits',
+          summary: 'From two transistors to a register file, every circuit simulated gate by gate with real propagation delays — and every block checked over its whole input space against a behavioural model that shares none of its code.',
+          sections: [
+            {
+              id: 'boolean-algebra-and-gates',
+              title: 'Boolean algebra and gates',
+              summary: 'One truth table derived by running the circuit, the canonical forms generated from that table, and the price of functional completeness measured in transistors and gate delays.',
+              tags: ['truth table', 'boolean function', 'nand', 'functional completeness', 'de morgan', 'canonical form', 'sum of products', 'cmos', 'propagation delay', 'fan-in']
+            },
+            {
+              id: 'logic-minimisation',
+              title: 'Combinational logic design and minimisation',
+              summary: 'Prime implicants, the covering problem, and the hazard minimisation leaves behind',
+              tags: ['karnaugh', 'quine-mccluskey', 'set cover', 'static hazard']
+            },
+            {
+              id: 'combinational-blocks',
+              title: 'The combinational building blocks',
+              summary: 'Multiplexers, decoders, priority encoders, comparators and barrel shifters, each checked against its specification',
+              tags: ['multiplexer', 'decoder', 'barrel shifter', 'exhaustive verification']
+            },
+            {
+              id: 'arithmetic-circuits',
+              title: 'Arithmetic circuits',
+              summary: 'Ripple, lookahead and select adders, the multiplier array, and why the latency table looks the way it does',
+              tags: ['adder', 'carry lookahead', 'multiplier', 'twos complement']
+            },
+            {
+              id: 'arithmetic-logic-unit',
+              title: 'The arithmetic logic unit',
+              summary: 'One adder, four operations and the four flags every conditional branch reads',
+              tags: ['alu', 'condition codes', 'overflow', 'signed and unsigned']
+            },
+            {
+              id: 'sequential-logic-and-state',
+              title: 'Sequential logic: latches, flip-flops and registers',
+              summary: 'Feedback, the first circuit with a memory, and the setup and hold constraints it imposes',
+              tags: ['latch', 'flip-flop', 'setup and hold', 'metastability']
+            },
+            {
+              id: 'hardware-state-machines',
+              title: 'State machines in hardware',
+              summary: 'Transition tables become flip-flops and gates, and the state encoding is a free choice with real costs',
+              tags: ['fsm', 'state encoding', 'one-hot', 'moore and mealy']
+            },
+            {
+              id: 'memory-arrays',
+              title: 'Memory arrays and register files',
+              summary: 'Storage is the cheap half: decoders, read ports and the read-during-write question',
+              tags: ['register file', 'sram', 'dram', 'read during write']
+            },
+            {
+              id: 'timing-clocking-and-power',
+              title: 'Timing, clocking and power',
+              summary: 'Static timing analysis on the circuits just built, and the power bill their switching produces',
+              tags: ['static timing', 'slack', 'pipelining', 'dynamic power']
+            },
+            {
+              id: 'hardware-description-and-verification',
+              title: 'Describing hardware, and proving it right',
+              summary: 'Modules, elaboration, exhaustive equivalence checking, and what coverage does not tell you',
+              tags: ['hdl', 'elaboration', 'equivalence checking', 'coverage']
+            }]
+        }
+      ],
       planned: [
-        { id: 'M33', title: 'Digital logic and sequential circuits', sections: 10 },
         { id: 'M34', title: 'ISA, assembly, datapath and control', sections: 10 },
         { id: 'M35', title: 'Pipelining, hazards and branch prediction', sections: 9 },
         { id: 'M36', title: 'Superscalar, out-of-order execution and speculation', sections: 9 },

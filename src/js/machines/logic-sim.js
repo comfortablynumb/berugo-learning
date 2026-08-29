@@ -45,6 +45,16 @@
   const ARITY = { not: 1, buf: 1, and: 2, or: 2, nand: 2, nor: 2, xor: 2, xnor: 2,
     mux: 3, dff: 2, input: 0, const0: 0, const1: 0 };
 
+  /**
+   * Transistors per gate in static CMOS, which is where the delays above come
+   * from and why NAND and NOR are the cheap gates: an inverting gate is one
+   * pull-up network and one pull-down network, and AND is a NAND followed by
+   * an inverter. A flip-flop is counted as two latches plus the clock
+   * inverter, which is the usual twenty-ish.
+   */
+  const TRANSISTORS = { not: 2, buf: 4, nand: 4, nor: 4, and: 6, or: 6, xor: 12,
+    xnor: 12, mux: 12, dff: 20, input: 0, const0: 0, const1: 0 };
+
   /* --------------------------------------------------------- construction */
 
   function create(name) {
@@ -362,6 +372,31 @@
         return source === null ? 0 : run.wires[source];
       })), node.delay);
     });
+    seedFlops(net, run);
+  }
+
+  /**
+   * Every flip-flop's clock is compared with the value it had at the end of
+   * the previous run, and a rise captures.
+   *
+   * This has to happen here rather than through propagation, because the
+   * inputs are SET at t = 0 rather than scheduled - so a clock going from 0 to
+   * 1 between two runs produces no event and the flip-flop would never see its
+   * own edge. The symptom is a state machine whose output is constant while
+   * every gate in it is correct, which is a very quiet way to be wrong.
+   */
+  function seedFlops(net, run) {
+    net.order.forEach(function (id) {
+      const node = net.nodes[id];
+
+      if (node.type !== 'dff') return;
+      const clock = node.inputs[1] === null ? 0 : run.wires[node.inputs[1]];
+      const previous = run.state[id + ':clk'] || 0;
+
+      run.state[id + ':clk'] = clock;
+      if (!(clock === 1 && previous === 0)) return;
+      schedule(run, id, node.inputs[0] === null ? 0 : run.wires[node.inputs[0]], node.delay);
+    });
   }
 
   /**
@@ -412,6 +447,10 @@
     });
 
     return { wires: run.wires, outputs: outputsOf(net, run.wires),
+      /* `state` is the wires PLUS the per-flip-flop clock memory. Passing the
+         wires alone forward loses the edge history, so every run thinks the
+         clock has just risen. */
+      state: Object.assign({}, run.state, run.wires),
       settleTime: run.time, events: run.events, history: run.history,
       changes: run.changes, glitches: glitched,
       settled: run.queue.length === 0,
@@ -433,8 +472,8 @@
     low[clock] = 0;
     high[clock] = 1;
     const before = simulate(net, low, { state: state, record: false });
-    const rising = simulate(net, high, { state: before.wires, record: false });
-    const after = simulate(net, low, { state: rising.wires, record: false });
+    const rising = simulate(net, high, { state: before.state, record: false });
+    const after = simulate(net, low, { state: rising.state, record: false });
 
     /* Two readings of the same cycle, and they are not the same answer. A
        read port sampled BEFORE the edge sees what was stored last cycle; the
@@ -442,11 +481,20 @@
        a design gives you is the whole read-during-write question, and it is
        why a pipeline needs a forwarding path. */
     return { outputs: after.outputs, before: before.outputs, after: after.outputs,
-      state: after.wires,
+      state: after.state,
       settleTime: before.settleTime + rising.settleTime + after.settleTime };
   }
 
   /* ------------------------------------------------ structural measurement */
+
+  /** Area, in the only unit that is comparable across gate types. */
+  function transistorCount(net) {
+    return net.order.reduce(function (sum, id) {
+      const cost = TRANSISTORS[net.nodes[id].type];
+
+      return sum + (cost === undefined ? 0 : cost);
+    }, 0);
+  }
 
   function gateCount(net) {
     return net.order.filter(function (id) {
@@ -510,7 +558,8 @@
     return { delay: depth[worst.id], path: path, output: worst.label, depth: depth };
   }
 
-  return { DELAY: DELAY, ARITY: ARITY,
+  return { DELAY: DELAY, ARITY: ARITY, TRANSISTORS: TRANSISTORS,
+    transistorCount: transistorCount,
     create: create, addInput: addInput, addGate: addGate, addOutput: addOutput,
     connect: connect, relax: relax, setInitial: setInitial,
     startValue: startValue,
