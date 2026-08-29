@@ -30,7 +30,7 @@
     if (!entries || !entries.length) return '';
     const sectionId = options && options.sectionId;
     return '<section class="section-block">' +
-      '<h3>Concepts</h3>' +
+      icons().heading('concepts', 'Concepts') +
       '<div class="concept-list">' +
       entries.map(function (entry, index) {
         return concept(entry, index, sectionId);
@@ -39,8 +39,34 @@
       '</section>';
   }
 
+  /* Resolved on use, not on load, exactly as the annotator itself does: it lets
+     `node --test` require this renderer and check what it emits. */
+  function notation() {
+    return scope && scope.NotationMarkup ? scope.NotationMarkup
+      : require('../utils/notation-markup.js');
+  }
+
   function annotator(sectionId) {
-    return scope.NotationMarkup.createAnnotator({ sectionId: sectionId });
+    return notation().createAnnotator({ sectionId: sectionId });
+  }
+
+  function icons() {
+    return scope && scope.Icons ? scope.Icons : require('../utils/icons.js');
+  }
+
+  /* A concept may carry its own diagram, and it is placed between the formal
+     line and the explanation on purpose: the reader who is about to meet a
+     240-character paragraph gets the shape of the thing first. The host is
+     empty here and filled at mount, exactly like the section diagram - markup
+     is built as a string and mermaid needs a live element. */
+  function conceptDiagram(entry, sectionId, index, mark) {
+    if (!entry.diagram || !entry.diagram.definition) return '';
+    return '<div class="concept-diagram">' +
+      '<div id="diagram-' + sectionId + '-c' + index + '" class="mermaid-host"></div>' +
+      (entry.diagram.caption
+        ? '<p class="note">' + mark.annotate(entry.diagram.caption) + '</p>'
+        : '') +
+      '</div>';
   }
 
   /** `detail` is one paragraph or several; both arrive here as an array. */
@@ -78,6 +104,7 @@
       mark.annotate(entry.term) + '</h4>' +
       '<p class="plain">' + mark.annotate(entry.plain) + '</p>' +
       formal(entry, mark) +
+      conceptDiagram(entry, sectionId, index, mark) +
       explanation(entry.detail, mark) +
       example(entry, mark) +
       '</article>';

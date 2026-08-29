@@ -72,31 +72,51 @@ abbr.notation.notation-end::after {
   right: 0;
 }
 
-/* Inside the formal line every symbol is chipped, so the underline there has
-   to be lighter still or the line turns into a rule. */
-.concept .formal abbr.notation {
+/* Inside a dense monospace block - the concept's formal line, a reference
+   equation, the arithmetic of a worked example - the symbols sit close enough
+   together that the accent underline turns the line into a rule. They get the
+   muted colour, and light up on hover like everything else. */
+.concept .formal abbr.notation,
+.equation abbr.notation,
+.step .step-work abbr.notation,
+table.ref-table td.mono abbr.notation {
   text-decoration-color: var(--text-muted);
 }
 
 .concept .formal abbr.notation:hover,
-.concept .formal abbr.notation:focus-visible {
+.concept .formal abbr.notation:focus-visible,
+.equation abbr.notation:hover,
+.equation abbr.notation:focus-visible,
+.step .step-work abbr.notation:hover,
+.step .step-work abbr.notation:focus-visible,
+table.ref-table td.mono abbr.notation:hover,
+table.ref-table td.mono abbr.notation:focus-visible {
   text-decoration-color: var(--accent);
 }
 
-/* The plain-English reading of the formal line. It sits directly under the
-   notation it decodes, which is the only placement that makes it a translation
-   rather than another fact to hold. */
-.concept .reads-as {
+/* The plain-English reading of a formal line or a reference equation. It sits
+   directly under the notation it decodes, which is the only placement that
+   makes it a translation rather than another fact to hold. */
+.reads-as {
   display: block;
-  margin: -0.0625rem 0 0.5rem;
-  padding: 0.375rem 0.5rem 0.375rem 0.625rem;
-  border-left: 2px solid var(--accent-soft);
+  margin: 0 0 1rem;
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 0 4px 4px;
+  background: color-mix(in srgb, var(--accent-soft) 55%, transparent);
   color: var(--text-secondary);
-  font-size: 0.8125rem;
-  line-height: 1.6;
+  font-size: 0.875rem;
+  line-height: 1.7;
 }
 
-.concept .reads-as strong {
+/* "In words." is a label for the sentence, not the first two words of it, so
+   it is set like every other label in this interface rather than like prose. */
+.reads-as strong {
+  display: block;
+  margin-bottom: 0.125rem;
   color: var(--text-muted);
+  font-size: 0.6875rem;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }

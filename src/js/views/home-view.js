@@ -20,11 +20,28 @@
     return scope.Helpers.escapeHtml(value);
   }
 
+  /* The notation decoder is the one affordance a reader without a maths
+     background most needs, and a dotted underline does not announce itself. So
+     the map says what it is, and says it in real chips rather than describing
+     them: the first Θ a learner meets is one they can hover here, on the page
+     they land on, rather than one buried inside an argument they are also
+     trying to follow. */
+  function decoderNote() {
+    const mark = scope.NotationMarkup.createAnnotator({});
+    return '<p>' + mark.annotate(
+      'You do not need a maths background to read any of it. Every symbol is ' +
+      'underlined the first time it appears — Θ(n log n), ⌈x⌉, Σ, ∈, iff — and ' +
+      'hovering it, tapping it or tabbing to it says how to pronounce it and what ' +
+      'it does. Where a section states something formally, the line directly ' +
+      'underneath restates it as a sentence you could say out loud.') + '</p>';
+  }
+
   function intro() {
     return '<div class="section-orientation">' +
       '<p>Every section here is the same five things: a short orientation, an interactive demo of ' +
       'the mechanism, an editable code lab with graded exercises, concepts and worked examples with ' +
       'real arithmetic, and a reference block with the invariants, costs, failure modes and sources.</p>' +
+      decoderNote() +
       '<p>Nothing states a cost it does not measure. Where a real system cannot be reproduced in a ' +
       'browser, the section models it, says so, and states what the model leaves out.</p>' +
       '</div>';

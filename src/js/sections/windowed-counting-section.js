@@ -28,7 +28,9 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'Counting the ones in the last N positions of a stream exactly needs Ω(N) bits, because the ' +
+        '**There is no way to answer "how many in the last N?" exactly without storing the last N, ' +
+          'so the design question is how wrong you are willing to be, and for how much memory.** ' +
+          'Counting the ones in the last N positions of a stream exactly needs Ω(N) bits, because the ' +
           'algorithm has to be able to tell every one of the 2^N possible windows apart. DGIM gives ' +
           'up exactness instead: it keeps buckets of sizes 1, 2, 4, … each stamped with the position ' +
           'of its most recent one, allows at most two buckets of any size, and counts every bucket ' +

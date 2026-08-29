@@ -16,17 +16,37 @@
 }(typeof window !== 'undefined' ? window : null, function (scope, $) {
   'use strict';
 
-  function esc(value) {
-    return scope.Helpers.escapeHtml(value);
+  /* Resolved on use, not on load, exactly as the annotator itself does: it
+     lets `node --test` require this renderer and check that the notation is
+     actually decoded, rather than that guarantee living only in a browser. */
+  function notation() {
+    return scope && scope.NotationMarkup ? scope.NotationMarkup
+      : require('../utils/notation-markup.js');
   }
 
-  function markup(exercise) {
+  function helpers() {
+    return scope && scope.Helpers ? scope.Helpers : require('../utils/helpers.js');
+  }
+
+  function esc(value) {
+    return helpers().escapeHtml(value);
+  }
+
+  /* The prompt states the task, and it states it in the notation the section
+     just taught - "returns the smallest c for which f(n) <= c*g(n)". A learner
+     who has to leave the lab to look a symbol up has left the lab, so the
+     prompt is annotated. The starter and the solution are code and are never
+     annotated: a backticked or typed identifier is not notation. */
+  function markup(exercise, options) {
     const id = exercise.id;
+    const mark = notation().createAnnotator({
+      sectionId: options && options.sectionId
+    });
     return '' +
       '<div class="code-lab" data-lab="' + id + '">' +
       '  <div class="code-lab-prompt">' +
-      '    <div class="prompt-title">' + esc(exercise.title || 'Exercise') + '</div>' +
-      '    <div class="prompt-text">' + esc(exercise.prompt) + '</div>' +
+      '    <div class="prompt-title">' + mark.annotate(exercise.title || 'Exercise') + '</div>' +
+      '    <div class="prompt-text">' + mark.annotate(exercise.prompt) + '</div>' +
       (exercise.entry
         ? '    <div class="note">Define a function named <code>' + esc(exercise.entry) + '</code>. ' +
           'Available inside your code: <code>log</code>, <code>rng</code>, <code>ops</code>, ' +

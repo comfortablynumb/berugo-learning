@@ -343,6 +343,10 @@
         term: 'Enumerating the small space is deterministic and meets the same bound',
         plain: 'The family’s average is exactly |E|/2, so its best member is at least that.',
         formal: 'the average over the family equals E[cut] under full independence, because the expectation only used pairs',
+        readAs: 'Average the cut size over every assignment in this small family and you get exactly ' +
+          'the same number as E[cut] — the long-run average you would get by flipping a fair coin ' +
+          'for every vertex, forever. The two agree because the calculation of that average never ' +
+          'looked at more than two vertices at a time, and the family already gets every pair right.',
         detail: 'This is the payoff of the previous two concepts and it is a genuinely surprising ' +
           'result: exponentially many coin flips are replaced by a logarithmic seed, and then by ' +
           'none at all, with no loss in the guarantee. The average being exactly the bound rather ' +

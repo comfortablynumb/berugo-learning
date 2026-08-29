@@ -24,13 +24,22 @@
     root.jQuery('#' + SECTION_ID + '-content').html(app.shell.render({
       sectionId: SECTION_ID,
       orientation: [
-        'O, Ω and Θ are sets of functions, and membership is decided by a witness: f is O(g) when ' +
-          'there exist a constant c and a threshold n₀ such that f(n) ≤ c·g(n) for every n ≥ n₀. ' +
-          'Nearly every argument about big-O is really an argument about whether such a pair exists.',
-        'Pick f, g and a witness below. The panel checks the inequality at every integer in the ' +
-          'range and reports the first n where it fails, which is the only useful form of "no".',
-        'This is an empirical check over a finite range - it can refute a witness, and it cannot ' +
-          'prove one. The distinction is the section.'
+        '**You already use big-O. What is usually left out is that it is a claim you can be wrong ' +
+          'about, and that checking it is a concrete procedure.** "Quicksort is n log n" sounds ' +
+          'like a property of quicksort, the way "sorted" is a property of an array. It is not. It ' +
+          'is a promise about how the cost behaves once the input is big enough — and a promise ' +
+          'can be tested, and can fail.',
+        'Here is the whole of it. To say f is O(g), you have to be able to name two numbers: a ' +
+          'multiplier c, and a size n₀ past which you stop caring about small inputs. The claim is ' +
+          'then that f(n) never rises above c·g(n) for any n from n₀ upward. That pair of numbers ' +
+          'is called a **witness**, because naming it is how the claim gets proved — which is why ' +
+          'nearly every argument about big-O is really an argument about whether such a pair exists.',
+        'Pick f, g and a witness below. The panel tests that inequality at every whole number in ' +
+          'the range and reports the first n where it breaks. One failure is enough to throw a ' +
+          'witness out, so "no" is the answer this demo can give you with confidence.',
+        '"Yes" is the one it cannot. The claim covers every n forever, and checking a thousand of ' +
+          'them is evidence rather than proof. Knowing which questions a measurement can settle ' +
+          'and which need an argument is what this section is really teaching.'
       ],
       demo: { title: 'Interactive demo — check a witness', markup: root.AsymptoticNotationTemplate.render() },
       diagram: {

@@ -23,6 +23,7 @@ const Curriculum = require('../../src/js/core/curriculum.js');
 const Helpers = require('../../src/js/utils/helpers.js');
 const NotationMarkup = require('../../src/js/utils/notation-markup.js');
 const NotationPanel = require('../../src/js/components/notation-panel.js');
+const Icons = require('../../src/js/utils/icons.js');
 
 function makeHost(options) {
   const settings = options || {};
@@ -47,6 +48,7 @@ function makeHost(options) {
     ChartBase: { repaints: 0, refreshVisible: function () { this.repaints += 1; return this.repaints; } },
     NotationMarkup: NotationMarkup,
     NotationPanel: NotationPanel,
+    Icons: Icons,
     SectionConcepts: { markup: function (entries) { return entries ? '<concepts n="' + entries.length + '">' : ''; } },
     SectionExamples: { markup: function (entries) { return entries ? '<examples n="' + entries.length + '">' : ''; } },
     SectionReference: { markup: function (entry) { return entry ? '<reference>' : ''; } },
@@ -169,6 +171,29 @@ test('shell: switching tab repaints the charts that drew while hidden', function
   assert.strictEqual(host.ChartBase.repaints, 1, 'the demo charts are repainted when shown');
 });
 
+/* A chip in a hidden panel has no geometry either, so `place` skipped it and it
+   kept the default left-hanging panel however little room was to its right.
+   That was harmless while chips only lived on the Description tab; the Examples
+   and References blocks now decode their own notation, so the placement pass
+   has to run again when one of them is shown. */
+test('shell: switching tab re-places the notation panels that were hidden', function () {
+  const host = makeHost({ concepts: [{}], examples: [{}], reference: {}, exercises: [] });
+  const placed = [];
+
+  host.NotationPanel = {
+    watch: function () { return true; },
+    place: function (container) { placed.push(container); return 0; }
+  };
+  SectionShell.__setHostForTests(host);
+
+  SectionShell.render(fullSection());
+  SectionShell.mount({ sectionId: 'code-engine', app: makeApp() });
+
+  assert.strictEqual(placed.length, 1, 'one placement pass at mount');
+  host.TabController.initCalls[0].onChange('references');
+  assert.strictEqual(placed.length, 2, 'and one more when a hidden tab is shown');
+});
+
 test('shell: mount renders the diagram the section declared at render time', function () {
   const host = makeHost({ exercises: [] });
   SectionShell.__setHostForTests(host);
@@ -183,6 +208,45 @@ test('shell: mount renders the diagram the section declared at render time', fun
   assert.strictEqual(result.diagram, true);
   assert.strictEqual(app.mermaid.calls.length, 1, 'the diagram must actually be rendered');
   assert.match(app.mermaid.calls[0].definition, /sequenceDiagram/);
+});
+
+/* A concept may carry its own diagram, so that the picture sits next to the
+   explanation it simplifies rather than once at the top of the section. */
+test('shell: a concept diagram gets its own host and its own render call', function () {
+  const host = makeHost({
+    concepts: [
+      { term: 'plain one' },
+      { term: 'with a picture', diagram: { definition: 'graph TD; A-->B;', caption: 'why' } }
+    ],
+    reference: {}, exercises: []
+  });
+  host.SectionConcepts = { markup: require('../../src/js/components/section-concepts.js').markup };
+  SectionShell.__setHostForTests(host);
+  const app = makeApp();
+
+  const html = SectionShell.render({ sectionId: 'code-engine', orientation: ['x'] });
+  assert.ok(html.indexOf('id="diagram-code-engine-c1"') !== -1,
+    'the concept that declares a diagram renders a host keyed by its index');
+  assert.strictEqual((html.match(/class="concept-diagram"/g) || []).length, 1,
+    'the concept that declares none renders no host');
+
+  const result = SectionShell.mount({ sectionId: 'code-engine', app: app });
+  assert.strictEqual(result.conceptDiagrams, 1);
+  assert.strictEqual(app.mermaid.calls.length, 1, 'one render call, for the one declared diagram');
+  assert.strictEqual(app.mermaid.calls[0].definition, 'graph TD; A-->B;');
+});
+
+test('shell: a concept diagram with no host fails loudly instead of silently', function () {
+  const host = makeHost({
+    concepts: [{ term: 'x', diagram: { definition: 'graph TD; A-->B;' } }],
+    reference: {}, exercises: [], missingHost: true
+  });
+  SectionShell.__setHostForTests(host);
+
+  SectionShell.render({ sectionId: 'code-engine', orientation: ['x'] });
+  assert.throws(function () {
+    SectionShell.mount({ sectionId: 'code-engine', app: makeApp() });
+  }, /declares a diagram but rendered no host/);
 });
 
 test('shell: a section with no diagram calls the renderer not at all', function () {

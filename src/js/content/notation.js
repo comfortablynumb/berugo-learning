@@ -50,6 +50,11 @@
 
   /* Logic and sets. */
   const LOGIC = [
+    /* The most dangerous three letters in the curriculum. A reader who has not
+       met it reads "iff" as a typo for "if" and takes away exactly half the
+       statement - the direction that was not being claimed. */
+    { token: 'iff', source: '\\biff\\b', reads: 'if and only if',
+      means: 'Not a typo for "if". It claims BOTH directions at once: the left side holds in exactly the cases the right side does, so you may argue from either one to the other. Plain "if" claims only one direction, and reading iff as if is how a proof quietly loses half its content.' },
     { token: '⟺', reads: 'if and only if',
       means: 'Both sides are true in exactly the same cases - each one implies the other. In code, an equivalence you may substitute in either direction.' },
     { token: '⇔', reads: 'if and only if',
@@ -128,8 +133,19 @@
       means: 'n! is n × (n−1) × … × 2 × 1 - the number of ways to put n things in order. It grows faster than any exponential: 20! is already about 2.4 × 10¹⁸.' },
     { token: 'E', source: 'E(?=\\[)', reads: 'the expected value of',
       means: 'The long-run average of a random quantity, weighting each outcome by how likely it is. E[X] is read "the expectation of X" and is what you would see averaged over very many runs - not what any single run must give.' },
+    /* `modulo` before `mod`, because ENTRIES order is match priority and the
+       shorter token would otherwise claim the first three letters. */
+    { token: 'modulo', source: '\\bmodulo\\b', reads: 'modulo',
+      means: 'The spelled-out form of mod: the remainder after dividing. "all modulo M" means every value in the expression is reduced to what is left once every whole multiple of M is taken out, so it always lands between 0 and M−1.' },
     { token: 'mod', source: '\\bmod\\b', reads: 'modulo',
       means: 'The remainder after dividing. "a mod b" is what is left of a once every whole multiple of b is taken out, so it always lands between 0 and b−1.' },
+    /* argmin and argmax are named in the readAs guard's HARD set but had no
+       entry, so a formal line was required to translate them while the word
+       itself stayed undecodable everywhere else it appeared. */
+    { token: 'argmin', source: '\\bargmin\\b', reads: 'arg min',
+      means: 'The input that produces the smallest output - not the smallest value itself. If f(3) is the lowest, min f is that lowest cost and argmin f is 3. The distinction matters because one is an answer and the other is the thing you act on.' },
+    { token: 'argmax', source: '\\bargmax\\b', reads: 'arg max',
+      means: 'The input that produces the largest output, rather than the largest value itself: max f is the best score, argmax f is the choice that achieved it.' },
     { token: '·', reads: 'times, or a bullet',
       means: 'Between two quantities it is multiplication, written as a raised dot so it is not mistaken for a full stop (between two vectors, the dot product). Between two labels it is only a separator: "Dijkstra 3 480 · SPFA 6 516" lists two measurements rather than multiplying them. Which one it is depends on whether the things either side are quantities or names.' },
     { token: '÷', reads: 'divided by',

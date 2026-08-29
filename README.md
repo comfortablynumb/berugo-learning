@@ -21,13 +21,17 @@ faithfully in a browser, the section models it, says so plainly, and states what
 - ✅ Architecture and conventions fixed — [`doc/architecture.md`](doc/architecture.md)
 - ✅ Build order and dependency graph — [`doc/ROADMAP.md`](doc/ROADMAP.md)
 - ✅ Scope decisions recorded — [`doc/topic-suggestions.md`](doc/topic-suggestions.md)
-- ✅ **Notation decoder across all 307 sections**: every mathematical symbol carries how to say it
-  and what it does, revealed on hover, tap or keyboard focus, and every formal statement whose
-  notation a reader cannot pronounce carries an "In words" translation beneath it. The audience is
-  a senior engineer with little or no mathematics, so the Description tab explains the idea before
-  the symbol — see [`src/js/content/notation.js`](src/js/content/notation.js) for the glossary and
+- ✅ **Notation decoder across all 307 sections, on all three tabs**: every mathematical symbol
+  carries how to say it and what it does, revealed on hover, tap or keyboard focus — in the
+  concepts and orientation, in the arithmetic of every worked example, in the cost table and
+  equations of every reference block, and in the prompt of every graded exercise. Every formal
+  statement whose notation a reader cannot pronounce carries an "In words" translation beneath it,
+  and so does every reference equation that has one. The audience is a senior engineer with little
+  or no mathematics, so the idea is always explained before the symbol — see
+  [`src/js/content/notation.js`](src/js/content/notation.js) for the glossary and
   [`notation-local.js`](src/js/content/notation-local.js) for the per-section meanings of α, ε, δ
-  and λ.
+  and λ. `tests/unit/notation-rendering.test.js` asserts the decoding on rendered markup, so a
+  block that stops calling the annotator fails the build rather than quietly going bare.
 - ✅ **M00 — platform foundation**: shell, curriculum-driven navigation, worker sandbox, graded
   code labs, content registries, D3/mermaid pipelines, progress, and three automated checks.
   4 sections live.
@@ -679,7 +683,7 @@ The render audit is not a substitute for opening the page, and M16's browser pas
 | Concern | Choice | Why |
 |---|---|---|
 | UI | jQuery + Tailwind CSS | No framework; every section reads as plain DOM code |
-| Structural diagrams | mermaid.js | State machines, pipelines, protocols, memory layouts |
+| Structural diagrams | mermaid.js | One per teaching section — state machines, pipelines, protocols, memory layouts. `tests/unit/mermaid-syntax.test.js` loads mermaid under jsdom and parses all 305 definitions, so a diagram that would render as an error block fails the build instead |
 | Charts and data-driven visuals | D3 v7 via `viz/chart-base.js` | Scales, axes, transitions and the layout algorithms (force, hierarchy, quadtree, contour); Canvas past a few thousand elements |
 | Code execution | Web Worker sandbox with hard timeouts | Learner code never touches the page |
 | Storage | `localStorage` behind an adapter interface | Theme, progress, lab state — all local, all exportable |
@@ -718,7 +722,7 @@ Every section is the same three tabs, and **Description** is the one that opens:
 
 | Tab | What is in it |
 |---|---|
-| **Description** | Orientation — what the thing is, what problem it solves, and the misconception experienced engineers usually carry about it — then **every concept explained in full**: a plain statement, the formal one, a paragraph on the mechanism and on what breaks without it, and a concrete instance. Then the structural diagram and the senior insight. |
+| **Description** | Orientation — what the thing is, what problem it solves, and the misconception experienced engineers usually carry about it — then the structural diagram, then **every concept explained in full**: a plain statement, the formal one with its plain-English reading, an optional diagram of its own, a paragraph on the mechanism and on what breaks without it, and a concrete instance. The senior insight closes it. The section diagram comes *before* the concepts, and a concept's own diagram comes *before* its explanation: a picture that arrives after the paragraph illustrates something the reader has already had to build in their head. |
 | **Examples** | The interactive demo with its charts and live metrics, the worked examples that show the arithmetic with real numbers, and the editable code lab with its graded exercises. |
 | **References** | Formulation, invariants, complexity, failure modes, real-world uses, sources. |
 

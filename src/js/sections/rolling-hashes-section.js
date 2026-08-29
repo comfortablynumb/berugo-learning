@@ -51,7 +51,9 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'The hash of a window is a polynomial in a base: `c₀·bᵐ⁻¹ + c₁·bᵐ⁻² + … + cₘ₋₁`, all modulo ' +
+        '**A rolling hash turns "does the text match here?" into a single integer comparison, and ' +
+          'keeps it a single comparison as the window slides along.** ' +
+          'The hash of a window is a polynomial in a base: `c₀·bᵐ⁻¹ + c₁·bᵐ⁻² + … + cₘ₋₁`, all modulo ' +
           'something. Sliding it one place is subtract, multiply, add — constant time whatever the ' +
           'window length — so matching becomes a stream of integer comparisons with a character ' +
           'comparison only when a fingerprint hits. The whole design rests on how often that hit is ' +

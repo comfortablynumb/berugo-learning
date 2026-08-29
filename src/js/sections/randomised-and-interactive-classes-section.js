@@ -38,14 +38,14 @@
         'a permutation and a comparison. It never tests isomorphism, which is the whole point.',
       definition: [
         'sequenceDiagram',
-        '    participant V as Verifier (weak, randomised)',
-        '    participant P as Prover (unbounded, maybe lying)',
+        '    participant V as "Verifier (weak, randomised)"',
+        '    participant P as "Prover (unbounded, maybe lying)"',
         '    V->>V: pick b in {0,1} secretly, and a random permutation',
         '    V->>P: here is H, a relabelling of graph b',
         '    P->>P: which of G0, G1 is H isomorphic to?',
         '    P->>V: my answer is b′',
         '    V->>V: accept this round only if b′ = b',
-        '    Note over V,P: repeat k times; a liar survives with probability 2^-k'
+        '    Note over V,P: repeat k times — a liar survives with probability 2^-k'
       ].join('\n')
     };
   }

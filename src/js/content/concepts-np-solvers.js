@@ -81,6 +81,11 @@
         term: 'The node counts on the unsatisfiable side are exactly 2·c! − 1',
         plain: 'The solver is enumerating assignments of the conflicting group, one permutation at a time.',
         formal: 'for a clique of size c asked for c − 1 slots, DPLL with a fixed variable order visits 2·c! − 1 nodes and c! conflicts',
+        readAs: 'Take a group of c things that all conflict with each other, and ask the solver to ' +
+          'fit them into one fewer slot than there are things. Reading the variables in a fixed ' +
+          'order it explores two times c factorial, minus one, search nodes, and hits c factorial ' +
+          'dead ends — where "c factorial" is c × (c − 1) × … × 1, the number of ways to put the ' +
+          'group in order.',
         detail: 'Seeing a factorial in a measurement is what makes symmetry breaking obvious ' +
           'rather than clever: the number is not merely large, it is exactly the count of ' +
           'permutations of the conflicting group. Three slots cost 11 nodes, four cost 47, five ' +

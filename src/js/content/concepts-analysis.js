@@ -15,6 +15,16 @@
     'asymptotic-notation': [
       {
         term: 'Witness pair',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    C["claim: f is O(g)"] --> N["name two numbers:<br/>a multiplier c<br/>a size n₀"]',
+            '    N --> T{"is f(n) ≤ c·g(n)<br/>for every n from n₀ up?"}',
+            '    T -->|"yes, and it never stops being true"| P["the claim is proved"]',
+            '    T -->|"it fails at even one n"| F["this pair is not a witness<br/>(another pair still might be)"]'
+          ].join('\n'),
+          caption: 'A witness is the pair you name. The claim is the promise that some pair exists — which is why you refute it by ruling out every pair, not one.'
+        },
         plain: 'The constant and threshold that make a big-O claim true. Without one, the claim is not yet a claim.',
         formal: 'f = O(g) ⟺ ∃c > 0, n₀ : ∀n ≥ n₀, f(n) ≤ c·g(n)',
         readAs: 'f is O(g) exactly when you can find one multiplier c and one starting size n₀ such ' +
@@ -33,6 +43,15 @@
       },
       {
         term: 'Big-O, Ω and Θ',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    O["O(g)<br/>a ceiling: never worse than g"] --> T["Θ(g)"]',
+            '    W["Ω(g)<br/>a floor: never better than g"] --> T',
+            '    T --> S["both claimed at once —<br/>the cost grows exactly like g"]'
+          ].join('\n'),
+          caption: 'Θ is not a third symbol to learn. It is the other two asserted together, which is why it needs two witness pairs rather than one.'
+        },
         plain: 'Upper bound, lower bound, and both at once. O is an upper bound, not a tight one.',
         formal: 'Θ(g) = O(g) ∩ Ω(g)',
         readAs: 'Θ(g) is the overlap of two claims: the functions O(g) caps from above, and the ' +
@@ -140,6 +159,16 @@
     recurrences: [
       {
         term: 'Recursion tree',
+        diagram: {
+          definition: [
+            'flowchart TD',
+            '    L0["level 0 — one call of size n<br/>work f(n)"] --> L1["level 1 — a calls of size n/b<br/>work a·f(n/b)"]',
+            '    L1 --> L2["level 2 — a² calls of size n/b²<br/>work a²·f(n/b²)"]',
+            '    L2 --> LK["…down to the base case"]',
+            '    LK --> S["total = the sum of the rows"]'
+          ].join('\n'),
+          caption: 'Sum the rows, not the calls. Every recurrence question is really "which level holds the work" — the top, the bottom, or all of them equally.'
+        },
         plain: 'Each level of recursion drawn out, with the work it costs. Summing the levels solves the recurrence.',
         formal: 'level i has a^i subproblems of size n/b^i',
         readAs: 'By depth i the problem has split a ways per level, so there are a multiplied by ' +
@@ -298,6 +327,17 @@
       },
       {
         term: 'Accounting method',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    C["a cheap push<br/>charged 3, actually costs 1"] -->|"banks 2"| B[("credit")]',
+            '    B -->|"pays for the copy"| E["the resize<br/>costs n, charged 0"]',
+            '    E --> I{"was the bank ever negative?"}',
+            '    I -->|"no"| V["the amortised bound holds"]',
+            '    I -->|"yes"| X["the accounting is wrong,<br/>whatever the total says"]'
+          ].join('\n'),
+          caption: 'The whole proof is the last check: the bank must be non-negative after every prefix, not merely at the end.'
+        },
         plain: 'Overcharge cheap operations and bank the credit to pay for expensive ones.',
         formal: 'banked credit must never go negative',
         detail: 'Assign each operation an invented price, spend the real cost from it, and save the ' +
@@ -359,6 +399,16 @@
       },
       {
         term: 'Hysteresis band',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    G["grow when the array is full"] --> A["array"]',
+            '    A --> S["shrink only when it is a quarter full"]',
+            '    S --> B["the gap between the two<br/>is the hysteresis band"]',
+            '    B --> R["one push and one pop<br/>can no longer force a copy each"]'
+          ].join('\n'),
+          caption: 'Shrink at the same point you grow at and an alternating push/pop pair copies the whole array every time. The gap is what stops it.'
+        },
         plain: 'The gap between the grow threshold and the shrink threshold. Without a gap, one alternation can resize on every operation.',
         formal: 'grow at size = capacity, shrink at size = capacity/4',
         detail: 'If a container grows when it is full and shrinks the moment it is half empty, the ' +
@@ -392,6 +442,16 @@
     'average-case': [
       {
         term: 'Indicator variable',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    E["did event i happen?"] --> X["Xᵢ = 1 if it did<br/>Xᵢ = 0 if it did not"]',
+            '    X --> S["add them all up:<br/>X = X₁ + X₂ + … + Xₙ"]',
+            '    S --> C["X is now the count<br/>of events that happened"]',
+            '    C --> A["so counting has turned into<br/>adding up probabilities"]'
+          ].join('\n'),
+          caption: 'The trick is the substitution: a hard counting question becomes a sum of easy yes/no questions, one per event.'
+        },
         plain: 'A 0/1 variable for "did this event happen". Summing them turns counting into probability.',
         formal: 'X = ΣXᵢⱼ, E[Xᵢⱼ] = P(event)',
         readAs: 'X is the total, built by adding up one 0-or-1 variable per possible occurrence. ' +
@@ -408,6 +468,16 @@
       },
       {
         term: 'Linearity of expectation',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["E[X₁]"] --> S["E[X₁ + X₂ + X₃]"]',
+            '    B["E[X₂]"] --> S',
+            '    C["E[X₃]"] --> S',
+            '    S --> N["equals E[X₁] + E[X₂] + E[X₃]<br/>whether or not the events<br/>depend on one another"]'
+          ].join('\n'),
+          caption: 'This is the step that does the work, and the one people distrust: independence is not required, so you never have to prove it.'
+        },
         plain: 'Expectations add even when the events depend on each other. The most useful fact in the subject.',
         formal: 'E[X + Y] = E[X] + E[Y], always',
         readAs: 'The average of a sum is the sum of the averages, with no conditions attached — the ' +
@@ -535,6 +605,18 @@
       },
       {
         term: 'Decision tree',
+        diagram: {
+          definition: [
+            'flowchart TD',
+            '    Q1{"a &lt; b?"} -->|yes| Q2{"b &lt; c?"}',
+            '    Q1 -->|no| Q3{"a &lt; c?"}',
+            '    Q2 -->|yes| L1["a b c"]',
+            '    Q2 -->|no| L2["a c b, or c a b"]',
+            '    Q3 -->|yes| L3["b a c"]',
+            '    Q3 -->|no| L4["b c a, or c b a"]'
+          ].join('\n'),
+          caption: 'Every run of the algorithm is one path from the root to a leaf, and every possible answer needs its own leaf. Counting leaves is what forces the bound.'
+        },
         plain: 'Every execution is a root-to-leaf path; each leaf is one possible answer.',
         formal: 'height ≥ ⌈log₂(leaves)⌉',
         readAs: 'The longest root-to-leaf path is at least log base 2 of the number of leaves, ' +
@@ -569,6 +651,17 @@
       },
       {
         term: 'Adversary argument',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the algorithm asks<br/>one comparison"] --> D["the adversary answers"]',
+            '    D --> K["it picks whichever answer<br/>keeps the most orderings alive"]',
+            '    K --> C{"is more than one<br/>ordering still possible?"}',
+            '    C -->|yes| A',
+            '    C -->|no| S["only now may the algorithm stop —<br/>count the questions it needed"]'
+          ].join('\n'),
+          caption: 'The adversary never commits to an input. It only refuses to be pinned down, and the bound is how long it can keep refusing.'
+        },
         plain: 'An opponent answers each query to keep as many answers alive as possible, without ever committing to an input.',
         formal: 'answers stay consistent with ≥ half the candidates',
         detail: 'Instead of fixing an input, imagine an adversary that decides each answer on the ' +

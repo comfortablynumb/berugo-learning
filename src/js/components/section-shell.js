@@ -44,6 +44,10 @@
     return host.NotationMarkup.createAnnotator({ sectionId: sectionId });
   }
 
+  function icons() {
+    return host.Icons;
+  }
+
   function orientation(paragraphs, sectionId) {
     if (!paragraphs || !paragraphs.length) return '';
     const annotate = mark(sectionId);
@@ -57,7 +61,7 @@
   function demo(config) {
     if (!config || !config.markup) return '';
     return '<section class="section-block">' +
-      '<h3>' + esc(config.title || 'Interactive demo') + '</h3>' +
+      icons().heading('demo', config.title || 'Interactive demo', esc) +
       config.markup +
       '</section>';
   }
@@ -65,7 +69,7 @@
   function diagram(config, sectionId) {
     if (!config) return '';
     return '<section class="section-block">' +
-      '<h3>' + esc(config.title || 'Diagram') + '</h3>' +
+      icons().heading('diagram', config.title || 'Diagram', esc) +
       '<div class="card"><div class="card-body">' +
       '<div id="diagram-' + esc(sectionId) + '" class="mermaid-host"></div>' +
       (config.caption ? '<p class="note">' + esc(config.caption) + '</p>' : '') +
@@ -73,18 +77,21 @@
       '</section>';
   }
 
-  function labs(exercises) {
+  function labs(exercises, sectionId) {
     if (!exercises || !exercises.length) return '';
     return '<section class="section-block">' +
-      '<h3>Code lab</h3>' +
-      exercises.map(function (exercise) { return host.CodeLab.markup(exercise); }).join('') +
+      icons().heading('lab', 'Code lab') +
+      exercises.map(function (exercise) {
+        return host.CodeLab.markup(exercise, { sectionId: sectionId });
+      }).join('') +
       '</section>';
   }
 
   function insight(text, sectionId) {
     if (!text) return '';
-    return '<div class="insight"><strong>Senior insight.</strong> ' +
-      mark(sectionId).annotateRich(text) + '</div>';
+    return '<div class="insight">' + icons().svg('insight') +
+      '<div><strong>Senior insight.</strong> ' +
+      mark(sectionId).annotateRich(text) + '</div></div>';
   }
 
   function navLinks(sectionId) {
@@ -96,17 +103,20 @@
       '</nav>';
   }
 
+  /* The section diagram used to sit after every concept, which is the one place
+     a reader who is already lost will not reach. It now follows the orientation:
+     the shape of the thing, then the concepts that fill it in. */
   function describe(config, sectionId) {
     return orientation(config.orientation, sectionId) +
-      host.SectionConcepts.markup(host.ConceptRegistry.get(sectionId), { sectionId: sectionId }) +
       diagram(config.diagram, sectionId) +
+      host.SectionConcepts.markup(host.ConceptRegistry.get(sectionId), { sectionId: sectionId }) +
       insight(config.insight, sectionId);
   }
 
   function exemplify(config, sectionId, exercises) {
     return demo(config.demo) +
-      host.SectionExamples.markup(host.ExampleRegistry.get(sectionId)) +
-      labs(exercises);
+      host.SectionExamples.markup(host.ExampleRegistry.get(sectionId), { sectionId: sectionId }) +
+      labs(exercises, sectionId);
   }
 
   /** The three panels, in order, with the empty ones dropped. */
@@ -116,7 +126,8 @@
         content: describe(config, sectionId) },
       { id: 'examples', label: 'Examples', content: exemplify(config, sectionId, exercises) },
       { id: 'references', label: 'References',
-        content: host.SectionReference.markup(host.ReferenceRegistry.get(sectionId)) }
+        content: host.SectionReference.markup(host.ReferenceRegistry.get(sectionId),
+          { sectionId: sectionId }) }
     ].filter(function (tab) { return Boolean(tab.content); });
   }
 
@@ -178,12 +189,39 @@
     return true;
   }
 
+  /* A concept may carry its own diagram. Same contract as the section one: a
+     declared diagram with no host is a wiring mistake and says so, rather than
+     leaving an empty box nobody notices. */
+  function mountConceptDiagrams(sectionId, app) {
+    const concepts = host.ConceptRegistry.get(sectionId) || [];
+    let mounted = 0;
+
+    concepts.forEach(function (concept, index) {
+      if (!concept.diagram || !concept.diagram.definition) return;
+      const element = host.jQuery('#diagram-' + sectionId + '-c' + index)[0];
+      if (!element) {
+        throw new Error('concept ' + index + ' of ' + sectionId + ' declares a diagram but rendered no host');
+      }
+      app.mermaid.render(element, concept.diagram.definition);
+      mounted += 1;
+    });
+    return mounted;
+  }
+
   /* A chart drawn while its tab was hidden measured no width, so every chart
      that is now on screen is repainted when the learner switches tab. */
+  /* Switching tab repaints two things for the same reason. A chart drawn in a
+     hidden panel measured no width; a notation chip in a hidden panel measured
+     no position either, so `place` skipped it and its panel kept the default
+     left-hanging side even where there is no room for it. Chips only lived on
+     the Description tab - the one open at mount - until the Examples and
+     References blocks started decoding their own notation, at which point the
+     placement pass had to follow the learner. */
   function mountTabs(sectionId) {
     return host.TabController.init(Object.assign(tabOptions(sectionId, []), {
       onChange: function () {
         if (host.ChartBase) host.ChartBase.refreshVisible();
+        mountNotation(sectionId);
       }
     }));
   }
@@ -208,10 +246,12 @@
 
     mountLabs(sectionId, exercises, app);
     const drewDiagram = mountDiagram(sectionId, config, app);
+    const conceptDiagrams = mountConceptDiagrams(sectionId, app);
     const tabs = mountTabs(sectionId);
     const flipped = mountNotation(sectionId);
 
-    return { labs: exercises.length, diagram: drewDiagram, tabs: tabs, notation: flipped };
+    return { labs: exercises.length, diagram: drewDiagram, conceptDiagrams: conceptDiagrams,
+      tabs: tabs, notation: flipped };
   }
 
   return {

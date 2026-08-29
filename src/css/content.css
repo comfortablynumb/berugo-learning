@@ -23,15 +23,35 @@
   margin-bottom: 0.375rem;
 }
 
+/* The formal line and the reading under it are one block - the notation, and
+   the sentence that says it out loud - and they are set apart from the prose
+   around them on purpose. A reader skimming a concept needs to see at a glance
+   which part is symbols and which part is the translation, and the old inline
+   chip sat in the paragraph flow where it read as another sentence. */
 .concept .formal {
+  display: block;
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.7;
   background: var(--surface-sunken);
-  border-radius: 4px;
-  padding: 0.1875rem 0.375rem;
-  display: inline-block;
-  margin-bottom: 0.25rem;
+  border-left: 3px solid var(--accent);
+  border-radius: 4px 4px 0 0;
+  padding: 0.5rem 0.75rem;
+  margin: 1rem 0 0;
   color: var(--text-primary);
+}
+
+/* A formal line with no reading beneath it closes the block itself. */
+.concept .formal:not(:has(+ .reads-as)) {
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+/* Same join in the reference block, where the reading follows an equation. */
+.equation:has(+ .reads-as) {
+  border-left: 3px solid var(--accent);
+  border-radius: 4px 4px 0 0;
+  margin-bottom: 0;
 }
 
 .concept .example {
@@ -98,15 +118,20 @@
 .worked-example {
   border: 1px solid var(--border-color);
   border-radius: var(--radius);
-  overflow: hidden;
   margin-bottom: 0.875rem;
   background: var(--surface-card);
 }
 
+/* This card used to clip its overflow to keep the header and answer bands
+   inside the rounded corners. It cannot any more: a notation chip opens its
+   panel below itself, and `overflow: hidden` here swallowed every panel in the
+   Examples tab. The two bands round their own outer corners instead, which
+   costs nothing and lets the panels out. */
 .worked-example > header {
   padding: 0.5rem 0.75rem;
   background: var(--surface-sunken);
   border-bottom: 1px solid var(--border-color);
+  border-radius: var(--radius) var(--radius) 0 0;
 }
 
 .worked-example .we-title {
@@ -155,7 +180,7 @@
   border-radius: 4px;
   padding: 0.5rem 0.625rem;
   color: var(--text-primary);
-  overflow-x: auto;
+  overflow-wrap: anywhere;
 }
 
 .step .step-result {
@@ -169,6 +194,7 @@
   padding: 0.625rem 0.75rem;
   background: var(--hue-green-soft);
   border-top: 1px solid var(--border-color);
+  border-radius: 0 0 var(--radius) var(--radius);
   font-size: 0.8125rem;
 }
 
@@ -176,7 +202,6 @@
   border: 1px solid var(--border-color);
   border-radius: var(--radius);
   background: var(--surface-card);
-  overflow: hidden;
 }
 
 .reference-part {
@@ -202,7 +227,7 @@
   border-radius: 4px;
   padding: 0.375rem 0.5rem;
   margin-bottom: 0.375rem;
-  overflow-x: auto;
+  overflow-wrap: anywhere;
 }
 
 .equation .eq-label {
@@ -287,6 +312,12 @@ table.ref-table td.mono {
 }
 
 .source-list .where {
+  color: var(--text-muted);
+}
+
+/* What the source is good for. Muted, because the title is what the reader
+   scans for and this is what makes them stop on one. */
+.source-list .source-note {
   color: var(--text-muted);
 }
 

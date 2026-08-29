@@ -197,10 +197,12 @@ input[type="range"] {
   display: none;
 }
 
-/* Description is prose, so it gets a reading measure. Examples and References
-   keep the full width: charts, tables and code labs want it. */
+/* All three panels take the full width of the section body. Description used
+   to be capped at 68rem as a reading measure; the cap left most of a wide
+   screen empty next to a diagram or a concept list that had room to breathe,
+   so the width is the reader's to choose with their window. */
 .panel-prose {
-  max-width: 68rem;
+  max-width: none;
 }
 
 /* Section frame ------------------------------------------------------- */
@@ -246,12 +248,48 @@ input[type="range"] {
   background: var(--border-color);
 }
 
+/* The heading is already a flex row with a divider rule after it, so an icon
+   just becomes another item in it. Accent-coloured and never shrinking: it is
+   the landmark the eye finds when scrolling past a screen of prose. */
+.section-block > h3 .icon {
+  flex: none;
+  color: var(--accent);
+}
+
+/* A diagram belonging to one concept rather than to the section. It sits
+   between the formal line and the explanation, so it is inset and quiet -
+   the section diagram is the one that gets a card. */
+.concept-diagram {
+  margin: 0 0 1rem;
+  padding: 0.375rem 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  background: var(--surface-sunken);
+}
+
+.concept-diagram .mermaid-host {
+  padding: 0.25rem 0;
+}
+
+.concept-diagram .note {
+  margin-top: 0.25rem;
+}
+
 .insight {
+  display: flex;
+  gap: 0.625rem;
+  align-items: flex-start;
   border-left: 3px solid var(--hue-amber);
   background: var(--hue-amber-soft);
   padding: 0.625rem 0.875rem;
   border-radius: 0 var(--radius) var(--radius) 0;
   margin-top: 0.875rem;
+}
+
+.insight > .icon {
+  flex: none;
+  margin-top: 0.15rem;
+  color: var(--hue-amber);
 }
 
 .insight strong {
@@ -266,6 +304,19 @@ input[type="range"] {
 .mermaid-host {
   overflow-x: auto;
   padding: 0.5rem 0;
+}
+
+/* Centred, because mermaid caps the svg at its own natural width and a
+   top-down diagram is narrow - left-aligned in a full-width column it sat in
+   the corner with the rest of the row empty.
+
+   Deliberately NOT height-capped. Capping it at 26rem did make a tall diagram
+   fit one screen, and scaled its labels to about 40% along the way: an
+   illegible diagram simplifies nothing, which is the entire reason these are
+   here. A tall diagram is allowed to be tall. */
+.mermaid-host svg {
+  display: block;
+  margin: 0 auto;
 }
 
 .mermaid-host svg {

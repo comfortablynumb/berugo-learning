@@ -68,9 +68,15 @@
 }
 
 /* One multiplier scales every rem in the stylesheet, which is all of them.
-   core/text-scale.js sets it; charts stay in pixels and do not follow. */
+   core/text-scale.js sets it; charts stay in pixels and do not follow.
+
+   The base is 17px, a notch above the browser's own 16. It was 14px, which put
+   body prose at 0.875rem = 12.25px and the note under a metric tile at 10.5px -
+   too small to read a page of dense technical prose in, which is the only thing
+   this platform asks anyone to do. Everything is in rem, so this lifts the whole
+   interface proportionally rather than making one block an exception. */
 html {
-  font-size: calc(14px * var(--text-scale, 1));
+  font-size: calc(17px * var(--text-scale, 1));
 }
 
 body {

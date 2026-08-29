@@ -15,6 +15,15 @@
     'constants-and-cache': [
       {
         term: 'Crossover point',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    S["small n<br/>the simple algorithm wins"] --> X{"the crossover"}',
+            '    X --> B["large n<br/>the asymptotically better one wins"]',
+            '    X --> H["a hybrid switches here<br/>and beats both everywhere"]'
+          ].join('\n'),
+          caption: 'Below the crossover the asymptotically better algorithm is the slower one. That is not a rounding error — it is where the constants live.'
+        },
         plain: 'The input size where the asymptotically better algorithm actually becomes faster.',
         formal: 'smallest n with T_better(n) < T_worse(n)',
         readAs: 'The crossover is the first input size at which the algorithm with the better complexity ' +
@@ -88,6 +97,16 @@
       },
       {
         term: 'The line is the unit',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    B["your code asks for 4 bytes"] --> C["the machine fetches<br/>a whole cache line"]',
+            '    C --> S{"is the next access<br/>inside that same line?"}',
+            '    S -->|yes| F["free — it is already there"]',
+            '    S -->|no| A["another full line, from scratch"]'
+          ].join('\n'),
+          caption: 'Cost is lines touched, not bytes read. That single substitution explains why sequential access beats scattered access at an identical operation count.'
+        },
         plain: 'Memory moves in cache lines, not bytes. What a program costs is how many lines it touches, and how much of each it uses.',
         formal: '64-byte line = 16 int32 values',
         readAs: 'A cache line is 64 bytes and a 32-bit integer is 4 bytes, so one line carries sixteen of ' +
@@ -103,6 +122,18 @@
       },
       {
         term: 'Memory hierarchy',
+        diagram: {
+          definition: [
+            'flowchart TD',
+            '    R["registers"] --> L1["L1 cache"]',
+            '    L1 --> L2["L2 cache"]',
+            '    L2 --> L3["L3 cache"]',
+            '    L3 --> M["main memory"]',
+            '    M --> D["SSD"]',
+            '    D --> N["each step down is roughly<br/>ten times slower and<br/>ten times larger"]'
+          ].join('\n'),
+          caption: 'What a program costs is mostly which level it has to reach, and only secondarily how many operations it runs.'
+        },
         plain: 'Each level is roughly an order of magnitude slower and larger than the one above it.',
         formal: 'L1 ≈ 1 ns; L2 ≈ 4 ns; L3 ≈ 12 ns; DRAM ≈ 80 ns',
         readAs: 'Four levels of memory with their typical access times, fastest first — L1, L2 and L3 being ' +
@@ -164,6 +195,15 @@
       },
       {
         term: 'Streaming',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["materialise:<br/>read all n, hold all n, then process"] --> B["peak memory grows with n"]',
+            '    C["stream:<br/>read one, process it, drop it"] --> D["peak memory stays constant"]',
+            '    D --> E["the input may now be larger<br/>than the machine"]'
+          ].join('\n'),
+          caption: 'Streaming does not make the program faster. It makes the peak stop depending on the input size, which is a different and usually more valuable thing.'
+        },
         plain: 'Hold one item, not the collection. Peak memory stops depending on input size.',
         formal: 'O(1) peak, O(n) time',
         readAs: 'Peak memory stays at some fixed amount no matter how large the input is, while the time ' +
@@ -194,6 +234,16 @@
       },
       {
         term: 'Stack space',
+        diagram: {
+          definition: [
+            'flowchart TD',
+            '    A["recurse one level deeper"] --> B["one more frame on the stack"]',
+            '    B --> C{"is the depth still<br/>inside the stack limit?"}',
+            '    C -->|yes| A',
+            '    C -->|no| X["stack overflow —<br/>while the heap is still almost empty"]'
+          ].join('\n'),
+          caption: 'Recursion depth is memory, and it is charged to a separate, much smaller budget than the heap — which is why this fails on inputs the heap could hold easily.'
+        },
         plain: 'Recursion depth is memory. Deep recursion overflows even when the heap is empty.',
         formal: 'depth × frame size',
         detail: 'Each live call holds a frame — return address, saved registers, locals, alignment ' +
@@ -252,6 +302,17 @@
     'empirical-complexity': [
       {
         term: 'Doubling experiment',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["time it at n"] --> R["ratio = time at 2n ÷ time at n"]',
+            '    B["time it at 2n"] --> R',
+            '    R --> C["ratio near 2 → linear"]',
+            '    R --> D["ratio near 4 → quadratic"]',
+            '    R --> E["ratio near 8 → cubic"]'
+          ].join('\n'),
+          caption: 'You never have to read the code. Doubling the input and reading one ratio names the class, and it names it in the units the machine actually charges.'
+        },
         plain: 'Double the input and look at the cost ratio. The ratio names the exponent.',
         formal: 'T(2n)/T(n) → 2^k for Θ(n^k)',
         readAs: 'If cost grows like n to the power k, then doubling n multiplies the cost by 2 to the power ' +
@@ -268,6 +329,15 @@
       },
       {
         term: 'Log-log slope',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["cost is about c·n^k<br/>(a power law)"] --> B["take the log of both axes"]',
+            '    B --> C["the curve becomes a straight line"]',
+            '    C --> D["its slope is k —<br/>read the exponent off the chart"]'
+          ].join('\n'),
+          caption: 'A power law is a straight line on log-log axes, so the exponent you are trying to identify becomes something you can measure with a ruler.'
+        },
         plain: 'A power law is a straight line on log-log axes, and its slope is the exponent.',
         formal: 'log T = k·log n + log c',
         readAs: 'Take the logarithm of both sides of T = c·n^k and the power turns into a multiplication, ' +
@@ -378,6 +448,16 @@
     benchmarking: [
       {
         term: 'Warm-up',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["the first runs:<br/>interpreted, caches cold,<br/>nothing optimised yet"] --> D["discard them"]',
+            '    D --> B["the later runs:<br/>compiled, caches warm"]',
+            '    B --> M["measure only these"]',
+            '    M --> W["and report how many you discarded,<br/>or nobody can check the number"]'
+          ].join('\n'),
+          caption: 'Without a warm-up you measure the compiler starting up. With an unreported one you measure something nobody else can reproduce.'
+        },
         plain: 'Discarded runs that let the engine compile and the caches fill, so you measure steady state.',
         formal: 'discard the first k runs',
         detail: 'A JavaScript engine begins in an interpreter, gathers type feedback, then optimises ' +
@@ -433,6 +513,16 @@
       },
       {
         term: 'Coordinated omission',
+        diagram: {
+          definition: [
+            'flowchart LR',
+            '    A["closed loop:<br/>send, wait for the reply, send again"] --> S["the system stalls"]',
+            '    S --> B["so the generator stalls too,<br/>and sends nothing"]',
+            '    B --> C["the requests that would have been slow<br/>were never made at all"]',
+            '    C --> D["the recorded latency looks healthy"]'
+          ].join('\n'),
+          caption: 'The measurement is not noisy, it is systematically wrong: the loop stops sampling exactly when the answer would have been bad.'
+        },
         plain: 'A closed-loop generator stops sending while the system is slow, so it never measures the queue it caused.',
         formal: 'measure against intended send time',
         detail: 'A load generator that waits for each response before sending the next one stops ' +

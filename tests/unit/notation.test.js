@@ -176,9 +176,12 @@ test('notation: every mathematical character in the curriculum is in the glossar
    functions ln, lim and mod. A line whose notation is only an O(...) or a ≤
    inside an English sentence is already readable, and adding a reading there
    would be noise rather than help - so the floor is this set, not all of it. */
-const HARD = new RegExp(
-  '[∀∃⟺⟹⇒⇔⇏∈∉⊆⊇⊊∪∩∖∅⋃∧∨¬⊥ΣΠ⌈⌉⌊⌋‖√∝≡≪≫⊕αβγδεθλμσρτφχΦΔΩΘ₀₁₂₃₄₅ₙₘᵢⱼ]' +
-  '|argmin|argmax|\bE\[|\bmod\b|\bln\b|\blim\b|[0-9)][!](?![=])', 'u');
+/* Written as a regex literal, not a built string. As a string this pattern
+   spelled `\b` with a single backslash, which in a JavaScript string literal is
+   a *backspace character* rather than a word boundary - so the five named
+   cases below silently matched nothing for as long as they existed, and the
+   comment above described a check that was not running. */
+const HARD = /[∀∃⟺⟹⇒⇔⇏∈∉⊆⊇⊊∪∩∖∅⋃∧∨¬⊥ΣΠ⌈⌉⌊⌋‖√∝≡≪≫⊕αβγδεθλμσρτφχΦΔΩΘ₀₁₂₃₄₅ₙₘᵢⱼ]|argmin|argmax|\bE\s*\[|\bmod\b|\bln\b|\blim\b|[0-9A-Za-z)]!(?![=])/u;
 
 test('notation: a formal line a reader cannot say out loud carries its reading', function () {
   const missing = [];

@@ -42,7 +42,7 @@
         '    B -->|nonterminal| F["table[top][lookahead]"]',
         '    F -->|one production| G[pop, push the right-hand side reversed]',
         '    F -->|empty| E',
-        '    F -->|two productions| H[not LL(1): the loop cannot choose]',
+        '    F -->|two productions| H["not LL(1): the loop cannot choose"]',
         '    D --> A',
         '    G --> A'
       ].join('\n')

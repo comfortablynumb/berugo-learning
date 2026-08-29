@@ -3994,3 +3994,175 @@ down to 16.02 across a sixteenfold input.
   choosing a fixture where the expected answer appears.
 - **A subset stated per program is a result; a subset hidden is a lie.** The wasm section reports
   8 of 17 with nine reasons, and the nine reasons are more instructive than the eight agreements.
+
+## Readability pass — the decoder reached one tab of three (complete)
+
+Read the platform end to end as its stated audience: a senior engineer with no
+maths background. The teaching was sound; the plumbing that makes it readable
+was not, and six defects sat where no existing test looked.
+
+### What was wrong
+
+- **The notation decoder ran on the Description tab only.** `section-concepts`
+  and `section-shell` annotated their text; `section-examples`,
+  `section-reference` and the code lab's prompt piped everything through `esc`.
+  That is 1 198 section-symbol pairs in the worked examples, 2 117 in the
+  reference blocks and 287 in the lab prompts rendered with nothing to hover —
+  and the worked example's `work` field is the densest arithmetic on the
+  platform. The reader who most needed the decoder met it least.
+- **Four containers clipped the panel anyway.** `.worked-example` and
+  `.reference-block` set `overflow: hidden` for their rounded corners, and
+  `.step-work` and `.equation` set `overflow-x: auto`. Every one of those is a
+  clipping context, so a chip inside them opens a panel nobody can see. The
+  corners are now rounded on the two bands that have a background, and the two
+  monospace blocks wrap (`overflow-wrap: anywhere`) rather than scroll — they
+  were already `pre-wrap`, so the scroll only ever caught an unbreakable token.
+- **488 "In the wild" entries rendered as an empty bullet.** The field is
+  written in two shapes — `{ system, how }` in most sections and one sentence in
+  122 others — and the renderer read only the first, so 122 sections showed a
+  list of `<li><span class="sym"></span> — </li>`. `escapeHtml(undefined)`
+  returns `''`, which is why it failed silently instead of printing "undefined".
+- **623 source notes, 121 source authors and 46 equation readings were never
+  rendered at all.** The `readAs` on a reference equation is the plain-English
+  sentence for exactly this audience — "A machine is a finite set of states, an
+  alphabet, a transition function…" — written 46 times and shown zero.
+- **The `HARD` regex in `notation.test.js` was built from a string, so its `\b`
+  was a backspace character.** `E[…]`, `n!`, `mod`, `ln` and `lim` were named in
+  the comment and matched by nothing. It is a regex literal now, and it
+  immediately found two formal lines with no reading (`derandomisation`,
+  `using-solvers`).
+- **Three modules threw on every page load.** `model-check.js`, `verify-vc.js` and
+  `spec-dsl.js` read `Berugo.Sat`, `Berugo.SatCheck` and `Berugo.TheoryLinear` at load
+  time, and their script tags sat eight lines *above* the solver that defines them. The
+  `pick` fallback then reached for `require`, which does not exist in a browser, so all
+  three failed to register — silently, because a module that throws before
+  `root.X = api` is indistinguishable from one nobody has wired yet. They are the parked
+  M32 modules, so no section broke, but the console carried three exceptions on every
+  load and the next person to build M32 would have found `SpecDsl` undefined. The tags now
+  follow the solver.
+- **`iff`, `modulo`, `argmin` and `argmax` had no glossary entry.** `iff` is the
+  worst of them: 53 uses, and a reader who has not met it reads it as a typo for
+  `if` and takes away half the statement. `argmin`/`argmax` were named in the
+  readAs guard's own HARD set while being undecodable everywhere else.
+
+### Three things this pass adds to the shape and worth keeping
+
+- **A renderer that escapes is not a renderer that teaches.** Every guarantee
+  the content layer makes — the glossary, the readings, the coverage floors —
+  is worth exactly as much as the component that renders it. The audit that
+  found this was one line: count `abbr.notation` per tab.
+- **Content written and never rendered fails silently in both directions.** No
+  test read the content *through* the renderer, so a field the renderer did not
+  know about was indistinguishable from a field that did not exist.
+  `content-rendering.test.js` now takes the longest plain-prose run out of every
+  string in a reference and worked-example entry and requires it in the rendered
+  text. It found the authors and the equation readings on its first run.
+- **A guard built from a string literal is a guard you have not read.** The
+  `\b` bug survived because the comment above it described the intent
+  convincingly, and nobody ran the pattern against an example it claimed to
+  catch. `notation-rendering.test.js` asserts on rendered output for that
+  reason: it can only pass by actually rendering a chip.
+
+## Readability pass, second round — reading the site as its audience (complete)
+
+Driven by the reader's own report: the first teaching section was hard, the type
+was too small, and the content did not use the window. All three were true.
+
+### What was wrong
+
+- **The first teaching section was written in the platform's oldest style.**
+  `asymptotic-notation` opened with "O, Ω and Θ are sets of functions, and
+  membership is decided by a witness", which is the formal definition, a set-
+  theoretic framing and an undefined term of art, in that order, in sentence
+  one — and it is the first thing anybody reads. The measurement says the style
+  drifted the right way over time and this section was left behind: 155 of 305
+  orientations now open with a bolded plain-English claim, and only 11 open cold
+  with notation. Most of those 11 are fine hooks ("Insertion sort is Θ(n²) and
+  merge sort is Θ(n log n), and for small n insertion sort wins anyway"). Three
+  genuinely opened with a definition rather than a claim; all three now lead
+  with the claim.
+- **The root font was 14px.** That put body prose at 0.875rem = 12.25px and a
+  metric note at 10.5px. It is 17px now, which lifts everything in the
+  stylesheet proportionally because every size here is in rem.
+- **The Description tab was capped at 68rem and the section body at 1400px.**
+  Both caps are gone; all three panels take the width of the window.
+- **The formal line sat in the paragraph flow.** It was an `inline-block` chip
+  with 3px of padding, so a reader skimming a concept could not see where the
+  notation stopped and the prose resumed. The formal line and its reading are
+  now one block with an accent bar, set apart above and below, and "In words."
+  is set as a label rather than as the first two words of the sentence.
+- **Two of the 305 mermaid diagrams did not parse**, and rendered in the browser
+  as `<pre class="mermaid-error">`. `top-down-parsing-and-ll1` had a round
+  bracket inside an unquoted node label — `H[not LL(1): …]` ends the label at
+  the bracket — and `randomised-and-interactive-classes` had a semicolon in a
+  sequence-diagram note, which mermaid reads as the end of the statement.
+
+### Three things this round adds to the shape and worth keeping
+
+- **A guard tuned to a corpus is not a guard.** The first attempt at catching
+  broken diagrams was two hand-written rules about brackets and semicolons.
+  They fired on `Y1(("y"))` and `E_p[f(X)]`, which parse fine, because a regex
+  cannot tell a node definition from the same characters inside a label; and
+  they would have been "fixed" by whittling them down against the current
+  corpus until they went quiet. They were deleted. mermaid loads under jsdom in
+  about 200ms if it arrives through a script element rather than `eval`, so
+  `tests/unit/mermaid-syntax.test.js` runs the real parser over all 305
+  definitions and asserts it still rejects both shapes that shipped broken.
+- **Read the source the way the source is written.** The first extraction glued
+  every string literal in a `definition:` array together with a newline, which
+  invents a line break wherever one element is concatenated across two source
+  lines — and reported `pushdown-automata` as broken when it renders perfectly.
+  Evaluating the array literal is the accurate reading; scanning for quotes is
+  not.
+- **The audit that finds a style problem is a distribution, not an example.**
+  "The first section is hard to read" is an anecdote until you can say 155 of
+  305 open with a claim and 11 open with notation. The number is what said this
+  was three sections to fix rather than a curriculum to rewrite.
+
+## Readability pass, third round — pictures in the Description tab (complete)
+
+The Description tab was a wall: an orientation, then eight to thirteen concepts
+each carrying a 240-character explanation, and one diagram after all of them.
+
+### What changed for every section
+
+- **The section diagram moved above the concepts.** It used to sit after every
+  one of them, which is the one place a reader who is already lost will not
+  reach. Orientation, then the shape of the thing, then the concepts that fill
+  it in.
+- **Block headings carry an icon** (`src/js/utils/icons.js`): concepts, diagram,
+  demo, worked examples, code lab, reference, and the senior insight. Inline
+  SVG in `currentColor`, `aria-hidden` because the heading beside each one
+  already says the same thing in words. They are landmarks for the eye on a long
+  page, not information.
+- **A concept may now carry its own diagram.** `concept.diagram = { definition,
+  caption }` renders between the formal line and the explanation — the picture
+  arrives before the paragraph it summarises, not after. The host is mounted the
+  same way the section diagram is, and a declared diagram with no host throws
+  rather than leaving a silent empty box.
+
+### What was wrong
+
+- **Two of the 305 section diagrams did not parse.** Fixed in the previous round
+  and now guarded; the guard grew to cover concept diagrams too.
+
+### Coverage, stated honestly
+
+18 concept diagrams are authored, covering all nine sections of M01 — the
+milestone a learner opens first. The capability is section-wide and the guard
+parses every diagram in the repo with the real mermaid parser, so the remaining
+milestones are an authoring job rather than an engineering one. There are 2 461
+concepts; a diagram belongs on the ones where a picture replaces a paragraph,
+not on all of them, and choosing which is the work.
+
+### Two things this round adds to the shape and worth keeping
+
+- **A picture before the paragraph, or it is decoration.** The concept diagram
+  is placed between the formal line and the explanation on purpose. Placed after
+  the explanation it illustrates something the reader has already had to
+  construct in their head, which is the point at which it stops helping.
+- **Build the slot, then fill it honestly.** The alternative was to generate a
+  diagram for all 305 sections from the concept list — a chain of boxes labelled
+  with the terms. It would have looked like full coverage and taught nobody.
+  Eighteen diagrams that replace a paragraph each are worth more than 305 that
+  restate a heading.
