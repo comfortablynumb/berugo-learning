@@ -14,14 +14,14 @@ faithfully in a browser, the section models it, says so plainly, and states what
 
 ## Status
 
-**M00–M33 shipped (328 sections). Building the curriculum, milestone by milestone.**
+**M00–M34 shipped (338 sections). Building the curriculum, milestone by milestone.**
 
 - ✅ Curriculum designed: 65 milestones, 634 sections, 11 tracks — one file per milestone in
   [`doc/milestones/`](doc/milestones/)
 - ✅ Architecture and conventions fixed — [`doc/architecture.md`](doc/architecture.md)
 - ✅ Build order and dependency graph — [`doc/ROADMAP.md`](doc/ROADMAP.md)
 - ✅ Scope decisions recorded — [`doc/topic-suggestions.md`](doc/topic-suggestions.md)
-- ✅ **Notation decoder across all 328 sections, on all three tabs**: every mathematical symbol
+- ✅ **Notation decoder across all 338 sections, on all three tabs**: every mathematical symbol
   carries how to say it and what it does, revealed on hover, tap or keyboard focus — in the
   concepts and orientation, in the arithmetic of every worked example, in the cost table and
   equations of every reference block, and in the prompt of every graded exercise. Every formal
@@ -594,6 +594,27 @@ The render audit is not a substitute for opening the page, and M16's browser pas
   section injects one wrong gate: the design still elaborates, still simulates, and still passes a
   corner-case list at **80% toggle coverage** — only the exhaustive check against an independent
   model finds it, naming the vector.
+
+- ✅ **M34 — the instruction set, the datapath and the control unit**: a complete RV32I-compatible
+  processor, built from M33's gates and checked against a behavioural simulator instruction by
+  instruction. The datapath is **5 945 gates and 75 698 transistors** at a clock period of **178
+  gate delays**, and taking it apart by area and by delay gives two different answers: the register
+  file is **72% of the gates at depth 16** and the ALU is **15% at depth 148**, which is **85% of
+  the 175 delays the clock charges for**. Fourteen encodings are compared byte for byte against the
+  RISC-V specification — the only oracle in the milestone that did not come out of this repository
+  — and **14 of 14** agree, including a branch whose immediate is reassembled from four separate
+  bit ranges. The control unit is **103 gates at depth 24**, matches its table on all **42**
+  instructions, leaves every write signal low for all **118** undefined opcodes, and can have any
+  signal forced: `regWrite` low turns 55 into 0, `branch` low never terminates, `memWrite` high
+  faults after one instruction, and `aluSrc` high returns **59 049 235** — a plausible number
+  computed with a constant, which is what makes control bugs expensive. The textbook multi-cycle
+  design **loses by 3.1 to 3.4 times** on all five sample programs, because one stage holds 148 of
+  the 175 gate delays; the section reports the break-even stage period (**48**) rather than
+  stopping at the rejection. Every trap class is raised by a program that runs, and the same timer
+  interrupt through two handlers gives **1 trap and a correct answer** against **5 traps and a
+  register that never got its value** — with no error message from either. The linker refuses an
+  out-of-range branch with **"needs 5012"** rather than truncating it, and the veneer scenario
+  builds the two-hop fix and runs it. 10 sections live.
 
 - ✅ **M30 — code generation, bytecode VMs and JIT**: the back end of the same compiler, and five
   ways to run one program compared against the front end that produced it. Two code generators

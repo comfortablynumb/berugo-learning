@@ -3367,12 +3367,15 @@ written. `ChartBase` now accepts either, which removes the trap for every future
 
 ## Next
 
-**M33 is complete. M34 — the instruction set, the datapath and the control unit — is next, and
-nothing of it exists yet.** It consumes M33's blocks directly: the ALU of 33.5, the register file
-of 33.8 and the state machine of 33.7 are the three pieces a single-cycle datapath is made of, and
-`machines/logic-sim.js` is the simulator it runs on. The spec is
-`doc/milestones/M34-isa-and-datapath.md` and `doc/ROADMAP.md` gives the order after it. The tree is
-green: 328 built sections, 306 planned, 634 total.
+**M34 is complete. M35 — pipelining, hazards and branch prediction is next, and nothing of it
+exists yet.** It consumes M34 directly: the single-cycle datapath of 34.4, the control table of
+34.5 and the stage delays of 34.6 are what a pipeline is cut from, and the multi-cycle section
+already measures the three-term equation the whole milestone argues with — that datapath spends
+148 of its 175 gate delays in one stage, so the first thing M35 has to say is where it cuts.
+`machines/brv32/` carries the ISA, the assembler, the behavioural simulator, the gate-level CPU
+and the differential harness; `machines/brv32/multicycle.js` carries the stage builders. The spec
+is `doc/milestones/M35-pipelining.md` and `doc/ROADMAP.md` gives the order after it. The tree is
+green: 338 built sections, 296 planned, 634 total.
 
 The shape to copy, unchanged through M33:
 
@@ -4335,3 +4338,146 @@ names the vector: **a=1 b=0 cin=1**. The same typo propagates to the 4-bit adder
   so a Moore machine whose output is a wire off the state register reports a delay of 1 — true,
   and not the number the clock has to accommodate. The register-to-register class from
   `Timing.frequency` is the one that sets the period: 14 rather than 1.
+
+
+## M34 — the instruction set, the datapath and the control unit (complete)
+
+Ten sections and one processor. `machines/brv32/` is an RV32I-compatible machine described once as
+data and read by everything else: the assembler, the disassembler, the behavioural simulator, the
+gate-level datapath and the control decoder are all readers of one instruction table rather than
+five implementations that must be kept in agreement. Every figure below came out of
+`node tools/section-dump.js` or a figure test.
+
+### The oracles, and what each one caught
+
+- **A published specification.** Fourteen encodings taken from the RISC-V manual and from standard
+  assembler output, compared byte for byte: **14 of 14**. This is the only column in the milestone
+  whose right-hand side did not come out of this repository, and it is the only check that could
+  catch an assembler and a disassembler written from the same misunderstanding — round-tripping
+  proves self-consistency and nothing else.
+- **A behavioural machine beside the gate-level one.** One propagates values through 5 945 gates;
+  the other calls a JavaScript function per instruction. They share the instruction table and
+  nothing else. All 32 registers and the program counter are compared after *every* instruction,
+  so the first disagreement names the instruction rather than leaving a wrong final answer to
+  bisect: **16 of 16** and **11 of 11**.
+- **The control table against the gate decoder**, on all **42** instructions, plus all **118**
+  opcode values with no row — every one of which must leave both write signals low.
+- **Three real programs with known answers**, run with each control signal forced to a constant.
+  The correct answers are 55, 37 and 5; every other row is a control unit with one wire stuck.
+- **Every width against every alignment against every region**: 18 accesses through the real
+  address decoder, 8 of which fault in two distinct classes.
+
+### Ten measurements the milestone rests on
+
+- **The datapath**: 5 945 gates, 75 698 transistors, clock period **178 gate delays** (175 of
+  logic plus 3 of flip-flop overhead), register-to-register limited by the load path.
+- **Area and delay rank the blocks differently.** Register file **4 271 gates (72%) at depth 16**;
+  ALU **869 (15%) at depth 148** — which is **85% of the 175** the period charges for; PC adder
+  160 at 130; control decoder 103 at 24; ALU function decoder 48 at 13. The biggest block is the
+  second shallowest, so "make it smaller" and "make it faster" are different projects.
+- **Three machine models on one expression**, all producing 20: stack **7 instructions / 7 bytes**,
+  accumulator **4 / 8**, register **3 / 12**. Instruction count and code size move in opposite
+  directions, and neither column alone settles anything.
+- **The field-packing arithmetic.** At 16 bits: 8 registers and 2 operands leave **5** immediate
+  bits (−16 to 15); 32 registers and 3 operands leave **−4**, which means the instruction does not
+  fit at all rather than having no immediate.
+- **The control unit is 103 gates at depth 24**, which is 2% of the processor and off its critical
+  path. No signal is asserted by more than seven of the nine opcode rows and four are asserted by
+  exactly one, so every OR gate is tiny — which is why a wide machine can afford four decoders.
+- **One wire stuck, three programs, six different-looking failures.** `regWrite=0` gives 0, 0, 0;
+  `branch=0` never finishes anywhere; `memWrite=1` faults after 1 instruction everywhere;
+  `aluSrc=1` gives **0, 59 049 235, never finishes**; `writeBack=memory` gives **0, 1 303, never
+  finishes**. The last two are the instructive ones: the machine keeps running and returns a
+  plausible number.
+- **The multi-cycle machine loses, and by how much is arithmetic.** Stage delays 16 / 148 / 130, so
+  the period is 151 against 178 — a 15% saving — and CPI 3.70 on the sum program. **7 832 gate
+  delays against 24 613, a 3.1× loss**, and 3.1 to 3.4× across all five programs. The break-even
+  stage period is **48** (45 of logic), which is the number the section reports instead of stopping
+  at the rejection.
+- **The programs**: sum 44 instructions → 55; factorial 125 → 120 (five frames, 40 bytes deep);
+  arrayMax 43 → 37; strlen 32 → 5; console 47 → "hi there". **58 of the factorial's 125 — 46% —
+  are inside a software multiply**, because the base instruction set has no multiply instruction.
+- **Every trap class, from a program that runs**: ecall cause 11, illegal cause 2 with the offending
+  word in mtval, misaligned load cause 4 and store cause 6 with the offending address, unmapped
+  load cause 5. All five continue afterwards and finish normally, because a trap is a redirection.
+- **The linker refuses rather than truncating.** The same source links with the target 12 bytes away
+  and reports **"needs 5012"** with 5 000 bytes in between; the veneer scenario branches 12 bytes to
+  a stub that jumps 5 004, links to 5 032 bytes and runs.
+
+### The two demonstrations the milestone exists for
+
+**A control unit with one wire stuck produces symptoms that look like six unrelated bugs.** Forcing
+`regWrite` low makes every program return 0; forcing `branch` low makes every loop run forever;
+forcing `memWrite` high faults on the first instruction; forcing `aluSrc` high returns 59 049 235.
+None of them is recognisable as "the control unit is wrong" from the symptom, and the differential
+test against the behavioural machine catches all six on the instruction where they first diverge.
+
+**A trap handler that is correct for every exception is wrong for every interrupt, silently.** The
+same timer interrupt through two handlers: the cause-aware one takes **1 trap** and the program
+ends with a3 = 4; the one that always advances mepc by four takes **5 traps** and a3 is still 0,
+because the instruction it landed on never ran and the timer was never acknowledged. Neither run
+reports anything. One branch on the sign bit of mcause is the whole difference.
+
+### Six things this milestone adds to the shape and worth keeping
+
+- **A gate-level step costs about 220 ms**, so anything that walks the machine has to be bounded and
+  say so. `GateCpu.differential` defaults to 24 instructions; reading all 32 registers through the
+  read port would cost 32 settlings, so `registersOf` reads the flip-flops directly.
+- **The event-driven simulator's default horizon is 5 000 events and this datapath needs 5 277.** A
+  run that hits the horizon returns whatever it had reached, which looks exactly like a wrong
+  answer. `gate-cpu.js` raises it to 200 000 and counts unsettled runs.
+- **A flip-flop captures what was already at its data input.** The loaded word has to be settled
+  onto the write-back path *before* the clock rises; skipping that settling made every load write
+  zero while everything else worked.
+- **A region that is exactly the size of a field's reach makes two failures indistinguishable.** The
+  ROM was 4 096 bytes and a branch reaches 4 094, so "out of branch range" and "off the end of
+  memory" were the same event and the linker section could not demonstrate a veneer at all. It is
+  32 KiB now, and `brv32-modules.test.js` asserts the relationship rather than the number.
+- **A device that cannot be acknowledged re-interrupts forever.** `devices.js` had no way to clear
+  the timer's pending flag, so an interrupt handler was re-entered the instant it returned — a
+  livelock rather than a crash, with nothing reported. Writing either timer register now clears it,
+  which is what re-arming a comparator means on real hardware.
+- **A chart note is a claim and gets checked like one.** The control section said "nothing reaches
+  four" about its signal counts; `jalr` asserts four. The figure suite found it because the same
+  count is computed there — which is the argument for computing a prose figure in a test even when
+  it looks too simple to be wrong.
+
+### What is where
+
+| Path | State |
+|---|---|
+| `machines/brv32/isa.js` | 42 instructions as data, encode/decode, immediate field tables |
+| `machines/brv32/devices.js` | address map, RAM, console and timer, alignment and mapping faults |
+| `machines/brv32/traps.js` | CSRs, trap entry and exit, privilege, pending interrupts |
+| `machines/brv32/reference-sim.js` | the behavioural machine — the oracle for everything else |
+| `machines/brv32/assembler.js` | two passes, pseudo-instructions, directives, CSR operands, relocations |
+| `machines/brv32/disassembler.js` | words to text with the full field breakdown |
+| `machines/brv32/control.js` | control table, gate decoder (103 gates), ALU function decoder (48) |
+| `machines/brv32/datapath.js` | the single-cycle CPU as 5 945 gates, from M33 blocks |
+| `machines/brv32/gate-cpu.js` | the gate machine wired to memory, plus `differential` |
+| `machines/brv32/linker.js` | placement, symbols, relocation shapes and range checks |
+| `machines/brv32/models.js` | stack / accumulator / register machines and field packing |
+| `machines/brv32/multicycle.js` | stage delays, CPI, the performance equation |
+| `machines/brv32/programs.js` | the sample programs, the fault programs and two trap handlers |
+| `machines/brv32/signal-machine.js` | a CPU driven by the control vector, for forcing signals |
+| `machines/brv32/isa-compare.js` | one function in three real instruction sets, counted |
+| `viz/datapath-view.js`, `viz/register-view.js` | the live schematic and the register formatting |
+
+Sections: `instruction-set-design`, `brv32-instruction-set`, `assembly-programming`,
+`single-cycle-datapath`, `the-control-unit`, `multi-cycle-execution`, `memory-interface-and-io`,
+`exceptions-and-privilege`, `assembler-linker-and-loading`, `real-instruction-sets`.
+
+Tests: `brv32-modules.test.js` (27, including the gate-versus-behavioural differential, which takes
+about 7 seconds), `worked-examples-brv32.test.js`, `worked-examples-brv32-datapath.test.js`,
+`worked-examples-brv32-system.test.js`.
+
+### One thing the milestone could not do, and said so
+
+The 34.10 listings are reference assembly checked against the published encoding rules, not
+compiler output — there is no x86 assembler in this project. Every row carries its encoded length
+and every x86 row carries its bytes, so any single line can be checked against the manual, and the
+section says all of this in its first orientation bullet rather than implying a toolchain it does
+not have. The measurement that comes out of it is narrower and more defensible than the usual
+argument: **ten instructions and a four-instruction loop on all three machines**, with byte counts
+of 40, 40 and 23 — so the whole measurable advantage of the variable-width machine on this function
+is code size, at **1.74×**.

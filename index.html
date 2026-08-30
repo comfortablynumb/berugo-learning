@@ -391,6 +391,16 @@
       <section data-section="memory-arrays" hidden><div class="section-body"><div id="memory-arrays-content"></div></div></section>
       <section data-section="timing-clocking-and-power" hidden><div class="section-body"><div id="timing-clocking-and-power-content"></div></div></section>
       <section data-section="hardware-description-and-verification" hidden><div class="section-body"><div id="hardware-description-and-verification-content"></div></div></section>
+      <section data-section="instruction-set-design" hidden><div class="section-body"><div id="instruction-set-design-content"></div></div></section>
+      <section data-section="brv32-instruction-set" hidden><div class="section-body"><div id="brv32-instruction-set-content"></div></div></section>
+      <section data-section="assembly-programming" hidden><div class="section-body"><div id="assembly-programming-content"></div></div></section>
+      <section data-section="single-cycle-datapath" hidden><div class="section-body"><div id="single-cycle-datapath-content"></div></div></section>
+      <section data-section="the-control-unit" hidden><div class="section-body"><div id="the-control-unit-content"></div></div></section>
+      <section data-section="multi-cycle-execution" hidden><div class="section-body"><div id="multi-cycle-execution-content"></div></div></section>
+      <section data-section="memory-interface-and-io" hidden><div class="section-body"><div id="memory-interface-and-io-content"></div></div></section>
+      <section data-section="exceptions-and-privilege" hidden><div class="section-body"><div id="exceptions-and-privilege-content"></div></div></section>
+      <section data-section="assembler-linker-and-loading" hidden><div class="section-body"><div id="assembler-linker-and-loading-content"></div></div></section>
+      <section data-section="real-instruction-sets" hidden><div class="section-body"><div id="real-instruction-sets-content"></div></div></section>
     </main>
   </div>
 
@@ -835,11 +845,28 @@
   <script src="src/js/machines/fsm-synth.js"></script>
   <script src="src/js/machines/timing.js"></script>
   <script src="src/js/machines/hdl.js"></script>
+    <script src="src/js/machines/brv32/isa.js"></script>
+    <script src="src/js/machines/brv32/devices.js"></script>
+    <script src="src/js/machines/brv32/traps.js"></script>
+    <script src="src/js/machines/brv32/reference-sim.js"></script>
+    <script src="src/js/machines/brv32/assembler.js"></script>
+    <script src="src/js/machines/brv32/disassembler.js"></script>
+    <script src="src/js/machines/brv32/control.js"></script>
+    <script src="src/js/machines/brv32/datapath.js"></script>
+    <script src="src/js/machines/brv32/gate-cpu.js"></script>
+    <script src="src/js/machines/brv32/linker.js"></script>
+    <script src="src/js/machines/brv32/models.js"></script>
+    <script src="src/js/machines/brv32/multicycle.js"></script>
+    <script src="src/js/machines/brv32/programs.js"></script>
+    <script src="src/js/machines/brv32/signal-machine.js"></script>
+    <script src="src/js/machines/brv32/isa-compare.js"></script>
 
   <script src="src/js/viz/chart-base.js"></script>
   <script src="src/js/viz/implication-graph.js"></script>
   <script src="src/js/viz/circuit-graph.js"></script>
   <script src="src/js/viz/waveform-view.js"></script>
+    <script src="src/js/viz/datapath-view.js"></script>
+    <script src="src/js/viz/register-view.js"></script>
   <script src="src/js/viz/canvas.js"></script>
   <script src="src/js/viz/legend.js"></script>
   <script src="src/js/viz/tooltip.js"></script>
@@ -1233,6 +1260,26 @@
   <script src="src/js/content/exercises-logic-arithmetic.js"></script>
   <script src="src/js/content/exercises-logic-sequential.js"></script>
   <script src="src/js/content/exercises-logic-design.js"></script>
+  <script src="src/js/content/concepts-brv32.js"></script>
+  <script src="src/js/content/concepts-brv32-assembly.js"></script>
+  <script src="src/js/content/concepts-brv32-datapath.js"></script>
+  <script src="src/js/content/examples-brv32.js"></script>
+  <script src="src/js/content/examples-brv32-assembly.js"></script>
+  <script src="src/js/content/examples-brv32-datapath.js"></script>
+  <script src="src/js/content/reference-brv32.js"></script>
+  <script src="src/js/content/reference-brv32-assembly.js"></script>
+  <script src="src/js/content/reference-brv32-datapath.js"></script>
+  <script src="src/js/content/exercises-brv32.js"></script>
+  <script src="src/js/content/exercises-brv32-assembly.js"></script>
+  <script src="src/js/content/exercises-brv32-datapath.js"></script>
+  <script src="src/js/content/concepts-brv32-system.js"></script>
+  <script src="src/js/content/concepts-brv32-toolchain.js"></script>
+  <script src="src/js/content/examples-brv32-system.js"></script>
+  <script src="src/js/content/examples-brv32-toolchain.js"></script>
+  <script src="src/js/content/reference-brv32-system.js"></script>
+  <script src="src/js/content/reference-brv32-toolchain.js"></script>
+  <script src="src/js/content/exercises-brv32-system.js"></script>
+  <script src="src/js/content/exercises-brv32-toolchain.js"></script>
   <script src="src/js/content/exercises-variance.js"></script>
   <script src="src/js/content/exercises-semantics.js"></script>
   <script src="src/js/content/exercises-ownership.js"></script>
@@ -1984,6 +2031,26 @@
   <script src="src/js/sections/timing-clocking-and-power-section.js"></script>
   <script src="src/js/sections/hardware-description-and-verification-template.js"></script>
   <script src="src/js/sections/hardware-description-and-verification-section.js"></script>
+  <script src="src/js/sections/instruction-set-design-template.js"></script>
+  <script src="src/js/sections/instruction-set-design-section.js"></script>
+  <script src="src/js/sections/brv32-instruction-set-template.js"></script>
+  <script src="src/js/sections/brv32-instruction-set-section.js"></script>
+  <script src="src/js/sections/assembly-programming-template.js"></script>
+  <script src="src/js/sections/assembly-programming-section.js"></script>
+  <script src="src/js/sections/single-cycle-datapath-template.js"></script>
+  <script src="src/js/sections/single-cycle-datapath-section.js"></script>
+  <script src="src/js/sections/the-control-unit-template.js"></script>
+  <script src="src/js/sections/the-control-unit-section.js"></script>
+  <script src="src/js/sections/multi-cycle-execution-template.js"></script>
+  <script src="src/js/sections/multi-cycle-execution-section.js"></script>
+  <script src="src/js/sections/memory-interface-and-io-template.js"></script>
+  <script src="src/js/sections/memory-interface-and-io-section.js"></script>
+  <script src="src/js/sections/exceptions-and-privilege-template.js"></script>
+  <script src="src/js/sections/exceptions-and-privilege-section.js"></script>
+  <script src="src/js/sections/assembler-linker-and-loading-template.js"></script>
+  <script src="src/js/sections/assembler-linker-and-loading-section.js"></script>
+  <script src="src/js/sections/real-instruction-sets-template.js"></script>
+  <script src="src/js/sections/real-instruction-sets-section.js"></script>
   <script src="src/js/app.js"></script>
 </body>
 </html>

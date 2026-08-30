@@ -125,10 +125,75 @@
               summary: 'Modules, elaboration, exhaustive equivalence checking, and what coverage does not tell you',
               tags: ['hdl', 'elaboration', 'equivalence checking', 'coverage']
             }]
+        },
+        {
+          id: 'M34',
+          title: 'ISA, assembly, datapath and control',
+          summary: 'A complete RV32I-compatible processor: the instruction set as data, an assembler and linker, and a single-cycle datapath built from M33 gates and checked against a behavioural simulator instruction by instruction.',
+          sections: [
+            {
+              id: 'instruction-set-design',
+              title: 'Instruction set design',
+              summary: 'Three machine models computing the same expression, and the arithmetic of what fits in an instruction',
+              tags: ['isa', 'encoding', 'risc and cisc', 'code density']
+            },
+            {
+              id: 'brv32-instruction-set',
+              title: 'The BRV32 instruction set',
+              summary: 'Six formats, the scrambled immediates and the hardware reason for them, checked against published encodings',
+              tags: ['riscv', 'encoding', 'instruction format', 'immediate']
+            },
+            {
+              id: 'assembly-programming',
+              title: 'Assembly programming',
+              summary: 'Four real programs, single-stepped, with the stack frames of a recursion visible as they stack up',
+              tags: ['assembly', 'calling convention', 'stack frame', 'recursion']
+            },
+            {
+              id: 'single-cycle-datapath',
+              title: 'The single-cycle datapath',
+              summary: 'A processor of 5945 gates built from M33 blocks, stepped instruction by instruction against a behavioural reference',
+              tags: ['datapath', 'single cycle', 'gate level', 'differential testing']
+            },
+            {
+              id: 'the-control-unit',
+              title: 'The control unit',
+              summary: 'Opcode to control vector, as a table and as 103 gates, with each signal forced in turn to see what breaks',
+              tags: ['control signals', 'hardwired control', 'microcode', 'decoder']
+            },
+            {
+              id: 'multi-cycle-execution',
+              title: 'Multi-cycle execution',
+              summary: 'The performance equation applied to two real machines, where the shorter clock loses and the break-even is named',
+              tags: ['cpi', 'performance equation', 'control fsm', 'clock period']
+            },
+            {
+              id: 'memory-interface-and-io',
+              title: 'Memory interface and I/O',
+              summary: 'Widths, alignment, sign extension and memory-mapped devices, with every combination driven and the faults asserted',
+              tags: ['alignment', 'endianness', 'memory-mapped io', 'sign extension']
+            },
+            {
+              id: 'exceptions-and-privilege',
+              title: 'Exceptions, interrupts and privilege',
+              summary: 'Every trap class raised by a real program, with the CSRs, the handler and the return visible at each step',
+              tags: ['traps', 'interrupts', 'csr', 'privilege']
+            },
+            {
+              id: 'assembler-linker-and-loading',
+              title: 'Assembler, linker and loading',
+              summary: 'Source to object to linked image to running machine, with an out-of-range relocation reported rather than truncated',
+              tags: ['two-pass assembly', 'relocation', 'symbol table', 'loader']
+            },
+            {
+              id: 'real-instruction-sets',
+              title: 'Real instruction sets compared',
+              summary: 'One function in RISC-V, ARM64 and x86-64, counted and explained decision by decision',
+              tags: ['risc-v', 'arm64', 'x86-64', 'code density']
+            }]
         }
       ],
       planned: [
-        { id: 'M34', title: 'ISA, assembly, datapath and control', sections: 10 },
         { id: 'M35', title: 'Pipelining, hazards and branch prediction', sections: 9 },
         { id: 'M36', title: 'Superscalar, out-of-order execution and speculation', sections: 9 },
         { id: 'M37', title: 'Caches and the memory hierarchy', sections: 10 },
