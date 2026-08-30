@@ -953,6 +953,21 @@ canvas.viz-canvas {
 .pipe-stall { outline: 2px solid var(--hue-orange); outline-offset: -2px; }
 .pipe-flush { outline: 2px solid var(--hue-red); outline-offset: -2px; }
 
+/* The out-of-order window reuses the pipeline table's layout, because it is
+   the same grid read the same way - instructions down, cycles across. Only the
+   cell states differ, and they are ordered so that the eye can follow one
+   instruction from waiting through executing to committed without reading the
+   letters: cool while it waits, warm while it works, green once it is real. */
+.ooo-fetch  { background: color-mix(in srgb, var(--hue-gray) 16%, transparent); }
+.ooo-wait   { background: color-mix(in srgb, var(--hue-blue) 18%, transparent); }
+.ooo-exec   { background: color-mix(in srgb, var(--hue-amber) 26%, transparent); }
+.ooo-done   { background: color-mix(in srgb, var(--hue-teal) 20%, transparent); }
+.ooo-commit { background: color-mix(in srgb, var(--hue-green) 26%, transparent); }
+.ooo-squash {
+  background: color-mix(in srgb, var(--hue-red) 20%, transparent);
+  text-decoration: line-through;
+}
+
 .pipe-legend {
   display: flex;
   flex-wrap: wrap;

@@ -26,7 +26,8 @@
    * search index and prev/next never see them.
    *
    * The track *data* lives in `curriculum-algorithms.js`,
-   * `curriculum-data-structures.js` and `curriculum-other-tracks.js`, because
+   * `curriculum-data-structures.js`, `curriculum-architecture.js` and
+   * `curriculum-other-tracks.js`, because
    * the syllabus passed a thousand lines at M12 and will keep growing. This
    * file is still the single source of truth - it is the only place the tracks
    * are ordered, and everything else reads the syllabus through the API below.
@@ -43,10 +44,11 @@
   function loadTracks() {
     if (typeof module !== 'undefined' && module.exports) {
       return [].concat(require('./curriculum-other-tracks.js'),
-        require('./curriculum-algorithms.js'), require('./curriculum-data-structures.js'));
+        require('./curriculum-algorithms.js'), require('./curriculum-data-structures.js'),
+        require('./curriculum-architecture.js'));
     }
     return [].concat(scope.CurriculumOtherTracks, scope.CurriculumAlgorithms,
-      scope.CurriculumDataStructures);
+      scope.CurriculumDataStructures, scope.CurriculumArchitecture);
   }
 
   /** Assembled in `TRACK_ORDER`; a track present in the data but missing from

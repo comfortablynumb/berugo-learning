@@ -14,14 +14,14 @@ faithfully in a browser, the section models it, says so plainly, and states what
 
 ## Status
 
-**M00–M35 shipped (347 sections). Building the curriculum, milestone by milestone.**
+**M00–M36 shipped (356 sections). Building the curriculum, milestone by milestone.**
 
 - ✅ Curriculum designed: 65 milestones, 634 sections, 11 tracks — one file per milestone in
   [`doc/milestones/`](doc/milestones/)
 - ✅ Architecture and conventions fixed — [`doc/architecture.md`](doc/architecture.md)
 - ✅ Build order and dependency graph — [`doc/ROADMAP.md`](doc/ROADMAP.md)
 - ✅ Scope decisions recorded — [`doc/topic-suggestions.md`](doc/topic-suggestions.md)
-- ✅ **Notation decoder across all 347 sections, on all three tabs**: every mathematical symbol
+- ✅ **Notation decoder across all 356 sections, on all three tabs**: every mathematical symbol
   carries how to say it and what it does, revealed on hover, tap or keyboard focus — in the
   concepts and orientation, in the arithmetic of every worked example, in the cost table and
   equations of every reference block, and in the prompt of every graded exercise. Every formal
@@ -638,6 +638,32 @@ The render audit is not a substitute for opening the page, and M16's browser pas
   the same 64 values give **503 cycles and 4 mispredicts** sorted and **563 and 34** shuffled, and
   a branchless rewrite is **654 either way** — losing here, and winning above a measured
   **4.8-cycle** break-even penalty. 9 sections live.
+
+- ✅ **M36 — superscalar, out-of-order execution and speculation**: the M35 pipeline with its
+  ordering broken and rebuilt out of renaming, a reorder buffer and a load/store queue, agreeing
+  with the behavioural machine on **twelve programs under ten configurations**. The milestone
+  supplies its own oracle: a dependence-graph bound computed from the trace, which the measured
+  IPC is asserted never to exceed at any width — a check the differential cannot make, because a
+  timing bug leaves every architectural value correct. The matched fixtures are the argument.
+  `chain` and `independent` are the same 32 additions and their ceilings are **1.00 and 32.00**;
+  written over four register names the second falls to **4.00** without renaming, so renaming is
+  worth **8.0×** on code a reader would call obviously parallel. Shrinking the physical file to
+  two spare registers costs `stride` **4.21×**. `stride` and `chase` touch the same cache lines
+  and miss **32 times each**, and differ by **3.90×** — the array overlaps **3.86** misses and
+  the chase exactly **1.00**, so miss registers are worth **5.06×** on one and **nothing** on the
+  other. Memory dependence speculation is worth **1.37×**, and the obvious fixture for it
+  measures **zero**, which is left in the demo on purpose. Five fault classes are proved precise
+  with all **32 buffer entries** occupied and **39 instructions** discarded. Two threads on one
+  core are worth **3.52×** on a pair that shares its data and **1.00×** on a pair that already
+  saturated the ports — the second thread paying **2.00×** for it — and strict priority leaves a
+  thread at **0 retired instructions** until a one-counter guard fixes it. A Flush+Reload
+  receiver recovers the secret at **100%** through 30% noise given enough rounds and drops to
+  **chance** the moment the speculative access is prevented, while index masking leaves the
+  channel working and puts public data through it. Top-down analysis charges every issue slot
+  and the four categories sum to **100.0%** on every program. Four real defects were found by
+  these measurements and are documented where they were fixed: a port model that halved every
+  unit, two physical-register leaks, and a store whose legality was checked by attempting the
+  write. 9 sections live.
 
 - ✅ **M30 — code generation, bytecode VMs and JIT**: the back end of the same compiler, and five
   ways to run one program compared against the front end that produced it. Two code generators

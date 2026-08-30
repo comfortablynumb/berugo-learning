@@ -4602,3 +4602,93 @@ reconciliation over every program), `worked-examples-pipeline.test.js` (14).
 Interrupts are out of scope in the pipelined machine. A pipelined processor takes an asynchronous
 interrupt at an instruction boundary, and this model does not implement that — the timer interrupt
 stays a M34 topic, and `pipeline.js` says so in its header rather than implementing half of it.
+
+---
+
+## M36 — superscalar, out-of-order execution and speculation
+
+**Done and green.** Nine sections, 356 in the tree, `npm test` and `npm run lint:size` clean, and
+every section opened in Chrome in both themes.
+
+### What is here
+
+| Path | What it is |
+|---|---|
+| `machines/ooo/cache.js` | set-associative, LRU, `probe` (non-disturbing) vs `access`, `flush` |
+| `machines/ooo/rename.js` | alias table, physical file, free list, checkpoints, **`unwind`** |
+| `machines/ooo/rob.js` | in-order commit, `squashAfter`, **`squashInclusive`**, window |
+| `machines/ooo/scheduler.js` | wakeup/select, four ports with an **initiation interval** |
+| `machines/ooo/lsq.js` | forwarding, store-set speculation, MSHRs |
+| `machines/ooo/workloads.js` | eight kernels in four matched pairs |
+| `machines/ooo/trace.js` | the dynamic trace: one row per retired instruction, with addresses |
+| `machines/ooo/smt.js` | two cores sharing ports, cache, window and issue queue |
+| `machines/ooo-core.js` | the core, with the full per-cycle event log |
+| `algorithms/ilp-analysis.js` | dependence graph, critical path, the bound |
+| `algorithms/topdown.js` | four categories that sum to 100% of the slot budget |
+| `machines/side-channel-lab.js` | Flush+Reload and Prime+Probe against `ooo/cache.js` |
+| `viz/ooo-view.js` | the in-flight window, plus occupancy, port use and MLP series |
+| `sections/ooo-lab.js` | the memoised measurement layer all nine sections share |
+| `components/data-table.js` | the one table helper; new sections use it |
+
+### The four real defects these measurements found
+
+Each one is documented at the code that fixes it, because all four are the kind that come back.
+
+1. **The port model conflated latency with occupancy.** `busyUntil = cycle + latency` blocked a
+   port for its full result latency, so every unit delivered half its throughput and the machine
+   saturated near IPC 1.0 *whatever the width*. The tell was that the saturation point did not
+   depend on the program. A pipelined unit takes one operation per cycle however long the result
+   takes; latency and initiation interval are separate numbers. `factorial` went 138 → 107 cycles.
+2. **`Rename.release` refused to recycle registers 1–31.** They hold the initial architectural
+   mapping, and the guard `old < ARCH` burned all thirty-one permanently. Invisible on a large
+   file; a machine with 34 physical registers renamed exactly twice and then **hung** with an
+   *empty* pipeline. Only physical register 0 stays reserved, because it is what x0 means.
+3. **A misaligned or unmapped store never faulted.** Legality was checked by attempting the write,
+   which is what precise exceptions forbid — so the store silently succeeded while the in-order
+   reference trapped. `Devices.checkAccess` reports without performing, and the core calls it when
+   the address is computed. Note why the differential missed it: the machine that skips a trap
+   retires *more* instructions, and both still hold the right values.
+4. **Memory-misspeculation recovery squashed the wrong range and leaked registers.** It used
+   `offenders[0].id - 1`, which finds nothing once that entry has committed, and nothing unwound
+   the renames because a load has no checkpoint. `hiddenAlias` hung. Now `squashIncluding` removes
+   the load itself, and `Rename.unwind` walks the squashed entries youngest-first.
+
+### Fixtures that measure nothing, and why they are kept
+
+Two of these are left visible in the demos on purpose, because a control with no effect looks
+exactly like a control with no importance.
+
+- **`alias` / `disjoint` cannot measure memory dependence speculation.** Both addresses are in
+  registers, so the store resolves before the load is even selected and the switch changes the
+  cycle count by zero. `hiddenAlias` / `hiddenDisjoint` load the *store's* address from memory, and
+  the control is then worth 1.37x.
+- **Forty independent additions then a fault does not fill the window.** They retire as fast as
+  they arrive, so the buffer has drained to three entries by the time the fault reaches the head.
+  Making the faulting *address* depend on a chain fills all 32 entries and squashes 39.
+- **Partitioning the window looked inert** until the issue queue was shared the same way. It only
+  bites under a policy that is already unfair — with `priority`, guard 8, thread 1 retires 20
+  shared and 33 partitioned.
+
+### Numbers the content quotes, all re-derived by `worked-examples-ooo.test.js`
+
+`chain` bound 1.00 against a measured 0.868; `independent` 32.00 against 1.524, and 4.00 unrenamed
+— renaming is worth 8.0x. `stride` at 34 physical registers is 530 cycles and 126 at 64. `stride`
+and `chase` miss 32 times each on a 256 B cache and take 174 and 678 cycles, at a measured
+memory-level parallelism of 3.86 and 1.00; the MSHR sweep is worth 5.06x on one and 1.00x on the
+other. Five faults are precise with 32 entries occupied. `chain+chain` gains 1.58x on SMT;
+`independent+independent` gains 1.00x while each thread pays up to 2.00x; `chase+chase` gains
+3.52x because they share a cache. Flush+Reload reaches 100% at 127 rounds through 30% noise and
+7.8% with a fence, against a chance rate of 6.25%.
+
+### Things deliberately not built, and said rather than half-built
+
+- **Value prediction.** Listed in the guesses table as not implemented, with the reason.
+- **A scoreboard mode.** The core has no unrenamed mode; what renaming is worth is measured through
+  the physical-file sweep and through the ILP bound under the `unrenamed` model.
+- **A memory hierarchy.** One small level, because M37 is where it gets a milestone.
+- **Asynchronous interrupts.** Out of scope in M35 and still out of scope here.
+
+### Then
+
+M37 — caches and the memory hierarchy — is next, and it inherits `machines/ooo/cache.js` and the
+`stride`/`chase` pair. M38–M64 follow in `doc/ROADMAP.md` order, using the nine-step shape above.

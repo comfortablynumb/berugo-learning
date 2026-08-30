@@ -410,6 +410,15 @@
       <section data-section="precise-exceptions-pipelined" hidden><div class="section-body"><div id="precise-exceptions-pipelined-content"></div></div></section>
       <section data-section="pipeline-depth-limits" hidden><div class="section-body"><div id="pipeline-depth-limits-content"></div></div></section>
       <section data-section="pipeline-friendly-code" hidden><div class="section-body"><div id="pipeline-friendly-code-content"></div></div></section>
+      <section data-section="instruction-level-parallelism" hidden><div class="section-body"><div id="instruction-level-parallelism-content"></div></div></section>
+      <section data-section="dynamic-scheduling" hidden><div class="section-body"><div id="dynamic-scheduling-content"></div></div></section>
+      <section data-section="reorder-buffer-and-precise-state" hidden><div class="section-body"><div id="reorder-buffer-and-precise-state-content"></div></div></section>
+      <section data-section="superscalar-issue" hidden><div class="section-body"><div id="superscalar-issue-content"></div></div></section>
+      <section data-section="speculation-and-recovery" hidden><div class="section-body"><div id="speculation-and-recovery-content"></div></div></section>
+      <section data-section="memory-level-parallelism" hidden><div class="section-body"><div id="memory-level-parallelism-content"></div></div></section>
+      <section data-section="simultaneous-multithreading" hidden><div class="section-body"><div id="simultaneous-multithreading-content"></div></div></section>
+      <section data-section="microarchitectural-side-channels" hidden><div class="section-body"><div id="microarchitectural-side-channels-content"></div></div></section>
+      <section data-section="anatomy-of-a-modern-core" hidden><div class="section-body"><div id="anatomy-of-a-modern-core-content"></div></div></section>
     </main>
   </div>
 
@@ -430,6 +439,7 @@
 
   <!-- Core -->
   <script src="src/js/core/curriculum-other-tracks.js"></script>
+  <script src="src/js/core/curriculum-architecture.js"></script>
   <script src="src/js/core/curriculum-algorithms-later.js"></script>
   <script src="src/js/core/curriculum-algorithms.js"></script>
   <script src="src/js/core/curriculum-data-structures.js"></script>
@@ -845,6 +855,10 @@
   <script src="src/js/machines/spec-dsl.js"></script>
   <script src="src/js/machines/logic-sim.js"></script>
   <script src="src/js/algorithms/boolean-min.js"></script>
+
+  <!-- M36: the dependence bound and the top-down classifier, both pure -->
+  <script src="src/js/algorithms/ilp-analysis.js"></script>
+  <script src="src/js/algorithms/topdown.js"></script>
   <script src="src/js/machines/blocks/select.js"></script>
   <script src="src/js/machines/blocks/adder.js"></script>
   <script src="src/js/machines/blocks/alu.js"></script>
@@ -873,6 +887,16 @@
     <script src="src/js/machines/brv32/predictors.js"></script>
     <script src="src/js/machines/brv32/pipeline.js"></script>
     <script src="src/js/machines/brv32/branch-traces.js"></script>
+    <script src="src/js/machines/ooo/cache.js"></script>
+    <script src="src/js/machines/ooo/rename.js"></script>
+    <script src="src/js/machines/ooo/rob.js"></script>
+    <script src="src/js/machines/ooo/scheduler.js"></script>
+    <script src="src/js/machines/ooo/lsq.js"></script>
+    <script src="src/js/machines/ooo/workloads.js"></script>
+    <script src="src/js/machines/ooo-core.js"></script>
+    <script src="src/js/machines/ooo/trace.js"></script>
+    <script src="src/js/machines/ooo/smt.js"></script>
+    <script src="src/js/machines/side-channel-lab.js"></script>
     <script src="src/js/machines/pipeline-model.js"></script>
 
   <script src="src/js/viz/chart-base.js"></script>
@@ -882,6 +906,7 @@
     <script src="src/js/viz/datapath-view.js"></script>
     <script src="src/js/viz/register-view.js"></script>
   <script src="src/js/viz/pipeline-view.js"></script>
+  <script src="src/js/viz/ooo-view.js"></script>
   <script src="src/js/viz/predictor-view.js"></script>
   <script src="src/js/viz/canvas.js"></script>
   <script src="src/js/viz/legend.js"></script>
@@ -922,6 +947,7 @@
   <script src="src/js/components/tab-controller.js"></script>
   <script src="src/js/components/control-panel.js"></script>
   <script src="src/js/components/metric-grid.js"></script>
+  <script src="src/js/components/data-table.js"></script>
   <script src="src/js/components/code-lab.js"></script>
   <script src="src/js/components/notation-panel.js"></script>
   <script src="src/js/components/section-concepts.js"></script>
@@ -1299,6 +1325,9 @@
   <script src="src/js/content/concepts-pipeline.js"></script>
   <script src="src/js/content/concepts-pipeline-control.js"></script>
   <script src="src/js/content/concepts-pipeline-limits.js"></script>
+  <script src="src/js/content/concepts-ooo.js"></script>
+  <script src="src/js/content/concepts-ooo-speculation.js"></script>
+  <script src="src/js/content/concepts-ooo-modern.js"></script>
   <script src="src/js/content/examples-pipeline.js"></script>
   <script src="src/js/content/examples-pipeline-control.js"></script>
   <script src="src/js/content/examples-pipeline-limits.js"></script>
@@ -1308,6 +1337,15 @@
   <script src="src/js/content/exercises-pipeline.js"></script>
   <script src="src/js/content/exercises-pipeline-control.js"></script>
   <script src="src/js/content/exercises-pipeline-limits.js"></script>
+  <script src="src/js/content/examples-ooo.js"></script>
+  <script src="src/js/content/examples-ooo-speculation.js"></script>
+  <script src="src/js/content/examples-ooo-modern.js"></script>
+  <script src="src/js/content/reference-ooo.js"></script>
+  <script src="src/js/content/reference-ooo-speculation.js"></script>
+  <script src="src/js/content/reference-ooo-modern.js"></script>
+  <script src="src/js/content/exercises-ooo.js"></script>
+  <script src="src/js/content/exercises-ooo-speculation.js"></script>
+  <script src="src/js/content/exercises-ooo-modern.js"></script>
   <script src="src/js/content/exercises-variance.js"></script>
   <script src="src/js/content/exercises-semantics.js"></script>
   <script src="src/js/content/exercises-ownership.js"></script>
@@ -2097,6 +2135,27 @@
   <script src="src/js/sections/pipeline-depth-limits-section.js"></script>
   <script src="src/js/sections/pipeline-friendly-code-template.js"></script>
   <script src="src/js/sections/pipeline-friendly-code-section.js"></script>
+
+  <!-- M36: superscalar, out-of-order execution and speculation -->
+  <script src="src/js/sections/ooo-lab.js"></script>
+  <script src="src/js/sections/instruction-level-parallelism-template.js"></script>
+  <script src="src/js/sections/instruction-level-parallelism-section.js"></script>
+  <script src="src/js/sections/dynamic-scheduling-template.js"></script>
+  <script src="src/js/sections/dynamic-scheduling-section.js"></script>
+  <script src="src/js/sections/reorder-buffer-and-precise-state-template.js"></script>
+  <script src="src/js/sections/reorder-buffer-and-precise-state-section.js"></script>
+  <script src="src/js/sections/superscalar-issue-template.js"></script>
+  <script src="src/js/sections/superscalar-issue-section.js"></script>
+  <script src="src/js/sections/speculation-and-recovery-template.js"></script>
+  <script src="src/js/sections/speculation-and-recovery-section.js"></script>
+  <script src="src/js/sections/memory-level-parallelism-template.js"></script>
+  <script src="src/js/sections/memory-level-parallelism-section.js"></script>
+  <script src="src/js/sections/simultaneous-multithreading-template.js"></script>
+  <script src="src/js/sections/simultaneous-multithreading-section.js"></script>
+  <script src="src/js/sections/microarchitectural-side-channels-template.js"></script>
+  <script src="src/js/sections/microarchitectural-side-channels-section.js"></script>
+  <script src="src/js/sections/anatomy-of-a-modern-core-template.js"></script>
+  <script src="src/js/sections/anatomy-of-a-modern-core-section.js"></script>
   <script src="src/js/app.js"></script>
 </body>
 </html>

@@ -137,17 +137,41 @@
   /** Both `read` and `write` return a fault rather than throwing, because a
    *  fault is architectural state — the trap handler is going to read the
    *  cause and the address, and an exception object would lose both. */
-  function read(state, address, width, signed) {
+  /**
+   * Whether an access is legal, WITHOUT performing it.
+   *
+   * An in-order machine never needs this: it can attempt the access and use
+   * the fault the attempt returns. An out-of-order machine does, because a
+   * store must know whether it will fault long before it is allowed to write
+   * anything - the fault has to travel with the instruction to commit, and the
+   * write must not happen until it gets there. Attempting the store to find
+   * out would be the one thing precise exceptions forbid.
+   *
+   * The two faults are the same two in both directions and differ only in the
+   * cause number, which is why this is one function rather than two that drift.
+   */
+  function checkAccess(state, address, width, store) {
     const target = address >>> 0;
 
     if (misaligned(target, width)) {
-      return { fault: { cause: CAUSE.misalignedLoad, value: target, name: 'misaligned load' } };
+      return { fault: { cause: store ? CAUSE.misalignedStore : CAUSE.misalignedLoad,
+        value: target, name: store ? 'misaligned store' : 'misaligned load' } };
     }
     const region = regionOf(target);
 
     if (!region) {
-      return { fault: { cause: CAUSE.faultLoad, value: target, name: 'load from unmapped memory' } };
+      return { fault: { cause: store ? CAUSE.faultStore : CAUSE.faultLoad, value: target,
+        name: store ? 'store to unmapped memory' : 'load from unmapped memory' } };
     }
+    return { region: region };
+  }
+
+  function read(state, address, width, signed) {
+    const target = address >>> 0;
+    const checked = checkAccess(state, target, width, false);
+
+    if (checked.fault) return checked;
+    const region = checked.region;
     const value = region.kind === 'device'
       ? deviceRead(state, region, target, width)
       : readWord(state, target, width);
@@ -157,19 +181,12 @@
 
   function write(state, address, value, width) {
     const target = address >>> 0;
+    const checked = checkAccess(state, target, width, true);
 
-    if (misaligned(target, width)) {
-      return { fault: { cause: CAUSE.misalignedStore, value: target, name: 'misaligned store' } };
-    }
-    const region = regionOf(target);
-
-    if (!region) {
-      return { fault: { cause: CAUSE.faultStore, value: target,
-        name: 'store to unmapped memory' } };
-    }
-    if (region.kind === 'device') deviceWrite(state, region, target, value);
+    if (checked.fault) return checked;
+    if (checked.region.kind === 'device') deviceWrite(state, checked.region, target, value);
     else writeWord(state, target, value, width);
-    return { region: region.name };
+    return { region: checked.region.name };
   }
 
   /** One tick of the timer, which is where an asynchronous interrupt comes
@@ -183,6 +200,6 @@
   }
 
   return { MAP: MAP, CAUSE: CAUSE, create: create, regionOf: regionOf, loadImage: loadImage,
-    read: read, write: write, tick: tick, readWord: readWord, writeWord: writeWord,
-    extend: extend, misaligned: misaligned };
+    read: read, write: write, checkAccess: checkAccess, tick: tick, readWord: readWord,
+    writeWord: writeWord, extend: extend, misaligned: misaligned };
 }));
