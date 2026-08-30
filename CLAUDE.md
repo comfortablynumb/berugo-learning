@@ -9,11 +9,11 @@ explained in full, diagram, insight), **Examples** (runnable demo with charts, w
 graded code lab) and **References** (the structured reference block).
 
 ## Status
-**M00–M34 are built** (338 sections; M00–M10, M16 and M31–M33 also verified in a browser), each
+**M00–M35 are built** (347 sections; M00–M10, M16 and M31–M35 also verified in a browser), each
 carrying 8+ concepts with full explanations, two worked examples, a reference entry and a graded
-exercise. The tree is green. **M35 — pipelining, hazards and branch prediction is next**, and
-nothing of it exists yet; it consumes M34's datapath, control table and stage delays
-(`machines/brv32/`). Read `doc/BUILD-STATE.md` first, its "Next" section
+exercise. The tree is green. **M36 — superscalar, out-of-order execution and speculation is
+next**, and nothing of it exists yet; it extends M35's pipeline
+(`machines/brv32/pipeline.js`). Read `doc/BUILD-STATE.md` first, its "Next" section
 carries the nine-step shape to copy. The rest of the curriculum follows the order in
 `doc/ROADMAP.md` (65 milestones in `doc/milestones/`). Keep `npm test` and `npm run lint:size`
 green at every step, and update the README status block and `doc/BUILD-STATE.md` as milestones

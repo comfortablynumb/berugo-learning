@@ -401,6 +401,15 @@
       <section data-section="exceptions-and-privilege" hidden><div class="section-body"><div id="exceptions-and-privilege-content"></div></div></section>
       <section data-section="assembler-linker-and-loading" hidden><div class="section-body"><div id="assembler-linker-and-loading-content"></div></div></section>
       <section data-section="real-instruction-sets" hidden><div class="section-body"><div id="real-instruction-sets-content"></div></div></section>
+      <section data-section="pipelining-fundamentals" hidden><div class="section-body"><div id="pipelining-fundamentals-content"></div></div></section>
+      <section data-section="structural-hazards" hidden><div class="section-body"><div id="structural-hazards-content"></div></div></section>
+      <section data-section="data-hazards-and-forwarding" hidden><div class="section-body"><div id="data-hazards-and-forwarding-content"></div></div></section>
+      <section data-section="control-hazards" hidden><div class="section-body"><div id="control-hazards-content"></div></div></section>
+      <section data-section="branch-prediction-basics" hidden><div class="section-body"><div id="branch-prediction-basics-content"></div></div></section>
+      <section data-section="advanced-branch-prediction" hidden><div class="section-body"><div id="advanced-branch-prediction-content"></div></div></section>
+      <section data-section="precise-exceptions-pipelined" hidden><div class="section-body"><div id="precise-exceptions-pipelined-content"></div></div></section>
+      <section data-section="pipeline-depth-limits" hidden><div class="section-body"><div id="pipeline-depth-limits-content"></div></div></section>
+      <section data-section="pipeline-friendly-code" hidden><div class="section-body"><div id="pipeline-friendly-code-content"></div></div></section>
     </main>
   </div>
 
@@ -860,6 +869,11 @@
     <script src="src/js/machines/brv32/programs.js"></script>
     <script src="src/js/machines/brv32/signal-machine.js"></script>
     <script src="src/js/machines/brv32/isa-compare.js"></script>
+    <script src="src/js/machines/brv32/hazards.js"></script>
+    <script src="src/js/machines/brv32/predictors.js"></script>
+    <script src="src/js/machines/brv32/pipeline.js"></script>
+    <script src="src/js/machines/brv32/branch-traces.js"></script>
+    <script src="src/js/machines/pipeline-model.js"></script>
 
   <script src="src/js/viz/chart-base.js"></script>
   <script src="src/js/viz/implication-graph.js"></script>
@@ -867,6 +881,8 @@
   <script src="src/js/viz/waveform-view.js"></script>
     <script src="src/js/viz/datapath-view.js"></script>
     <script src="src/js/viz/register-view.js"></script>
+  <script src="src/js/viz/pipeline-view.js"></script>
+  <script src="src/js/viz/predictor-view.js"></script>
   <script src="src/js/viz/canvas.js"></script>
   <script src="src/js/viz/legend.js"></script>
   <script src="src/js/viz/tooltip.js"></script>
@@ -1280,6 +1296,18 @@
   <script src="src/js/content/reference-brv32-toolchain.js"></script>
   <script src="src/js/content/exercises-brv32-system.js"></script>
   <script src="src/js/content/exercises-brv32-toolchain.js"></script>
+  <script src="src/js/content/concepts-pipeline.js"></script>
+  <script src="src/js/content/concepts-pipeline-control.js"></script>
+  <script src="src/js/content/concepts-pipeline-limits.js"></script>
+  <script src="src/js/content/examples-pipeline.js"></script>
+  <script src="src/js/content/examples-pipeline-control.js"></script>
+  <script src="src/js/content/examples-pipeline-limits.js"></script>
+  <script src="src/js/content/reference-pipeline.js"></script>
+  <script src="src/js/content/reference-pipeline-control.js"></script>
+  <script src="src/js/content/reference-pipeline-limits.js"></script>
+  <script src="src/js/content/exercises-pipeline.js"></script>
+  <script src="src/js/content/exercises-pipeline-control.js"></script>
+  <script src="src/js/content/exercises-pipeline-limits.js"></script>
   <script src="src/js/content/exercises-variance.js"></script>
   <script src="src/js/content/exercises-semantics.js"></script>
   <script src="src/js/content/exercises-ownership.js"></script>
@@ -2051,6 +2079,24 @@
   <script src="src/js/sections/assembler-linker-and-loading-section.js"></script>
   <script src="src/js/sections/real-instruction-sets-template.js"></script>
   <script src="src/js/sections/real-instruction-sets-section.js"></script>
+  <script src="src/js/sections/pipelining-fundamentals-template.js"></script>
+  <script src="src/js/sections/pipelining-fundamentals-section.js"></script>
+  <script src="src/js/sections/structural-hazards-template.js"></script>
+  <script src="src/js/sections/structural-hazards-section.js"></script>
+  <script src="src/js/sections/data-hazards-and-forwarding-template.js"></script>
+  <script src="src/js/sections/data-hazards-and-forwarding-section.js"></script>
+  <script src="src/js/sections/control-hazards-template.js"></script>
+  <script src="src/js/sections/control-hazards-section.js"></script>
+  <script src="src/js/sections/branch-prediction-basics-template.js"></script>
+  <script src="src/js/sections/branch-prediction-basics-section.js"></script>
+  <script src="src/js/sections/advanced-branch-prediction-template.js"></script>
+  <script src="src/js/sections/advanced-branch-prediction-section.js"></script>
+  <script src="src/js/sections/precise-exceptions-pipelined-template.js"></script>
+  <script src="src/js/sections/precise-exceptions-pipelined-section.js"></script>
+  <script src="src/js/sections/pipeline-depth-limits-template.js"></script>
+  <script src="src/js/sections/pipeline-depth-limits-section.js"></script>
+  <script src="src/js/sections/pipeline-friendly-code-template.js"></script>
+  <script src="src/js/sections/pipeline-friendly-code-section.js"></script>
   <script src="src/js/app.js"></script>
 </body>
 </html>

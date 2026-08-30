@@ -903,3 +903,74 @@ canvas.viz-canvas {
   display: block;
   height: 100%;
 }
+
+/* ---------------------------------------------------------------- pipeline */
+
+/* The stage-by-cycle diagram. It is a table because the data is a grid of
+   short labels with no continuous axis, and because a table stays readable at
+   eighty columns where a chart of eighty categories does not. The horizontal
+   scroll is deliberate: the row labels stay put and the cycles run off to the
+   right, which is how a waveform is read. */
+.pipe-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.pipe-table {
+  border-collapse: collapse;
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+}
+
+.pipe-table th,
+.pipe-table td {
+  border: 1px solid color-mix(in srgb, var(--hue-gray) 20%, transparent);
+  padding: 0.15rem 0.3rem;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.pipe-table th.pipe-label {
+  text-align: left;
+  position: sticky;
+  left: 0;
+  background: var(--surface-card);
+  z-index: 1;
+}
+
+.pipe-gap {
+  background: transparent;
+}
+
+.pipe-if { background: color-mix(in srgb, var(--hue-blue) 18%, transparent); }
+.pipe-id { background: color-mix(in srgb, var(--hue-teal) 18%, transparent); }
+.pipe-ex { background: color-mix(in srgb, var(--hue-green) 18%, transparent); }
+.pipe-mem { background: color-mix(in srgb, var(--hue-amber) 18%, transparent); }
+.pipe-wb { background: color-mix(in srgb, var(--hue-purple) 18%, transparent); }
+
+/* A cycle that cost something is outlined rather than recoloured, so the
+   stage it happened in is still readable underneath. */
+.pipe-stall { outline: 2px solid var(--hue-orange); outline-offset: -2px; }
+.pipe-flush { outline: 2px solid var(--hue-red); outline-offset: -2px; }
+
+.pipe-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+}
+
+.pipe-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.pipe-swatch {
+  display: inline-block;
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 2px;
+  border: 1px solid color-mix(in srgb, var(--hue-gray) 30%, transparent);
+}

@@ -3367,15 +3367,15 @@ written. `ChartBase` now accepts either, which removes the trap for every future
 
 ## Next
 
-**M34 is complete. M35 — pipelining, hazards and branch prediction is next, and nothing of it
-exists yet.** It consumes M34 directly: the single-cycle datapath of 34.4, the control table of
-34.5 and the stage delays of 34.6 are what a pipeline is cut from, and the multi-cycle section
-already measures the three-term equation the whole milestone argues with — that datapath spends
-148 of its 175 gate delays in one stage, so the first thing M35 has to say is where it cuts.
-`machines/brv32/` carries the ISA, the assembler, the behavioural simulator, the gate-level CPU
-and the differential harness; `machines/brv32/multicycle.js` carries the stage builders. The spec
-is `doc/milestones/M35-pipelining.md` and `doc/ROADMAP.md` gives the order after it. The tree is
-green: 338 built sections, 296 planned, 634 total.
+**M35 is complete. M36 — superscalar, out-of-order execution and speculation is next, and
+nothing of it exists yet.** It is the direct answer to what M35 measured: this pipeline reaches
+an IPC of 0.83 at best, every hazard it stalls on is a dependence the machine could have worked
+around, and 35.3 lists three dependence kinds that are impossible in order and become the whole
+difficulty out of order. `machines/brv32/pipeline.js` is the machine to extend — it already
+carries a cycle log, an exact attribution and a differential against the M34 behavioural
+simulator, and 35.7 states the constraint M36 has to preserve while breaking the ordering that
+makes it easy. The spec is `doc/milestones/M36-out-of-order.md` and `doc/ROADMAP.md` gives the
+order after it. The tree is green: 347 built sections, 287 planned, 634 total.
 
 The shape to copy, unchanged through M33:
 
@@ -4481,3 +4481,124 @@ not have. The measurement that comes out of it is narrower and more defensible t
 argument: **ten instructions and a four-instruction loop on all three machines**, with byte counts
 of 40, 40 and 23 — so the whole measurable advantage of the variable-width machine on this function
 is code size, at **1.74×**.
+
+## M35 — pipelining, hazards and branch prediction (complete)
+
+Nine sections and one cycle-accurate machine. `machines/brv32/pipeline.js` is a second
+implementation of execution, not a re-timing of the first: it has its own register file, its own
+operand selection and its own memory ordering, and shares only the instruction table with M34's
+behavioural simulator. Every figure below came out of a run.
+
+### The oracles, and what each one caught
+
+- **The M34 behavioural machine, on every program in every configuration.** Nine configurations —
+  no forwarding, naive forwarding, unified memory, decode resolution, four predictors — times five
+  programs, with the architectural state compared at the same retire count. Zero differences
+  everywhere except the deliberately broken forwarding unit, which is the point of having it.
+- **The cycle accounting, which has to reconcile.** Every cycle either retires an instruction,
+  commits a trap, or holds a bubble charged to whatever made it. The first version derived the
+  attribution from the stall and flush events instead and was **off by exactly one on every
+  program**; charging each empty write-back cycle to the bubble that arrived there is exact by
+  construction.
+- **Fixtures built to separate specific predictors** rather than to flatter all of them, including
+  a random fixture that is the floor and a correlated fixture whose third branch is a function of
+  the first two.
+- **The precise-exception check**: five fault classes, each raised by a program that runs, with the
+  state at the handler compared against a machine that executes one instruction at a time.
+
+### Ten measurements the milestone rests on
+
+- **Pipelining this datapath makes it slower.** The sum program is **7 654 gate delays**
+  single-cycle and **7 852** pipelined, because the ALU is 148 of the 175 gate delays and a
+  five-stage split therefore has a period of 151 against 178. Balanced at 38 delays a stage the
+  same run is **1 976 — 3.9× faster**. The whole benefit of pipelining is in the gap between those
+  two numbers, which makes it a statement about stage balance.
+- **Every cycle attributed**: 52 = 43 retired + 1 trap + 4 of fill + 4 of flush, exactly, on every
+  program and every configuration.
+- **A second memory port is worth nothing to nothing.** 0 cycles on the sum loop, which has no
+  memory instructions; **3, 5 and 16** on the other three, tracking their memory-instruction counts
+  of 6, 6 and 19 rather than their lengths.
+- **Forwarding is worth 6 cycles of 15** on a four-instruction dependency chain, and worth nothing
+  at all on the load-use hazard, which no wiring removes.
+- **The double hazard**: a forwarding unit that checks MEM/WB before EX/MEM is correct on four of
+  five hand-written fixtures and computes **59 049 235 instead of 37** on the array-maximum
+  program.
+- **Resolving branches in decode halves the flushes and loses on two of four programs.** sum
+  70→69 cycles, arrayMax 72→70, **strlen 54→56 and factorial 197→205** with 19 extra stalls,
+  because a branch whose operand is still being computed one instruction ahead cannot be resolved
+  early at all.
+- **One bit against two, on a nested loop**: 65.0% against 80.8%, which is 42 mispredicts against
+  23 — and a static "backward branches are taken" rule beats both at 82.5%.
+- **The correlated fixture**: bimodal **73.3%** and gshare **88.8%** on the site that carries the
+  correlation, against 57.3% and 63.7% overall. The overall figures differ by 6.4 points and the
+  effect is 15.5.
+- **gshare is worse than bimodal on a plain loop**, 64.0% against 88.0%, because history spreads a
+  well-behaved site across counters that each see less training. No predictor wins every row.
+- **The sorted-array result, with the mechanism counted**: the same 64 values give **503 cycles and
+  4 mispredicts** sorted and **563 and 34** shuffled, computing 6 947 both times, and
+  563 − 503 = 2 × (34 − 4) exactly. The branchless variant is **654 cycles either way** and loses
+  here; the **break-even misprediction penalty is 4.8 cycles**, which every processor built in the
+  last twenty years exceeds.
+
+### The demonstration the milestone is built around
+
+**Precision, with five instructions in flight.** A misaligned load is detected in the memory stage
+at cycle 5 and the trap commits at write-back at cycle 6; five instructions fetched after it never
+commit anything; and the registers are identical to the M34 behavioural machine's at the same
+retire count, on all five fault classes. Both halves of the mechanism are load-bearing: squashing
+at detection stops a younger store reaching memory, and committing at write-back lets the older
+instructions finish. The depth model then says where this design stops paying — **fastest at 35
+stages, most efficient at 18**, and with a realistic register overhead **18 and 8**, which is
+where the industry landed after running the experiment in public.
+
+### Six things this milestone adds to the shape and worth keeping
+
+- **Count the effect, not the cause.** The cycle attribution derived from stall and flush events
+  was off by one on every program, because a bubble created near the end of a run never reaches
+  write-back and a pipeline that refills after a trap pays the fill twice. Charging each empty
+  write-back cycle to the bubble that arrived there is exact by construction, and an attribution
+  that is nearly right is one nobody can use to settle an argument.
+- **A speculative instruction carries a speculative exception.** Fetch runs past the end of every
+  mispredicted branch and decodes zeros as an illegal instruction. Freezing on that and not
+  unfreezing when the redirect squashes it makes the machine stop dead after two instructions —
+  which it did, and the symptom looked nothing like the cause.
+- **A control register is read in execute and written at commit.** Doing both at write-back leaves
+  the destination register holding zero for two stages, so the next instruction forwards a zero —
+  and a trap handler that reads mcause and branches on it then takes the wrong path, returns to
+  the wrong address and faults again. The demo trapped 17 times instead of once.
+- **mret and control-register writes are serialising.** There is no forwarding path from a control
+  register, so the pipeline drains. A six-instruction handler drains it twice, which is a large
+  part of why a trap costs far more than its instruction count suggests.
+- **The instruction one ahead of decode is in EXECUTE.** Getting that latch mapping off by one
+  hides completely behind forwarding: the machine computes every right answer and simply never
+  stalls, so only a stall-count assertion catches it.
+- **A negative result reported honestly is worth more than a tuned positive one.** Pipelining this
+  datapath is slower than not pipelining it; early branch resolution loses on half the programs;
+  gshare regresses on a plain loop; branchless code loses on this machine. Every one of those is
+  the measurement rather than the expectation, and each of them teaches something the expected
+  result would not have.
+
+### What is where
+
+| Path | State |
+|---|---|
+| `machines/brv32/pipeline.js` | five stages, latches, cycle log, exact attribution |
+| `machines/brv32/hazards.js` | forwarding priority, stall detection, structural conflict |
+| `machines/brv32/predictors.js` | static, one-bit, bimodal, gshare, tournament, TAGE-lite, BTB, RAS |
+| `machines/brv32/branch-traces.js` | fixtures built to separate predictors, and the filter programs |
+| `machines/pipeline-model.js` | depth, period, penalty, power and the two optima |
+| `viz/pipeline-view.js` | the stage-by-cycle table and the cycle attribution |
+| `viz/predictor-view.js` | per-site accuracy, counter states, mispredicts per thousand |
+
+Sections: `pipelining-fundamentals`, `structural-hazards`, `data-hazards-and-forwarding`,
+`control-hazards`, `branch-prediction-basics`, `advanced-branch-prediction`,
+`precise-exceptions-pipelined`, `pipeline-depth-limits`, `pipeline-friendly-code`.
+
+Tests: `pipeline-modules.test.js` (18, including the nine-configuration differential and the
+reconciliation over every program), `worked-examples-pipeline.test.js` (14).
+
+### What the milestone deliberately does not do
+
+Interrupts are out of scope in the pipelined machine. A pipelined processor takes an asynchronous
+interrupt at an instruction boundary, and this model does not implement that — the timer interrupt
+stays a M34 topic, and `pipeline.js` says so in its header rather than implementing half of it.

@@ -191,10 +191,69 @@
               summary: 'One function in RISC-V, ARM64 and x86-64, counted and explained decision by decision',
               tags: ['risc-v', 'arm64', 'x86-64', 'code density']
             }]
+        },
+        {
+          id: 'M35',
+          title: 'Pipelining, hazards and branch prediction',
+          summary: 'The M34 processor cut into five stages, with every stall and flush attributed to a cause, a forwarding unit whose classic bug is a control, and predictors measured on fixtures built to separate them.',
+          sections: [
+            {
+              id: 'pipelining-fundamentals',
+              title: 'Pipelining fundamentals',
+              summary: 'Five stages, one instruction per cycle, and every cycle attributed to retiring, filling, stalling or flushing',
+              tags: ['pipeline', 'throughput', 'latency', 'ipc']
+            },
+            {
+              id: 'structural-hazards',
+              title: 'Structural hazards',
+              summary: 'One memory or two, and the stall count that decides which is worth building',
+              tags: ['resource conflict', 'harvard split', 'arbitration', 'queueing']
+            },
+            {
+              id: 'data-hazards-and-forwarding',
+              title: 'Data hazards and forwarding',
+              summary: 'Five dependency shapes and three forwarding units, one of which carries the classic double-hazard bug',
+              tags: ['forwarding', 'load-use', 'raw hazard', 'instruction scheduling']
+            },
+            {
+              id: 'control-hazards',
+              title: 'Control hazards',
+              summary: 'Move the branch resolution point and watch the flushes halve and the stalls appear',
+              tags: ['branch penalty', 'flush', 'early resolution', 'delayed branch']
+            },
+            {
+              id: 'branch-prediction-basics',
+              title: 'Branch prediction: the basics',
+              summary: 'One-bit against two-bit on patterns built to separate them, with accuracy reported per site',
+              tags: ['saturating counter', 'branch history', 'return-address stack', 'btb']
+            },
+            {
+              id: 'advanced-branch-prediction',
+              title: 'Advanced branch prediction',
+              summary: 'gshare, tournament and TAGE on a correlated fixture, where the overall average hides the difference',
+              tags: ['gshare', 'global history', 'tage', 'aliasing']
+            },
+            {
+              id: 'precise-exceptions-pipelined',
+              title: 'Precise exceptions in a pipeline',
+              summary: 'Five fault classes with five instructions in flight, and the state proved identical to a machine with one',
+              tags: ['precise exceptions', 'squash', 'commit point', 'serialising']
+            },
+            {
+              id: 'pipeline-depth-limits',
+              title: 'Deeper pipelines and their limits',
+              summary: 'The depth curve, its bottom, and the industry experiment that found the same answer',
+              tags: ['pipeline depth', 'frequency', 'performance per watt', 'pentium 4']
+            },
+            {
+              id: 'pipeline-friendly-code',
+              title: 'Writing pipeline-friendly code',
+              summary: 'The sorted-array result reproduced with mispredict counts, and a branchless variant that loses here and wins elsewhere',
+              tags: ['branchless', 'mispredicts', 'measurement', 'profiling']
+            }]
         }
       ],
       planned: [
-        { id: 'M35', title: 'Pipelining, hazards and branch prediction', sections: 9 },
         { id: 'M36', title: 'Superscalar, out-of-order execution and speculation', sections: 9 },
         { id: 'M37', title: 'Caches and the memory hierarchy', sections: 10 },
         { id: 'M38', title: 'Cache coherence and memory consistency', sections: 9 },

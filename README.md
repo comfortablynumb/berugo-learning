@@ -14,14 +14,14 @@ faithfully in a browser, the section models it, says so plainly, and states what
 
 ## Status
 
-**M00–M34 shipped (338 sections). Building the curriculum, milestone by milestone.**
+**M00–M35 shipped (347 sections). Building the curriculum, milestone by milestone.**
 
 - ✅ Curriculum designed: 65 milestones, 634 sections, 11 tracks — one file per milestone in
   [`doc/milestones/`](doc/milestones/)
 - ✅ Architecture and conventions fixed — [`doc/architecture.md`](doc/architecture.md)
 - ✅ Build order and dependency graph — [`doc/ROADMAP.md`](doc/ROADMAP.md)
 - ✅ Scope decisions recorded — [`doc/topic-suggestions.md`](doc/topic-suggestions.md)
-- ✅ **Notation decoder across all 338 sections, on all three tabs**: every mathematical symbol
+- ✅ **Notation decoder across all 347 sections, on all three tabs**: every mathematical symbol
   carries how to say it and what it does, revealed on hover, tap or keyboard focus — in the
   concepts and orientation, in the arithmetic of every worked example, in the cost table and
   equations of every reference block, and in the prompt of every graded exercise. Every formal
@@ -615,6 +615,29 @@ The render audit is not a substitute for opening the page, and M16's browser pas
   register that never got its value** — with no error message from either. The linker refuses an
   out-of-range branch with **"needs 5012"** rather than truncating it, and the veneer scenario
   builds the two-hop fix and runs it. 10 sections live.
+
+- ✅ **M35 — pipelining, hazards and branch prediction**: the M34 processor cut into five stages,
+  with a cycle-accurate simulator whose every cycle is attributed and whose architectural state
+  matches the behavioural machine under **nine configurations on five programs**. The headline is a
+  negative result: pipelining *this* datapath is **1.03× slower** than not pipelining it, because
+  the ALU is 148 of the 175 gate delays and a five-stage split therefore has a period of 151
+  against 178 — balanced at 38 delays a stage the same run is **3.9× faster**, which makes the
+  whole benefit a statement about stage balance rather than about pipelining. A second memory port
+  is worth **0, 3, 5 and 16 cycles** on the four programs, tracking their memory-instruction counts
+  rather than their lengths. Forwarding saves **6 cycles of 15** on a dependency chain and nothing
+  at all on the load-use hazard; a forwarding unit that checks the pipeline latches in the wrong
+  order is correct on four of five hand-written fixtures and computes **59 049 235 instead of 37**
+  on a real program. Resolving branches in decode halves the flushes and makes **two of the four
+  programs slower**. On predictor fixtures built to separate them: one bit against two is **65.0%
+  against 80.8%** on a nested loop, a static rule beats both at **82.5%**, gshare reaches **88.8%**
+  where bimodal caps at **73.3%** on a correlated branch — and gshare is **24 points worse** than
+  bimodal on a plain loop. Five fault classes are proved precise with five instructions in flight.
+  The depth model puts the fastest pipeline at **35 stages** and the most efficient at **18**, and
+  at a realistic register overhead at **18 and 8** — which is where the industry landed. Finally
+  the branch laboratory reproduces the sorted-array result with the counter rather than the clock:
+  the same 64 values give **503 cycles and 4 mispredicts** sorted and **563 and 34** shuffled, and
+  a branchless rewrite is **654 either way** — losing here, and winning above a measured
+  **4.8-cycle** break-even penalty. 9 sections live.
 
 - ✅ **M30 — code generation, bytecode VMs and JIT**: the back end of the same compiler, and five
   ways to run one program compared against the front end that produced it. Two code generators
