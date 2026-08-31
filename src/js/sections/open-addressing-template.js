@@ -37,7 +37,7 @@
       'everything.</p></div></div>' +
       '</div>' +
       scope.MetricGrid.markup(METRICS) +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">Probes against load factor</div>' +
       '<div class="card-body"><div id="oa-chart"></div><div id="oa-legend"></div>' +
       '<p class="note">The 1/(1−α) wall is real and it is close: at α = 0.9 a linear-probing lookup ' +

@@ -51,7 +51,7 @@
       '<th>Conditional expectation after</th>' +
       '</tr></thead><tbody></tbody></table>' +
       '<p class="note" id="drz-walk-note"></p></div></div>' +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">How independent the small family actually is</div>' +
       '<div class="card-body"><table class="ref-table" id="drz-profile"><thead><tr>' +
       '<th>Property</th><th>Worst deviation from uniform</th><th>Verdict</th>' +

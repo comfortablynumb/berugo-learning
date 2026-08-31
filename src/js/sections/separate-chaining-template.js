@@ -33,7 +33,7 @@
       'length; the interesting number is how far the tallest bar sits above it.</p></div></div>' +
       '</div>' +
       scope.MetricGrid.markup(METRICS) +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">Observed against Poisson</div>' +
       '<div class="card-body"><div id="sc-chart"></div><div id="sc-legend"></div>' +
       '<p class="note">Bucket occupancy under a good hash is Poisson with mean α: the fraction of ' +

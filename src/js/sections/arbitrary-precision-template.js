@@ -58,7 +58,7 @@
       '<th>Left limb</th><th>Digit</th><th>Partial products</th><th>Carries out</th>' +
       '</tr></thead><tbody></tbody></table>' +
       '<p class="note" id="ap-limbs-note"></p></div></div>' +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">Division, and the correction nobody reaches</div>' +
       '<div class="card-body"><table class="ref-table" id="ap-div-table"><thead><tr>' +
       '<th>Check</th><th>Result</th>' +

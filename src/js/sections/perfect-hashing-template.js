@@ -32,7 +32,7 @@
       'collisions, and no comparison chain to walk.</p></div></div>' +
       '</div>' +
       scope.MetricGrid.markup(METRICS) +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">Space against a hash table</div>' +
       '<div class="card-body"><div id="ph-chart"></div><div id="ph-legend"></div>' +
       '<p class="note">A hash table has to keep the keys to answer "is this key present". A perfect ' +

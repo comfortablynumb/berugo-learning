@@ -64,8 +64,17 @@
     update(app);
   }
 
+  /** How many nodes the measured frame limit allows, which is unknowable until
+   *  the overflow button has actually found that limit. */
+  function headroomFor(shape) {
+    if (!measuredLimit) return null;
+    if (shape === 'degenerate') return measuredLimit.depth;
+    return Math.pow(2, Math.min(50, measuredLimit.depth));
+  }
+
   function update(app) {
     const values = panel.values();
+    const headroom = headroomFor(values['stack-shape']);
     const comparison = root.CallStack.compare({
       count: values['stack-nodes'],
       shape: values['stack-shape'],
@@ -73,11 +82,6 @@
     });
 
     const frameBytes = root.CallStack.FRAME_BYTES;
-    const headroom = measuredLimit
-      ? (values['stack-shape'] === 'degenerate'
-        ? measuredLimit.depth
-        : Math.pow(2, Math.min(50, measuredLimit.depth)))
-      : null;
 
     root.MetricGrid.update({
       'stack-depth': {
@@ -100,11 +104,16 @@
         value: measuredLimit ? root.Format.exact(measuredLimit.depth) + ' frames' : 'not measured',
         note: measuredLimit ? 'ended with ' + measuredLimit.error : 'press the button — it really does overflow'
       },
+      /* Says "not measured" in words rather than leaving the em-dash, which is
+         what the tile beside it does and what a reader needs: the headroom is
+         unknowable until the overflow button has actually found the limit. */
       'stack-headroom': {
-        value: headroom === null ? '—' : root.Format.count(headroom) + ' nodes',
-        note: values['stack-shape'] === 'degenerate'
-          ? 'one frame per node, so the limit is the node count'
-          : 'a balanced tree of this depth holds 2^depth nodes'
+        value: headroom === null ? 'not measured' : root.Format.count(headroom) + ' nodes',
+        note: headroom === null
+          ? 'press the button above to find the limit, and this follows from it'
+          : (values['stack-shape'] === 'degenerate'
+            ? 'one frame per node, so the limit is the node count'
+            : 'a balanced tree of this depth holds 2^depth nodes')
       }
     });
 

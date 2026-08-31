@@ -419,6 +419,16 @@
       <section data-section="simultaneous-multithreading" hidden><div class="section-body"><div id="simultaneous-multithreading-content"></div></div></section>
       <section data-section="microarchitectural-side-channels" hidden><div class="section-body"><div id="microarchitectural-side-channels-content"></div></div></section>
       <section data-section="anatomy-of-a-modern-core" hidden><div class="section-body"><div id="anatomy-of-a-modern-core-content"></div></div></section>
+      <section data-section="memory-hierarchy-numbers" hidden><div class="section-body"><div id="memory-hierarchy-numbers-content"></div></div></section>
+      <section data-section="cache-organisation" hidden><div class="section-body"><div id="cache-organisation-content"></div></div></section>
+      <section data-section="cache-policies" hidden><div class="section-body"><div id="cache-policies-content"></div></div></section>
+      <section data-section="cache-performance-analysis" hidden><div class="section-body"><div id="cache-performance-analysis-content"></div></div></section>
+      <section data-section="cache-friendly-software" hidden><div class="section-body"><div id="cache-friendly-software-content"></div></div></section>
+      <section data-section="virtual-memory-and-the-tlb" hidden><div class="section-body"><div id="virtual-memory-and-the-tlb-content"></div></div></section>
+      <section data-section="prefetching" hidden><div class="section-body"><div id="prefetching-content"></div></div></section>
+      <section data-section="dram-and-the-memory-controller" hidden><div class="section-body"><div id="dram-and-the-memory-controller-content"></div></div></section>
+      <section data-section="numa-and-affinity" hidden><div class="section-body"><div id="numa-and-affinity-content"></div></div></section>
+      <section data-section="measuring-the-hierarchy" hidden><div class="section-body"><div id="measuring-the-hierarchy-content"></div></div></section>
     </main>
   </div>
 
@@ -859,6 +869,8 @@
   <!-- M36: the dependence bound and the top-down classifier, both pure -->
   <script src="src/js/algorithms/ilp-analysis.js"></script>
   <script src="src/js/algorithms/topdown.js"></script>
+
+  <!-- M37: the memory hierarchy, all pure -->
   <script src="src/js/machines/blocks/select.js"></script>
   <script src="src/js/machines/blocks/adder.js"></script>
   <script src="src/js/machines/blocks/alu.js"></script>
@@ -897,6 +909,15 @@
     <script src="src/js/machines/ooo/trace.js"></script>
     <script src="src/js/machines/ooo/smt.js"></script>
     <script src="src/js/machines/side-channel-lab.js"></script>
+    <script src="src/js/machines/memory/cache.js"></script>
+    <script src="src/js/machines/memory/hierarchy.js"></script>
+    <script src="src/js/machines/memory/tlb.js"></script>
+    <script src="src/js/machines/memory/dram.js"></script>
+    <script src="src/js/machines/memory/numa.js"></script>
+  <script src="src/js/algorithms/three-cs.js"></script>
+  <script src="src/js/algorithms/prefetchers.js"></script>
+  <script src="src/js/algorithms/cache-microbench.js"></script>
+  <script src="src/js/algorithms/matrix-blocking.js"></script>
     <script src="src/js/machines/pipeline-model.js"></script>
 
   <script src="src/js/viz/chart-base.js"></script>
@@ -907,6 +928,8 @@
     <script src="src/js/viz/register-view.js"></script>
   <script src="src/js/viz/pipeline-view.js"></script>
   <script src="src/js/viz/ooo-view.js"></script>
+  <script src="src/js/viz/cache-view.js"></script>
+  <script src="src/js/viz/dram-timeline-view.js"></script>
   <script src="src/js/viz/predictor-view.js"></script>
   <script src="src/js/viz/canvas.js"></script>
   <script src="src/js/viz/legend.js"></script>
@@ -1328,6 +1351,9 @@
   <script src="src/js/content/concepts-ooo.js"></script>
   <script src="src/js/content/concepts-ooo-speculation.js"></script>
   <script src="src/js/content/concepts-ooo-modern.js"></script>
+  <script src="src/js/content/concepts-cache.js"></script>
+  <script src="src/js/content/concepts-cache-software.js"></script>
+  <script src="src/js/content/concepts-cache-systems.js"></script>
   <script src="src/js/content/examples-pipeline.js"></script>
   <script src="src/js/content/examples-pipeline-control.js"></script>
   <script src="src/js/content/examples-pipeline-limits.js"></script>
@@ -1346,6 +1372,15 @@
   <script src="src/js/content/exercises-ooo.js"></script>
   <script src="src/js/content/exercises-ooo-speculation.js"></script>
   <script src="src/js/content/exercises-ooo-modern.js"></script>
+  <script src="src/js/content/examples-cache.js"></script>
+  <script src="src/js/content/examples-cache-software.js"></script>
+  <script src="src/js/content/examples-cache-systems.js"></script>
+  <script src="src/js/content/reference-cache.js"></script>
+  <script src="src/js/content/reference-cache-software.js"></script>
+  <script src="src/js/content/reference-cache-systems.js"></script>
+  <script src="src/js/content/exercises-cache.js"></script>
+  <script src="src/js/content/exercises-cache-software.js"></script>
+  <script src="src/js/content/exercises-cache-systems.js"></script>
   <script src="src/js/content/exercises-variance.js"></script>
   <script src="src/js/content/exercises-semantics.js"></script>
   <script src="src/js/content/exercises-ownership.js"></script>
@@ -2156,6 +2191,29 @@
   <script src="src/js/sections/microarchitectural-side-channels-section.js"></script>
   <script src="src/js/sections/anatomy-of-a-modern-core-template.js"></script>
   <script src="src/js/sections/anatomy-of-a-modern-core-section.js"></script>
+
+  <!-- M37: caches and the memory hierarchy -->
+  <script src="src/js/sections/memory-lab.js"></script>
+  <script src="src/js/sections/memory-hierarchy-numbers-template.js"></script>
+  <script src="src/js/sections/memory-hierarchy-numbers-section.js"></script>
+  <script src="src/js/sections/cache-organisation-template.js"></script>
+  <script src="src/js/sections/cache-organisation-section.js"></script>
+  <script src="src/js/sections/cache-policies-template.js"></script>
+  <script src="src/js/sections/cache-policies-section.js"></script>
+  <script src="src/js/sections/cache-performance-analysis-template.js"></script>
+  <script src="src/js/sections/cache-performance-analysis-section.js"></script>
+  <script src="src/js/sections/cache-friendly-software-template.js"></script>
+  <script src="src/js/sections/cache-friendly-software-section.js"></script>
+  <script src="src/js/sections/virtual-memory-and-the-tlb-template.js"></script>
+  <script src="src/js/sections/virtual-memory-and-the-tlb-section.js"></script>
+  <script src="src/js/sections/prefetching-template.js"></script>
+  <script src="src/js/sections/prefetching-section.js"></script>
+  <script src="src/js/sections/dram-and-the-memory-controller-template.js"></script>
+  <script src="src/js/sections/dram-and-the-memory-controller-section.js"></script>
+  <script src="src/js/sections/numa-and-affinity-template.js"></script>
+  <script src="src/js/sections/numa-and-affinity-section.js"></script>
+  <script src="src/js/sections/measuring-the-hierarchy-template.js"></script>
+  <script src="src/js/sections/measuring-the-hierarchy-section.js"></script>
   <script src="src/js/app.js"></script>
 </body>
 </html>

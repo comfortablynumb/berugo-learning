@@ -53,7 +53,7 @@
       '<th>Final objective</th><th>Outcome</th>' +
       '</tr></thead><tbody></tbody></table>' +
       '<p class="note" id="opt-stability-note"></p></div></div>' +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">Conditioning — what descent pays and Newton does not</div>' +
       '<div class="card-body"><table class="ref-table" id="opt-condition"><thead><tr>' +
       '<th>κ</th><th>Gradient descent</th><th>Newton</th>' +

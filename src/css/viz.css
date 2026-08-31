@@ -968,6 +968,27 @@ canvas.viz-canvas {
   text-decoration: line-through;
 }
 
+/* The set/way grid and the DRAM bank timeline reuse the pipeline table's
+   layout for the same reason it exists: a grid of short labels with no
+   continuous axis reads better as a table than as a chart, and stays readable
+   at sixty-four rows. Only the cell states differ. */
+.cache-clean { background: color-mix(in srgb, var(--hue-blue) 18%, transparent); }
+.cache-dirty { background: color-mix(in srgb, var(--hue-amber) 26%, transparent); }
+.cache-picked { outline: 2px solid var(--hue-green); outline-offset: -2px; }
+
+/* Set occupancy, from empty to full. The ramp is one hue at rising strength
+   rather than a rainbow, because the quantity is ordered and a reader should
+   not have to consult a key to know which end is which. */
+.cache-heat-0 { background: transparent; }
+.cache-heat-1 { background: color-mix(in srgb, var(--hue-teal) 12%, transparent); }
+.cache-heat-2 { background: color-mix(in srgb, var(--hue-teal) 26%, transparent); }
+.cache-heat-3 { background: color-mix(in srgb, var(--hue-teal) 40%, transparent); }
+.cache-heat-4 { background: color-mix(in srgb, var(--hue-teal) 55%, transparent); }
+
+.dram-hit { background: color-mix(in srgb, var(--hue-green) 26%, transparent); }
+.dram-miss { background: color-mix(in srgb, var(--hue-amber) 26%, transparent); }
+.dram-conflict { background: color-mix(in srgb, var(--hue-red) 26%, transparent); }
+
 .pipe-legend {
   display: flex;
   flex-wrap: wrap;

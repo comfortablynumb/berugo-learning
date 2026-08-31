@@ -50,7 +50,7 @@
       '<div class="card-header">A Snowflake bit layout, and what each field gives away</div>' +
       '<div class="card-body"><div id="ia-word"></div>' +
       '<p class="note" id="ia-word-note"></p></div></div>' +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">When the clock steps backwards</div>' +
       '<div class="card-body"><table class="ref-table" id="ia-clock"><thead><tr>' +
       '<th>Policy</th><th>Issued</th><th>Dropped</th><th>Duplicates</th><th>Still monotonic</th>' +

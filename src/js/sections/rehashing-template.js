@@ -29,7 +29,7 @@
       'rehashes; each one is a single call that moved the whole table.</p></div></div>' +
       '</div>' +
       scope.MetricGrid.markup(METRICS) +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">Latency distribution</div>' +
       '<div class="card-body"><div id="rs-percentiles"></div></div></div>' +
       '<div class="card"><div class="card-header">Migration state</div>' +

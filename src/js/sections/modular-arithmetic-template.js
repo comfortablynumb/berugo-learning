@@ -53,7 +53,7 @@
       '<th>Rate</th><th>Miller–Rabin</th><th>Witness</th><th>How the witness caught it</th>' +
       '</tr></thead><tbody></tbody></table>' +
       '<p class="note" id="ma-carmichael-note"></p></div></div>' +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">Factoring: two methods, one answer</div>' +
       '<div class="card-body"><table class="ref-table" id="ma-factor"><thead><tr>' +
       '<th>Quantity</th><th>The number selected</th><th>A fixed 15-digit semiprime</th>' +

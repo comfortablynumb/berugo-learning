@@ -52,7 +52,7 @@
       '<th>Annealing</th><th>Tabu</th><th>Genetic</th><th>Ant colony</th><th>GRASP</th>' +
       '</tr></thead><tbody></tbody></table>' +
       '<p class="note" id="mth-budgets-note"></p></div></div>' +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">Annealing at five temperatures, including zero</div>' +
       '<div class="card-body"><table class="ref-table" id="mth-cooling"><thead><tr>' +
       '<th>Starting temperature</th><th>Tour</th><th>Moves accepted</th><th>Of which worsening</th>' +

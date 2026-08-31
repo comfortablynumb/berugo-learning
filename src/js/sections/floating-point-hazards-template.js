@@ -51,7 +51,7 @@
       '<th>Kahan sum</th><th>Doubles away</th>' +
       '</tr></thead><tbody></tbody></table>' +
       '<p class="note" id="fpz-orders-note"></p></div></div>' +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">Variance, three ways</div>' +
       '<div class="card-body"><table class="ref-table" id="fpz-var-table"><thead><tr>' +
       '<th>Method</th><th>Variance</th><th>Relative error</th><th>Negative</th>' +

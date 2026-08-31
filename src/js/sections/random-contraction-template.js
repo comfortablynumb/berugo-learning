@@ -49,7 +49,7 @@
       '<th>Step</th><th>Merged</th><th>Supernodes left</th><th>Edges surviving</th>' +
       '</tr></thead><tbody></tbody></table>' +
       '<p class="note" id="krg-trace-note"></p></div></div>' +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">Success as the trial budget grows</div>' +
       '<div class="card-body"><div id="krg-chart" class="chart-host"></div>' +
       '<div id="krg-legend"></div><p class="note" id="krg-chart-note"></p></div></div>' +

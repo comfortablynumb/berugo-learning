@@ -35,7 +35,7 @@
       '<p class="note" id="ir-word-note"></p></div></div>' +
       '</div>' +
       scope.MetricGrid.markup(METRICS) +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">The wheel, and where the cut is</div>' +
       '<div class="card-body"><div id="ir-wheel"></div>' +
       '<p class="note" id="ir-wheel-note"></p></div></div>' +

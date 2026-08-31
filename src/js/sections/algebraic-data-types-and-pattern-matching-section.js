@@ -187,7 +187,9 @@
         note: state.exhaustive.exhaustive
           ? 'every value of the type is matched by some clause'
           : 'at least one value falls through every clause' },
-      'adt-witness': { value: state.exhaustive.witness || '—',
+      /* "none" rather than an em-dash: the absence of a witness is the RESULT
+         here, not a missing measurement, and a bare dash reads as the second. */
+      'adt-witness': { value: state.exhaustive.witness || 'none',
         note: state.exhaustive.witness
           ? 'built by the same recursion that proved the match incomplete'
           : 'there is none, which is what exhaustive means' },

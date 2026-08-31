@@ -45,7 +45,7 @@
       '<th>Structurally malformed</th><th>Why the NO instance has no answer</th>' +
       '</tr></thead><tbody></tbody></table>' +
       '<p class="note" id="dcp-rejection-note"></p></div></div>' +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">The same problem at rising size</div>' +
       '<div class="card-body"><table class="ref-table" id="dcp-sweep"><thead><tr>' +
       '<th>Vertices</th><th>Verify</th><th>Search, YES</th><th>Search, NO</th>' +

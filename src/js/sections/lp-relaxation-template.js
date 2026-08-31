@@ -49,7 +49,7 @@
       '<th>Proven bound</th>' +
       '</tr></thead><tbody></tbody></table>' +
       '<p class="note" id="lpr-methods-note"></p></div></div>' +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">The gap on complete graphs, where it is worst</div>' +
       '<div class="card-body"><table class="ref-table" id="lpr-complete-table"><thead><tr>' +
       '<th>Graph</th><th>LP optimum</th><th>Integer optimum</th><th>Gap</th><th>2 − 2/n</th>' +

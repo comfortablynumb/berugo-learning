@@ -3,7 +3,7 @@
 Where the implementation stands, and exactly what the next session should pick up.
 Update this file at the end of any session that leaves work unfinished.
 
-**Last updated:** 2026-08-27 (M31 complete — nine sections, 307 in the tree. The tree is GREEN.)
+**Last updated:** 2026-08-30 (M37 IN PROGRESS and uncommitted — see the M37 section at the end of this file. Unit tests green; wiring, render, lint and build:css not re-run.)
 
 ---
 
@@ -4692,3 +4692,201 @@ other. Five faults are precise with 32 entries occupied. `chain+chain` gains 1.5
 
 M37 — caches and the memory hierarchy — is next, and it inherits `machines/ooo/cache.js` and the
 `stride`/`chase` pair. M38–M64 follow in `doc/ROADMAP.md` order, using the nine-step shape above.
+
+---
+
+## M37 — caches and the memory hierarchy
+
+**Done and green.** Ten sections, 366 in the tree, `npm test` and
+`npm run lint:size` clean, the stylesheet rebuilt, and the ten sections opened
+in a browser. Finished on 2026-08-30, in one commit with the GitHub Pages
+workflow and the layout fixes listed below.
+
+### What it is
+
+**Ten section pairs** (`sections/<id>-{template,section}.js`), all parsing and
+registered, element-id prefixes in brackets:
+
+| # | id | prefix |
+|---|---|---|
+| 37.1 | `memory-hierarchy-numbers` | `lad-` |
+| 37.2 | `cache-organisation` | `org-` |
+| 37.3 | `cache-policies` | `pol-` |
+| 37.4 | `cache-performance-analysis` | `cpa-` |
+| 37.5 | `cache-friendly-software` | `cfs-` |
+| 37.6 | `virtual-memory-and-the-tlb` | `tlb-` |
+| 37.7 | `prefetching` | `pfe-` |
+| 37.8 | `dram-and-the-memory-controller` | `dram-` |
+| 37.9 | `numa-and-affinity` | `numa-` |
+| 37.10 | `measuring-the-hierarchy` | `msr-` |
+
+**Machinery:** `machines/memory/{cache,hierarchy,tlb,dram,numa}.js`,
+`algorithms/{three-cs,prefetchers,cache-microbench,matrix-blocking}.js`,
+`viz/{cache-view,dram-timeline-view}.js`, `sections/memory-lab.js`.
+
+**Content — all twelve files written and passing the coverage test:**
+`content/concepts-cache{,-software,-systems}.js`,
+`examples-cache{,-software,-systems}.js`,
+`reference-cache{,-software,-systems}.js`,
+`exercises-cache{,-software,-systems}.js`.
+
+The curriculum and `index.html` are wired; `Curriculum.sections().length` is 366.
+
+### NAMING TRAP that cost time — do not repeat it
+
+M20-era memory management already owns `content/{concepts,examples,reference,
+exercises}-memory*.js`. Writing `concepts-memory.js` for M37 **silently
+clobbered** the existing M20 file (it was restored from HEAD). M37 content is
+therefore named `*-cache*.js`. Check `git ls-files src/js/content/` before
+choosing a content filename.
+
+### The three test files, and what each is for
+
+- `tests/unit/cache-modules.test.js` — the five `machines/memory/*` modules.
+  Two checks carry it: an inclusive hierarchy must actually be inclusive (and
+  only a geometry whose L2 is narrower than its L1 exercises the rule at all —
+  under the preset it never fires, so a test written against the preset passes
+  whether the rule is implemented or deleted), and every mechanism that is
+  supposed to change something has a test that fails if it is removed.
+- `tests/unit/cache-algorithms.test.js` — the four algorithms and the two
+  views. The three-Cs categories must sum to the miss count exactly, and each
+  confounder the discovery method claims to avoid has to be shown breaking it.
+  Split from the file above at 987 lines, which is too near the 1 000 limit to
+  leave.
+- `tests/unit/worked-examples-cache.test.js` — 38 tests recomputing every
+  figure the twenty worked examples quote, from the same modules and the same
+  settings the sections use. Where the prose does arithmetic — a ratio, a cost
+  per million accesses — the arithmetic is redone from the measured inputs
+  rather than from the quoted output.
+
+### Shipped in the same commit, unrelated to M37
+
+- `.github/workflows/pages.yml` — GitHub Pages publish (check → build → deploy).
+  README gained a "Publishing" block; the repo still needs the one-time manual
+  setting **Pages → Build and deployment → Source → GitHub Actions**.
+- `manifest.webmanifest` lost its `"id": "/"`. Every other path in the shell,
+  the manifest and the service worker is relative, so the app works unchanged
+  under a project subpath — but an absolute id identifies the app by the origin
+  root, and on `<user>.github.io` that origin is shared with every other project
+  page the same account publishes. With the member absent the id defaults to the
+  start URL, which is correct under any subpath.
+- `src/css/components.css` — new `.grid-even` (two equal columns). `.grid-2`
+  stays the sidebar layout (`minmax(220px,300px) 1fr`). 30 templates were
+  switched from `.grid-2` to `.grid-even` where the first child was a card
+  rather than a `ControlPanel`; `code-engine` and `js-systems` were deliberately
+  left on `.grid-2`.
+- Three placeholder metrics now read honestly instead of showing a stale number:
+  `stacks-and-frames` (`stack-headroom`), `disjoint-sets` (`dsu-visits`),
+  `algebraic-data-types-and-pattern-matching` (`adt-witness`).
+
+### Defects the M37 measurements found (all fixed, keep the lesson)
+
+- **RRIP was defeated by its own install.** `install` called `promote()`, which
+  reset the re-reference value to 0, so the insertion prediction never applied
+  and RRIP scored *identically to LRU* on the scan fixture it exists to beat.
+  Fixed with `touch(cache, set, way, onHit)`: only a hit resets.
+- **DRAM row-hit rate was always 0.** `counters[outcome] += 1` with singular
+  outcome names (`rowHit`) against plural counter keys (`rowHits`). Fixed with
+  an explicit `COUNTER` map.
+- **DRAM banks could not overlap.** A single global clock made eight banks
+  behave like one and the interleaving control did nothing. Fixed with per-bank
+  `freeAt` plus a shared `busUntil`, and `overlap = cost - tCAS`.
+- **Script order.** `algorithms/{three-cs,prefetchers,cache-microbench}.js` were
+  loaded *before* `machines/memory/*`, so their `root.Memory.Cache` guard fell
+  through to `require()` and threw in the browser. Only the console saw it; the
+  wiring audit did not. They now load after the machines.
+- **`msr-assoc-table` "the answer is" was computed per row** (`lines - 1`), so
+  the row after the answer claimed a different one. Now it names the first
+  failing count and says so.
+- **`cpa-assoc` caption asserted a shape the data contradicts.** With capacity
+  held fixed, more ways means fewer sets, and on the n=64 matmul the miss count
+  is *not* monotone (2-way is the best row at 16 932; 16-way is worst at
+  75 920). Fully associative LRU takes 33 792 — worse than several set-
+  associative rows, which is the cyclic-thrash effect from 37.3. The caption is
+  now computed from the rows and names the non-monotonicity.
+- **Pseudo-LRU was pseudo-MOST-recently-used, and it looked like a finding.**
+  `plruTouch` wrote `right ? 0 : 1` while `plruVictim` walks right on a 0, so a
+  touch pointed the victim search *into* the half just used and the policy
+  evicted the line it had touched a moment earlier. Nothing about that is
+  visible in a hit rate — it evicts one line per miss, never overflows a set,
+  and scores within a per cent of LRU on ordinary walks. What it did was win the
+  cyclic fixture LRU is supposed to lose, 150 of 180 against 0, which four
+  places in the content had written up as "the approximation beats what it
+  approximates". Corrected, pLRU scores 0 like the policy it approximates, and
+  random at 132 is the only one that escapes — which is the textbook result and
+  the better lesson: an approximation inherits the worst case, only a different
+  rule escapes it. Caught by asserting that the victim is not the way just
+  touched.
+- **The access-pattern control changed nothing at all, on two sections.** 37.1
+  and 37.10 both offer chase / ordered / sequential and both explained at length
+  what each does to the measurement — and all three produced the *identical*
+  curve, because the harness had no prefetcher and no memory-level parallelism
+  for a predictable pattern to exploit. A trace of addresses cannot express
+  dependence, so an ordered chase and a sequential walk were also byte-for-byte
+  the same input. Fixed by building the mechanism rather than deleting the
+  claim: `Microbench.timedWalk` runs the real stride prefetcher from
+  `prefetchers.js` over the actual address stream, and completes independent
+  accesses through a sliding window of ten outstanding misses with a one-per-
+  cycle issue floor. Nothing tells the prefetcher which walk it is looking at.
+  The chase is unchanged at 4/18/63/313 with three steps, because no delta ever
+  repeats; the ordered chase goes flat at 4.0 — "it all fits in L1" — and the
+  sequential walk flat at 1.0, *below* the L1 hit latency, which is the one
+  confounder of the four that announces itself. Both sections now share the one
+  harness. `cache-algorithms.test.js` asserts the three answers differ and,
+  with `prefetch: false`, that they collapse back into one.
+- **Two content figures were simply wrong.** Padding the *blocked* matrix
+  multiply was written up as "still 3,072 trips: there were 0 conflict misses
+  left to remove"; it is 3,144, because the padding is still 24 more lines to
+  touch — faintly harmful rather than neutral, which is a better statement of
+  the rule. And next-line on the random fixture issues 4,073 lines of which four
+  are used, not 4,076.
+
+### Fixtures that measure nothing, and why they are kept
+
+- **`bankConflict` is inert under both DRAM policies**, at 0.0% row hits and
+  22.3 either way. A stride of exactly the bank span puts every request in one
+  bank, so there is never a second bank to overlap with and never a queued
+  request hitting an open row. It stays in the matrix because it is the shape
+  that makes the interleaving decision matter, and the row that shows a
+  scheduler with nothing to schedule is worth as much as the row that shows one
+  winning.
+- **Interleaving is worth nothing on the random stream** (45.7 bank-first
+  against 46.1 row-first, at under half a per cent of row hits either way).
+  Nothing is adjacent, so no address-bit assignment helps. The
+  same table shows it worth 5% on a sequential walk and far more on interleaved
+  streams, which is the point of having all four rows.
+- **`alias`-style traps from M36 recur here as the ordered chase**, which is
+  kept precisely because it produces the *wrong* answer confidently rather than
+  no answer at all.
+
+### Figures the content quotes, all re-derived by `worked-examples-cache.test.js`
+
+- 37.1 capacities 32 KiB / 512 KiB / 8 MiB recovered exactly; 4.0 → 18.0 → 63.0
+  → 313.0 cycles, at ratios 4.50x / 3.50x / 4.97x; DRAM is 78.3 L1 hits.
+- 37.2 hit rate 66.7% at a 64 B stride, 0.0% at 2048 B; associativity is a
+  cliff (0.0% at 8 ways, 75.0% at 16); 16 B lines fetch 4 096 B and 256 B lines
+  16 384 B for the same 2 048 B used.
+- 37.3 write-back 4 transactions vs write-through 1000, and 1 936 vs 1 000 the
+  other way; RRIP holds a scan of 8 (156 of 160 against 80) and loses at 16.
+- 37.4 41 992 misses = 1 536 + 8 064 + 32 392, exactly; AMAT 5.32 both ways,
+  with L2's *local* miss rate 3.61%.
+- 37.5 41 992 → 9 551 → 3 072 trips (13.67x); padding +1 element = 2.50x; the
+  rule picks tile 36 at 3 292 and the sweep picks 40 at 2 998.
+- 37.6 reach 256 KiB, 91.5 cycles/access at 4x reach, 1.0 with 2 MiB pages;
+  1 936 cycles per context switch without address-space identifiers.
+- 37.7 stride 98% coverage at 100% accuracy for 2 extra lines; stream 99% at
+  33% for 1 022; next-line issues 4 073 lines on noise and uses 4.
+- 37.8 FCFS 0% row hits / 31.4 vs FR-FCFS 48.4% / 64.5; identical at depth 1;
+  banks worth 1.12x and then nothing; bank-first 66.2 vs row-first 63.2.
+- 37.9 mistake 50% locality at 110.0 cycles, fix 100% at 80.0; handoff 16
+  migrations, alternating 0.
+- 37.10 all four numbers recovered exactly (32 KiB / 512 KiB / 8 MiB, 8 ways,
+  64 B lines); ordered flat at 4.0, sequential flat at 1.0, and including the
+  first pass lifts the curve to 81.3 / 91.8 / 125.5 / 313.0 and loses a step.
+
+### Then
+
+M38 — cache coherence and memory consistency — is next, and it inherits
+`machines/memory/{cache,hierarchy}.js` and the inclusion policy this milestone
+enforces and tests. M39–M64 follow in `doc/ROADMAP.md` order, using the
+nine-step shape above.

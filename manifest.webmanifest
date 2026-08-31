@@ -2,7 +2,6 @@
   "name": "Berugo Learning",
   "short_name": "Berugo",
   "description": "Computer science and systems engineering, runnable: algorithms, data structures, architecture and systems, with a live demo and a graded lab in every section.",
-  "id": "/",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",

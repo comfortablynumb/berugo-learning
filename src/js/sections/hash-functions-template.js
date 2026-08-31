@@ -43,7 +43,7 @@
       'never mixed.</p></div></div>' +
       '</div>' +
       scope.MetricGrid.markup(METRICS) +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">Bucket distribution</div>' +
       '<div class="card-body"><div id="hf-histogram"></div></div></div>' +
       '<div class="card"><div class="card-header">Composite keys: XOR against an ordered combine</div>' +

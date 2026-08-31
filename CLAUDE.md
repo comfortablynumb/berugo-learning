@@ -9,11 +9,12 @@ explained in full, diagram, insight), **Examples** (runnable demo with charts, w
 graded code lab) and **References** (the structured reference block).
 
 ## Status
-**M00–M36 are built** (356 sections; M00–M10, M16 and M31–M36 also verified in a browser), each
+**M00–M37 are built** (366 sections; M00–M10, M16 and M31–M37 also verified in a browser), each
 carrying 8+ concepts with full explanations, two worked examples, a reference entry and a graded
-exercise. The tree is green. **M37 — caches and the memory hierarchy is next**, and nothing of it
-exists yet; it inherits `machines/ooo/cache.js` and M36's `stride`/`chase` fixture pair. Read
-`doc/BUILD-STATE.md` first, its M36 section carries the nine-step shape to copy. The rest of the curriculum follows the order in
+exercise. The tree is green. **M38 — cache coherence and memory consistency is next**, and nothing
+of it exists yet; it inherits `machines/memory/{cache,hierarchy}.js` and the inclusion policy M37
+enforces. Read `doc/BUILD-STATE.md` first, its M37 section carries the nine-step shape to copy.
+The rest of the curriculum follows the order in
 `doc/ROADMAP.md` (65 milestones in `doc/milestones/`). Keep `npm test` and `npm run lint:size`
 green at every step, and update the README status block and `doc/BUILD-STATE.md` as milestones
 land.

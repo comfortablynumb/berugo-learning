@@ -47,7 +47,7 @@
       '<th>Conflicts</th><th>Nodes ÷ 2·h!</th>' +
       '</tr></thead><tbody></tbody></table>' +
       '<p class="note" id="saz-sweep-note"></p></div></div>' +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">Karp’s chain, one link at a time</div>' +
       '<div class="card-body"><table class="ref-table" id="saz-chain"><thead><tr>' +
       '<th>From</th><th>To</th><th>The gadget</th>' +

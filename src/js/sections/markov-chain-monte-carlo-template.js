@@ -52,7 +52,7 @@
       '<th>Honest error bar</th>' +
       '</tr></thead><tbody></tbody></table>' +
       '<p class="note" id="mcm-widths-note"></p></div></div>' +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">Autocorrelation, lag by lag</div>' +
       '<div class="card-body"><div id="mcm-acf" class="chart-host"></div>' +
       '<div id="mcm-acf-legend"></div><p class="note" id="mcm-acf-note"></p></div></div>' +

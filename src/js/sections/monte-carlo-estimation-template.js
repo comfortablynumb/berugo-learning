@@ -56,7 +56,7 @@
       '<th>Van der Corput error</th><th>Star discrepancy</th>' +
       '</tr></thead><tbody></tbody></table>' +
       '<p class="note" id="mce-series-note"></p></div></div>' +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">Dimension, at a fixed point budget</div>' +
       '<div class="card-body"><table class="ref-table" id="mce-dimension"><thead><tr>' +
       '<th>d</th><th>Nodes per axis</th><th>Grid points</th><th>Grid error</th>' +

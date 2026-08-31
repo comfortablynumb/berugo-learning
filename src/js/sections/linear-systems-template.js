@@ -56,7 +56,7 @@
       '<th>Method</th><th>Iterations</th><th>Final residual</th><th>Outcome</th>' +
       '</tr></thead><tbody></tbody></table>' +
       '<p class="note" id="ls-iterative-note"></p></div></div>' +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">Finding the relaxation factor by sweeping it</div>' +
       '<div class="card-body"><table class="ref-table" id="ls-omega-table"><thead><tr>' +
       '<th>ω</th><th>Iterations</th>' +

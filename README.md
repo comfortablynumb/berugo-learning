@@ -14,14 +14,14 @@ faithfully in a browser, the section models it, says so plainly, and states what
 
 ## Status
 
-**M00–M36 shipped (356 sections). Building the curriculum, milestone by milestone.**
+**M00–M37 shipped (366 sections). Building the curriculum, milestone by milestone.**
 
 - ✅ Curriculum designed: 65 milestones, 634 sections, 11 tracks — one file per milestone in
   [`doc/milestones/`](doc/milestones/)
 - ✅ Architecture and conventions fixed — [`doc/architecture.md`](doc/architecture.md)
 - ✅ Build order and dependency graph — [`doc/ROADMAP.md`](doc/ROADMAP.md)
 - ✅ Scope decisions recorded — [`doc/topic-suggestions.md`](doc/topic-suggestions.md)
-- ✅ **Notation decoder across all 356 sections, on all three tabs**: every mathematical symbol
+- ✅ **Notation decoder across all 366 sections, on all three tabs**: every mathematical symbol
   carries how to say it and what it does, revealed on hover, tap or keyboard focus — in the
   concepts and orientation, in the arithmetic of every worked example, in the cost table and
   equations of every reference block, and in the prompt of every graded exercise. Every formal
@@ -639,6 +639,42 @@ The render audit is not a substitute for opening the page, and M16's browser pas
   a branchless rewrite is **654 either way** — losing here, and winning above a measured
   **4.8-cycle** break-even penalty. 9 sections live.
 
+- ✅ **M37 — caches and the memory hierarchy**: the levels, measured rather than tabulated. A
+  shuffled pointer chase over a growing working set recovers **32 KiB, 512 KiB and 8 MiB** from
+  the timing alone — the harness is told none of them — and the same sweep run three ways is the
+  point of the milestone: laid out in address order it goes **flat at 4.0 cycles** because the
+  prefetcher answers instead, and as a sequential walk it goes flat at **1.0**, which is *below*
+  the four-cycle L1 hit and is therefore proof that throughput was measured rather than latency.
+  Address decomposition is a cliff you can walk off: the same 32 lines hit **66.7%** at a
+  64-byte stride and **0.0%** at 2 048, and sixteen conflicting lines get nothing at 8 ways and
+  **75.0%** at 16. No write policy wins both workloads — **4 transactions against 1 000** on a
+  rewritten working set, **1 936 against 1 000** on a streaming one. Every miss is classified by
+  what two other caches would have done, so the categories sum exactly: **1 536 + 8 064 + 32 392
+  = 41 992**, and three quarters being conflict misses is what picks the fix. Applying it takes
+  the naive matrix multiply to **3 072 trips, 13.67×**, with each transformation removing the
+  category it was aimed at — and padding the blocked version, which has no conflicts left, makes
+  it **slightly worse** rather than neutral. The translation reach is **entries × page size and
+  nothing else**: a knee exactly at 256 KiB, **91.5 cycles** an access past it, **1.0** with huge
+  pages, and a context switch without address-space identifiers costing **1 936 cycles** of pure
+  re-translation. Three prefetchers on one walk rank stream, stride, next-line by coverage and
+  the other way by traffic: the best coverage on the page spends **1 022 extra lines to remove
+  four more misses**, while the stride design's confidence counter issues **nothing at all** on a
+  random pattern at every threshold — where next-line issues **4 073 lines of which four are
+  used**. Reordering the DRAM queue takes the row-hit rate from **0.0% to 48.4%** and the
+  throughput from 31.4 to **64.5** with no hardware change, evaporates entirely at a queue depth
+  of one, and is paid for in a worst wait that grows **45 → 510** with the depth; banks are worth
+  **1.12×** and then nothing, because there is one bus. The NUMA mistake nobody writes costs
+  **1.38×** and is fixed by moving the initialisation loop, and a migration heuristic is judged
+  on the fixture it must refuse — **16 migrations** on a handoff and **0** on two nodes sharing.
+  Nine defects were found by these measurements and are documented where they were fixed. Two
+  are worth naming: a pseudo-LRU whose bits pointed the wrong way, so it evicted the line it had
+  just touched, beat true LRU on the fixture LRU is supposed to lose, and looked like a finding
+  rather than a bug; and an access-pattern control that changed nothing on two whole sections,
+  because the harness had no prefetcher and no overlap for a predictable pattern to exploit —
+  fixed by building the mechanism rather than softening the paragraph, with a test asserting
+  that the three answers collapse back into one when the prefetcher is switched off.
+  10 sections live.
+
 - ✅ **M36 — superscalar, out-of-order execution and speculation**: the M35 pipeline with its
   ordering broken and rebuilt out of renaming, a reorder buffer and a load/store queue, agreeing
   with the behavioural machine on **twelve programs under ten configurations**. The milestone
@@ -820,6 +856,27 @@ npm run test:wiring  # static audit of index.html and every module
 npm run test:unit    # node --test over the DOM-free logic modules
 npm run lint:size    # files over 1000 lines, functions over 50 lines
 ```
+
+### Publishing
+
+`.github/workflows/pages.yml` publishes the site to GitHub Pages on every push to `main`, and
+on demand through **Actions → Publish → Run workflow**. The deploy is gated on `npm test` and
+`npm run lint:size`, so a section that throws on render cannot reach the published site.
+
+The app is static and vendored, so publishing is a copy of the shell plus `assets/`, `lib/` and
+`src/` — about 30 MB and 1 700 scripts. Every path in `index.html`, the manifest and the service
+worker is relative, so it works unchanged under a project subpath such as
+`https://<user>.github.io/berugo-learning/`.
+
+Two things have to be done by hand once, and neither can live in the repository:
+
+- **Pages → Build and deployment → Source → GitHub Actions**, in the repository settings. Until
+  that is selected the workflow runs and the deploy step fails.
+- **The workflow file has to reach the default branch.** GitHub only offers `workflow_dispatch`
+  for workflows it can see on the default branch, and the push trigger is `main` — so neither
+  trigger fires while the file exists only on a feature branch, however green that branch is.
+  Merging the branch to `main` is what turns the publish on.
+
 
 ---
 

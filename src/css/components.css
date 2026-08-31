@@ -342,6 +342,10 @@ input[type="range"] {
   white-space: pre-wrap;
 }
 
+/* A narrow sidebar and a wide main column: the control panel on the left and
+   whatever it drives on the right. This is what almost every demo wants at the
+   top of its Examples tab, and the 300px cap is what keeps a control panel from
+   growing to half the page. */
 .grid-2 {
   display: grid;
   grid-template-columns: minmax(220px, 300px) 1fr;
@@ -349,8 +353,25 @@ input[type="range"] {
   align-items: start;
 }
 
+/* Two equal halves, for a pair of cards that are peers rather than a sidebar
+   and its content. Thirty-one sections used `.grid-2` for this and got a 300px
+   card beside a 1500px one - the class was doing exactly what it says, and the
+   markup was asking the wrong question.
+
+   `minmax(0, 1fr)` rather than `1fr`, because the implicit minimum of a grid
+   track is min-content: a card holding a wide table would otherwise refuse to
+   shrink and take the space from its neighbour, which is the same bug in a
+   different disguise. */
+.grid-even {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.875rem;
+  align-items: start;
+}
+
 @media (max-width: 900px) {
-  .grid-2 {
+  .grid-2,
+  .grid-even {
     grid-template-columns: 1fr;
   }
 }

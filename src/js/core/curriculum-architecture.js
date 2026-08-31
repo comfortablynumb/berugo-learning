@@ -275,10 +275,75 @@
               summary: 'Top-down analysis over the event log: four categories that sum to 100%, and the change each one implies',
               tags: ['top-down', 'front-end bound', 'back-end bound', 'bad speculation']
             }]
+        },
+        {
+          id: 'M37',
+          title: 'Caches and the memory hierarchy',
+          summary: 'A configurable multi-level cache, a TLB, a DRAM model and a NUMA topology, all measured rather than described: the three Cs sum exactly, the parameter-discovery method recovers the configured sizes from timing alone, and a prefetcher that removes 98% of the misses is reported as the net loss it is.',
+          sections: [
+            {
+              id: 'memory-hierarchy-numbers',
+              title: 'The hierarchy and the numbers',
+              summary: 'Latency recovered from timing alone: four cycles, eighteen, sixty-three, three hundred',
+              tags: ['locality', 'latency', 'processor-memory gap', 'pointer chase']
+            },
+            {
+              id: 'cache-organisation',
+              title: 'Cache organisation',
+              summary: 'Tag, index and offset, and the stride that turns a 32 KiB cache into 256 bytes',
+              tags: ['set associative', 'tag and index', 'line size', 'conflict']
+            },
+            {
+              id: 'cache-policies',
+              title: 'Policies: writes and replacement',
+              summary: 'Five replacement policies where only the one with no state survives the cyclic pattern, and the write policy that moves 250x the traffic',
+              tags: ['write back', 'write allocate', 'pseudo-LRU', 'rrip']
+            },
+            {
+              id: 'cache-performance-analysis',
+              title: 'Cache performance analysis',
+              summary: 'The three Cs by parallel simulation, summing exactly, and each one naming a different fix',
+              tags: ['three cs', 'amat', 'conflict', 'capacity']
+            },
+            {
+              id: 'cache-friendly-software',
+              title: 'Optimising software for the cache',
+              summary: 'One matrix multiply, four versions, and 13.7x fewer trips to memory',
+              tags: ['loop interchange', 'blocking', 'padding', 'tile size']
+            },
+            {
+              id: 'virtual-memory-and-the-tlb',
+              title: 'Virtual memory and the TLB',
+              summary: 'A reach cliff at exactly 256 KiB, and huge pages taking 106 cycles per access down to 1',
+              tags: ['tlb', 'page table walk', 'reach', 'huge pages']
+            },
+            {
+              id: 'prefetching',
+              title: 'Prefetching',
+              summary: 'Coverage without accuracy, measured: 98% of the misses removed and a net loss',
+              tags: ['stride prefetcher', 'coverage', 'accuracy', 'pollution']
+            },
+            {
+              id: 'dram-and-the-memory-controller',
+              title: 'DRAM and the memory controller',
+              summary: 'Row hits, misses and conflicts on a bank timeline, and the reordering that doubles throughput',
+              tags: ['row buffer', 'bank parallelism', 'FR-FCFS', 'interleaving']
+            },
+            {
+              id: 'numa-and-affinity',
+              title: 'NUMA and affinity',
+              summary: 'The parallel-for that allocates everything on one node, and what it costs',
+              tags: ['first touch', 'affinity', 'page migration', 'remote latency']
+            },
+            {
+              id: 'measuring-the-hierarchy',
+              title: 'Measuring the hierarchy',
+              summary: 'Cache sizes, line size and associativity recovered from timing, and the confounders that break it',
+              tags: ['microbenchmark', 'parameter discovery', 'stream', 'roofline']
+            }]
         }
       ],
       planned: [
-        { id: 'M37', title: 'Caches and the memory hierarchy', sections: 10 },
         { id: 'M38', title: 'Cache coherence and memory consistency', sections: 9 },
         { id: 'M39', title: 'Linking, loading and the ABI', sections: 9 },
         { id: 'M40', title: 'GPUs, SIMD and domain-specific accelerators', sections: 9 }

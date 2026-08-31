@@ -32,7 +32,7 @@
       'this engine. Both are shown, and they disagree — which is the lesson.</p></div></div>' +
       '</div>' +
       scope.MetricGrid.markup(METRICS) +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">Insertion-ordered map with O(1) delete</div>' +
       '<div class="card-body"><div id="hp-ordered" class="mono" style="font-size:.8125rem"></div>' +
       '<p class="note">Delete punches a hole rather than splicing. Without compaction the backing ' +

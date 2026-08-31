@@ -45,7 +45,7 @@
       '<th>Promised at least</th><th>Table cells</th><th>Cheaper than exact?</th>' +
       '</tr></thead><tbody></tbody></table>' +
       '<p class="note" id="sch-sweep-note"></p></div></div>' +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">A PTAS at each k, against the FPTAS at the same guarantee</div>' +
       '<div class="card-body"><table class="ref-table" id="sch-compare"><thead><tr>' +
       '<th>k</th><th>Guarantee</th><th>PTAS value</th><th>Subsets enumerated</th>' +

@@ -61,7 +61,7 @@
       '<th>Exact ties encountered</th>' +
       '</tr></thead><tbody></tbody></table>' +
       '<p class="note" id="fd-policies-note"></p></div></div>' +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">What an exact rational costs</div>' +
       '<div class="card-body"><div id="fd-chart" class="chart-host"></div>' +
       '<div id="fd-legend"></div><p class="note" id="fd-chart-note"></p></div></div>' +

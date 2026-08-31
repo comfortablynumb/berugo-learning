@@ -33,7 +33,7 @@
       'insertion walks the chain the previous ones built.</p></div></div>' +
       '</div>' +
       scope.MetricGrid.markup(METRICS) +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">Bucket occupancy under attack</div>' +
       '<div class="card-body"><div id="uh-buckets-view"></div></div></div>' +
       '<div class="card"><div class="card-header">Multiply-shift and tabulation</div>' +

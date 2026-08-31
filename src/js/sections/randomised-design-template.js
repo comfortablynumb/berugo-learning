@@ -51,7 +51,7 @@
       '<th>This composite’s bound</th><th>Rabin’s universal 4⁻ᵏ</th><th>Standard error</th>' +
       '</tr></thead><tbody></tbody></table>' +
       '<p class="note" id="rzd-amplify-note"></p></div></div>' +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">Las Vegas — always correct, and the runtime is the random variable</div>' +
       '<div class="card-body"><table class="ref-table" id="rzd-vegas-table"><thead><tr>' +
       '<th>Statistic</th><th>Measured</th><th>Predicted</th>' +

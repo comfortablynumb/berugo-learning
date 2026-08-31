@@ -30,7 +30,7 @@
       'matters either way.</p></div></div>' +
       '</div>' +
       scope.MetricGrid.markup(METRICS) +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">Probes as the table fills</div>' +
       '<div class="card-body"><div id="swt-chart"></div><div id="swt-legend"></div>' +
       '<p class="note">Group probes against slot probes for the same keys at the same load.</p>' +

@@ -53,7 +53,7 @@
       '<th>Measured accept rate</th><th>Schwartz–Zippel bound d/|F|</th>' +
       '</tr></thead><tbody></tbody></table>' +
       '<p class="note" id="frv-identity-note"></p></div></div>' +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">Comparing two long sequences by one number</div>' +
       '<div class="card-body"><table class="ref-table" id="frv-strings"><thead><tr>' +
       '<th>Field</th><th>Bits compared</th><th>One position differs</th>' +

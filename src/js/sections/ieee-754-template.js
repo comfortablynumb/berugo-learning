@@ -43,7 +43,7 @@
       '<p class="note" id="ie-word-note"></p></div></div>' +
       '</div>' +
       scope.MetricGrid.markup(METRICS) +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">The neighbours on either side</div>' +
       '<div class="card-body"><table class="ref-table" id="ie-neighbours"><thead><tr>' +
       '<th>Position</th><th>Value</th><th>Exact decimal</th>' +

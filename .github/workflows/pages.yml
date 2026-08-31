@@ -1,0 +1,106 @@
+# Publish the site to GitHub Pages.
+#
+# The app is static and vendored - no bundler, no server - so publishing is a
+# copy of the shell plus the four directories it loads from. Two things about
+# it are deliberate:
+#
+# The deploy is GATED on the full test suite. `npm test` runs the wiring audit,
+# the unit suite and the render audit, and the render audit boots every section
+# headlessly; a section that throws on render is exactly the kind of break that
+# would otherwise reach the site and stay there. A green deploy therefore means
+# something.
+#
+# The build step is `npm run build:css`, and it is not optional. Tailwind is
+# compiled into `lib/tailwind.css` and that file is what the page loads, so a
+# markup change published without it renders unstyled.
+name: Publish
+
+on:
+  push:
+    branches: [main]
+  # So the site can be published from a branch on purpose, rather than only as
+  # a side effect of merging.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deploy at a time, and a newer commit supersedes an in-flight older one.
+# `cancel-in-progress: false` because a half-finished deploy leaves the site in
+# a state nobody chose.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      # The wiring audit, the unit suite and the render audit.
+      - run: npm test
+
+      # File and function size limits, which are a review rule rather than a
+      # style preference here.
+      - run: npm run lint:size
+
+  build:
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Compile the stylesheet
+        run: npm run build:css
+
+      # Only what the browser asks for. The tests, the milestone documents and
+      # the tooling are not part of the app, and node_modules is 100 MB of
+      # things the page never loads.
+      - name: Assemble the site
+        run: |
+          mkdir -p _site
+          cp index.html manifest.webmanifest sw.js _site/
+          cp -r assets lib src _site/
+          # Pages runs Jekyll unless told not to, and Jekyll drops paths it
+          # does not recognise.
+          touch _site/.nojekyll
+
+      - name: Check the shell is really there
+        run: |
+          test -s _site/index.html
+          test -s _site/lib/tailwind.css
+          test -s _site/src/js/core/curriculum.js
+          echo "published $(find _site -name '*.js' | wc -l) scripts"
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

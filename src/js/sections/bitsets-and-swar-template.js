@@ -55,7 +55,7 @@
       '<th>Words touched</th><th>Set probes</th>' +
       '</tr></thead><tbody></tbody></table>' +
       '<p class="note" id="bs-ops-note"></p></div></div>' +
-      '<div class="grid-2" style="margin-top:.875rem">' +
+      '<div class="grid-even" style="margin-top:.875rem">' +
       '<div class="card"><div class="card-header">A sieve, both ways</div>' +
       '<div class="card-body"><table class="ref-table" id="bs-sieve"><thead><tr>' +
       '<th>Representation</th><th>Marks written</th><th>Bytes</th>' +

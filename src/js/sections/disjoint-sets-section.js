@@ -129,9 +129,15 @@
           ? 'after a find on every element'
           : 'press the button to run a find on every element'
       },
+      /* Says "no sweep yet" in words rather than leaving the em-dash: the tile
+         above already handles the same state that way, and a bare dash reads
+         as a broken tile rather than as a measurement nobody has taken. */
       'dsu-visits': {
-        value: lastSweep ? root.Format.fixed(lastSweep.nodeVisits / Math.max(1, dsu.size()), 3) : '—',
-        note: lastSweep ? 'pointer hops per find, averaged over the sweep' : 'no sweep run yet'
+        value: lastSweep
+          ? root.Format.fixed(lastSweep.nodeVisits / Math.max(1, dsu.size()), 3)
+          : 'no sweep yet',
+        note: lastSweep ? 'pointer hops per find, averaged over the sweep'
+          : 'press the button above to run a find on every element'
       },
       'dsu-writes': {
         value: root.Format.exact(stats.pointerWrites),
