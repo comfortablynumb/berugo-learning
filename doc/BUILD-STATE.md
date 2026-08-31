@@ -4770,6 +4770,15 @@ choosing a content filename.
   fast-forwarded from its stub first commit to this one — GitHub fires neither
   the push trigger nor `workflow_dispatch` for a workflow it cannot see on the
   default branch.
+
+  The published site was then checked in a browser rather than trusted: 37.10
+  recovers 32 KiB / 512 KiB / 8 MiB, 8 ways and a 64 B line from the live
+  bundle, with the chart at full width and no empty table. The one thing that
+  only shows up off `localhost` is the load: about 1 700 individual script tags
+  take **43 s** to reach `interactive` cold and **4.5 s** warm. Not broken, but
+  it is the first thing to fix if the site is ever meant for an audience
+  arriving cold — and it is an argument for a bundler that the offline-first,
+  no-build-step design has so far not needed.
 - `manifest.webmanifest` lost its `"id": "/"`. Every other path in the shell,
   the manifest and the service worker is relative, so the app works unchanged
   under a project subpath — but an absolute id identifies the app by the origin

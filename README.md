@@ -865,6 +865,13 @@ on demand through **Actions → Publish → Run workflow**. The deploy is gated 
 
 The site is live at **https://comfortablynumb.github.io/berugo-learning/**.
 
+One honest caveat about that, measured rather than assumed: `index.html` loads about 1 700
+individual `<script>` tags, which is instant from `localhost` and is not instant over a network.
+A cold first visit took **43 seconds** to reach `interactive`; a repeat visit, with the service
+worker and the HTTP cache warm, took **4.5 seconds**. Nothing is broken — every section renders
+and the demos run — but the shape of the load is a consequence of having no bundler, and it is
+the first thing to fix if the published site is ever meant for an audience arriving cold.
+
 The app is static and vendored, so publishing is a copy of the shell plus `assets/`, `lib/` and
 `src/` — about 30 MB and 1 700 scripts. Every path in `index.html`, the manifest and the service
 worker is relative, so it works unchanged under the project subpath, and the manifest carries no
