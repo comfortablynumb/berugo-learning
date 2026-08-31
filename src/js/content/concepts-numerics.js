@@ -341,8 +341,9 @@
           'contrast, rounds once per solve. It is also more work: n solves to build, and then the ' +
           'same n² to apply as a triangular substitution pair. `inv(A) @ b` is worse than ' +
           '`solve(A, b)` on both axes in every library that offers both.',
-        example: 'The demo measures the inverse route at 8.4× the worst relative error of the ' +
-          'factorisation it was built from.'
+        example: 'The demo measures the inverse route at several times the worst relative error '
+          + 'of the factorisation it was built from - 8.4x on one engine and 6.0x on another, '
+          + 'which is why the claim is a band.'
       },
       {
         term: 'Cholesky is half the work when the matrix is symmetric positive definite',

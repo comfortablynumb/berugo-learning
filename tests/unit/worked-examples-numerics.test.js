@@ -229,14 +229,20 @@ test('linear systems: reuse is free and the inverse is not', function () {
   assert.strictEqual(study.factorisations.fresh, 20);
   assert.strictEqual(study.reusedError, study.freshError,
     'reuse and from-scratch give bit-identical answers');
+  /* The penalty is a ratio of two rounding-error norms and it is engine
+     sensitive - 8.41 on Node 24, 6.02 on Node 22, same source and same seed,
+     because the Gaussian that builds the right-hand sides runs on `Math.log`
+     and V8 does not round it identically across releases. Pinning it to a
+     decimal is asserting a property of the engine; the band is the claim the
+     section actually makes, and it is still tight enough to fail if the
+     inverse route ever stopped being worse. */
   assert.ok(study.inversePenalty > 2,
     'the inverse is materially worse, at ' + study.inversePenalty + 'x');
-  assert.ok(Math.abs(study.inversePenalty - 8.4) < 0.5,
-    'and the penalty quoted in the prose is ' + study.inversePenalty);
+  assert.ok(study.inversePenalty > 4 && study.inversePenalty < 12,
+    'several times worse rather than marginally or catastrophically, at '
+      + study.inversePenalty + 'x');
 
-  prose.quotes('linear-systems', [
-    '8.4', '20', exponential(study.reusedError, 2), exponential(study.inverseError, 2)
-  ]);
+  prose.quotes('linear-systems', ['20', 'several times worse']);
 });
 
 test('linear systems: the iterative race, and preconditioning as a no-op', function () {

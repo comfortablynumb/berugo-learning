@@ -256,17 +256,25 @@
           {
             do: 'Measure the worst relative error of factor-and-reuse and of solve-from-scratch.',
             why: 'To establish that reuse costs nothing in accuracy.',
-            work: 'both report 2.40e-11',
-            result: 'identical answers — reuse is purely a saving'
+            work: 'both report the same worst relative error, around 2e-11',
+            result: 'bit-identical answers — reuse is purely a saving'
           },
           {
             do: 'Measure the inverse route on the same right-hand sides.',
             why: 'This is the comparison the rule of thumb is about.',
-            work: '2.02e-10 against 2.40e-11',
-            result: '8.4× worse than the factorisation it was built from'
+            work: 'around 2e-10 against around 2e-11',
+            result: 'several times worse than the factorisation it was built from'
           },
           {
-            do: 'Explain the factor of 8.4 rather than just reporting it.',
+            do: 'Read the ratio as a band rather than a decimal.',
+            why: 'It divides two rounding errors, so its digits belong to the engine.',
+            work: '8.4x on one JavaScript engine and 6.0x on another, from the same seed, '
+              + 'because the Gaussian underneath runs on a `Math.log` that is not required '
+              + 'to be correctly rounded',
+            result: 'the honest statement is "several times", and the mechanism is what transfers'
+          },
+          {
+            do: 'Explain the factor rather than just reporting it.',
             why: 'A number without a mechanism is a coincidence.',
             work: 'each of the 60 columns of A⁻¹ is itself a rounded solve, so applying it applies 60 rounded answers instead of 1',
             result: 'the inverse accumulates its rounding before the caller asks anything'
@@ -278,9 +286,12 @@
             result: 'strictly more work, for a strictly worse answer'
           }
         ],
-        answer: 'Factor-and-reuse and solve-from-scratch give bit-identical answers at 2.40e-11, ' +
-          'so choosing between them is purely about the nineteen wasted factorisations. The ' +
-          'inverse is the one to remember: 2.02e-10, which is 8.4× worse, for more work. That is ' +
+        answer: 'Factor-and-reuse and solve-from-scratch give bit-identical answers, around ' +
+          '2e-11, so choosing between them is purely about the nineteen wasted factorisations. ' +
+          'The inverse is the one to remember: around 2e-10, several times worse, for more ' +
+          'work — and the ratio is quoted as a band on purpose, because dividing one rounding ' +
+          'error by another lands on 8.4 under one engine\'s `Math.log` and 6.0 under ' +
+          'another\'s. That is ' +
           'why "never invert a matrix" is a numerical rule and not a stylistic one — `inv(A) @ b` ' +
           'loses on both axes against `solve(A, b)` in every library that offers both, and the ' +
           'mechanism is that every column of the inverse is a solve whose rounding you inherit.'

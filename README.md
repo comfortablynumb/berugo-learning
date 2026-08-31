@@ -863,19 +863,24 @@ npm run lint:size    # files over 1000 lines, functions over 50 lines
 on demand through **Actions → Publish → Run workflow**. The deploy is gated on `npm test` and
 `npm run lint:size`, so a section that throws on render cannot reach the published site.
 
+The site is live at **https://comfortablynumb.github.io/berugo-learning/**.
+
 The app is static and vendored, so publishing is a copy of the shell plus `assets/`, `lib/` and
 `src/` — about 30 MB and 1 700 scripts. Every path in `index.html`, the manifest and the service
-worker is relative, so it works unchanged under a project subpath such as
-`https://<user>.github.io/berugo-learning/`.
+worker is relative, so it works unchanged under the project subpath, and the manifest carries no
+`id` member so its identity defaults to the start URL rather than to the origin root — which on a
+`github.io` account is shared with every other project page.
 
-Two things have to be done by hand once, and neither can live in the repository:
+The repository setting this needs is already applied: **Pages → Build and deployment → Source →
+GitHub Actions** (set once, and settable with
+`gh api repos/OWNER/REPO/pages -X POST -f build_type=workflow` rather than by hand). Two things are
+worth knowing if this is ever set up again elsewhere:
 
-- **Pages → Build and deployment → Source → GitHub Actions**, in the repository settings. Until
-  that is selected the workflow runs and the deploy step fails.
-- **The workflow file has to reach the default branch.** GitHub only offers `workflow_dispatch`
-  for workflows it can see on the default branch, and the push trigger is `main` — so neither
-  trigger fires while the file exists only on a feature branch, however green that branch is.
-  Merging the branch to `main` is what turns the publish on.
+- Without that setting the workflow still runs and the **deploy step fails** — the build is fine
+  and the publish is not.
+- GitHub only offers `workflow_dispatch` for workflows it can see on the **default branch**, and
+  the push trigger is `main`, so neither trigger fires while the file exists only on a feature
+  branch, however green that branch is.
 
 
 ---

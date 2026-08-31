@@ -237,7 +237,7 @@
             terms: [
               { sym: 'why P', meaning: 'the permutation records the row swaps partial pivoting performed' },
               { sym: 'reuse', meaning: '1 factorisation for 20 right-hand sides against 20, at identical accuracy' },
-              { sym: 'the inverse', meaning: '8.4× worse relative error than the factorisation it was built from' },
+              { sym: 'the inverse', meaning: 'several times worse relative error than the factorisation it was built from — 8.4× or 6.0× depending on the engine, so read it as a band' },
               { sym: 'Cholesky', meaning: 'A = LLᵀ at n³/6 for symmetric positive definite, no pivoting needed' }
             ]
           },
@@ -287,7 +287,7 @@
         {
           name: 'Forming A⁻¹ is more work and less accurate than keeping the factorisation',
           why: 'Every column of the inverse is itself a rounded solve, and applying it applies all of them.',
-          breaks: 'The measured penalty here is 8.4× on the relative error, for strictly more arithmetic.'
+          breaks: 'The measured penalty here is several times the relative error, for strictly more arithmetic — a ratio of two rounding errors, so its digits move with the engine and only its order transfers.'
         },
         {
           name: 'Cholesky succeeds exactly when the matrix is symmetric positive definite',

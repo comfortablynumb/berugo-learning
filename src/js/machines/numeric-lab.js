@@ -298,9 +298,22 @@
     });
   }
 
-  /** Factor once and reuse against many right-hand sides, against solving
-   *  from scratch each time - and against the explicit inverse, which is the
-   *  option that is both slower and less accurate. */
+  /**
+   * Factor once and reuse against many right-hand sides, against solving
+   * from scratch each time - and against the explicit inverse, which is the
+   * option that is both slower and less accurate.
+   *
+   * `inversePenalty` is a ratio of two rounding-error norms, and it is the one
+   * figure here that is NOT reproducible to its digits. The right-hand sides
+   * come from a Gaussian, which is built on `Math.log`; that function is not
+   * required to be correctly rounded and V8 has changed it between releases,
+   * so the last bits of the test vectors differ by engine and a ratio of two
+   * near-cancelling quantities amplifies the difference. Measured: 8.41 on
+   * Node 24 and 6.02 on Node 22, from identical source and an identical seed.
+   * The claim the section makes is therefore the one that survives that -
+   * several times worse, for more work - and the prose quotes a band rather
+   * than a decimal.
+   */
   function reuseStudy(options) {
     const settings = options || {};
     const n = settings.size || 60;

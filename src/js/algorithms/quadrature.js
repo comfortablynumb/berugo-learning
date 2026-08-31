@@ -86,10 +86,26 @@
    * method, so the minimum and the two slopes either side of it are visible
    * rather than described.
    */
+  /**
+   * The decade itself, not whatever `Math.pow` returns for it.
+   *
+   * `Math.pow` is not required to be correctly rounded and engines disagree:
+   * `Math.pow(10, -5)` is 0.00001 on some V8 builds and 9.999999999999999e-6
+   * on others, one unit in the last place below. The numeric literal parser IS
+   * correctly rounded by specification, so `Number('1e-5')` is the nearest
+   * double to ten to the minus five everywhere. It matters here because the
+   * step size is a value the section PRINTS and the test pins: a sweep whose
+   * grid reads 1e-5 in one browser and 9.999999999999999e-6 in another is
+   * reporting the engine rather than the method.
+   */
+  function decade(power) {
+    return Number('1e' + power);
+  }
+
   function stepSweep(spec) {
     const out = [];
     for (let power = spec.fromPower; power <= spec.toPower; power += 1) {
-      const h = Math.pow(10, power);
+      const h = decade(power);
       const row = {
         h: h,
         forward: Math.abs(forwardDifference(spec.f, spec.x, h) - spec.truth),

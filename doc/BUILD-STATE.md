@@ -4761,9 +4761,15 @@ choosing a content filename.
 
 ### Shipped in the same commit, unrelated to M37
 
-- `.github/workflows/pages.yml` — GitHub Pages publish (check → build → deploy).
-  README gained a "Publishing" block; the repo still needs the one-time manual
-  setting **Pages → Build and deployment → Source → GitHub Actions**.
+- `.github/workflows/pages.yml` — GitHub Pages publish (check → build → deploy),
+  and the site is **live at https://comfortablynumb.github.io/berugo-learning/**.
+  Two things had to happen outside the repository and both are done: Pages was
+  enabled with `gh api repos/OWNER/REPO/pages -X POST -f build_type=workflow`
+  (the "Source → GitHub Actions" setting, which is an API call rather than a
+  manual step, contrary to what the README first claimed), and `main` was
+  fast-forwarded from its stub first commit to this one — GitHub fires neither
+  the push trigger nor `workflow_dispatch` for a workflow it cannot see on the
+  default branch.
 - `manifest.webmanifest` lost its `"id": "/"`. Every other path in the shell,
   the manifest and the service worker is relative, so the app works unchanged
   under a project subpath — but an absolute id identifies the app by the origin
@@ -4840,6 +4846,36 @@ choosing a content filename.
   touch — faintly harmful rather than neutral, which is a better statement of
   the rule. And next-line on the random fixture issues 4,073 lines of which four
   are used, not 4,076.
+
+### What the first CI run found: two figures that belonged to the engine
+
+The publish workflow's `check` job runs on Node 22; this project is developed on
+Node 24. The first run went red with **2 failures out of 6 268**, both in M18
+numerics, both pre-existing, and both worth the trip:
+
+- **`Math.pow(10, -5)` is not the same number on every engine.** It is
+  `0.00001` on one V8 build and `9.999999999999999e-6` on another, one unit in
+  the last place apart, because `Math.pow` is not required to be correctly
+  rounded. `quadrature.js` built its step-size sweep with it, so the grid the
+  section *prints* was engine-dependent. Fixed with `Number('1e' + power)` —
+  the numeric literal parser IS correctly rounded by specification. This one is
+  a plain bug and the fix is exact.
+- **A ratio of two rounding errors has no reproducible digits.** The
+  inverse-versus-factorisation penalty in `reuseStudy` measures 8.41 on Node 24
+  and 6.02 on Node 22, from identical source and an identical seed: the
+  right-hand sides come from a Gaussian built on `Math.log`, which V8 has
+  changed between releases, and dividing two near-cancelling quantities
+  amplifies the last bits. Four places in the content quoted "8.4×" as a fact.
+  They now quote a band and say why, the test asserts the band, and the
+  mechanism — every column of the inverse is a solve whose rounding you inherit
+  — is what carries, because that part is true on any engine.
+
+The lesson generalises past these two: a figure derived through `Math.pow`,
+`Math.log`, `Math.exp`, `Math.sin` or `Math.cos` is reproducible on the engine
+that produced it and not necessarily anywhere else. Seeding the RNG does not
+help, because the RNG's own transcendentals move. CI is deliberately left on a
+different Node major from the development machine so that this class of drift
+keeps showing up rather than being pinned away.
 
 ### Fixtures that measure nothing, and why they are kept
 
