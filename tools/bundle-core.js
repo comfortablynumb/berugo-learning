@@ -93,4 +93,49 @@ function bundle(options) {
   };
 }
 
-module.exports = { bundle: bundle, rewrite: rewrite, concatenate: concatenate };
+/* -------------------------------------------------- the stylesheet */
+
+/* `@import` is the other serial round trip in the boot path. The browser has
+   to fetch `main.css`, parse it, and only then discover the eleven files it
+   pulls in — so the stylesheet costs two round trips and thirteen requests
+   where it could cost one and two. */
+const IMPORT_LINE = /^[ \t]*@import\s+url\(\s*['"]([^'"]+)['"]\s*\)\s*;[ \t]*\r?\n/gm;
+
+/**
+ * Inline a stylesheet's `@import`s, one level.
+ *
+ * Deliberately not recursive. Every imported file sits beside `main.css` and
+ * none of them imports anything, so `read` resolving against one directory is
+ * correct — and a nested import would quietly resolve against the wrong one.
+ * So instead of guessing, the guard below fails if an `@import` survives, and
+ * whoever adds a nested one gets told rather than shipped a broken stylesheet.
+ *
+ * The files contain no other `url()` at all, which is what makes inlining
+ * safe: nothing in them is resolved relative to where they used to live.
+ *
+ * @param {{ css: string, read: function }} options
+ * @returns {{ css: string, imports: string[] }}
+ */
+function inlineImports(options) {
+  const imports = [];
+
+  const out = options.css.replace(IMPORT_LINE, function (line, href) {
+    imports.push(href);
+    return '/* ==== ' + href + ' ==== */\n' + options.read(href) + '\n';
+  });
+
+  /* A fresh, non-global test: `IMPORT_LINE` carries a `lastIndex` and reusing
+     it here would make the guard depend on where the previous scan stopped. */
+  if (/@import/.test(out)) {
+    throw new Error('bundle: an @import survived inlining — nested imports are not supported');
+  }
+
+  return { css: out, imports: imports };
+}
+
+module.exports = {
+  bundle: bundle,
+  rewrite: rewrite,
+  concatenate: concatenate,
+  inlineImports: inlineImports
+};

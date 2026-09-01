@@ -854,7 +854,8 @@ Then open `http://localhost:3002`. Other commands:
 npm test             # wiring + unit + render audits — must be green before any commit
 npm run test:wiring  # static audit of index.html and every module
 npm run test:unit    # node --test over the DOM-free logic modules
-npm run test:render  # boots every section in jsdom; takes a section id or a shard ("2/4")
+npm run test:render  # boots every section in jsdom, four shards
+node tests/render-audit.js <id>   # ...or one section, or one shard ("2/4")
 npm run lint:size    # files over 1000 lines, functions over 50 lines
 npm run build:site   # the publish path: build:css, assemble _site, bundle, boot the bundle
 ```
@@ -874,7 +875,10 @@ the render audit in four shards. Booting the app in jsdom costs about two second
 perfectly. `tests/support/shard.js` owns the split, and `shard.test.js` asserts the shards
 partition the curriculum, because a sharding bug does not fail, it quietly audits less.
 
-The site is live at **https://comfortablynumb.github.io/berugo-learning/**.
+The site is live at **https://comfortablynumb.github.io/berugo-learning/**, and the last step of
+the workflow fetches that URL and checks it serves the bundled shell. Everything upstream of it is
+checked against `_site`; `deploy-pages` reports that it handed the artifact over, which is not the
+same claim as the site serving it.
 
 **The published shell is bundled, and the repository is not.** In development the app is 1 738
 separate classic scripts loaded in dependency order, which is the right trade when there is
@@ -883,8 +887,8 @@ took **43 seconds** to reach `interactive` (4.5 s warm, with the service worker 
 primed). `tools/bundle.js` concatenates those modules into one `lib/app.bundle.js` **in `_site`
 only**; `index.html`, `npm start`, the tests and the offline story are untouched. The shell goes
 from 1 739 script tags to 2 (jQuery, then the bundle) and from 174 KB to 57 KB; the bundle is
-22.7 MiB, 5.6 MiB gzipped, which is the same code the browser was fetching before across 1 738
-requests.
+22.7 MiB, and GitHub Pages serves it gzipped at 6.0 MB — the same code the browser was fetching
+before across 1 738 requests.
 
 Concatenation is safe here for reasons worth stating rather than assuming: every module in
 `src/js` is wrapped in a UMD IIFE, so none of them leaks a top-level binding; no file carries a
@@ -895,6 +899,18 @@ change is the failure mode — a syntax error used to kill one module and leave 
 and now it kills the bundle — so `tests/bundle-audit.js` boots the assembled site before it
 ships, checks that every module the source shell lists has made it in, and renders the first,
 middle and last section. `tools/bundle-core.js` is filesystem-free and unit tested.
+
+The stylesheet is inlined for the same reason. `src/css/main.css` is a manifest of eleven
+`@import`s, and the browser can only discover them *after* it has fetched and parsed the manifest —
+two serial round trips and thirteen requests where there could be one and two. The publish step
+splices the eleven files into `main.css` in place, keeping the cascade order the manifest declared.
+It is written back over `main.css` itself so the shell needs no second rewrite and any future
+relative `url()` still resolves from the directory the rules were written in; today the files
+contain no `url()` at all except the imports, which is what makes the splice safe. A nested import
+would resolve against the wrong directory, so rather than guess, an `@import` surviving the pass is
+an error.
+
+Boot requests go from **1 757 to 7**.
 
 `src/` is still published after bundling: the Web Worker sandbox is started from
 `src/js/core/worker-runtime.js` at run time and `importScripts` its dependencies by relative path.

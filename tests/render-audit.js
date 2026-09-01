@@ -30,9 +30,14 @@
  *
  * Run with a section id to audit one section: `node tests/render-audit.js bfs`.
  * Run with a shard spec to audit a slice of the tree: `... render-audit.js 2/4`.
- * Booting costs about two seconds and each section a couple more, so four
- * shards on four runners is close to a four-times speed-up; CI uses that, and
- * `npm run test:render` still audits everything.
+ *
+ * `npm run test:render` runs the four shards, and does so even though it runs
+ * them one after another in the same terminal. Booting costs about two seconds
+ * and each of the 366 sections a couple more, but the sections accumulate in
+ * one jsdom window: the heap reaches 3.5 GB by the end of a whole-tree run and
+ * garbage collection starts to dominate. Four processes of ninety-two sections
+ * each takes 3m06s where one process of 366 takes 6m41s. On CI the four shards
+ * are four runners and the same split is a four-times speed-up instead.
  */
 'use strict';
 

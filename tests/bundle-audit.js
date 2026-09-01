@@ -59,6 +59,25 @@ function checkShell(sources) {
   return sources;
 }
 
+/* The other serial round trip in the boot path: `main.css` used to name eleven
+   files the browser could only discover after parsing it. */
+function checkStylesheet(siteDir) {
+  const css = fs.readFileSync(path.join(siteDir, 'src/css/main.css'), 'utf8');
+  const expected = fs.readFileSync(path.join(ROOT, 'src/css/main.css'), 'utf8')
+    .match(/@import\s+url\(\s*['"]([^'"]+)['"]/g) || [];
+
+  if (css.indexOf('@import') !== -1) fail('stylesheet-not-inlined', 'main.css still has an @import');
+
+  expected.forEach(function (line) {
+    const href = /['"]([^'"]+)['"]/.exec(line)[1];
+
+    if (css.indexOf('/* ==== ' + href + ' ==== */') === -1) {
+      fail('missing-stylesheet', href + ' is imported by the source and not in the inlined sheet');
+    }
+  });
+  return expected.length;
+}
+
 /**
  * Every module the *source* shell lists must have a marker in the bundle.
  *
@@ -139,6 +158,7 @@ function run() {
   const html = fs.readFileSync(path.join(siteDir, 'index.html'), 'utf8');
   const sources = checkShell(scriptSources(html));
   const bundled = checkCompleteness(fs.readFileSync(path.join(siteDir, 'lib/app.bundle.js'), 'utf8'));
+  const sheets = checkStylesheet(siteDir);
 
   const booted = boot(siteDir, html, sources);
   const app = booted.window.BerugoStart ? booted.window.BerugoStart() : null;
@@ -156,8 +176,9 @@ function run() {
     fail('console-error', message.slice(0, 200));
   });
 
-  console.log('  bundled ' + bundled + ' modules into one script, booted ' + rendered +
-    ' sections, rendered ' + sampleIds(booted.window.Curriculum.sections()).join(', '));
+  console.log('  bundled ' + bundled + ' modules into one script and ' + sheets +
+    ' stylesheets into one sheet, booted ' + rendered + ' sections, rendered ' +
+    sampleIds(booted.window.Curriculum.sections()).join(', '));
 }
 
 try {

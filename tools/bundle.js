@@ -17,17 +17,17 @@
 
 const fs = require('fs');
 const path = require('path');
-const { bundle } = require('./bundle-core.js');
+const { bundle, inlineImports } = require('./bundle-core.js');
 
 const BUNDLE_PATH = 'lib/app.bundle.js';
 const PREFIX = 'src/js/';
+const STYLESHEET = 'src/css/main.css';
 
 function kib(bytes) {
   return (bytes / 1024).toFixed(0);
 }
 
-function main() {
-  const siteDir = path.resolve(process.argv[2] || '_site');
+function bundleScripts(siteDir) {
   const indexPath = path.join(siteDir, 'index.html');
 
   if (!fs.existsSync(indexPath)) throw new Error('bundle: no index.html under ' + siteDir);
@@ -45,6 +45,30 @@ function main() {
   console.log('bundled ' + result.sources.length + ' modules into ' + BUNDLE_PATH +
     ' (' + kib(Buffer.byteLength(result.script)) + ' KiB), ' +
     (result.html.match(/<script\s+src=/g) || []).length + ' script tags left in the shell');
+}
+
+/* Written back over `main.css` itself rather than to a new path, so the shell
+   needs no second rewrite and any future relative `url()` still resolves from
+   the directory the rules were written in. */
+function inlineStylesheet(siteDir) {
+  const cssPath = path.join(siteDir, STYLESHEET);
+  const cssDir = path.dirname(cssPath);
+
+  const result = inlineImports({
+    css: fs.readFileSync(cssPath, 'utf8'),
+    read: function (href) { return fs.readFileSync(path.join(cssDir, href), 'utf8'); }
+  });
+
+  fs.writeFileSync(cssPath, result.css);
+  console.log('inlined ' + result.imports.length + ' stylesheets into ' + STYLESHEET +
+    ' (' + kib(Buffer.byteLength(result.css)) + ' KiB)');
+}
+
+function main() {
+  const siteDir = path.resolve(process.argv[2] || '_site');
+
+  bundleScripts(siteDir);
+  inlineStylesheet(siteDir);
 }
 
 main();

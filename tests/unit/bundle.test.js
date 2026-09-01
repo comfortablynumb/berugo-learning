@@ -13,7 +13,7 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const { bundle, rewrite, concatenate } = require('../../tools/bundle-core.js');
+const { bundle, rewrite, concatenate, inlineImports } = require('../../tools/bundle-core.js');
 
 const SHELL = [
   '<!DOCTYPE html>',
@@ -128,4 +128,57 @@ test('rewrite reports the sources it took and leaves other prefixes alone', func
 
   assert.deepStrictEqual(result.sources, ['src/js/utils/helpers.js', 'src/js/utils/palette.js']);
   assert.ok(result.html.indexOf('src="src/js/app.js"') !== -1, 'app.js is outside the prefix');
+});
+
+/* -------------------------------------------------- the stylesheet */
+
+const SHEETS = {
+  'base.css': ':root { --hue-a: 210; }',
+  'layout.css': '.sidebar { width: 16rem; }'
+};
+
+function inlined(css) {
+  return inlineImports({
+    css: css,
+    read: function (href) {
+      if (!Object.prototype.hasOwnProperty.call(SHEETS, href)) throw new Error('no such sheet: ' + href);
+      return SHEETS[href];
+    }
+  });
+}
+
+test('every @import is replaced by the file it named, in order', function () {
+  const result = inlined("@import url('base.css');\n@import url('layout.css');\n.x { color: red; }\n");
+
+  assert.deepStrictEqual(result.imports, ['base.css', 'layout.css']);
+  assert.ok(result.css.indexOf('--hue-a: 210') < result.css.indexOf('width: 16rem'),
+    'the cascade order the manifest declared is preserved');
+  assert.ok(result.css.indexOf('.x { color: red; }') !== -1, 'the importing file\'s own rules survive');
+});
+
+test('the inlined stylesheet has no @import left and names what it absorbed', function () {
+  const result = inlined("@import url('base.css');\n");
+
+  assert.strictEqual(result.css.indexOf('@import'), -1);
+  assert.ok(result.css.indexOf('/* ==== base.css ==== */') !== -1, 'marker for base.css');
+});
+
+test('double quotes and loose spacing are the same import', function () {
+  assert.deepStrictEqual(inlined('  @import   url( "base.css" ) ;  \n').imports, ['base.css']);
+});
+
+test('an @import that survives is an error, because it would be a nested one', function () {
+  assert.throws(function () {
+    inlineImports({
+      css: "@import url('base.css');\n",
+      read: function () { return "@import url('deeper.css');\n.y {}"; }
+    });
+  }, /@import survived inlining/);
+});
+
+test('a stylesheet with no imports passes through untouched', function () {
+  const css = '.x { color: red; }\n';
+
+  assert.strictEqual(inlined(css).css, css);
+  assert.deepStrictEqual(inlined(css).imports, []);
 });

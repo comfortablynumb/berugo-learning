@@ -180,3 +180,26 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v5
+
+      # `deploy-pages` reports that it handed the artifact over, which is not
+      # the same claim as "the site serves it". Everything upstream of here has
+      # been checked against `_site`; this is the only step that looks at the
+      # URL a visitor would type. The retry is for CDN propagation, not for
+      # flakiness — a page that is still wrong after a minute is wrong.
+      - name: The published URL serves what was built
+        run: |
+          url='${{ steps.deployment.outputs.page_url }}'
+          for attempt in 1 2 3 4 5 6; do
+            page=$(curl -fsS --max-time 30 "$url" || true)
+            tags=$(printf '%s' "$page" | grep -c '<script src=' || true)
+            if printf '%s' "$page" | grep -q 'lib/app.bundle.js' && [ "$tags" = "2" ]; then
+              bundle=$(curl -fsS -o /dev/null -w '%{http_code} %{size_download}' \
+                -H 'Accept-Encoding: gzip' --max-time 120 "${url}lib/app.bundle.js")
+              echo "serving the bundled shell ($tags script tags); bundle: $bundle"
+              exit 0
+            fi
+            echo "attempt $attempt: $tags script tags, not the bundled shell yet"
+            sleep 10
+          done
+          echo "::error::$url is not serving the bundled shell"
+          exit 1

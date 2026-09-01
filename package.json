@@ -9,7 +9,7 @@
     "test": "npm run test:wiring && npm run test:unit && npm run test:render",
     "test:wiring": "node tests/wiring-audit.js",
     "test:unit": "node --test \"tests/unit/*.test.js\"",
-    "test:render": "node tests/render-audit.js",
+    "test:render": "node tests/render-audit.js 1/4 && node tests/render-audit.js 2/4 && node tests/render-audit.js 3/4 && node tests/render-audit.js 4/4",
     "test:bundle": "node tests/bundle-audit.js _site",
     "lint:size": "node tests/file-size-check.js",
     "build:css": "tailwindcss -i src/css/tailwind-source.css -o lib/tailwind.css --minify",
