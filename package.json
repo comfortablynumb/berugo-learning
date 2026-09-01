@@ -10,8 +10,10 @@
     "test:wiring": "node tests/wiring-audit.js",
     "test:unit": "node --test \"tests/unit/*.test.js\"",
     "test:render": "node tests/render-audit.js",
+    "test:bundle": "node tests/bundle-audit.js _site",
     "lint:size": "node tests/file-size-check.js",
-    "build:css": "tailwindcss -i src/css/tailwind-source.css -o lib/tailwind.css --minify"
+    "build:css": "tailwindcss -i src/css/tailwind-source.css -o lib/tailwind.css --minify",
+    "build:site": "npm run build:css && node tools/assemble-site.js _site && node tools/bundle.js _site && npm run test:bundle"
   },
   "devDependencies": {
     "jsdom": "^29.1.1",

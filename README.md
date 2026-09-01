@@ -851,44 +851,80 @@ npm start            # serve on http://localhost:3002
 Then open `http://localhost:3002`. Other commands:
 
 ```bash
-npm test             # wiring audit + unit tests — must be green before any commit
+npm test             # wiring + unit + render audits — must be green before any commit
 npm run test:wiring  # static audit of index.html and every module
 npm run test:unit    # node --test over the DOM-free logic modules
+npm run test:render  # boots every section in jsdom; takes a section id or a shard ("2/4")
 npm run lint:size    # files over 1000 lines, functions over 50 lines
+npm run build:site   # the publish path: build:css, assemble _site, bundle, boot the bundle
 ```
 
 ### Publishing
 
-`.github/workflows/pages.yml` publishes the site to GitHub Pages on every push to `main`, and
-on demand through **Actions → Publish → Run workflow**. The deploy is gated on `npm test` and
-`npm run lint:size`, so a section that throws on render cannot reach the published site.
+`.github/workflows/pages.yml` runs on **every branch push** and on demand through
+**Actions → Publish → Run workflow**; it deploys only from `main` or from a deliberate manual
+run. The earlier version ran nothing before a merge, which meant the first red build was red *on
+main* with the site already not publishing — work here happens on `feat/…` branches that
+fast-forward into main, so the branch push is the thing worth checking.
+
+The deploy is gated on the whole suite, so a section that throws on render cannot reach the
+published site. The suite runs across six parallel runners: the wiring audit, the unit suite, and
+the render audit in four shards. Booting the app in jsdom costs about two seconds and each of the
+366 sections a couple more, so the render audit — the long pole by a wide margin — shards almost
+perfectly. `tests/support/shard.js` owns the split, and `shard.test.js` asserts the shards
+partition the curriculum, because a sharding bug does not fail, it quietly audits less.
 
 The site is live at **https://comfortablynumb.github.io/berugo-learning/**.
 
-One honest caveat about that, measured rather than assumed: `index.html` loads about 1 700
-individual `<script>` tags, which is instant from `localhost` and is not instant over a network.
-A cold first visit took **43 seconds** to reach `interactive`; a repeat visit, with the service
-worker and the HTTP cache warm, took **4.5 seconds**. Nothing is broken — every section renders
-and the demos run — but the shape of the load is a consequence of having no bundler, and it is
-the first thing to fix if the published site is ever meant for an audience arriving cold.
+**The published shell is bundled, and the repository is not.** In development the app is 1 738
+separate classic scripts loaded in dependency order, which is the right trade when there is
+nothing to rebuild after an edit — and a bad one for a cold visitor: the first published version
+took **43 seconds** to reach `interactive` (4.5 s warm, with the service worker and the HTTP cache
+primed). `tools/bundle.js` concatenates those modules into one `lib/app.bundle.js` **in `_site`
+only**; `index.html`, `npm start`, the tests and the offline story are untouched. The shell goes
+from 1 739 script tags to 2 (jQuery, then the bundle) and from 174 KB to 57 KB; the bundle is
+22.7 MiB, 5.6 MiB gzipped, which is the same code the browser was fetching before across 1 738
+requests.
 
-The app is static and vendored, so publishing is a copy of the shell plus `assets/`, `lib/` and
-`src/` — about 30 MB and 1 700 scripts. Every path in `index.html`, the manifest and the service
-worker is relative, so it works unchanged under the project subpath, and the manifest carries no
-`id` member so its identity defaults to the start URL rather than to the origin root — which on a
-`github.io` account is shared with every other project page.
+Concatenation is safe here for reasons worth stating rather than assuming: every module in
+`src/js` is wrapped in a UMD IIFE, so none of them leaks a top-level binding; no file carries a
+top-level `"use strict"`, so no file's strictness leaks into the next; sources are joined with a
+newline and a semicolon, so a trailing line comment or expression cannot merge into its
+neighbour; and the order is exactly the order of the tags it replaces. What concatenation *does*
+change is the failure mode — a syntax error used to kill one module and leave the rest running,
+and now it kills the bundle — so `tests/bundle-audit.js` boots the assembled site before it
+ships, checks that every module the source shell lists has made it in, and renders the first,
+middle and last section. `tools/bundle-core.js` is filesystem-free and unit tested.
+
+`src/` is still published after bundling: the Web Worker sandbox is started from
+`src/js/core/worker-runtime.js` at run time and `importScripts` its dependencies by relative path.
+
+```
+npm run build:site   # build:css → assemble _site → bundle → boot the bundle
+```
+
+That one command is the publish path, and it runs the same way locally as it does in CI — which
+is why the assemble step is `tools/assemble-site.js` rather than four lines of `cp` that only
+work on Linux.
+
+Every path in `index.html`, the manifest and the service worker is relative, so the site works
+unchanged under the project subpath, and the manifest carries no `id` member so its identity
+defaults to the start URL rather than to the origin root — which on a `github.io` account is
+shared with every other project page.
 
 The repository setting this needs is already applied: **Pages → Build and deployment → Source →
 GitHub Actions** (set once, and settable with
-`gh api repos/OWNER/REPO/pages -X POST -f build_type=workflow` rather than by hand). Two things are
-worth knowing if this is ever set up again elsewhere:
+`gh api repos/OWNER/REPO/pages -X POST -f build_type=workflow` rather than by hand). Three things
+are worth knowing if this is ever set up again elsewhere:
 
 - Without that setting the workflow still runs and the **deploy step fails** — the build is fine
   and the publish is not.
-- GitHub only offers `workflow_dispatch` for workflows it can see on the **default branch**, and
-  the push trigger is `main`, so neither trigger fires while the file exists only on a feature
-  branch, however green that branch is.
-
+- GitHub only offers `workflow_dispatch` for workflows it can see on the **default branch**, so
+  the manual trigger does not appear while the file exists only on a feature branch, however
+  green that branch is.
+- Action majors go stale in a way that is a warning long before it is a failure. Every step ran
+  on the deprecated Node 20 runtime until the actions were moved to `checkout@v7`,
+  `setup-node@v7`, `configure-pages@v6`, `upload-pages-artifact@v5` and `deploy-pages@v5`.
 
 ---
 

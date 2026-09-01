@@ -1,23 +1,47 @@
 # Publish the site to GitHub Pages.
 #
-# The app is static and vendored - no bundler, no server - so publishing is a
-# copy of the shell plus the four directories it loads from. Two things about
-# it are deliberate:
+# The app is static and vendored — no bundler in development, no server — so
+# publishing is a copy of the shell plus the four directories it loads from,
+# with one transformation applied on the way out. Four things about this
+# workflow are deliberate:
 #
-# The deploy is GATED on the full test suite. `npm test` runs the wiring audit,
-# the unit suite and the render audit, and the render audit boots every section
+# It runs on EVERY BRANCH PUSH, not only on main. The first version gated the
+# deploy on `npm test` but ran nothing before a merge, so the first red build
+# was red *on main* — with the site already not publishing — and stayed that
+# way until a follow-up commit. Work here happens on `feat/…` branches that
+# fast-forward into main, so the branch push is the thing worth checking; a
+# check that only runs after the merge is a check that reports the fire.
+#
+# The deploy is GATED on the full suite. `npm test` runs the wiring audit, the
+# unit suite and the render audit, and the render audit boots every section
 # headlessly; a section that throws on render is exactly the kind of break that
-# would otherwise reach the site and stay there. A green deploy therefore means
-# something.
+# would otherwise reach the site and stay there. A green deploy means something.
+# The suite runs across six parallel runners because its legs are independent
+# and the render audit shards cleanly, so the wall clock is the longest leg
+# rather than the sum of all of them.
 #
 # The build step is `npm run build:css`, and it is not optional. Tailwind is
 # compiled into `lib/tailwind.css` and that file is what the page loads, so a
-# markup change published without it renders unstyled.
+# markup change published without it renders unstyled. `lib/tailwind.css` is
+# also committed, so the lint job checks the committed copy is what the source
+# compiles to — otherwise the dev server and the render audit run against a
+# stale stylesheet that CI silently repairs on the way to Pages.
+#
+# The published shell is BUNDLED. In development the app is 1 700-odd separate
+# classic scripts, which is the right trade when there is nothing to rebuild
+# after an edit and a terrible one for a cold visitor: the first published
+# version took 43 s to reach `interactive`. `tools/bundle.js` concatenates them
+# into one file *in `_site` only* — the repository, `npm start` and the offline
+# story are untouched — and `tests/bundle-audit.js` boots the result before it
+# ships, because concatenation's one interesting failure mode is a module that
+# parses alone and not beside its neighbours. Every branch runs that same
+# assemble-bundle-audit path; only main uploads it.
+
 name: Publish
 
 on:
   push:
-    branches: [main]
+    branches: ['**']
   # So the site can be published from a branch on purpose, rather than only as
   # a side effect of merging.
   workflow_dispatch:
@@ -28,79 +52,131 @@ permissions:
   id-token: write
 
 # One deploy at a time, and a newer commit supersedes an in-flight older one.
-# `cancel-in-progress: false` because a half-finished deploy leaves the site in
-# a state nobody chose.
+# `cancel-in-progress` is false on main because a half-finished deploy leaves
+# the site in a state nobody chose; on a branch there is nothing to leave
+# half-finished, so a superseded run is only wasted minutes.
 concurrency:
-  group: pages
-  cancel-in-progress: false
+  group: publish-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  check:
+  # The whole suite, split across parallel runners.
+  #
+  # The three legs are independent, and the render audit — which is the long
+  # pole by a wide margin — shards almost perfectly: booting the app costs
+  # about two seconds and each of the 366 sections a couple more, so four
+  # runners each pay the boot once and take a quarter of the tree.
+  # `tests/support/shard.js` owns the split and `shard.test.js` asserts the
+  # shards partition the curriculum, because a sharding bug does not fail, it
+  # quietly audits less.
+  test:
+    name: ${{ matrix.name }}
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: wiring,   run: npm run test:wiring }
+          - { name: unit,     run: npm run test:unit }
+          - { name: render 1, run: node tests/render-audit.js 1/4 }
+          - { name: render 2, run: node tests/render-audit.js 2/4 }
+          - { name: render 3, run: node tests/render-audit.js 3/4 }
+          - { name: render 4, run: node tests/render-audit.js 4/4 }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      # Deliberately a different Node major from the development machine, which
+      # is on 24. Two figures in M18 were engine-dependent and only this
+      # difference found them: a number derived through Math.pow or Math.log is
+      # reproducible on the engine that produced it and not necessarily
+      # anywhere else, and seeding the RNG does not help.
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
           cache: npm
 
       - run: npm ci
 
-      # The wiring audit, the unit suite and the render audit.
-      - run: npm test
+      - run: ${{ matrix.run }}
+
+  # Fast enough to report before the suite has warmed up, which is the point:
+  # a size violation or a stale stylesheet should not wait behind a quarter of
+  # an hour of tests to be told.
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
 
       # File and function size limits, which are a review rule rather than a
       # style preference here.
       - run: npm run lint:size
 
-  build:
-    needs: check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+      # `lib/tailwind.css` is committed *and* built. If the two disagree, the
+      # published site is right and every local run is wrong, which is the
+      # confusing direction for the mismatch to point.
+      - name: The committed stylesheet is what the source compiles to
+        run: |
+          npm run build:css
+          git diff --exit-code -- lib/tailwind.css \
+            || { echo "::error::lib/tailwind.css is stale — run 'npm run build:css' and commit it"; exit 1; }
 
-      - uses: actions/setup-node@v4
+  # Assembles and bundles the site, and proves the bundle boots. Runs on every
+  # branch — the transformation is part of publishing, so it is part of what a
+  # branch has to prove — and only uploads when there is somewhere to deploy to.
+  build:
+    needs: [test, lint]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
           cache: npm
 
       - run: npm ci
 
-      - name: Compile the stylesheet
-        run: npm run build:css
-
-      # Only what the browser asks for. The tests, the milestone documents and
-      # the tooling are not part of the app, and node_modules is 100 MB of
-      # things the page never loads.
-      - name: Assemble the site
-        run: |
-          mkdir -p _site
-          cp index.html manifest.webmanifest sw.js _site/
-          cp -r assets lib src _site/
-          # Pages runs Jekyll unless told not to, and Jekyll drops paths it
-          # does not recognise.
-          touch _site/.nojekyll
+      # Compile the stylesheet, copy only what the browser asks for, bundle the
+      # shell's modules into one script, and boot the result. The same command
+      # reproduces the published site locally, which is why it is a script here
+      # rather than four lines of shell that only work on Linux.
+      - name: Build the site
+        run: npm run build:site
 
       - name: Check the shell is really there
         run: |
           test -s _site/index.html
           test -s _site/lib/tailwind.css
-          test -s _site/src/js/core/curriculum.js
-          echo "published $(find _site -name '*.js' | wc -l) scripts"
+          test -s _site/lib/app.bundle.js
+          test -s _site/src/js/core/worker-runtime.js
+          echo "shell requests $(grep -c '<script src=' _site/index.html) scripts"
 
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
+        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
+        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
         with:
           path: _site
 
   deploy:
     needs: build
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

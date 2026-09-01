@@ -29,12 +29,18 @@
  *   - a metric tile still reading the em-dash placeholder after the update
  *
  * Run with a section id to audit one section: `node tests/render-audit.js bfs`.
+ * Run with a shard spec to audit a slice of the tree: `... render-audit.js 2/4`.
+ * Booting costs about two seconds and each section a couple more, so four
+ * shards on four runners is close to a four-times speed-up; CI uses that, and
+ * `npm run test:render` still audits everything.
  */
 'use strict';
 
 const fs = require('fs');
 const path = require('path');
 const { JSDOM, VirtualConsole } = require('jsdom');
+const { installStubs } = require('./support/jsdom-stubs.js');
+const { shardOf } = require('./support/shard.js');
 
 const ROOT = path.join(__dirname, '..');
 
@@ -62,47 +68,6 @@ function scriptSources(html) {
     match = pattern.exec(html);
   }
   return out;
-}
-
-/** jsdom has no layout and no canvas, and the app must not try to fetch the
- *  vendored D3 or mermaid over a network that is not there. */
-function installStubs(window) {
-  const noop = function () {};
-
-  window.ResizeObserver = function () {
-    return { observe: noop, unobserve: noop, disconnect: noop };
-  };
-  window.IntersectionObserver = window.ResizeObserver;
-  window.matchMedia = function (query) {
-    return { matches: false, media: query, addListener: noop, removeListener: noop,
-      addEventListener: noop, removeEventListener: noop, onchange: null };
-  };
-  window.scrollTo = noop;
-  window.HTMLCanvasElement.prototype.getContext = function () {
-    return canvasContext();
-  };
-  window.SVGElement.prototype.getBBox = function () {
-    return { x: 0, y: 0, width: 0, height: 0 };
-  };
-  window.Worker = undefined;
-}
-
-/** Enough of a 2D context that a canvas renderer runs to completion. Nothing
- *  here checks what was drawn - only that drawing did not throw. */
-function canvasContext() {
-  const noop = function () {};
-  const context = {
-    canvas: { width: 800, height: 400 },
-    measureText: function (text) { return { width: String(text).length * 6 }; },
-    createLinearGradient: function () { return { addColorStop: noop }; },
-    getImageData: function () { return { data: new Uint8ClampedArray(4) }; },
-    setTransform: noop, save: noop, restore: noop
-  };
-  ['clearRect', 'fillRect', 'strokeRect', 'beginPath', 'closePath', 'moveTo', 'lineTo',
-    'arc', 'arcTo', 'rect', 'ellipse', 'quadraticCurveTo', 'bezierCurveTo', 'fill', 'stroke',
-    'clip', 'fillText', 'strokeText', 'translate', 'scale', 'rotate', 'drawImage',
-    'setLineDash', 'putImageData'].forEach(function (name) { context[name] = noop; });
-  return context;
 }
 
 function boot() {
@@ -270,23 +235,39 @@ function auditSection(app, window, consoleErrors, sectionId) {
 
 /* -------------------------------------------------- the run */
 
+/**
+ * The argument is a section id, a shard spec ("2/4"), or absent for everything.
+ *
+ * Booting costs about two seconds and each section a couple more, so the audit
+ * shards almost perfectly across parallel runners; `support/shard.js` owns the
+ * split and its test asserts the shards partition the curriculum.
+ */
+function selectSections(all, argument) {
+  const shard = shardOf(all, argument);
+
+  if (shard) return shard;
+  return all.filter(function (section) { return !argument || section.id === argument; });
+}
+
 function run() {
-  const only = process.argv[2];
+  const argument = process.argv[2];
   const booted = boot();
   const window = booted.window;
   const app = window.BerugoStart ? window.BerugoStart() : null;
 
   if (!app) throw new Error('the app did not boot: window.BerugoStart is missing');
 
-  const sections = window.Curriculum.sections()
-    .filter(function (section) { return !only || section.id === only; });
+  const all = window.Curriculum.sections();
+  const sections = selectSections(all, argument);
+  const scope = shardOf(all, argument) ? ' (shard ' + argument + ')' : '';
 
-  if (sections.length === 0) throw new Error('no section matched ' + only);
+  if (sections.length === 0) throw new Error('no section matched ' + argument);
   sections.forEach(function (section) {
     auditSection(app, window, booted.consoleErrors, section.id);
   });
 
-  notes.push('booted ' + booted.scriptCount + ' scripts, activated ' + sections.length + ' sections');
+  notes.push('booted ' + booted.scriptCount + ' scripts, activated ' + sections.length +
+    ' of ' + all.length + ' sections' + scope);
   return sections.length;
 }
 

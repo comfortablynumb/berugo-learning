@@ -112,9 +112,10 @@ berugo-learning/
 ## Commands
 ```
 npm start           # serve on :3002 (required - Workers need http://)
-npm test            # wiring audit + unit tests
+npm test            # wiring audit + unit tests + render audit
 npm run lint:size   # file/function size report
 npm run build:css   # after any markup or template change
+npm run build:site  # the publish path: build:css, assemble _site, bundle, boot the bundle
 ```
 
 ## Adding a section
