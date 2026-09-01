@@ -883,12 +883,16 @@ same claim as the site serving it.
 **The published shell is bundled, and the repository is not.** In development the app is 1 738
 separate classic scripts loaded in dependency order, which is the right trade when there is
 nothing to rebuild after an edit — and a bad one for a cold visitor: the first published version
-took **43 seconds** to reach `interactive` (4.5 s warm, with the service worker and the HTTP cache
-primed). `tools/bundle.js` concatenates those modules into one `lib/app.bundle.js` **in `_site`
-only**; `index.html`, `npm start`, the tests and the offline story are untouched. The shell goes
-from 1 739 script tags to 2 (jQuery, then the bundle) and from 174 KB to 57 KB; the bundle is
-22.7 MiB, and GitHub Pages serves it gzipped at 6.0 MB — the same code the browser was fetching
-before across 1 738 requests.
+took **43 seconds** to reach `interactive`. `tools/bundle.js` concatenates those modules into one
+`lib/app.bundle.js` **in `_site` only**; `index.html`, `npm start`, the tests and the offline story
+are untouched. The shell goes from 1 739 script tags to 2 (jQuery, then the bundle) and from
+174 KB to 57 KB; the bundle is 22.7 MiB, and GitHub Pages serves it gzipped at 6.0 MB — the same
+code the browser was fetching before across 1 738 requests.
+
+Measured on the published site: **`domInteractive` 1 870 ms**, against 43 000 ms. The bundle takes
+457 ms to download cold on that connection and 55 ms revalidated, so the transfer is not the
+expensive part — the rest is parsing and executing the same 22.7 MiB the browser used to parse
+across 1 738 files.
 
 Concatenation is safe here for reasons worth stating rather than assuming: every module in
 `src/js` is wrapped in a UMD IIFE, so none of them leaks a top-level binding; no file carries a

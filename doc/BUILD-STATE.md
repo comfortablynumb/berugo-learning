@@ -4935,3 +4935,202 @@ M38 — cache coherence and memory consistency — is next, and it inherits
 `machines/memory/{cache,hierarchy}.js` and the inclusion policy this milestone
 enforces and tests. M39–M64 follow in `doc/ROADMAP.md` order, using the
 nine-step shape above.
+
+---
+
+## The Pages publish, made to work rather than to pass (complete)
+
+The workflow shipped with M37 was green from its second run onward, and the
+site it produced was not usable: a cold first visit took **43 s** to reach
+`interactive`. Green and broken at the same time, which is the shape of a check
+that measures the wrong thing. Three separate problems, fixed together.
+
+### 1 739 script tags, published as two
+
+In development the app is 1 738 `src/js` modules loaded as separate classic
+scripts in dependency order. That is the right trade while building it — there
+is nothing to rebuild after an edit — and a bad one for a visitor arriving
+cold. `tools/bundle.js` concatenates them into one `lib/app.bundle.js` **in
+`_site` only**: `index.html`, `npm start`, the tests and the offline story are
+untouched, and the repository still has no bundler.
+
+- The shell goes from **1 739 script tags to 2** (jQuery, then the bundle) and
+  from **174 KB to 57 KB**.
+- The bundle is **22.7 MiB**, and GitHub Pages serves it **gzipped at 6.03 MB**
+  — worth checking rather than assuming, because a CDN skipping compression
+  above some size threshold would have made this worse, not better.
+
+Concatenation is safe here for reasons that are stated rather than assumed, and
+each one is a thing that would have broken it:
+
+- Every module is wrapped in a UMD IIFE, so none leaks a top-level binding.
+  (Classic scripts already share one global lexical environment, so two
+  top-level `const`s of the same name collide as separate tags too — the bundle
+  does not introduce that failure, it moves it earlier.)
+- No file carries a top-level `"use strict"`, so no file's strictness leaks
+  into the files concatenated after it. jQuery looks like it does and does not:
+  its directive is inside the IIFE, and jQuery is left as its own tag anyway.
+- Sources are joined with a newline and a semicolon, so a file ending in a line
+  comment or a bare expression cannot merge into the next one.
+- Each module is preceded by a `/* ==== path ==== */` marker, which is what
+  makes a stack trace from the published site usable: the nearest marker above
+  a bundle line names the module that line belongs to.
+
+What concatenation genuinely changes is the failure mode. A syntax error used
+to kill one module and leave the rest running; now it kills the bundle. So
+`tests/bundle-audit.js` boots the assembled site before it ships — the shell
+has no module tags left, every module the source shell lists has a marker in
+the bundle, `BerugoStart` boots, the curriculum is the full 366, and the first,
+middle and last sections render. The dropped-module case is the one bundler bug
+that boots fine, which is why it is checked by name rather than by smoke test.
+`tools/bundle-core.js` is filesystem-free and unit tested.
+
+`src/` is still published: the Worker sandbox is started from
+`src/js/core/worker-runtime.js` at run time and `importScripts` its
+dependencies by relative path. Verified in a browser against the bundled site —
+the worker answers a ping, and the `binary-search` code lab grades its starter
+code 3 of 4 with the real failure message.
+
+### The stylesheet was the other serial round trip
+
+`src/css/main.css` is a manifest of eleven `@import`s, and the browser can only
+discover them *after* it has fetched and parsed the manifest: two round trips
+and thirteen requests where there could be one and two. The publish step
+splices the eleven files into `main.css` in place, keeping the cascade order the
+manifest declared — checked in a browser by toggling the theme, since
+`theme-dark.css` and `theme-light.css` only work if they land in the order the
+manifest listed them.
+
+It is written back over `main.css` itself so the shell needs no second rewrite
+and any future relative `url()` still resolves from the directory the rules were
+written in. Today the files contain no `url()` at all except the imports, which
+is what makes the splice safe. A nested import would resolve against the wrong
+directory, so rather than guess, an `@import` surviving the pass is an error.
+
+### What it comes to, measured on the published site
+
+| | before | after |
+|---|---|---|
+| Boot requests | 1 757 | **7** |
+| `domInteractive` | 43 000 ms | **1 870 ms** |
+| Shell | 174 KB, 1 739 script tags | 57 KB, 2 |
+| Stylesheet requests | 13, in two serial rounds | 2, in one |
+| Bundle over the wire | — | 6.03 MB gzipped, 457 ms forced cold |
+| CI, push to deployed | 16m51s | **~4m30s** |
+| First failing signal | 16 min | **15-20 s** |
+
+Two honesty notes on that `domInteractive`. It was measured with the service
+worker and its cache cleared, but the browser's HTTP cache still held the
+bundle from an earlier visit, so the transfer was a revalidation rather than a
+download. A forced download of the bundle on the same connection takes 457 ms
+(`fetch(url, {cache: 'reload'})`, against 55 ms revalidated), so a genuinely
+cold visit here is a little over two seconds — and the very first load of the
+bundle, measured before the stylesheet was also inlined, came in at 3 022 ms.
+Anywhere in that range is the same story against 43 s.
+
+And the bundle's `transferSize` reads 0 in the browser's timing entries, which
+is not a cache hit: a response that passes through a service worker reports
+zero unless the worker says otherwise. The timings above come from `duration`
+and from forced fetches, not from `transferSize`.
+
+The download is not the expensive part. 6 MB over the wire is under half a
+second; the rest is parsing and executing 22.7 MiB of JavaScript, which is the
+same work the browser was doing before across 1 738 files. Minifying would
+roughly halve it, and was measured and left alone for now: whole-line comments
+are only 8.9% of the bundle, so the win would come from mangling rather than
+from stripping, and that costs the stack traces the markers exist to keep.
+
+### Nothing ran before a merge
+
+The first version triggered on `push: branches: [main]`. Work here happens on
+`feat/…` branches that fast-forward into main, so nothing was checked until it
+was already on main — and the one red build was red on main, with the site
+already not publishing, and stayed that way until a follow-up commit. Now it
+runs on every branch push and deploys only from main or a deliberate
+`workflow_dispatch`. Every branch runs the full assemble-bundle-audit path; only
+main uploads it.
+
+### Seventeen minutes of feedback, in four
+
+`npm test` was one 16-minute step. It is now six parallel runners, and the run
+went from **16m51s to about 4m30s**, with the size lint and the wiring audit
+reporting in **20 seconds**.
+
+The render audit is the long pole and it shards almost perfectly: booting the
+app in jsdom costs about two seconds and each of the 366 sections a couple
+more, so four runners each pay the boot once and take a quarter of the tree —
+1m17s to 2m3s each, against roughly fourteen minutes unsharded. The split is
+round-robin rather than contiguous blocks, because sections are in curriculum
+order and a milestone's ten sections share a simulator and so tend to be alike
+in cost.
+
+`tests/support/shard.js` owns the split and `shard.test.js` asserts the shards
+*partition* the real curriculum at seven different shard counts. That test is
+the point: a sharding bug does not fail, it quietly audits less, which is the
+same blind-spot shape as M28's oracles.
+
+The unit suite is now the long pole at 3m26s. Node's built-in `--test-shard`
+would split it, and it was measured and left alone: the three shards come out
+at 1 187 / 1 012 / 4 085 tests because it shards by file and a few files hold
+most of the tests, so the balance is poor and the remaining saving is about a
+minute.
+
+**The same split halves the local run for a different reason.** `npm test` used
+to run the render audit as one process, and the sections accumulate in one
+jsdom window: the heap reaches 3.5 GB by the end of a whole-tree run and
+collection starts to dominate. Four processes of ninety-two sections take
+**3m06s** where one process of 366 takes **6m41s** — sequentially, on one
+machine, with no parallelism at all. `test:render` now runs the four shards one
+after another; `node tests/render-audit.js <id>` still audits one section.
+
+### The workflow now checks the URL a visitor would type
+
+`deploy-pages` reports that it handed the artifact over, which is not the same
+claim as the site serving it. Everything upstream of the deploy is checked
+against `_site` — the bundle audit boots it, the shell check greps it — and none
+of that looks at the published origin. The last step fetches
+`steps.deployment.outputs.page_url`, asserts the shell it gets back has two
+script tags and names the bundle, and reports the bundle's status and gzipped
+size. It retries for CDN propagation, not for flakiness: a page still wrong
+after a minute is wrong. On the first run that carried it, it printed
+`serving the bundled shell (2 script tags); bundle: 200 6029380`.
+
+### Three smaller things that were wrong
+
+- **Every step ran on the deprecated Node 20 action runtime.** Moved to
+  `checkout@v7`, `setup-node@v7`, `configure-pages@v6`,
+  `upload-pages-artifact@v5`, `deploy-pages@v5`. Every job now has a timeout,
+  so a hang costs minutes rather than six hours.
+- **`lib/tailwind.css` is committed *and* built, and nothing checked the two
+  agreed.** If they disagree the published site is right and every local run is
+  wrong, which is the confusing direction for a mismatch to point. The lint job
+  rebuilds it and fails on a diff. (It was in sync; the check is for next time.
+  The minified output has no newlines at all, so the CRLF/LF difference between
+  this Windows checkout and the Linux runner cannot produce a false failure.)
+- **`cache.addAll` is all-or-nothing.** One 404 in the service worker's shell
+  list rejects the batch and leaves the cache empty, and the install handler's
+  `catch` turned that into a successful-looking install with nothing precached.
+  Adding the bundle to the list makes that the normal case in the repository
+  copy, where `lib/app.bundle.js` does not exist — so entries are now cached
+  one at a time. Checked in a browser: all nine land, bundle included.
+
+### What is where
+
+| Path | Purpose |
+|---|---|
+| `tools/bundle-core.js` | Rewrite the shell, concatenate the modules, inline the `@import`s. No filesystem. |
+| `tools/bundle.js` | The CLI: reads and writes `_site` |
+| `tools/assemble-site.js` | Copy only what the browser asks for, in Node so it runs on Windows too |
+| `tests/bundle-audit.js` | Boots the published bundle, not the source tree |
+| `tests/support/shard.js` | The round-robin audit split |
+| `tests/support/jsdom-stubs.js` | The browser surface jsdom lacks, shared by both audits |
+
+`npm run build:site` is the whole publish path and runs identically locally and
+in CI, which is why the assemble step is a Node script rather than four lines of
+`cp` that only work on Linux.
+
+### Then
+
+The publish is the thing that was asked for and it is done: green, fast, and
+serving a site that is usable cold. M38 — cache coherence and memory
+consistency — is the next milestone, and nothing of it exists yet.

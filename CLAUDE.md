@@ -30,6 +30,9 @@ land.
 - **Storage:** `localStorage` behind `core/storage-adapter.js` (theme, progress, exercise state).
 - **Dependencies:** vendored into `lib/`. The app runs offline, but must be *served*
   (`npm start`) - Workers do not start from `file://`.
+- **No bundler in the repository.** `index.html` lists 1 738 classic scripts in dependency order.
+  The *publish* step concatenates them into `_site/lib/app.bundle.js` and inlines the stylesheet's
+  `@import`s (`npm run build:site`); `_site/` is gitignored and nothing built ever lands in `src/`.
 
 ## Project structure
 ```
