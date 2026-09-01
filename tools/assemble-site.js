@@ -43,8 +43,11 @@ function main() {
 
   FILES.concat(DIRECTORIES).forEach(function (name) { copyInto(siteDir, name); });
 
-  /* Pages runs Jekyll unless told not to, and Jekyll drops paths it does not
-     recognise — which here would be every directory the app loads from. */
+  /* Branch-served Pages runs Jekyll unless told not to, and Jekyll drops paths
+     it does not recognise. The artifact path this repository uses does not run
+     Jekyll at all — and `upload-pages-artifact` excludes dotfiles, so this
+     marker does not even reach the deployment. It is written anyway because it
+     costs nothing and it is what makes `_site` correct to serve any other way. */
   fs.writeFileSync(path.join(siteDir, '.nojekyll'), '');
 
   console.log('assembled ' + countFiles(siteDir) + ' files into ' + path.relative(ROOT, siteDir));

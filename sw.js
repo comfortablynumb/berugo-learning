@@ -20,14 +20,35 @@ const SHELL = [
   './lib/tailwind.css',
   './src/css/main.css',
   './lib/jquery-3.7.1.min.js',
+  /* Only exists in the published copy: the shell served from the repository
+     loads its 1 738 modules as separate tags and the publish step concatenates
+     them. Precached rather than left to the fetch handler because the first
+     visit downloads it either way, so caching it costs nothing and completes
+     the install. */
+  './lib/app.bundle.js',
   './assets/icon-192.png',
   './assets/icon-512.png'
 ];
 
+/**
+ * Each entry on its own, because `cache.addAll` is all-or-nothing.
+ *
+ * One 404 in the list rejects the whole batch and leaves the cache empty, and
+ * the `catch` below would swallow that into a successful-looking install with
+ * nothing precached. The bundle is exactly that entry when the app is served
+ * from the repository, so the list has to tolerate a miss rather than be
+ * voided by one.
+ */
+function precache(cache) {
+  return Promise.all(SHELL.map(function (url) {
+    return cache.add(url).catch(function () { return null; });
+  }));
+}
+
 self.addEventListener('install', function (event) {
   event.waitUntil(
     caches.open(VERSION)
-      .then(function (cache) { return cache.addAll(SHELL); })
+      .then(precache)
       .then(function () { return self.skipWaiting(); })
       .catch(function () { return self.skipWaiting(); })
   );

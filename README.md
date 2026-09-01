@@ -899,6 +899,14 @@ middle and last section. `tools/bundle-core.js` is filesystem-free and unit test
 `src/` is still published after bundling: the Web Worker sandbox is started from
 `src/js/core/worker-runtime.js` at run time and `importScripts` its dependencies by relative path.
 
+The service worker precaches the bundle, and precaches each entry on its own rather than through
+`cache.addAll`. `addAll` is all-or-nothing: one 404 in the list rejects the whole batch and leaves
+the cache empty, and the install handler's `catch` turns that into a successful-looking install
+with nothing precached. The bundle is exactly that entry — it does not exist in the repository
+copy — so the list has to tolerate a miss rather than be voided by one. On the published site all
+nine entries land, checked in a browser: `/`, the shell, the manifest, both stylesheets, jQuery,
+the bundle and both icons.
+
 ```
 npm run build:site   # build:css → assemble _site → bundle → boot the bundle
 ```
