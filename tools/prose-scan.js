@@ -88,12 +88,14 @@ function paragraphsOf(detail) {
  * Markdown counts, on both sides of the boundary: a paragraph here often opens
  * with a bold thesis, so the full stop can sit inside the `**` and the next
  * sentence can start with one. Treating either as a continuation glues two
- * sentences into a phantom that reports as the longest in the curriculum.
+ * sentences into a phantom that reports as the longest in the curriculum. The
+ * capital is \p{Lu} rather than A-Z, because a sentence here starts "Θ(g)
+ * asserts both at once" often enough to matter.
  */
 function sentences(text) {
   return String(text || '')
     .replace(/\s+/g, ' ')
-    .split(/(?<=[.!?][*_`"'”)\]]{0,3})\s+(?=[A-Z0-9"'“(*`_])/)
+    .split(/(?<=[.!?][*_`"'”)\]]{0,3})\s+(?=[\p{Lu}0-9"'“(*`_])/u)
     .map(function (s) { return s.trim(); })
     .filter(Boolean);
 }

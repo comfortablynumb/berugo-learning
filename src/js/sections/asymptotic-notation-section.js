@@ -29,11 +29,12 @@
           'like a property of quicksort, the way "sorted" is a property of an array. It is not. It ' +
           'is a promise about how the cost behaves once the input is big enough — and a promise ' +
           'can be tested, and can fail.',
-        'Here is the whole of it. To say f is O(g), you have to be able to name two numbers: a ' +
-          'multiplier c, and a size n₀ past which you stop caring about small inputs. The claim is ' +
-          'then that f(n) never rises above c·g(n) for any n from n₀ upward. That pair of numbers ' +
-          'is called a **witness**, because naming it is how the claim gets proved — which is why ' +
-          'nearly every argument about big-O is really an argument about whether such a pair exists.',
+        'Here is the whole of it. To say f is O(g), you have to be able to name two numbers. ' +
+          'One is a multiplier c. The other is a size n₀, past which you stop caring about small ' +
+          'inputs. The claim is then that f(n) never rises above c·g(n) for any n from n₀ upward.',
+        'That pair of numbers is called a **witness**, because naming it is how the claim gets ' +
+          'proved. It is why nearly every argument about big-O is really an argument about ' +
+          'whether such a pair exists.',
         'Pick f, g and a witness below. The panel tests that inequality at every whole number in ' +
           'the range and reports the first n where it breaks. One failure is enough to throw a ' +
           'witness out, so "no" is the answer this demo can give you with confidence.',

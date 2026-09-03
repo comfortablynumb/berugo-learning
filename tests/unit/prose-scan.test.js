@@ -67,6 +67,12 @@ test('a full stop inside a bold thesis still ends the sentence', function () {
   assert.strictEqual(scan.sentences(text).length, 2);
 });
 
+test('a sentence may start with a capital that is not ASCII', function () {
+  const text = 'O(g) caps from above. Ω(g) floors from below. Θ(g) claims both.';
+
+  assert.strictEqual(scan.sentences(text).length, 3);
+});
+
 test('a decimal point does not end a sentence', function () {
   assert.strictEqual(scan.sentences('The ratio is 1.5 at most.').length, 1);
 });

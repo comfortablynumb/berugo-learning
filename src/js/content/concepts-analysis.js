@@ -27,18 +27,22 @@
         },
         plain: 'The constant and threshold that make a big-O claim true. Without one, the claim is not yet a claim.',
         formal: 'f = O(g) ⟺ ∃c > 0, n₀ : ∀n ≥ n₀, f(n) ≤ c·g(n)',
-        readAs: 'f is O(g) exactly when you can find one multiplier c and one starting size n₀ such ' +
-          'that, for every n from n₀ upward, f(n) never rises above c times g(n). The whole ' +
-          'definition is a promise that two such numbers exist.',
-        detail: 'Big-O never claims your function is g. It claims that if you scale g by some fixed ' +
-          'multiplier you get a ceiling your function stays under — and not everywhere, only from ' +
-          'some input size onward. That is why proving a bound means naming the two numbers the ' +
-          'definition promises exist: the multiplier c, and the size n₀ where the ceiling starts ' +
-          'holding. Until you can name them you have an impression rather than a bound. Neither ' +
-          'number is unique — if (c, n₀) works then so does (2c, n₀) and any larger threshold — ' +
-          'which is why nobody quotes them and why the smallest pair is not what you are asked for. ' +
-          'What the pair buys you is a way to argue back: to refute a claimed bound, show that for ' +
-          'every candidate c the inequality fails infinitely often.',
+        readAs: 'f is O(g) exactly when you can find one multiplier c and one starting size n₀. ' +
+          'From n₀ upward, f(n) never rises above c times g(n). The whole definition is a promise ' +
+          'that two such numbers exist.',
+        detail: [
+          'Big-O never claims your function is g. It claims that if you scale g by some fixed ' +
+            'multiplier you get a ceiling your function stays under. And not everywhere: only from ' +
+            'some input size onward.',
+          'That is why proving a bound means naming the two numbers the definition promises exist ' +
+            '— the multiplier c, and the size n₀ where the ceiling starts holding. Until you can ' +
+            'name them you have an impression rather than a bound.',
+          'Neither number is unique. If (c, n₀) works then so does (2c, n₀), and so does any ' +
+            'larger threshold. That is why nobody quotes them, and why the smallest pair is not ' +
+            'what you are asked for.',
+          'What the pair buys you is a way to argue back. To refute a claimed bound, show that for ' +
+            'every candidate c the inequality fails infinitely often.'
+        ],
         example: 'n log n = O(n²) with c = 1, n₀ = 1.'
       },
       {
@@ -56,13 +60,16 @@
         formal: 'Θ(g) = O(g) ∩ Ω(g)',
         readAs: 'Θ(g) is the overlap of two claims: the functions O(g) caps from above, and the ' +
           'functions Ω(g) floors from below. To be Θ(g) a function has to be in both groups.',
-        detail: 'Three relations, and only one of them says what people usually mean. O(g) caps a ' +
-          'function from above, Ω(g) floors it from below, and Θ(g) asserts both at once, so the ' +
-          'function grows exactly like g up to constants — you are allowed to multiply g by any ' +
-          'fixed number, but not to change its shape. Almost every sentence that reaches for O ' +
-          'is trying to say Θ: "merge sort is O(n log n)" is true, but so is "merge sort is O(n⁵)", ' +
-          'and the reader cannot tell which you meant. Θ is a strictly stronger claim and needs two ' +
-          'witness pairs rather than one, which is exactly why it is the one worth proving.',
+        detail: [
+          'Three relations, and only one of them says what people usually mean. O(g) caps a ' +
+            'function from above. Ω(g) floors it from below. Θ(g) asserts both at once, so the ' +
+            'function grows exactly like g up to constants — you may multiply g by any fixed ' +
+            'number, but not change its shape.',
+          'Almost every sentence that reaches for O is trying to say Θ. "Merge sort is O(n log n)" ' +
+            'is true, but so is "merge sort is O(n⁵)", and the reader cannot tell which you meant.',
+          'Θ is a strictly stronger claim and needs two witness pairs rather than one. That is ' +
+            'exactly why it is the one worth proving.'
+        ],
         example: 'Every algorithm that is Θ(n) is also, truthfully, O(n²).'
       },
       {
@@ -71,12 +78,16 @@
         formal: 'f = O(g) means f ∈ O(g)',
         readAs: 'Read "f = O(g)" as "f is one of the functions in the collection O(g)". The equals ' +
           'sign is doing the job of "is a member of", and it only works read left to right.',
-        detail: 'O(g) denotes the set of all functions bounded above by a constant multiple of g, so ' +
-          'the honest symbol is ∈. The convention of writing = is sixty years old and is not going ' +
-          'to change, but it misleads in one specific way: equality is symmetric and this is not. ' +
-          'n = O(n²) is true and O(n²) = n is meaningless, and a chain like T(n) = O(n) + O(n²) is ' +
-          'read as "there exist functions in those sets whose sum is T", left to right only. Treat ' +
-          'the = as a one-way arrow and the notation stops generating false steps.',
+        detail: [
+          'O(g) denotes the set of all functions bounded above by a constant multiple of g, so the ' +
+            'honest symbol is ∈.',
+          'The convention of writing = is sixty years old and is not going to change. It misleads ' +
+            'in one specific way: equality is symmetric and this is not. n = O(n²) is true, and ' +
+            'O(n²) = n is meaningless.',
+          'A chain like T(n) = O(n) + O(n²) reads as "there exist functions in those sets whose ' +
+            'sum is T", left to right only. Treat the = as a one-way arrow and the notation stops ' +
+            'generating false steps.'
+        ],
         example: 'n = O(n²) and n² = O(n²), but n ≠ n².'
       },
       {
@@ -85,58 +96,68 @@
         formal: 'f = o(g) ⟺ lim f(n)/g(n) = 0',
         readAs: 'f is little-o of g exactly when the ratio f(n)/g(n) can be pushed below any number ' +
           'you care to name, just by taking n large enough. That is what "the limit is 0" says.',
-        detail: 'Big-O allows f to keep pace with g — n² = O(n²) — while little-o insists f is ' +
-          'eventually beaten by every constant multiple of g, however small. Swapping "some" for ' +
-          '"every" is the whole difference: O asks for some multiplier c that works, o demands that ' +
-          'all of them do. So o(g) ' +
-          'is a strict subset of O(g), and the functions in the difference are exactly those that ' +
-          'grow at the same rate as g. In practice little-o is how lower-order terms get dismissed ' +
-          'cleanly: writing T(n) = n² + o(n²) says the rest genuinely vanishes relative to the main ' +
-          'term rather than merely staying under it.',
+        detail: [
+          'Big-O allows f to keep pace with g — n² = O(n²). Little-o insists that f is eventually ' +
+            'beaten by every constant multiple of g, however small.',
+          'Swapping "some" for "every" is the whole difference. O asks for some multiplier c that ' +
+            'works; o demands that all of them do. So o(g) is a strict subset of O(g), and the ' +
+            'functions in the difference are exactly those that grow at the same rate as g.',
+          'In practice little-o is how lower-order terms get dismissed cleanly. Writing ' +
+            'T(n) = n² + o(n²) says the rest genuinely vanishes relative to the main term, rather ' +
+            'than merely staying under it.'
+        ],
         example: 'n log n = o(n²), and n² ≠ o(n²).'
       },
       {
         term: 'Tightness',
         plain: 'A bound can be true and useless. Saying an algorithm is O(2ⁿ) when it is Θ(n) is not a lie.',
         formal: 'O gives an upper bound only',
-        detail: 'Because O is one-sided, inflating it never makes it false: every linear algorithm is ' +
-          'honestly O(n²), O(n³) and O(2ⁿ). This matters when reading someone else\'s claim, since a ' +
-          'documented O(n log n) may be a proven tight bound or the first thing that occurred to the ' +
-          'author. It matters more when writing one, because an untight bound cannot be used to ' +
-          'compare two implementations — if both are O(n²) you have learned nothing about which is ' +
-          'faster, or even whether either is quadratic. Ask what makes the bound tight, and if ' +
-          'nothing does, say Θ or say the case.',
+        detail: [
+          'Because O is one-sided, inflating it never makes it false. Every linear algorithm is ' +
+            'honestly O(n²), O(n³) and O(2ⁿ).',
+          'That matters when reading someone else\'s claim. A documented O(n log n) may be a ' +
+            'proven tight bound, or the first thing that occurred to the author.',
+          'It matters more when writing one, because an untight bound cannot be used to compare ' +
+            'two implementations. If both are O(n²) you have learned nothing about which is ' +
+            'faster, or even whether either is quadratic. Ask what makes the bound tight, and if ' +
+            'nothing does, say Θ or say the case.'
+        ],
         example: '"This sort is O(n²)" is true of merge sort.'
       },
       {
         term: 'Asymptotic ≠ practical',
         plain: 'The definition only promises behaviour past n₀, and n₀ can be larger than any input you have.',
         formal: 'the guarantee begins at n₀',
-        readAs: 'Everything the notation promises starts at some input size n₀ and says nothing at ' +
-          'all below it — and nothing in the definition stops n₀ from being astronomically large.',
-        detail: 'Nothing in the definition constrains the constant or the threshold, so an algorithm ' +
-          'can be asymptotically superior and useless: if the crossover sits at 10⁴⁰ items, the ' +
-          'better complexity class is a statement about a machine nobody will build. Fast matrix ' +
-          'multiplication is the standard case — the exponent keeps falling and the practical ' +
-          'implementations still use Strassen at best. The reverse trap is more common in ordinary ' +
-          'code: at the sizes you actually run, a Θ(n²) routine with tiny constants and perfect ' +
-          'locality routinely beats a Θ(n log n) one that allocates. Asymptotics rank algorithms; ' +
-          'measurement ranks implementations.',
+        readAs: 'Everything the notation promises starts at some input size n₀, and it says nothing ' +
+          'at all below that. Nothing in the definition stops n₀ from being astronomically large.',
+        detail: [
+          'Nothing in the definition constrains the constant or the threshold, so an algorithm can ' +
+            'be asymptotically superior and useless. If the crossover sits at 10⁴⁰ items, the ' +
+            'better complexity class is a statement about a machine nobody will build.',
+          'Fast matrix multiplication is the standard case. The exponent keeps falling, and the ' +
+            'practical implementations still use Strassen at best.',
+          'The reverse trap is more common in ordinary code. At the sizes you actually run, a Θ(n²) ' +
+            'routine with tiny constants and perfect locality routinely beats a Θ(n log n) one ' +
+            'that allocates. Asymptotics rank algorithms; measurement ranks implementations.'
+        ],
         example: 'Galactic algorithms beat everything, past inputs nobody will ever run.'
       },
       {
         term: 'A case, not an algorithm',
         plain: 'O, Ω and Θ bound a stated case. A sentence that names no case is not yet a claim.',
         formal: 'worst-case T(n) = Θ(n²), not "the algorithm is Θ(n²)"',
-        readAs: 'T(n) is the running time on an input of size n, and the growth symbol bounds it ' +
-          'only for whichever case you named — worst, best or average. Name the case in the sentence.',
-        detail: 'An algorithm does not have one running time, it has a different one for every input, ' +
-          'so a bound has to say which of those it is talking about: the worst input of size n, the ' +
-          'best, or the expectation over some distribution. The notation and the case are ' +
-          'independent choices, and all nine combinations are meaningful — the worst case has a ' +
-          'lower bound too. Dropping the case is what produces confident nonsense like "insertion ' +
-          'sort is Ω(n²)", which is false, because on already-sorted input insertion sort finishes in ' +
-          'Θ(n). What is true is that its worst case is Θ(n²).',
+        readAs: 'T(n) is the running time on an input of size n. The growth symbol bounds it only ' +
+          'for whichever case you named: worst, best or average. Name the case in the sentence.',
+        detail: [
+          'An algorithm does not have one running time. It has a different one for every input. ' +
+            'So a bound has to say which of those it is talking about: the worst input of size n, ' +
+            'the best, or the expectation over some distribution.',
+          'The notation and the case are independent choices, and all nine combinations are ' +
+            'meaningful. The worst case has a lower bound too.',
+          'Dropping the case is what produces confident nonsense like "insertion sort is Ω(n²)". ' +
+            'That is false: on already-sorted input insertion sort finishes in Θ(n). What is true ' +
+            'is that its worst case is Θ(n²).'
+        ],
         example: 'Insertion sort is Θ(n²) in the worst case and Θ(n) in the best; "insertion sort is Ω(n²)" is simply false.'
       },
       {
@@ -145,13 +166,17 @@
         formal: 'O(V + E), not O(V) or O(E)',
         readAs: 'V is how many vertices the graph has and E how many edges. The cost is capped by ' +
           'their sum, and neither one on its own can stand in for it.',
-        detail: 'Some inputs have two independent dimensions, and squeezing them into one loses the ' +
-          'thing you needed to know. A graph traversal costs O(V + E), and neither term dominates in ' +
-          'general: a sparse graph has E ≈ V so the bound behaves linearly in V, while a dense one ' +
-          'has E ≈ V² so the same algorithm behaves quadratically. Substituting the worst case for E ' +
-          'up front gives O(V²) and slanders the algorithm on every sparse input it will actually ' +
-          'see. The same applies to string matching in O(n + m), to joins over two table sizes, and ' +
-          'to anything parameterised by an alphabet or a key length.',
+        detail: [
+          'Some inputs have two independent dimensions, and squeezing them into one loses the thing ' +
+            'you needed to know.',
+          'A graph traversal costs O(V + E), and neither term dominates in general. A sparse graph ' +
+            'has E ≈ V, so the bound behaves linearly in V. A dense one has E ≈ V², so the same ' +
+            'algorithm behaves quadratically.',
+          'Substituting the worst case for E up front gives O(V²), which slanders the algorithm on ' +
+            'every sparse input it will actually see. The same applies to string matching in ' +
+            'O(n + m), to joins over two table sizes, and to anything parameterised by an alphabet ' +
+            'or a key length.'
+        ],
         example: 'A graph scan is O(V + E): dense graphs make E the term that matters, sparse ones make it V.'
       }
     ],
