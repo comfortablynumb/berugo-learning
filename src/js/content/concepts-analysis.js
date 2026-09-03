@@ -351,13 +351,17 @@
         term: 'Amortised cost',
         plain: 'The average cost per operation over a worst-case sequence. No probability is involved.',
         formal: 'total cost of the sequence ÷ operations',
-        detail: 'An amortised bound is a statement about a whole sequence: whatever operations you ' +
-          'choose, in whatever order, the total divided by the count stays under the stated figure. ' +
-          'That makes it a worst-case guarantee, not an expectation — there is no distribution and no ' +
-          'coin anywhere in the argument, and an adversary who knows your implementation cannot ' +
-          'break it. What it deliberately does not promise is anything about a single operation: the ' +
-          'occasional push that copies a million elements is fully consistent with an O(1) amortised ' +
-          'bound, because the cheap pushes before it have already paid for it.',
+        detail: [
+          'An amortised bound is a statement about a whole sequence. Whatever operations you ' +
+            'choose, in whatever order, the total divided by the count stays under the stated ' +
+            'figure.',
+          'That makes it a worst-case guarantee, not an expectation. There is no distribution and ' +
+            'no coin anywhere in the argument, and an adversary who knows your implementation ' +
+            'cannot break it.',
+          'What it deliberately does not promise is anything about a single operation. The ' +
+            'occasional push that copies a million elements is fully consistent with an O(1) ' +
+            'amortised bound, because the cheap pushes before it have already paid for it.'
+        ],
         example: 'Push into a dynamic array: O(1) amortised, O(n) occasionally.'
       },
       {
@@ -365,13 +369,16 @@
         plain: 'Total the whole sequence, then divide. Simplest, and often enough.',
         formal: 'T(n)/n',
         readAs: 'Add up what all n operations cost, then divide by n. One figure for the whole run.',
-        detail: 'The aggregate method skips the bookkeeping and bounds the sum directly. For a ' +
-          'doubling array the copies form a geometric series — 1 + 2 + 4 + … + n < 2n — so n pushes ' +
-          'cost under 3n in total and under 3 each on average. It works whenever you can see the ' +
-          'total, and it gives one bound for every operation in the sequence, which is its main ' +
-          'limitation: a structure whose operations differ in cost (a stack that supports push, pop ' +
-          'and a multi-pop) gets a single blunt figure. When you need to charge different operations ' +
-          'differently, move to accounting or potential.',
+        detail: [
+          'The aggregate method skips the bookkeeping and bounds the sum directly. For a doubling ' +
+            'array the copies form a geometric series: 1 + 2 + 4 + … + n < 2n. So n pushes cost ' +
+            'under 3n in total, and under 3 each on average.',
+          'It works whenever you can see the total. Its limitation is that it gives one bound for ' +
+            'every operation in the sequence, so a structure whose operations differ in cost gets a ' +
+            'single blunt figure. A stack supporting push, pop and a multi-pop is the usual example.',
+          'When you need to charge different operations differently, move to accounting or ' +
+            'potential.'
+        ],
         example: 'n pushes cost under 3n, so under 3 per push.'
       },
       {
@@ -389,61 +396,73 @@
         },
         plain: 'Overcharge cheap operations and bank the credit to pay for expensive ones.',
         formal: 'banked credit must never go negative',
-        detail: 'Assign each operation an invented price, spend the real cost from it, and save the ' +
-          'difference on the data structure itself. If the bank never runs dry, the invented prices ' +
-          'are a valid amortised bound, because the actual total can never exceed the charged total. ' +
-          'For a doubling array, charging 3 per push works out as 1 to store the element and 2 saved ' +
-          'against the eventual copy — one for the new element, one for an old element that has ' +
-          'already spent its credit. The art is in choosing where the credit is stored, and the ' +
-          'proof obligation is to show the invariant holds after every operation, not on average.',
+        detail: [
+          'Assign each operation an invented price, spend the real cost from it, and save the ' +
+            'difference on the data structure itself. If the bank never runs dry, the invented ' +
+            'prices are a valid amortised bound, because the actual total can never exceed the ' +
+            'charged total.',
+          'For a doubling array, charging 3 per push works out as 1 to store the element and 2 ' +
+            'saved against the eventual copy. The 2 covers one new element and one old element ' +
+            'that has already spent its own credit.',
+          'The art is in choosing where the credit is stored. The proof obligation is to show the ' +
+            'invariant holds after every operation, not on average.'
+        ],
         example: 'Charge 3 per push: 1 to insert, 2 saved towards the next copy.'
       },
       {
         term: 'Potential method',
         plain: 'Define Φ over the data structure so a drop in Φ pays for an expensive step. The one that generalises.',
         formal: 'â = actual + Φ(after) − Φ(before)',
-        readAs: 'The amortised cost of an operation — written â and read "a-hat" — is what it really ' +
-          'cost, plus however much the stored-up potential Φ rose, or minus however much it fell. An ' +
-          'operation that banks potential is charged more than it spent; one that spends it is ' +
-          'charged less.',
-        detail: 'The potential method replaces the scattered credits of the accounting method with a ' +
-          'single function of the structure\'s state. Amortised cost is defined as the actual cost ' +
-          'plus the change in Φ, so a cheap operation that builds up potential is charged extra and ' +
-          'an expensive one that discharges it is charged little. Add those up across the sequence ' +
-          'and the middle terms cancel in pairs — that is what "telescoping" means — leaving the ' +
-          'total amortised cost equal to the total actual cost plus Φ(end) − Φ(start). So as long ' +
-          'as Φ starts ' +
-          'at zero and never goes negative, the amortised total bounds the real one. It generalises ' +
-          'the other two methods and is what scales to splay trees and Fibonacci heaps, where no ' +
-          'per-operation credit story is available.',
+        readAs: 'The amortised cost of an operation is written â and read "a-hat". It is what the ' +
+          'operation really cost, plus however much the stored-up potential Φ rose, or minus ' +
+          'however much it fell. An operation that banks potential is charged more than it spent; ' +
+          'one that spends potential is charged less.',
+        detail: [
+          'The potential method replaces the scattered credits of the accounting method with a ' +
+            'single function of the structure\'s state.',
+          'Amortised cost is defined as the actual cost plus the change in Φ. So a cheap operation ' +
+            'that builds up potential is charged extra, and an expensive one that discharges it is ' +
+            'charged little.',
+          'Add those up across the sequence and the middle terms cancel in pairs. That is what ' +
+            '"telescoping" means, and it leaves the total amortised cost equal to the total actual ' +
+            'cost plus Φ(end) − Φ(start). So as long as Φ starts at zero and never goes negative, ' +
+            'the amortised total bounds the real one.',
+          'It generalises the other two methods, and it is what scales to splay trees and ' +
+            'Fibonacci heaps, where no per-operation credit story is available.'
+        ],
         example: 'Φ = 2·size − capacity is zero after a grow and rises as the array fills.'
       },
       {
         term: 'Amortised ≠ average case',
         plain: 'Amortised is a worst-case guarantee over a sequence; average case is an expectation over inputs.',
         formal: 'no distribution appears in an amortised bound',
-        detail: 'The two are often used interchangeably and they are not the same kind of statement. ' +
-          'An average-case bound assumes something about the inputs and reports an expectation, so an ' +
-          'adversary who supplies bad inputs can defeat it. An amortised bound assumes nothing and ' +
-          'holds for every sequence, so there is nothing to defeat — the guarantee is deterministic. ' +
-          'A dynamic array demonstrates this cleanly: its input is a fixed list of pushes with no ' +
-          'randomness available anywhere, and it still has an O(1) amortised bound. Confusing them ' +
-          'leads to reasoning about probability where none exists, and to trusting an average-case ' +
-          'bound against an adversarial workload.',
+        detail: [
+          'The two are often used interchangeably, and they are not the same kind of statement.',
+          'An average-case bound assumes something about the inputs and reports an expectation, so ' +
+            'an adversary who supplies bad inputs can defeat it. An amortised bound assumes nothing ' +
+            'and holds for every sequence, so there is nothing to defeat. The guarantee is ' +
+            'deterministic.',
+          'A dynamic array demonstrates this cleanly. Its input is a fixed list of pushes with no ' +
+            'randomness available anywhere, and it still has an O(1) amortised bound.',
+          'Confusing the two leads to reasoning about probability where none exists, and to ' +
+            'trusting an average-case bound against an adversarial workload.'
+        ],
         example: 'A dynamic array has no random inputs, and still has an amortised bound.'
       },
       {
         term: 'When amortised is not enough',
         plain: 'A latency-sensitive path cares about the worst single operation, not the average.',
         formal: 'worst-case per-operation ≠ amortised',
-        detail: 'Amortised analysis answers "what does this cost over time", which is the right ' +
-          'question for throughput and the wrong one for a deadline. A control loop with a 1 ms ' +
-          'budget is failed by the single push that copies a million elements, no matter how cheap ' +
-          'the surrounding thousand pushes were. The same critique applies to a stop-the-world ' +
-          'garbage collector and to a hash table that rehashes in one go: excellent amortised ' +
-          'numbers, and a tail that shows up directly as p99 latency. The fixes all trade total work ' +
-          'for predictability — incremental resizing, preallocation, or a structure with a real ' +
-          'worst-case per-operation bound.',
+        detail: [
+          'Amortised analysis answers "what does this cost over time". That is the right question ' +
+            'for throughput and the wrong one for a deadline.',
+          'A control loop with a 1 ms budget is failed by the single push that copies a million ' +
+            'elements, no matter how cheap the surrounding thousand pushes were. The same goes ' +
+            'for a stop-the-world garbage collector, or a hash table that rehashes in one go. ' +
+            'Excellent amortised numbers, and a tail that shows up directly as p99 latency.',
+          'The fixes all trade total work for predictability — incremental resizing, ' +
+            'preallocation, or a structure with a real worst-case per-operation bound.'
+        ],
         example: 'A real-time system rejects the one push that copies a million elements.'
       },
       {
@@ -460,14 +479,17 @@
         },
         plain: 'The gap between the grow threshold and the shrink threshold. Without a gap, one alternation can resize on every operation.',
         formal: 'grow at size = capacity, shrink at size = capacity/4',
-        detail: 'If a container grows when it is full and shrinks the moment it is half empty, the ' +
-          'two thresholds meet, and a workload that alternates push and pop across the boundary ' +
-          'triggers a full copy on every single operation — the amortised bound is destroyed by an ' +
-          'input of length two, repeated. Leaving a band between the thresholds fixes it: shrink only ' +
-          'at a quarter full, so that after either resize the structure sits at half capacity and ' +
-          'needs a linear number of operations before it can trigger the next one. That distance is ' +
-          'what the potential function is measuring, and it is why the standard rule is grow at ' +
-          'full, halve at a quarter.',
+        detail: [
+          'If a container grows when it is full and shrinks the moment it is half empty, the two ' +
+            'thresholds meet. A workload that alternates push and pop across the boundary then ' +
+            'triggers a full copy on every single operation. The amortised bound is destroyed by ' +
+            'an input of length two, repeated.',
+          'Leaving a band between the thresholds fixes it. Shrink only at a quarter full. After ' +
+            'either resize the structure then sits at half capacity, and needs a linear number of ' +
+            'operations before it can trigger the next one.',
+          'That distance is what the potential function is measuring, and it is why the standard ' +
+            'rule is grow at full, halve at a quarter.'
+        ],
         example: 'Shrinking at half instead costs 512 copies per operation on a pop/push alternation.'
       },
       {
@@ -477,13 +499,17 @@
         readAs: 'Add up (what you charged minus what it really cost) over the first operation, then ' +
           'the first two, then the first three, and so on. Every one of those running totals has to ' +
           'be zero or more — not merely the last one.',
-        detail: 'The whole force of an amortised argument comes from the claim that charged work ' +
-          'covers real work at all times, so the obligation is a prefix property: after every ' +
-          'operation, the credit banked so far is at least the real cost incurred so far. A scheme ' +
-          'that dips negative in the middle and recovers by the end has proved nothing — it has ' +
-          'assumed the sequence continues, which the adversary is free to refuse by stopping there. ' +
-          'This is the step people skip, and it is the one that catches invalid schemes: an argument ' +
-          'that pays for a copy out of pushes that have not happened yet is a hope, not a bound.',
+        detail: [
+          'The whole force of an amortised argument is the claim that charged work covers real ' +
+            'work at all times. So the obligation is a prefix property: after every operation, the ' +
+            'credit banked so far is at least the real cost incurred so far.',
+          'A scheme that dips negative in the middle and recovers by the end has proved nothing. ' +
+            'It has assumed the sequence continues, which the adversary is free to refuse by ' +
+            'stopping there.',
+          'This is the step people skip, and it is the one that catches invalid schemes. An ' +
+            'argument that pays for a copy out of pushes that have not happened yet is a hope, not ' +
+            'a bound.'
+        ],
         example: 'A scheme that borrows against a future copy is not an amortised bound, it is a hope.'
       }
     ],

@@ -25,8 +25,8 @@
     root.jQuery('#' + SECTION_ID + '-content').html(app.shell.render({
       sectionId: SECTION_ID,
       orientation: [
-        'A push into a dynamic array costs 1 almost always and n occasionally. Averaging that over ' +
-          'a sequence is amortised analysis, and it is not the same as average-case: there is no ' +
+        '**A push into a dynamic array costs 1 almost always and n occasionally.** Averaging that ' +
+          'over a sequence is amortised analysis. It is not the same as average-case: there is no ' +
           'probability here, only bookkeeping over a worst-case sequence.',
         'Three ways to do the bookkeeping. Aggregate: total the whole sequence and divide. ' +
           'Accounting: overcharge each cheap operation and bank the credit for the expensive one. ' +
@@ -48,8 +48,8 @@
           '    note right of Copying: Φ = 2·size − capacity drops to pay for the copy'
         ].join('\n')
       },
-      insight: 'Growth factor 2 versus 1.5 is a memory-reuse argument, not a speed one: with a ' +
-        'factor of 2 the sum of all previously freed blocks is always one short of the block you ' +
+      insight: 'Growth factor 2 versus 1.5 is a memory-reuse argument, not a speed one. With a ' +
+        'factor of 2, the sum of all previously freed blocks is always one short of the block you ' +
         'now need, so the allocator can never reuse them. That is why several standard libraries ' +
         'chose 1.5.'
     }));
