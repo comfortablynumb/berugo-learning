@@ -59,39 +59,43 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'Digit DP answers "how many numbers in [L, R] have property P" by walking the bound\'s digits left ' +
-          'to right instead of walking the numbers. The state is (position, whatever the property needs to ' +
-          'remember, **tight**), and tight means every digit chosen so far equals the bound\'s. While tight ' +
-          'the next digit is capped; the moment a smaller digit is chosen the number is already below the ' +
-          'bound and every later digit is free.',
-        '**Only the free states are memoisable, and that is why the technique works.** A tight state lies ' +
-          'on exactly one path - the bound\'s own prefix - so there is nothing to reuse and at most one ' +
-          'per position exists. Everything else is shared across an enormous number of prefixes. The ' +
-          'result is that the work depends on the bound\'s *length*: counting to 10¹⁸ costs about three ' +
-          'times counting to 10⁶, not a trillion times.',
-        '**The property is a DFA, and once that is seen the whole family collapses into one walk.** "No ' +
-          'two equal adjacent digits" remembers the previous digit; "digit sum divisible by 3" remembers a ' +
-          'residue; "contains 13" is a two-state matcher. The same counting code drives all of them, which ' +
-          'is the bridge to M24 - and counting the strings a DFA accepts is this algorithm with the tight ' +
-          'flag deleted.',
-        '**The number zero is where this goes wrong.** Leading zeros must not make "007" and "7" two ' +
-          'different numbers, so the walk carries a `started` flag - and the natural termination, "count ' +
-          'this if it started and the automaton accepts", silently drops zero itself. The count comes out ' +
-          'exactly one short on every property that accepts it, ranges still agree because the error ' +
-          'cancels in the subtraction, and nothing looks wrong. Only counting one by one finds it.'
+        '**Digit DP answers "how many numbers in [L, R] have property P" by walking the ' +
+          'bound\'s digits left to right, instead of walking the numbers.** The state is ' +
+          '(position, whatever the property needs to remember, **tight**), and tight means every ' +
+          'digit chosen so far equals the bound\'s.',
+        'While tight, the next digit is capped. The moment a smaller digit is chosen the number ' +
+          'is already below the bound, and every later digit is free.',
+        '**Only the free states are memoisable, and that is why the technique works.** A tight ' +
+          'state lies on exactly one path — the bound\'s own prefix — so there is nothing to ' +
+          'reuse, and at most one per position exists. Everything else is shared across an ' +
+          'enormous number of prefixes.',
+        'The result is that the work depends on the bound\'s *length*. Counting to 10¹⁸ costs ' +
+          'about three times counting to 10⁶, not a trillion times.',
+        '**The property is a DFA, and once that is seen the whole family collapses into one ' +
+          'walk.** "No two equal adjacent digits" remembers the previous digit. "Digit sum ' +
+          'divisible by 3" remembers a residue. "Contains 13" is a two-state matcher.',
+        'The same counting code drives all of them, which is the bridge to M24. Counting the ' +
+          'strings a DFA accepts is this algorithm with the tight flag deleted.',
+        '**The number zero is where this goes wrong.** Leading zeros must not make "007" and "7" ' +
+          'two different numbers, so the walk carries a `started` flag. And the natural ' +
+          'termination — "count this if it started and the automaton accepts" — silently drops ' +
+          'zero itself.',
+        'The count comes out exactly one short on every property that accepts zero. Ranges still ' +
+          'agree, because the error cancels in the subtraction, and nothing looks wrong. Only ' +
+          'counting one by one finds it.'
       ],
       demo: {
         title: 'Interactive demo — four properties, a range check, and the cost against the value',
         markup: root.DigitDpTemplate.render()
       },
       diagram: diagram(),
-      insight: 'Whenever a counting question has a range too large to iterate, the answer is almost always ' +
-        '"walk the representation, not the values". Digit DP is that idea for numbers; the same move gives ' +
-        'you counting over strings by walking an automaton, and counting over trees by walking the shape. ' +
-        'The recognition test is simple: if the bound appears in the *size* of your loop rather than in the ' +
-        'number of *digits* of your loop, there is a representation walk hiding underneath. And whatever ' +
-        'the representation, check the smallest element of the range explicitly — that is where the ' +
-        'off-by-one lives.'
+      insight: 'Whenever a counting question has a range too large to iterate, the answer is ' +
+        'almost always "walk the representation, not the values". Digit DP is that idea for ' +
+        'numbers. The same move gives you counting over strings by walking an automaton, and ' +
+        'counting over trees by walking the shape. The recognition test is simple. If the bound ' +
+        'appears in the *size* of your loop rather than in the number of *digits* of your loop, ' +
+        'there is a representation walk hiding underneath. And whatever the representation, ' +
+        'check the smallest element of the range explicitly. That is where the off-by-one lives.'
     };
   }
 

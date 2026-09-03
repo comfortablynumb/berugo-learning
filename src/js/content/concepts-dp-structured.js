@@ -482,17 +482,20 @@
         term: 'Walk the representation, not the values',
         plain: 'Counting numbers in a huge range means walking the bound\'s digits, not the range.',
         formal: 'state is (position, property state, tight), so the cost is Θ(digits · |property| · 2)',
-        readAs: 'Digit DP walks the number one digit at a time, carrying whatever the property needs plus one ' +
-          'bit for whether you are still hugging the upper bound. The cost is digits, not the value — ' +
-          'which is the entire point.',
-        detail: 'This is the general move and it goes far beyond numbers: when a range is too large to ' +
-          'iterate, count over the structure that describes its members instead. For integers that ' +
-          'structure is the decimal expansion, so the cost depends on how many digits the bound has rather ' +
-          'than on how large it is. The recognition test is simple - if the bound appears in the size of ' +
-          'your loop rather than in the number of digits of your loop, there is a representation walk ' +
-          'hiding underneath.',
-        example: 'Counting numbers with no two equal adjacent digits: 25 states up to 1 000 and 190 states ' +
-          'up to 10¹⁸, for counts of 820 and 168 856 464 709 123 940.'
+        readAs: 'Digit DP walks the number one digit at a time, carrying whatever the property ' +
+          'needs plus one bit for whether you are still hugging the upper bound. The cost is ' +
+          'digits, not the value, which is the entire point.',
+        detail: [
+          'This is the general move, and it goes far beyond numbers. When a range is too large to ' +
+            'iterate, count over the structure that describes its members instead.',
+          'For integers that structure is the decimal expansion. So the cost depends on how many ' +
+            'digits the bound has, rather than on how large it is.',
+          'The recognition test is simple. If the bound appears in the size of your loop rather ' +
+            'than in the number of digits of your loop, there is a representation walk hiding ' +
+            'underneath.'
+        ],
+        example: 'Counting numbers with no two equal adjacent digits: 25 states up to 1 000, ' +
+          'and 190 states up to 10¹⁸. The counts are 820 and 168 856 464 709 123 940.'
       },
       {
         term: 'The tight flag',
@@ -508,14 +511,18 @@
         },
         plain: 'Tight means every digit so far equals the bound\'s, so the next one is capped.',
         formal: 'tight ∧ digit = bound[i] ⟹ still tight; digit < bound[i] ⟹ free for every later position',
-        readAs: 'While you are matching the limit digit for digit you are constrained; the moment you pick ' +
-          'anything smaller, every later digit is unconstrained. The ∧ is "and", the ⟹ is "which ' +
-          'means".',
-        detail: 'This is the only subtle part of the technique and the only part that goes wrong. Drop the ' +
-          'flag and the count runs past the bound; freeze it on and the count stops at the bound\'s own ' +
-          'prefix. It also explains the memoisation rule: a tight state lies on exactly one path - the ' +
-          'bound\'s prefix - so there is nothing to reuse and at most one exists per position, while free ' +
-          'states are shared across an enormous number of prefixes and are the only ones worth caching.',
+        readAs: 'While you are matching the limit digit for digit you are constrained. The moment ' +
+          'you pick anything smaller, every later digit is unconstrained. The ∧ is "and", and the ' +
+          '⟹ is "which means".',
+        detail: [
+          'This is the only subtle part of the technique, and the only part that goes wrong.',
+          'Drop the flag and the count runs past the bound. Freeze it on and the count stops at ' +
+            'the bound\'s own prefix.',
+          'It also explains the memoisation rule. A tight state lies on exactly one path — the ' +
+            'bound\'s prefix — so there is nothing to reuse, and at most one exists per position. ' +
+            'Free states are shared across an enormous number of prefixes, and are the only ones ' +
+            'worth caching.'
+        ],
         example: 'Counting to 4 321, the first digit ranges 0…4; choosing 3 releases the cap and the ' +
           'remaining three digits range 0…9 freely.'
       },
@@ -523,12 +530,15 @@
         term: 'The property is a DFA',
         plain: 'Once the property is an automaton, one counting walk serves every property.',
         formal: '(start, step(state, symbol) → state | reject, accepting(state))',
-        detail: 'Writing the property as a state machine separates what is being counted from how the ' +
-          'counting works, and it collapses a family of ad-hoc solutions into one. "No two equal adjacent ' +
-          'digits" remembers the previous digit; "digit sum divisible by 3" remembers a residue; "contains ' +
-          '13" is a two-state matcher. It also matters that rejecting a transition and reaching a ' +
-          'non-accepting state are different mechanisms: the first prunes, the second is decided at the ' +
-          'end, and a property may need either or both.',
+        detail: [
+          'Writing the property as a state machine separates what is being counted from how the ' +
+            'counting works. It collapses a family of ad-hoc solutions into one.',
+          '"No two equal adjacent digits" remembers the previous digit. "Digit sum divisible by 3" ' +
+            'remembers a residue. "Contains 13" is a two-state matcher.',
+          'It also matters that rejecting a transition and reaching a non-accepting state are ' +
+            'different mechanisms. The first prunes, the second is decided at the end, and a ' +
+            'property may need either or both.'
+        ],
         example: 'Four properties over 137…4 321 give 3 155, 185, 1 395 and 184 — all from the same walk ' +
           'with a different automaton.'
       },
@@ -536,26 +546,33 @@
         term: 'Leading zeros, and the number zero',
         plain: 'A `started` flag stops 007 counting twice, and it is where the off-by-one lives.',
         formal: 'the automaton is fed only once a non-zero digit appears; the all-zeros path IS the value zero',
-        detail: 'Padding the bound to a fixed length means shorter numbers appear as prefixes of zeros, so ' +
-          'the walk needs to know whether the number has begun. The natural termination - "count this if it ' +
-          'started and the automaton accepts" - never counts zero itself, so every prefix count comes out ' +
-          'one short on any property that accepts zero. Ranges still agree, because the error cancels in ' +
-          'the subtraction, which is precisely why this bug survives testing. It is found only by counting ' +
-          'one at a time.',
-        example: 'Zero is accepted by "no equal adjacent digits" and by "strictly increasing", and rejected ' +
-          'by "contains 13" — so the naive termination is one short on two of the four properties.'
+        detail: [
+          'Padding the bound to a fixed length means shorter numbers appear as prefixes of zeros, ' +
+            'so the walk needs to know whether the number has begun.',
+          'The natural termination — "count this if it started and the automaton accepts" — never ' +
+            'counts zero itself. So every prefix count comes out one short on any property that ' +
+            'accepts zero.',
+          'Ranges still agree, because the error cancels in the subtraction. That is precisely why ' +
+            'this bug survives testing, and it is found only by counting one at a time.'
+        ],
+        example: 'Zero is accepted by "no equal adjacent digits" and by "strictly ' +
+          'increasing", and rejected by "contains 13". The naive termination is therefore one ' +
+          'short on two of the four properties.'
       },
       {
         term: 'An inclusive range is two counts and a subtraction',
         plain: 'count(L, R) = count(0, R) − count(0, L−1), and L−1 is where the off-by-one lives.',
         formal: 'the prefix-count function is monotone, so the range count is a difference of prefixes',
-        readAs: 'Count everything up to the high end, count everything below the low end, subtract. The same ' +
-          'trick as a prefix sum, applied to a counting problem.',
-        detail: 'Writing the subtraction once, in the module, rather than at every call site is a small ' +
-          'discipline with a large payoff, because `low - 1` is exactly the kind of expression that gets ' +
-          'typed as `low` in one place out of five. It also interacts with the zero bug above in a way ' +
-          'worth understanding: a prefix count that is uniformly one short still gives correct ranges, so ' +
-          'range tests cannot find the defect and only prefix tests can.',
+        readAs: 'Count everything up to the high end, count everything below the low end, ' +
+          'subtract. The same trick as a prefix sum, applied to a counting problem.',
+        detail: [
+          'Writing the subtraction once, in the module, rather than at every call site is a small ' +
+            'discipline with a large payoff. `low - 1` is exactly the kind of expression that gets ' +
+            'typed as `low` in one place out of five.',
+          'It also interacts with the zero bug above in a way worth understanding.',
+          'A prefix count that is uniformly one short still gives correct ranges. So range tests ' +
+            'cannot find the defect, and only prefix tests can.'
+        ],
         example: 'For 137…4 321 with no equal adjacent digits: 3 270 up to 4 321 minus 115 up to 136 gives ' +
           '3 155, matching a one-by-one count exactly.'
       },
@@ -563,11 +580,14 @@
         term: 'DP over a DAG, where the DAG is the input',
         plain: 'A topological order turns longest path from NP-hard into linear.',
         formal: 'process nodes in topological order; each edge relaxes its target exactly once',
-        detail: 'Longest path is NP-hard on a general graph and linear on a DAG, and the entire difference ' +
-          'is that a DAG has a topological order. It is the clearest statement available of "a DP is a walk ' +
-          'over a DAG of subproblems", because here the DAG is given rather than implied by a recursion - ' +
-          'there is no recursion to look at, only an order and a relaxation. The same walk counts paths, ' +
-          'finds shortest paths, and propagates any monoid.',
+        detail: [
+          'Longest path is NP-hard on a general graph and linear on a DAG, and the entire ' +
+            'difference is that a DAG has a topological order.',
+          'It is the clearest statement available of "a DP is a walk over a DAG of subproblems", ' +
+            'because here the DAG is given rather than implied by a recursion. There is no ' +
+            'recursion to look at, only an order and a relaxation.',
+          'The same walk counts paths, finds shortest paths, and propagates any monoid.'
+        ],
         example: 'A 14-node random DAG: longest path 14 over three nodes, and 11 distinct paths from node 0, ' +
           'both from a single topological sweep.'
       },
@@ -575,13 +595,17 @@
         term: 'Counting can overflow, and should say so',
         plain: 'Path counts on a dense DAG exceed the safe integer range without any warning.',
         formal: 'report whether every count stayed ≤ 2^53 − 1 rather than returning a rounded double',
-        readAs: 'Counting problems overflow the exactly-representable integer range quickly, and a rounded ' +
-          'answer looks exactly like a right one. Report whether the bound held.',
-        detail: 'JavaScript numbers are exact integers only up to 2^53 − 1, and a path count doubles with ' +
-          'depth. Past that the arithmetic silently rounds, so the returned counts are approximately right ' +
-          'and never flagged - which is the worst kind of numeric failure because it looks like a correct ' +
-          'answer. Reporting an `exact` flag alongside the counts costs one comparison per entry and turns ' +
-          'a silent corruption into a visible one.',
+        readAs: 'Counting problems overflow the exactly-representable integer range quickly, and ' +
+          'a rounded answer looks exactly like a right one. Report whether the bound held.',
+        detail: [
+          'JavaScript numbers are exact integers only up to 2^53 − 1, and a path count doubles ' +
+            'with depth.',
+          'Past that the arithmetic silently rounds, so the returned counts are approximately ' +
+            'right and never flagged. That is the worst kind of numeric failure, because it looks ' +
+            'like a correct answer.',
+          'Reporting an `exact` flag alongside the counts costs one comparison per entry, and ' +
+            'turns a silent corruption into a visible one.'
+        ],
         example: 'The 14-node DAG totals 11 paths and reports exact; a denser or deeper graph would report ' +
           'the same shape of answer with the flag cleared.'
       },
@@ -589,13 +613,16 @@
         term: 'Automaton DP is digit DP without the bound',
         plain: 'Counting the strings a DFA accepts is the same walk with the tight flag removed.',
         formal: 'push a distribution over automaton states forward one symbol at a time for L steps',
-        detail: 'Remove the bound and the tight flag has nothing to do, leaving a walk that carries how many ' +
-          'ways each automaton state can be reached at each position. That is the standard way to count ' +
-          'strings with a property, it is a matrix power in disguise, and it is the bridge to M24 - the ' +
-          'automata there are exactly the properties here. Seeing the two as one algorithm is what makes ' +
-          'both feel routine rather than clever.',
+        detail: [
+          'Remove the bound and the tight flag has nothing to do. What is left is a walk carrying ' +
+            'how many ways each automaton state can be reached at each position.',
+          'That is the standard way to count strings with a property, and it is a matrix power in ' +
+            'disguise.',
+          'It is also the bridge to M24: the automata there are exactly the properties here. ' +
+            'Seeing the two as one algorithm is what makes both feel routine rather than clever.'
+        ],
         example: 'Four-digit strings with no two equal adjacent digits: 7 290, which is 10 × 9³ exactly.'
       }
-    ]
+    ],
   });
 }(typeof window !== 'undefined' ? window : null));
