@@ -181,11 +181,15 @@
         },
         plain: 'The value of a position is the best value its moves lead to, with "best" alternating.',
         formal: 'v(s) = max over moves of v(s\') at a maximising node, min at a minimising node',
-        detail: 'Minimax is that recurrence written out, and treating it as a DP rather than as a separate ' +
-          'subject makes everything else follow: the state space is the positions, the transitions are the ' +
-          'moves, memoising it is transposition tables, and the evaluation order question is whether the ' +
-          'position graph has cycles. Scoring from one player\'s point of view at every depth keeps the two ' +
-          'players one sign apart rather than two code paths, which removes an entire class of bug.',
+        detail: [
+          'Minimax is that recurrence written out, and treating it as a DP rather than as a ' +
+            'separate subject makes everything else follow.',
+          'The state space is the positions. The transitions are the moves. Memoising it is ' +
+            'transposition tables. The evaluation-order question is whether the position graph has ' +
+            'cycles.',
+          'Scoring from one player\'s point of view at every depth keeps the two players one sign ' +
+            'apart rather than two code paths, which removes an entire class of bug.'
+        ],
         example: 'Tic-tac-toe from an empty board is 549 946 nodes and 255 168 terminal positions, and its ' +
           'value is 0 — a draw with correct play.'
       },
@@ -193,14 +197,18 @@
         term: 'Alpha-beta prunes what cannot matter',
         plain: 'Once a node is provably no better than something already in hand, its remaining moves are irrelevant.',
         formal: 'maintain [α, β]; at a node where β ≤ α the parent will never choose this branch, so stop',
-        readAs: 'Alpha-beta pruning: α is the best the maximising side is already assured of, β the best the ' +
-          'minimising side is. Once they cross, whatever is below cannot change the answer, so it is ' +
-          'never looked at.',
-        detail: 'The window carries "the best the maximiser is already guaranteed" and "the best the ' +
-          'minimiser is already guaranteed". When they cross, the current node\'s value cannot influence ' +
-          'the answer whatever its unexamined moves contain, so they are never examined. The value returned ' +
-          'is exactly minimax\'s - the pruning is about what is searched, never about what is computed - ' +
-          'which is why the value is the check and the node count is the result.',
+        readAs: 'Alpha-beta pruning: α is the best the maximising side is already assured of, and ' +
+          'β the best the minimising side is. Once they cross, whatever is below cannot change ' +
+          'the answer, so it is never looked at.',
+        detail: [
+          'The window carries "the best the maximiser is already guaranteed" and "the best the ' +
+            'minimiser is already guaranteed".',
+          'When they cross, the current node\'s value cannot influence the answer whatever its ' +
+            'unexamined moves contain. So they are never examined.',
+          'The value returned is exactly minimax\'s. The pruning is about what is searched, never ' +
+            'about what is computed, which is why the value is the check and the node count is ' +
+            'the result.'
+        ],
         example: 'Tic-tac-toe: 549 946 nodes with plain minimax and 7 275 with alpha-beta under a good ' +
           'ordering, both returning 0.'
       },
@@ -208,15 +216,18 @@
         term: 'The saving belongs to the move ordering',
         plain: 'Alpha-beta with bad ordering approaches the full tree; with perfect ordering it approaches its square root.',
         formal: 'best case Θ(b^(d/2)), worst case Θ(b^d) — the same algorithm, different orders',
-        readAs: 'With perfect move ordering, alpha-beta searches the square root of the tree — which is twice ' +
-          'the depth for the same effort. With the worst ordering it searches all of it. Nothing else ' +
-          'changes.',
-        detail: 'This is the fact that matters in practice, and it reframes engineering effort: once ' +
-          'alpha-beta is in place, the returns come from ordering heuristics rather than from the search. ' +
-          'It also explains why real engines spend so much on move ordering - killer moves, history ' +
-          'heuristics, iterative deepening feeding the previous depth\'s best move first. The measurement ' +
-          'here is a 5.8× spread between two orderings of the same algorithm on the same position, both ' +
-          'returning the same value.',
+        readAs: 'With perfect move ordering, alpha-beta searches the square root of the tree, ' +
+          'which is twice the depth for the same effort. With the worst ordering it searches all ' +
+          'of it. Nothing else changes.',
+        detail: [
+          'This is the fact that matters in practice, and it reframes engineering effort. Once ' +
+            'alpha-beta is in place, the returns come from ordering heuristics rather than from ' +
+            'the search.',
+          'It also explains why real engines spend so much on move ordering: killer moves, history ' +
+            'heuristics, iterative deepening feeding the previous depth\'s best move first.',
+          'The measurement here is a 5.8× spread between two orderings of the same algorithm on ' +
+            'the same position, both returning the same value.'
+        ],
         example: 'Centre-first visits 7 275 nodes and edges-first 42 094 on the same empty board, both ' +
           'returning 0.'
       },
@@ -224,11 +235,15 @@
         term: 'Reversing the move list is not a worse ordering',
         plain: 'On a symmetric board, board order and reversed board order prune identically.',
         formal: 'a symmetry of the position induces a bijection on the search tree that preserves cutoffs',
-        detail: 'This is worth stating because "try it backwards and see" is how people usually test an ' +
-          'ordering heuristic, and on a symmetric position it measures nothing. Both orders visit 18 297 ' +
-          'nodes. A genuinely bad ordering has to be bad *about the game* - examining weak moves first so ' +
-          'that no early cutoff is available - rather than bad about the array. Ranking squares by quality ' +
-          'and reversing that ranking is a real perturbation; reversing the index list is not.',
+        detail: [
+          'This is worth stating because "try it backwards and see" is how people usually test an ' +
+            'ordering heuristic, and on a symmetric position it measures nothing. Both orders ' +
+            'visit 18 297 nodes.',
+          'A genuinely bad ordering has to be bad *about the game*: examining weak moves first, so ' +
+            'that no early cutoff is available.',
+          'Ranking squares by quality and reversing that ranking is a real perturbation. Reversing ' +
+            'the index list is not.'
+        ],
         example: 'Board order and reversed board order both visit 18 297 nodes and prune 6 930 branches — ' +
           'identical to the last node.'
       },
@@ -236,26 +251,33 @@
         term: 'Win, lose, and the Grundy number that generalises them',
         plain: 'A position is lost exactly when every move leads to a won one; Grundy 0 says the same thing.',
         formal: 'g(s) = mex{g(s\') : s → s\'}; s is losing iff g(s) = 0',
-        detail: 'The minimum excludant - the smallest non-negative integer not among the children\'s values ' +
-          '- turns the two-valued win/lose labelling into a number, and the number carries strictly more ' +
-          'information. The labelling tells you who wins one game; the Grundy value tells you how that game ' +
-          'combines with others. Everything in Sprague-Grundy theory rests on this one operation, and its ' +
-          'zero case is exactly the classical labelling.',
-        example: 'Nim\'s Grundy value is the heap size itself, so only the empty heap is losing; the ' +
-          'subtraction game {1, 3, 4} gives 0, 1, 0, 1, 2, 3, 2 and then repeats with period 7.'
+        detail: [
+          'The minimum excludant — the smallest non-negative integer not among the children\'s ' +
+            'values — turns the two-valued win/lose labelling into a number.',
+          'The number carries strictly more information. The labelling tells you who wins one ' +
+            'game; the Grundy value tells you how that game combines with others.',
+          'Everything in Sprague-Grundy theory rests on this one operation, and its zero case is ' +
+            'exactly the classical labelling.'
+        ],
+        example: 'Nim\'s Grundy value is the heap size itself, so only the empty heap is losing. ' +
+          'The subtraction game {1, 3, 4} gives 0, 1, 0, 1, 2, 3, 2 and then repeats with ' +
+          'period 7.'
       },
       {
         term: 'Sprague-Grundy: the XOR is exact',
         plain: 'A sum of impartial games behaves exactly like one Nim heap of size equal to the XOR.',
         formal: 'g(G₁ + G₂ + … + Gₙ) = g(G₁) ⊕ g(G₂) ⊕ … ⊕ g(Gₙ)',
-        readAs: 'The Sprague-Grundy theorem: the value of several games played side by side is the XOR of ' +
-          'their individual values. Exact, not approximate — which is why a position with XOR zero is a ' +
-          'loss and anything else is a win.',
-        detail: 'This is a theorem rather than a heuristic, and it is the reason the family exists. A ' +
-          'position made of independent components would otherwise need a state space that is the product ' +
-          'of the components\', and the theorem replaces that product with a XOR of independently computed ' +
-          'numbers. Recognising that a position *decomposes* is the whole trick - the theory is easy once ' +
-          'the components are identified, and identifying them is the part that takes judgement.',
+        readAs: 'The Sprague-Grundy theorem: the value of several games played side by side is ' +
+          'the XOR of their individual values. Exact, not approximate — which is why a position ' +
+          'with XOR zero is a loss and anything else is a win.',
+        detail: [
+          'This is a theorem rather than a heuristic, and it is the reason the family exists.',
+          'A position made of independent components would otherwise need a state space that is ' +
+            'the product of the components\'. The theorem replaces that product with a XOR of ' +
+            'independently computed numbers.',
+          'Recognising that a position *decomposes* is the whole trick. The theory is easy once ' +
+            'the components are identified, and identifying them is the part that takes judgement.'
+        ],
         example: 'Three heaps of seven under {1, 3, 4}: three tables of 41 states give a XOR of 0, and the ' +
           '393-state joint search agrees that the first player loses.'
       },
@@ -263,11 +285,14 @@
         term: 'Grundy sequences are eventually periodic',
         plain: 'A finite subtraction set gives a repeating Grundy sequence, so a small table answers for any heap.',
         formal: 'for a finite move set the sequence is ultimately periodic; the period is found, not assumed',
-        detail: 'Because each value depends on a bounded window of earlier values, the sequence of ' +
-          '(window) states is finite and must eventually repeat - and once it repeats it repeats forever. ' +
-          'That turns an unbounded game into a lookup: compute enough of the table to see the period, then ' +
-          'answer any heap size by modular arithmetic. Detecting the period rather than assuming one is ' +
-          'the honest version, because a periodic-looking prefix is not a proof.',
+        detail: [
+          'Each value depends on a bounded window of earlier values, so the sequence of window ' +
+            'states is finite and must eventually repeat. Once it repeats, it repeats forever.',
+          'That turns an unbounded game into a lookup. Compute enough of the table to see the ' +
+            'period, then answer any heap size by modular arithmetic.',
+          'Detecting the period rather than assuming one is the honest version, because a ' +
+            'periodic-looking prefix is not a proof.'
+        ],
         example: '{1, 3, 4} has period 7 from the start; {1, 2} has period 3; Nim has no period at all, ' +
           'because its Grundy value is the heap size.'
       },
@@ -275,14 +300,18 @@
         term: 'Retrograde analysis handles cycles',
         plain: 'Work backwards from the terminal positions, counting each state\'s unresolved successors.',
         formal: 'a state is won if any successor is lost; lost when all successors are won; anything unresolved is a draw',
-        readAs: 'Work backwards from the end: you win if you can move to a position your opponent loses from, ' +
-          'and lose if every move hands them a win. Positions that never resolve are draws.',
-        detail: 'A forward memoised search cannot label a game whose positions can repeat - it recurses ' +
-          'forever - and repetition is exactly what produces draws. Retrograde analysis starts at the ' +
-          'terminals and propagates backwards with a counter of unresolved successors per state, so a state ' +
-          'is settled as lost only when every one of its moves has been settled as won. Whatever is never ' +
-          'settled is a draw, which is the correct answer rather than a failure. This is how endgame ' +
-          'tablebases are built.',
+        readAs: 'Work backwards from the end. You win if you can move to a position your opponent ' +
+          'loses from, and lose if every move hands them a win. Positions that never resolve are ' +
+          'draws.',
+        detail: [
+          'A forward memoised search cannot label a game whose positions can repeat — it recurses ' +
+            'forever — and repetition is exactly what produces draws.',
+          'Retrograde analysis starts at the terminals and propagates backwards, with a counter of ' +
+            'unresolved successors per state. A state is settled as lost only when every one of ' +
+            'its moves has been settled as won.',
+          'Whatever is never settled is a draw, which is the correct answer rather than a failure. ' +
+            'This is how endgame tablebases are built.'
+        ],
         example: 'Nim to heap 40: 40 winning positions, 1 losing one, and no draws — matching the single ' +
           'zero in the Grundy table.'
       }

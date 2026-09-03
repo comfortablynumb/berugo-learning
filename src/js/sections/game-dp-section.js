@@ -67,38 +67,42 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'A two-player game is a DP over positions: the value of a position is the best value its moves ' +
-          'lead to, with "best" alternating between the players. Minimax is that recursion written out, ' +
-          'and on tic-tac-toe from an empty board it visits 549 946 nodes. Alpha-beta returns the same ' +
-          'value from a fraction of them by noticing when a node cannot influence the answer.',
-        '**Alpha-beta\'s saving belongs to the move ordering, not to alpha-beta.** With perfect ordering ' +
-          'the search is about the square root of the tree; with bad ordering it approaches the whole ' +
-          'thing. On this board, centre-first visits 7 275 nodes and edges-first visits 42 094 — a factor ' +
-          'of 5.8 between two orderings of the same algorithm on the same position, both returning the ' +
-          'same value.',
-        '**Reversing the move list is not a bad ordering, and the table shows it.** Board order and ' +
-          'reversed board order prune *identically* here, because the board is symmetric. A bad ordering ' +
-          'has to be bad about the game rather than about the array, which is exactly why "try it ' +
-          'backwards" is a useless test of an ordering heuristic.',
-        '**Sprague–Grundy refuses to build the product.** A sum of impartial games is equivalent to a ' +
-          'single Nim heap whose size is the XOR of the components\' Grundy numbers, and that is exact ' +
-          'rather than approximate. Three heaps of seven is 512 joint states against three independent ' +
-          'tables of eight. Recognising that a position decomposes into independent components is the ' +
-          'whole trick, and the demo computes the answer both ways so the equivalence is checked rather ' +
-          'than asserted.'
+        '**A two-player game is a DP over positions.** The value of a position is the best ' +
+          'value its moves lead to, with "best" alternating between the players.',
+        'Minimax is that recursion written out, and on tic-tac-toe from an empty board it visits ' +
+          '549 946 nodes. Alpha-beta returns the same value from a fraction of them, by noticing ' +
+          'when a node cannot influence the answer.',
+        '**Alpha-beta\'s saving belongs to the move ordering, not to alpha-beta.** With perfect ' +
+          'ordering the search is about the square root of the tree. With bad ordering it ' +
+          'approaches the whole thing.',
+        'On this board, centre-first visits 7 275 nodes and edges-first visits 42 094. That is a ' +
+          'factor of 5.8 between two orderings of the same algorithm on the same position, both ' +
+          'returning the same value.',
+        '**Reversing the move list is not a bad ordering, and the table shows it.** Board order ' +
+          'and reversed board order prune *identically* here, because the board is symmetric.',
+        'A bad ordering has to be bad about the game rather than about the array, which is ' +
+          'exactly why "try it backwards" is a useless test of an ordering heuristic.',
+        '**Sprague–Grundy refuses to build the product.** A sum of impartial games is equivalent ' +
+          'to a single Nim heap whose size is the XOR of the components\' Grundy numbers, and ' +
+          'that is exact rather than approximate. Three heaps of seven is 512 joint states ' +
+          'against three independent tables of eight.',
+        'Recognising that a position decomposes into independent components is the whole trick. ' +
+          'The demo computes the answer both ways, so the equivalence is checked rather than ' +
+          'asserted.'
       ],
       demo: {
         title: 'Interactive demo — ordering against node count, and XOR against the product',
         markup: root.GameDpTemplate.render()
       },
       diagram: diagram(),
-      insight: 'When a game position is really several independent positions side by side, the state space ' +
-        'you are about to build is a product you do not need. Grundy numbers are the formal version of ' +
-        'that observation for impartial games, but the habit generalises: before enumerating a combined ' +
-        'state, ask whether the components interact at all. If they do not, solve them separately and ' +
-        'combine the answers — and if they interact only weakly, that is usually where the useful ' +
-        'approximation lives. The same instinct is what makes a search over one dimension possible when ' +
-        'the joint search over all of them is not.'
+      insight: 'When a game position is really several independent positions side by side, the ' +
+        'state space you are about to build is a product you do not need. Grundy numbers are the ' +
+        'formal version of that observation for impartial games, and the habit generalises. ' +
+        'Before enumerating a combined state, ask whether the components interact at all. If ' +
+        'they do not, solve them separately and combine the answers. If they interact only ' +
+        'weakly, that is usually where the useful approximation lives. The same instinct is what ' +
+        'makes a search over one dimension possible when the joint search over all of them is ' +
+        'not.'
     };
   }
 
