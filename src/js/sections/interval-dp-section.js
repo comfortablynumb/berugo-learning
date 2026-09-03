@@ -50,40 +50,43 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'An interval DP\'s state is a contiguous range, and its recurrence asks where that range breaks. ' +
-          'Matrix-chain multiplication, optimal binary search trees, palindrome partitioning and burst ' +
-          'balloons are all that shape. Because `best[i][j]` depends on strictly shorter intervals, the ' +
-          'evaluation order must be **by increasing length** - and the natural nested loop over i and j is ' +
-          'not that order. It reads cells that are still zero and produces a plausible number.',
-        'Burst balloons is worth the detour because its *state* is the thing people get wrong rather than ' +
-          'its order. "Which balloon do I burst first" has no optimal substructure - bursting changes who ' +
-          'is adjacent to whom, so the two sides are not independent. "Which do I burst **last** in this ' +
-          'interval" does: at that moment its neighbours are exactly the interval\'s endpoints, and the two ' +
-          'sides never interact. Same problem, one word different, and one of them is a DP.',
-        '**Knuth\'s optimisation is a narrowing, and a narrowing with a false precondition is a fast wrong ' +
-          'answer.** If the cost satisfies the quadrangle inequality, the best split for [i, j] lies ' +
-          'between the best splits for [i, j−1] and [i+1, j], so the k loop can be restricted to that band ' +
-          'and the whole DP drops from O(n³) to O(n²). If it does not, the band can exclude the true ' +
-          'optimum - and nothing raises. The demo tests the inequality against the actual weights and the ' +
+        '**An interval DP\'s state is a contiguous range, and its recurrence asks where that ' +
+          'range breaks.** Matrix-chain multiplication, optimal binary search trees, palindrome ' +
+          'partitioning and burst balloons are all that shape.',
+        '`best[i][j]` depends on strictly shorter intervals, so the evaluation order must be **by ' +
+          'increasing length**. The natural nested loop over i and j is not that order: it reads ' +
+          'cells that are still zero, and produces a plausible number.',
+        'Burst balloons is worth the detour because its *state* is the thing people get wrong, ' +
+          'rather than its order. "Which balloon do I burst first" has no optimal substructure — ' +
+          'bursting changes who is adjacent to whom, so the two sides are not independent.',
+        '"Which do I burst **last** in this interval" does have it. At that moment its neighbours ' +
+          'are exactly the interval\'s endpoints, and the two sides never interact. Same problem, ' +
+          'one word different, and one of them is a DP.',
+        '**Knuth\'s optimisation is a narrowing, and a narrowing with a false precondition is a ' +
+          'fast wrong answer.** If the cost satisfies the quadrangle inequality, the best split ' +
+          'for [i, j] lies between the best splits for [i, j−1] and [i+1, j]. The k loop can then ' +
+          'be restricted to that band, and the whole DP drops from O(n³) to O(n²).',
+        'If it does not satisfy the inequality, the band can exclude the true optimum — and ' +
+          'nothing raises. The demo tests the inequality against the actual weights, and the ' +
           'optimised solver refuses to run when it fails.',
-        'The check is worth a paragraph of its own, because it is where a subtlety lives. The interval ' +
-          'weight is a difference of prefix sums, so on nine two-decimal probabilities the inequality is ' +
-          'violated by about 1.1 × 10⁻¹⁶ - pure floating-point noise. An exact `<=` therefore rejects the ' +
-          'textbook instance the optimisation was written for. The tolerance is not a fudge; it is part of ' +
-          'the check being correct.'
+        'The check is worth a paragraph of its own, because it is where a subtlety lives. The ' +
+          'interval weight is a difference of prefix sums, so on nine two-decimal probabilities ' +
+          'the inequality is violated by about 1.1 × 10⁻¹⁶ — pure floating-point noise.',
+        'An exact `<=` therefore rejects the textbook instance the optimisation was written for. ' +
+          'The tolerance is not a fudge. It is part of the check being correct.'
       ],
       demo: {
         title: 'Interactive demo — the diagonal sweep, and a precondition that is tested',
         markup: root.IntervalDpTemplate.render()
       },
       diagram: diagram(),
-      insight: 'Every DP optimisation in the literature is a narrowing of a search, and every one has a ' +
-        'precondition. Convexity, a monotone argmin, the quadrangle inequality - they are all the same kind ' +
-        'of promise, and they are all cheap to test on the actual cost function at the size your tests run ' +
-        'at. Do that once, in a unit test, comparing the optimised answer against the unoptimised one. The ' +
-        'alternative is shipping something that is measurably faster and occasionally wrong, which is the ' +
-        'worst outcome available: it will pass review, pass benchmarking, and fail in a way nobody traces ' +
-        'back to the optimisation.'
+      insight: 'Every DP optimisation in the literature is a narrowing of a search, and every ' +
+        'one has a precondition. Convexity, a monotone argmin, the quadrangle inequality: all ' +
+        'the same kind of promise. All of them are cheap to test on the actual cost function, at ' +
+        'the size your tests run at. Do that once, in a unit test, comparing the optimised answer ' +
+        'against the unoptimised one. The alternative is shipping something that is measurably ' +
+        'faster and occasionally wrong. That is the worst outcome available: it will pass review, ' +
+        'pass benchmarking, and fail in a way nobody traces back to the optimisation.'
     };
   }
 

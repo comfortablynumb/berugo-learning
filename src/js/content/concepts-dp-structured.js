@@ -10,15 +10,18 @@
         term: 'The state is a contiguous range',
         plain: 'best[i][j] is the answer for the sub-range from i to j, and it asks where that range breaks.',
         formal: 'best[i][j] = op over k in [i, j) of combine(best[i][k], best[k+1][j], join(i, k, j))',
-        readAs: 'For an interval from i to j, try every place k to split it, and combine the answers for the ' +
-          'two halves with whatever the join itself costs. The round bracket means k stops just short ' +
-          'of j.',
-        detail: 'Matrix-chain multiplication, optimal binary search trees, palindrome partitioning and burst ' +
-          'balloons are one recurrence with four join costs. Because a range of length L is built from ' +
-          'ranges of length strictly less than L, the family shares an evaluation order and a shape - the ' +
-          'upper triangle of a square table, filled diagonal by diagonal. Recognising the shape is worth ' +
-          'more than remembering any individual member, because the join cost is then the only thing left ' +
-          'to design.',
+        readAs: 'For an interval from i to j, try every place k to split it, and combine the ' +
+          'answers for the two halves with whatever the join itself costs. The round bracket means ' +
+          'k stops just short of j.',
+        detail: [
+          'Matrix-chain multiplication, optimal binary search trees, palindrome partitioning and ' +
+            'burst balloons are one recurrence with four join costs.',
+          'A range of length L is built from ranges of length strictly less than L. So the ' +
+            'family shares an evaluation order and a shape: the upper triangle of a square ' +
+            'table, filled diagonal by diagonal.',
+          'Recognising the shape is worth more than remembering any individual member, because the ' +
+            'join cost is then the only thing left to design.'
+        ],
         example: 'A six-matrix chain has 15 intervals of length 2 or more, and settling all of them tests 35 ' +
           'split points in total.'
       },
@@ -36,26 +39,35 @@
         },
         plain: 'The natural nested loop over i and j reads cells that have not been written.',
         formal: 'any reverse topological order works; increasing interval length is the simplest one',
-        detail: 'A cell depends on strictly shorter intervals, so a valid order settles all of length 2, then ' +
-          'all of length 3, and so on. The obvious `for i, for j` loop visits [0, n−1] long before [1, 2], ' +
-          'and reads two cells still holding their initial value. The failure is a number rather than an ' +
-          'error, because the table was allocated full of zeros - which makes this the interval family\'s ' +
-          'version of the evaluation-order bug 12.1 names, and the reason the order is stated as data on ' +
-          'the page rather than described.',
-        example: 'For n = 6 the sweep settles 5 intervals of length 2, then 4 of length 3, and so on to a ' +
-          'single interval of length 6 — 15 cells in all.'
+        detail: [
+          'A cell depends on strictly shorter intervals, so a valid order settles all of length 2, ' +
+            'then all of length 3, and so on.',
+          'The obvious `for i, for j` loop visits [0, n−1] long before [1, 2], and reads two cells ' +
+            'still holding their initial value.',
+          'The failure is a number rather than an error, because the table was allocated full of ' +
+            'zeros. This is the interval family\'s version of the evaluation-order bug 12.1 names, ' +
+            'and the reason the order is stated as data on the page rather than described.'
+        ],
+        example: 'For n = 6 the sweep settles 5 intervals of length 2, then 4 of length 3, ' +
+          'and so on up to a single interval of length 6. Fifteen cells in all.'
       },
       {
         term: 'The lower triangle is not empty, it is absent',
         plain: 'An interval [i, j] with j < i does not exist, so a zero there is a lie.',
         formal: 'the domain is {(i, j) : i ≤ j}; cells outside it have no value, not the value zero',
-        readAs: 'Only cells where the start is at or before the end mean anything. Leaving the others as zero ' +
-          'rather than as "no value" is how a nonsense interval sneaks into a minimum.',
-        detail: 'Half the table is not part of the problem, and treating it as unfilled-but-legitimate is how ' +
-          'a mis-ordered sweep gets away with returning a plausible number. Drawing it greyed out rather ' +
-          'than as zeros is not decoration - it is the difference between a reader seeing "this cell has ' +
-          'not been computed yet" and "this cell is zero", and those imply different bugs. The same applies ' +
-          'to any DP whose state space is a strict subset of the array holding it.',
+        readAs: 'Only cells where the start is at or before the end mean anything. Leaving the ' +
+          'others as zero rather than as "no value" is how a nonsense interval sneaks into a ' +
+          'minimum.',
+        detail: [
+          'Half the table is not part of the problem, and treating it as ' +
+            'unfilled-but-legitimate is how a mis-ordered sweep gets away with returning a ' +
+            'plausible number.',
+          'Drawing it greyed out rather than as zeros is not decoration. It is the difference ' +
+            'between a reader seeing "this cell has not been computed yet" and "this cell is ' +
+            'zero", and those imply different bugs.',
+          'The same applies to any DP whose state space is a strict subset of the array holding ' +
+            'it.'
+        ],
         example: 'A six-matrix chain uses 21 of the 36 cells in its 6 × 6 table; the other 15 are ranges that ' +
           'do not exist.'
       },
@@ -63,11 +75,15 @@
         term: 'Choose the state so the sides stay independent',
         plain: 'Burst balloons has no substructure under "first", and has it under "last".',
         formal: 'the correct state is "k is burst last in [i, j]", at which point its neighbours are i and j',
-        detail: 'This is the milestone\'s sharpest illustration that state design is the difficulty. Asking ' +
-          'which balloon is popped first fails, because popping changes adjacency and the two remaining ' +
-          'sides are no longer independent problems. Asking which is popped *last* works: at that moment ' +
-          'everything else in the range is gone, so its neighbours are exactly the range endpoints, and the ' +
-          'two sides never interact. Same problem, one word different, and only one of them is a DP at all.',
+        detail: [
+          'This is the milestone\'s sharpest illustration that state design is the difficulty.',
+          'Asking which balloon is popped first fails. Popping changes adjacency, so the two ' +
+            'remaining sides are no longer independent problems.',
+          'Asking which is popped *last* works. At that moment everything else in the range is ' +
+            'gone, so its neighbours are exactly the range endpoints, and the two sides never ' +
+            'interact.',
+          'Same problem, one word different, and only one of them is a DP at all.'
+        ],
         example: 'Eight balloons yield 2 019 coins under the last-burst state, and every burst order ' +
           'enumerated exhaustively agrees.'
       },
@@ -75,14 +91,18 @@
         term: "Knuth's optimisation narrows the split range",
         plain: 'The best split for [i, j] lies between the best splits for [i, j−1] and [i+1, j].',
         formal: 'opt[i][j−1] ≤ opt[i][j] ≤ opt[i+1][j], summing to O(n²) split tests instead of O(n³)',
-        readAs: 'The best split point only ever moves right as the interval grows. So instead of trying every ' +
-          'k for every cell, each cell searches between its two neighbours\' answers — and those ranges ' +
-          'add up to n² rather than n³.',
-        detail: 'The k loop is what makes an interval DP cubic, and monotonicity of the optimal split bounds ' +
-          'it. Because the ranges telescope across each diagonal, the total number of split tests over the ' +
-          'whole table collapses from cubic to quadratic - the same trick as divide-and-conquer ' +
-          'optimisation, specialised to intervals. It is a genuine order-of-magnitude on a real instance, ' +
-          'and it is conditional on a property of the cost function rather than of the algorithm.',
+        readAs: 'The best split point only ever moves right as the interval grows. So instead of ' +
+          'trying every k for every cell, each cell searches between its two neighbours\' answers ' +
+          '— and those ranges add up to n² rather than n³.',
+        detail: [
+          'The k loop is what makes an interval DP cubic, and monotonicity of the optimal split ' +
+            'bounds it.',
+          'The ranges telescope across each diagonal, so the total number of split tests over the ' +
+            'whole table collapses from cubic to quadratic. It is the same trick as ' +
+            'divide-and-conquer optimisation, specialised to intervals.',
+          'It is a genuine order-of-magnitude on a real instance, and it is conditional on a ' +
+            'property of the cost function rather than of the algorithm.'
+        ],
         example: 'Nine keys: 156 split tests unoptimised and 72 with the narrowing, for the identical cost ' +
           'of 2.590000.'
       },
@@ -90,15 +110,19 @@
         term: 'The quadrangle inequality is the precondition',
         plain: 'Knuth\'s narrowing is valid only if the interval weight satisfies w(a,c) + w(b,d) ≤ w(a,d) + w(b,c).',
         formal: 'for a ≤ b ≤ c ≤ d, the QI plus monotonicity on nested intervals implies the argmin is monotone',
-        readAs: 'Given four points in order, the quadrangle inequality says that widening an interval never ' +
-          'costs less than widening a narrower one inside it. That is what forces the best split point ' +
-          'to move only rightwards.',
-        detail: 'When the inequality fails, the narrowed range can exclude the true optimum, so the run is ' +
-          'faster *and wrong* - and nothing raises, because a smaller search producing a larger minimum is ' +
-          'indistinguishable from a correct one without a reference. Non-negative weights always satisfy it, ' +
-          'which is why the textbook instance works and why the failure is easy to never encounter until a ' +
-          'cost function grows a negative term. Testing the precondition on the actual weights is a few ' +
-          'lines and is the only thing standing between the optimisation and a silent defect.',
+        readAs: 'Given four points in order, the quadrangle inequality says that widening an ' +
+          'interval never costs less than widening a narrower one inside it. That is what forces ' +
+          'the best split point to move only rightwards.',
+        detail: [
+          'When the inequality fails, the narrowed range can exclude the true optimum. The run is ' +
+            'then faster *and wrong*, and nothing raises: a smaller search producing a larger ' +
+            'minimum is indistinguishable from a correct one without a reference.',
+          'Non-negative weights always satisfy it, which is why the textbook instance works — and ' +
+            'why the failure is easy to never encounter until a cost function grows a negative ' +
+            'term.',
+          'Testing the precondition on the actual weights is a few lines, and it is the only thing ' +
+            'standing between the optimisation and a silent defect.'
+        ],
         example: 'Flipping one of nine probabilities negative makes the inequality fail at (a, b, c, d) = ' +
           '(0, 0, 2, 4), and the optimised solver refuses rather than answering.'
       },
@@ -106,14 +130,19 @@
         term: 'The precondition check needs a tolerance',
         plain: 'Interval weights are differences of prefix sums, so exact comparison rejects valid instances.',
         formal: 'w(i, j) = P[j+1] − P[i]; floating-point error accumulates in P and must be tolerated in the test',
-        readAs: 'Interval weights come from differences of prefix sums, and those differences drift by tiny ' +
-          'amounts in floating point. A test that demands exact equality will fail on correct code.',
-        detail: 'This is a real subtlety rather than a caveat. Nine two-decimal probabilities - the textbook ' +
-          'optimal-BST instance - violate the quadrangle inequality by about 1.11 × 10⁻¹⁶ purely because ' +
-          'the prefix sums are computed in binary floating point. An exact `<=` therefore rejects exactly ' +
-          'the case Knuth\'s optimisation was written for, and a reviewer would conclude the optimisation ' +
-          'does not apply. The tolerance is not a fudge to make a test pass; it is what makes the test ' +
-          'measure the mathematical property rather than the arithmetic.',
+        readAs: 'Interval weights come from differences of prefix sums, and those differences ' +
+          'drift by tiny amounts in floating point. A test that demands exact equality will fail ' +
+          'on correct code.',
+        detail: [
+          'This is a real subtlety rather than a caveat.',
+          'Nine two-decimal probabilities — the textbook optimal-BST instance — violate the ' +
+            'quadrangle inequality by about 1.11 × 10⁻¹⁶, purely because the prefix sums are ' +
+            'computed in binary floating point.',
+          'An exact `<=` therefore rejects exactly the case Knuth\'s optimisation was written for, ' +
+            'and a reviewer would conclude the optimisation does not apply.',
+          'The tolerance is not a fudge to make a test pass. It is what makes the test measure the ' +
+            'mathematical property rather than the arithmetic.'
+        ],
         example: 'The default nine weights violate the inequality by 1.11 × 10⁻¹⁶ and pass with a tolerance ' +
           'of 1.02 × 10⁻⁹ scaled to the total weight.'
       },
@@ -121,14 +150,19 @@
         term: 'Keep the split, or lose the answer',
         plain: 'The scalar count does not say which parenthesisation achieved it.',
         formal: 'store argmin k per cell; recomputing it from the values breaks on ties',
-        readAs: 'Record which split won, rather than working it out again later from the stored costs. When ' +
-          'two splits tie, recomputation can pick the other one and the reconstructed answer stops ' +
-          'matching its own reported cost.',
-        detail: 'A matrix-chain cost is a number and the thing a caller actually wants is the order to ' +
-          'multiply in. Recording the argmin as the cell is settled costs one array and makes the ' +
-          'reconstruction a walk; recomputing it afterwards from the value table is possible and breaks on ' +
-          'ties, because two splits achieving the same cost are indistinguishable after the fact and the ' +
-          'reconstruction may pick one whose sub-splits were never the ones that produced the total.',
+        readAs: 'Record which split won, rather than working it out again later from the stored ' +
+          'costs. When two splits tie, recomputation can pick the other one — and the ' +
+          'reconstructed answer then stops matching its own reported cost.',
+        detail: [
+          'A matrix-chain cost is a number, and the thing a caller actually wants is the order to ' +
+            'multiply in.',
+          'Recording the argmin as the cell is settled costs one array, and makes the ' +
+            'reconstruction a walk.',
+          'Recomputing it afterwards from the value table is possible, and breaks on ties. Two ' +
+            'splits achieving the same cost are indistinguishable after the fact, so the ' +
+            'reconstruction may pick one whose sub-splits were never the ones that produced the ' +
+            'total.'
+        ],
         example: 'The default six-matrix chain costs 18 984 scalar multiplications under the ' +
           'parenthesisation (M0 ((((M1 M2) M3) M4) M5)).'
       }
