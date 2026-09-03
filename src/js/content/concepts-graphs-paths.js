@@ -323,12 +323,15 @@
         readAs: 'Bellman-Ford makes progress by edge count rather than by distance: after k passes every ' +
           'route using at most k edges is correct. Since no shortest path uses more than n−1 edges, n−1 ' +
           'passes suffice.',
-        detail: 'The proof is an induction on path length rather than on anything clever, which is why ' +
-          'the algorithm needs no assumption about weights at all. Its practical form always carries ' +
-          'an early exit: if a round changes nothing, no later round can either, and most graphs ' +
-          'converge in far fewer than n − 1 rounds. That exit is not just an optimisation — it is what ' +
-          'makes the n-th round meaningful, because a round that still improves something after ' +
-          'n − 1 rounds is a proof that no shortest path exists.',
+        detail: [
+          'The proof is an induction on path length rather than on anything clever, which is why the ' +
+            'algorithm needs no assumption about weights at all.',
+          'Its practical form always carries an early exit. If a round changes nothing, no later ' +
+            'round can either, and most graphs converge in far fewer than n − 1 rounds.',
+          'That exit is not just an optimisation. It is what makes the n-th round meaningful, ' +
+            'because a round that still improves something after n − 1 rounds is a proof that no ' +
+            'shortest path exists.'
+        ],
         example: 'The 900-cell grid converges in 6 rounds rather than 900, at 3 480 relaxations each.'
       },
       {
@@ -348,22 +351,28 @@
         readAs: 'After n−1 passes everything should be settled. If a pass still improves something, the only ' +
           'explanation is a loop you can go round to keep getting cheaper — and then no shortest path ' +
           'exists at all.',
-        detail: 'This is detection, and detection is the cheap half. What it gives the caller is a ' +
-          'boolean they usually already suspected — the rate table is inconsistent, the cost model has ' +
-          'a hole — with no indication of where. The vertex that improved on the last round is a ' +
-          'starting point, not the answer, because it may be downstream of the cycle rather than in it.',
+        detail: [
+          'This is detection, and detection is the cheap half.',
+          'What it gives the caller is a boolean they usually already suspected: the rate table is ' +
+            'inconsistent, the cost model has a hole. It comes with no indication of where.',
+          'The vertex that improved on the last round is a starting point, not the answer, because ' +
+            'it may be downstream of the cycle rather than in it.'
+        ],
         example: 'The default rate table is proved inconsistent after 4 rounds on 4 currencies.'
       },
       {
         term: 'Extraction: walk the parents back n times before closing the loop',
         plain: 'Follow parent pointers n steps to land inside the cycle, then walk until you repeat.',
         formal: 'n parent steps from any vertex reachable through the cycle land on a cycle vertex; then close it',
-        detail: 'Skipping the n-step walk is the classic error and produces a "cycle" with a tail ' +
-          'hanging off it: a path into the cycle, followed by the cycle. Since the vertex that improved ' +
-          'last may be several hops downstream, only after n parent steps are you guaranteed to be ' +
-          'inside the loop, at which point walking until a vertex repeats closes it exactly. The extra ' +
-          'cost is one linear walk, and the difference in usefulness is the difference between "your ' +
-          'rates admit arbitrage" and the list of trades to make.',
+        detail: [
+          'Skipping the n-step walk is the classic error. It produces a "cycle" with a tail hanging ' +
+            'off it: a path into the cycle, followed by the cycle.',
+          'The vertex that improved last may be several hops downstream. Only after n parent steps ' +
+            'are you guaranteed to be inside the loop, and walking until a vertex repeats then ' +
+            'closes it exactly.',
+          'The extra cost is one linear walk. The difference in usefulness is the difference between ' +
+            '"your rates admit arbitrage" and the list of trades to make.'
+        ],
         example: 'The extracted loop is JPY → GBP → JPY, verified edge by edge against the graph, ' +
           'total −0.0070.'
       },
@@ -374,12 +383,15 @@
         readAs: 'Taking logs turns multiplying exchange rates into adding them, and negating turns "gains ' +
           'more than 1" into "sums below 0". An arbitrage cycle becomes a negative cycle, and ' +
           'Bellman-Ford finds it.',
-        detail: 'The transform is the entire trick and it is worth being able to derive rather than ' +
-          'remember: logarithms turn products into sums, and the negation turns "greater than one" ' +
-          'into "less than zero", which is what a negative cycle is. Everything after that is ' +
-          'Bellman-Ford. The only care needed is on the way back — the answer must be priced in the ' +
-          'original units, both because that is the number a human acts on and because a "profit" of ' +
-          '1.0000 is floating-point noise rather than an opportunity.',
+        detail: [
+          'The transform is the entire trick, and it is worth being able to derive rather than ' +
+            'remember. Logarithms turn products into sums, and the negation turns "greater than ' +
+            'one" into "less than zero", which is what a negative cycle is.',
+          'Everything after that is Bellman-Ford.',
+          'The only care needed is on the way back: the answer must be priced in the original ' +
+            'units. That is the number a human acts on, and a "profit" of 1.0000 is floating-point ' +
+            'noise rather than an opportunity.'
+        ],
         example: 'The found loop prices at a multiplier of 1.007000 — 0.70% per round trip — computed ' +
           'from the original rates rather than from the logs.'
       },
@@ -390,12 +402,16 @@
         readAs: 'Floyd-Warshall asks, for each intermediate vertex k in turn: is going through k better than ' +
           'what I had? The outer loop is over k, not over i or j — swapping them is the classic way to ' +
           'get a subtly wrong answer.',
-        detail: 'The state being built is "shortest path using intermediates drawn from {0..k}", and it ' +
-          'is defined in terms of the same quantity at k − 1. Making k the outer loop is what ensures ' +
-          'every cell read at level k has already been finalised at level k − 1. Put i or j outermost ' +
-          'and the algorithm reads cells that have moved on to a different k — it still terminates, ' +
-          'still does exactly the same number of relaxations, still returns a full matrix, and the ' +
-          'matrix is not the shortest-path matrix. No timing signal, no exception, nothing.',
+        detail: [
+          'The state being built is "shortest path using intermediates drawn from {0..k}", and it is ' +
+            'defined in terms of the same quantity at k − 1.',
+          'Making k the outer loop is what ensures every cell read at level k has already been ' +
+            'finalised at level k − 1.',
+          'Put i or j outermost and the algorithm reads cells that have moved on to a different k. ' +
+            'It still terminates, still does exactly the same number of relaxations, and still ' +
+            'returns a full matrix. The matrix is simply not the shortest-path matrix, and there is ' +
+            'no timing signal and no exception.'
+        ],
         example: 'On a 40-vertex graph both orders perform 64 000 relaxations; the swapped one differs ' +
           'from the truth on 554 of 1 600 cells.'
       },
@@ -407,12 +423,15 @@
           'w′ is read "w prime", a second related weight. Every path between the same two endpoints ' +
           'shifts by the same amount, so the ordering of paths is untouched and Dijkstra becomes ' +
           'usable.',
-        detail: 'The potential h comes from one Bellman-Ford run from a super-source joined to every ' +
-          'vertex at cost zero, so h(v) is at most h(u) + w(u, v) for every edge — which rearranges ' +
-          'exactly into the reweighted edge being non-negative. Because the shift telescopes along any ' +
-          'path, every path from s to t changes by the same h(s) − h(t), so the *shortest* path is ' +
-          'unchanged and can be recovered by subtracting the shift back off. One Bellman-Ford plus n ' +
-          'Dijkstras replaces n Bellman-Fords.',
+        detail: [
+          'The potential h comes from one Bellman-Ford run from a super-source joined to every ' +
+            'vertex at cost zero. So h(v) is at most h(u) + w(u, v) for every edge, which rearranges ' +
+            'exactly into the reweighted edge being non-negative.',
+          'The shift telescopes along any path, so every path from s to t changes by the same ' +
+            'h(s) − h(t). The *shortest* path is therefore unchanged, and can be recovered by ' +
+            'subtracting the shift back off.',
+          'One Bellman-Ford plus n Dijkstras replaces n Bellman-Fords.'
+        ],
         example: 'On a 40-vertex graph with 7 negative edges, Johnson costs 5 124 relaxations against ' +
           '26 520 for Bellman-Ford from every vertex and 64 000 for Floyd-Warshall.'
       },
@@ -422,12 +441,16 @@
         formal: 'n = 100 000 is 10¹⁰ cells — 80 GB at 8 bytes — whatever the running time is',
         readAs: 'All-pairs output is n² numbers, and at a hundred thousand vertices that is eighty gigabytes. ' +
           'The algorithm\'s speed is irrelevant; the answer does not fit.',
-        detail: 'People reach for all-pairs shortest paths and then discover the answer does not fit ' +
-          'anywhere. At a hundred thousand vertices the matrix alone is tens of gigabytes, so the ' +
-          'question is never "how fast can we compute it" but "do we actually need every pair". Usually ' +
-          'the answer is a handful of sources, in which case n Dijkstras beat the matrix on both axes; ' +
-          'sometimes it is a reachability question, in which case a bitset transitive closure is orders ' +
-          'of magnitude cheaper. Route planning at scale exists because this wall is real.',
+        detail: [
+          'People reach for all-pairs shortest paths and then discover the answer does not fit ' +
+            'anywhere.',
+          'At a hundred thousand vertices the matrix alone is tens of gigabytes. So the question is ' +
+            'never "how fast can we compute it" but "do we actually need every pair".',
+          'Usually the answer is a handful of sources, in which case n Dijkstras beat the matrix on ' +
+            'both axes. Sometimes it is a reachability question, in which case a bitset transitive ' +
+            'closure is orders of magnitude cheaper. Route planning at scale exists because this ' +
+            'wall is real.'
+        ],
         example: 'The demo\'s 40-vertex instance is 1 600 cells for 120 edges — already more cells than ' +
           'edges, and the ratio worsens quadratically.'
       },
@@ -438,12 +461,15 @@
         readAs: 'SPFA has exactly the same worst-case bound as the algorithm it optimises, and is usually ' +
           'much faster in practice. "Usually" is not a bound, and adversarial graphs hit the worst case ' +
           'reliably.',
-        detail: 'The optimisation is obvious and correct: a vertex whose distance did not change cannot ' +
-          'improve its neighbours, so keep a queue of the ones that did. On ordinary graphs this is a ' +
-          'large constant-factor win. The catch is that adversarial inputs exist and are easy to ' +
-          'construct, so SPFA is a good default and a bad guarantee — the same shape as quicksort ' +
-          'without a randomised pivot. Where the worst case matters, the honest answer is plain ' +
-          'Bellman-Ford or a queue with the small-label-first discipline and a measured bound.',
+        detail: [
+          'The optimisation is obvious and correct: a vertex whose distance did not change cannot ' +
+            'improve its neighbours, so keep a queue of the ones that did. On ordinary graphs this ' +
+            'is a large constant-factor win.',
+          'The catch is that adversarial inputs exist and are easy to construct. SPFA is a good ' +
+            'default and a bad guarantee — the same shape as quicksort without a randomised pivot.',
+          'Where the worst case matters, the honest answer is plain Bellman-Ford, or a queue with ' +
+            'the small-label-first discipline and a measured bound.'
+        ],
         example: 'SPFA settles 1 700 vertices on the 900-cell grid against Dijkstra\'s 900 — more work ' +
           'here, and no worse an answer.'
       }

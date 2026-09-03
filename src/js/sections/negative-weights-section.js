@@ -67,44 +67,53 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**Bellman-Ford relaxes every edge n − 1 times**, which is enough because a shortest path has ' +
+        'at most n − 1 edges.',
+      'An early exit when a round changes nothing makes it fast on most graphs. An n-th round that ' +
+        'still improves something is a proof that a negative cycle exists, because no simple path ' +
+        'can be that long.',
+      '**Detecting the cycle is the easy half; extracting it is the useful one.** Walking the parent ' +
+        'pointers back n times lands inside the cycle, because the vertex that improved on the last ' +
+        'round may be downstream of it rather than on it. Walking once more closes the loop.',
+      'That costs a few lines, and it changes the output entirely. Instead of "this table admits ' +
+        'arbitrage" you get "sell JPY for GBP, sell the GBP back for JPY, and you hold 0.70% more ' +
+        'than you started with".',
+      'That is a two-currency loop the demo finds, verifies edge by edge, and then prices at a ' +
+        'multiplier of 1.007000.',
+      '**A rate table becomes a shortest-path problem under −log.** Multiplying rates around a loop ' +
+        'becomes adding their negative logarithms, so a product above 1 becomes a total below 0 — a ' +
+        'negative cycle.',
+      'That transform is the whole trick, and the demo prices the cycle back in the original units ' +
+        'so the number means something.',
+      '**Floyd-Warshall\'s triple loop has one correct order.** Putting `k` outermost is not ' +
+        'convention. The value `dist[i][j]` using intermediates {0..k} is defined in terms of the ' +
+        'same quantity at k − 1. The two orthogonal orders read cells that have already moved on.',
+      'The swapped version terminates, returns a full matrix, and is wrong on a fraction of the ' +
+        'cells — which the table below counts.',
+      '**Johnson\'s algorithm** is the sparse-graph alternative. One Bellman-Ford pass produces a ' +
+        'potential that makes every edge non-negative, and then Dijkstra from each vertex is legal ' +
+        'again.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**Bellman-Ford relaxes every edge n − 1 times**, which is enough because a shortest path has at ' +
-          'most n − 1 edges. An early exit when a round changes nothing makes it fast on most graphs, and ' +
-          'an n-th round that still improves something is a proof that a negative cycle exists — because ' +
-          'no simple path can be that long.',
-        '**Detecting the cycle is the easy half; extracting it is the useful one.** Walking the parent ' +
-          'pointers back n times lands inside the cycle — the vertex that improved on the last round may ' +
-          'be downstream of it rather than on it — and walking once more closes the loop. That costs a few ' +
-          'lines and turns "this table admits arbitrage" into "sell JPY for GBP, sell the GBP back for ' +
-          'JPY, and you hold 0.70% more than you started with" — a two-currency loop the demo finds, ' +
-          'verifies edge by edge and then prices at a multiplier of 1.007000.',
-        '**A rate table becomes a shortest-path problem under −log.** Multiplying rates around a loop ' +
-          'becomes adding their negative logarithms, so a product above 1 becomes a total below 0 — a ' +
-          'negative cycle. That transform is the whole trick, and the demo prices the cycle back in the ' +
-          'original units so the number means something.',
-        '**Floyd-Warshall\'s triple loop has one correct order.** `k` outermost is not convention: ' +
-          '`dist[i][j]` using intermediates {0..k} is defined in terms of the same quantity at k − 1, and ' +
-          'the two orthogonal orders read cells that have already moved on. The swapped version ' +
-          'terminates, returns a full matrix, and is wrong on a fraction of the cells — which the table ' +
-          'below counts. **Johnson\'s algorithm** is the sparse-graph alternative: one Bellman-Ford pass ' +
-          'produces a potential that makes every edge non-negative, and then Dijkstra from each vertex is ' +
-          'legal again.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — an arbitrage loop, priced, and a loop order that is silently wrong',
         markup: root.NegativeWeightsTemplate.render()
       },
       diagram: diagram(),
       insight: 'When an algorithm can fail on a property of the input, the useful return value is the ' +
-        'witness rather than the verdict — and this milestone keeps finding the same lesson. A cycle in a ' +
-        'build graph, an odd cycle in a two-colouring, the four indices where an inequality broke, the ' +
-        'negative loop in a rate table: in every case the boolean was already suspected and the evidence ' +
-        'is what was needed. Here the witness is also the product, which turns a correctness result into a ' +
-        'trade — and if the product comes out at 1.0000 the "arbitrage" was floating-point noise, which is ' +
-        'exactly why it is computed rather than assumed.'
+        'witness rather than the verdict. This milestone keeps finding the same lesson. Think of a cycle ' +
+        'in a build graph, an odd cycle in a two-colouring, the four indices where an inequality broke, ' +
+        'or the negative loop in a rate table. In every case the boolean was already suspected, and the ' +
+        'evidence is what was needed. Here the witness is also the product, which turns a correctness ' +
+        'result into a trade. And if the product comes out at 1.0000 the "arbitrage" was floating-point ' +
+        'noise, which is exactly why it is computed rather than assumed.'
     };
   }
 
