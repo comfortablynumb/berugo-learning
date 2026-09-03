@@ -299,13 +299,16 @@
         formal: 'the multiplicity of eigenvalue 0 equals the number of connected components',
         readAs: 'How many times zero appears among the Laplacian\'s eigenvalues is exactly how many pieces ' +
           'the graph is in. A connectivity question answered by linear algebra.',
-        detail: 'The second-smallest eigenvalue — the algebraic connectivity, or Fiedler value — is ' +
-          'a continuous measure of how hard the graph is to cut, and it degrades gracefully: a graph ' +
-          'that is barely connected has a small positive value rather than jumping from 0 to ' +
-          'something large. That continuity is what makes it usable as a diagnostic on a real ' +
-          'network, where "connected" is a yes-or-no answer that hides everything interesting.',
-        example: 'On four planted clusters joined in a ring the value is 0.06497 and the bisection ' +
-          'cuts a single edge; on a random graph it is 0.64231 and the cut costs 10.'
+        detail: [
+          'The second-smallest eigenvalue is the algebraic connectivity, or Fiedler value. It is a ' +
+            'continuous measure of how hard the graph is to cut.',
+          'It also degrades gracefully. A graph that is barely connected has a small positive value, ' +
+            'rather than jumping from 0 to something large.',
+          'That continuity is what makes it usable as a diagnostic on a real network, where ' +
+            '"connected" is a yes-or-no answer that hides everything interesting.'
+        ],
+        example: 'On four planted clusters joined in a ring the value is 0.06497, and the bisection ' +
+          'cuts a single edge. On a random graph it is 0.64231 and the cut costs 10.'
       },
       {
         term: 'The Fiedler vector orders the vertices, and splitting it is a partition',
@@ -321,11 +324,14 @@
         },
         plain: 'Each vertex gets a number; cut at the median and you have two halves.',
         formal: 'spectral bisection minimises a continuous relaxation of the balanced-cut objective',
-        detail: 'The relaxation is the reason this works and the reason it is not exact: the ' +
-          'discrete problem wants each vertex to be −1 or +1 and the eigenvector gives real numbers, ' +
-          'so rounding at the median is a choice rather than a derivation. It is a very good choice ' +
-          'in practice, it is one eigenvector computation rather than a search, and it comes with a ' +
-          'measured cut size that can be compared against anything else.',
+        detail: [
+          'The relaxation is the reason this works, and the reason it is not exact.',
+          'The discrete problem wants each vertex to be −1 or +1, and the eigenvector gives real ' +
+            'numbers. So rounding at the median is a choice rather than a derivation.',
+          'It is a very good choice in practice, and it is one eigenvector computation rather than a ' +
+            'search. It also comes with a measured cut size that can be compared against anything ' +
+            'else.'
+        ],
         example: 'Four planted clusters split 12 and 12 across a cut of 1 edge.'
       },
       {
@@ -335,11 +341,14 @@
         readAs: 'PageRank in one line: your score is a damped share of your inbound neighbours\' scores, plus ' +
           'a small fixed amount everyone gets. That fixed amount — the teleport — is what guarantees ' +
           'the iteration converges at all.',
-        detail: 'Without the teleport the chain need not have a unique stationary distribution at ' +
-          'all — a graph with two disconnected halves has infinitely many, and a bipartite one ' +
-          'oscillates instead of converging. The damping factor is therefore not a tuning knob bolted ' +
-          'on for robustness; it is what makes the question well posed. It also changes the answer, ' +
-          'which is easy to forget when it is quoted as a constant.',
+        detail: [
+          'Without the teleport the chain need not have a unique stationary distribution at all. A ' +
+            'graph with two disconnected halves has infinitely many, and a bipartite one oscillates ' +
+            'instead of converging.',
+          'The damping factor is therefore not a tuning knob bolted on for robustness. It is what ' +
+            'makes the question well posed.',
+          'It also changes the answer, which is easy to forget when it is quoted as a constant.'
+        ],
         example: 'On a 40-page link graph the highest-ranked page is 6 at damping 0.50 and 0.70, ' +
           'and 16 at 0.85 and above.'
       },
@@ -347,12 +356,15 @@
         term: 'The d^k convergence bound is worst-case and enormously pessimistic',
         plain: 'The theory says thousands of iterations at damping 0.99; it takes 48.',
         formal: 'the error contracts by a factor of d per iteration in the worst case over starting vectors and graphs',
-        detail: 'Two things account for the gap. The bound is over every starting vector, and the ' +
-          'uniform distribution the algorithm actually starts from is already close to the answer on ' +
-          'most graphs. And the contraction factor d is attained only on a graph engineered to mix ' +
-          'slowly; a real link graph mixes far faster. Quoting the bound as a cost estimate ' +
-          'therefore overstates the work by more than an order of magnitude at high damping, which ' +
-          'is exactly where people expect trouble.',
+        detail: [
+          'Two things account for the gap.',
+          'The bound is over every starting vector, and the uniform distribution the algorithm ' +
+            'actually starts from is already close to the answer on most graphs. And the contraction ' +
+            'factor d is attained only on a graph engineered to mix slowly, while a real link graph ' +
+            'mixes far faster.',
+          'Quoting the bound as a cost estimate therefore overstates the work by more than an order ' +
+            'of magnitude at high damping — which is exactly where people expect trouble.'
+        ],
         example: 'At damping 0.99 the bound predicts 2 292 iterations and the measurement is 48 — ' +
           '47.8× fewer.'
       },
@@ -363,12 +375,15 @@
         readAs: 'A page with no outbound links is a leak: rank flows in and never comes back out. Left ' +
           'unfixed the totals quietly shrink towards zero, and the ranking still looks perfectly ' +
           'plausible.',
-        detail: 'The usual description of this bug is that "the ranking drifts", and measurement ' +
-          'says otherwise: over thousands of small link graphs, dropping the dangling mass never ' +
-          'once inverts a pair in the ranking, while leaking up to 85% of the probability. That ' +
-          'makes it far more dangerous than the usual description suggests. The output people ' +
-          'eyeball — the order — is perfect, and everything that treats the score as a *number* is ' +
-          'silently wrong.',
+        detail: [
+          'The usual description of this bug is that "the ranking drifts", and measurement says ' +
+            'otherwise.',
+          'Over thousands of small link graphs, dropping the dangling mass never once inverts a pair ' +
+            'in the ranking, while leaking up to 85% of the probability.',
+          'That makes it far more dangerous than the usual description suggests. The output people ' +
+            'eyeball — the order — is perfect, and everything that treats the score as a *number* is ' +
+            'silently wrong.'
+        ],
         example: 'On a 40-page graph the broken version holds 0.434437 of the probability instead ' +
           'of 1, and moves 0 of 40 positions.'
       },
@@ -376,11 +391,14 @@
         term: 'Centrality is a question, and the three standard answers disagree',
         plain: 'Whose removal lengthens the most routes, who can reach everybody quickly, and where a random walk spends its time.',
         formal: 'betweenness sums over shortest-path pairs; closeness inverts mean distance; PageRank is a stationary distribution',
-        detail: 'These three are routinely treated as interchangeable measures of "importance" and ' +
-          'they answer different questions with different answers. A bridge between two clusters has ' +
-          'enormous betweenness and unremarkable closeness. A vertex at the centre of one dense ' +
-          'cluster has the reverse. Choosing by the question rather than by which library function ' +
-          'came to hand is the entire practical content of centrality analysis.',
+        detail: [
+          'These three are routinely treated as interchangeable measures of "importance", and they ' +
+            'answer different questions with different answers.',
+          'A bridge between two clusters has enormous betweenness and unremarkable closeness. A ' +
+            'vertex at the centre of one dense cluster has the reverse.',
+          'Choosing by the question rather than by which library function came to hand is the entire ' +
+            'practical content of centrality analysis.'
+        ],
         example: 'On the four-cluster graph betweenness names vertex 20 and closeness and PageRank ' +
           'both name vertex 7.'
       },
@@ -391,12 +409,15 @@
         readAs: 'Brandes\' accumulation: a vertex\'s betweenness credit is its share of each successor\'s ' +
           'shortest paths, times what that successor already accumulated plus one for itself. It is ' +
           'what turns betweenness from cubic into V times E.',
-        detail: 'The naive method enumerates shortest paths, and there can be exponentially many of ' +
-          'them, so the algorithm is not an optimisation but the difference between feasible and ' +
-          'not. The recurrence works because the dependency of a source on a vertex decomposes over ' +
-          'that vertex\'s successors in the shortest-path DAG, so a single backward pass over the ' +
-          'BFS order accumulates everything. Checking it against the enumeration on small graphs is ' +
-          'the only way to be sure the recurrence was implemented right.',
+        detail: [
+          'The naive method enumerates shortest paths, and there can be exponentially many of them. ' +
+            'So the algorithm is not an optimisation but the difference between feasible and not.',
+          'The recurrence works because the dependency of a source on a vertex decomposes over that ' +
+            'vertex\'s successors in the shortest-path DAG. A single backward pass over the BFS ' +
+            'order then accumulates everything.',
+          'Checking it against the enumeration on small graphs is the only way to be sure the ' +
+            'recurrence was implemented right.'
+        ],
         example: '24 single-source sweeps agree with path enumeration to 1.7e-13.'
       },
       {
@@ -406,12 +427,14 @@
         readAs: 'Modularity scores a partition against what random chance would have produced. Since chance ' +
           'produces clumps of its own, a positive score is not by itself evidence of community ' +
           'structure.',
-        detail: 'This is the number to remember before believing a community-detection result. ' +
-          'Louvain maximises modularity greedily and always returns a partition; on a graph built ' +
-          'with four planted communities it recovers them exactly, and on a random graph of the same ' +
-          'size it returns nine communities at a score of about 0.25. Without the second run the ' +
-          'first is uninterpretable, because there is no scale on which 0.68 is obviously good until ' +
-          'you know that 0.25 is what noise looks like.',
+        detail: [
+          'This is the number to remember before believing a community-detection result.',
+          'Louvain maximises modularity greedily and always returns a partition. On a graph built ' +
+            'with four planted communities it recovers them exactly; on a random graph of the same ' +
+            'size it returns nine communities at a score of about 0.25.',
+          'Without the second run the first is uninterpretable. There is no scale on which 0.68 is ' +
+            'obviously good until you know that 0.25 is what noise looks like.'
+        ],
         example: 'Four planted clusters: 4 communities at modularity 0.6773, matching the truth on ' +
           '100% of vertex pairs. The same size at random: 9 communities at 0.2476.'
       }

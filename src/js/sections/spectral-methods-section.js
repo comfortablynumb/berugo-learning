@@ -46,35 +46,43 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**Write a graph as a matrix and its structure becomes arithmetic.** The **Laplacian** ' +
+        '`L = D − A` has a smallest eigenvalue of exactly 0, with an all-ones eigenvector.',
+      'The *second*-smallest is the **algebraic connectivity**. It is 0 precisely when the graph is ' +
+        'disconnected, and it grows with how hard the graph is to cut.',
+      'Its eigenvector — the **Fiedler vector** — assigns each vertex a number, and splitting at the ' +
+        'median is **spectral bisection**. That is a partition into two halves derived from linear ' +
+        'algebra rather than search.',
+      '**PageRank** is the stationary distribution of a random walk that follows a link with ' +
+        'probability `d` and teleports with probability `1 − d`.',
+      'The teleport is not a fudge. It is what makes the chain irreducible and aperiodic, and ' +
+        'therefore what makes a unique stationary distribution exist.',
+      '**Power iteration** finds it by repeated multiplication, and this section checks the result ' +
+        'against a direct linear solve. A power iteration that stopped early returns a plausible ' +
+        'vector rather than an error.',
+      '**Centrality is a question, not a property.** **Betweenness** counts the shortest paths ' +
+        'passing through a vertex, and Brandes computes all of them in O(VE) rather than by ' +
+        'enumeration — the two are compared here.',
+      '**Closeness** is the reciprocal of the mean distance to everybody else. **PageRank** is a ' +
+        'walk.',
+      'The three routinely disagree about which vertex matters most, and the table below is the ' +
+        'argument that you must choose the measure by the question rather than by convenience.',
+      '**Modularity** compares a partition\'s internal edge count to what a random graph with the ' +
+        'same degrees would have. **Louvain** maximises it greedily: move each vertex to its best ' +
+        'neighbouring community, collapse, repeat.',
+      'It is fast, and it has a **resolution limit**. On a graph with no communities at all it still ' +
+        'returns communities, with a modularity around 0.25; on a graph with four planted ones it ' +
+        'recovers them exactly.',
+      'Both cases are below, because only the pair tells you what the score means.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'Write a graph as a matrix and its structure becomes arithmetic. The **Laplacian** `L = D − ' +
-          'A` has a smallest eigenvalue of exactly 0 with an all-ones eigenvector; the ' +
-          '*second*-smallest, the **algebraic connectivity**, is 0 precisely when the graph is ' +
-          'disconnected and grows with how hard the graph is to cut. Its eigenvector — the **Fiedler ' +
-          'vector** — assigns each vertex a number, and splitting at the median is **spectral ' +
-          'bisection**: a partition into two halves derived from linear algebra rather than search.',
-        '**PageRank** is the stationary distribution of a random walk that follows a link with ' +
-          'probability `d` and teleports with probability `1 − d`. The teleport is not a fudge — it ' +
-          'is what makes the chain irreducible and aperiodic, and therefore what makes a unique ' +
-          'stationary distribution exist. **Power iteration** finds it by repeated multiplication, ' +
-          'and this section checks the result against a direct linear solve, because a power ' +
-          'iteration that stopped early returns a plausible vector rather than an error.',
-        '**Centrality is a question, not a property.** **Betweenness** counts the shortest paths ' +
-          'passing through a vertex — Brandes computes all of them in O(VE) rather than the ' +
-          'quadratic-in-paths enumeration, and the two are compared here. **Closeness** is the ' +
-          'reciprocal of the mean distance to everybody else. **PageRank** is a walk. The three ' +
-          'routinely disagree about which vertex matters most, and the table below is the argument ' +
-          'that you must choose the measure by the question rather than by convenience.',
-        '**Modularity** compares a partition\'s internal edge count to what a random graph with the ' +
-          'same degrees would have, and **Louvain** maximises it greedily — move each vertex to its ' +
-          'best neighbouring community, collapse, repeat. It is fast and it has a **resolution ' +
-          'limit**: on a graph with no communities at all it still returns communities, with a ' +
-          'modularity around 0.25, and on a graph with four planted ones it recovers them exactly. ' +
-          'Both cases are below, because only the pair tells you what the score means.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — four measures, two partitions, and one bug that hides',
         markup: root.SpectralMethodsTemplate.render()
@@ -82,11 +90,11 @@
       diagram: diagram(),
       insight: 'Dangling nodes are the detail that breaks naive PageRank implementations, and the ' +
         'way they break it is not the way it is usually described. The panel below runs both ' +
-        'versions over thousands of link graphs: dropping the dangling mass never once inverts a ' +
-        'pair in the ranking, and leaks up to 85% of the probability. So the eyeball test passes, ' +
-        'the vector is nonsense, and everything downstream that treats a PageRank score as a number ' +
-        'rather than an order — a threshold, a weighted blend with other signals, a comparison ' +
-        'between two crawls — is quietly wrong. Check the invariant, not the output.'
+        'versions over thousands of link graphs. Dropping the dangling mass never once inverts a ' +
+        'pair in the ranking, and it leaks up to 85% of the probability. So the eyeball test passes ' +
+        'and the vector is nonsense. Everything downstream that treats a PageRank score as a number ' +
+        'rather than an order is quietly wrong: a threshold, a weighted blend with other signals, a ' +
+        'comparison between two crawls. Check the invariant, not the output.'
     };
   }
 
