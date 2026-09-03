@@ -13,12 +13,16 @@
         readAs: 'Two rules make something a flow: no pipe carries more than it can hold or a negative amount, ' +
           'and everything entering a junction leaves it again. Only the source and the sink are allowed ' +
           'to create or absorb.',
-        detail: 'Those two rules are the entire definition, and everything else in the section is a ' +
-          'consequence of them. Capacity is local and easy to check; conservation is what makes the ' +
-          'problem global, because a decision on one arc constrains arcs several hops away. The two ' +
-          'together are also the whole test suite: a flow algorithm fails by returning a plausible ' +
-          'number, and the only way to tell a maximum flow from an array of integers that happens ' +
-          'to look like one is to check capacity on every arc and balance at every vertex.',
+        detail: [
+          'Those two rules are the entire definition, and everything else in the section is a ' +
+            'consequence of them.',
+          'Capacity is local and easy to check. Conservation is what makes the problem global, ' +
+            'because a decision on one arc constrains arcs several hops away.',
+          'The two together are also the whole test suite, because a flow algorithm fails by ' +
+            'returning a plausible number. You cannot tell a maximum flow from an array of integers ' +
+            'that happens to look like one, so you check capacity on every arc and balance at every ' +
+            'vertex.'
+        ],
         example: 'On the default 18-node layered network the value is 22, and the checker reports no ' +
           'arc over capacity and no vertex out of balance.'
       },
@@ -36,16 +40,18 @@
         },
         plain: 'Pushing f along an arc leaves capacity − f forward and adds f backward.',
         formal: 'residual capacity c_f(u,v) = c(u,v) − f(u,v) forward, and f(u,v) backward on the reverse arc',
-        readAs: 'The residual graph records what you could still do: how much spare room each pipe has, and — ' +
-          'crucially — how much you could undo by pushing back. That backward arc is what lets the ' +
-          'algorithm correct an earlier bad choice.',
-        detail: 'The backward arc does not exist in the input file, in the road network, or in the ' +
-          'pipe. It is bookkeeping: permission for a later augmenting path to route flow back out ' +
-          'of a vertex that an earlier path filled badly. Without it, repeatedly finding paths and ' +
-          'filling them is not a slower algorithm, it is a wrong one — it gets stuck at a local ' +
-          'maximum with no way to undo an early bad choice. Every algorithm in this milestone, ' +
-          'including push-relabel and min-cost flow, works on the residual graph rather than the ' +
-          'original.',
+        readAs: 'The residual graph records what you could still do. It holds how much spare room ' +
+          'each pipe has, and — crucially — how much you could undo by pushing back. That backward ' +
+          'arc is what lets the algorithm correct an earlier bad choice.',
+        detail: [
+          'The backward arc does not exist in the input file, in the road network, or in the pipe.',
+          'It exists only inside the algorithm: permission for a later augmenting path to route flow ' +
+            'back out of a vertex that an earlier path filled badly.',
+          'Without it, repeatedly finding paths and filling them is not a slower algorithm but a ' +
+            'wrong one. It gets stuck at a local maximum with no way to undo an early bad choice. ' +
+            'Every algorithm in this milestone, including push-relabel and min-cost flow, works on ' +
+            'the residual graph rather than the original.'
+        ],
         example: 'The default network has 39 arcs and its residual has 54, of which 28 are backward ' +
           'arcs that appear in no input anywhere.'
       },
@@ -63,13 +69,16 @@
         },
         plain: 'On four vertices with two arcs of 1 000 and one of 1, greedy stops at 1 999 and reports success.',
         formal: 'the greedy is not an approximation algorithm; its answer has no ratio bound',
-        detail: 'This is the failure that matters, because the shortfall is one unit in two thousand ' +
-          'and the run reports nothing unusual. A depth-first search takes the middle arc on its ' +
-          'first path, which routes 1 unit through the crossing, and the 999 units stranded on each ' +
-          'side can never be moved because there is no arc to move them along. On random layered ' +
-          'networks the same greedy falls short on 2 of 20 instances with a worst shortfall of ' +
-          '9.5%, so it is not a contrived failure — it is the normal behaviour of the obvious ' +
-          'implementation.',
+        detail: [
+          'This is the failure that matters, because the shortfall is one unit in two thousand and ' +
+            'the run reports nothing unusual.',
+          'A depth-first search takes the middle arc on its first path, which routes 1 unit through ' +
+            'the crossing. The 999 units stranded on each side can never be moved, because there is ' +
+            'no arc to move them along.',
+          'On random layered networks the same greedy falls short on 2 of 20 instances, with a worst ' +
+            'shortfall of 9.5%. It is not a contrived failure — it is the normal behaviour of the ' +
+            'obvious implementation.'
+        ],
         example: 'Greedy 1 999 in 3 paths against Ford-Fulkerson\'s 2 000 in 2, on the same ' +
           'four-vertex network.'
       },
@@ -77,13 +86,17 @@
         term: 'The four augmenting-path algorithms differ only in which path they take',
         plain: 'Any path, the shortest path, a whole blocking flow, or only fat paths.',
         formal: 'Ford-Fulkerson O(f·E); Edmonds-Karp O(VE²); Dinic O(V²E); capacity scaling O(E² log C)',
-        detail: 'Ford-Fulkerson takes whatever path the search finds first, so its cost depends on ' +
-          'the arc order and on the numbers in the capacities — with irrational capacities it need ' +
-          'not terminate at all. Edmonds-Karp always takes the shortest augmenting path, which ' +
-          'bounds the count by the graph alone. Dinic builds a level graph and saturates an entire ' +
-          'blocking flow per phase, so the phase count rather than the path count is what is ' +
-          'bounded. Capacity scaling only considers arcs with at least delta residual, halving ' +
-          'delta each round, so every path found carries a lot.',
+        detail: [
+          'Ford-Fulkerson takes whatever path the search finds first, so its cost depends on the arc ' +
+            'order and on the numbers in the capacities. With irrational capacities it need not ' +
+            'terminate at all.',
+          'Edmonds-Karp always takes the shortest augmenting path, which bounds the count by the ' +
+            'graph alone.',
+          'Dinic builds a level graph and saturates an entire blocking flow per phase, so the phase ' +
+            'count rather than the path count is what is bounded. Capacity scaling only considers ' +
+            'arcs with at least delta residual, halving delta each round, so every path found ' +
+            'carries a lot.'
+        ],
         example: 'On the default network: Ford-Fulkerson 13 paths and 576 arc visits, Edmonds-Karp ' +
           '10 and 647, Dinic 10 paths in 1 phase and 247, scaling 8 paths and 832.'
       },
@@ -93,13 +106,16 @@
         formal: 'each phase strictly increases the shortest augmenting path length, so there are at most V − 1 phases',
         readAs: 'Dinic works in phases, and each one leaves the shortest route from source to sink strictly ' +
           'longer than before. A path cannot exceed V−1 edges, so the phases run out.',
-        detail: 'This is the property that separates the algorithms that care about the *numbers* ' +
-          'from the algorithms that care about the *shape*. A blocking flow saturates at least one ' +
-          'arc on every shortest path, so after a phase no shortest path of that length survives ' +
-          'and the level graph deepens. On a layered network every source-to-sink path has the same ' +
-          'length, so a single blocking flow saturates a cut and one phase finishes the job at any ' +
-          'capacity at all. Ford-Fulkerson has no such bound, which is why its pathological example ' +
-          'uses two huge capacities and one small one.',
+        detail: [
+          'This is the property that separates the algorithms that care about the *numbers* from the ' +
+            'algorithms that care about the *shape*.',
+          'A blocking flow saturates at least one arc on every shortest path, so after a phase no ' +
+            'shortest path of that length survives and the level graph deepens.',
+          'On a layered network every source-to-sink path has the same length, so a single blocking ' +
+            'flow saturates a cut and one phase finishes the job at any capacity at all. ' +
+            'Ford-Fulkerson has no such bound, which is why its pathological example uses two huge ' +
+            'capacities and one small one.'
+        ],
         example: 'Capacities 1, 4, 16, 64 and 256 give Dinic 1 phase throughout while the value ' +
           'rises 4, 10, 29, 103, 403.'
       },
@@ -110,12 +126,15 @@
         readAs: 'With whole-number capacities, every step moves a whole number, so the answer is a whole ' +
           'number too. That is why max-flow can decide matchings and assignments — problems where half ' +
           'an edge would be meaningless.',
-        detail: 'This is not an implementation convenience, it is the bridge between a continuous ' +
-          'optimisation problem and a discrete one. A unit-capacity flow of value k is exactly k ' +
-          'edge-disjoint paths, so maximum flow answers "how many disjoint routes are there" ' +
-          'without any rounding step. That is what makes bipartite matching, edge-disjoint path ' +
-          'packing, project selection and image segmentation all reducible to flow: each one wants ' +
-          'a whole-number answer, and the flow it reduces to has one for free.',
+        detail: [
+          'This is not an implementation convenience. It is the bridge between a continuous ' +
+            'optimisation problem and a discrete one.',
+          'A unit-capacity flow of value k is exactly k edge-disjoint paths, so maximum flow answers ' +
+            '"how many disjoint routes are there" without any rounding step.',
+          'That is what makes bipartite matching, edge-disjoint path packing, project selection and ' +
+            'image segmentation all reducible to flow. Each one wants a whole-number answer, and the ' +
+            'flow it reduces to has one for free.'
+        ],
         example: 'Bipartite matching is exactly this: a maximum flow of value 9 on a unit-capacity ' +
           'network is 9 disjoint source-to-sink paths, which is a matching of size 9.'
       },
@@ -123,13 +142,16 @@
         term: 'The cut is the proof, and it is free',
         plain: 'When no augmenting path remains, what the source can still reach is one side of a minimum cut.',
         formal: 'max-flow min-cut: the maximum flow value equals the minimum cut capacity',
-        detail: 'A flow value on its own is unverifiable — you cannot tell a maximum from a nearly ' +
-          'maximum by looking. The cut is the certificate: take everything still reachable from the ' +
-          'source in the residual graph, and every original arc leaving that set must be saturated ' +
-          '(or it would still be reachable) while every arc entering it must be empty. The capacity ' +
-          'of those arcs is therefore exactly the flow, and no flow can exceed any cut. That is why ' +
-          'every run here reports the cut capacity beside the value: two numbers that must agree, ' +
-          'computed two different ways.',
+        detail: [
+          'A flow value on its own is unverifiable. You cannot tell a maximum from a nearly maximum ' +
+            'by looking.',
+          'The cut is the certificate. Take everything still reachable from the source in the ' +
+            'residual graph. Every original arc leaving that set must be saturated, or it would ' +
+            'still be reachable, and every arc entering it must be empty.',
+          'The capacity of those arcs is therefore exactly the flow, and no flow can exceed any cut. ' +
+            'That is why every run here reports the cut capacity beside the value — two numbers that ' +
+            'must agree, computed two different ways.'
+        ],
         example: 'The default run\'s cut crosses 8 arcs with total capacity 22, which is the flow ' +
           'value exactly, and all six algorithms report the same 22.'
       },
@@ -137,13 +159,16 @@
         term: 'Check the flow, not the number',
         plain: 'Six implementations agreeing on a value is weaker evidence than one implementation passing a structural check.',
         formal: 'validity = capacity respected on every arc AND conservation at every non-terminal vertex AND value = cut capacity',
-        detail: 'Two implementations that share a mistake produce two matching wrong numbers, and ' +
-          'flow implementations share mistakes constantly because they are all built from the same ' +
-          'residual idea. The three checks are independent of each other and of the algorithm: ' +
-          'capacity is local, conservation is per-vertex, and the cut equality relates the answer to ' +
-          'a structure derived from it. The demo reports all three as columns rather than throwing, ' +
-          'because a section whose point is "this can silently be wrong" has to be able to render ' +
-          'the wrong answer.',
+        detail: [
+          'Two implementations that share a mistake produce two matching wrong numbers. Flow ' +
+            'implementations share mistakes constantly, because they are all built from the same ' +
+            'residual idea.',
+          'The three checks are independent of each other and of the algorithm. Capacity is local, ' +
+            'conservation is per-vertex, and the cut equality relates the answer to a structure ' +
+            'derived from it.',
+          'The demo reports all three as columns rather than throwing, because a section whose point ' +
+            'is "this can silently be wrong" has to be able to render the wrong answer.'
+        ],
         example: 'The comparison table shows value, work, cut capacity and validity for all six ' +
           'algorithms; the agreement metric goes to NO if any column disagrees.'
       }

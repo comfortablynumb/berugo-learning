@@ -44,43 +44,51 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**A flow assigns a number to every arc, subject to two rules.** Nothing exceeds its ' +
+        'capacity, and everything that enters a vertex leaves it again — except at the source and ' +
+        'the sink.',
+      'The maximum flow is the largest total that can leave the source. Every algorithm here finds ' +
+        'it the same way: repeatedly find a path from source to sink with capacity to spare, push as ' +
+        'much as the tightest arc allows, and repeat.',
+      '**The residual graph is the whole idea.** Pushing f units along an arc leaves `capacity − f` ' +
+        'available forward *and adds f available backward*.',
+      'That backward arc is not in the input. It is the permission for a later path to route flow ' +
+        'back out of a vertex an earlier path filled badly.',
+      'Without it, path filling is not a slower algorithm but a wrong one. The panel below runs it ' +
+        'and gets 1 999 where the answer is 2 000.',
+      'The four augmenting-path algorithms differ only in *which* path they take.',
+      '**Ford-Fulkerson** takes any path. Its path count depends on the order the arcs happen to be ' +
+        'in, and on irrational capacities it need not terminate at all.',
+      '**Edmonds-Karp** always takes the shortest, which bounds the count at O(VE) independently of ' +
+        'the capacities. **Dinic** builds a level graph and saturates a whole blocking flow per ' +
+        'phase. **Capacity scaling** only considers arcs with at least delta left, halving delta ' +
+        'each round, so every path found is fat.',
+      '**The cut is the proof.** When no augmenting path remains, the vertices still reachable from ' +
+        'the source in the residual graph form one side of a cut.',
+      'Every original arc leaving that side is saturated, and the cut\'s capacity equals the flow. ' +
+        'That is max-flow min-cut, and it is checked on every run here. A value that does not equal ' +
+        'its own cut capacity is a bug the value alone would never reveal.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'A **flow** assigns a number to every arc subject to two rules: nothing exceeds its capacity, ' +
-          'and everything that enters a vertex leaves it again — except at the source and the sink. ' +
-          'The maximum flow is the largest total that can leave the source, and every algorithm here ' +
-          'finds it the same way: repeatedly find a path from source to sink with capacity to spare, ' +
-          'push as much as the tightest arc allows, and repeat.',
-        '**The residual graph is the whole idea.** Pushing f units along an arc leaves `capacity − f` ' +
-          'available forward *and adds f available backward*. That backward arc is not in the input; ' +
-          'it is the permission for a later path to route flow back out of a vertex an earlier path ' +
-          'filled badly. Without it, path filling is not a slower algorithm but a wrong one — the ' +
-          'panel below runs it and gets 1 999 where the answer is 2 000.',
-        'The four augmenting-path algorithms differ only in *which* path they take. **Ford-Fulkerson** ' +
-          'takes any; its path count depends on the order the arcs happen to be in and on irrational ' +
-          'capacities it need not terminate at all. **Edmonds-Karp** always takes the shortest, which ' +
-          'bounds the count at O(VE) independently of the capacities. **Dinic** builds a level graph ' +
-          'and saturates a whole blocking flow per phase. **Capacity scaling** only considers arcs ' +
-          'with at least delta left, halving delta each round, so every path found is fat.',
-        '**The cut is the proof.** When no augmenting path remains, the vertices still reachable from ' +
-          'the source in the residual graph form one side of a cut, every original arc leaving that ' +
-          'side is saturated, and the cut\'s capacity equals the flow. That is max-flow min-cut, and ' +
-          'it is checked on every run here — a value that does not equal its own cut capacity is a ' +
-          'bug the value alone would never reveal.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — six algorithms, one network, and the residual beside it',
         markup: root.MaximumFlowTemplate.render()
       },
       diagram: diagram(),
       insight: 'When you meet a problem that looks like flow, the thing to get right is not the ' +
-        'algorithm — any of these four is a page of code and they all agree — it is the *model*. ' +
-        'Which vertices, which capacities, and which two terminals? Almost every real use of maximum ' +
-        'flow in an engineering setting is a modelling exercise followed by a library call, and the ' +
-        'next two sections are entirely about what the cut then means. Learn the residual argument ' +
-        'well enough to trust the library, and spend the rest of your attention on the reduction.'
+        'algorithm. Any of these four is a page of code and they all agree. What matters is the ' +
+        '*model*: which vertices, which capacities, and which two terminals? Almost every real use ' +
+        'of maximum flow in an engineering setting is a modelling exercise followed by a library ' +
+        'call. The next two sections are entirely about what the cut then means. Learn the residual ' +
+        'argument well enough to trust the library, and spend the rest of your attention on the ' +
+        'reduction.'
     };
   }
 
