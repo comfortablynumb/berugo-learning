@@ -345,14 +345,19 @@
         term: 'A strongly connected component is a mutual-reachability class',
         plain: 'Every vertex in it can reach every other one, going the right way down the arrows.',
         formal: 'u ~ v iff u reaches v and v reaches u; this is an equivalence relation, so the classes partition V',
-        readAs: 'Two vertices are in the same component when each can reach the other. Because that relation ' +
-          'is reflexive, symmetric and transitive — an equivalence relation — it carves the vertices ' +
-          'into disjoint groups with nothing left over and nothing in two groups.',
-        detail: 'Because mutual reachability is an equivalence relation, the components partition the ' +
-          'vertices — every vertex is in exactly one, including vertices on no cycle at all, which form ' +
-          'components of size one. That last case is the one people forget, and it is why a singleton ' +
-          'count is a useful output: a directed graph whose components are all singletons has no ' +
-          'directed cycle anywhere, which is the same as saying it is a DAG already.',
+        readAs: 'Two vertices are in the same component when each can reach the other. That ' +
+          'relation is reflexive, symmetric and transitive — an equivalence relation — so it ' +
+          'carves the vertices into disjoint groups, with nothing left over and nothing in two ' +
+          'groups.',
+        detail: [
+          'Because mutual reachability is an equivalence relation, the components partition the ' +
+            'vertices. Every vertex is in exactly one, including vertices on no cycle at all, ' +
+            'which form components of size one.',
+          'That last case is the one people forget, and it is why a singleton count is a useful ' +
+            'output.',
+          'A directed graph whose components are all singletons has no directed cycle anywhere, ' +
+            'which is the same as saying it is a DAG already.'
+        ],
         example: 'Five chained cycles of four give 15 components of size 4 and zero singletons on a ' +
           '60-node digraph.'
       },
@@ -370,27 +375,35 @@
         },
         plain: 'Track the earliest vertex reachable from this subtree that is still on the stack.',
         formal: 'lowlink[v] = min(index[v], lowlink of children, index of stack neighbours); v is a root iff lowlink = index',
-        readAs: 'Each vertex records the earliest-discovered vertex reachable from its subtree. When that ' +
-          'value equals the vertex\'s own discovery number, nothing under it escapes upward — so it is ' +
-          'the root of a component.',
-        detail: 'The algorithm is a depth-first walk with a stack of vertices whose component is not yet ' +
-          'decided. A vertex whose lowlink never falls below its own index cannot reach anything ' +
-          'earlier that is still open, so it is the root of its component and everything above it on ' +
-          'the stack pops out together. One pass, one traversal of every edge, and it needs neither the ' +
-          'reverse graph nor a second walk — which is why it wins on memory when the graph is large ' +
-          'enough that materialising the reverse is a real cost.',
+        readAs: 'Each vertex records the earliest-discovered vertex reachable from its subtree. ' +
+          'When that value equals the vertex\'s own discovery number, nothing under it escapes ' +
+          'upward, so it is the root of a component.',
+        detail: [
+          'The algorithm is a depth-first walk with a stack of vertices whose component is not yet ' +
+            'decided.',
+          'A vertex whose lowlink never falls below its own index cannot reach anything earlier ' +
+            'that is still open. So it is the root of its component, and everything above it on ' +
+            'the stack pops out together.',
+          'One pass, one traversal of every edge, and it needs neither the reverse graph nor a ' +
+            'second walk. That is why it wins on memory when the graph is large enough that ' +
+            'materialising the reverse is a real cost.'
+        ],
         example: 'Tarjan finds all 15 components in one pass over 60 vertices and 74 edges.'
       },
       {
         term: 'This lowlink is not the biconnectivity lowlink',
         plain: 'Here it may follow an edge to anything still on the stack; there, only to an ancestor.',
         formal: 'SCC: min over stack-resident neighbours. Bridges: min over already-discovered ancestors',
-        detail: 'The two algorithms look nearly identical on the page and answer different questions, ' +
-          'so conflating them produces code that runs, terminates and is wrong. Strong connectivity ' +
-          'asks whether a subtree can reach anything whose component is still undecided, which includes ' +
-          'cross edges into open components. Biconnectivity asks whether a subtree has a second route ' +
-          'up to an ancestor, which is a strictly narrower question. Writing both in the same codebase ' +
-          'and naming both variables `low` is a reliable way to lose a day.',
+        detail: [
+          'The two algorithms look nearly identical on the page and answer different questions. ' +
+            'Conflating them produces code that runs, terminates and is wrong.',
+          'Strong connectivity asks whether a subtree can reach anything whose component is still ' +
+            'undecided, which includes cross edges into open components. Biconnectivity asks ' +
+            'whether a subtree has a second route up to an ancestor, which is a strictly narrower ' +
+            'question.',
+          'Writing both in the same codebase and naming both variables `low` is a reliable way to ' +
+            'lose a day.'
+        ],
         example: 'The SCC lowlink accepts a cross edge into an open component; the bridge lowlink of ' +
           '13.4 must not.'
       },
@@ -398,15 +411,18 @@
         term: 'Kosaraju: two passes, and it exists to check the first one',
         plain: 'Finish-order DFS, then a DFS on the reversed graph in that order.',
         formal: 'order by decreasing finish time in G, then take DFS trees in that order on Gᵀ',
-        readAs: 'Kosaraju\'s two passes: one to order the vertices by when the search finished with them, and ' +
-          'one on the graph with every edge reversed — that is what the superscript T means — taking ' +
-          'the trees in that order.',
-        detail: 'Kosaraju needs the reverse graph and walks every edge twice, so it is the slower ' +
-          'algorithm — and it is the one to keep, because it is derived completely differently and ' +
-          'therefore fails differently. Two independent implementations that agree on a partition are ' +
-          'evidence; one implementation that passes its own tests is not. Compare them as *partitions* ' +
-          'rather than as labellings: the component ids are arbitrary and only the grouping is the ' +
-          'answer.',
+        readAs: 'Kosaraju\'s two passes: one to order the vertices by when the search finished ' +
+          'with them, and one on the graph with every edge reversed. That is what the superscript ' +
+          'T means, and the trees are taken in that order.',
+        detail: [
+          'Kosaraju needs the reverse graph and walks every edge twice, so it is the slower ' +
+            'algorithm. It is also the one to keep, because it is derived completely differently ' +
+            'and therefore fails differently.',
+          'Two independent implementations that agree on a partition are evidence. One ' +
+            'implementation that passes its own tests is not.',
+          'Compare them as *partitions* rather than as labellings. The component ids are ' +
+            'arbitrary, and only the grouping is the answer.'
+        ],
         example: 'Kosaraju examines 148 edges against Tarjan’s 74 on the same graph, and the two ' +
           'partitions match exactly.'
       },
@@ -414,13 +430,16 @@
         term: 'The condensation is always a DAG',
         plain: 'Collapse each component to one node and no cycle can survive.',
         formal: 'if the condensation had a cycle, its components would be mutually reachable and would be one component',
-        detail: 'This is the payoff of the whole computation rather than a curiosity: whatever the ' +
-          'original graph looked like, the condensation is acyclic, so every technique from the ' +
-          'topological-order section applies to it. Cycle-aware analysis therefore becomes ' +
-          '"components, then a sweep over the condensation" — which is how a compiler handles recursive ' +
-          'function groups, how a build tool handles a module cycle, and how 2-SAT is solved. Verify it ' +
-          'with an actual topological sweep rather than quoting the theorem, because a broken SCC ' +
-          'computation produces a condensation with a cycle and nothing else notices.',
+        detail: [
+          'This is the payoff of the whole computation rather than a curiosity. Whatever the ' +
+            'original graph looked like, the condensation is acyclic, so every technique from the ' +
+            'topological-order section applies to it.',
+          'Cycle-aware analysis therefore becomes "components, then a sweep over the ' +
+            'condensation". That is how a compiler handles recursive function groups, how a build ' +
+            'tool handles a module cycle, and how 2-SAT is solved.',
+          'Verify it with an actual topological sweep rather than quoting the theorem. A broken ' +
+            'SCC computation produces a condensation with a cycle, and nothing else notices.'
+        ],
         example: '60 vertices and 74 edges condense to 15 nodes and 14 edges, and a topological sweep ' +
           'places all 15.'
       },
@@ -428,14 +447,17 @@
         term: 'The condensation loses parallel crossings, and should',
         plain: 'Many edges between two components collapse into one.',
         formal: 'edges(condensation) <= edges(G), usually far fewer; only the existence of a crossing survives',
-        readAs: 'Collapsing each component to a single node keeps at most as many edges and usually far ' +
-          'fewer, because many edges between two components become one. What survives is whether a ' +
-          'connection exists, not how many.',
-        detail: 'The de-duplication is what makes the condensation small enough to be useful, and it is ' +
-          'also the thing to remember when a caller wants edge weights back. Component-level analysis ' +
-          'answers "can this group reach that group", not "how expensive is the cheapest crossing" — ' +
-          'and if you need the second, the crossing edges must be kept alongside the condensation ' +
-          'rather than recovered from it afterwards.',
+        readAs: 'Collapsing each component to a single node keeps at most as many edges, and ' +
+          'usually far fewer, because many edges between two components become one. What survives ' +
+          'is whether a connection exists, not how many.',
+        detail: [
+          'The de-duplication is what makes the condensation small enough to be useful.',
+          'It is also the thing to remember when a caller wants edge weights back. Component-level ' +
+            'analysis answers "can this group reach that group", not "how expensive is the ' +
+            'cheapest crossing".',
+          'If you need the second, the crossing edges have to be kept alongside the condensation, ' +
+            'rather than recovered from it afterwards.'
+        ],
         example: '74 edges become 14 in the condensation, because most crossings duplicate one that is ' +
           'already there.'
       },
@@ -443,12 +465,16 @@
         term: 'Import cycles, deadlocks and 2-SAT are one computation',
         plain: 'Different graphs, same question: which vertices are mutually reachable?',
         formal: 'modules/imports, threads/waits-for, literals/implications — a component of size > 1 is the answer in each',
-        detail: 'The reason to learn strong connectivity properly is that it keeps turning up under ' +
-          'other names. A module cycle is a component in the import graph. A deadlock is a component in ' +
-          'the waits-for graph. Unsatisfiability in 2-SAT is a variable sharing a component with its ' +
-          'own negation in the implication graph, which is the least obvious of the four and the most ' +
-          'striking: an NP-complete-looking problem becomes a single linear-time SCC pass because the ' +
-          'clauses have exactly two literals.',
+        detail: [
+          'The reason to learn strong connectivity properly is that it keeps turning up under ' +
+            'other names.',
+          'A module cycle is a component in the import graph. A deadlock is a component in the ' +
+            'waits-for graph.',
+          'Unsatisfiability in 2-SAT is a variable sharing a component with its own negation in ' +
+            'the implication graph. That is the least obvious of the four and the most striking: ' +
+            'an NP-complete-looking problem becomes a single linear-time SCC pass, because the ' +
+            'clauses have exactly two literals.'
+        ],
         example: 'The demo lists four graphs — modules, threads, literals, build targets — where a ' +
           'component of size above one is the defect.'
       },
@@ -456,14 +482,17 @@
         term: 'A component must be rebuilt as a unit',
         plain: 'Nothing inside a cycle can be skipped, because everything in it depends on everything else.',
         formal: 'incremental analysis is exact on the condensation and coarse inside a component',
-        detail: 'This is the operational consequence that makes engineers care about SCCs. Incremental ' +
-          'builds, incremental type-checking and incremental analysis all work by processing a DAG in ' +
-          'order and skipping anything whose inputs did not change; inside a strongly connected group ' +
-          'that reasoning collapses, because every member is downstream of every other. So a component ' +
-          'of size 40 in a module graph is a 40-module rebuild every time any one of them changes, and ' +
-          'the SCC computation is what tells you which 40.',
+        detail: [
+          'This is the operational consequence that makes engineers care about SCCs.',
+          'Incremental builds, incremental type-checking and incremental analysis all work by ' +
+            'processing a DAG in order and skipping anything whose inputs did not change. Inside a ' +
+            'strongly connected group that reasoning collapses, because every member is downstream ' +
+            'of every other.',
+          'So a component of size 40 in a module graph is a 40-module rebuild every time any ' +
+            'one of them changes. The SCC computation is what tells you which 40.'
+        ],
         example: 'A component of size 4 in the demo is four packages that always rebuild together.'
       }
-    ]
+    ],
   });
 }(typeof window !== 'undefined' ? window : null));

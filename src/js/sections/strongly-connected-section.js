@@ -53,38 +53,43 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'Two vertices are in the same strongly connected component when each can reach the other. The ' +
-          'components partition the graph, and collapsing each one to a single node - the **condensation** ' +
-          '- always produces a DAG. That is the whole reason the computation matters: it turns any ' +
-          'directed graph into an acyclic one plus a note about what was inside each blob, and every ' +
-          'algorithm that needs acyclicity can then run on it.',
-        '**Tarjan does it in one pass** with two numbers per vertex: `index`, the discovery order, and ' +
-          '`lowlink`, the smallest index reachable from this subtree including through one back edge. A ' +
-          'vertex whose lowlink equals its own index is the root of a component, and everything above it ' +
-          'on the stack belongs to that component. **Kosaraju does it in two passes** - finish times on ' +
-          'the graph, then components on its reverse in decreasing finish order - and is slower by a ' +
-          'constant and far easier to be sure of.',
-        '**Both are on the page because an SCC bug produces a plausible partition.** Nothing downstream ' +
-          'notices a component that is slightly too large or split in two; the graph still looks like a ' +
-          'graph. So the two are compared as *partitions* rather than as labellings - the ids are ' +
-          'arbitrary - and the condensation is checked for acyclicity, which is a theorem and therefore a ' +
-          'second independent oracle.',
-        '**The same computation appears under at least four names.** Import-cycle detection, deadlock ' +
-          'detection in a wait-for graph, 2-SAT solving over an implication graph, and "why can this ' +
-          'module not be built incrementally" are all one SCC computation over different graphs. ' +
-          'Recognising that is worth more than any of the four individually.'
+        '**Two vertices are in the same strongly connected component when each can reach the ' +
+          'other.** The components partition the graph, and collapsing each one to a single node ' +
+          '— the **condensation** — always produces a DAG.',
+        'That is the whole reason the computation matters. It turns any directed graph into an ' +
+          'acyclic one, plus a note about what was inside each blob, and every algorithm that ' +
+          'needs acyclicity can then run on it.',
+        '**Tarjan does it in one pass**, with two numbers per vertex: `index`, the discovery ' +
+          'order, and `lowlink`, the smallest index reachable from this subtree including through ' +
+          'one back edge. A vertex whose lowlink equals its own index is the root of a component, ' +
+          'and everything above it on the stack belongs to that component.',
+        '**Kosaraju does it in two passes** — finish times on the graph, then components on its ' +
+          'reverse in decreasing finish order. It is slower by a constant, and far easier to be ' +
+          'sure of.',
+        '**Both are on the page because an SCC bug produces a plausible partition.** Nothing ' +
+          'downstream notices a component that is slightly too large or split in two. The graph ' +
+          'still looks like a graph.',
+        'So the two are compared as *partitions* rather than as labellings, because the ids are ' +
+          'arbitrary. And the condensation is checked for acyclicity, which is a theorem and ' +
+          'therefore a second independent oracle.',
+        '**The same computation appears under at least four names.** Import-cycle detection. ' +
+          'Deadlock detection in a wait-for graph. 2-SAT solving over an implication graph. And ' +
+          '"why can this module not be built incrementally". All one SCC computation over ' +
+          'different graphs, and recognising that is worth more than any of the four ' +
+          'individually.'
       ],
       demo: {
         title: 'Interactive demo — Tarjan against Kosaraju, and the condensation checked',
         markup: root.StronglyConnectedTemplate.render()
       },
       diagram: diagram(),
-      insight: 'When two independent implementations of the same thing are cheap, keep both and compare ' +
-        'them on every run rather than choosing the faster one and hoping. It is the single most effective ' +
-        'testing technique available for problems whose wrong answers look right, and this milestone uses ' +
-        'it five times — Tarjan against Kosaraju, bridges against a removal oracle, three MSTs against ' +
-        'each other, three LCAs against a naive climb, and contraction hierarchies against Dijkstra. In ' +
-        'every one of those, the fast implementation is the one that is subtly wrong.'
+      insight: 'When two independent implementations of the same thing are cheap, keep both and ' +
+        'compare them on every run, rather than choosing the faster one and hoping. It is the ' +
+        'single most effective testing technique available for problems whose wrong answers look ' +
+        'right. This milestone uses it five times: Tarjan against Kosaraju, bridges against a ' +
+        'removal oracle, three MSTs against each other, three LCAs against a naive climb, and ' +
+        'contraction hierarchies against Dijkstra. In every one of those, the fast ' +
+        'implementation is the one that is subtly wrong.'
     };
   }
 
