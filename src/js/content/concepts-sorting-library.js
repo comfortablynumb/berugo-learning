@@ -180,27 +180,33 @@
         },
         plain: 'Ω(n log n) applies to algorithms that only compare pairs. These do not.',
         formal: 'counting and radix read the key as an index or a digit sequence, never as a comparand',
-        detail: 'The decision-tree argument bounds any algorithm whose only information about the input comes ' +
-          'from comparisons. Counting sort never compares anything: it uses the key as an array index. Radix ' +
-          'sort never compares anything either: it reads the key one digit at a time. The demo reports zero ' +
-          'comparisons for every radix run, and that is not an instrumentation gap - it is what leaving the ' +
-          'model means. They are not faster comparison sorts; they are a different kind of algorithm with a ' +
-          'different precondition.',
+        detail: [
+          'The decision-tree argument bounds any algorithm whose only information about the input ' +
+            'comes from comparisons.',
+          'Counting sort never compares anything: it uses the key as an array index. Radix sort ' +
+            'never compares anything either: it reads the key one digit at a time.',
+          'The demo reports zero comparisons for every radix run. That is not an instrumentation ' +
+            'gap — it is what leaving the model means. These are not faster comparison sorts. They ' +
+            'are a different kind of algorithm, with a different precondition.'
+        ],
         example: 'LSD radix on 20 000 elements: 0 comparisons, 4 passes, 80 000 moves.'
       },
       {
         term: 'Counting sort is priced by the key range',
         plain: 'One counter per possible key, so memory depends on k and not on n.',
         formal: 'O(n + k) time and O(k) space, where k is the size of the key domain',
-        readAs: 'Counting sort costs one pass over the data plus one over the range of possible keys. When ' +
-          'the range is small that beats any comparison sort; when it is large the k term is the whole ' +
-          'cost.',
-        detail: 'This is the constraint that decides whether counting sort is usable, and it has nothing to ' +
-          'do with how many elements there are. Sorting a thousand values with byte-sized keys needs a ' +
-          '1 024-byte table and beats any comparison sort outright. Sorting a thousand 32-bit integers the ' +
-          'same way needs a table of 4 294 967 296 counters - 17 GB. The crossover moves with n, because a ' +
-          'large table is worth amortising over more elements, which is the real rule rather than "counting ' +
-          'sort needs small keys".',
+        readAs: 'Counting sort costs one pass over the data plus one over the range of possible ' +
+          'keys. When the range is small that beats any comparison sort. When it is large, the k ' +
+          'term is the whole cost.',
+        detail: [
+          'This is the constraint that decides whether counting sort is usable, and it has nothing ' +
+            'to do with how many elements there are.',
+          'Sorting a thousand values with byte-sized keys needs a 1 024-byte table, and beats any ' +
+            'comparison sort outright. Sorting a thousand 32-bit integers the same way needs a ' +
+            'table of 4 294 967 296 counters — 17 GB.',
+          'The crossover moves with n, because a large table is worth amortising over more ' +
+            'elements. That is the real rule, rather than "counting sort needs small keys".'
+        ],
         example: 'n = 1 000: key range 256 needs 1 024 bytes and wins; key range 65 536 needs 262 144 bytes and loses.'
       },
       {
@@ -217,79 +223,102 @@
         },
         plain: 'Every digit pass must preserve the order the previous passes established.',
         formal: 'sort by digit 0, then digit 1, ...; each pass must be stable or the earlier ones are undone',
-        readAs: 'Least-significant-digit radix sort works only because each pass preserves the order the ' +
-          'previous one established. An unstable pass anywhere in the chain silently destroys all the ' +
-          'work before it.',
-        detail: 'Least-significant-digit radix works by induction: after sorting on digits 0..i the array is ' +
-          'ordered by the low i+1 digits, and the pass on digit i+1 preserves that ordering *within* each ' +
-          'group of equal digit-(i+1) values only because it is stable. Break stability in any single pass ' +
-          'and every earlier pass is silently reversed. It is one line - the scatter loop walks the input ' +
-          'backwards while decrementing the bucket cursor - and getting it wrong produces output that is not ' +
-          'sorted but looks close.',
+        readAs: 'Least-significant-digit radix sort works only because each pass preserves the ' +
+          'order the previous one established. An unstable pass anywhere in the chain silently ' +
+          'destroys all the work before it.',
+        detail: [
+          'Least-significant-digit radix works by induction. After sorting on digits 0..i the ' +
+            'array is ordered by the low i+1 digits.',
+          'The pass on digit i+1 preserves that ordering *within* each group of equal digit-(i+1) ' +
+            'values, and it does so only because it is stable. Break stability in any single pass ' +
+            'and every earlier pass is silently reversed.',
+          'It is one line: the scatter loop walks the input backwards while decrementing the ' +
+            'bucket cursor. Getting it wrong produces output that is not sorted, but looks close.'
+        ],
         example: 'With a wide key range, an unstable digit pass leaves the very first adjacent pair out of order.'
       },
       {
         term: 'The failure is graded by how many passes matter',
         plain: 'One meaningful pass hides an unstable scatter; four passes expose it completely.',
         formal: 'passes that carry information = ceil(log_radix(key range))',
-        readAs: 'You only need as many digit passes as it takes to cover the actual range of keys, not the ' +
-          'full width of the type. Sorting 32-bit integers that all fit in 16 bits needs half the ' +
-          'passes.',
-        detail: 'This is why the bug survives testing. If the keys all fit in one digit, only one pass does ' +
-          'anything, and an unstable pass still produces sorted output - only the tie order is wrong, which ' +
-          'nothing downstream may notice. Widen the keys so four passes carry information and the same code ' +
-          'produces output that is not sorted at all. A radix sort tested on small keys and deployed on large ' +
-          'ones fails exactly here, and the code did not change.',
+        readAs: 'You only need as many digit passes as it takes to cover the actual range of keys, ' +
+          'not the full width of the type. Sorting 32-bit integers that all fit in 16 bits needs ' +
+          'half the passes.',
+        detail: [
+          'This is why the bug survives testing.',
+          'If the keys all fit in one digit, only one pass does anything. An unstable pass then ' +
+            'still produces sorted output — only the tie order is wrong, which nothing downstream ' +
+            'may notice.',
+          'Widen the keys so four passes carry information and the same code produces output that ' +
+            'is not sorted at all. A radix sort tested on small keys and deployed on large ones ' +
+            'fails exactly here, and the code did not change.'
+        ],
         example: 'Key range 0..19: unstable is still sorted. Key range 0..10^6: unstable is not sorted at all.'
       },
       {
         term: 'Negative numbers and the sign bias',
         plain: 'Two\'s-complement negatives have the top bit set, so an unsigned digit sort puts them last.',
         formal: 'map value to (value XOR 0x80000000), which is order-preserving on the full 32-bit range',
-        readAs: 'Flipping the sign bit turns signed integers into unsigned ones that sort in the same order, ' +
-          'so a radix sort can treat them as plain bit patterns. Without it, every negative number ' +
-          'sorts above every positive one.',
-        detail: 'The bug is universal in hand-rolled radix sorts because it is invisible on non-negative test ' +
-          'data. A negative 32-bit integer has its most significant bit set, so treating the key as unsigned ' +
-          'sorts every negative after every positive. Flipping that sign bit maps the signed range onto the ' +
-          'unsigned one monotonically, which is one XOR at the point the digit is extracted and costs ' +
-          'nothing. The same idea handles floats, with a slightly larger transformation.',
+        readAs: 'Flipping the sign bit turns signed integers into unsigned ones that sort in the ' +
+          'same order, so a radix sort can treat them as plain bit patterns. Without it, every ' +
+          'negative number sorts above every positive one.',
+        detail: [
+          'The bug is universal in hand-rolled radix sorts, because it is invisible on ' +
+            'non-negative test data.',
+          'A negative 32-bit integer has its most significant bit set, so treating the key as ' +
+            'unsigned sorts every negative after every positive.',
+          'Flipping that sign bit maps the signed range onto the unsigned one monotonically. It is ' +
+            'one XOR at the point the digit is extracted, and it costs nothing. The same idea ' +
+            'handles floats, with a slightly larger transformation.'
+        ],
         example: 'Without the bias: [0, 1, 100, 2147483647, -2147483648, -100, -1].'
       },
       {
         term: 'MSD radix and variable-length keys',
         plain: 'Most-significant digit first can stop as soon as a bucket holds one element.',
         formal: 'recurse per bucket; a bucket of size <= 1 needs no further digits',
-        detail: 'LSD must examine every digit of every key, which is correct for fixed-width integers and ' +
-          'wasteful for strings where most pairs differ in the first character. MSD partitions on the high ' +
-          'digit first and recurses, so a key that is already distinguished is never looked at again - which ' +
-          'is what makes it the right shape for strings and the wrong one for integers. American flag sort is ' +
-          'MSD done in place by permutation cycles, trading stability for the buffer.',
+        detail: [
+          'LSD must examine every digit of every key. That is correct for fixed-width integers, ' +
+            'and wasteful for strings, where most pairs differ in the first character.',
+          'MSD partitions on the high digit first and recurses, so a key that is already ' +
+            'distinguished is never looked at again. That makes it the right shape for strings and ' +
+            'the wrong one for integers.',
+          'American flag sort is MSD done in place by permutation cycles, trading stability for ' +
+            'the buffer.'
+        ],
         example: 'MSD with an insertion-sort cutoff at 16 elements short-circuits most of its recursion.'
       },
       {
         term: 'Bucket sort assumes a distribution',
         plain: 'Split the range into n equal buckets and sort each - which is linear only if the keys are uniform.',
         formal: 'O(n) expected under uniformity; O(n log n) or worse when the assumption fails',
-        detail: 'Bucket sort is the only algorithm in this milestone whose complexity depends on a property ' +
-          'of the *values* rather than of their order. Uniform keys spread evenly and each bucket holds a ' +
-          'constant number of elements; skewed keys pile into one bucket and the cost becomes whatever sorts ' +
-          'that bucket. The number to watch is the largest bucket, not the mean, and the demo reports it - a ' +
-          'mean of 1.0 with a maximum of n is a linear algorithm on paper and a quadratic one in practice.',
+        detail: [
+          'Bucket sort is the only algorithm in this milestone whose complexity depends on a ' +
+            'property of the *values*, rather than of their order.',
+          'Uniform keys spread evenly and each bucket holds a constant number of elements. Skewed ' +
+            'keys pile into one bucket, and the cost becomes whatever sorts that bucket.',
+          'The number to watch is the largest bucket, not the mean, and the demo reports it. A ' +
+            'mean of 1.0 with a maximum of n is a linear algorithm on paper and a quadratic one in ' +
+            'practice.'
+        ],
         example: 'The histogram shows the fullest bucket against the mean; when they diverge the assumption has failed.'
       },
       {
         term: 'Digit width: passes against table size',
         plain: 'A wider digit means fewer passes and a bigger counter table, and the cache decides.',
         formal: 'r bits per digit gives ceil(32/r) passes over 2^r buckets',
-        readAs: 'Wider digits mean fewer passes over more buckets: 8 bits gives 4 passes over 256 buckets, 16 ' +
-          'bits gives 2 passes over 65 536. The buckets have to stay in cache, which is what caps the ' +
-          'digit width.',
-        detail: 'Four bits gives 16 buckets and eight passes; sixteen bits gives 65 536 buckets and two ' +
-          'passes. Fewer passes is less data movement, so the wide digit looks obviously better until the ' +
-          'counter table stops fitting in cache and every scatter becomes a miss. Eight bits - 256 counters, ' +
-          'one kilobyte - is the usual answer because that table stays resident. This is a cache decision ' +
-          'dressed as an arithmetic one, and it is why the answer is 8 rather than as-wide-as-possible.',
+        readAs: 'Wider digits mean fewer passes over more buckets. 8 bits gives 4 passes over 256 ' +
+          'buckets; 16 bits gives 2 passes over 65 536. The buckets have to stay in cache, which ' +
+          'is what caps the digit width.',
+        detail: [
+          'Four bits gives 16 buckets and eight passes. Sixteen bits gives 65 536 buckets and two ' +
+            'passes.',
+          'Fewer passes is less data movement, so the wide digit looks obviously better — until ' +
+            'the counter table stops fitting in cache and every scatter becomes a miss.',
+          'Eight bits is the usual answer: 256 counters, one kilobyte, and that table stays ' +
+            'resident. This is a cache decision dressed as an arithmetic one, and it is why the ' +
+            'answer is 8 rather than as-wide-as-possible.'
+        ],
         example: '8 bits: 256 buckets, 1 024 bytes, 4 passes. 16 bits: 65 536 buckets, 262 144 bytes, 2 passes.'
       }
     ],
