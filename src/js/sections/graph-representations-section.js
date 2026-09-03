@@ -49,38 +49,43 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'A graph has three usual representations and they differ by orders of magnitude in memory rather ' +
-          'than in asymptotics. An **adjacency list** is an array of arrays: simple, and every neighbour ' +
-          'lookup is a pointer chase into a separately allocated block. An **adjacency matrix** is n² ' +
-          'entries whatever the edge count, which buys O(1) edge tests and is unusable past a few thousand ' +
-          'nodes. **CSR** is two typed arrays — offsets and targets — so a neighbour scan is a contiguous ' +
-          'read of memory that is already in cache.',
-        '**CSR is what every serious graph library stores**, and the reason is the scan rather than the ' +
-          'byte count: traversal becomes a sequential walk of two flat arrays with no indirection at all. ' +
-          'The list-of-arrays version has the same complexity and is several times slower on real hardware, ' +
-          'which is the M02 lesson about layout applied to a different structure.',
-        '**BFS and DFS differ in what they hold, not in what they cost.** Both visit every node once and ' +
-          'examine every edge once. BFS holds a frontier, which on a grid is proportional to the perimeter ' +
-          'of a circle and on a wide graph can be enormous; DFS holds a stack, which is the depth. On a ' +
-          'path those numbers are 1 and n; on a star they are n and 1. The demo reports both because the ' +
-          'peak is the memory and only the peak varies.',
-        '**In an undirected graph there are only two kinds of edge: tree and back.** Forward and cross ' +
-          'edges are directed phenomena. An undirected walk meets every non-tree edge twice, once from ' +
-          'each end, and classifying both sightings gives an equal number of spurious "forward" edges — ' +
-          'which is why the second sighting is dropped **by edge id and not by parent vertex**. Dropping it ' +
-          'by vertex also drops genuine parallel edges, and that is the bug 13.4 is entirely about.'
+        '**A graph has three usual representations, and they differ by orders of magnitude in ' +
+          'memory rather than in asymptotics.**',
+        'An **adjacency list** is an array of arrays: simple, and every neighbour lookup is a ' +
+          'pointer chase into a separately allocated block. An **adjacency matrix** is n² entries ' +
+          'whatever the edge count, which buys O(1) edge tests and is unusable past a few ' +
+          'thousand nodes. **CSR** is two typed arrays — offsets and targets — so a neighbour ' +
+          'scan is a contiguous read of memory that is already in cache.',
+        '**CSR is what every serious graph library stores**, and the reason is the scan rather ' +
+          'than the byte count. Traversal becomes a sequential walk of two flat arrays with no ' +
+          'indirection at all.',
+        'The list-of-arrays version has the same complexity and is several times slower on real ' +
+          'hardware. That is the M02 lesson about layout, applied to a different structure.',
+        '**BFS and DFS differ in what they hold, not in what they cost.** Both visit every node ' +
+          'once and examine every edge once. BFS holds a frontier, which on a wide graph can be ' +
+          'enormous. DFS holds a stack, which is the depth.',
+        'On a path those numbers are 1 and n. On a star they are n and 1. The demo reports both, ' +
+          'because the peak is the memory and only the peak varies.',
+        '**In an undirected graph there are only two kinds of edge: tree and back.** Forward and ' +
+          'cross edges are directed phenomena. An undirected walk meets every non-tree edge twice, ' +
+          'once from each end, and classifying both sightings gives an equal number of spurious ' +
+          '"forward" edges.',
+        'That is why the second sighting is dropped **by edge id and not by parent vertex**. ' +
+          'Dropping it by vertex also drops genuine parallel edges, and that is the bug 13.4 is ' +
+          'entirely about.'
       ],
       demo: {
         title: 'Interactive demo — three representations, two walks, four edge kinds',
         markup: root.GraphRepresentationsTemplate.render()
       },
       diagram: diagram(),
-      insight: 'Before optimising a graph algorithm, look at how the graph is stored. A five-times speed-up ' +
-        'is routinely available from moving an adjacency list into CSR, and it costs no change to the ' +
-        'algorithm at all — the loop body is identical and the memory it touches is contiguous instead of ' +
-        'scattered. The corollary is that a benchmark comparing two graph algorithms on different ' +
-        'representations is measuring the representation, which is a mistake that is easy to make and ' +
-        'impossible to see in the numbers afterwards.'
+      insight: 'Before optimising a graph algorithm, look at how the graph is stored. A ' +
+        'five-times speed-up is routinely available from moving an adjacency list into CSR, and ' +
+        'it costs no change to the algorithm at all. The loop body is identical, and the memory ' +
+        'it touches is contiguous instead of scattered. The corollary is that a benchmark ' +
+        'comparing two graph algorithms on different representations is measuring the ' +
+        'representation. That mistake is easy to make and impossible to see in the numbers ' +
+        'afterwards.'
     };
   }
 

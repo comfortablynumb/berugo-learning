@@ -21,12 +21,15 @@
         },
         plain: 'Store it as a list of edges and convert to whatever the algorithm needs.',
         formal: '{ n, edges: [{ from, to, weight }], directed } converts to adjacency list, matrix or CSR',
-        detail: 'Every representation is good at something and hopeless at something else, so a library ' +
-          'that commits to one has already lost an argument it never had. Keeping the edge list as the ' +
-          'canonical form and converting per algorithm costs one linear pass and makes the trade ' +
-          'explicit: the conversion appears in the profile instead of hiding as a constant factor ' +
-          'inside a traversal. It also means the memory question is answerable — the same graph can be ' +
-          'measured in all three forms at once, which is the first table in this section.',
+        detail: [
+          'Every representation is good at something and hopeless at something else. A library ' +
+            'that commits to one has already lost an argument it never had.',
+          'Keeping the edge list as the canonical form and converting per algorithm costs one ' +
+            'linear pass, and makes the trade explicit. The conversion appears in the profile, ' +
+            'instead of hiding as a constant factor inside a traversal.',
+          'It also means the memory question is answerable. The same graph can be measured in all ' +
+            'three forms at once, which is the first table in this section.'
+        ],
         example: 'A 400-node grid with 760 edges costs 25.3 KB as CSR, 38.8 KB as an adjacency list and ' +
           '1.2 MB as a matrix.'
       },
@@ -34,13 +37,17 @@
         term: 'CSR is what a serious graph library stores',
         plain: 'Two typed arrays: where each vertex starts, and its neighbours laid out end to end.',
         formal: 'offsets[v] .. offsets[v + 1] is v’s slice of targets; a neighbour scan is one contiguous read',
-        detail: 'An adjacency list of arrays gives the same asymptotics and a completely different ' +
-          'machine: each vertex\'s neighbours live in a separately allocated object, so a traversal is ' +
-          'a pointer chase per vertex and the prefetcher can do nothing. Compressed sparse row puts ' +
-          'every neighbour in one flat array, so scanning a vertex is a sequential read and scanning ' +
-          'the whole graph is a sequential read of the whole array. That is why the same BFS is ' +
-          'several times faster on CSR, and why the representation is the first thing to check when a ' +
-          'graph workload is slower than its complexity says it should be.',
+        detail: [
+          'An adjacency list of arrays gives the same asymptotics and a completely different ' +
+            'machine. Each vertex\'s neighbours live in a separately allocated object, so a ' +
+            'traversal is a pointer chase per vertex and the prefetcher can do nothing.',
+          'Compressed sparse row puts every neighbour in one flat array. Scanning a vertex is then ' +
+            'a sequential read, and scanning the whole graph is a sequential read of the whole ' +
+            'array.',
+          'That is why the same BFS is several times faster on CSR. It is also why the ' +
+            'representation is the first thing to check when a graph workload is slower than its ' +
+            'complexity says it should be.'
+        ],
         example: 'CSR is 1.53× smaller than the adjacency list on the default grid — and the ' +
           'locality, not the bytes, is the reason to use it.'
       },
@@ -48,15 +55,18 @@
         term: 'The adjacency matrix buys one operation and pays n² for it',
         plain: 'Constant-time "is there an edge?" at the cost of storing every absent edge.',
         formal: 'Θ(n²) entries whatever m is; the neighbour scan is Θ(n) per vertex, mostly over Infinity',
-        readAs: 'A matrix reserves a cell for every possible edge, whether it exists or not — n vertices ' +
-          'means n² cells. Scanning one vertex\'s neighbours then costs n, nearly all of it spent ' +
-          'reading "no edge here".',
-        detail: 'The matrix is the right structure exactly when the graph is dense or when the ' +
-          'algorithm is defined over the matrix itself — Floyd-Warshall, transitive closure, anything ' +
-          'that wants a bit-parallel row operation. Everywhere else it is a trap that looks tidy: at ' +
-          '0.95% density the default grid spends more than 99% of 1.2 MB recording the absence of ' +
-          'edges, and its neighbour scan reads 400 cells to find four neighbours. Reach for it when ' +
-          'you have measured the density, not when the code looks nicer.',
+        readAs: 'A matrix reserves a cell for every possible edge, whether it exists or not, so n ' +
+          'vertices means n² cells. Scanning one vertex\'s neighbours then costs n, nearly all of ' +
+          'it spent reading "no edge here".',
+        detail: [
+          'The matrix is the right structure in exactly two cases: when the graph is dense, or ' +
+            'when the algorithm is defined over the matrix itself. Floyd-Warshall, transitive ' +
+            'closure and anything wanting a bit-parallel row operation qualify.',
+          'Everywhere else it is a trap that looks tidy. At 0.95% density the default grid spends ' +
+            'more than 99% of 1.2 MB recording the absence of edges, and its neighbour scan reads ' +
+            '400 cells to find four neighbours.',
+          'Reach for it when you have measured the density, not when the code looks nicer.'
+        ],
         example: 'The matrix is 49.38× the size of CSR on a graph that is 0.95% dense.'
       },
       {
@@ -74,15 +84,18 @@
         },
         plain: 'Same vertices, same edges — the peak memory is the whole difference.',
         formal: 'both are Θ(n + m); BFS peaks at the widest level, DFS at the longest root-to-node path',
-        readAs: 'The two traversals cost the same — one visit per vertex and one per edge — and differ only ' +
-          'in memory. BFS holds a whole level at once; DFS holds one path. Which is worse depends ' +
-          'entirely on the shape of the graph.',
-        detail: 'This is the comparison that gets stated backwards. Neither search is faster; they ' +
-          'visit every reachable vertex and examine every incident edge exactly once, and on the same ' +
-          'graph the counters are equal. What differs is the frontier: breadth-first holds one level, ' +
-          'which is wide and shallow, and depth-first holds one path, which is narrow and deep. Choose ' +
-          'by which of those your graph makes enormous — a wide bipartite layer graph kills BFS, a ' +
-          'long chain kills recursive DFS.',
+        readAs: 'The two traversals cost the same, one visit per vertex and one per edge. They ' +
+          'differ only in memory: BFS holds a whole level at once and DFS holds one path. Which is ' +
+          'worse depends entirely on the shape of the graph.',
+        detail: [
+          'This is the comparison that gets stated backwards. Neither search is faster. They visit ' +
+            'every reachable vertex and examine every incident edge exactly once, and on the same ' +
+            'graph the counters are equal.',
+          'What differs is the frontier. Breadth-first holds one level, which is wide and shallow. ' +
+            'Depth-first holds one path, which is narrow and deep.',
+          'Choose by which of those your graph makes enormous. A wide bipartite layer graph kills ' +
+            'BFS; a long chain kills recursive DFS.'
+        ],
         example: 'On the 400-node grid both visit 400 nodes and examine 1 520 edges; the BFS frontier ' +
           'peaks at 20 and the DFS stack at 400.'
       },
@@ -90,24 +103,31 @@
         term: 'Recursive DFS is a stack overflow waiting for the right input',
         plain: 'Use an explicit stack; the recursion depth is the path length, not the log of anything.',
         formal: 'depth = length of the longest root-to-node path in the DFS tree, which is n on a path graph',
-        detail: 'A balanced tree makes recursion look safe because its depth is logarithmic, and a ' +
-          'graph offers no such guarantee: a path, a linked list of objects, a deeply nested ' +
-          'dependency chain all produce a DFS tree of depth n. Every traversal in this milestone is ' +
-          'iterative for that reason, and the cost is a few lines of explicit stack frame. The failure ' +
-          'mode is also the worst kind — it depends on the data, so it survives every test written ' +
-          'against small fixtures and appears in production on the one customer with a long chain.',
+        detail: [
+          'A balanced tree makes recursion look safe because its depth is logarithmic, and a graph ' +
+            'offers no such guarantee. A path, a linked list of objects, a deeply nested dependency ' +
+            'chain all produce a DFS tree of depth n.',
+          'Every traversal in this milestone is iterative for that reason, and the cost is a few ' +
+            'lines of explicit stack frame.',
+          'The failure mode is also the worst kind. It depends on the data, so it survives every ' +
+            'test written against small fixtures, and appears in production on the one customer ' +
+            'with a long chain.'
+        ],
         example: 'The DFS stack reaches 400 on a 400-node grid, and the path generator makes it exactly n.'
       },
       {
         term: 'Edge classification, and what an undirected walk can produce',
         plain: 'Tree, back, forward and cross — but undirected graphs only ever have the first two.',
         formal: 'directed: 4 classes by discovery/finish times; undirected: every non-tree edge is a back edge',
-        detail: 'Classifying edges during a depth-first walk is how cycle detection, topological order ' +
-          'and strong connectivity are all derived, so it is worth getting exact. A back edge points ' +
-          'at an ancestor still on the stack and is precisely a cycle. A forward edge is a shortcut ' +
-          'into your own already-finished subtree and a cross edge points into a different one — and ' +
-          'neither can exist in an undirected graph, because an undirected edge is walkable from both ' +
-          'ends and would have been taken as a tree edge from the other side first.',
+        detail: [
+          'Classifying edges during a depth-first walk is how cycle detection, topological order ' +
+            'and strong connectivity are all derived. So it is worth getting exact.',
+          'A back edge points at an ancestor still on the stack, and is precisely a cycle. A ' +
+            'forward edge is a shortcut into your own already-finished subtree, and a cross edge ' +
+            'points into a different one.',
+          'Neither of those can exist in an undirected graph. An undirected edge is walkable from ' +
+            'both ends, and would have been taken as a tree edge from the other side first.'
+        ],
         example: 'The 400-node grid classifies 399 tree edges and 361 back edges — exactly the 760 it ' +
           'has, with zero forward and zero cross.'
       },
@@ -115,12 +135,16 @@
         term: 'An undirected walk sees every edge twice, and the second sighting must be dropped by id',
         plain: 'Skip the edge you arrived on — the edge, not the vertex.',
         formal: 'track the parent EDGE id; tracking the parent vertex also discards genuine parallel edges',
-        detail: 'The walk arrives at v along an edge and then meets that same edge again from v\'s side. ' +
-          'It must be ignored or it would be classified as a back edge to the parent, which is not a ' +
-          'cycle. The natural way to ignore it — "is this neighbour my parent?" — also ignores a second, ' +
-          'genuinely different edge to the same parent, and a second edge to the same parent is exactly ' +
-          'what makes something not a bridge. This is why every adjacency entry in this milestone ' +
-          'carries an edge id, and it is the bug section 13.4 is built around.',
+        detail: [
+          'The walk arrives at v along an edge, and then meets that same edge again from v\'s ' +
+            'side. It must be ignored, or it would be classified as a back edge to the parent, ' +
+            'which is not a cycle.',
+          'The natural way to ignore it — "is this neighbour my parent?" — also ignores a second, ' +
+            'genuinely different edge to the same parent. And a second edge to the same parent is ' +
+            'exactly what makes something not a bridge.',
+          'This is why every adjacency entry in this milestone carries an edge id, and it is the ' +
+            'bug section 13.4 is built around.'
+        ],
         example: 'Three nodes with 0 and 1 joined twice: skipping by edge id reports one bridge, ' +
           'skipping by vertex reports two.'
       },
@@ -128,15 +152,18 @@
         term: 'Two-colouring is BFS with one extra array',
         plain: 'Alternate colours by level; a same-colour edge is an odd cycle.',
         formal: 'a graph is bipartite iff it has no odd cycle; the witness is one edge plus the path around it',
-        readAs: 'A graph can be two-coloured exactly when it contains no cycle of odd length — and the "iff" ' +
-          'means that is a complete test, not just a necessary one. When it fails, the offending edge ' +
-          'and the tree path joining its ends are the proof.',
-        detail: 'Bipartiteness is the smallest example of the pattern this whole milestone repeats: the ' +
-          'boolean is nearly useless and the witness is what you needed. "Not bipartite" leaves the ' +
-          'caller with nowhere to go; "these two vertices have the same colour and here is the odd ' +
-          'cycle through them" is a defect report. The check itself is free — one colour array carried ' +
-          'through a breadth-first walk you were doing anyway — and it is the reachability test behind ' +
-          'matching, two-colouring conflicts and half of the scheduling problems that look harder.',
+        readAs: 'A graph can be two-coloured exactly when it contains no cycle of odd length, and ' +
+          'the "iff" means that is a complete test rather than just a necessary one. When it ' +
+          'fails, the offending edge and the tree path joining its ends are the proof.',
+        detail: [
+          'Bipartiteness is the smallest example of the pattern this whole milestone repeats. The ' +
+            'boolean is nearly useless and the witness is what you needed.',
+          '"Not bipartite" leaves the caller with nowhere to go. "These two vertices have the same ' +
+            'colour and here is the odd cycle through them" is a defect report.',
+          'The check itself is free: one colour array carried through a breadth-first walk you ' +
+            'were doing anyway. It is the reachability test behind matching, two-colouring ' +
+            'conflicts and half of the scheduling problems that look harder.'
+        ],
         example: 'The grid is bipartite; adding one diagonal makes it not, and the demo names the edge ' +
           'and the odd cycle rather than returning false.'
       }
