@@ -50,37 +50,42 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**On a bipartite graph the augmenting-path argument is clean.** Every alternating walk moves ' +
+        'left, right, left, right, so a vertex reached on the left is never reached on the right ' +
+        'and marking it once is safe.',
+      '**On a general graph that breaks.** An odd cycle — a blossom — can be entered on one side ' +
+        'and needs to be left on the other. A search that marks each vertex once will refuse to do ' +
+        'it.',
+      'The result is not a slower algorithm but a wrong one. The panel below runs it on a ' +
+        'six-vertex graph where it returns 2 against an answer of 3.',
+      '**Edmonds\'s blossom algorithm** fixes it by contraction. When the alternating search finds ' +
+        'an edge joining two vertices at even distance from the root, the cycle it closes is odd.',
+      'The whole cycle is contracted to a single pseudo-vertex and the search continues. An ' +
+        'augmenting path found in the contracted graph lifts back to one in the original, ' +
+        'rearranging the matching inside the blossom as it goes.',
+      'It was the first algorithm ever argued to be polynomial in the modern sense, and that ' +
+        'argument is where "polynomial time" as a definition of tractable comes from.',
+      '**Weighted matching is a different question with a different answer.** The assignment problem ' +
+        'asks for the cheapest *perfect* matching on a complete bipartite graph, given a cost matrix.',
+      'The **Hungarian algorithm** solves it in O(n³) by maintaining a pair of **potentials**, one ' +
+        'per row and one per column. Every reduced cost `c(i,j) − u(i) − v(j)` stays non-negative, ' +
+        'and every chosen cell has reduced cost exactly zero.',
+      'Those two facts together are a *certificate*. They prove optimality without reference to the ' +
+        'algorithm that produced them, and this section checks them on every run.',
+      '**The potentials are Johnson\'s reweighting and the dual of a linear program**, which is the ' +
+        'same observation 14.4 makes about min-cost flow.',
+      'Once you see the assignment problem as a min-cost flow of value n on a unit-capacity ' +
+        'bipartite network, the Hungarian algorithm stops being a separate thing to learn. It ' +
+        'becomes successive shortest paths with the potentials written down explicitly.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'On a bipartite graph the augmenting-path argument is clean: every alternating walk moves ' +
-          'left, right, left, right, so a vertex reached on the left is never reached on the right ' +
-          'and marking it once is safe. **On a general graph that breaks.** An odd cycle — a blossom ' +
-          '— can be entered on one side and needs to be left on the other, and a search that marks ' +
-          'each vertex once will refuse to do it. The result is not a slower algorithm but a wrong ' +
-          'one, and the panel below runs it on a six-vertex graph where it returns 2 against an ' +
-          'answer of 3.',
-        '**Edmonds\'s blossom algorithm** fixes it by contraction. When the alternating search finds ' +
-          'an edge joining two vertices at even distance from the root, the cycle it closes is odd; ' +
-          'the whole cycle is contracted to a single pseudo-vertex and the search continues. An ' +
-          'augmenting path found in the contracted graph lifts back to one in the original, ' +
-          'rearranging the matching inside the blossom as it goes. It was the first algorithm ever ' +
-          'argued to be polynomial in the modern sense, and that argument is where the word ' +
-          '"polynomial time" as a definition of tractable comes from.',
-        '**Weighted matching is a different question with a different answer.** The assignment ' +
-          'problem asks for the cheapest *perfect* matching on a complete bipartite graph given a ' +
-          'cost matrix, and the **Hungarian algorithm** solves it in O(n³) by maintaining a pair of ' +
-          '**potentials** — one per row, one per column — such that every reduced cost `c(i,j) − u(i) ' +
-          '− v(j)` is non-negative and every chosen cell has reduced cost exactly zero. Those two ' +
-          'facts together are a *certificate*: they prove optimality without reference to the ' +
-          'algorithm that produced them, and this section checks them on every run.',
-        '**The potentials are Johnson\'s reweighting and the dual of a linear program**, which is ' +
-          'the same observation 14.4 makes about min-cost flow. Once you see the assignment problem ' +
-          'as a min-cost flow of value n on a unit-capacity bipartite network, the Hungarian ' +
-          'algorithm stops being a separate thing to learn and becomes successive shortest paths ' +
-          'with the potentials written down explicitly.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — the counter-example, the failure rate, and the cost matrix',
         markup: root.GeneralMatchingTemplate.render()
@@ -89,9 +94,9 @@
       insight: 'You will almost certainly never implement blossoms. What is worth carrying is the ' +
         'reason they are needed: the bipartite augmenting-path argument depends on two-colourability, ' +
         'and an odd cycle destroys it. That single fact tells you when a graph library\'s ' +
-        '`maximumMatching` is safe to trust on your input and when it is not, and it is the same ' +
-        'boundary that separates the easy version of half a dozen other problems from the hard one — ' +
-        'colouring, independent set and vertex cover all become tractable on bipartite graphs for ' +
+        '`maximumMatching` is safe to trust on your input and when it is not. It is also the same ' +
+        'boundary that separates the easy version of half a dozen other problems from the hard one. ' +
+        'Colouring, independent set and vertex cover all become tractable on bipartite graphs for ' +
         'exactly this reason.'
     };
   }
