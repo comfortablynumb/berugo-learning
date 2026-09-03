@@ -61,6 +61,12 @@ test('sentences split before a bold markdown lead', function () {
   assert.strictEqual(scan.sentences(text).length, 2);
 });
 
+test('a full stop inside a bold thesis still ends the sentence', function () {
+  const text = '**A buffer is bytes.** Once that is concrete the rest is ordinary.';
+
+  assert.strictEqual(scan.sentences(text).length, 2);
+});
+
 test('a decimal point does not end a sentence', function () {
   assert.strictEqual(scan.sentences('The ratio is 1.5 at most.').length, 1);
 });

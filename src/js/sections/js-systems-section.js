@@ -29,12 +29,12 @@
     root.jQuery('#' + SECTION_ID + '-content').html(app.shell.render({
       sectionId: SECTION_ID,
       orientation: [
-        'A buffer is bytes; a view is an interpretation of those bytes. Once that separation is ' +
-          'concrete, the rest of this platform - a CPU with real registers, a page table, a packet ' +
-          'parser - is ordinary JavaScript rather than metaphor.',
-        'Two boundaries are worth memorising. Bitwise operators coerce to 32 bits, so anything above ' +
-          '2³¹ wraps or turns negative. And every number is a float64, so integers stop being exact ' +
-          'at 2⁵³ - the chart below shows exactly where.',
+        '**A buffer is bytes; a view is an interpretation of those bytes.** Once that separation ' +
+          'is concrete, the rest of this platform is ordinary JavaScript rather than metaphor — a ' +
+          'CPU with real registers, a page table, a packet parser.',
+        'Two boundaries are worth memorising. Bitwise operators coerce to 32 bits, so anything ' +
+          'above 2³¹ wraps or turns negative. And every number is a float64, so integers stop ' +
+          'being exact at 2⁵³ — the chart below shows exactly where.',
         'Flip a bit in the grid and watch every reading change at once.'
       ],
       demo: { title: 'Interactive demo — one buffer, six views', markup: root.JsSystemsTemplate.render() },

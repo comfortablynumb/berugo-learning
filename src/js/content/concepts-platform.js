@@ -213,13 +213,17 @@
         plain: 'A buffer is raw bytes; a typed array or DataView is an interpretation of those bytes. ' +
           'Several views can share one buffer.',
         formal: 'new Float64Array(buffer) aliases the same memory as new Uint8Array(buffer)',
-        detail: 'An ArrayBuffer has no type at all — it is a length in bytes and nothing more. Every ' +
-          'read and write goes through a view, and views over the same buffer are aliases, not ' +
-          'copies: writing through the Float64Array changes what the Uint8Array reads back on the ' +
-          'next line. That is the whole mechanism behind bit-level work in JavaScript, and it is how ' +
-          'a language with one numeric type gets to inspect a float\'s exponent. It also means ' +
-          'aliasing bugs are available to you in a language that otherwise has none, and that a view ' +
-          'must respect alignment: a Float64Array can only start at a byte offset divisible by 8.',
+        detail: [
+          'An ArrayBuffer has no type at all. It is a length in bytes and nothing more. Every read ' +
+            'and write goes through a view.',
+          'Views over the same buffer are aliases, not copies. Write through the Float64Array and ' +
+            'the Uint8Array reads the change back on the next line. That is the whole mechanism ' +
+            'behind bit-level work in JavaScript, and it is how a language with one numeric type ' +
+            'gets to inspect a float\'s exponent.',
+          'It also means aliasing bugs are available to you in a language that otherwise has none. ' +
+            'And a view has to respect alignment: a Float64Array can only start at a byte offset ' +
+            'divisible by 8.'
+        ],
         example: 'Write a float, read its eight bytes, and flip the sign bit by hand.'
       },
       {
@@ -227,14 +231,17 @@
         plain: 'The order bytes are stored in. Typed arrays use the platform order; DataView lets ' +
           'you choose, which is what a wire format needs.',
         formal: 'view.getUint32(0, littleEndian)',
-        detail: 'A four-byte integer has to be laid out somehow, and the two answers — least ' +
-          'significant byte first, or most significant first — are both in use. Typed arrays take ' +
-          'whatever the platform does, which is little-endian on x86 and on ARM as configured ' +
-          'everywhere you are likely to run this, so code that reads its own memory never notices. ' +
-          'Code that reads someone else\'s does: network protocols and most file formats are ' +
-          'big-endian, and a Uint32Array over those bytes silently produces reversed numbers. ' +
-          'DataView is the fix — every accessor takes an explicit littleEndian flag, so the byte ' +
-          'order is stated in the code rather than inherited from the machine.',
+        detail: [
+          'A four-byte integer has to be laid out somehow, and both answers are in use: least ' +
+            'significant byte first, or most significant first.',
+          'Typed arrays take whatever the platform does. That is little-endian on x86, and on ARM ' +
+            'as configured everywhere you are likely to run this, so code that reads its own ' +
+            'memory never notices.',
+          'Code that reads someone else\'s memory does notice. Network protocols and most file ' +
+            'formats are big-endian, and a Uint32Array over those bytes silently produces reversed ' +
+            'numbers. DataView is the fix: every accessor takes an explicit littleEndian flag, so ' +
+            'the byte order is stated in the code rather than inherited from the machine.'
+        ],
         example: '0x01020304 is 04 03 02 01 in memory on x86 and ARM.'
       },
       {
@@ -253,16 +260,20 @@
         readAs: 'Two multiplied by itself 53 times, minus one: 9 007 199 254 740 991, a little over ' +
           'nine quadrillion. Up to there every whole number has its own exact representation; past ' +
           'it they start sharing one.',
-        detail: 'A double stores a number in three parts: a sign, an exponent saying roughly how ' +
-          'big it is, and a mantissa — the significant digits, written in binary. The mantissa is 52 ' +
-          'stored bits plus one leading bit that is always 1 and so is never written down, which ' +
-          'gives 53 bits of precision. That is exactly enough to name every whole number up to 2⁵³, ' +
-          'and past it the values start skipping: above 2⁵³ only even ' +
-          'numbers are representable, above 2⁵⁴ only multiples of four, and so on. Nothing warns you ' +
-          'at the boundary — 2⁵³ + 1 simply rounds to 2⁵³ and compares equal to it. This is why ' +
-          'database ids, nanosecond timestamps and 64-bit counters cannot ride in a Number, and why ' +
-          'BigInt exists. Below the boundary the guarantee is genuinely exact, so ordinary integer ' +
-          'arithmetic is safe; it is the size of the values, not the operations, that decides.',
+        detail: [
+          'A double stores a number in three parts: a sign, an exponent saying roughly how big it ' +
+            'is, and a mantissa — the significant digits, written in binary. The mantissa is 52 ' +
+            'stored bits plus one leading bit that is always 1 and so is never written down. That ' +
+            'gives 53 bits of precision.',
+          'Fifty-three bits is exactly enough to name every whole number up to 2⁵³. Past it the ' +
+            'values start skipping: above 2⁵³ only even numbers are representable, above 2⁵⁴ only ' +
+            'multiples of four, and so on. Nothing warns you at the boundary. 2⁵³ + 1 simply ' +
+            'rounds to 2⁵³ and compares equal to it.',
+          'This is why database ids, nanosecond timestamps and 64-bit counters cannot ride in a ' +
+            'Number, and why BigInt exists. Below the boundary the guarantee is genuinely exact, ' +
+            'so ordinary integer arithmetic is safe. It is the size of the values, not the ' +
+            'operations, that decides.'
+        ],
         example: '2⁵³ + 1 === 2⁵³ evaluates to true.'
       },
       {
@@ -270,18 +281,20 @@
         plain: 'Bitwise operators convert to signed 32-bit first; >>> converts to unsigned 32-bit.',
         formal: 'ToInt32 for & | ^ << >> ~, ToUint32 for >>>',
         readAs: 'Before any of the operators & | ^ << >> or ~ looks at your value, the language ' +
-          'quietly converts it to a signed 32-bit integer; >>> converts it to an unsigned one ' +
-          'instead. "Signed" means the top bit is read as a minus sign rather than as part of the ' +
-          'number.',
-        detail: 'Every bitwise operator starts by truncating its operands to 32 bits, which is why ' +
-          'they behave like a different language from the arithmetic around them. The conversion ' +
-          'wraps modulo 2³² — it keeps only the remainder after dividing by 2³², which in bits just ' +
-          'means keeping the last 32 of them — and then reads the top bit as a sign, so a value ' +
-          'above 2³¹ − 1 ' +
-          'comes back negative — the classic surprise being a hash that goes negative the moment it ' +
-          'sets its high bit. The unsigned shift >>> is the one exception, and it is the standard ' +
-          'idiom for getting an unsigned reading back: x >>> 0. Truncation also silently discards ' +
-          'anything above bit 31, so a value built up past 2³² keeps only its low word.',
+          'quietly converts it to a signed 32-bit integer. The operator >>> converts it to an ' +
+          'unsigned one instead. "Signed" means the top bit is read as a minus sign rather than as ' +
+          'part of the number.',
+        detail: [
+          'Every bitwise operator starts by truncating its operands to 32 bits, which is why they ' +
+            'behave like a different language from the arithmetic around them.',
+          'The conversion wraps modulo 2³². It keeps only the remainder after dividing by 2³², ' +
+            'which in bits just means keeping the last 32 of them. It then reads the top bit as a ' +
+            'sign, so a value above 2³¹ − 1 comes back negative. The classic surprise is a hash ' +
+            'that goes negative the moment it sets its high bit.',
+          'The unsigned shift >>> is the one exception, and x >>> 0 is the standard idiom for ' +
+            'getting an unsigned reading back. Truncation also silently discards anything above ' +
+            'bit 31, so a value built up past 2³² keeps only its low word.'
+        ],
         example: '(2 ** 31) | 0 is −2147483648, and (−1) >>> 0 is 4294967295.'
       },
       {
@@ -290,30 +303,37 @@
           'bits that hashing depends on.',
         formal: 'Math.imul(a, b) ≡ (a · b) mod 2³² as a signed int32',
         readAs: 'Math.imul(a, b) gives the same answer as multiplying a by b and then throwing away ' +
-          'everything except the last 32 bits, read back with the top bit as a sign. "mod 2³²" is ' +
-          '"the remainder after dividing by 2³²", which in binary is exactly that truncation.',
-        detail: 'Multiplying two 32-bit values produces up to 64 bits of product, and a double can ' +
-          'only hold 53 of them exactly — so plain * rounds, and what it throws away is the low end. ' +
-          'For a hash function that is fatal: mixing works precisely by carrying low-bit entropy ' +
-          'upward, and a rounded product corrupts the bits the next step depends on. Math.imul does ' +
-          'the multiply as the hardware does it, keeping the low 32 bits and discarding the high ' +
-          'ones, which is exactly what a mod-2³² mixer wants. Every murmur- or xxhash-style step in ' +
-          'this platform is written with it, and swapping in * changes the avalanche result — ' +
-          'avalanche being the property a hash is judged on: flip one bit of the input and about ' +
-          'half the output bits should flip.',
+          'everything except the last 32 bits. The result is read back with the top bit as a sign. ' +
+          '"mod 2³²" is "the remainder after dividing by 2³²", which in binary is exactly that ' +
+          'truncation.',
+        detail: [
+          'Multiplying two 32-bit values produces up to 64 bits of product, and a double can only ' +
+            'hold 53 of them exactly. So plain * rounds, and what it throws away is the low end.',
+          'For a hash function that is fatal. Mixing works precisely by carrying low-bit entropy ' +
+            'upward, and a rounded product corrupts the bits the next step depends on.',
+          'Math.imul does the multiply the way the hardware does it: keep the low 32 bits, discard ' +
+            'the high ones. That is exactly what a mod-2³² mixer wants. Every murmur- or ' +
+            'xxhash-style step in this platform is written with it, and swapping in * changes the ' +
+            'avalanche result. Avalanche is the property a hash is judged on: flip one bit of the ' +
+            'input and about half the output bits should flip.'
+        ],
         example: 'Every mixing step in a murmur-style hash is a Math.imul.'
       },
       {
         term: 'Structured clone vs transfer',
         plain: 'Posting a buffer to a worker copies it; transferring moves it and empties the sender.',
         formal: 'postMessage(buf, [buf]) transfers ownership',
-        detail: 'postMessage cannot share memory, so by default it deep-copies the message with the ' +
-          'structured clone algorithm — which is fine for a small object and quietly O(n) for a ' +
-          '50 MB buffer, on both sides. Listing the buffer in the transfer list instead moves ' +
-          'ownership: no bytes are copied, and the sender\'s buffer is detached, so its byteLength ' +
-          'becomes 0 and every view over it throws on access. That detachment is the point of the ' +
-          'design — it is what makes zero-copy safe without shared mutable state — and it is also the ' +
-          'bug people hit, because the sender usually still holds a reference it expects to work.',
+        detail: [
+          'postMessage cannot share memory, so by default it deep-copies the message with the ' +
+            'structured clone algorithm. That is fine for a small object, and quietly O(n) for a ' +
+            '50 MB buffer — on both sides.',
+          'Listing the buffer in the transfer list instead moves ownership. No bytes are copied, ' +
+            'and the sender\'s buffer is detached: its byteLength becomes 0 and every view over it ' +
+            'throws on access.',
+          'That detachment is the point of the design. It is what makes zero-copy safe without ' +
+            'shared mutable state. It is also the bug people hit, because the sender usually still ' +
+            'holds a reference it expects to work.'
+        ],
         example: 'After a transfer, the original buffer\'s byteLength is 0.'
       },
       {
@@ -322,18 +342,21 @@
           'just above 1 — it is not a universal tolerance.',
         formal: 'ulp(x) = 2^(⌊log₂|x|⌋ − 52); Number.EPSILON = 2⁻⁵²',
         readAs: 'The gap between x and the next representable number along is two raised to the ' +
-          'power of (the exponent of x, minus 52) — where the exponent is how many times you can ' +
-          'halve x before landing between 1 and 2. Number.EPSILON is that same gap measured at ' +
-          'x = 1, which works out at 2⁻⁵², about 2.22 × 10⁻¹⁶.',
-        detail: 'Floating point does not space its values evenly. It has a fixed 52 bits of ' +
-          'precision to spend wherever the number happens to sit, so the gap between one ' +
-          'representable value and the next is a fixed fraction of the value rather than a fixed ' +
-          'amount — which means the gap doubles every time the magnitude does. Near 1 it is 2⁻⁵², ' +
-          'which is what Number.EPSILON names; near 10⁹ it is about ' +
-          '1.19 × 10⁻⁷, roughly a billion times larger. Comparing with Math.abs(a − b) < ' +
-          'Number.EPSILON therefore means "bit-identical" at large magnitudes — it rejects even ' +
-          'adjacent doubles — and means "wildly loose" near zero. A tolerance that works across ' +
-          'magnitudes has to scale with the operands, or be expressed in ulps directly.',
+          'power of the exponent of x, minus 52. The exponent is how many times you can halve x ' +
+          'before landing between 1 and 2. Number.EPSILON is that same gap measured at x = 1, ' +
+          'which works out at 2⁻⁵², about 2.22 × 10⁻¹⁶.',
+        detail: [
+          'Floating point does not space its values evenly. It has a fixed 52 bits of precision ' +
+            'to spend wherever the number happens to sit. So the gap between one representable ' +
+            'value and the next is a fixed fraction of the value rather than a fixed amount, and ' +
+            'it doubles every time the magnitude does.',
+          'Near 1 that gap is 2⁻⁵², which is what Number.EPSILON names. Near 10⁹ it is about ' +
+            '1.19 × 10⁻⁷, roughly a billion times larger.',
+          'So Math.abs(a − b) < Number.EPSILON means "bit-identical" at large magnitudes: it ' +
+            'rejects even adjacent doubles. Near zero the same test is wildly loose. A tolerance ' +
+            'that works across magnitudes has to scale with the operands, or be expressed in ulps ' +
+            'directly.'
+        ],
         example: 'Near 10⁹ the neighbours are 1.19 × 10⁻⁷ apart, so |a − b| ≤ 2.2 × 10⁻¹⁶ is never ' +
           'true there, even for adjacent values.'
       },
@@ -342,13 +365,16 @@
         plain: 'When a result falls exactly between two representable values, IEEE takes the one whose ' +
           'last mantissa bit is 0 rather than always rounding up.',
         formal: 'roundTiesToEven — the default IEEE 754 rounding mode',
-        detail: 'Always rounding a tie upward introduces a systematic bias: over a long summation the ' +
-          'errors accumulate in one direction instead of cancelling. Ties-to-even removes the bias by ' +
-          'choosing the neighbour with an even final mantissa bit, which is up half the time and down ' +
-          'the other half. It is also the explanation for the most famous result in the language: ' +
-          '0.1 and 0.2 are each stored slightly off, their exact sum lands precisely on the midpoint ' +
-          'between two doubles, and the even neighbour is the one above 0.3. The lesson is that ' +
-          '0.1 + 0.2 !== 0.3 is not sloppiness — it is a deterministic rule doing exactly what it says.',
+        detail: [
+          'Always rounding a tie upward introduces a systematic bias. Over a long summation the ' +
+            'errors accumulate in one direction instead of cancelling.',
+          'Ties-to-even removes the bias by choosing the neighbour whose final mantissa bit is ' +
+            'even. That is up half the time and down the other half.',
+          'It is also the explanation for the most famous result in the language. 0.1 and 0.2 are ' +
+            'each stored slightly off, their exact sum lands precisely on the midpoint between two ' +
+            'doubles, and the even neighbour is the one above 0.3. So 0.1 + 0.2 !== 0.3 is not ' +
+            'sloppiness. It is a deterministic rule doing exactly what it says.'
+        ],
         example: 'It is why 0.1 + 0.2 lands above 0.3: the exact sum is a tie, and the upper ' +
           'neighbour is the one with the even mantissa.'
       },
@@ -356,13 +382,17 @@
         term: 'SameValueZero',
         plain: 'The equality Map and Set use for keys: like ===, except NaN matches NaN and +0 matches −0.',
         formal: 'SameValueZero(x, y)',
-        detail: 'JavaScript has four equality relations and they disagree in exactly the corners that ' +
-          'matter for a hash table. Strict === says NaN !== NaN, which would make a NaN key ' +
-          'impossible to look up once stored; Object.is says +0 is not −0, which would split one ' +
-          'numeric key in two. SameValueZero is the compromise the collections use: NaN matches ' +
-          'itself so keys are always retrievable, and the two zeroes are one key so arithmetic that ' +
-          'produces −0 does not lose your entry. Knowing which relation applies is what lets you ' +
-          'predict whether a lookup will hit — includes uses it too, while indexOf still uses ===.',
+        detail: [
+          'JavaScript has four equality relations, and they disagree in exactly the corners that ' +
+            'matter for a hash table.',
+          'Strict === says NaN !== NaN, which would make a NaN key impossible to look up once ' +
+            'stored. Object.is says +0 is not −0, which would split one numeric key in two.',
+          'SameValueZero is the compromise the collections use. NaN matches itself, so keys are ' +
+            'always retrievable, and the two zeroes are one key, so arithmetic that produces −0 ' +
+            'does not lose your entry. Knowing which relation applies is what lets you predict ' +
+            'whether a lookup will hit: includes uses SameValueZero too, while indexOf still uses ' +
+            '===.'
+        ],
         example: 'new Map([[NaN, 1]]).get(NaN) is 1, while NaN === NaN is false.'
       }
     ]

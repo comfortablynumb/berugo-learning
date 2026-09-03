@@ -85,14 +85,15 @@ function paragraphsOf(detail) {
  * Sentence boundaries. A full stop only ends a sentence when whitespace and
  * something that could start a sentence follow, which keeps "1.5" and "n₀."
  * from splitting the line into fragments and reporting a flattering average.
- * Markdown counts: a paragraph here often opens its next sentence with a bold
- * thesis, and treating `**Sum with...` as a continuation hides the longest
- * sentences in the curriculum behind a 110-word phantom.
+ * Markdown counts, on both sides of the boundary: a paragraph here often opens
+ * with a bold thesis, so the full stop can sit inside the `**` and the next
+ * sentence can start with one. Treating either as a continuation glues two
+ * sentences into a phantom that reports as the longest in the curriculum.
  */
 function sentences(text) {
   return String(text || '')
     .replace(/\s+/g, ' ')
-    .split(/(?<=[.!?])\s+(?=[A-Z0-9"'“(*`_])/)
+    .split(/(?<=[.!?][*_`"'”)\]]{0,3})\s+(?=[A-Z0-9"'“(*`_])/)
     .map(function (s) { return s.trim(); })
     .filter(Boolean);
 }
