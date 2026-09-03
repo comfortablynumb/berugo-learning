@@ -57,44 +57,53 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**Plain Dijkstra settles every node closer than the target**, which on a continental road ' +
+        'network is most of a continent for a cross-country query.',
+      'Three ideas cut that down. **Searching from both ends** replaces one ball of radius d with ' +
+        'two of radius d/2.',
+      '**Contraction hierarchies** rank the nodes, remove them one at a time, and add a shortcut ' +
+        'edge wherever removing a node would have lost a shortest path. After that, a query never ' +
+        'has to walk *down* the ranking. **Hub labelling and arc flags** go further still, at more ' +
+        'memory.',
+      'The contraction is where all the subtlety is. Removing v means asking a question for every ' +
+        'pair of its surviving neighbours u and w. Can the graph without v still get from u to w ' +
+        'within the cost of u→v→w?',
+      'If it does, that path is the **witness** and no shortcut is needed. If it does not, the ' +
+        'shortcut must be added, because after v is gone that distance exists nowhere else.',
+      '**The two mistakes are not symmetric, and that asymmetry is the whole engineering lesson.** ' +
+        'Failing to find a witness that exists adds an unnecessary shortcut: the graph grows and the ' +
+        'query slows, and the answer stays correct.',
+      'Claiming a witness that does not exist skips a necessary shortcut, and the answer is silently ' +
+        'wrong on a handful of pairs.',
+      'The witness search is therefore allowed to be *conservative* — truncated by hops, bounded by ' +
+        'distance — and is never allowed to be optimistic.',
+      '**Preprocessing is not free and the query win is not automatic.** On this page the witness ' +
+        'search costs 2 927 steps on a 16-node network and 864 467 on a 144-node one. That is 295× ' +
+        'the work for 9× the nodes, while the query settles 87 nodes instead of 144.',
+      'That ratio is what makes CH a continental-scale technique and a poor choice for a graph small ' +
+        'enough to search directly. The table below is the honest version of a claim usually made ' +
+        'without one.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'Plain Dijkstra settles every node closer than the target, which on a continental road network ' +
-          'is most of a continent for a cross-country query. Three ideas cut that down. **Searching ' +
-          'from both ends** replaces one ball of radius d with two of radius d/2. **Contraction ' +
-          'hierarchies** rank the nodes, remove them one at a time, and add a shortcut edge wherever ' +
-          'removing a node would have lost a shortest path - after which a query never has to walk ' +
-          '*down* the ranking. **Hub labelling and arc flags** go further still, at more memory.',
-        'The contraction is where all the subtlety is. Removing v means asking, for every pair of its ' +
-          'surviving neighbours u and w, whether the graph without v still gets from u to w within the ' +
-          'cost of u→v→w. If it does, that path is the **witness** and no shortcut is needed. If it does ' +
-          'not, the shortcut must be added, because after v is gone that distance exists nowhere else.',
-        '**The two mistakes are not symmetric, and that asymmetry is the whole engineering lesson.** ' +
-          'Failing to find a witness that exists adds an unnecessary shortcut: the graph grows and the ' +
-          'query slows, and the answer stays correct. Claiming a witness that does not exist skips a ' +
-          'necessary shortcut, and the answer is silently wrong on a handful of pairs. The witness ' +
-          'search is therefore allowed to be *conservative* - truncated by hops, bounded by distance - ' +
-          'and is never allowed to be optimistic.',
-        '**Preprocessing is not free and the query win is not automatic.** On this page the witness ' +
-          'search costs 2 927 steps on a 16-node network and 864 467 on a 144-node one - 295× the work ' +
-          'for 9× the nodes - while the query settles 87 nodes instead of 144. That ratio is what makes ' +
-          'CH a continental-scale technique and a poor choice for a graph small enough to search ' +
-          'directly, and the table below is the honest version of a claim usually made without one.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — preprocess a network, then break the witness search on purpose',
         markup: root.RoutePlanningTemplate.render()
       },
       diagram: diagram(),
       insight: 'A preprocessing bug is the worst kind of bug to own, because the artefact outlives the ' +
-        'run that produced it and every query afterwards inherits the error. That is why the check here ' +
-        'is all-pairs rather than a sample: with the witness search routing through contracted nodes, ' +
-        '1 218 of 1 260 pairs are perfectly correct, and the 42 that are not include 20 that claim two ' +
-        'connected towns cannot be reached from each other. No integration test built from plausible ' +
-        'journeys would have found that. If you build an index, verify it exhaustively at a size where ' +
-        'exhaustive is affordable, and keep that fixture forever.'
+        'run that produced it and every query afterwards inherits the error. That is why the check ' +
+        'here is all-pairs rather than a sample. With the witness search routing through contracted ' +
+        'nodes, 1 218 of 1 260 pairs are perfectly correct. The 42 that are not include 20 that claim ' +
+        'two connected towns cannot be reached from each other. No integration test built from ' +
+        'plausible journeys would have found that. If you build an index, verify it exhaustively at a ' +
+        'size where exhaustive is affordable, and keep that fixture forever.'
     };
   }
 

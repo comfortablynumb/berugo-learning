@@ -206,12 +206,16 @@
         formal: 'settled set = { v : d(s, v) <= d(s, t) }, which for a cross-country query is most of the network',
         readAs: 'The set of vertices Dijkstra settles is everything nearer to the start than the target is. ' +
           'For a long journey that is nearly the whole map, which is why route planners preprocess.',
-        detail: 'This is why route planning is a separate subject rather than a call to a shortest-path ' +
-          'routine. The work is not proportional to the length of the answer; it is proportional to the ' +
-          'area the answer spans. A twenty-million-node continental network answers a local query in ' +
-          'microseconds and a Lisbon-to-Helsinki query by settling nearly the whole graph, and no ' +
-          'amount of micro-optimisation changes the shape of that curve. Every technique in this ' +
-          'section attacks the ball rather than the constant factor.',
+        detail: [
+          'This is why route planning is a separate subject rather than a call to a shortest-path ' +
+            'routine.',
+          'The work is not proportional to the length of the answer. It is proportional to the area ' +
+            'the answer spans.',
+          'A twenty-million-node continental network answers a local query in microseconds, and a ' +
+            'Lisbon-to-Helsinki query by settling nearly the whole graph. No amount of ' +
+            'micro-optimisation changes the shape of that curve, so every technique in this section ' +
+            'attacks the ball rather than the constant factor.'
+        ],
         example: 'On a road-like 12×12 network Dijkstra settles all 144 nodes for a corner-to-corner ' +
           'query, while the hierarchy settles 87.'
       },
@@ -230,23 +234,28 @@
         },
         plain: 'Delete the node; wherever a shortest path went through it, add an edge that replaces it.',
         formal: 'for each surviving pair (u, w): if the only u→w route within cost(u→v→w) went through v, add that shortcut',
-        detail: 'Contraction is a preprocessing step, not a query-time one: nodes are removed one at a ' +
-          'time in a chosen order, and each removal patches the graph so that the distances among the ' +
-          'remaining nodes are unchanged. The output is the original graph plus a set of shortcut edges ' +
-          'and a rank per node. Everything about the technique\'s speed follows from the order, and ' +
-          'everything about its correctness follows from the patching step.',
+        detail: [
+          'Contraction is a preprocessing step, not a query-time one. Nodes are removed one at a ' +
+            'time in a chosen order, and each removal patches the graph so that the distances among ' +
+            'the remaining nodes are unchanged.',
+          'The output is the original graph plus a set of shortcut edges and a rank per node.',
+          'Everything about the technique\'s speed follows from the order, and everything about its ' +
+            'correctness follows from the patching step.'
+        ],
         example: 'A road-like 6×6 network needs 18 shortcuts, taking 62 edges to 80 — a growth of 1.29×.'
       },
       {
         term: 'The witness search is where correctness lives',
         plain: 'Before adding a shortcut, ask whether another route already covers it.',
         formal: 'a bounded Dijkstra from u to w avoiding v, limited by cost(u→v→w) and by a hop count',
-        detail: 'If a route from u to w that avoids v is no more expensive than going through v, then ' +
-          'removing v loses nothing and no shortcut is needed. That route is the witness. The search ' +
-          'for it is bounded in both distance and hops for speed, and it is the single subroutine on ' +
-          'which the entire hierarchy\'s correctness rests — a hierarchy with a subtly wrong witness ' +
-          'search builds to the expected size in the expected time and answers a small fraction of ' +
-          'queries incorrectly forever after.',
+        detail: [
+          'If a route from u to w that avoids v is no more expensive than going through v, then ' +
+            'removing v loses nothing and no shortcut is needed. That route is the witness.',
+          'The search for it is bounded in both distance and hops for speed. It is also the single ' +
+            'subroutine on which the entire hierarchy\'s correctness rests.',
+          'A hierarchy with a subtly wrong witness search builds to the expected size in the ' +
+            'expected time, and answers a small fraction of queries incorrectly forever after.'
+        ],
         example: 'The 6×6 network finds 70 witnesses in 28 876 search steps, and adds a shortcut ' +
           'wherever it finds none.'
       },
@@ -257,12 +266,15 @@
         readAs: 'The witness search decides whether a shortcut is needed. Failing to find a witness that ' +
           'exists costs you an extra edge and nothing else; believing in one that does not exist ' +
           'deletes a route.',
-        detail: 'This asymmetry is what licenses every practical shortcut in the implementation. The ' +
-          'search may be truncated by hop count, bounded by distance, or abandoned early, because all ' +
-          'of those failures fall on the safe side: they add edges nobody needed, making the graph ' +
-          'bigger and the query slower while leaving every distance correct. What is never permissible ' +
-          'is claiming a witness that does not exist — and the easiest way to do that is to let the ' +
-          'search walk through nodes that have already been contracted and are therefore gone.',
+        detail: [
+          'This asymmetry is what licenses every practical shortcut in the implementation.',
+          'The search may be truncated by hop count, bounded by distance, or abandoned early, ' +
+            'because all of those failures fall on the safe side. They add edges nobody needed, ' +
+            'making the graph bigger and the query slower while leaving every distance correct.',
+          'What is never permissible is claiming a witness that does not exist. The easiest way to ' +
+            'do that is to let the search walk through nodes that have already been contracted and ' +
+            'are therefore gone.'
+        ],
         example: 'Skipping the witness search entirely gives 492 shortcuts instead of 18, a graph 8.94× ' +
           'the original size, and 0 wrong pairs of 1 260.'
       },
@@ -270,12 +282,15 @@
         term: 'Searching through contracted nodes finds witnesses that no longer exist',
         plain: 'A node that has been removed cannot carry a route.',
         formal: 'the witness must be a path in the *remaining* graph; `contracted` is a required argument, not an option',
-        detail: 'This is the bug the section exists for, and its signature is what makes it dangerous: ' +
-          'the hierarchy comes out almost exactly the right size, the build takes the usual time, every ' +
-          'structural invariant holds, and a few pairs in a thousand return a distance that is too ' +
-          'large — or Infinity, on a connected graph. No spot check finds it. Nothing about the ' +
-          'artefact looks wrong. The only defence is an exhaustive comparison against a reference at a ' +
-          'size where exhaustive is affordable, kept as a fixture forever.',
+        detail: [
+          'This is the bug the section exists for, and its signature is what makes it dangerous.',
+          'The hierarchy comes out almost exactly the right size, the build takes the usual time, ' +
+            'and every structural invariant holds. A few pairs in a thousand return a distance that ' +
+            'is too large — or Infinity, on a connected graph.',
+          'No spot check finds it, and nothing about the artefact looks wrong. The only defence is ' +
+            'an exhaustive comparison against a reference at a size where exhaustive is affordable, ' +
+            'kept as a fixture forever.'
+        ],
         example: 'The broken variant produces 20 shortcuts against the correct 18 and is wrong on 42 of ' +
           '1 260 pairs, 20 of which are reported unreachable.'
       },
@@ -283,12 +298,15 @@
         term: 'The order decides speed, never correctness',
         plain: 'Contract the nodes that need fewest shortcuts first — edge difference is the usual score.',
         formal: 'edge difference = shortcuts a contraction would add − edges it would remove; recomputed lazily',
-        detail: 'Any contraction order produces a correct hierarchy, so the ordering heuristic is a ' +
-          'pure performance knob and can be as approximate as you like. Edge difference is the standard ' +
-          'greedy choice and it is recomputed lazily because contracting a node changes its ' +
-          'neighbours\' scores. What emerges is worth looking at: on a road-like network the last nodes ' +
-          'contracted are the junctions where the fast roads meet — the algorithm rediscovers the ' +
-          'motorway network from nothing but a shortcut count.',
+        detail: [
+          'Any contraction order produces a correct hierarchy, so the ordering heuristic is a pure ' +
+            'performance knob and can be as approximate as you like.',
+          'Edge difference is the standard greedy choice, and it is recomputed lazily because ' +
+            'contracting a node changes its neighbours\' scores.',
+          'What emerges is worth looking at. On a road-like network the last nodes contracted are ' +
+            'the junctions where the fast roads meet — the algorithm rediscovers the motorway ' +
+            'network from nothing but a shortcut count.'
+        ],
         example: 'The demo highlights the last 15% of nodes to be contracted, and on a road-like ' +
           'network they are exactly the fast-road junctions.'
       },
@@ -296,12 +314,14 @@
         term: 'The query never goes down the hierarchy',
         plain: 'Two searches, both moving only to higher-ranked nodes, meeting at the top.',
         formal: 'forward search on upward edges from s, backward on upward edges into t; the meeting node is the highest on the path',
-        detail: 'The upward restriction is what makes the query fast — it halves the edges each search ' +
-          'sees and confines both to a small neighbourhood of the top of the ranking. It is only ' +
-          'correct because contraction added a shortcut everywhere the true path descends, which is ' +
-          'exactly what the witness search decides. Query correctness and preprocessing correctness are ' +
-          'therefore the same property, seen at two different times, which is why a preprocessing bug ' +
-          'is so much worse than a query bug.',
+        detail: [
+          'The upward restriction is what makes the query fast. It halves the edges each search ' +
+            'sees, and confines both to a small neighbourhood of the top of the ranking.',
+          'It is only correct because contraction added a shortcut everywhere the true path ' +
+            'descends, which is exactly what the witness search decides.',
+          'Query correctness and preprocessing correctness are therefore the same property, seen at ' +
+            'two different times. That is why a preprocessing bug is so much worse than a query bug.'
+        ],
         example: 'On a road-like 8×8 network Dijkstra settles 64 nodes, bidirectional Dijkstra 42 and ' +
           'the hierarchy 37, all returning 46.'
       },
@@ -309,12 +329,15 @@
         term: 'Preprocessing is amortised over queries, and the exchange rate is brutal',
         plain: 'The build cost grows far faster than the query saving does.',
         formal: 'witness search is the dominant preprocessing cost and scales superlinearly; query settled counts fall slowly',
-        detail: 'The reason contraction hierarchies are a continental-scale technique and a poor choice ' +
-          'for a small graph is visible in one table: over a 9× increase in nodes, preprocessing work ' +
-          'rises by nearly 300× while the query settles roughly half as many nodes. That is a good ' +
-          'trade only when the preprocessing is paid once and the query is run billions of times. For ' +
-          'a handful of route lookups on a graph that fits in memory, bidirectional Dijkstra is the ' +
-          'right answer and needs no build step at all.',
+        detail: [
+          'The reason contraction hierarchies are a continental-scale technique, and a poor choice ' +
+            'for a small graph, is visible in one table.',
+          'Over a 9× increase in nodes, preprocessing work rises by nearly 300× while the query ' +
+            'settles roughly half as many nodes. That is a good trade only when the preprocessing is ' +
+            'paid once and the query is run billions of times.',
+          'For a handful of route lookups on a graph that fits in memory, bidirectional Dijkstra is ' +
+            'the right answer and needs no build step at all.'
+        ],
         example: 'Witness steps rise from 2 927 at 16 nodes to 864 467 at 144 — 295× the work for 9× ' +
           'the nodes.'
       },
@@ -322,24 +345,31 @@
         term: 'Some graphs have nothing to contract around',
         plain: 'A path and a barbell produce zero shortcuts, so the hierarchy is pure overhead.',
         formal: 'shortcuts are needed only where a contracted node lies on a unique shortest path between survivors',
-        detail: 'Recognising the degenerate case before deploying the technique saves a lot of ' +
-          'disappointment. On a path every node has at most two neighbours and removing one leaves a ' +
-          'single pair whose only route was through it — but the replacement edge is the path itself, ' +
-          'so no *extra* structure appears. On a clique-heavy graph almost every pair already has a ' +
-          'direct edge. The technique earns its keep on graphs with a genuine hierarchy of importance, ' +
-          'which road networks have and social graphs largely do not.',
+        detail: [
+          'Recognising the degenerate case before deploying the technique saves a lot of ' +
+            'disappointment.',
+          'On a path every node has at most two neighbours, and removing one leaves a single pair ' +
+            'whose only route was through it. But the replacement edge is the path itself, so no ' +
+            '*extra* structure appears. On a clique-heavy graph almost every pair already has a ' +
+            'direct edge.',
+          'The technique earns its keep on graphs with a genuine hierarchy of importance, which road ' +
+            'networks have and social graphs largely do not.'
+        ],
         example: 'A path of 20 and a barbell of 5 both build with 0 shortcuts and 1.00× edge growth.'
       },
       {
         term: 'Verify an index exhaustively at a size where exhaustive is affordable',
         plain: 'Check every pair against a reference, and keep the fixture forever.',
         formal: 'n² queries against Dijkstra; the disagreement count is a reported field, not an exception',
-        detail: 'A preprocessing artefact outlives the run that produced it, so every query afterwards ' +
-          'inherits any error in it. Sampled testing is useless here because the failure rate is a few ' +
-          'per thousand and the failures are indistinguishable from correct answers. An all-pairs ' +
-          'comparison on a few dozen nodes takes milliseconds and catches the entire class — and ' +
-          'reporting the disagreement count rather than throwing keeps the demo usable exactly when a ' +
-          'broken variant is selected on purpose.',
+        detail: [
+          'A preprocessing artefact outlives the run that produced it, so every query afterwards ' +
+            'inherits any error in it.',
+          'Sampled testing is useless here, because the failure rate is a few per thousand and the ' +
+            'failures are indistinguishable from correct answers.',
+          'An all-pairs comparison on a few dozen nodes takes milliseconds and catches the entire ' +
+            'class. Reporting the disagreement count rather than throwing keeps the demo usable ' +
+            'exactly when a broken variant is selected on purpose.'
+        ],
         example: '4 460 pairs across six fixtures, 0 wrong with the correct witness search and 42 wrong ' +
           'with the broken one.'
       }
