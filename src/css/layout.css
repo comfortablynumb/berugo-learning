@@ -287,6 +287,7 @@
   gap: 0.5rem;
   min-width: 0;
   flex: 0 1 auto;
+  overflow: hidden;
 }
 
 /* The search box owns the middle of the bar and its dropdown hangs from it. */
@@ -434,9 +435,65 @@
   cursor: default;
 }
 
+/* Narrow screens. Two things break a single-row header: the heading paints
+   over the search box once flexbox has shrunk it to nothing (fixed by the
+   `overflow: hidden` above), and the tools do not shrink at all, so below
+   roughly 470px the row is wider than the viewport and the last button falls
+   off the right edge.
+
+   So: under 900px the crumb goes and the section title stays - the title is
+   what tells a reader where they are, the track name is not - and under 640px
+   the bar wraps, with the search on its own row.
+
+   A wrapped bar cannot keep a declared height - at the largest text scale the
+   tools alone are wider than the viewport and need a third row - and
+   `.section-tabs` sticks to `var(--header-height)`, so a header of measured
+   height would slide the tab strip underneath itself. Under 640px the header
+   therefore stops being sticky and the tab strip takes the top of the viewport
+   instead: the strip is what a reader reaches for mid-section, the header is
+   what they scroll back up for, and the coupling between the two disappears. */
 @media (max-width: 900px) {
-  .header-heading h2 { display: none; }
+  .header-crumb { display: none; }
   .text-scale-value { display: none; }
+}
+
+@media (max-width: 640px) {
+  .app-header {
+    position: static;
+    height: auto;
+    min-height: var(--header-height);
+    flex-wrap: wrap;
+    align-content: center;
+    row-gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+  }
+  /* A flex line breaks on the *hypothetical* size, so the basis decides the
+     wrap: at `auto` the full section title pushes the tools onto their own row
+     immediately, at 0 the tools take the whole row and squeeze the title to
+     nothing. 5rem asks for a readable stub of the title and gives the tools
+     their own row only once they genuinely cannot share one - which is what
+     happens as the text scale climbs. */
+  .header-heading { flex: 1 1 5rem; }
+  /* The tools are a shrink-to-fit flex container, so they measure at
+     max-content and `flex-wrap` alone never fires. Letting them shrink is what
+     makes the wrap reachable, and without it the last button hangs off the
+     edge on a 320px screen at the larger text scales. */
+  .header-tools {
+    order: 1;
+    margin-left: auto;
+    flex-shrink: 1;
+    min-width: 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    row-gap: 0.375rem;
+  }
+  .header-search {
+    order: 2;
+    flex: 1 0 100%;
+    max-width: none;
+    margin-left: 0;
+  }
+  .section-tabs { top: 0; }
 }
 
 .header-crumb {
@@ -444,6 +501,8 @@
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .section-body {
