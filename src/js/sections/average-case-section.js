@@ -25,12 +25,12 @@
     root.jQuery('#' + SECTION_ID + '-content').html(app.shell.render({
       sectionId: SECTION_ID,
       orientation: [
-        'The expected number of comparisons in randomised quicksort is derived without touching a ' +
-          'recurrence: for each pair of elements, write down the probability that they are ever ' +
-          'compared, then add the probabilities up. Linearity of expectation does the rest, and it ' +
-          'does not care that the events are dependent.',
+        '**The expected number of comparisons in randomised quicksort is derived without ' +
+          'touching a recurrence.** For each pair of elements, write down the probability that ' +
+          'they are ever compared, then add the probabilities up. Linearity of expectation does ' +
+          'the rest, and it does not care that the events are dependent.',
         'Two elements whose ranks differ by g are compared exactly when one of them is chosen as ' +
-          'pivot before any of the g−1 elements between them, which happens with probability ' +
+          'pivot before any of the g−1 elements between them. That happens with probability ' +
           '2/(g+1). Summing over every pair gives the exact expectation shown below.',
         'Then run the experiment. The measured mean should sit on the closed form; the spread is ' +
           'what tells you how often a single run will be far from it.'
@@ -45,9 +45,9 @@
           '    C["Arbitrary input,<br/>randomised algorithm"] --> D["Expected cost:<br/>holds for every input,<br/>over your own randomness"]'
         ].join('\n')
       },
-      insight: '"Average case" silently assumes a distribution over inputs that your adversary — or ' +
-        'just your production traffic — may not honour. Randomising the algorithm makes the ' +
-        'guarantee hold for every input, and that is why quicksort chooses a random pivot.'
+      insight: '"Average case" silently assumes a distribution over inputs, and your adversary ' +
+        '— or just your production traffic — may not honour it. Randomising the algorithm makes ' +
+        'the guarantee hold for every input. That is why quicksort chooses a random pivot.'
     }));
 
     app.shell.mount({ sectionId: SECTION_ID, app: app });

@@ -530,15 +530,19 @@
         plain: 'A 0/1 variable for "did this event happen". Summing them turns counting into probability.',
         formal: 'X = ΣXᵢⱼ, E[Xᵢⱼ] = P(event)',
         readAs: 'X is the total, built by adding up one 0-or-1 variable per possible occurrence. ' +
-          'Because each of those is only ever 0 or 1, its long-run average is exactly the ' +
-          'probability that its event happens — which is what P(event) denotes.',
-        detail: 'An indicator is 1 when its event happens and 0 otherwise, which makes its ' +
-          'expectation exactly the probability of the event — the bridge that turns a counting ' +
-          'problem into a probability problem. The technique is to write the quantity you care about ' +
-          'as a sum of indicators, one per possible occurrence, then take expectations term by term. ' +
+          'Each of those is only ever 0 or 1, so its long-run average is exactly the probability ' +
+          'that its event happens. That is what P(event) denotes.',
+        detail: [
+          'An indicator is 1 when its event happens and 0 otherwise. That makes its expectation ' +
+            'exactly the probability of the event — the bridge that turns a counting problem into ' +
+            'a probability problem.',
+          'The technique is to write the quantity you care about as a sum of indicators, one per ' +
+            'possible occurrence, then take expectations term by term.',
           'For quicksort you define Xᵢⱼ = 1 when the i-th and j-th smallest elements are ever ' +
-          'compared, and the total comparison count becomes a double sum. The hard part of the ' +
-          'analysis then reduces to one local question: what is the probability of a single event?',
+            'compared, and the total comparison count becomes a double sum. The hard part of the ' +
+            'analysis then reduces to one local question: what is the probability of a single ' +
+            'event?'
+        ],
         example: 'Xᵢⱼ = 1 when quicksort ever compares the i-th and j-th smallest.'
       },
       {
@@ -555,76 +559,90 @@
         },
         plain: 'Expectations add even when the events depend on each other. The most useful fact in the subject.',
         formal: 'E[X + Y] = E[X] + E[Y], always',
-        readAs: 'The average of a sum is the sum of the averages, with no conditions attached — the ' +
+        readAs: 'The average of a sum is the sum of the averages, with no conditions attached. The ' +
           'two quantities may be as tangled up with one another as you like.',
-        detail: 'E[X + Y] = E[X] + E[Y] holds with no independence assumption whatsoever, which is ' +
-          'what makes the indicator technique work on problems that are hopelessly tangled. In ' +
-          'quicksort, whether elements 3 and 7 get compared is strongly dependent on which pivots ' +
-          'were chosen earlier and therefore on nearly every other indicator — and none of that ' +
-          'matters, because the expectations still add exactly. Compare the situation for variance ' +
-          'or for E[XY], which need independence and fail loudly without it. When an analysis looks ' +
-          'intractable because everything depends on everything, linearity is usually the way in.',
+        detail: [
+          'E[X + Y] = E[X] + E[Y] holds with no independence assumption whatsoever. That is what ' +
+            'makes the indicator technique work on problems that are hopelessly tangled.',
+          'In quicksort, whether elements 3 and 7 get compared depends strongly on which pivots ' +
+            'were chosen earlier, and therefore on nearly every other indicator. None of that ' +
+            'matters, because the expectations still add exactly.',
+          'Compare the situation for variance, or for E[XY]. Those need independence and fail ' +
+            'loudly without it. When an analysis looks intractable because everything depends on ' +
+            'everything, linearity is usually the way in.'
+        ],
         example: 'Quicksort pairs are highly dependent; the sum is still exact.'
       },
       {
         term: 'Expected comparisons',
         plain: 'Randomised quicksort compares two elements only if one is chosen as pivot before everything between them.',
         formal: 'E[X] = Σ_{i<j} 2/(j−i+1) ≈ 2n ln n',
-        readAs: 'Add up 2/(j − i + 1) over every pair of ranks i and j where i comes before j — that ' +
-          'restriction is what the small print under the Σ says — and the total works out at roughly ' +
+        readAs: 'Add up 2/(j − i + 1) over every pair of ranks i and j where i comes before j. That ' +
+          'restriction is what the small print under the Σ says. The total works out at roughly ' +
           '2n ln n.',
-        detail: 'Consider the j − i + 1 elements ranked between i and j inclusive. The first of them ' +
-          'chosen as a pivot decides everything: if it is i or j the two are compared, and if it is ' +
-          'any of the ones between, they are split apart and never compared at all. Every one of ' +
-          'those elements is equally likely to be picked first, so the probability is exactly ' +
-          '2/(j − i + 1) — no conditioning on the rest of the run required. Summing over all pairs ' +
-          'gives a harmonic series — 1 + 1/2 + 1/3 + … , whose total grows like ln n — and the ' +
-          'classic ≈ 2n ln n ≈ 1.39 n log₂ n, which is about 39% more ' +
-          'comparisons than the information-theoretic floor.',
+        detail: [
+          'Consider the j − i + 1 elements ranked between i and j inclusive. The first of them ' +
+            'chosen as a pivot decides everything. If it is i or j the two are compared. If it is ' +
+            'any of the ones between, they are split apart and never compared at all.',
+          'Every one of those elements is equally likely to be picked first, so the probability is ' +
+            'exactly 2/(j − i + 1). No conditioning on the rest of the run is required.',
+          'Summing over all pairs gives a harmonic series — 1 + 1/2 + 1/3 + …, whose total grows ' +
+            'like ln n. The classic result is ≈ 2n ln n ≈ 1.39 n log₂ n, which is about 39% more ' +
+            'comparisons than the information-theoretic floor.'
+        ],
         example: 'At n = 200 that is about 2 000 comparisons.'
       },
       {
         term: 'Average case versus randomised',
         plain: 'One assumes the input is random; the other makes its own randomness and works for every input.',
         formal: 'input distribution vs algorithmic coin',
-        detail: 'An average-case bound is conditional on the inputs behaving, and real inputs are ' +
-          'notoriously already sorted, reverse sorted or full of duplicates — so quicksort with a ' +
-          'fixed pivot has a perfectly good average case and degrades to Θ(n²) on the file you were ' +
-          'handed. A randomised algorithm moves the randomness inside: the pivot is chosen by a coin ' +
-          'the input cannot see, so the expectation holds for every input, and the only way to get a ' +
-          'bad run is to be unlucky rather than to be attacked. The distinction is a security ' +
-          'property as much as a performance one, which is the same argument that motivates ' +
-          'universal hashing.',
+        detail: [
+          'An average-case bound is conditional on the inputs behaving, and real inputs are ' +
+            'notoriously already sorted, reverse sorted or full of duplicates. So quicksort with a ' +
+            'fixed pivot has a perfectly good average case, and degrades to Θ(n²) on the file you ' +
+            'were handed.',
+          'A randomised algorithm moves the randomness inside. The pivot is chosen by a coin the ' +
+            'input cannot see, so the expectation holds for every input. The only way to get a bad ' +
+            'run is to be unlucky, rather than to be attacked.',
+          'The distinction is a security property as much as a performance one. It is the same ' +
+            'argument that motivates universal hashing.'
+        ],
         example: 'Sorted input is worst case for a fixed pivot and ordinary for a random one.'
       },
       {
         term: 'Concentration',
         plain: 'How rarely a run strays far from the expectation. Without it, an expectation says little about one run.',
         formal: 'Markov, Chebyshev, Chernoff',
-        readAs: 'Three named inequalities, in rising order of strength and of what each demands: ' +
-          'Markov needs only the average, Chebyshev also needs the spread, and Chernoff needs the ' +
+        readAs: 'Three named inequalities, in rising order of strength and of what each demands. ' +
+          'Markov needs only the average. Chebyshev also needs the spread. Chernoff needs the ' +
           'parts being added up to be independent of one another.',
-        detail: 'An expectation is one number summarising a distribution, and on its own it does not ' +
-          'promise that any particular run lands near it — a variable that is 0 almost always and ' +
-          'enormous occasionally can have a comfortable mean. Concentration results supply the ' +
-          'missing half by bounding how much probability mass sits far from the mean. This is why ' +
-          'randomised quicksort is trusted in practice: not merely because its expected cost is ' +
-          '2n ln n, but because the probability of exceeding twice that falls off so sharply that ' +
-          'the bad case never appears at realistic n. An expectation with no concentration behind it ' +
-          'is a planning figure, not a guarantee.',
+        detail: [
+          'An expectation is one number summarising a distribution, and on its own it does not ' +
+            'promise that any particular run lands near it. A variable that is 0 almost always and ' +
+            'enormous occasionally can have a comfortable mean.',
+          'Concentration results supply the missing half, by bounding how much probability mass ' +
+            'sits far from the mean.',
+          'This is why randomised quicksort is trusted in practice, and not merely because its ' +
+            'expected cost is 2n ln n. The probability of exceeding twice that falls off so ' +
+            'sharply that the bad case never appears at realistic n. An expectation with no ' +
+            'concentration behind it is a planning figure, not a guarantee.'
+        ],
         example: 'Quicksort exceeds twice its expected cost vanishingly rarely.'
       },
       {
         term: 'Tail bound',
         plain: 'A ceiling on how often a run exceeds a threshold. What it costs is what you have to know about the variable.',
         formal: 'Markov needs the mean; Chebyshev needs the variance; Chernoff needs independence',
-        detail: 'The three standard tail bounds are priced by how much you know. Markov needs only a ' +
-          'non-negative mean and gives the weakest answer; Chebyshev needs the variance and squares ' +
-          'the improvement; Chernoff needs independent summands and gives an exponential decay, ' +
-          'which is what turns "unlikely" into "will not happen". Applying the strongest one you can ' +
-          'justify is the whole skill, and applying one you cannot — Chernoff on dependent variables ' +
-          '— produces confident, wrong numbers. On the coupon collector at n = 100 the same threshold ' +
-          'is bounded at 68% by Markov, 28% by Chebyshev and 5% by a union bound.',
+        detail: [
+          'The three standard tail bounds are priced by how much you know. Markov needs only a ' +
+            'non-negative mean and gives the weakest answer. Chebyshev needs the variance and ' +
+            'squares the improvement. Chernoff needs independent summands and gives an exponential ' +
+            'decay, which is what turns "unlikely" into "will not happen".',
+          'Applying the strongest one you can justify is the whole skill. Applying one you cannot ' +
+            '— Chernoff on dependent variables — produces confident, wrong numbers.',
+          'On the coupon collector at n = 100 the same threshold is bounded at 68% by Markov, 28% ' +
+            'by Chebyshev and 5% by a union bound.'
+        ],
         example: 'On the coupon collector at n = 100, Markov gives 68%, Chebyshev 28% and a union bound 5% — for the same threshold.'
       },
       {
@@ -634,15 +652,18 @@
         readAs: 'The chance that at least one of the bad events happens is at most the sum of their ' +
           'individual chances. The ∪ is "or" taken across the whole list, and P(…) is "the ' +
           'probability of".',
-        detail: 'The union bound throws away all information about how the bad events overlap and ' +
-          'simply adds their probabilities, which is why it needs no independence and never fails. ' +
+        detail: [
+          'The union bound throws away all information about how the bad events overlap and simply ' +
+            'adds their probabilities. That is why it needs no independence and never fails.',
           'It is loose exactly when the events overlap heavily, and tight when they are nearly ' +
-          'disjoint — which describes most failure analyses, where each bad event is individually ' +
-          'rare. The standard move is to make each of n bad events improbable enough that n times ' +
-          'that probability is still small: for the coupon collector, running n·(ln n + c) draws ' +
-          'leaves each coupon unseen with probability at most e^(−c)/n — e being the constant ' +
-          '2.718…, so e^(−c) shrinks fast as c grows — and the chance that any is missing is ' +
-          'therefore at most e^(−c).',
+            'disjoint. Most failure analyses are the second case, because each bad event is ' +
+            'individually rare.',
+          'The standard move is to make each of n bad events improbable enough that n times that ' +
+            'probability is still small. For the coupon collector, running n·(ln n + c) draws ' +
+            'leaves each coupon unseen with probability at most e^(−c)/n. Here e is the constant ' +
+            '2.718…, so e^(−c) shrinks fast as c grows, and the chance that any coupon is missing ' +
+            'is at most e^(−c).'
+        ],
         example: 'n coupons each unseen with probability 1/(n·e^c) gives P(not done) ≤ e^(−c).'
       },
       {
@@ -650,16 +671,19 @@
         plain: 'For a skewed distribution the expectation can sit where almost no run lands.',
         formal: 'E[X] ≠ median(X) whenever the distribution is skewed',
         readAs: 'The average and the middle value are two different numbers whenever the outcomes ' +
-          'are lopsided: a long tail on one side drags the average towards it and leaves the middle ' +
-          'roughly where it was.',
-        detail: 'Reporting an expectation invites the reader to picture runs clustered around it, ' +
-          'which is only true for a symmetric, tightly concentrated variable. Coupon collection at ' +
-          'n = 100 has a mean of 518.7 draws and a standard deviation of 128.3 — a quarter of the ' +
-          'mean — with a long right tail, so "about 519" describes the centre of gravity rather than ' +
-          'a typical outcome. The practical consequence is that capacity planned on a mean is ' +
-          'planned to be wrong roughly half the time, and the more skewed the distribution the worse ' +
-          'the error. Quote a percentile alongside the mean, or quote the spread, and the shape ' +
-          'stops being invisible.',
+          'are lopsided. A long tail on one side drags the average towards it, and leaves the ' +
+          'middle roughly where it was.',
+        detail: [
+          'Reporting an expectation invites the reader to picture runs clustered around it. That ' +
+            'is only true for a symmetric, tightly concentrated variable.',
+          'Coupon collection at n = 100 has a mean of 518.7 draws and a standard deviation of ' +
+            '128.3 — a quarter of the mean — with a long right tail. So "about 519" describes the ' +
+            'centre of gravity rather than a typical outcome.',
+          'The practical consequence is that capacity planned on a mean is planned to be wrong ' +
+            'roughly half the time, and the more skewed the distribution the worse the error. ' +
+            'Quote a percentile alongside the mean, or quote the spread, and the shape stops being ' +
+            'invisible.'
+        ],
         example: 'Coupon collection has mean 518.7 and a standard deviation of 128.3 — a quarter of the mean.'
       }
     ],
