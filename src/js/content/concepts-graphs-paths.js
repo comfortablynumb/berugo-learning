@@ -16,18 +16,21 @@
             '    B -->|no| D["a cycle offered another way round"]',
             '    C --> E["in a network, a bridge is<br/>a single point of failure"]'
           ].join('\n'),
-          caption: 'An edge is a bridge exactly when it lies on no cycle, which is why a depth-first search that tracks how far back a subtree reaches can find them all in one pass.'
+          caption: 'An edge is a bridge exactly when it lies on no cycle. That is why one depth-first search, tracking how far back each subtree reaches, finds them all in a single pass.'
         },
         plain: 'Remove it and the number of connected components goes up.',
         formal: 'e is a bridge iff components(G − e) > components(G); equivalently, e is on no cycle',
-        readAs: 'An edge is a bridge exactly when removing it breaks the graph into more pieces — which is ' +
-          'the same as saying it lies on no cycle, because a cycle would provide a way round.',
-        detail: 'The cycle characterisation is the one to hold on to, because it says immediately what ' +
-          'the fix is: an edge on no cycle has no alternative route, and adding any second route ' +
-          'removes it from the list. That is what redundancy purchases, and it is why the answer to ' +
-          '"this link is a single point of failure" is always another link rather than a bigger one. ' +
-          'The definition by removal is also a perfectly good oracle at small sizes, and this section ' +
-          'checks every claim against it.',
+        readAs: 'An edge is a bridge exactly when removing it breaks the graph into more pieces. ' +
+          'That is the same as saying it lies on no cycle, because a cycle would offer a way round.',
+        detail: [
+          'The cycle characterisation is the one to hold on to, because it says immediately what the ' +
+            'fix is. An edge on no cycle has no alternative route, and adding any second route ' +
+            'removes it from the list.',
+          'That is what redundancy purchases. It is why the answer to "this link is a single point ' +
+            'of failure" is always another link rather than a bigger one.',
+          'The definition by removal is also a perfectly good oracle at small sizes, and this ' +
+            'section checks every claim against it.'
+        ],
         example: 'A barbell of 40 nodes has exactly one bridge — the link joining the two halves — and ' +
           'a path of 40 has 39.'
       },
@@ -35,12 +38,16 @@
         term: 'An articulation point is the same idea one dimension up',
         plain: 'A vertex whose removal disconnects the graph.',
         formal: 'v is a cut vertex iff components(G − v) > components(G); the root of the DFS tree iff it has >1 child',
-        detail: 'Edge redundancy and vertex redundancy are different purchases and the demo shows the ' +
-          'difference directly: adding a second link across the bridge in a barbell removes the bridge ' +
-          'and leaves both articulation points exactly where they were, because the endpoints of that ' +
-          'link are still the only way through. Surviving any one *cable* cut and surviving any one ' +
-          '*router* failure are different requirements with different price tags, and conflating them ' +
-          'is how a redundancy budget gets spent on the wrong thing.',
+        detail: [
+          'Edge redundancy and vertex redundancy are different purchases, and the demo shows the ' +
+            'difference directly.',
+          'Adding a second link across the bridge in a barbell removes the bridge. It leaves both ' +
+            'articulation points exactly where they were, because the endpoints of that link are ' +
+            'still the only way through.',
+          'Surviving any one *cable* cut and surviving any one *router* failure are different ' +
+            'requirements with different price tags. Conflating them is how a redundancy budget ' +
+            'gets spent on the wrong thing.'
+        ],
         example: 'One redundant link takes the barbell from 1 bridge to 0 and leaves its 2 articulation ' +
           'points untouched.'
       },
@@ -50,13 +57,17 @@
         formal: 'low[v] = min(disc[v], disc of ancestors reached by back edges, low of children)',
         readAs: 'The earliest-discovered vertex reachable from v\'s subtree without using the edge that ' +
           'entered it. Comparing that against the parent\'s discovery number is the whole bridge test.',
-        detail: 'A depth-first walk numbers vertices as it discovers them, and `low[v]` records the ' +
-          'smallest discovery number the subtree rooted at v can reach using tree edges and at most ' +
-          'one back edge. The tree edge (u, v) is a bridge exactly when `low[v] > disc[u]` — the ' +
-          'subtree below v has no other way out — and u is a cut vertex when some child satisfies ' +
-          '`low[child] >= disc[u]`, the difference between the two comparisons being whether reaching ' +
-          'u itself counts as escaping. Both fall out of one traversal, which is why this is a linear ' +
-          'algorithm rather than an m-fold repetition of a connectivity check.',
+        detail: [
+          'A depth-first walk numbers vertices as it discovers them. The value `low[v]` records the ' +
+            'smallest discovery number the subtree rooted at v can reach, using tree edges and at ' +
+            'most one back edge.',
+          'The tree edge (u, v) is a bridge exactly when `low[v] > disc[u]`, because the subtree ' +
+            'below v then has no other way out. And u is a cut vertex when some child satisfies ' +
+            '`low[child] >= disc[u]`. The difference between the two comparisons is whether ' +
+            'reaching u itself counts as escaping.',
+          'Both fall out of one traversal, which is why this is a linear algorithm rather than an ' +
+            'm-fold repetition of a connectivity check.'
+        ],
         example: 'Both the bridge list and the cut-vertex list come from one walk of the 40-node ' +
           'network, and both match the removal oracle.'
       },
@@ -64,13 +75,16 @@
         term: 'Tracking the parent vertex is the classic bug',
         plain: 'Skip the edge you came in on by its id, not by which vertex it led to.',
         formal: 'a second parallel edge to the parent is a genuine escape route; skipping by vertex hides it',
-        detail: 'This is the reason the section exists. An undirected walk meets its own incoming edge ' +
-          'again from the other end and has to ignore that sighting; the tempting test — "is this ' +
-          'neighbour the vertex I came from?" — also ignores every *other* edge to that vertex, and ' +
-          'another edge to that vertex is exactly what stops the first one being a bridge. The result ' +
-          'is a bridge reported where none exists, on every multigraph, silently. Three lines of ' +
-          'difference, and it only shows up on inputs with redundant links, which are precisely the ' +
-          'inputs a network engineer cares about.',
+        detail: [
+          'This is the reason the section exists. An undirected walk meets its own incoming edge ' +
+            'again from the other end, and it has to ignore that second sighting.',
+          'The tempting test is "is this neighbour the vertex I came from?". That test also ignores ' +
+            'every *other* edge to that vertex, and another edge to that vertex is exactly what ' +
+            'stops the first one being a bridge.',
+          'The result is a bridge reported where none exists, on every multigraph, silently. Three ' +
+            'lines of difference, and it only shows up on inputs with redundant links. Those are ' +
+            'precisely the inputs a network engineer cares about.'
+        ],
         example: 'On three nodes with 0 and 1 doubled, the edge-id version reports only 1–2 and the ' +
           'vertex version reports 0–1 as well.'
       },
@@ -78,11 +92,14 @@
         term: 'Biconnected components are the regions with no internal weak point',
         plain: 'Maximal chunks in which no single vertex removal disconnects anything.',
         formal: 'equivalence classes of edges under "lie on a common simple cycle"; blocks meet only at cut vertices',
-        detail: 'Blocks are what makes the analysis actionable rather than merely alarming. A list of ' +
-          'cut vertices says where the graph is fragile; the block decomposition says what each one ' +
-          'costs, because it names the regions that fall apart when a given cut vertex goes. Note that ' +
-          'the classes are of *edges*, not vertices — a cut vertex belongs to every block it joins, ' +
-          'which is precisely what makes it a cut vertex.',
+        detail: [
+          'Blocks are what makes the analysis actionable rather than merely alarming.',
+          'A list of cut vertices says where the graph is fragile. The block decomposition says ' +
+            'what each one costs, because it names the regions that fall apart when a given cut ' +
+            'vertex goes.',
+          'Note that the classes are of *edges*, not vertices. A cut vertex belongs to every block ' +
+            'it joins, which is precisely what makes it a cut vertex.'
+        ],
         example: 'The default barbell decomposes into 3 blocks: the two cliques and the bridge between ' +
           'them, which is a block of one edge.'
       },
@@ -90,11 +107,15 @@
         term: 'A block of a single edge is a bridge',
         plain: 'The two ideas are the same thing seen from two directions.',
         formal: 'a biconnected component with exactly one edge has no cycle through it, which is the bridge condition',
-        detail: 'Noticing this saves writing the second algorithm. Bridges are not a separate ' +
-          'computation bolted onto biconnectivity; they are its degenerate case, and an implementation ' +
-          'that produces the block decomposition already has them. It also gives a free consistency ' +
-          'check that is worth keeping in tests: the number of single-edge blocks must equal the number ' +
-          'of bridges, and if it does not, one of the two lowlink comparisons is wrong.',
+        detail: [
+          'Noticing this saves writing the second algorithm.',
+          'Bridges are not a separate computation bolted onto biconnectivity. They are its ' +
+            'degenerate case, and an implementation that produces the block decomposition already ' +
+            'has them.',
+          'It also gives a free consistency check worth keeping in tests: the number of single-edge ' +
+            'blocks must equal the number of bridges. If it does not, one of the two lowlink ' +
+            'comparisons is wrong.'
+        ],
         example: 'The barbell reports 1 bridge and 3 blocks, one of which is the single bridge edge.'
       },
       {
@@ -103,11 +124,14 @@
         formal: 'nodes = blocks + cut vertices; edges = memberships; nodes − components = edges',
         readAs: 'The block-cut tree has one node per biconnected block and one per cut vertex, joined by ' +
           'membership. The last equation is just the statement that it is a forest.',
-        detail: 'The block-cut tree is the structure that answers "if this vertex fails, what is ' +
-          'stranded and how much of it" — you delete the cut vertex from the tree and read off the ' +
-          'pieces. It is always a forest, which is a theorem, and this milestone\'s habit is to verify ' +
-          'such theorems by counting rather than to assume them: a broken decomposition produces a ' +
-          'block-cut structure with a cycle in it, and no other check in the pipeline would notice.',
+        detail: [
+          'The block-cut tree answers the question "if this vertex fails, what is stranded and how ' +
+            'much of it". You delete the cut vertex from the tree and read off the pieces.',
+          'It is always a forest, which is a theorem. This milestone\'s habit is to verify such ' +
+            'theorems by counting rather than to assume them.',
+          'A broken decomposition produces a block-cut structure with a cycle in it, and no other ' +
+            'check in the pipeline would notice.'
+        ],
         example: '3 blocks plus 2 cut vertices give 5 nodes and 4 edges, and the forest identity is ' +
           'checked rather than quoted.'
       },
@@ -115,12 +139,15 @@
         term: 'A grid has no single point of failure and a path is nothing else',
         plain: 'The generator you test on decides whether you ever see the interesting case.',
         formal: 'grid: 0 bridges, 0 cut vertices. Path: n − 1 bridges, n − 2 cut vertices',
-        detail: 'Random graphs at any reasonable density have almost no bridges, so a bridge finder ' +
-          'tested only on random inputs is tested on the case where the answer is empty. The shape ' +
-          'selector exists for that reason: a path is 100% bridges and 95% cut vertices, a star is ' +
-          'every edge a bridge, a grid is none of either, and a barbell is the one interesting bridge ' +
-          'surrounded by dense noise. Choosing generators that make the answer non-trivial is as much ' +
-          'a part of testing as choosing assertions.',
+        detail: [
+          'Random graphs at any reasonable density have almost no bridges. A bridge finder tested ' +
+            'only on random inputs is tested on the case where the answer is empty.',
+          'The shape selector exists for that reason. A path is 100% bridges and 95% cut vertices, ' +
+            'a star is every edge a bridge, and a grid is neither. A barbell is the one interesting ' +
+            'bridge surrounded by dense noise.',
+          'Choosing generators that make the answer non-trivial is as much a part of testing as ' +
+            'choosing assertions.'
+        ],
         example: 'A 40-node path reports 39 bridges and 38 cut vertices; a grid of the same size ' +
           'reports none of either.'
       }

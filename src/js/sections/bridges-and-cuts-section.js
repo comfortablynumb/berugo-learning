@@ -48,41 +48,49 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**A bridge is an edge whose removal increases the number of connected components**, and an ' +
+        '**articulation point** is a vertex with the same property. In a network they are the single ' +
+        'points of failure.',
+      'The whole graph decomposes into **biconnected blocks** — maximal regions with no such point ' +
+        'inside them — joined at the cut vertices.',
+      'Both fall out of one depth-first walk and one number per vertex. That number is `low`: the ' +
+        'earliest discovery time reachable from this subtree through tree edges and *at most one* ' +
+        'back edge.',
+      'A tree edge (u, v) is a bridge exactly when `low[v] > discovery[u]`, because the subtree ' +
+        'below v then has no other way out. A vertex is a cut vertex when some child satisfies ' +
+        '`low[child] >= discovery[u]`. The root is a special case: it is a cut vertex exactly when ' +
+        'it has more than one DFS child.',
+      '**The lowlink here is not Tarjan\'s SCC lowlink**, and conflating them is the other classic ' +
+        'error. For strongly connected components, lowlink may follow an edge to any vertex still ' +
+        'on the stack. Here it may follow only edges to an already-discovered *ancestor*, because ' +
+        'the question is whether the subtree has another route upwards.',
+      '**The parallel-edge case is the bug this section is about.** An undirected walk sees the ' +
+        'edge it arrived on twice and must skip the second sighting. Skipping it by asking "is this ' +
+        'neighbour my parent?" also skips a genuine second link to that parent. That second link is ' +
+        'precisely what stops the edge being a bridge.',
+      'Skip by **edge id** instead. The redundancy slider adds parallel links, and everything on ' +
+        'this page is checked against a remove-each-edge-and-recount oracle, so the difference is ' +
+        'measured rather than argued.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'A **bridge** is an edge whose removal increases the number of connected components; an ' +
-          '**articulation point** is a vertex with the same property. In a network they are the single ' +
-          'points of failure, and the whole graph decomposes into **biconnected blocks** - maximal regions ' +
-          'with no such point inside them - joined at the cut vertices.',
-        'Both fall out of one depth-first walk and one number per vertex: `low`, the earliest discovery ' +
-          'time reachable from this subtree through tree edges and *at most one* back edge. A tree edge ' +
-          '(u, v) is a bridge exactly when `low[v] > discovery[u]` - the subtree below v has no other way ' +
-          'out. A vertex is a cut vertex when some child satisfies `low[child] >= discovery[u]`, with the ' +
-          'root a special case: it is a cut vertex exactly when it has more than one DFS child.',
-        '**The lowlink here is not Tarjan\'s SCC lowlink**, and conflating them is the other classic ' +
-          'error. For strongly connected components, lowlink may follow an edge to any vertex still on the ' +
-          'stack; here it may follow only edges to an already-discovered *ancestor*, because the question ' +
-          'is whether the subtree has another route upwards.',
-        '**The parallel-edge case is the bug this section is about.** An undirected walk sees the edge it ' +
-          'arrived on twice and must skip the second sighting - but skipping it by asking "is this ' +
-          'neighbour my parent?" also skips a genuine second link to that same parent, which is precisely ' +
-          'what stops the edge being a bridge. Skip by **edge id** instead. The redundancy slider adds ' +
-          'parallel links, and everything on this page is checked against a remove-each-edge-and-recount ' +
-          'oracle so the difference is measured rather than argued.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — single points of failure, and the redundancy that removes them',
         markup: root.BridgesAndCutsTemplate.render()
       },
       diagram: diagram(),
-      insight: 'The reason to compute bridges on a real network is not the list — it is the block-cut ' +
+      insight: 'The reason to compute bridges on a real network is not the list. It is the block-cut ' +
         'tree, which tells you what each single point of failure actually costs. A bridge whose removal ' +
         'strands two nodes is a different problem from one that strands half the estate, and only the ' +
-        'decomposition distinguishes them. The engineering move that follows is always the same and is ' +
-        'visible on this page: one extra independent link across a bridge removes it entirely, and the ' +
-        'blocks on either side merge into one.'
+        'decomposition distinguishes them. The engineering move that follows is always the same, and it ' +
+        'is visible on this page. One extra independent link across a bridge removes it entirely, and ' +
+        'the blocks on either side merge into one.'
     };
   }
 
