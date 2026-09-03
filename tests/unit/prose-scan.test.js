@@ -80,3 +80,39 @@ test('a decimal point does not end a sentence', function () {
 test('wordCount ignores repeated whitespace', function () {
   assert.strictEqual(scan.wordCount('  three  words here '), 3);
 });
+
+test('an orientation lifted into its own function is still scanned', function () {
+  const source = [
+    '(function (root) {',
+    '  function orientation() {',
+    '    return [',
+    "      'First paragraph.',",
+    "      'Second ' +",
+    "        'paragraph.'",
+    '    ];',
+    '  }',
+    '',
+    '  function config() {',
+    '    return { orientation: orientation(), insight: \'Closing line.\' };',
+    '  }',
+    '}(window));'
+  ].join('\n');
+
+  assert.deepStrictEqual(scan.proseFor(source, 'orientation'),
+    ['First paragraph.', 'Second paragraph.']);
+  assert.deepStrictEqual(scan.proseFor(source, 'insight'), ['Closing line.']);
+});
+
+test('an inline orientation array is preferred over any function of that name', function () {
+  const source = [
+    '  function config() {',
+    '    return {',
+    '      orientation: [',
+    "        'Inline paragraph.'",
+    '      ]',
+    '    };',
+    '  }'
+  ].join('\n');
+
+  assert.deepStrictEqual(scan.proseFor(source, 'orientation'), ['Inline paragraph.']);
+});

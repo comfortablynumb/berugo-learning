@@ -68,11 +68,35 @@ function valuesFor(source, key) {
   return stringsIn(valueAt(source, at + key.length + 1));
 }
 
+/**
+ * Prose lifted out of `config()` into its own `orientation()` or `insight()`
+ * function - which half the curriculum does, because a `config()` carrying six
+ * paragraphs is over the 50-line limit. The config site then reads
+ * `orientation: orientation()`, which holds no strings at all, so a scan that
+ * stopped at the key would report those sections as having no orientation and
+ * quietly pass them.
+ */
+function functionProse(source, key) {
+  const at = source.indexOf('\n  function ' + key + '() {');
+
+  if (at < 0) return [];
+  const open = source.indexOf('return ', at);
+  const end = source.indexOf('\n  }', at);
+
+  if (open < 0 || end < 0 || open > end) return [];
+  return stringsIn(valueAt(source, open + 'return '.length));
+}
+
+function proseFor(source, key) {
+  const inline = valuesFor(source, key);
+  return inline.length ? inline : functionProse(source, key);
+}
+
 /** The prose a section passes to `shell.render`: orientation, then insight. */
 function configProse(file) {
   if (!fs.existsSync(file)) return [];
   const source = fs.readFileSync(file, 'utf8');
-  return valuesFor(source, 'orientation').concat(valuesFor(source, 'insight'));
+  return proseFor(source, 'orientation').concat(proseFor(source, 'insight'));
 }
 
 /** `detail` is one paragraph or several; both arrive here as an array. */
@@ -106,6 +130,7 @@ function wordCount(sentence) {
 
 module.exports = {
   configProse: configProse,
+  proseFor: proseFor,
   paragraphsOf: paragraphsOf,
   sentences: sentences,
   wordCount: wordCount,
