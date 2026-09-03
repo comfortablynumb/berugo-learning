@@ -177,14 +177,18 @@
         },
         plain: 'Two searches of half the size, combined by a lookup, replace one search of the full size.',
         formal: '2^n becomes 2·2^(n/2) states plus 2^(n/2)·log(2^(n/2)) work to combine',
-        readAs: 'Meet in the middle: split the input in half, enumerate each half separately, then match them ' +
-          'up. Two square-roots of the original count instead of the count itself — at n = 50, about 34 ' +
-          'million instead of 10^15.',
-        detail: 'The improvement is entirely structural: nothing is learned about the problem, and no branch ' +
-          'is pruned. Enumerating each half separately is exponentially cheaper than enumerating the whole, ' +
-          'and if the two halves can be recombined by searching one of them rather than by pairing them all, ' +
-          'the saving survives. That last clause is the condition - it needs a way to ask "what is the best ' +
-          'partner for this partial answer" in logarithmic time, which usually means sorting one side.',
+        readAs: 'Meet in the middle: split the input in half, enumerate each half separately, ' +
+          'then match them up. Two square-roots of the original count instead of the count itself ' +
+          '— at n = 50, about 34 million instead of 10^15.',
+        detail: [
+          'The improvement is entirely structural. Nothing is learned about the problem, and no ' +
+            'branch is pruned.',
+          'Enumerating each half separately is exponentially cheaper than enumerating the whole. ' +
+            'And if the two halves can be recombined by searching one of them, rather than by ' +
+            'pairing them all, the saving survives.',
+          'That last clause is the condition. It needs a way to ask "what is the best partner for ' +
+            'this partial answer" in logarithmic time, which usually means sorting one side.'
+        ],
         example: 'At n = 40 the split generates 2 097 152 states where the full enumeration would generate ' +
           '1 099 511 627 776.'
       },
@@ -201,11 +205,15 @@
         },
         plain: 'Pairing every left half with every right half is 2^n again — the point is to look up instead.',
         formal: 'sort the right-half sums, then for each left sum binary-search for the largest partner that fits',
-        detail: 'This is the part that is easy to get wrong in the design and it is where the technique ' +
-          'actually lives. Generating both halves is trivially cheaper; recombining them naively costs the ' +
-          'product of their sizes, which is exactly the original 2^n. Sorting one side and searching it makes ' +
-          'the recombination 2^(n/2)·(n/2) instead. Whether that is possible depends on the objective: it ' +
-          'works for sums because the best partner is monotone in the remaining room.',
+        detail: [
+          'This is the part that is easy to get wrong in the design, and it is where the technique ' +
+            'actually lives.',
+          'Generating both halves is trivially cheaper. Recombining them naively costs the product ' +
+            'of their sizes, which is exactly the original 2^n.',
+          'Sorting one side and searching it makes the recombination 2^(n/2)·(n/2) instead. ' +
+            'Whether that is possible depends on the objective: it works for sums, because the ' +
+            'best partner is monotone in the remaining room.'
+        ],
         example: 'Forty items: 20 969 549 binary-search probes over the sorted right half, rather than ' +
           '2^40 pairings.'
       },
@@ -213,13 +221,17 @@
         term: 'Memory is the price and it is exponential',
         plain: 'Both halves must be resident, so the technique stops near n = 50 whatever the machine.',
         formal: 'peak memory is Θ(2^(n/2)) entries; at n = 50 that is 2^25 ≈ 3.4 × 10⁷ per side',
-        readAs: 'The technique trades time for memory, and the memory is the binding constraint: 34 million ' +
-          'entries per side at n = 50, which is what actually stops you going further.',
-        detail: 'A time improvement bought with an exponential space cost has a ceiling, and stating it is ' +
-          'part of teaching the technique honestly. Each two items added multiply the memory by two, so the ' +
-          'practical limit arrives quickly and arrives as an allocation failure rather than as slowness. ' +
-          'That also makes the trade explicit for the reader: this is not a free asymptotic win, it is time ' +
-          'exchanged for space at a fixed rate.',
+        readAs: 'The technique trades time for memory, and the memory is the binding constraint. ' +
+          'At n = 50 that is 34 million entries per side, which is what actually stops you going ' +
+          'further.',
+        detail: [
+          'A time improvement bought with an exponential space cost has a ceiling, and stating it ' +
+            'is part of teaching the technique honestly.',
+          'Each two items added multiply the memory by two, so the practical limit arrives ' +
+            'quickly — and arrives as an allocation failure rather than as slowness.',
+          'That also makes the trade explicit for the reader. This is not a free asymptotic win. ' +
+            'It is time exchanged for space at a fixed rate.'
+        ],
         example: 'At n = 40 the search holds 2 097 152 partial sums at once; at n = 50 it would hold ' +
           '67 108 864.'
       },
@@ -227,13 +239,16 @@
         term: 'Extrapolate rather than saying "infeasible"',
         plain: 'Time the exhaustive search at a size that finishes and double from there.',
         formal: 'measure t(k) for a feasible k, then project t(n) = t(k)·2^(n−k)',
-        readAs: 'Time a size you can actually run, then double the estimate for every extra element. It turns ' +
-          '"this is exponential" into a number of hours.',
-        detail: 'A comparison needs two numbers, and "infeasible" is not one. Measuring an eighteen-item ' +
-          'exhaustive search takes milliseconds, and doubling from there gives a defensible projection for ' +
-          'forty items on this machine. It also keeps the claim honest in the other direction: the projection ' +
-          'shows exactly which sizes brute force would still handle, which is often larger than people ' +
-          'assume and is the reason the technique is worth exactly the sizes it is worth.',
+        readAs: 'Time a size you can actually run, then double the estimate for every extra ' +
+          'element. It turns "this is exponential" into a number of hours.',
+        detail: [
+          'A comparison needs two numbers, and "infeasible" is not one.',
+          'Measuring an eighteen-item exhaustive search takes milliseconds, and doubling from ' +
+            'there gives a defensible projection for forty items on this machine.',
+          'It also keeps the claim honest in the other direction. The projection shows exactly ' +
+            'which sizes brute force would still handle, which is often larger than people ' +
+            'assume. That is why the technique is worth exactly the sizes it is worth.'
+        ],
         example: 'An 18-item enumeration measured in the page, doubled 22 times, is the projected cost of ' +
           'the 40-item search.'
       },
@@ -241,27 +256,32 @@
         term: 'Bidirectional search',
         plain: 'Search forward from the start and backward from the goal; stop where they meet.',
         formal: 'b^d becomes b^(d/2) + b^(d/2), provided the graph can be traversed backwards',
-        readAs: 'Searching from both ends means two half-depth searches instead of one full-depth one — a ' +
-          'square root of the work. It needs the edges to be followable in reverse, which not every ' +
-          'graph allows.',
-        detail: 'The same halving, on a graph. It needs two things that are easy to overlook: predecessors ' +
-          'must be enumerable, which rules out many implicit state spaces, and the goal must be a single ' +
-          'known state rather than a predicate, because the backward frontier has to start somewhere. When ' +
-          'both hold, the improvement is dramatic and grows with the depth, since the exponent rather than ' +
-          'the base is halved.',
+        readAs: 'Searching from both ends means two half-depth searches instead of one full-depth ' +
+          'one — a square root of the work. It needs the edges to be followable in reverse, which ' +
+          'not every graph allows.',
+        detail: [
+          'The same halving, on a graph. It needs two things that are easy to overlook.',
+          'Predecessors have to be enumerable, which rules out many implicit state spaces. And the ' +
+            'goal has to be a single known state rather than a predicate, because the backward ' +
+            'frontier has to start somewhere.',
+          'When both hold, the improvement is dramatic and grows with the depth, since the ' +
+            'exponent rather than the base is halved.'
+        ],
         example: 'Branching factor 3 at depth 8: 3 281 states expanded forwards, 22 bidirectionally.'
       },
       {
         term: 'The meeting test must run at generation time',
         plain: 'Check each new node against the other side immediately, not after the level completes.',
         formal: 'on generating v from u, if v ∈ seen(other) then the answer is dist(u) + 1 + distOther(v)',
-        readAs: 'The two searches meet when one generates a node the other has already seen. The total ' +
-          'distance is what each side spent, plus the edge joining them.',
-        detail: 'Testing for a meeting only between levels finds the intersection one level late, and on an ' +
-          'odd-length shortest path that returns a distance one too large. It is a bug that passes every test ' +
-          'with an even-length answer, which is half of them, and it is the single most common defect in a ' +
-          'hand-written bidirectional search. The correct version tests as each neighbour is produced and can ' +
-          'return immediately.',
+        readAs: 'The two searches meet when one generates a node the other has already seen. The ' +
+          'total distance is what each side spent, plus the edge joining them.',
+        detail: [
+          'Testing for a meeting only between levels finds the intersection one level late. On an ' +
+            'odd-length shortest path that returns a distance one too large.',
+          'It is a bug that passes every test with an even-length answer, which is half of them, ' +
+            'and it is the single most common defect in a hand-written bidirectional search.',
+          'The correct version tests as each neighbour is produced, and can return immediately.'
+        ],
         example: 'Both the forward and bidirectional searches return distance 8 here — a disagreement would ' +
           'be exactly this bug.'
       },
@@ -269,11 +289,14 @@
         term: 'Expanding the smaller frontier',
         plain: 'Alternate sides by size, not by turn.',
         formal: 'at each step expand whichever frontier currently holds fewer nodes',
-        detail: 'Strict alternation is fine on a regular graph and poor on a real one, where the two ' +
-          'directions can have very different branching factors - a goal with one predecessor and a start ' +
-          'with fifty successors, for instance. Choosing the smaller frontier each time keeps both sides ' +
-          'balanced in work rather than in depth, which is what the b^(d/2) analysis actually assumes. It ' +
-          'costs one comparison per step.',
+        detail: [
+          'Strict alternation is fine on a regular graph and poor on a real one, where the two ' +
+            'directions can have very different branching factors. A goal with one predecessor and ' +
+            'a start with fifty successors, for instance.',
+          'Choosing the smaller frontier each time keeps both sides balanced in work rather than ' +
+            'in depth, which is what the b^(d/2) analysis actually assumes.',
+          'It costs one comparison per step.'
+        ],
         example: 'On a graph whose backward branching is 1 and forward branching is 10, alternating by turn ' +
           'gives away most of the saving.'
       },
@@ -281,15 +304,18 @@
         term: 'When the split buys nothing',
         plain: 'If the halves constrain each other, there is nothing to sort and nothing to look up.',
         formal: 'the technique needs the objective to decompose as f(left) ⊕ g(right) with ⊕ searchable',
-        readAs: 'Splitting only works if the thing you are optimising can be computed from the two halves ' +
-          'separately and then combined — and combined by an operation you can search over, such as ' +
-          'addition, rather than one you cannot.',
-        detail: 'Subset sum splits because a total is a sum of the two halves\' totals, and the best partner ' +
-          'for a given left sum is found by a single search. A problem where the halves interact - a graph ' +
-          'colouring whose edges cross the cut, a schedule where left-half choices change the right half\'s ' +
-          'feasibility - has no such decomposition, and enumerating both halves produces two sets that can ' +
-          'only be combined by trying all pairs. Recognising the difference is what makes the reflex useful ' +
-          'rather than a habit.',
+        readAs: 'Splitting only works if the thing you are optimising can be computed from the two ' +
+          'halves separately and then combined. And combined by an operation you can search over, ' +
+          'such as addition, rather than one you cannot.',
+        detail: [
+          'Subset sum splits because a total is a sum of the two halves\' totals, and the best ' +
+            'partner for a given left sum is found by a single search.',
+          'A problem where the halves interact has no such decomposition. Think of a graph ' +
+            'colouring whose edges cross the cut, or a schedule where left-half choices change ' +
+            'the right half\'s feasibility. Those leave two sets that can only be combined by ' +
+            'trying all pairs.',
+          'Recognising the difference is what makes the reflex useful rather than a habit.'
+        ],
         example: 'Subset sum splits; graph colouring across the cut does not, because a left-half colouring ' +
           'changes which right-half colourings are legal.'
       }

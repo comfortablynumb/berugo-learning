@@ -44,32 +44,38 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'Subset sum over n items is 2^n states. Split the items into two halves, enumerate each half ' +
-          'separately, sort one side, and binary-search it once for every element of the other: the cost ' +
-          'becomes 2^(n/2) · n, which at n = 40 is about a million states instead of a trillion. Nothing ' +
-          'clever happened to the problem - the technique is entirely a change of shape, and it is the ' +
-          'clearest example in this milestone of an asymptotic win with no insight into the domain at all.',
-        'The price is memory. Both halves have to be materialised, so the peak is 2 · 2^(n/2) partial sums, ' +
-          'and that is the reason the technique tops out somewhere near n = 50 whatever the machine. The ' +
-          'demo reports that number beside the state count rather than only the speedup, because the trade ' +
-          'is the technique: halving the exponent in time costs an exponential in space.',
-        'Bidirectional search is the same idea on a graph. A breadth-first search to depth d touches b^d ' +
-          'nodes; two searches of depth d/2 touch 2·b^(d/2). On a branching factor of 3 at depth 8 that is ' +
-          '3 281 states against 22. The subtlety is the meeting test: a node has to be checked against the ' +
-          'other side\'s visited set at the moment it is generated, because checking after the level ' +
-          'completes returns a distance one too large whenever the true path has odd length.'
+        '**Subset sum over n items is 2^n states.** Split the items into two halves, enumerate ' +
+          'each half separately, sort one side, and binary-search it once for every element of ' +
+          'the other. The cost becomes 2^(n/2) · n, which at n = 40 is about a million states ' +
+          'instead of a trillion.',
+        'Nothing clever happened to the problem. The technique is entirely a change of shape, and ' +
+          'it is the clearest example in this milestone of an asymptotic win with no insight into ' +
+          'the domain at all.',
+        'The price is memory. Both halves have to be materialised, so the peak is 2 · 2^(n/2) ' +
+          'partial sums. That is the reason the technique tops out somewhere near n = 50 whatever ' +
+          'the machine.',
+        'The demo reports that number beside the state count rather than only the speedup, ' +
+          'because the trade is the technique: halving the exponent in time costs an exponential ' +
+          'in space.',
+        'Bidirectional search is the same idea on a graph. A breadth-first search to depth d ' +
+          'touches b^d nodes, and two searches of depth d/2 touch 2·b^(d/2). On a branching ' +
+          'factor of 3 at depth 8 that is 3 281 states against 22.',
+        'The subtlety is the meeting test. A node has to be checked against the other side\'s ' +
+          'visited set at the moment it is generated. Checking after the level completes returns ' +
+          'a distance one too large whenever the true path has odd length.'
       ],
       demo: {
         title: 'Interactive demo — halved exponents, and what they cost in memory',
         markup: root.MeetInTheMiddleTemplate.render()
       },
       diagram: diagram(),
-      insight: 'The technique is worth knowing mostly as a reflex: when an exponential search is exactly ' +
-        'twice too big, ask whether the state splits into two independent halves that can be recombined by a ' +
-        'search rather than by enumeration. That question also has a negative answer worth recognising - if ' +
-        'the halves interact, there is nothing to sort and nothing to look up, and the split buys nothing. ' +
-        'Subset sum splits because the total is a sum; a problem whose halves constrain each other, like ' +
-        'graph colouring across the cut, does not.'
+      insight: 'The technique is worth knowing mostly as a reflex. When an exponential search ' +
+        'is exactly twice too big, ask whether the state splits into two independent halves that ' +
+        'can be recombined by a search rather than by enumeration. That question also has a ' +
+        'negative answer worth recognising. If the halves interact, there is nothing to sort and ' +
+        'nothing to look up, and the split buys nothing. Subset sum splits because the total is ' +
+        'a sum. A problem whose halves constrain each other, like graph colouring across the ' +
+        'cut, does not.'
     };
   }
 
