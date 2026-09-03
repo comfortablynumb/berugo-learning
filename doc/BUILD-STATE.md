@@ -5170,9 +5170,9 @@ no concept whose `detail` is a single block.
 Run `lint:size` every time. Splitting one orientation paragraph in two costs
 the enclosing function two lines, and several `config()` functions sit within a
 few lines of the 50-line limit; three of them crossed it before this was part
-of the loop. The fix is `python tools/../extract_orientation.py` in spirit —
-move the orientation array into its own `orientation()` function, which is pure
-prose with no locals.
+of the loop. The fix is `node tools/extract-orientation.js
+src/js/sections/<id>-section.js`, which moves the array into its own
+`orientation()` function — pure prose with no locals, so nothing else changes.
 
 Do not open a sentence with a lowercase code identifier (`ops.view(array)
 wraps…`): the sentence splitter cannot see the boundary, and the section reads
