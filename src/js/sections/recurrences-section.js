@@ -24,12 +24,13 @@
     root.jQuery('#' + SECTION_ID + '-content').html(app.shell.render({
       sectionId: SECTION_ID,
       orientation: [
-        'A recursion tree answers the question the master theorem only classifies: where does the ' +
-          'work actually live? Each level costs a·(work per subproblem), so the totals form a ' +
-          'geometric series that either grows, stays flat, or shrinks down the tree.',
+        '**A recursion tree answers the question the master theorem only classifies: where does ' +
+          'the work actually live?** Each level costs a·(work per subproblem). The totals down ' +
+          'the tree therefore form a geometric series, and it either grows, stays flat, or ' +
+          'shrinks.',
         'Those three behaviours are the three master cases. Read them off the level table below ' +
-          'rather than memorising the inequalities: if the bottom row dominates you are in case 1, ' +
-          'if the rows are equal you are in case 2, and if the top dominates you are in case 3.',
+          'rather than memorising the inequalities. If the bottom row dominates you are in case 1. ' +
+          'If the rows are equal you are in case 2. If the top dominates you are in case 3.',
         'Case 3 also carries a regularity condition, and there are recurrences the theorem cannot ' +
           'answer at all. The panel says so instead of guessing.'
       ],

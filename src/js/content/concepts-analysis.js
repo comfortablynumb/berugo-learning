@@ -196,16 +196,19 @@
         },
         plain: 'Each level of recursion drawn out, with the work it costs. Summing the levels solves the recurrence.',
         formal: 'level i has a^i subproblems of size n/b^i',
-        readAs: 'By depth i the problem has split a ways per level, so there are a multiplied by ' +
-          'itself i times — that is what a^i means, "a to the power of i" — and each piece is n ' +
-          'divided by b that many times over.',
-        detail: 'The tree turns a recurrence into an arithmetic problem you can see. Level i holds a^i ' +
-          'calls, each on an input of size n/b^i, so the work on that level is a^i · f(n/b^i) and the ' +
-          'total is the sum down to the leaves. Drawing it answers the question the closed form hides ' +
-          '— where the cost lives. Merge sort spends the same n at every level and so pays for its ' +
-          'depth; a recurrence with a growing top level pays for its root and stops caring about the ' +
-          'depth entirely. Because the tree is a direct calculation rather than a lookup, it also ' +
-          'works for the recurrences no theorem covers.',
+        readAs: 'By depth i the problem has split a ways per level, so there are a^i calls. That is ' +
+          'a multiplied by itself i times, read "a to the power of i". Each piece is n divided by ' +
+          'b that many times over.',
+        detail: [
+          'The tree turns a recurrence into an arithmetic problem you can see. Level i holds a^i ' +
+            'calls, each on an input of size n/b^i. So the work on that level is a^i · f(n/b^i), ' +
+            'and the total is the sum down to the leaves.',
+          'Drawing it answers the question the closed form hides: where the cost lives. Merge sort ' +
+            'spends the same n at every level, so it pays for its depth. A recurrence with a ' +
+            'growing top level pays for its root and stops caring about the depth entirely.',
+          'Because the tree is a direct calculation rather than a lookup, it also works for the ' +
+            'recurrences no theorem covers.'
+        ],
         example: 'Merge sort: every level costs n, and there are log₂ n of them.'
       },
       {
@@ -214,81 +217,95 @@
         formal: 'log_b(a)',
         readAs: 'Read it "log base b of a": how many times you multiply b by itself to reach a. ' +
           'Splitting into a = 2 pieces that are each b = 2 times smaller gives 1.',
-        detail: 'The number of leaves in the recursion tree is a^(log_b n), which is the same number ' +
-          'as n^(log_b a) — the two are equal because raising to a power and taking a logarithm undo ' +
-          'each other. Each ' +
-          'leaf costs a constant, so the leaf row alone costs Θ(n^log_b a). That expression is the ' +
-          'pivot the whole analysis turns on: if f(n) grows more slowly, the leaves dominate and the ' +
-          'answer is the leaf count; if it grows faster, the root dominates and the answer is f(n); ' +
-          'if they match, every level costs about the same and the answer picks up a log n factor ' +
-          'for the depth. Computing log_b a first and then comparing is the whole method, and it is ' +
-          'why halving into two subproblems (log₂ 2 = 1) makes linear merge work the balanced case.',
+        detail: [
+          'The recursion tree has a^(log_b n) leaves, which is the same number as n^(log_b a). The ' +
+            'two are equal because raising to a power and taking a logarithm undo each other.',
+          'Each leaf costs a constant, so the leaf row alone costs Θ(n^log_b a). That expression ' +
+            'is the pivot the whole analysis turns on.',
+          'If f(n) grows more slowly, the leaves dominate and the answer is the leaf count. If it ' +
+            'grows faster, the root dominates and the answer is f(n). If they match, every level ' +
+            'costs about the same, and the answer picks up a log n factor for the depth.',
+          'Computing log_b a first and then comparing is the whole method. It is why halving into ' +
+            'two subproblems, where log₂ 2 = 1, makes linear merge work the balanced case.'
+        ],
         example: 'a = 2, b = 2 gives 1, so f(n) = n is the balanced case.'
       },
       {
         term: 'Master theorem',
         plain: 'A lookup table for T(n) = a·T(n/b) + f(n). Three cases: leaves win, tie, root wins.',
         formal: 'compare f(n) with n^log_b(a)',
-        readAs: 'Work out what the leaf row costs — n raised to the power log-base-b-of-a — then ask ' +
+        readAs: 'Work out what the leaf row costs: n raised to the power log-base-b-of-a. Then ask ' +
           'whether the work you do per call, f(n), is smaller than that, the same, or larger. That ' +
           'one comparison picks the case.',
-        detail: 'The theorem packages the recursion-tree argument for the shape that covers most ' +
-          'divide-and-conquer algorithms: a subproblems, each a factor b smaller, plus f(n) to split ' +
-          'and combine. Case 1 has f polynomially smaller than n^log_b a and answers Θ(n^log_b a); ' +
-          'case 2 has them equal and answers Θ(n^log_b a · log n); case 3 has f polynomially larger, ' +
-          'passes the regularity check and answers Θ(f(n)). The word polynomially is the catch — the ' +
-          'comparison must be by a whole factor of n raised to some positive power ε, however tiny, ' +
-          'and not merely by a logarithm — which is ' +
-          'why perfectly ordinary recurrences fall into the gaps between the cases.',
+        detail: [
+          'The theorem packages the recursion-tree argument for the shape that covers most ' +
+            'divide-and-conquer algorithms: a subproblems, each a factor b smaller, plus f(n) to ' +
+            'split and combine.',
+          'Case 1 has f polynomially smaller than n^log_b a, and answers Θ(n^log_b a). Case 2 has ' +
+            'them equal, and answers Θ(n^log_b a · log n). Case 3 has f polynomially larger, ' +
+            'passes the regularity check, and answers Θ(f(n)).',
+          'The word polynomially is the catch. The comparison has to be by a whole factor of n ' +
+            'raised to some positive power ε, however tiny — not merely by a logarithm. That is ' +
+            'why perfectly ordinary recurrences fall into the gaps between the cases.'
+        ],
         example: 'a=8, b=2, f=n² gives log₂8 = 3 > 2, so Θ(n³).'
       },
       {
         term: 'Regularity condition',
         plain: 'Case 3 needs f to shrink fast enough as the problem shrinks, or the theorem does not apply.',
         formal: 'a·f(n/b) ≤ c·f(n) for some c < 1',
-        readAs: 'All the work one level down — a pieces, each costing f(n/b) — has to come to at ' +
-          'most some fixed fraction c of the work at this level, with c strictly below 1. That is ' +
+        readAs: 'All the work one level down is a pieces, each costing f(n/b). That has to come to ' +
+          'at most some fixed fraction c of the work at this level, with c strictly below 1. It is ' +
           'what makes the levels shrink fast enough for the total to collapse onto the top one.',
-        detail: 'Case 3 concludes that the root dominates, which is only sound if the next level down ' +
-          'really is cheaper by a constant factor — otherwise the levels could stay comparable and ' +
-          'the sum would not collapse onto the root. The regularity condition states exactly that: ' +
-          'the whole of level one costs at most c < 1 times level zero, so the total is a geometric ' +
-          'series summing to Θ(f(n)). Every polynomial f satisfies it, which is why it is usually ' +
-          'waved through. It fails for functions that oscillate or that dip on the divided argument, ' +
-          'and when it fails the answer genuinely differs from Θ(f(n)) — the check is not a formality.',
+        detail: [
+          'Case 3 concludes that the root dominates. That is only sound if the next level down ' +
+            'really is cheaper by a constant factor. Otherwise the levels could stay comparable, ' +
+            'and the sum would not collapse onto the root.',
+          'The regularity condition states exactly that: the whole of level one costs at most ' +
+            'c < 1 times level zero, so the total is a geometric series summing to Θ(f(n)).',
+          'Every polynomial f satisfies it, which is why it is usually waved through. It fails for ' +
+            'functions that oscillate, or that dip on the divided argument. When it fails the ' +
+            'answer genuinely differs from Θ(f(n)), so the check is not a formality.'
+        ],
         example: 'It fails for oscillating f, which is why the panel checks it.'
       },
       {
         term: 'Gap cases',
         plain: 'Recurrences that fall between the cases. The theorem stays silent; the tree still answers.',
         formal: 'f between n^log_b(a) and n^log_b(a)·log n',
-        readAs: 'f sits above the leaf cost, but by less than a factor of log n — too little ' +
-          'separation for case 1 or case 3, and not equality for case 2. The theorem has no case ' +
-          'that fits.',
-        detail: 'Because cases 1 and 3 require a polynomial separation, there is room between them ' +
-          'that no case reaches: an f that beats n^log_b a by only a logarithmic factor is neither ' +
-          'polynomially smaller, nor equal, nor polynomially larger. T(n) = 2T(n/2) + n/log n sits ' +
-          'squarely in that gap. The theorem does not give a wrong answer here, it gives none, and ' +
-          'the mistake is to round the recurrence to the nearest case and quote the result. Summing ' +
-          'the recursion tree still works: the levels form a harmonic-style series, and the answer ' +
-          'comes out Θ(n log log n) — a class the three cases cannot even express.',
+        readAs: 'f sits above the leaf cost, but by less than a factor of log n. That is too ' +
+          'little separation for case 1 or case 3, and it is not equality either, so case 2 is ' +
+          'out. The theorem has no case that fits.',
+        detail: [
+          'Cases 1 and 3 require a polynomial separation, and that leaves room between them no ' +
+            'case reaches. An f that beats n^log_b a by only a logarithmic factor is neither ' +
+            'polynomially smaller, nor equal, nor polynomially larger.',
+          'T(n) = 2T(n/2) + n/log n sits squarely in that gap. The theorem does not give a wrong ' +
+            'answer here. It gives none, and the mistake is to round the recurrence to the nearest ' +
+            'case and quote the result.',
+          'Summing the recursion tree still works. The levels form a harmonic-style series, and ' +
+            'the answer comes out Θ(n log log n) — a class the three cases cannot even express.'
+        ],
         example: 'T(n)=2T(n/2)+n/log n needs a tree, not the theorem.'
       },
       {
         term: 'Akra–Bazzi',
         plain: 'The generalisation for uneven splits, where subproblems are different sizes.',
         formal: 'T(n) = Σ aᵢT(n/bᵢ) + f(n)',
-        readAs: 'The cost at size n is the total over each differently shaped recursive call — aᵢ of ' +
-          'them, each on a piece n/bᵢ as big — plus f(n) for the work outside the calls. The Σ just ' +
-          'says "add all of these up", and the small i is the index counting through them.',
-        detail: 'The master theorem assumes every subproblem is the same size, and plenty of real ' +
-          'algorithms do not oblige. Akra–Bazzi handles a sum of differently shaped recursive calls ' +
-          'by first solving Σ aᵢ·bᵢ^(−p) = 1 for the exponent p — one equation, whose only unknown ' +
-          'is p — then integrating f against it; the ' +
-          'master theorem is the special case where all the bᵢ agree. It also tolerates the floors, ' +
-          'ceilings and small perturbations that a careful implementation forces on you and that the ' +
-          'simpler theorem quietly ignores. The cost is that you solve an equation and evaluate an ' +
-          'integral rather than reading a case off a table.',
+        readAs: 'The cost at size n adds up every differently shaped recursive call: aᵢ of them, ' +
+          'each on a piece n/bᵢ as big. On top of that comes f(n), the work outside the calls. The ' +
+          'Σ just says "add all of these up", and the small i is the index counting through them.',
+        detail: [
+          'The master theorem assumes every subproblem is the same size, and plenty of real ' +
+            'algorithms do not oblige.',
+          'Akra–Bazzi handles a sum of differently shaped recursive calls. First solve ' +
+            'Σ aᵢ·bᵢ^(−p) = 1 for the exponent p — one equation, whose only unknown is p. Then ' +
+            'integrate f against it. The master theorem is the special case where all the bᵢ agree.',
+          'It also tolerates the floors, ceilings and small perturbations that a careful ' +
+            'implementation forces on you, and that the simpler theorem quietly ignores. The cost ' +
+            'is that you solve an equation and evaluate an integral rather than reading a case off ' +
+            'a table.'
+        ],
         example: 'Median-of-medians splits into 1/5 and 7/10.'
       },
       {
@@ -298,26 +315,33 @@
         readAs: 'Take the bound as already granted for every input smaller than n, feed that into ' +
           'the recurrence, and show the same bound falls out for n itself. That is induction: this ' +
           'step plus a base case covers every size there is.',
-        detail: 'Substitution is the fallback with no preconditions: assume the bound for all smaller ' +
-          'inputs, substitute it into the recurrence, and show the same bound comes out for n. It is ' +
-          'also the only method that verifies rather than derives, so the recursion tree usually ' +
-          'supplies the guess and substitution confirms it. The characteristic difficulty is that the ' +
-          'induction fails by a lower-order term — you need to prove ≤ cn and end up with cn + 1 — ' +
-          'and the fix is counter-intuitive: strengthen the hypothesis to cn − d, which gives the ' +
-          'induction more to work with and makes the extra term cancel.',
+        detail: [
+          'Substitution is the fallback with no preconditions. Assume the bound for all smaller ' +
+            'inputs, substitute it into the recurrence, and show the same bound comes out for n.',
+          'It is also the only method that verifies rather than derives. So the recursion tree ' +
+            'usually supplies the guess, and substitution confirms it.',
+          'The characteristic difficulty is that the induction fails by a lower-order term: you ' +
+            'need to prove ≤ cn and end up with cn + 1. The fix is counter-intuitive. Strengthen ' +
+            'the hypothesis to cn − d, which gives the induction more to work with and makes the ' +
+            'extra term cancel.'
+        ],
         example: 'The induction often fails until you strengthen the guess by subtracting a lower-order term.'
       },
       {
         term: 'What the base case changes',
         plain: 'The base case moves the constant, never the class — but the constant is what you pay.',
         formal: 'T(1) = 0 against T(1) = 1 shifts the total by the leaf count',
-        detail: 'Changing what a leaf costs adds a fixed multiple of the leaf count to the total, and ' +
-          'since the leaf count is n^log_b a it cannot change the asymptotic class when the class is ' +
-          'already at least that large. What it does change is the number you measure. Merge sort at ' +
-          'n = 1024 costs 10 240 counting only the merges and 11 264 once each of the 1 024 leaves is ' +
-          'charged one unit — a tenth of the total, from a decision the recurrence usually writes as ' +
-          'T(1) = Θ(1) and forgets. This is also why cutting over to insertion sort at a small size ' +
-          'is worth real time: it replaces the most numerous rows of the tree.',
+        detail: [
+          'Changing what a leaf costs adds a fixed multiple of the leaf count to the total. The ' +
+            'leaf count is n^log_b a, so it cannot change the asymptotic class when the class is ' +
+            'already at least that large.',
+          'What it does change is the number you measure. Merge sort at n = 1024 costs 10 240 ' +
+            'counting only the merges, and 11 264 once each of the 1 024 leaves is charged one ' +
+            'unit. That is a tenth of the total, from a decision the recurrence usually writes as ' +
+            'T(1) = Θ(1) and forgets.',
+          'This is also why cutting over to insertion sort at a small size is worth real time: it ' +
+            'replaces the most numerous rows of the tree.'
+        ],
         example: 'Merge sort at n = 1024 costs 10 240 with T(1) = 0 and 11 264 counting the leaf row.'
       }
     ],
