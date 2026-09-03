@@ -44,36 +44,41 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'Bentley\'s observation - that most published binary searches were wrong - is not about carelessness. ' +
-          'It is about writing a loop from a picture instead of from an invariant. Write the invariant down ' +
-          'first and every line follows from it: the half-open interval [low, high) always contains the ' +
-          'answer, so `high` starts at `length` rather than `length − 1`, the loop runs while `low < high` ' +
-          'because an empty interval means the answer is `low`, and `mid` is always strictly below `high` so ' +
-          'the interval always shrinks and the loop always ends.',
-        'The two sides are deliberately not symmetric, and that asymmetry is where the plus-ones live. ' +
-          '`high = mid` discards the half-open range [mid, high); `low = mid + 1` discards the closed range ' +
-          '[low, mid]. Both discard the probe, both make progress, and neither needs a matching adjustment on ' +
-          'the other branch. Every mutation in the demo below is a change to one of those two lines, and each ' +
-          'one is a real implementation you can select and watch run.',
-        'What the table shows is how weak output testing is here. The `high = mid − 1` mutation is caught by ' +
-          'exactly one of thirteen probe cases; a hand-written test suite that omits "target absent, in the ' +
-          'interior" ships it. The `while (low <= high)` mutation is never caught by a wrong answer at all - ' +
-          'it reads `array[length]`, JavaScript returns `undefined`, every comparison against `undefined` is ' +
-          'false, and the search still returns the right index. In C that read is whatever was next in memory ' +
-          'and in Java it throws, so the same code is a latent crash in two languages and silent here.'
+        '**Bentley\'s observation — that most published binary searches were wrong — is not ' +
+          'about carelessness.** It is about writing a loop from a picture instead of from an ' +
+          'invariant.',
+        'Write the invariant down first and every line follows from it. The half-open interval ' +
+          '[low, high) always contains the answer, so `high` starts at `length` rather than ' +
+          '`length − 1`. The loop runs while `low < high`, because an empty interval means the ' +
+          'answer is `low`. And `mid` is always strictly below `high`, so the interval always ' +
+          'shrinks and the loop always ends.',
+        'The two sides are deliberately not symmetric, and that asymmetry is where the plus-ones ' +
+          'live. `high = mid` discards the half-open range [mid, high); `low = mid + 1` discards ' +
+          'the closed range [low, mid]. Both discard the probe, both make progress, and neither ' +
+          'needs a matching adjustment on the other branch.',
+        'Every mutation in the demo below is a change to one of those two lines, and each one is ' +
+          'a real implementation you can select and watch run.',
+        'What the table shows is how weak output testing is here. The `high = mid − 1` mutation ' +
+          'is caught by exactly one of thirteen probe cases, so a hand-written test suite that ' +
+          'omits "target absent, in the interior" ships it.',
+        'The `while (low <= high)` mutation is never caught by a wrong answer at all. It reads ' +
+          '`array[length]`, JavaScript returns `undefined`, every comparison against `undefined` ' +
+          'is false, and the search still returns the right index. In C that read is whatever was ' +
+          'next in memory, and in Java it throws — so the same code is a latent crash in two ' +
+          'languages and silent here.'
       ],
       demo: {
         title: 'Interactive demo — the invariant, and seven ways to break it',
         markup: root.BinarySearchTemplate.render()
       },
       diagram: diagram(),
-      insight: 'Writing the invariant down first is the entire fix, and it is cheaper than the debugging it ' +
-        'replaces. "The answer is in [low, high)" is one comment, and with it there is no decision left to ' +
-        'get wrong: `high` starts at the length because the interval is half-open, the loop condition is ' +
-        '`low < high` because that is what "non-empty" means, and only one of the two branches gets a plus ' +
-        'one because only one of them discards a closed range. Every binary-search bug in the demo is a line ' +
-        'that contradicts a stated invariant, which is exactly the class of bug that stops existing once the ' +
-        'invariant is stated.'
+      insight: 'Writing the invariant down first is the entire fix, and it is cheaper than the ' +
+        'debugging it replaces. "The answer is in [low, high)" is one comment, and with it there ' +
+        'is no decision left to get wrong. `high` starts at the length because the interval is ' +
+        'half-open. The loop condition is `low < high` because that is what "non-empty" means. ' +
+        'And only one of the two branches gets a plus one, because only one of them discards a ' +
+        'closed range. Every binary-search bug in the demo is a line that contradicts a stated ' +
+        'invariant — exactly the class of bug that stops existing once the invariant is stated.'
     };
   }
 

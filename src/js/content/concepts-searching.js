@@ -22,28 +22,38 @@
         },
         plain: 'The half-open interval [low, high) always contains the answer.',
         formal: 'low <= answer <= high is maintained by every branch; the loop ends when low = high',
-        readAs: 'The answer is always somewhere between the two bounds, and every iteration keeps that true ' +
-          'while shrinking the gap. When the bounds meet, the gap holds exactly one thing.',
-        detail: 'Bentley found that most published binary searches were wrong, and the cause was not ' +
-          'carelessness - it was writing a loop from a mental picture instead of from a stated property. ' +
-          'Once the invariant is written down every decision is forced: `high` starts at the length because ' +
-          'the interval is half-open, the loop condition is `low < high` because that is what non-empty ' +
-          'means, and `mid` is strictly below `high` so the interval always shrinks. There is nothing left to ' +
-          'get wrong by feel.',
+        readAs: 'The answer is always somewhere between the two bounds, and every iteration keeps ' +
+          'that true while shrinking the gap. When the bounds meet, the gap holds exactly one ' +
+          'thing.',
+        detail: [
+          'Bentley found that most published binary searches were wrong, and the cause was not ' +
+            'carelessness. It was writing a loop from a mental picture instead of from a stated ' +
+            'property.',
+          'Once the invariant is written down, every decision is forced. `high` starts at the ' +
+            'length because the interval is half-open. The loop condition is `low < high` because ' +
+            'that is what non-empty means. And `mid` is strictly below `high`, so the interval ' +
+            'always shrinks.',
+          'There is nothing left to get wrong by feel.'
+        ],
         example: 'Every step of every trace in the demo reports the invariant holding, including on the empty array.'
       },
       {
         term: 'The two branches are deliberately not symmetric',
         plain: '`high = mid` discards a half-open range; `low = mid + 1` discards a closed one.',
         formal: 'high = mid removes [mid, high); low = mid + 1 removes [low, mid]',
-        readAs: 'The two updates discard different halves, and the bracket styles say exactly which: a square ' +
-          'bracket includes its endpoint, a round one excludes it. Getting one of them wrong is what ' +
-          'makes a binary search loop forever.',
-        detail: 'This is where every plus-one argument comes from, and the asymmetry is correct rather than ' +
-          'an oversight. When the probe says the answer is at or below `mid`, the range from `mid` upwards is ' +
-          'gone and `mid` itself might still be the answer - so `high = mid`. When the probe says the answer ' +
-          'is strictly above `mid`, then `mid` is excluded too - so `low = mid + 1`. Both discard the probe, ' +
-          'both make progress, and adding a matching adjustment to the other side breaks it.',
+        readAs: 'The two updates discard different halves, and the bracket styles say exactly ' +
+          'which: a square bracket includes its endpoint, a round one excludes it. Getting one of ' +
+          'them wrong is what makes a binary search loop forever.',
+        detail: [
+          'This is where every plus-one argument comes from, and the asymmetry is correct rather ' +
+            'than an oversight.',
+          'When the probe says the answer is at or below `mid`, the range from `mid` upwards is ' +
+            'gone — and `mid` itself might still be the answer. So `high = mid`.',
+          'When the probe says the answer is strictly above `mid`, then `mid` is excluded too. So ' +
+            '`low = mid + 1`.',
+          'Both discard the probe, and both make progress. Adding a matching adjustment to the ' +
+            'other side breaks it.'
+        ],
         example: 'The `high = mid - 1` mutation discards the answer itself when the probe lands on it.'
       },
       {
@@ -59,76 +69,99 @@
         },
         plain: 'First index >= target, and first index > target - and their difference is the count.',
         formal: 'upperBound(x) - lowerBound(x) is the number of occurrences of x',
-        readAs: 'The first position where x could go and the first position after every x, subtracted, give ' +
-          'how many copies of x there are. Two searches answer a counting question with no extra ' +
-          'structure.',
-        detail: 'A plain "does it contain x" search throws away information the same loop already computed. ' +
-          'The two bounds answer where x would be inserted at the front or the back of its run of equals, ' +
-          'which gives membership, insertion position, occurrence count and range extraction from one ' +
-          'primitive. Building `search` on top of `lowerBound` rather than writing a third loop is not tidiness ' +
-          'either: a third loop is a third chance to get the interval wrong.',
+        readAs: 'The first position where x could go, and the first position after every x, ' +
+          'subtracted, give how many copies of x there are. Two searches answer a counting ' +
+          'question with no extra structure.',
+        detail: [
+          'A plain "does it contain x" search throws away information the same loop already ' +
+            'computed.',
+          'The two bounds answer where x would be inserted at the front or the back of its run of ' +
+            'equals. From that one primitive you get membership, insertion position, occurrence ' +
+            'count and range extraction.',
+          'Building `search` on top of `lowerBound` rather than writing a third loop is not ' +
+            'tidiness either. A third loop is a third chance to get the interval wrong.'
+        ],
         example: 'In [1, 3, 3, 3, 5]: lowerBound(3) = 1, upperBound(3) = 4, so there are three of them.'
       },
       {
         term: 'The mutations that no test notices',
         plain: 'Several one-character changes are correct on almost every input a hand-written test would use.',
         formal: 'each mutation is caught by between 1 and 11 of 13 targeted probe cases',
-        detail: 'The value of the mutation table is not that the variants are wrong - it is the distribution ' +
-          'of how many inputs notice. `high = mid - 1` is caught by exactly one of thirteen deliberately ' +
-          'chosen cases, so a test suite that omits "target absent, in the interior" ships it. That is the ' +
-          'argument for testing binary search against a linear scan over every length from zero and every ' +
-          'target including the boundaries, rather than against a handful of examples.',
+        detail: [
+          'The value of the mutation table is not that the variants are wrong. It is the ' +
+            'distribution of how many inputs notice.',
+          '`high = mid - 1` is caught by exactly one of thirteen deliberately chosen cases. A test ' +
+            'suite that omits "target absent, in the interior" ships it.',
+          'So test binary search against a linear scan, over every length from zero and every ' +
+            'target including the boundaries. A handful of examples is not enough.'
+        ],
         example: 'The correct implementation is caught by 0 of 13; `high = mid - 1` by exactly 1.'
       },
       {
         term: 'The out-of-bounds read that JavaScript hides',
         plain: '`while (low <= high)` with high = length reads array[length] and still returns the right answer.',
         formal: 'undefined compares false against everything, so the branch behaves as if the element were large',
-        detail: 'This is the mutation that proves output testing is not enough. The loop reads one element ' +
-          'past the end; JavaScript yields `undefined`, every relational comparison against it is false, the ' +
-          'search takes the branch it would have taken anyway and returns the correct index. In C that read ' +
-          'is whatever happened to be next in memory and in Java it throws immediately. The same source is a ' +
-          'latent crash in two languages and completely silent in this one, and only an instrumented harness ' +
-          'watching for the read can see it here.',
+        detail: [
+          'This is the mutation that proves output testing is not enough.',
+          'The loop reads one element past the end. JavaScript yields `undefined`, every ' +
+            'relational comparison against it is false, the search takes the branch it would have ' +
+            'taken anyway, and it returns the correct index.',
+          'In C that read is whatever happened to be next in memory. In Java it throws ' +
+            'immediately. The same source is a latent crash in two languages and completely ' +
+            'silent in this one, and only an instrumented harness watching for the read can see it ' +
+            'here.'
+        ],
         example: 'The demo catches it by watching reads past the end - never by a wrong answer.'
       },
       {
         term: 'The midpoint overflow',
         plain: '`(low + high) / 2` overflows in fixed-width arithmetic; `low + (high - low) / 2` does not.',
         formal: 'in 32-bit signed arithmetic, low + high wraps negative once the sum exceeds 2^31 - 1',
-        readAs: 'Adding two large indices can overflow past the largest signed 32-bit value and come back ' +
-          'negative. Writing low + (high - low) / 2 instead of (low + high) / 2 avoids it — the famous ' +
-          'bug that sat in the JDK for nine years.',
-        detail: 'This is the bug Bentley\'s own published version carried for two decades and Java\'s ' +
-          'binarySearch carried until 2006. JavaScript numbers are exact to 2^53, so the naive form is ' +
-          'genuinely safe here - which is why the demo shows the same expression forced through 32 bits ' +
-          'rather than pretending. The habit is still worth keeping: the safe form costs nothing, reads no ' +
-          'worse, and the code often outlives the language it was written in.',
+        readAs: 'Adding two large indices can overflow past the largest signed 32-bit value and ' +
+          'come back negative. Write low + (high - low) / 2 instead of (low + high) / 2 to avoid ' +
+          'it — the famous bug that sat in the JDK for nine years.',
+        detail: [
+          'This is the bug Bentley\'s own published version carried for two decades, and Java\'s ' +
+            'binarySearch carried until 2006.',
+          'JavaScript numbers are exact to 2^53, so the naive form is genuinely safe here. That is ' +
+            'why the demo shows the same expression forced through 32 bits, rather than ' +
+            'pretending.',
+          'The habit is still worth keeping. The safe form costs nothing, reads no worse, and the ' +
+            'code often outlives the language it was written in.'
+        ],
         example: 'low = 2 000 000 000, high = 2 100 000 000: the safe midpoint is 2 050 000 000 and the 32-bit one is −97 483 648.'
       },
       {
         term: 'Rotated, unimodal and unbounded variants',
         plain: 'The halving survives a rotation, a peak, and not knowing the length.',
         formal: 'rotated: one half is always sorted. exponential: double a bound, then search inside it',
-        detail: 'What binary search actually needs is not sortedness but a way to discard half the range with ' +
-          'one probe. In a rotated array one of the two halves is still sorted and one comparison identifies ' +
-          'which, so the log survives. On an unbounded or streamed sequence, doubling an index until it ' +
-          'passes the target costs log i probes for a target at position i and then bounds an ordinary ' +
-          'search. Recognising the halving as the essential part is what lets it be reused.',
+        detail: [
+          'What binary search actually needs is not sortedness. It is a way to discard half the ' +
+            'range with one probe.',
+          'In a rotated array one of the two halves is still sorted, and one comparison identifies ' +
+            'which. So the log survives.',
+          'On an unbounded or streamed sequence, doubling an index until it passes the target ' +
+            'costs log i probes for a target at position i, and then bounds an ordinary search.',
+          'Recognising the halving as the essential part is what lets it be reused.'
+        ],
         example: 'Exponential search finds the element at index 3 with a bound of 4, searching only [2, 5).'
       },
       {
         term: 'Interpolation search and its assumption',
         plain: 'Guess where the target is instead of splitting in half - if the keys are uniform.',
         formal: 'O(log log n) on uniform keys, O(n) when the distribution assumption fails',
-        readAs: 'Interpolation search guesses where the key should be rather than taking the midpoint. On ' +
-          'evenly spread keys that is extraordinarily fast; on clustered keys it degenerates to a ' +
-          'linear scan.',
-        detail: 'Interpolation search estimates the position by linear extrapolation between the endpoints, ' +
-          'which on uniformly distributed keys lands almost on the answer: measured, one probe over ten ' +
-          'thousand uniform values. The estimate is a straight line, so on keys whose gaps grow the guess is ' +
-          'systematically wrong and the search degrades toward linear. It is a specialist tool, and the ' +
-          'demo reports the probe count on both distributions rather than quoting the good case.',
+        readAs: 'Interpolation search guesses where the key should be, rather than taking the ' +
+          'midpoint. On evenly spread keys that is extraordinarily fast. On clustered keys it ' +
+          'degenerates to a linear scan.',
+        detail: [
+          'Interpolation search estimates the position by linear extrapolation between the ' +
+            'endpoints. On uniformly distributed keys that lands almost on the answer: measured, ' +
+            'one probe over ten thousand uniform values.',
+          'The estimate is a straight line, so on keys whose gaps grow the guess is ' +
+            'systematically wrong, and the search degrades toward linear.',
+          'It is a specialist tool, and the demo reports the probe count on both distributions ' +
+            'rather than quoting the good case.'
+        ],
         example: 'Ten thousand keys: 1 probe when uniform, 13 when the gaps grow.'
       }
     ],
