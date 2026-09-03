@@ -47,45 +47,52 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**A planar graph is one that can be drawn with no edge crossings.** **Euler\'s formula** ' +
+        '`V − E + F = 2` gives a counting consequence for any simple planar graph with at least ' +
+        'three vertices: `E ≤ 3V − 6`.',
+      'That is a genuinely useful test in one direction only. A graph that fails it is certainly not ' +
+        'planar, and a graph that passes it may or may not be.',
+      '**Kuratowski\'s theorem** is the real characterisation: a graph is planar exactly when it ' +
+        'contains no subdivision of `K5` or `K3,3`.',
+      '**Force-directed layout** treats vertices as particles that repel and edges as springs that ' +
+        'pull, then integrates. Fruchterman-Reingold caps each step by a temperature that cools ' +
+        'linearly, which is what stops the system oscillating.',
+      'It has no notion of crossings at all — it minimises an energy. And yet on a planar graph it ' +
+        'routinely lands on a planar drawing, because crossings and high energy tend to coincide.',
+      '"Tend to" is doing real work in that sentence, and the panel measures it.',
+      '**Layered (Sugiyama) layout** is what you want for anything with a direction: a build graph, ' +
+        'a state machine, a dependency tree.',
+      'Assign each vertex to a layer one below its deepest predecessor. Split every long edge into a ' +
+        'chain of **dummy vertices**, so each intermediate layer has something to place. Then ' +
+        'reorder within layers by the mean position of each vertex\'s neighbours, sweeping down and ' +
+        'up a few times.',
+      'Crossing minimisation is NP-hard even between two adjacent layers, so the barycentre sweep is ' +
+        'a heuristic — and every layered engine you have used runs one.',
+      '**The crossing count is the only objective measure of a drawing anybody agrees on.** It is ' +
+        'not the whole story, because edge length uniformity, angular resolution and symmetry all ' +
+        'matter to a reader.',
+      'But it is the one that can be computed, and it turns "this diagram is unreadable" into a ' +
+        'number that a different layout can be measured against.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'A **planar** graph is one that can be drawn with no edge crossings. **Euler\'s formula** ' +
-          '`V − E + F = 2` gives a counting consequence for any simple planar graph with at least ' +
-          'three vertices: `E ≤ 3V − 6`. That is a genuinely useful test in one direction only — a ' +
-          'graph that fails it is certainly not planar, and a graph that passes it may or may not ' +
-          'be. **Kuratowski\'s theorem** is the real characterisation: a graph is planar exactly ' +
-          'when it contains no subdivision of `K5` or `K3,3`.',
-        '**Force-directed layout** treats vertices as particles that repel and edges as springs that ' +
-          'pull, then integrates. Fruchterman-Reingold caps each step by a temperature that cools ' +
-          'linearly, which is what stops the system oscillating. It has no notion of crossings at ' +
-          'all — it minimises an energy — and yet on a planar graph it routinely lands on a planar ' +
-          'drawing, because crossings and high energy tend to coincide. "Tend to" is doing real work ' +
-          'in that sentence, and the panel measures it.',
-        '**Layered (Sugiyama) layout** is what you want for anything with a direction: a build ' +
-          'graph, a state machine, a dependency tree. Assign each vertex to a layer one below its ' +
-          'deepest predecessor, split every long edge into a chain of **dummy vertices** so each ' +
-          'intermediate layer has something to place, then reorder within layers by the mean ' +
-          'position of each vertex\'s neighbours — sweeping down and up a few times. Crossing ' +
-          'minimisation is NP-hard even between two adjacent layers, so the barycentre sweep is a ' +
-          'heuristic and every layered engine you have used runs one.',
-        '**The crossing count is the only objective measure of a drawing anybody agrees on.** It is ' +
-          'not the whole story — edge length uniformity, angular resolution and symmetry all matter ' +
-          'to a reader — but it is the one that can be computed, and it turns "this diagram is ' +
-          'unreadable" into a number that a different layout can be measured against.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — three layouts, the energy curve, and two counting bounds',
         markup: root.GraphLayoutTemplate.render()
       },
       diagram: diagram(),
-      insight: 'Every diagram on this platform is laid out by one of these algorithms — mermaid runs ' +
+      insight: 'Every diagram on this platform is laid out by one of these algorithms. Mermaid runs ' +
         'a layered layout with a barycentre ordering pass, which is why a mermaid diagram gets worse ' +
         'exactly when you add an edge that spans several levels. Knowing that is what lets you fix ' +
-        'an unreadable generated diagram by changing the *graph* — introducing an intermediate node, ' +
-        'or reversing an edge to remove a cycle — instead of dragging boxes around. The layout ' +
-        'engine is not being obtuse; it is minimising something, and you can find out what.'
+        'an unreadable generated diagram by changing the *graph* rather than dragging boxes around. ' +
+        'Introduce an intermediate node, or reverse an edge to remove a cycle. The layout engine is ' +
+        'not being obtuse. It is minimising something, and you can find out what.'
     };
   }
 

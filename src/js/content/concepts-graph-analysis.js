@@ -165,15 +165,18 @@
         },
         plain: 'A simple planar graph on three or more vertices has at most 3V − 6 edges.',
         formal: 'V − E + F = 2, and every face has at least three edges, so 2E >= 3F',
-        readAs: 'Euler\'s formula for a planar drawing: vertices minus edges plus faces is always 2. Since ' +
-          'every face is bounded by at least three edges and each edge borders two faces, that gives E ' +
-          '<= 3V − 6 — the reason a graph can be too dense to draw flat.',
-        detail: 'The bound is a genuinely useful rejection filter — it is two integers and a ' +
-          'comparison — and it is one-directional. A graph that exceeds it is certainly not planar. ' +
-          'A graph below it may or may not be, and treating the check as a test is a classic error ' +
-          'because the check passes on almost every sparse graph. Kuratowski\'s theorem is the real ' +
-          'characterisation, and the linear-time planarity tests built on it are what a library ' +
-          'actually calls.',
+        readAs: 'Euler\'s formula for a planar drawing: vertices minus edges plus faces is always 2. ' +
+          'Since every face is bounded by at least three edges and each edge borders two faces, that ' +
+          'gives E <= 3V − 6. That is the reason a graph can be too dense to draw flat.',
+        detail: [
+          'The bound is a genuinely useful rejection filter — it is two integers and a comparison — ' +
+            'and it is one-directional.',
+          'A graph that exceeds it is certainly not planar. A graph below it may or may not be, and ' +
+            'treating the check as a test is a classic error, because the check passes on almost ' +
+            'every sparse graph.',
+          'Kuratowski\'s theorem is the real characterisation, and the linear-time planarity tests ' +
+            'built on it are what a library actually calls.'
+        ],
         example: 'K5 has 10 edges against a bound of 9, so Euler settles it; K3,3 has 9 against a ' +
           'bound of 12 and sails through.'
       },
@@ -181,25 +184,32 @@
         term: 'The tighter bipartite bound is what catches K3,3',
         plain: 'A bipartite planar graph has no triangular face, so every face has at least four edges.',
         formal: '2E >= 4F gives E <= 2V − 4 for a bipartite simple planar graph',
-        detail: 'Two non-planar graphs and two different arguments is the whole lesson: a counting ' +
-          'bound encodes an assumption about face size, and a different graph class supports a ' +
-          'different assumption. Neither bound ever proves planarity, and picking the right one ' +
-          'requires knowing something about the graph beforehand. That is exactly the position ' +
-          'every heuristic filter puts you in, and the reason the real test is structural.',
+        detail: [
+          'Two non-planar graphs and two different arguments is the whole lesson.',
+          'A counting bound encodes an assumption about face size, and a different graph class ' +
+            'supports a different assumption.',
+          'Neither bound ever proves planarity, and picking the right one requires knowing something ' +
+            'about the graph beforehand. That is exactly the position every heuristic filter puts ' +
+            'you in, and the reason the real test is structural.'
+        ],
         example: 'K3,3 at 9 edges against 2V − 4 = 8 — caught by the bipartite bound only.'
       },
       {
         term: 'Force-directed layout minimises energy and has no idea what a crossing is',
         plain: 'Vertices repel, edges pull, and the step size cools linearly.',
         formal: 'Fruchterman-Reingold: repulsion k²/d, attraction d²/k, displacement capped by a falling temperature',
-        readAs: 'Every pair of vertices pushes apart with a force that grows as they get closer, connected ' +
-          'pairs pull together with a force that grows as they get further, and the maximum movement ' +
-          'per round shrinks over time so the layout settles instead of oscillating.',
-        detail: 'It is worth being precise about what the algorithm is optimising, because it is ' +
-          'not what you want. There is no crossing term anywhere in the energy; the model is purely ' +
-          'geometric. It lands on planar drawings of planar graphs because crossings and high ' +
-          'energy tend to coincide, and "tend to" is doing real work — on a graph with any density ' +
-          'the correlation weakens and the crossing count stops falling.',
+        readAs: 'Every pair of vertices pushes apart with a force that grows as they get closer. ' +
+          'Connected pairs pull together with a force that grows as they get further apart. The ' +
+          'maximum movement per round shrinks over time, so the layout settles instead of ' +
+          'oscillating.',
+        detail: [
+          'It is worth being precise about what the algorithm is optimising, because it is not what ' +
+            'you want.',
+          'There is no crossing term anywhere in the energy; the model is purely geometric.',
+          'It lands on planar drawings of planar graphs because crossings and high energy tend to ' +
+            'coincide. "Tend to" is doing real work: on a graph with any density the correlation ' +
+            'weakens, and the crossing count stops falling.'
+        ],
         example: 'On a 5×5 grid the force model finds a drawing with 0 crossings where the circular ' +
           'layout has 70.'
       },
@@ -207,12 +217,15 @@
         term: 'The energy does not fall monotonically, and the cooling schedule is why',
         plain: 'Roughly a third of the iterations increase the energy.',
         formal: 'gradient descent is monotone in the limit of infinitesimal steps; a temperature-capped finite step can overshoot',
-        detail: '"It converges" is a claim about the endpoint and is routinely mistaken for a claim ' +
-          'about every step. Each iteration moves every vertex by up to the current temperature in ' +
-          'the direction of its net force, which can carry it past the minimum it was aiming at, and ' +
-          'the resulting energy is higher than before. The cooling schedule is what makes those ' +
-          'overshoots shrink to nothing — it is the reason the run *ends* somewhere sensible, not ' +
-          'the reason each step improves.',
+        detail: [
+          '"It converges" is a claim about the endpoint, and is routinely mistaken for a claim about ' +
+            'every step.',
+          'Each iteration moves every vertex by up to the current temperature in the direction of ' +
+            'its net force. That can carry it past the minimum it was aiming at, and the resulting ' +
+            'energy is higher than before.',
+          'The cooling schedule is what makes those overshoots shrink to nothing. It is the reason ' +
+            'the run *ends* somewhere sensible, not the reason each step improves.'
+        ],
         example: 'Over 200 iterations on the default grid the energy falls from 123.67 to 4.70 and ' +
           'rises on 68 of them — 34.0%.'
       },
@@ -220,11 +233,14 @@
         term: 'Layered layout assigns levels, invents vertices, then reorders',
         plain: 'Each vertex sits one level below its deepest predecessor; long edges get dummy vertices; layers are reordered by neighbour barycentre.',
         formal: 'Sugiyama: cycle removal, layer assignment, crossing reduction, coordinate assignment',
-        detail: 'The dummy vertices are the part people skip and the part that matters. Without ' +
-          'them a long edge is drawn straight through whatever occupies the levels in between, and ' +
-          'the ordering pass has nothing to place; with them the edge becomes a chain that the ' +
-          'ordering pass can route. They are also the cost: an edge spanning six levels contributes ' +
-          'five dummies and five more chances to cross something.',
+        detail: [
+          'The dummy vertices are the part people skip, and the part that matters.',
+          'Without them a long edge is drawn straight through whatever occupies the levels in ' +
+            'between, and the ordering pass has nothing to place. With them the edge becomes a chain ' +
+            'that the ordering pass can route.',
+          'They are also the cost. An edge spanning six levels contributes five dummies, and five ' +
+            'more chances to cross something.'
+        ],
         example: 'On a scale-free graph of 24 vertices the layered layout inserts 48 dummy ' +
           'vertices — two per real vertex — across 9 layers.'
       },
@@ -232,12 +248,14 @@
         term: 'Crossing minimisation is NP-hard even between two adjacent layers',
         plain: 'The barycentre sweep is a heuristic, and every layered engine you have used runs one.',
         formal: 'two-layer crossing minimisation is NP-hard; barycentre and median heuristics are the standard responses',
-        detail: 'Knowing that the reordering step is a heuristic changes how you read a bad ' +
-          'diagram: the engine is not being obtuse, it is running a cheap approximation to an ' +
-          'intractable subproblem, and it will do better on a graph that gives it less to decide. ' +
+        detail: [
+          'Knowing that the reordering step is a heuristic changes how you read a bad diagram.',
+          'The engine is not being obtuse. It is running a cheap approximation to an intractable ' +
+            'subproblem, and it will do better on a graph that gives it less to decide.',
           'That is why adding an explicit intermediate node to a source graph often fixes a ' +
-          'generated diagram — it removes dummies, and each dummy is a decision made with almost no ' +
-          'information.',
+            'generated diagram. It removes dummies, and each dummy is a decision made with almost no ' +
+            'information.'
+        ],
         example: 'Four barycentre sweeps, down and up, are the default; the crossing count they ' +
           'reach on the scale-free graph is 96 against the force model\'s 45.'
       },
@@ -247,11 +265,14 @@
         formal: 'the denominator is m(m−1)/2 minus the adjacent pairs, so the rate is comparable across graphs',
         readAs: 'Counting crossings alone favours small graphs. Dividing by the pairs of edges that could ' +
           'possibly cross gives a rate that means the same thing at any size.',
-        detail: 'Edge-length uniformity, angular resolution and symmetry all matter to a reader and ' +
-          'none of them has an agreed definition. The crossing count does, it is cheap to compute, ' +
-          'and it turns "this diagram is unreadable" into a number that a different layout can be ' +
-          'measured against. Reporting it as a rate over candidate pairs rather than as a raw count ' +
-          'is what makes two graphs of different sizes comparable.',
+        detail: [
+          'Edge-length uniformity, angular resolution and symmetry all matter to a reader, and none ' +
+            'of them has an agreed definition.',
+          'The crossing count does have one, it is cheap to compute, and it turns "this diagram is ' +
+            'unreadable" into a number that a different layout can be measured against.',
+          'Reporting it as a rate over candidate pairs rather than as a raw count is what makes two ' +
+            'graphs of different sizes comparable.'
+        ],
         example: 'On the 5×5 grid: force 0, layered 0, circular 70 — over 780 candidate pairs, so ' +
           '8.97% for the ring.'
       },
@@ -259,11 +280,13 @@
         term: 'A circular layout is worth keeping because it is usually the worst',
         plain: 'It costs nothing, it is perfectly deterministic, and it ignores the edges entirely.',
         formal: 'position v at angle 2πv/n; the crossing count is a property of the vertex numbering alone',
-        detail: 'A baseline that ignores the data is the honest comparison for any layout claim, in ' +
-          'the same way that a constant predictor is the honest baseline for a model. It also has ' +
-          'genuine uses: it is stable under changes to the graph, which matters when a diagram is ' +
-          'regenerated repeatedly, and on a graph with a natural cyclic structure it can beat both ' +
-          'of the others.',
+        detail: [
+          'A baseline that ignores the data is the honest comparison for any layout claim, in the ' +
+            'same way that a constant predictor is the honest baseline for a model.',
+          'It also has genuine uses. It is stable under changes to the graph, which matters when a ' +
+            'diagram is regenerated repeatedly.',
+          'And on a graph with a natural cyclic structure it can beat both of the others.'
+        ],
         example: 'On the scale-free graph the three cost 45, 268 and 96 crossings for force, ' +
           'circular and layered.'
       }
