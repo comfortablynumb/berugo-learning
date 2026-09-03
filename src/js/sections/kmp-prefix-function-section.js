@@ -42,32 +42,36 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**A border of a string is a proper prefix that is also a suffix.** The **prefix function** — ' +
+        'the border array, the failure function; three names for one thing — records the longest ' +
+        'border of every prefix of the pattern.',
+      'It is computed in one left-to-right pass whose inner loop looks quadratic and is not. The ' +
+        'border length rises by at most one per position, so across the whole run it can fall at ' +
+        'most n times.',
+      '**The matcher never moves backwards in the text.** On a mismatch after k matched characters ' +
+        'it sets k to the border of the matched prefix, and tries again *at the same text position*. ' +
+        'The border is the longest overlap the text is already known to support.',
+      'The text index only ever increases. That is why KMP is the matcher you can point at a socket, ' +
+        'and why the demo reports a "text positions re-read" column that is always zero.',
+      '**The array answers questions that have nothing to do with searching.** `n − border[n−1]` is ' +
+        'the smallest period of the string, and the string is an exact power exactly when that ' +
+        'period divides n.',
+      'Counting backwards along the border chain gives the number of occurrences of every prefix ' +
+        'inside the pattern. Both are two lines on top of an array you computed for another reason.',
+      '**The automaton view** turns the fallback loop into a table: `next[state][symbol]` with every ' +
+        'failure already resolved, so matching is one lookup per character with no inner loop at all.',
+      'It costs `|alphabet| × (m+1)` cells, and the last panel measures both halves — the ' +
+        'comparisons saved and the cells paid. On a Unicode alphabet the table is the reason nobody ' +
+        'ships this.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'A **border** of a string is a proper prefix that is also a suffix. The **prefix function** ' +
-          '— the border array, the failure function; three names for one thing — records the longest ' +
-          'border of every prefix of the pattern. It is computed in one left-to-right pass whose ' +
-          'inner loop looks quadratic and is not: the border length rises by at most one per ' +
-          'position, so across the whole run it can fall at most n times.',
-        '**The matcher never moves backwards in the text.** On a mismatch after k matched characters ' +
-          'it sets k to the border of the matched prefix and tries again *at the same text ' +
-          'position*, because the border is the longest overlap the text is already known to ' +
-          'support. The text index only ever increases, which is why KMP is the matcher you can ' +
-          'point at a socket, and why the demo reports a "text positions re-read" column that is ' +
-          'always zero.',
-        '**The array answers questions that have nothing to do with searching.** `n − border[n−1]` ' +
-          'is the smallest period of the string, and the string is an exact power exactly when that ' +
-          'period divides n. Counting backwards along the border chain gives the number of ' +
-          'occurrences of every prefix inside the pattern. Both are two lines on top of an array you ' +
-          'computed for another reason.',
-        '**The automaton view** turns the fallback loop into a table: `next[state][symbol]` with ' +
-          'every failure already resolved, so matching is one lookup per character with no inner ' +
-          'loop at all. It costs `|alphabet| × (m+1)` cells, and the last panel measures both halves ' +
-          '— the comparisons saved and the cells paid — because on a Unicode alphabet the table is ' +
-          'the reason nobody ships this.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — the border array, the scan, and four things it answers',
         markup: root.KmpPrefixFunctionTemplate.render()
@@ -75,10 +79,10 @@
       diagram: diagram(),
       insight: 'Under time pressure, implement the prefix function and not KMP. The array is eight ' +
         'lines and hard to get wrong; the matcher on top of it is four more. And once you have the ' +
-        'array, "is this string a repetition of something shorter", "what is its smallest period", ' +
-        '"how many times does each prefix occur" and "what is the minimal rotation" are all one or ' +
-        'two lines each — which is a much better return than one matcher, and it is why the prefix ' +
-        'function shows up in problems that never mention searching.'
+        'array, four more questions are one or two lines each. Is this string a repetition of ' +
+        'something shorter? What is its smallest period? How many times does each prefix occur? ' +
+        'What is the minimal rotation? That is a much better return than one matcher, and it is why ' +
+        'the prefix function shows up in problems that never mention searching.'
     };
   }
 

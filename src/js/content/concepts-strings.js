@@ -174,11 +174,14 @@
         formal: 'border(s) = the longest proper prefix of s that is also a suffix of s',
         readAs: 'The longest stretch that appears both at the start and at the end of the string, without ' +
           'being the whole string — "proper" is what rules that out. On "ababa" it is "aba".',
-        detail: 'The border array records the longest border of every prefix of the pattern, and it ' +
-          'is the single most reusable object in string algorithms. Everything KMP does is a ' +
-          'consequence of one observation: after matching k characters and failing, the longest ' +
-          'overlap the text is *known* to support is the border of those k characters, so the ' +
-          'pattern may slide by `k − border(k)` without re-examining anything.',
+        detail: [
+          'The border array records the longest border of every prefix of the pattern, and it is ' +
+            'the single most reusable object in string algorithms.',
+          'Everything KMP does is a consequence of one observation. After matching k characters and ' +
+            'failing, the longest overlap the text is *known* to support is the border of those k ' +
+            'characters.',
+          'So the pattern may slide by `k − border(k)` without re-examining anything.'
+        ],
         example: 'The array for "ababcabab" is 0, 0, 1, 2, 0, 1, 2, 3, 4 — and its last entry is ' +
           'the border of the whole pattern.'
       },
@@ -186,14 +189,18 @@
         term: 'The construction looks quadratic and is linear',
         plain: 'The inner loop walks a chain of borders, and the chain can only be walked n times in total.',
         formal: 'the border length rises by at most 1 per position, so across n positions it can fall at most n times',
-        readAs: 'The classic amortised argument: a quantity that can only creep up one step at a time cannot ' +
-          'fall more than n times in total, however far each individual fall goes. That is why the ' +
-          'construction is linear despite its inner loop.',
-        detail: 'This is the same amortisation argument as a dynamic array\'s doubling and it is the ' +
-          'only subtle thing in the algorithm. A single position can walk a long chain, so no ' +
-          'per-position bound holds; the total is bounded because every step down the chain is paid ' +
-          'for by an earlier step up, and there are at most n steps up. Recognising this shape is ' +
-          'worth more than the algorithm — it is why "the inner loop looks bad" is not an argument.',
+        readAs: 'The classic amortised argument. A quantity that can only creep up one step at a ' +
+          'time cannot fall more than n times in total, however far each individual fall goes. That ' +
+          'is why the construction is linear despite its inner loop.',
+        detail: [
+          'This is the same amortisation argument as a dynamic array\'s doubling, and it is the only ' +
+            'subtle thing in the algorithm.',
+          'A single position can walk a long chain, so no per-position bound holds. The total is ' +
+            'bounded because every step down the chain is paid for by an earlier step up, and there ' +
+            'are at most n steps up.',
+          'Recognising this shape is worth more than the algorithm. It is why "the inner loop looks ' +
+            'bad" is not an argument.'
+        ],
         example: 'The array for a 9-character pattern costs 9 preprocessing steps; for a 34-character ' +
           'Fibonacci word it costs 38.'
       },
@@ -211,26 +218,32 @@
         },
         plain: 'On a mismatch the pattern slides and the text index stays where it is.',
         formal: 'the text index is monotonically non-decreasing, so the matcher works on a stream that cannot be rewound',
-        detail: 'That property, not the comparison count, is what KMP is for. A matcher that ' +
-          'backtracks in the text needs the text in memory or a seekable file; one that does not can ' +
-          'be pointed at a socket, a pipe or a decompression stream and will report matches as they ' +
-          'arrive. Every other matcher in this milestone except the automaton form needs to look ' +
-          'backwards or forwards, and Boyer-Moore needs to look forwards by up to m.',
+        detail: [
+          'That property, not the comparison count, is what KMP is for.',
+          'A matcher that backtracks in the text needs the text in memory or a seekable file. One ' +
+            'that does not can be pointed at a socket, a pipe or a decompression stream, and will ' +
+            'report matches as they arrive.',
+          'Every other matcher in this milestone except the automaton form needs to look backwards ' +
+            'or forwards, and Boyer-Moore needs to look forwards by up to m.'
+        ],
         example: 'The demo reports a "text positions re-read" column, and it is 0 on every corpus.'
       },
       {
         term: 'The smallest period is one subtraction',
         plain: 'n minus the longest border is the smallest period, and it divides n exactly when the string is a power.',
         formal: 'period(s) = |s| − border(s); s is an exact repetition iff period(s) divides |s|',
-        readAs: 'The period is the length minus the border. When the period divides the length exactly, the ' +
-          'string is some block repeated a whole number of times — which is how you detect a repetition ' +
-          'without ever comparing blocks.',
-        detail: 'This is the most reusable consequence of the array and it has nothing to do with ' +
-          'searching. "Is this string a repetition of something shorter", "what is the shortest ' +
-          'string that generates it", "how many times does it repeat" are all answered by one ' +
-          'subtraction and one modulo on an array you computed for a matcher. It arrives in ' +
-          'compression, in cycle detection, in rotation problems and in half the string questions ' +
-          'that never mention matching.',
+        readAs: 'The period is the length minus the border. When the period divides the length ' +
+          'exactly, the string is some block repeated a whole number of times. That is how you ' +
+          'detect a repetition without ever comparing blocks.',
+        detail: [
+          'This is the most reusable consequence of the array, and it has nothing to do with ' +
+            'searching.',
+          'Three questions are answered by one subtraction and one modulo, on an array you computed ' +
+            'for a matcher. Is this string a repetition of something shorter? What is the shortest ' +
+            'string that generates it? How many times does it repeat?',
+          'It arrives in compression, in cycle detection, in rotation problems, and in half the ' +
+            'string questions that never mention matching.'
+        ],
         example: '"abcabcabcabc" has border 9 and period 3, and 3 divides 12, so it is 4 copies of ' +
           '"abc". Change one character and the period jumps to 12.'
       },
@@ -238,36 +251,45 @@
         term: 'Periodicity is not a robust property',
         plain: 'Change one character of an exact power and the period jumps to the full length.',
         formal: 'the period is a discrete function with no continuity: a single edit can move it from 3 to n',
-        detail: 'That fragility is why "nearly periodic" needs the approximate machinery of 15.8 ' +
-          'rather than this array. A border array tells you exactly whether a string repeats and ' +
-          'tells you nothing at all about whether it almost repeats — and almost-repeating is the ' +
-          'case real data presents. Knowing which of the two questions you are asking decides ' +
-          'whether the answer costs a subtraction or a dynamic-programming grid.',
+        detail: [
+          'That fragility is why "nearly periodic" needs the approximate machinery of 15.8 rather ' +
+            'than this array.',
+          'A border array tells you exactly whether a string repeats, and tells you nothing at all ' +
+            'about whether it almost repeats. Almost-repeating is the case real data presents.',
+          'Knowing which of the two questions you are asking decides whether the answer costs a ' +
+            'subtraction or a dynamic-programming grid.'
+        ],
         example: '"abcabcabc" has period 3; "abcabcabd" has period 9.'
       },
       {
         term: 'The border chain counts every prefix occurrence at once',
         plain: 'Walking the chain backwards gives the number of times each prefix appears in the pattern.',
         formal: 'count[border[i]] accumulates from the end, so one backwards pass answers all n prefixes',
-        detail: 'A second thing the array answers for free, and a good illustration of why the ' +
-          'array rather than the matcher is the object worth learning. The question "how many times ' +
-          'does each prefix of this string occur inside it" sounds like it needs n searches and ' +
-          'needs one backwards loop instead. The same trick underlies counting occurrences of a ' +
-          'pattern in a text with the concatenation from 15.3.',
+        detail: [
+          'A second thing the array answers for free, and a good illustration of why the array ' +
+            'rather than the matcher is the object worth learning.',
+          'The question "how many times does each prefix of this string occur inside it" sounds like ' +
+            'it needs n searches, and needs one backwards loop instead.',
+          'The same trick underlies counting occurrences of a pattern in a text with the ' +
+            'concatenation from 15.3.'
+        ],
         example: 'In "aabaaab" the first character occurs 5 times and the whole string once.'
       },
       {
         term: 'The automaton form trades memory for the inner loop',
         plain: 'Resolve every fallback into a table and matching is one lookup per character.',
         formal: 'next[state][symbol] with all failures precomputed; |alphabet| × (m + 1) cells',
-        readAs: 'Flatten every failure jump into a lookup table so each character costs one array read. The ' +
-          'table has one row per pattern position and one column per possible character, so it grows ' +
-          'with the alphabet — cheap for DNA, expensive for Unicode.',
-        detail: 'The border array keeps a fallback loop that runs zero or more times per character; ' +
-          'the table has no loop at all. The cost is a cell per state per alphabet symbol, so the ' +
-          'decision is entirely about the alphabet: on DNA the table is trivially affordable and on ' +
-          'Unicode it is not. That is why every production matcher that builds a table works over ' +
-          'bytes, and it is the same trade Aho-Corasick makes in 15.6 at a larger scale.',
+        readAs: 'Flatten every failure jump into a lookup table so each character costs one array ' +
+          'read. The table has one row per pattern position and one column per possible character, ' +
+          'so it grows with the alphabet. It is cheap for DNA and expensive for Unicode.',
+        detail: [
+          'The border array keeps a fallback loop that runs zero or more times per character. The ' +
+            'table has no loop at all.',
+          'The cost is a cell per state per alphabet symbol, so the decision is entirely about the ' +
+            'alphabet. On DNA the table is trivially affordable; on Unicode it is not.',
+          'That is why every production matcher that builds a table works over bytes, and it is the ' +
+            'same trade Aho-Corasick makes in 15.6 at a larger scale.'
+        ],
         example: 'A 9-character pattern gives 10 states: 40 cells on DNA and 260 on English, for ' +
           'the identical automaton.'
       },
@@ -275,12 +297,15 @@
         term: 'KMP is often slower than the naive scan on real text',
         plain: 'On English it costs slightly more per character, plus the preprocessing.',
         formal: 'the guarantee is a worst-case bound, and the worst case is not the common case',
-        detail: 'The measurement is the point: KMP\'s value is that its cost does not depend on the ' +
-          'input, not that its cost is low. On natural language the naive scan is already nearly ' +
-          'linear, so a matcher with the same asymptotic cost and a slightly worse constant loses. ' +
-          'What KMP buys is the absence of a cliff — the adversarial corpus that takes the naive ' +
-          'scan to 11.97 comparisons per character takes KMP to about 2 — and that is insurance ' +
-          'rather than speed.',
+        detail: [
+          'The measurement is the point. KMP\'s value is that its cost does not depend on the ' +
+            'input, not that its cost is low.',
+          'On natural language the naive scan is already nearly linear, so a matcher with the same ' +
+            'asymptotic cost and a slightly worse constant loses.',
+          'What KMP buys is the absence of a cliff. The adversarial corpus that takes the naive scan ' +
+            'to 11.97 comparisons per character takes KMP to about 2, and that is insurance rather ' +
+            'than speed.'
+        ],
         example: 'On English, KMP costs 1.08 comparisons per character against the naive scan\'s ' +
           '1.07, plus 9 preprocessing steps.'
       }
