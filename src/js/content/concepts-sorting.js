@@ -24,12 +24,16 @@
         },
         plain: 'Stable, in place, adaptive and comparator-safe are four separate promises, and no sort makes all of them.',
         formal: 'stability × space × adaptivity × comparison model',
-        detail: 'Asking "which sort is fastest" is the wrong question because the answer depends on four ' +
-          'independent axes that are usually collapsed into one. Stability decides whether equal elements keep ' +
-          'their order. In-place decides whether the sort needs a buffer proportional to n. Adaptivity decides ' +
-          'whether existing order is exploited or ignored. And the comparison model decides what happens when ' +
-          'the comparator is not a strict weak ordering. Every algorithm in this milestone picks a different ' +
-          'subset, and the picking is the engineering.',
+        detail: [
+          '"Which sort is fastest" is the wrong question. The answer depends on four independent ' +
+            'axes that are usually collapsed into one.',
+          'Stability decides whether equal elements keep their order. In-place decides whether the ' +
+            'sort needs a buffer proportional to n. Adaptivity decides whether existing order is ' +
+            'exploited or ignored. The comparison model decides what happens when the comparator is ' +
+            'not a strict weak ordering.',
+          'Every algorithm in this milestone picks a different subset, and the picking is the ' +
+            'engineering.'
+        ],
         example: 'Selection sort: unstable, in place, not adaptive - and 1 999 000 comparisons on 2 000 elements of any shape.'
       },
       {
@@ -46,96 +50,125 @@
         },
         plain: 'A stable sort leaves equal elements in the order it found them.',
         formal: 'i < j and key(a[i]) = key(a[j]) implies a[i] precedes a[j] in the output',
-        readAs: 'If two records have equal keys, the one that started earlier finishes earlier. That is the ' +
-          'whole definition of stability, and it is what lets you sort by one field and then another ' +
-          'without destroying the first.',
-        detail: 'Stability is what makes multi-key sorting compose. Sort a table by date, then sort the result ' +
-          'by author, and with a stable sort each author\'s rows are still in date order - the second sort ' +
-          'preserves the first one\'s work. With an unstable sort the second pass scrambles the first, and the ' +
-          'bug appears only where there are ties, which is exactly the data a small test set has least of. It ' +
-          'is also unobservable from the sorted keys alone: to detect it you have to tag each element with ' +
-          'where it started, which is what this milestone\'s harness does for every run.',
+        readAs: 'If two records have equal keys, the one that started earlier finishes earlier. That ' +
+          'is the whole definition of stability, and it is what lets you sort by one field and then ' +
+          'another without destroying the first.',
+        detail: [
+          'Stability is what makes multi-key sorting compose. Sort a table by date, then sort the ' +
+            'result by author. With a stable sort each author\'s rows are still in date order, ' +
+            'because the second sort preserves the first one\'s work.',
+          'With an unstable sort the second pass scrambles the first. The bug appears only where ' +
+            'there are ties, which is exactly the data a small test set has least of.',
+          'It is also unobservable from the sorted keys alone. To detect it you have to tag each ' +
+            'element with where it started, which is what this milestone\'s harness does for every ' +
+            'run.'
+        ],
         example: 'Insertion sort stops shifting at the first element that is not strictly greater; that `>` rather than `>=` is its entire stability.'
       },
       {
         term: 'Adaptivity: paying for the disorder that is actually there',
         plain: 'An adaptive sort costs less on input that is already partly ordered.',
         formal: 'insertion sort is O(n + I) where I is the number of inversions',
-        readAs: 'An inversion is any pair that is currently in the wrong order. Insertion sort costs one step ' +
-          'per element plus one per inversion, so on nearly-sorted data — where there are few ' +
-          'inversions — it is close to linear.',
-        detail: 'Insertion sort\'s cost is not n² - it is the number of inversions, the pairs that are out of ' +
-          'order. On a sorted array there are none and it does n-1 comparisons and no moves at all; on a ' +
-          'reversed array every pair is inverted and it does n(n-1)/2. That is why it is the fallback inside ' +
-          'Timsort and pdqsort: below a few dozen elements a subarray is nearly sorted after partitioning, and ' +
-          'a sort whose cost tracks the remaining disorder is exactly what is wanted. Selection sort has no ' +
-          'such property and never will: it scans the whole remaining range whatever it contains.',
+        readAs: 'An inversion is any pair that is currently in the wrong order. Insertion sort costs ' +
+          'one step per element plus one per inversion. So on nearly-sorted data, where there are ' +
+          'few inversions, it is close to linear.',
+        detail: [
+          'Insertion sort\'s cost is not n². It is the number of inversions — the pairs that are ' +
+            'out of order.',
+          'On a sorted array there are none, and it does n-1 comparisons and no moves at all. On a ' +
+            'reversed array every pair is inverted, and it does n(n-1)/2.',
+          'That is why it is the fallback inside Timsort and pdqsort. Below a few dozen elements a ' +
+            'subarray is nearly sorted after partitioning, and a sort whose cost tracks the ' +
+            'remaining disorder is exactly what is wanted.',
+          'Selection sort has no such property and never will. It scans the whole remaining range ' +
+            'whatever it contains.'
+        ],
         example: 'On 1 000 elements: insertion sort does 999 comparisons on sorted input and about 250 000 on random.'
       },
       {
         term: 'In place, and what it costs',
         plain: 'O(1) extra space, or O(n) - and the trade shows up in the move count.',
         formal: 'auxiliary space, counted separately from the recursion stack',
-        detail: 'Merge sort needs a buffer the size of the array; quicksort needs only its recursion stack. ' +
-          'That is usually where the discussion stops, and it should not, because "in place" is bought with ' +
-          'data movement. Rotation-based in-place merging is O(n log n) comparisons and O(n log² n) moves: ' +
-          'measured on 2 000 random elements it does 102 734 moves where buffered top-down merge does 43 904, ' +
-          'and it allocates nothing. Whether that is a good trade depends on whether memory or bandwidth is ' +
-          'the scarce thing, which is a question about the machine and not about the algorithm.',
+        detail: [
+          'Merge sort needs a buffer the size of the array. Quicksort needs only its recursion ' +
+            'stack. That is usually where the discussion stops, and it should not, because "in ' +
+            'place" is bought with data movement.',
+          'Rotation-based in-place merging is O(n log n) comparisons and O(n log² n) moves. ' +
+            'Measured on 2 000 random elements it does 102 734 moves where buffered top-down merge ' +
+            'does 43 904 — and it allocates nothing.',
+          'Whether that is a good trade depends on whether memory or bandwidth is the scarce thing. ' +
+            'That is a question about the machine, not about the algorithm.'
+        ],
         example: 'In-place merge on 2 000 elements: 0 allocations, 51 367 swaps. Buffered merge: 1 allocation, 0 swaps.'
       },
       {
         term: 'The comparison model, and the bound it implies',
         plain: 'A sort that only compares pairs needs at least log₂(n!) comparisons.',
         formal: 'a decision tree with n! leaves has depth >= log2(n!) ~ n log2 n - 1.44n',
-        readAs: 'Sorting n items has n! possible answers — n factorial, the number of orders they could be in ' +
-          '— and each comparison only halves the possibilities. So you need at least log base 2 of that ' +
-          'many comparisons, which works out at about n log₂ n minus 1.44n.',
-        detail: 'The lower bound is a counting argument, not a statement about cleverness. A comparison sort ' +
-          'is a decision tree: each internal node is a comparison and each leaf is one of the n! possible ' +
-          'orderings. A tree with n! leaves has height at least log₂(n!), which is about n log₂ n. Any ' +
-          'algorithm that learns about its input only through comparisons is subject to it, which is why the ' +
-          'sorts that beat it - counting, radix, bucket - are the ones that read the key\'s structure instead ' +
-          'of comparing it.',
+        readAs: 'Sorting n items has n! possible answers — n factorial, the number of orders they ' +
+          'could be in. Each comparison only halves the possibilities. So you need at least log ' +
+          'base 2 of that many comparisons, which works out at about n log₂ n minus 1.44n.',
+        detail: [
+          'The lower bound is a counting argument, not a statement about cleverness.',
+          'A comparison sort is a decision tree. Each internal node is a comparison, and each leaf ' +
+            'is one of the n! possible orderings. A tree with n! leaves has height at least ' +
+            'log₂(n!), which is about n log₂ n.',
+          'Any algorithm that learns about its input only through comparisons is subject to it. ' +
+            'That is why the sorts which beat it — counting, radix, bucket — are the ones that read ' +
+            'the key\'s structure instead of comparing it.'
+        ],
         example: 'Sorting 2 000 elements needs at least about 19 200 comparisons; Timsort measured 19 399 on random input.'
       },
       {
         term: 'The comparator contract: a strict weak ordering',
         plain: 'Irreflexive on equality, antisymmetric, and transitive - all three, or the sort is undefined.',
         formal: 'compare(x, x) = 0; sign(compare(a, b)) = -sign(compare(b, a)); a < b and b < c implies a < c',
-        readAs: 'The three rules a comparator must obey: an element equals itself, swapping the arguments ' +
-          'flips the sign, and the ordering is transitive. Break any of them and the sort may crash, ' +
-          'loop, or silently produce garbage — none of which points at the comparator.',
-        detail: 'These are not pedantic conditions; they are what the algorithm reasons with. A sort that has ' +
-          'established a < b and b < c will never compare a with c, so if transitivity fails the wrong order ' +
-          'is not detected - it is assumed. C++ calls a violation undefined behaviour, Java throws ' +
-          '"Comparison method violates its general contract" when it happens to notice, and JavaScript does ' +
-          'neither: it returns an array, and the array is not sorted. Which of the three the caller broke ' +
-          'decides how wrong the output looks, and none of them produce a diagnostic.',
+        readAs: 'The three rules a comparator must obey: an element equals itself, swapping the ' +
+          'arguments flips the sign, and the ordering is transitive. Break any of them and the sort ' +
+          'may crash, loop, or silently produce garbage — none of which points at the comparator.',
+        detail: [
+          'These are not pedantic conditions. They are what the algorithm reasons with.',
+          'A sort that has established a < b and b < c will never compare a with c. So if ' +
+            'transitivity fails, the wrong order is not detected. It is assumed.',
+          'C++ calls a violation undefined behaviour. Java throws "Comparison method violates its ' +
+            'general contract" when it happens to notice. JavaScript does neither: it returns an ' +
+            'array, and the array is not sorted.',
+          'Which of the three rules the caller broke decides how wrong the output looks, and none ' +
+            'of them produce a diagnostic.'
+        ],
         example: '`(a, b) => a > b` returns a boolean; `false` coerces to 0, so the sort is told most pairs are equal.'
       },
       {
         term: 'Counting the right things: comparisons, moves, swaps, allocations',
         plain: 'Four separate budgets, because algorithms trade between them.',
         formal: 'a swap is two moves; an allocation is a buffer, not an element',
-        detail: 'Collapsing the counters into one "operations" figure hides exactly what each algorithm is ' +
-          'about. Selection sort does the most comparisons of any sort in this milestone and almost the ' +
-          'fewest moves - at most n-1 swaps - which is the right trade when an element is a kilobyte and a key ' +
-          'is an integer. Merge sort does few comparisons and many moves. An in-place merge trades allocations ' +
-          'for moves. Every readout in this milestone names its counter for that reason, and no figure here ' +
-          'is a time unless a run count travels with it.',
+        detail: [
+          'Collapsing the counters into one "operations" figure hides exactly what each algorithm ' +
+            'is about.',
+          'Selection sort does the most comparisons of any sort in this milestone and almost the ' +
+            'fewest moves — at most n-1 swaps. That is the right trade when an element is a ' +
+            'kilobyte and a key is an integer.',
+          'Merge sort does few comparisons and many moves. An in-place merge trades allocations for ' +
+            'moves.',
+          'Every readout in this milestone names its counter for that reason, and no figure here is ' +
+            'a time unless a run count travels with it.'
+        ],
         example: 'Selection sort on 2 000 random elements: 1 999 000 comparisons, 3 984 moves. Bubble sort: 1 994 247 comparisons, 1 983 686 moves.'
       },
       {
         term: 'Elementary sorts are not obsolete, they are the base case',
         plain: 'Below a few dozen elements, the simple sort with the small constant wins.',
         formal: 'insertion sort is the cutoff routine inside introsort, Timsort and pdqsort',
-        detail: 'Asymptotics describe behaviour as n grows and say nothing about n = 20, where the constant ' +
-          'factor is everything: no recursion, no buffer, sequential access and a branch predictor that ' +
-          'guesses right. Every production sort in this milestone falls back to insertion sort below a ' +
-          'threshold - 16 elements for introsort, 24 for pdqsort, and Timsort\'s minrun of 16 to 32 is the ' +
-          'same idea in a different shape. The elementary sorts are not a historical section; they are the ' +
-          'innermost loop of the sophisticated ones.',
+        detail: [
+          'Asymptotics describe behaviour as n grows, and say nothing about n = 20. There the ' +
+            'constant factor is everything: no recursion, no buffer, sequential access, and a ' +
+            'branch predictor that guesses right.',
+          'Every production sort in this milestone falls back to insertion sort below a threshold. ' +
+            'It is 16 elements for introsort and 24 for pdqsort, and Timsort\'s minrun of 16 to 32 ' +
+            'is the same idea in a different shape.',
+          'The elementary sorts are not a historical section. They are the innermost loop of the ' +
+            'sophisticated ones.'
+        ],
         example: 'pdqsort switches to insertion sort at 24 elements; Timsort pads every natural run up to minrun with a binary insertion sort.'
       }
     ],

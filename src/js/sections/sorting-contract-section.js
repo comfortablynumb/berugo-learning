@@ -53,35 +53,39 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'A sort is not one operation with one cost. It is a contract with four independent clauses - is it ' +
-          'stable, is it in place, is it adaptive, and what does it assume about the comparator - and every ' +
-          'algorithm in this milestone satisfies a different subset. Selection sort does exactly ' +
-          'n(n−1)/2 = 1 999 000 comparisons on 2 000 elements whether they arrive sorted, reversed or shuffled; ' +
-          'insertion sort does 1 999 on the sorted one and 993 838 on the random one. Those are the same two ' +
-          'algorithms on the same data, and the ranking between them depends entirely on the shape of the input.',
-        'Stability is the clause that is load-bearing and invisible. A stable sort leaves equal elements in the ' +
-          'order it found them, which is what makes "sort by date, then sort by author" produce authors in date ' +
-          'order rather than a scramble. Insertion and bubble sort are stable because they only ever move an ' +
-          'element past something strictly greater; selection sort is not, because it swaps the minimum in from ' +
-          'a distance and throws whatever was there over its equals. That is a three-line difference in the ' +
-          'code and a different guarantee for every caller.',
-        'The comparator is the clause with teeth. A comparison sort assumes a strict weak ordering - irreflexive ' +
-          'on equality, antisymmetric, transitive - and C++ calls a violation undefined behaviour, Java throws ' +
-          '"Comparison method violates its general contract", and JavaScript does neither. It returns an array. ' +
-          'The array is not sorted, nothing was logged, and the demo below runs four broken comparators through ' +
-          'the platform\'s own sort to show exactly what comes back.'
+        '**A sort is not one operation with one cost.** It is a contract with four independent ' +
+          'clauses: is it stable, is it in place, is it adaptive, and what does it assume about ' +
+          'the comparator? Every algorithm in this milestone satisfies a different subset.',
+        'Selection sort does exactly n(n−1)/2 = 1 999 000 comparisons on 2 000 elements, whether ' +
+          'they arrive sorted, reversed or shuffled. Insertion sort does 1 999 on the sorted one ' +
+          'and 993 838 on the random one. Same two algorithms, same data — and the ranking ' +
+          'between them depends entirely on the shape of the input.',
+        'Stability is the clause that is load-bearing and invisible. A stable sort leaves equal ' +
+          'elements in the order it found them. That is what makes "sort by date, then sort by ' +
+          'author" produce authors in date order rather than a scramble.',
+        'Insertion and bubble sort are stable because they only ever move an element past ' +
+          'something strictly greater. Selection sort is not: it swaps the minimum in from a ' +
+          'distance and throws whatever was there over its equals. That is a three-line ' +
+          'difference in the code, and a different guarantee for every caller.',
+        'The comparator is the clause with teeth. A comparison sort assumes a strict weak ' +
+          'ordering — irreflexive on equality, antisymmetric, transitive. C++ calls a violation ' +
+          'undefined behaviour, and Java throws "Comparison method violates its general ' +
+          'contract". JavaScript does neither. It returns an array, the array is not sorted, and ' +
+          'nothing was logged. The demo below runs four broken comparators through the ' +
+          'platform\'s own sort to show exactly what comes back.'
       ],
       demo: {
         title: 'Interactive demo — four sorts, one input, and a comparator that lies',
         markup: root.SortingContractTemplate.render()
       },
       diagram: diagram(),
-      insight: 'An inconsistent comparator is undefined behaviour in C++ and an exception in Java, and in ' +
-        'JavaScript it is a wrong answer with no diagnostic at all. `(a, b) => a > b` is the common form: it ' +
-        'returns `true` or `false`, `false` becomes 0, and the sort is told that half the pairs it asked about ' +
-        'are equal. The result is an array that is *nearly* sorted, which is the worst possible outcome because ' +
-        'it survives a glance. Write comparators that return a number, and if a sort ever produces something ' +
-        'almost right, suspect the comparator before the algorithm.'
+      insight: 'An inconsistent comparator is undefined behaviour in C++ and an exception in ' +
+        'Java. In JavaScript it is a wrong answer with no diagnostic at all. `(a, b) => a > b` is ' +
+        'the common form. It returns `true` or `false`, `false` becomes 0, and the sort is told ' +
+        'that half the pairs it asked about are equal. The result is an array that is *nearly* ' +
+        'sorted, which is the worst possible outcome, because it survives a glance. Write ' +
+        'comparators that return a number — and if a sort ever produces something almost right, ' +
+        'suspect the comparator before the algorithm.'
     };
   }
 
