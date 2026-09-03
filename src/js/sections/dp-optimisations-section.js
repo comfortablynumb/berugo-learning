@@ -47,37 +47,43 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'A DP whose transition looks at every earlier state is quadratic, and there are four standard ways ' +
-          'to make it not be. The **convex hull trick** applies when the transition cost is linear in a ' +
-          'query value: expand the square and `dp[i] + (P[j] − P[i])²` becomes the minimum of a set of ' +
-          'lines evaluated at P[j]. **Divide and conquer optimisation** applies when the optimal split ' +
-          'point is monotone. The **monotonic queue** applies when the transition looks at a sliding ' +
-          'window. The **Lagrangian trick** turns "exactly k groups" into a search over a penalty.',
-        '**Every one of them has a precondition, and every one of them is silently wrong without it.** ' +
-          'The hull needs decreasing slopes and increasing queries, which for this cost function means ' +
-          'non-negative values. Divide and conquer needs the argmin to be monotone. The Lagrangian trick ' +
-          'needs the cost to be convex in the group count. None of these produce an error when violated; ' +
-          'they produce a number that is too large, computed faster.',
-        '**So the solvers here refuse.** Each one tests its precondition against the actual instance and ' +
-          'returns `refused: true` with a witness rather than an answer. `force: true` is how the demo ' +
-          'shows what running it anyway produces — and the panel below prints that number next to the ' +
-          'correct one so the failure is visible rather than described.',
-        '**Li Chao is the one that gives up the preconditions.** It answers the same minimum-of-lines ' +
-          'query with lines added in any order and queried in any order, for a log factor. That is the ' +
-          'trade worth remembering: the hull is faster and the tree is the one still correct when the ' +
-          'data stops cooperating, which in practice is most of the time.'
+        '**A DP whose transition looks at every earlier state is quadratic, and there are four ' +
+          'standard ways to make it not be.**',
+        'The **convex hull trick** applies when the transition cost is linear in a query value. ' +
+          'Expand the square and `dp[i] + (P[j] − P[i])²` becomes the minimum of a set of lines ' +
+          'evaluated at P[j]. **Divide and conquer optimisation** applies when the optimal split ' +
+          'point is monotone. The **monotonic queue** applies when the transition looks at a ' +
+          'sliding window. The **Lagrangian trick** turns "exactly k groups" into a search over a ' +
+          'penalty.',
+        '**Every one of them has a precondition, and every one of them is silently wrong without ' +
+          'it.** The hull needs decreasing slopes and increasing queries, which for this cost ' +
+          'function means non-negative values. Divide and conquer needs the argmin to be ' +
+          'monotone. The Lagrangian trick needs the cost to be convex in the group count.',
+        'None of these produce an error when violated. They produce a number that is too large, ' +
+          'computed faster.',
+        '**So the solvers here refuse.** Each one tests its precondition against the actual ' +
+          'instance, and returns `refused: true` with a witness rather than an answer.',
+        '`force: true` is how the demo shows what running it anyway produces. The panel below ' +
+          'prints that number next to the correct one, so the failure is visible rather than ' +
+          'described.',
+        '**Li Chao is the one that gives up the preconditions.** It answers the same ' +
+          'minimum-of-lines query with lines added in any order and queried in any order, for a ' +
+          'log factor.',
+        'That is the trade worth remembering. The hull is faster; the tree is the one still ' +
+          'correct when the data stops cooperating, which in practice is most of the time.'
       ],
       demo: {
         title: 'Interactive demo — four narrowings, and what each one needs to be true',
         markup: root.DpOptimisationsTemplate.render()
       },
       diagram: diagram(),
-      insight: 'Treat every DP optimisation as a claim with a proof obligation attached, and discharge the ' +
-        'obligation in a test rather than in your head. The test is cheap: run the optimised and ' +
-        'unoptimised versions on a few hundred random instances and assert the values are equal. That one ' +
-        'test catches every precondition violation there is, including the ones you did not know the ' +
-        'optimisation had, and it keeps catching them when somebody later changes the cost function and ' +
-        'does not realise the optimisation depended on its shape.'
+      insight: 'Treat every DP optimisation as a claim with a proof obligation attached, and ' +
+        'discharge the obligation in a test rather than in your head. The test is cheap. Run the ' +
+        'optimised and unoptimised versions on a few hundred random instances, and assert the ' +
+        'values are equal. That one test catches every precondition violation there is, ' +
+        'including the ones you did not know the optimisation had. And it keeps catching them ' +
+        'when somebody later changes the cost function and does not realise the optimisation ' +
+        'depended on its shape.'
     };
   }
 

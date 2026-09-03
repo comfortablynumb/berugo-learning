@@ -21,15 +21,18 @@
         },
         plain: 'These techniques do not compute faster; they look at fewer candidates.',
         formal: 'each replaces argmin over [0, j) with argmin over a subset S(j) ⊆ [0, j)',
-        readAs: 'Every optimisation in this section does the same thing: instead of searching all previous ' +
-          'positions for the best predecessor, prove that only a few of them can ever win, and search ' +
-          'those. The ⊆ means that smaller set sits inside the full range.',
-        detail: 'The convex hull trick, divide-and-conquer optimisation, the monotonic queue and Knuth\'s ' +
-          'optimisation all restrict which earlier states a transition considers. That is why the failure ' +
-          'mode is uniform across the family and uniformly nasty: when the precondition is false the ' +
-          'restricted set can exclude the true optimum, so the answer is worse, the run is faster, and ' +
-          'nothing raises. A fast wrong answer passes review and passes benchmarking, which makes it the ' +
-          'most expensive kind of defect to ship.',
+        readAs: 'Every optimisation in this section does the same thing. Instead of searching all ' +
+          'previous positions for the best predecessor, prove that only a few of them can ever ' +
+          'win, and search those. The ⊆ means that smaller set sits inside the full range.',
+        detail: [
+          'The convex hull trick, divide-and-conquer optimisation, the monotonic queue and ' +
+            'Knuth\'s optimisation all restrict which earlier states a transition considers.',
+          'That is why the failure mode is uniform across the family, and uniformly nasty. When ' +
+            'the precondition is false the restricted set can exclude the true optimum, so the ' +
+            'answer is worse, the run is faster, and nothing raises.',
+          'A fast wrong answer passes review and passes benchmarking, which makes it the most ' +
+            'expensive kind of defect to ship.'
+        ],
         example: 'The hull on 400 elements evaluates 783 transitions against the quadratic reference\'s ' +
           '80 200 — the same value of 80 131, and only because the preconditions hold.'
       },
@@ -37,15 +40,18 @@
         term: 'The convex hull trick, derived',
         plain: 'Expand the square and the transition becomes the minimum of a set of lines.',
         formal: 'dp[j] = P[j]² + c + min over i of ((−2P[i])·P[j] + dp[i] + P[i]²)',
-        readAs: 'Rewritten this way, each earlier position i contributes a straight line in P[j]: slope ' +
-          '−2P[i], intercept dp[i] + P[i]². Minimising over i is then asking which of a set of lines is ' +
-          'lowest at a given x — which is a geometry problem with a fast answer.',
-        detail: 'The rewriting *is* the technique and everything else is bookkeeping. A cost of the form ' +
-          '(P[j] − P[i])² expands into a term depending only on j, a term depending only on i, and a cross ' +
-          'term linear in P[j] - so each earlier state contributes a line y = m·x + c with m = −2P[i], and ' +
-          'the best transition at j is the lowest line at x = P[j]. Once the problem is a minimum over ' +
-          'lines, only the lines on the lower envelope can ever win, and the rest can be discarded as soon ' +
-          'as that is known.',
+        readAs: 'Rewritten this way, each earlier position i contributes a straight line in P[j]: ' +
+          'slope −2P[i], intercept dp[i] + P[i]². Minimising over i is then asking which of a set ' +
+          'of lines is lowest at a given x, which is a geometry problem with a fast answer.',
+        detail: [
+          'The rewriting *is* the technique, and everything else is bookkeeping.',
+          'A cost of the form (P[j] − P[i])² expands into a term depending only on j, a term ' +
+            'depending only on i, and a cross term linear in P[j]. So each earlier state ' +
+            'contributes a line y = m·x + c with m = −2P[i], and the best transition at j is the ' +
+            'lowest line at x = P[j].',
+          'Once the problem is a minimum over lines, only the lines on the lower envelope can ever ' +
+            'win. The rest can be discarded as soon as that is known.'
+        ],
         example: 'On 400 elements the hull holds 385 lines at its largest, and the pointer walk over them ' +
           'costs 783 evaluations in total.'
       },
@@ -53,12 +59,15 @@
         term: 'The hull needs monotone slopes and monotone queries',
         plain: 'Lines must arrive with falling slopes and queries must arrive with rising x.',
         formal: 'both hold iff the prefix sums are non-decreasing, which needs non-negative values',
-        detail: 'The monotone hull is a stack plus a forward-only pointer, and both parts depend on order. ' +
-          'Slopes arriving out of order break the stack\'s "is this line now useless" test; queries moving ' +
-          'backwards break the pointer, which never returns. For the grouping cost the slopes are −2P[i] ' +
-          'and the queries are P[j], so both are monotone exactly when the prefix sums rise - which is a ' +
-          'statement about the data rather than about the algorithm, and is therefore worth testing on the ' +
-          'actual instance.',
+        detail: [
+          'The monotone hull is a stack plus a forward-only pointer, and both parts depend on ' +
+            'order.',
+          'Slopes arriving out of order break the stack\'s "is this line now useless" test. ' +
+            'Queries moving backwards break the pointer, which never returns.',
+          'For the grouping cost the slopes are −2P[i] and the queries are P[j], so both are ' +
+            'monotone exactly when the prefix sums rise. That is a statement about the data rather ' +
+            'than about the algorithm, and is therefore worth testing on the actual instance.'
+        ],
         example: 'One negative value in a 60-element sequence makes the prefix sums fall at index 2, and the ' +
           'guarded solver refuses rather than answering.'
       },
@@ -66,11 +75,14 @@
         term: 'Li Chao trades a log factor for the preconditions',
         plain: 'The same minimum-of-lines query with lines and queries in any order.',
         formal: 'a segment tree over x, each node holding the line that wins at its midpoint; O(log range) per operation',
-        detail: 'This is the honest alternative when the data does not cooperate, and in practice the data ' +
-          'usually does not. Li Chao gives up the hull\'s amortised O(1) and gains complete independence ' +
-          'from arrival order, which is a good trade whenever the input is not under your control. Knowing ' +
-          'both, and knowing which precondition each one needs, is what turns "use the convex hull trick" ' +
-          'from a memorised move into a decision.',
+        detail: [
+          'This is the honest alternative when the data does not cooperate, and in practice the ' +
+            'data usually does not.',
+          'Li Chao gives up the hull\'s amortised O(1) and gains complete independence from ' +
+            'arrival order. That is a good trade whenever the input is not under your control.',
+          'Knowing both, and knowing which precondition each one needs, is what turns "use the ' +
+            'convex hull trick" from a memorised move into a decision.'
+        ],
         example: 'Fifty lines inserted in random order and queried at arbitrary points: Li Chao agrees with ' +
           'a direct minimum over all fifty at every query.'
       },
@@ -78,14 +90,18 @@
         term: 'Divide and conquer optimisation needs a monotone argmin',
         plain: 'If the best split point never moves backwards, solving the middle bounds both halves.',
         formal: 'opt(j) non-decreasing in j ⟹ solving the middle j gives ranges for the left and right recursions',
-        readAs: 'If the best predecessor only ever moves rightwards, then solving the middle position pins ' +
-          'down where the left and right halves must look. Recursing on that gives n log n instead of ' +
-          'n².',
-        detail: 'Settle the middle index of a layer first, and its optimum splits the candidate range for ' +
-          'everything on either side. Recursing gives O(n log n) per layer instead of O(n²), and the ' +
-          'precondition is that the argmin is monotone. Checking that precondition is itself quadratic - it ' +
-          'requires computing every argmin the slow way - which is exactly right: the check belongs in a ' +
-          'test, at test sizes, not in the production path.',
+        readAs: 'If the best predecessor only ever moves rightwards, then solving the middle ' +
+          'position pins down where the left and right halves must look. Recursing on that gives ' +
+          'n log n instead of n².',
+        detail: [
+          'Settle the middle index of a layer first, and its optimum splits the candidate range ' +
+            'for everything on either side.',
+          'Recursing gives O(n log n) per layer instead of O(n²), and the precondition is that the ' +
+            'argmin is monotone.',
+          'Checking that precondition is itself quadratic, because it requires computing every ' +
+            'argmin the slow way. That is exactly right: the check belongs in a test, at test ' +
+            'sizes, not in the production path.'
+        ],
         example: 'Splitting 120 values into 4 groups: 29 040 transitions unoptimised and 3 262 with the ' +
           'divide-and-conquer bound, for the identical value of 453 673.'
       },
@@ -93,14 +109,18 @@
         term: 'The monotonic queue, applied to a transition',
         plain: 'When the transition looks back over a sliding window, the deque from M11.7 applies unchanged.',
         formal: 'dp[j] = min over i in [j − w, j − 1] of dp[i] + cost(j); the front of the deque is that minimum',
-        readAs: 'When only a fixed window of previous positions is eligible, a monotone deque keeps the ' +
-          'minimum of that window available in constant time — the same sliding-window trick as in M11.',
-        detail: 'This is the least glamorous of the four and the most reusable, because "the transition ' +
-          'looks at the previous w states" is an extremely common shape. Each index enters the deque once ' +
-          'and leaves once, so the whole sweep is linear regardless of the window width, while the rescan ' +
-          'is proportional to it. It is the same amortisation argument as the sliding-window maximum, ' +
-          'moved from an array query to a DP transition - and the bounded knapsack\'s deque variant is ' +
-          'this technique in yet another disguise.',
+        readAs: 'When only a fixed window of previous positions is eligible, a monotone deque ' +
+          'keeps the minimum of that window available in constant time. It is the same ' +
+          'sliding-window trick as in M11.',
+        detail: [
+          'This is the least glamorous of the four and the most reusable, because "the transition ' +
+            'looks at the previous w states" is an extremely common shape.',
+          'Each index enters the deque once and leaves once, so the whole sweep is linear ' +
+            'regardless of the window width. The rescan is proportional to it.',
+          'It is the same amortisation argument as the sliding-window maximum, moved from an array ' +
+            'query to a DP transition. The bounded knapsack\'s deque variant is this technique in ' +
+            'yet another disguise.'
+        ],
         example: 'A window of 50 over 400 elements: 400 transitions with the deque against 18 775 with the ' +
           'rescan, and the same answer of 30.'
       },
@@ -108,14 +128,19 @@
         term: 'The Lagrangian (aliens) trick',
         plain: 'Price a group, binary-search the price, and "exactly k" falls out of the unconstrained problem.',
         formal: 'solve with penalty λ per group; the optimal group count is monotone in λ; subtract k·λ at the end',
-        readAs: 'The Lagrangian trick: instead of forcing exactly k groups, charge a fee λ per group and ' +
-          'binary-search λ until the solver naturally chooses k. Then subtract the fees you charged.',
-        detail: 'A constraint of the form "use exactly k of something" usually adds a dimension to the DP ' +
-          'and multiplies the cost by k. The Lagrangian move removes the dimension by charging λ per use ' +
-          'and searching for the λ at which the unconstrained optimum happens to use exactly k. It needs ' +
-          'the cost to be convex in k, and its honest failure is that the group count can jump straight ' +
-          'over the target - in which case reporting that is the only correct answer, because an answer ' +
-          'for k − 1 is not an answer for k.',
+        readAs: 'The Lagrangian trick: instead of forcing exactly k groups, charge a fee λ per ' +
+          'group and binary-search λ until the solver naturally chooses k. Then subtract the fees ' +
+          'you charged.',
+        detail: [
+          'A constraint of the form "use exactly k of something" usually adds a dimension to the ' +
+            'DP, and multiplies the cost by k.',
+          'The Lagrangian move removes the dimension by charging λ per use, and searching for the ' +
+            'λ at which the unconstrained optimum happens to use exactly k. It needs the cost to ' +
+            'be convex in k.',
+          'Its honest failure is that the group count can jump straight over the target. Reporting ' +
+            'that is then the only correct answer, because an answer for k − 1 is not an answer ' +
+            'for k.'
+        ],
         example: 'Splitting 120 values into exactly 4 groups: the penalty search lands at λ ≈ 90 646 and ' +
           'recovers 453 673, matching the two-dimensional DP.'
       },
@@ -123,14 +148,17 @@
         term: 'Test the optimised against the unoptimised',
         plain: 'One property test over random instances catches every precondition violation there is.',
         formal: '∀ instances: optimised(instance) = reference(instance), asserted on values not on timings',
-        readAs: 'For every instance — the ∀ is "for all" — the fast version and the plain one must agree on ' +
-          'the answer. The test is on values, never on how long each took.',
-        detail: 'Each of these techniques has a proof obligation, and discharging it in a test is far more ' +
-          'reliable than discharging it in your head. Running both versions on a few hundred random ' +
-          'instances and asserting the values are equal catches violations you knew about and violations ' +
-          'you did not - and it keeps catching them later, when somebody changes the cost function and does ' +
-          'not realise the optimisation depended on its shape. The reference implementation is not dead ' +
-          'code; it is the test.',
+        readAs: 'For every instance — the ∀ is "for all" — the fast version and the plain one must ' +
+          'agree on the answer. The test is on values, never on how long each took.',
+        detail: [
+          'Each of these techniques has a proof obligation, and discharging it in a test is far ' +
+            'more reliable than discharging it in your head.',
+          'Run both versions on a few hundred random instances and assert the values are equal. ' +
+            'That catches violations you knew about and violations you did not.',
+          'It also keeps catching them later, when somebody changes the cost function and does not ' +
+            'realise the optimisation depended on its shape. The reference implementation is not ' +
+            'dead code. It is the test.'
+        ],
         example: 'The quadratic reference and the hull agree at 80 131 on the default instance, and the ' +
           'reference is the only reason that number can be trusted.'
       }
