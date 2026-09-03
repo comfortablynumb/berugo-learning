@@ -29,31 +29,35 @@
     });
   }
 
+  function orientation() {
+    return [
+      '**Merge sort is one operation — merging two sorted runs into one — plus a decision ' +
+        'about what order to do the merges in.** Top-down recursion, bottom-up doubling and ' +
+        'natural run detection are three answers to that scheduling question. They perform the ' +
+        'same merges; what differs is the bookkeeping.',
+      'On 2 000 random elements the top-down and bottom-up schedules do 19 407 and 19 420 ' +
+        'comparisons, the same to within noise. But they do 43 904 against 24 000 moves. The ' +
+        'textbook recursion copies the merged range back into the array at every level, and ' +
+        'the bottom-up loop swaps the two buffers instead.',
+      'Stability is one character. The merge takes from the left run when the two heads compare ' +
+        'equal, so an element that started earlier stays earlier. Change that `<=` to `<` and ' +
+        'the sort still returns a correctly ordered array, while silently ceasing to be stable. ' +
+        'No test of the output alone catches it, which is why every element in this demo ' +
+        'carries the index it started at.',
+      'Natural merge sort is the variant that matters in practice, and the direct ancestor of ' +
+        'Timsort. It finds the ascending runs already present and merges those. On ' +
+        'already-sorted input it finds one run, performs zero merges and costs 2 000 ' +
+        'comparisons — a single linear scan.',
+      'A strictly descending stretch is reversed in place and counted as a run too, which is ' +
+        'why reversed input is also one pass. The descent test has to be *strict* for that ' +
+        'reversal to be safe, and that is the whole reason Timsort uses strict descent too.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**Merge sort is one operation — merging two sorted runs into one — plus a decision ' +
-          'about what order to do the merges in.** Top-down recursion, bottom-up doubling and ' +
-          'natural run detection are three answers to that scheduling question. They perform the ' +
-          'same merges; what differs is the bookkeeping.',
-        'On 2 000 random elements the top-down and bottom-up schedules do 19 407 and 19 420 ' +
-          'comparisons, the same to within noise. But they do 43 904 against 24 000 moves. The ' +
-          'textbook recursion copies the merged range back into the array at every level, and ' +
-          'the bottom-up loop swaps the two buffers instead.',
-        'Stability is one character. The merge takes from the left run when the two heads compare ' +
-          'equal, so an element that started earlier stays earlier. Change that `<=` to `<` and ' +
-          'the sort still returns a correctly ordered array, while silently ceasing to be stable. ' +
-          'No test of the output alone catches it, which is why every element in this demo ' +
-          'carries the index it started at.',
-        'Natural merge sort is the variant that matters in practice, and the direct ancestor of ' +
-          'Timsort. It finds the ascending runs already present and merges those. On ' +
-          'already-sorted input it finds one run, performs zero merges and costs 2 000 ' +
-          'comparisons — a single linear scan.',
-        'A strictly descending stretch is reversed in place and counted as a run too, which is ' +
-          'why reversed input is also one pass. The descent test has to be *strict* for that ' +
-          'reversal to be safe, and that is the whole reason Timsort uses strict descent too.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — four schedules, the runs they find, and what each one costs',
         markup: root.MergeSortTemplate.render()

@@ -25,29 +25,37 @@
     });
   }
 
+  function orientation() {
+    return [
+      '**Quickselect is quicksort that recurses into one side only, and that single change is ' +
+        'the whole result.** Quicksort\'s recurrence is T(n) = 2T(n/2) + n, which sums to ' +
+        'n log n because every level still handles the whole array. Quickselect\'s is ' +
+        'T(n) = T(n/2) + n, which sums to 2n because the work halves at every level.',
+      'Measured on 20 000 random elements, it costs 2.99 comparisons per element to find the ' +
+        'median, where sorting the same array and indexing it costs 12.99. That is the mean of ' +
+        'seven pivot seeds, because a single run is one sample of an expectation.',
+      'Median of medians is the guarantee, and its constant is the reason people are surprised ' +
+        'by it. Split into groups of five, take each group\'s median, recursively select the ' +
+        'median of those, and use that as the pivot. It provably discards at least 3n/10 ' +
+        'elements per step, so the worst case is linear.',
+      'The measured cost is 8.10 comparisons per element at 20 000 and 8.27 at 80 000 — flat, ' +
+        'and about 2.7 times quickselect\'s expected cost. You pay it on every input, to remove ' +
+        'a worst case most workloads never see. It is the right choice when an adversary picks ' +
+        'your input, and the wrong one otherwise.',
+      'The question usually asked is not "the k-th smallest" but "the top k", and those have ' +
+        'different answers. A bounded max-heap of size k is one pass, O(n log k), and never ' +
+        'needs the array in memory. That makes it the streaming answer, and the one that works ' +
+        'when n does not fit.',
+      'Quickselect is O(n), needs the whole array, and permutes it. Neither dominates. The heap ' +
+        'wins on a stream, the select wins on an array, and "sort then take k" is fine until it ' +
+        'is not.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'Quickselect is quicksort that recurses into one side only, and that single change is the whole ' +
-          'result. Quicksort\'s recurrence is T(n) = 2T(n/2) + n, which sums to n log n because every level ' +
-          'still handles the whole array. Quickselect\'s is T(n) = T(n/2) + n, which sums to 2n because the ' +
-          'work halves at every level. Measured on 20 000 random elements - the mean of seven pivot seeds, ' +
-          'because a single run is one sample of an expectation - it costs 2.99 comparisons per element to ' +
-          'find the median, where sorting the same array and indexing it costs 12.99.',
-        'Median of medians is the guarantee, and its constant is the reason people are surprised by it. Split ' +
-          'into groups of five, take each group\'s median, recursively select the median of those, and use ' +
-          'that as the pivot: it provably discards at least 3n/10 elements per step, so the worst case is ' +
-          'linear. The measured cost is 8.10 comparisons per element at 20 000 and 8.27 at 80 000 - flat, and ' +
-          'about 2.7 times quickselect\'s expected cost, paid on every input to remove a worst case most ' +
-          'workloads never see. It is the right choice when an adversary picks your input and the wrong one ' +
-          'otherwise.',
-        'The question usually asked is not "the k-th smallest" but "the top k", and those have different ' +
-          'answers. A bounded max-heap of size k is one pass, O(n log k), and never needs the array in memory ' +
-          '- so it is the streaming answer, and the one that works when n does not fit. Quickselect is O(n) ' +
-          'and needs the whole array and permutes it. Neither dominates: the heap wins on a stream, the ' +
-          'select wins on an array, and "sort then take k" is fine until it is not.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — three constants, one element to find',
         markup: root.SelectionAndOrderTemplate.render()
@@ -66,12 +74,13 @@
           '    F --> G["at least 3n/10 discarded — recurse on at most 7n/10"]'
         ].join('\n')
       },
-      insight: '"Sort then take the k-th" is O(n log n) and is usually the right answer, because it is one ' +
-        'line and the log factor is a factor of about four at twenty thousand elements rather than a factor ' +
-        'of a thousand. The moment it stops being the right answer is when the sort is the hot path and k is a ' +
-        'single element - and then the answer is quickselect, not a faster sort. Reaching for a cleverer sort ' +
-        'to answer a selection question is the mistake: the problem is not that the sort is slow, it is that ' +
-        'you are computing an order you asked one question about.'
+      insight: '"Sort then take the k-th" is O(n log n) and is usually the right answer. It is ' +
+        'one line, and the log factor is a factor of about four at twenty thousand elements ' +
+        'rather than a factor of a thousand. It stops being the right answer when the sort is ' +
+        'the hot path and k is a single element, and then the answer is quickselect, not a ' +
+        'faster sort. Reaching for a cleverer sort to answer a selection question is the ' +
+        'mistake. The problem is not that the sort is slow. It is that you are computing an ' +
+        'order you asked one question about.'
     };
   }
 

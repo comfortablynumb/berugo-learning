@@ -24,31 +24,35 @@
     });
   }
 
+  function orientation() {
+    return [
+      '**The Ω(n log n) bound is a statement about a *model*, not about sorting.** It says an ' +
+        'algorithm that learns about its input only by comparing pairs needs that many ' +
+        'comparisons, because a decision tree with n! leaves has depth at least log₂(n!).',
+      'Counting sort and radix sort do not compare anything. They read the key as an index, or ' +
+        'as a sequence of digits. The demo below reports zero comparisons for every radix run, ' +
+        'and that is not a measurement error. It is what escaping the model means.',
+      'What they pay instead is a constraint on the key. Counting sort allocates one counter ' +
+        'per possible value, so the memory is decided by the key range and not by n. A thousand ' +
+        'values with byte-sized keys need a 1 024-byte table, and beat a comparison sort. A ' +
+        'thousand 32-bit integers sorted the same way need 17 179 869 184 bytes.',
+      'Radix sort fixes that by processing the key a digit at a time. Eight bits gives 256 ' +
+        'buckets and four passes over 32-bit keys, which turns a memory problem into a ' +
+        'pass-count problem.',
+      'LSD radix has a precondition that is easy to state and easy to break: every digit pass ' +
+        'must be stable. The pass on digit 1 must leave elements with equal digit-1 values in ' +
+        'the order digit 0 put them, or everything the earlier passes established is undone.',
+      'It is one line — scatter backwards through the input while decrementing the bucket ' +
+        'cursor, not forwards — and the demo runs both. With a narrow key range only one pass ' +
+        'matters, and the unstable version still produces sorted output with the ties reordered. ' +
+        'With a wide range four passes matter, and the output is simply wrong.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**The Ω(n log n) bound is a statement about a *model*, not about sorting.** It says an ' +
-          'algorithm that learns about its input only by comparing pairs needs that many ' +
-          'comparisons, because a decision tree with n! leaves has depth at least log₂(n!).',
-        'Counting sort and radix sort do not compare anything. They read the key as an index, or ' +
-          'as a sequence of digits. The demo below reports zero comparisons for every radix run, ' +
-          'and that is not a measurement error. It is what escaping the model means.',
-        'What they pay instead is a constraint on the key. Counting sort allocates one counter ' +
-          'per possible value, so the memory is decided by the key range and not by n. A thousand ' +
-          'values with byte-sized keys need a 1 024-byte table, and beat a comparison sort. A ' +
-          'thousand 32-bit integers sorted the same way need 17 179 869 184 bytes.',
-        'Radix sort fixes that by processing the key a digit at a time. Eight bits gives 256 ' +
-          'buckets and four passes over 32-bit keys, which turns a memory problem into a ' +
-          'pass-count problem.',
-        'LSD radix has a precondition that is easy to state and easy to break: every digit pass ' +
-          'must be stable. The pass on digit 1 must leave elements with equal digit-1 values in ' +
-          'the order digit 0 put them, or everything the earlier passes established is undone.',
-        'It is one line — scatter backwards through the input while decrementing the bucket ' +
-          'cursor, not forwards — and the demo runs both. With a narrow key range only one pass ' +
-          'matters, and the unstable version still produces sorted output with the ties reordered. ' +
-          'With a wide range four passes matter, and the output is simply wrong.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — digit widths, key ranges, and the pass that must be stable',
         markup: root.NonComparisonSortsTemplate.render()

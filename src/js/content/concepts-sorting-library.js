@@ -337,50 +337,66 @@
         },
         plain: 'Quickselect is quicksort that throws away the half it does not need.',
         formal: 'T(n) = T(n/2) + n sums to 2n; T(n) = 2T(n/2) + n sums to n log n',
-        readAs: 'Recursing into one half gives a total of 2n — the work halves every level, so the series ' +
-          'converges. Recursing into both gives n at every level and log n levels. That single ' +
-          'difference is why selection is linear and sorting is not.',
-        detail: 'The two recurrences differ by a single coefficient and that coefficient is the whole result. ' +
-          'Quicksort handles the entire array at every level, so the per-level cost stays n and there are ' +
-          'log n levels. Quickselect discards one side, so the per-level cost halves and the geometric series ' +
-          'n + n/2 + n/4 + ... sums to 2n. Everything else about the two algorithms - the partition scheme, ' +
-          'the pivot rule, the worst case, the fixes for it - is identical.',
+        readAs: 'Recursing into one half gives a total of 2n: the work halves every level, so the ' +
+          'series converges. Recursing into both gives n at every level, and log n levels. That ' +
+          'single difference is why selection is linear and sorting is not.',
+        detail: [
+          'The two recurrences differ by a single coefficient, and that coefficient is the whole ' +
+            'result.',
+          'Quicksort handles the entire array at every level, so the per-level cost stays n and ' +
+            'there are log n levels. Quickselect discards one side, so the per-level cost halves ' +
+            'and the geometric series n + n/2 + n/4 + ... sums to 2n.',
+          'Everything else about the two algorithms is identical: the partition scheme, the pivot ' +
+            'rule, the worst case, and the fixes for it.'
+        ],
         example: 'Median of 100 000 random elements: quickselect 3.30 comparisons per element, sorting 15.29.'
       },
       {
         term: 'Median of medians: a guarantee with a large constant',
         plain: 'Groups of five, the median of each, then the median of those - and at least 30% is discarded.',
         formal: 'the pivot exceeds at least 3n/10 elements, so T(n) <= T(n/5) + T(7n/10) + n is linear',
-        readAs: 'Median-of-medians guarantees the pivot beats at least three tenths of the input, so the ' +
-          'larger side is at most seven tenths. Because 1/5 + 7/10 is less than 1, the recursion ' +
-          'shrinks geometrically and the total is linear.',
-        detail: 'The chosen value is greater than three elements in at least half the groups of five, so at ' +
-          'least 3n/10 of the array is below it and at least 3n/10 above - meaning the recursion is on at ' +
-          'most 7n/10 whichever way the partition falls. Since 1/5 + 7/10 < 1 the recurrence is linear. That ' +
-          'is a real worst-case bound and it comes with a constant around 8 to 10 in practice, which is why ' +
-          'it is the right choice when an adversary picks your input and the wrong one otherwise.',
+        readAs: 'Median-of-medians guarantees the pivot beats at least three tenths of the input, ' +
+          'so the larger side is at most seven tenths. Because 1/5 + 7/10 is less than 1, the ' +
+          'recursion shrinks geometrically and the total is linear.',
+        detail: [
+          'The chosen value is greater than three elements in at least half the groups of five. So ' +
+            'at least 3n/10 of the array is below it, and at least 3n/10 above.',
+          'That means the recursion is on at most 7n/10, whichever way the partition falls. Since ' +
+            '1/5 + 7/10 < 1, the recurrence is linear.',
+          'It is a real worst-case bound, and it comes with a constant around 8 to 10 in practice. ' +
+            'That is why it is the right choice when an adversary picks your input, and the wrong ' +
+            'one otherwise.'
+        ],
         example: 'Measured on 100 000 elements: 8.28 comparisons per element against quickselect\'s 3.30.'
       },
       {
         term: 'Introselect: the same escape hatch as introsort',
         plain: 'Quickselect, with the guaranteed pivot rule taking over when the depth says the pivots are going badly.',
         formal: 'switch to median-of-medians pivots after 2 log2 n levels',
-        detail: 'The pattern is identical to introsort and for the same reason: the expected-linear algorithm ' +
-          'is what you want almost always, and the guaranteed one is what you want in the tail. A depth ' +
-          'counter distinguishes them at negligible cost, and the average case is untouched because the ' +
-          'fallback never fires on well-behaved input. This composition - fast algorithm, cheap detector, ' +
-          'guaranteed fallback - is the most transferable idea in the whole milestone.',
+        detail: [
+          'The pattern is identical to introsort, and for the same reason. The expected-linear ' +
+            'algorithm is what you want almost always, and the guaranteed one is what you want in ' +
+            'the tail.',
+          'A depth counter distinguishes them at negligible cost, and the average case is ' +
+            'untouched because the fallback never fires on well-behaved input.',
+          'This composition — fast algorithm, cheap detector, guaranteed fallback — is the most ' +
+            'transferable idea in the whole milestone.'
+        ],
         example: 'Introselect matches quickselect on random input and matches median-of-medians on the adversarial one.'
       },
       {
         term: 'Duplicates need three-way partitioning here too',
         plain: 'If k lands inside the equal block, the answer is already found and no recursion happens.',
         formal: 'partition into less/equal/greater; if left <= k < right, return immediately',
-        detail: 'A two-way partition on an array of few distinct values re-partitions the same equal elements ' +
-          'over and over, exactly as it does in quicksort, and the selection becomes quadratic for the same ' +
-          'reason. Partitioning three ways fixes it and adds something the sort does not get: when k falls ' +
-          'inside the equal block every element there *is* the answer, so the algorithm returns without ' +
-          'recursing at all. Selection on an all-equal array is one pass.',
+        detail: [
+          'A two-way partition on an array of few distinct values re-partitions the same equal ' +
+            'elements over and over, exactly as it does in quicksort. The selection becomes ' +
+            'quadratic for the same reason.',
+          'Partitioning three ways fixes it, and adds something the sort does not get. When k ' +
+            'falls inside the equal block, every element there *is* the answer, so the algorithm ' +
+            'returns without recursing at all.',
+          'Selection on an all-equal array is one pass.'
+        ],
         example: 'All 80 elements equal to 4: every k from 0 to 79 is answered by a single partition.'
       },
       {
@@ -396,51 +412,68 @@
         },
         plain: 'A bounded heap of size k is one streaming pass; quickselect needs the whole array.',
         formal: 'heap: O(n log k) time, O(k) space, streaming. quickselect: O(n) time, O(n) space, in place',
-        readAs: 'Two ways to get the top k. The heap is slower in theory but holds only k items and works on ' +
-          'a stream; quickselect is linear but needs the whole array in memory and reorders it.',
-        detail: 'These are not competing implementations of one operation, they are answers to different ' +
-          'constraints. The heap holds k elements, sees each input once and never needs the data resident - ' +
-          'so it works on a stream of a billion records with k = 10. Quickselect is asymptotically better and ' +
-          'requires the array in memory and permutes it. The comparison count says the select wins; the ' +
-          'memory model usually decides, and it often says the heap.',
+        readAs: 'Two ways to get the top k. The heap is slower in theory but holds only k items ' +
+          'and works on a stream. Quickselect is linear, but needs the whole array in memory and ' +
+          'reorders it.',
+        detail: [
+          'These are not competing implementations of one operation. They are answers to different ' +
+            'constraints.',
+          'The heap holds k elements, sees each input once, and never needs the data resident. So ' +
+            'it works on a stream of a billion records with k = 10.',
+          'Quickselect is asymptotically better, and requires the array in memory, and permutes ' +
+            'it. The comparison count says the select wins. The memory model usually decides, and ' +
+            'it often says the heap.'
+        ],
         example: 'Top 10 of 20 000: the heap and the select produce identical output; only their memory differs.'
       },
       {
         term: 'Partial sorting: the k-th element, and the k before it in order',
         plain: 'One quickselect, then sort only the k elements that ended up on the left.',
         formal: 'O(n + k log k), which is what "the top 10 of a million" actually asks for',
-        detail: 'The usual request is not "the k-th smallest" but "the smallest k, in order", and doing it as ' +
-          'a full sort computes an ordering of the other n-k elements that nobody asked about. One ' +
-          'quickselect puts the k smallest at the front - unordered - and sorting just those k costs ' +
-          'k log k. For k = 10 and n = 1 000 000 that is a linear pass plus about thirty comparisons, against ' +
-          'twenty million for the sort.',
+        detail: [
+          'The usual request is not "the k-th smallest" but "the smallest k, in order". Doing that ' +
+            'as a full sort computes an ordering of the other n-k elements that nobody asked ' +
+            'about.',
+          'One quickselect puts the k smallest at the front, unordered. Sorting just those k costs ' +
+            'k log k.',
+          'For k = 10 and n = 1 000 000 that is a linear pass plus about thirty comparisons, ' +
+            'against twenty million for the sort.'
+        ],
         example: 'Top 10 of 2 000: partial sort agrees exactly with the first ten of a full sort.'
       },
       {
         term: 'Where k is changes what selection costs',
         plain: 'Selecting the minimum discards almost everything on the first partition; selecting the median discards half.',
         formal: 'expected comparisons are about 2n at the median and about n at either extreme',
-        detail: 'The 2n figure is the worst position for k, not a universal constant. Selecting the smallest ' +
-          'element means the first partition throws away everything above the pivot and the recursion drops ' +
-          'immediately into a tiny range, so the total approaches a single pass. The median is the expensive ' +
-          'case because each partition can only halve what remains. Moving k across the range in the demo ' +
-          'makes the curve visible, and it explains why "find the minimum" is never worth a select.',
+        detail: [
+          'The 2n figure is the worst position for k, not a universal constant.',
+          'Selecting the smallest element means the first partition throws away everything above ' +
+            'the pivot, and the recursion drops immediately into a tiny range. The total ' +
+            'approaches a single pass.',
+          'The median is the expensive case, because each partition can only halve what remains. ' +
+            'Moving k across the range in the demo makes the curve visible, and it explains why ' +
+            '"find the minimum" is never worth a select.'
+        ],
         example: 'The demo\'s k slider moves the measured comparison count between roughly n and 2n.'
       },
       {
         term: 'Sort-then-index is usually the right answer',
         plain: 'The log factor is a factor of 15 at a hundred thousand elements, not a factor of a thousand.',
         formal: 'n log2 n / 2n = log2(n) / 2, which is 8.5 at n = 100 000',
-        readAs: 'Sorting everything costs about n log₂ n; selecting the median costs about 2n. Divide one by ' +
-          'the other and at a hundred thousand elements sorting is roughly eight and a half times the ' +
-          'work — for an answer you did not ask for.',
-        detail: 'Reaching for quickselect before there is a reason is the mirror of the mistake this section ' +
-          'warns about. Sorting and indexing is one line, obviously correct, and gives you every other order ' +
-          'statistic for free. The measured penalty at a hundred thousand elements is about 4.6× against ' +
-          'quickselect, which matters when the selection is the hot path and does not otherwise. The signal ' +
-          'to switch is a profile, and the switch is to a select - not to a faster sort.',
+        readAs: 'Sorting everything costs about n log₂ n, and selecting the median costs about 2n. ' +
+          'Divide one by the other and at a hundred thousand elements sorting is roughly eight and ' +
+          'a half times the work — for an answer you did not ask for.',
+        detail: [
+          'Reaching for quickselect before there is a reason is the mirror of the mistake this ' +
+            'section warns about.',
+          'Sorting and indexing is one line, obviously correct, and gives you every other order ' +
+            'statistic for free. The measured penalty at a hundred thousand elements is about 4.6× ' +
+            'against quickselect, which matters when the selection is the hot path and does not ' +
+            'otherwise.',
+          'The signal to switch is a profile, and the switch is to a select — not to a faster sort.'
+        ],
         example: 'n = 200 000: sorting 3 258 388 comparisons, quickselect 504 274 - a factor of 6.5.'
       }
-    ]
+    ],
   });
 }(typeof window !== 'undefined' ? window : null));
