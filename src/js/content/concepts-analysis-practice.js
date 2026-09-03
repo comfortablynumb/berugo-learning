@@ -363,16 +363,20 @@
         },
         plain: 'Double the input and look at the cost ratio. The ratio names the exponent.',
         formal: 'T(2n)/T(n) → 2^k for Θ(n^k)',
-        readAs: 'If cost grows like n to the power k, then doubling n multiplies the cost by 2 to the power ' +
-          'k. So divide the two measured times and the ratio names the exponent: about 2 means ' +
-          'k = 1, about 4 means k = 2, about 8 means k = 3.',
-        detail: 'For a power law the constant cancels in a ratio, so doubling the input and dividing ' +
-          'the times gives 2^k directly and you never need to know c. A ratio near 2 is linear, near ' +
-          '4 quadratic, near 8 cubic, and a little above 2 is linearithmic. The method is robust ' +
-          'because it is relative — it survives a slow machine, a warm cache and an unfair build, as ' +
-          'long as those conditions apply equally to both runs. Its weakness is resolution: ratios ' +
-          'grow multiplicatively with the exponent, so distinguishing n log n from n^1.1 needs far ' +
-          'more precision than distinguishing linear from quadratic.',
+        readAs: 'If cost grows like n to the power k, then doubling n multiplies the cost by 2 to ' +
+          'the power k. So divide the two measured times and the ratio names the exponent: about 2 ' +
+          'means k = 1, about 4 means k = 2, about 8 means k = 3.',
+        detail: [
+          'For a power law the constant cancels in a ratio. Double the input, divide the times, and ' +
+            'you get 2^k directly — you never need to know c.',
+          'A ratio near 2 is linear, near 4 quadratic, near 8 cubic. A little above 2 is ' +
+            'linearithmic.',
+          'The method is robust because it is relative. It survives a slow machine, a warm cache ' +
+            'and an unfair build, as long as those conditions apply equally to both runs.',
+          'Its weakness is resolution. Ratios grow multiplicatively with the exponent, so ' +
+            'distinguishing n log n from n^1.1 needs far more precision than distinguishing linear ' +
+            'from quadratic.'
+        ],
         example: 'A ratio near 4 means quadratic.'
       },
       {
@@ -388,107 +392,130 @@
         },
         plain: 'A power law is a straight line on log-log axes, and its slope is the exponent.',
         formal: 'log T = k·log n + log c',
-        readAs: 'Take the logarithm of both sides of T = c·n^k and the power turns into a multiplication, ' +
-          'leaving the equation of a straight line: slope k, intercept log c. That is why a power ' +
-          'law plots straight on log-log axes.',
-        detail: 'Taking logs of T = c·n^k gives log T = k·log n + log c, which is a straight line ' +
-          'whose slope is the exponent and whose intercept is the constant. Plotting on log-log axes ' +
-          'therefore turns "which curve is this" into "is this straight, and how steep" — a question ' +
-          'the eye is good at. Curvature is informative too: an upward bend means the exponent is ' +
-          'rising, which is what a cache boundary or a hidden allocation looks like. What the plot ' +
-          'cannot do is separate curves that differ by a logarithm, since a log factor is a gentle ' +
-          'bend rather than a change of slope.',
+        readAs: 'Take the logarithm of both sides of T = c·n^k and the power turns into a ' +
+          'multiplication. What is left is the equation of a straight line: slope k, intercept ' +
+          'log c. That is why a power law plots straight on log-log axes.',
+        detail: [
+          'Taking logs of T = c·n^k gives log T = k·log n + log c. That is a straight line whose ' +
+            'slope is the exponent and whose intercept is the constant.',
+          'Plotting on log-log axes therefore turns "which curve is this" into "is this straight, ' +
+            'and how steep". The eye is good at that question.',
+          'Curvature is informative too. An upward bend means the exponent is rising, which is what ' +
+            'a cache boundary or a hidden allocation looks like.',
+          'What the plot cannot do is separate curves that differ by a logarithm. A log factor is a ' +
+            'gentle bend rather than a change of slope.'
+        ],
         example: 'Slope 1.0 is linear; 2.0 is quadratic.'
       },
       {
         term: 'Curve fitting',
         plain: 'Fit candidate curves and compare residuals. Useful, and easy to over-trust when two candidates are close.',
         formal: 'minimise ‖y − c·f(n)‖',
-        readAs: 'Pick the multiplier c that makes the candidate curve sit as close to the measured points as ' +
-          'possible. The double bars mean the overall size of the gap between the two — one ' +
-          'number summarising the error at every point at once.',
-        detail: 'Fitting each candidate model and ranking them by residual is the natural mechanised ' +
-          'version of reading a plot, and it works well when the candidates are far apart. It ' +
-          'becomes misleading when they are not: over a single decade of n, n log n and n^1.1 are ' +
-          'close enough that ordinary measurement jitter decides the winner, so the fit reports a ' +
-          'confident answer that would flip on a rerun. The defences are to widen the range rather ' +
-          'than add points inside it, to report the runner-up\'s residual alongside the winner\'s, ' +
-          'and to treat a small gap between two models as the absence of a result.',
+        readAs: 'Pick the multiplier c that makes the candidate curve sit as close to the measured ' +
+          'points as possible. The double bars mean the overall size of the gap between the two — ' +
+          'one number summarising the error at every point at once.',
+        detail: [
+          'Fitting each candidate model and ranking them by residual is the natural mechanised ' +
+            'version of reading a plot, and it works well when the candidates are far apart.',
+          'It becomes misleading when they are not. Over a single decade of n, n log n and n^1.1 ' +
+            'are close enough that ordinary measurement jitter decides the winner. The fit then ' +
+            'reports a confident answer that would flip on a rerun.',
+          'Three defences. Widen the range rather than adding points inside it. Report the ' +
+            'runner-up\'s residual alongside the winner\'s. And treat a small gap between two ' +
+            'models as the absence of a result.'
+        ],
         example: 'n log n and n are hard to separate over one decade.'
       },
       {
         term: 'Asymptotic regime',
         plain: 'Small inputs are dominated by constants, so the measured exponent only settles at larger n.',
         formal: 'the fit applies past n₀',
-        readAs: 'Whatever the fit tells you is a claim about behaviour from some input size n₀ upward. Points ' +
-          'measured below n₀ describe the setup costs instead.',
-        detail: 'Every complexity claim is about behaviour past some threshold, and measurement below ' +
-          'that threshold describes the lower-order terms instead. At small n a quadratic routine ' +
-          'spends most of its time in setup, allocation and the linear part, so the fitted exponent ' +
-          'comes out near 1 and stays there until the quadratic term takes over. Three points from ' +
-          'n = 8 to n = 32 are not a weak measurement of the asymptotic behaviour, they are a ' +
-          'measurement of something else. Push the range up until the ratio stabilises across ' +
-          'consecutive doublings, and treat that stabilisation as the evidence that you have reached ' +
-          'the regime.',
+        readAs: 'Whatever the fit tells you is a claim about behaviour from some input size n₀ ' +
+          'upward. Points measured below n₀ describe the setup costs instead.',
+        detail: [
+          'Every complexity claim is about behaviour past some threshold, and measurement below ' +
+            'that threshold describes the lower-order terms instead.',
+          'At small n a quadratic routine spends most of its time in setup, allocation and the ' +
+            'linear part. So the fitted exponent comes out near 1, and stays there until the ' +
+            'quadratic term takes over.',
+          'Three points from n = 8 to n = 32 are not a weak measurement of the asymptotic ' +
+            'behaviour. They are a measurement of something else.',
+          'Push the range up until the ratio stabilises across consecutive doublings, and treat ' +
+            'that stabilisation as the evidence that you have reached the regime.'
+        ],
         example: 'Three points from 8 to 32 tell you almost nothing.'
       },
       {
         term: 'Measuring the wrong thing',
         plain: 'A warm cache, a deleted loop or a quadratic input generator all produce confident nonsense.',
         formal: 'validate the measurement first',
-        detail: 'The most expensive mistakes in empirical work are not statistical, they are ' +
-          'measuring the wrong subject entirely. A dead-code-eliminated loop reports a wonderful ' +
-          'time for work that never happened; a benchmark that reuses one input measures a warm ' +
-          'cache; and a generator that builds its test data by repeated string concatenation is ' +
-          'often the quadratic curve you then attribute to the algorithm. Validate first: check that ' +
-          'the result is consumed, that the reported cost changes when the algorithm is deliberately ' +
-          'made worse, and time the generator separately so its shape cannot be mistaken for the ' +
-          'subject\'s.',
+        detail: [
+          'The most expensive mistakes in empirical work are not statistical. They are measuring ' +
+            'the wrong subject entirely.',
+          'A dead-code-eliminated loop reports a wonderful time for work that never happened. A ' +
+            'benchmark that reuses one input measures a warm cache. A generator that builds its ' +
+            'test data by repeated string concatenation is often the quadratic curve you then ' +
+            'attribute to the algorithm.',
+          'So validate first. Check that the result is consumed. Check that the reported cost ' +
+            'changes when the algorithm is deliberately made worse. And time the generator ' +
+            'separately, so its shape cannot be mistaken for the subject\'s.'
+        ],
         example: 'A generator that concatenates strings is often the real subject.'
       },
       {
         term: 'Resolution limit',
         plain: 'A ratio table separates classes that differ by a factor of n. It cannot separate two curves that differ by a logarithm.',
         formal: 'n log n and n^1.1 give ratios 2.15 and 2.14 over a 16× range',
-        readAs: 'Two genuinely different growth shapes produce doubling ratios that differ in the second ' +
-          'decimal place, even measured across a sixteenfold spread of input sizes. Ordinary ' +
-          'measurement noise is larger than that gap.',
-        detail: 'The doubling ratio for n log n creeps up as log n grows, while the ratio for n^1.1 ' +
-          'is a constant 2.14 — and over a realistic 16× range those two sequences agree to within a ' +
-          'hundredth. Since ordinary run-to-run jitter is a percent or two, the measurement cannot ' +
-          'distinguish them however many points you add. A least-squares fit does not solve this: ' +
-          'run it on exact n^1.1 data and it happily reports O(n log n) with a residual smaller than ' +
-          'the noise. The honest conclusion is that some hypotheses are outside the resolution of ' +
-          'the method, and the way to separate them is a different measurement, not more of this one.',
+        readAs: 'Two genuinely different growth shapes produce doubling ratios that differ in the ' +
+          'second decimal place, even measured across a sixteenfold spread of input sizes. ' +
+          'Ordinary measurement noise is larger than that gap.',
+        detail: [
+          'The doubling ratio for n log n creeps up as log n grows, while the ratio for n^1.1 is a ' +
+            'constant 2.14. Over a realistic 16× range those two sequences agree to within a ' +
+            'hundredth.',
+          'Ordinary run-to-run jitter is a percent or two, so the measurement cannot distinguish ' +
+            'them however many points you add.',
+          'A least-squares fit does not solve this. Run it on exact n^1.1 data and it happily ' +
+            'reports O(n log n), with a residual smaller than the noise.',
+          'The honest conclusion is that some hypotheses are outside the resolution of the method. ' +
+            'The way to separate them is a different measurement, not more of this one.'
+        ],
         example: 'A least-squares fit labels exact n^1.1 data as O(n log n), with a residual smaller than 2% jitter produces.'
       },
       {
         term: 'Regime boundary',
         plain: 'When the input crosses a cache level, the measured exponent jumps for reasons that have nothing to do with the algorithm.',
         formal: 'a knee at working set ≈ cache size',
-        detail: 'Measured cost is the algorithm\'s operation count multiplied by a per-operation ' +
-          'price, and that price is not constant: it steps up each time the working set outgrows a ' +
-          'cache level. So a curve can bend sharply while the algorithm does exactly what it always ' +
-          'did, and fitting across the bend produces an exponent that describes neither side. The ' +
-          'giveaway is that the knee sits at a size that matches a cache boundary rather than ' +
-          'anything in the code. Fit each regime separately, and report where the knee is — it is ' +
-          'usually the most actionable thing the experiment found.',
+        detail: [
+          'Measured cost is the algorithm\'s operation count multiplied by a per-operation price, ' +
+            'and that price is not constant. It steps up each time the working set outgrows a cache ' +
+            'level.',
+          'So a curve can bend sharply while the algorithm does exactly what it always did, and ' +
+            'fitting across the bend produces an exponent that describes neither side.',
+          'The giveaway is that the knee sits at a size matching a cache boundary rather than ' +
+            'anything in the code. Fit each regime separately, and report where the knee is — it is ' +
+            'usually the most actionable thing the experiment found.'
+        ],
         example: 'An in-memory sort looks linearithmic until the array leaves L2, then briefly looks quadratic.'
       },
       {
         term: 'Pre-asymptotic constants',
         plain: 'At small n the low-order terms dominate, so the fitted exponent describes the constants, not the class.',
         formal: 'T(n) = an² + bn + c with bn ≫ an² for small n',
-        readAs: 'The true cost has a quadratic part, a linear part and a fixed part. At small n the linear ' +
-          'part is much the larger, so what you measure there is the linear term wearing the name ' +
-          'of the quadratic one.',
-        detail: 'A real cost function is a sum of terms, and the leading one only leads once n is ' +
-          'large enough. With T(n) = an² + bn + c and a small a, the linear term can dominate ' +
-          'throughout the range you measured, so the fit reports an exponent near 1 for a genuinely ' +
-          'quadratic routine — and it will be wrong by orders of magnitude when extrapolated. This ' +
-          'is the failure mode behind "it tested fine and fell over in production at 10× the data". ' +
-          'The check is to extend the range until consecutive doubling ratios stop drifting; a ' +
-          'drifting ratio means the terms are still trading places.',
+        readAs: 'The true cost has a quadratic part, a linear part and a fixed part. At small n the ' +
+          'linear part is much the larger, so what you measure there is the linear term wearing the ' +
+          'name of the quadratic one.',
+        detail: [
+          'A real cost function is a sum of terms, and the leading one only leads once n is large ' +
+            'enough.',
+          'With T(n) = an² + bn + c and a small a, the linear term can dominate throughout the ' +
+            'range you measured. The fit then reports an exponent near 1 for a genuinely quadratic ' +
+            'routine, and it will be wrong by orders of magnitude when extrapolated.',
+          'This is the failure mode behind "it tested fine and fell over in production at 10× the ' +
+            'data".',
+          'The check is to extend the range until consecutive doubling ratios stop drifting. A ' +
+            'drifting ratio means the terms are still trading places.'
+        ],
         example: 'Fitting over n = 100…800 can report an exponent near 1 for a genuinely quadratic routine.'
       }
     ],

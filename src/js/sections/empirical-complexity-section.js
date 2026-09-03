@@ -75,11 +75,12 @@
     root.jQuery('#' + SECTION_ID + '-content').html(app.shell.render({
       sectionId: SECTION_ID,
       orientation: [
-        'You can measure a complexity class without reading the code. Double the input, measure the ' +
-          'cost, and look at the ratio: a Θ(n^k) algorithm gives T(2n)/T(n) → 2^k, so the exponent ' +
-          'is log₂ of the ratio. Four minutes of measurement settles arguments a code review cannot.',
+        '**You can measure a complexity class without reading the code.** Double the input, ' +
+          'measure the cost, and look at the ratio. A Θ(n^k) algorithm gives T(2n)/T(n) → 2^k, so ' +
+          'the exponent is log₂ of the ratio. Four minutes of measurement settles arguments a code ' +
+          'review cannot.',
         'Two independent readings are shown: the ratio table, and a least-squares fit over a basis ' +
-          'of candidate curves. When they agree, the reading is solid; when they disagree, the ' +
+          'of candidate curves. When they agree, the reading is solid. When they disagree, the ' +
           'measurement is telling you something about itself.',
         'Pick a subject, run the experiment, decide what it is, and only then reveal the answer.'
       ],
@@ -99,7 +100,7 @@
         ].join('\n')
       },
       insight: 'A doubling table settles arguments that a code review cannot, and it takes four ' +
-        'minutes. The discipline is to check the failure modes first — a warm cache, a result that ' +
+        'minutes. The discipline is to check the failure modes first: a warm cache, a result that ' +
         'was optimised away, or an input generator that is itself the bottleneck.'
     }));
 
