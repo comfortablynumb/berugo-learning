@@ -51,8 +51,8 @@
       sectionId: SECTION_ID,
       orientation: [
         '**Quicksort has no single cost.** It has a partition scheme, a pivot rule and an ' +
-          'input, and the three of them together decide whether it is the fastest sort in the ' +
-          'room or a quadratic one that still returns the right answer.',
+          'input. Those three together decide whether it is the fastest sort in the room, or a ' +
+          'quadratic one that still returns the right answer.',
         'On 2 000 elements of three distinct values, Lomuto partitioning with a median-of-three ' +
           'pivot does 676 647 comparisons, and three-way partitioning does 3 389. That is a ' +
           'factor of 200 from the partition scheme alone, with the same pivot rule and the same ' +
@@ -80,8 +80,8 @@
       diagram: diagram(),
       insight: 'Quicksort\'s failure mode is a *quiet* quadratic. Every other sort here fails ' +
         'loudly or not at all. This one keeps returning correct output and simply takes n²/4 ' +
-        'comparisons to do it, so it surfaces as a timeout on one tenant\'s data rather than as ' +
-        'a wrong answer anywhere. The engineering answer is not a cleverer pivot: every ' +
+        'comparisons to do it. So it surfaces as a timeout on one tenant\'s data, rather than ' +
+        'as a wrong answer anywhere. The engineering answer is not a cleverer pivot: every ' +
         'deterministic rule has an input that defeats it, and the demo builds one on request. It ' +
         'is a depth counter and an escape hatch. Run quicksort, and if the recursion passes ' +
         '2·log₂ n, finish that subarray with heapsort. The average case is untouched and the ' +

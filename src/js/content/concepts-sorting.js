@@ -391,9 +391,9 @@
         plain: 'Split into less, equal and greater, and never recurse into the equal part.',
         formal: 'Dijkstra\'s Dutch national flag: one pass, three regions, one invariant',
         detail: [
-          'When duplicates are common — a status column, a category, a rounded score — the equal ' +
-            'block is a large fraction of the array, and a two-way partition keeps re-partitioning ' +
-            'it.',
+          'Duplicates are often common: a status column, a category, a rounded score. The equal ' +
+            'block is then a large fraction of the array, and a two-way partition keeps ' +
+            're-partitioning it.',
           'A three-way partition places every element equal to the pivot in one contiguous block ' +
             'and recurses only into the two sides. An array of one distinct value is then sorted ' +
             'by a single linear pass.',
