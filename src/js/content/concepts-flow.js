@@ -342,12 +342,14 @@
         readAs: 'A preflow lets water pile up at a junction rather than balancing immediately. Push-relabel ' +
           'works with those piles and only drains them at the end, which is what frees it from having ' +
           'to find whole paths.',
-        detail: 'Augmenting-path algorithms maintain a valid flow at every step and improve it. ' +
-          'Push-relabel does the opposite: it floods the network immediately, violating ' +
-          'conservation everywhere, and then spends its whole run repairing that violation. The ' +
-          'intermediate states are not flows at all, which is why the check at the end has to ' +
-          'confirm that no vertex is still active — a run that stops early returns a preflow, and a ' +
-          'preflow has a value that looks entirely reasonable and is wrong.',
+        detail: [
+          'Augmenting-path algorithms maintain a valid flow at every step and improve it.',
+          'Push-relabel does the opposite. It floods the network immediately, violating conservation ' +
+            'everywhere, and then spends its whole run repairing that violation.',
+          'The intermediate states are not flows at all, so the check at the end has to confirm that ' +
+            'no vertex is still active. A run that stops early returns a preflow, and a preflow has ' +
+            'a value that looks entirely reasonable and is wrong.'
+        ],
         example: 'The default 27-node run finishes with value 20, heights valid and nothing still ' +
           'active — three separate assertions.'
       },
@@ -358,25 +360,31 @@
         readAs: 'Water only ever flows downhill, and exactly one step at a time. The heights are a made-up ' +
           'ordering that the algorithm raises as it goes; the source starts n high and the sink at ' +
           'zero.',
-        detail: 'The heights are a lower bound on the residual distance to the sink, and the ' +
-          'one-step rule is what stops flow cycling between two vertices for ever. Because heights ' +
-          'only ever increase and are bounded by 2n, the relabel count is bounded, and that is the ' +
-          'whole termination argument. The boundary condition h(s) = n is not a constraint to be ' +
-          'checked but a definition — it is what makes the source unreachable from below, so ' +
-          'excess that cannot reach the sink is pushed back to the source instead of oscillating.',
+        detail: [
+          'The heights are a lower bound on the residual distance to the sink, and the one-step rule ' +
+            'is what stops flow cycling between two vertices for ever.',
+          'Because heights only ever increase and are bounded by 2n, the relabel count is bounded. ' +
+            'That is the whole termination argument.',
+          'The boundary condition h(s) = n is not a constraint to be checked but a definition. It is ' +
+            'what makes the source unreachable from below, so excess that cannot reach the sink is ' +
+            'pushed back to the source instead of oscillating.'
+        ],
         example: 'The default run does 50 relabels and 87 pushes, 39 of them saturating and 48 not.'
       },
       {
         term: 'checkHeights must skip arcs out of the source',
         plain: 'h(s) = n is a boundary condition, not something the invariant applies to.',
         formal: 'the valid-labelling condition h(u) <= h(v) + 1 is required for residual arcs (u,v) with u != s',
-        detail: 'This is the kind of detail that turns a correct implementation into one that fails ' +
-          'its own assertion. The source is set to height n at the start, and its outgoing arcs are ' +
-          'saturated immediately, so in the residual graph the interesting arcs at the source are ' +
-          'the backward ones. Applying the general condition to arcs leaving the source flags a ' +
-          'violation on every run of a perfectly correct algorithm, and the natural response — ' +
-          'weakening the check until it passes — removes the one assertion that would have caught a ' +
-          'real bug.',
+        detail: [
+          'This is the kind of detail that turns a correct implementation into one that fails its ' +
+            'own assertion.',
+          'The source is set to height n at the start, and its outgoing arcs are saturated ' +
+            'immediately. So in the residual graph the interesting arcs at the source are the ' +
+            'backward ones.',
+          'Applying the general condition to arcs leaving the source flags a violation on every run ' +
+            'of a perfectly correct algorithm. The natural response — weakening the check until it ' +
+            'passes — removes the one assertion that would have caught a real bug.'
+        ],
         example: 'With the exclusion, the height check passes across 20 seeds, two selection rules ' +
           'and four heuristic combinations.'
       },
@@ -384,13 +392,16 @@
         term: 'The selection rule decides how much work the same algorithm does',
         plain: 'Take the next active vertex from a queue, or always the highest one.',
         formal: 'FIFO gives O(V³); highest-label gives O(V²·sqrt(E)); the flow value is identical',
-        detail: 'The rule changes nothing about correctness — any order of pushes and relabels ' +
-          'terminates at a maximum flow — and it changes the constant and the asymptotics ' +
-          'substantially. Highest-label works on the vertex furthest from the sink first, which ' +
-          'tends to move excess in long coherent runs instead of shuffling it locally, so fewer ' +
-          'relabels are needed overall. This is the same pattern as the ordering in greedy ' +
-          'colouring: the algorithm is a family indexed by a choice, and the choice is where the ' +
-          'performance lives.',
+        detail: [
+          'The rule changes nothing about correctness, because any order of pushes and relabels ' +
+            'terminates at a maximum flow. It changes the constant and the asymptotics ' +
+            'substantially.',
+          'Highest-label works on the vertex furthest from the sink first, which tends to move ' +
+            'excess in long coherent runs instead of shuffling it locally. Fewer relabels are needed ' +
+            'overall.',
+          'This is the same pattern as the ordering in greedy colouring. The algorithm is a family ' +
+            'indexed by a choice, and the choice is where the performance lives.'
+        ],
         example: 'FIFO 41 relabels and 79 pushes against highest-label\'s 35 and 70 on the ' +
           '14.1 network, at 760 and 627 arc visits.'
       },
@@ -401,24 +412,29 @@
         readAs: 'If no vertex sits at some height, nothing above that height can ever reach the sink — the ' +
           'downhill chain is broken. Lifting them all out at once is the gap heuristic, and it is worth ' +
           'several times the running time.',
-        detail: 'Without it, each of those vertices discovers independently, one relabel at a time, ' +
-          'that it is cut off from the sink, and the cost of that discovery is quadratic in the ' +
-          'layer size. The gap test is a histogram lookup — genuinely one array of counts — and it ' +
-          'converts that whole rediscovery into a single sweep. It is the clearest example in the ' +
-          'milestone of a heuristic that is not an optimisation but a structural insight: the empty ' +
-          'bucket *proves* the vertices below it are stranded.',
+        detail: [
+          'Without it, each of those vertices discovers independently, one relabel at a time, that ' +
+            'it is cut off from the sink. The cost of that discovery is quadratic in the layer size.',
+          'The gap test is a histogram lookup — genuinely one array of counts — and it converts that ' +
+            'whole rediscovery into a single sweep.',
+          'It is the clearest example in the milestone of a heuristic that is not an optimisation ' +
+            'but a structural insight: the empty bucket *proves* the vertices below it are stranded.'
+        ],
         example: 'The default run does 23 gap lifts out of 50 relabels.'
       },
       {
         term: 'Global relabelling recomputes the heights exactly, backwards from the sink',
         plain: 'A breadth-first search in the reverse residual graph replaces every estimate with the truth.',
         formal: 'h(v) = residual distance to t, or n + residual distance to s for vertices that cannot reach t, and a common height for neither',
-        detail: 'The three-way split is the part that is easy to get wrong and catastrophic to get ' +
-          'wrong. Setting every vertex that cannot reach the sink to 2n looks reasonable and ' +
-          'abandons any excess that has to drain back to the source: the run finishes with vertices ' +
-          'still holding excess, the height invariant violated, and — the dangerous part — the ' +
-          'reported value correct anyway on most instances. The correct version relabels in three ' +
-          'groups, and the fix was found by an assertion rather than by a wrong answer.',
+        detail: [
+          'The three-way split is the part that is easy to get wrong, and catastrophic to get wrong.',
+          'Setting every vertex that cannot reach the sink to 2n looks reasonable, and it abandons ' +
+            'any excess that has to drain back to the source. The run finishes with vertices still ' +
+            'holding excess, the height invariant violated, and — the dangerous part — the reported ' +
+            'value correct anyway on most instances.',
+          'The correct version relabels in three groups, and the fix was found by an assertion ' +
+            'rather than by a wrong answer.'
+        ],
         example: 'Two global passes in the default run; across 20 seeds, two rules and four ' +
           'heuristic settings, no vertex is left active and no height invalid.'
       },
@@ -426,12 +442,15 @@
         term: 'The heuristics are not additive, and the section says so',
         plain: 'Global relabelling alone beats gap and global together on this network.',
         formal: 'gap + global 50 relabels; gap only 83; global only 44; neither 369',
-        detail: 'It is tempting to report the combined speed-up and stop. The honest table shows ' +
-          'that global relabelling alone does fewer relabels than the pair, because a gap lift ' +
-          'raises vertices to heights that the next global pass then has to correct. Both are still ' +
-          'enormous wins over neither — 7.4×, 4.5× and 8.4× fewer relabels respectively — and the ' +
-          'ranking between them is instance-dependent. A benchmark that reported only the best ' +
-          'combination would hide the fact that one of its two components was doing negative work.',
+        detail: [
+          'It is tempting to report the combined speed-up and stop.',
+          'The honest table shows that global relabelling alone does fewer relabels than the pair. ' +
+            'A gap lift raises vertices to heights that the next global pass then has to correct.',
+          'Both are still enormous wins over neither — 7.4×, 4.5× and 8.4× fewer relabels ' +
+            'respectively — and the ranking between them is instance-dependent. A benchmark that ' +
+            'reported only the best combination would hide the fact that one of its two components ' +
+            'was doing negative work.'
+        ],
         example: '1 030, 989, 1 011 and 4 433 arc visits for gap+global, gap only, global only ' +
           'and neither.'
       },
@@ -439,12 +458,15 @@
         term: 'Without its heuristics the textbook algorithm disappoints on purpose',
         plain: 'Plain push-relabel does 369 relabels where the tuned version does 50.',
         formal: 'the O(V³) bound is met either way; the constant is 7× and it is the constant that decides',
-        detail: 'Push-relabel is presented as the fast modern alternative to augmenting paths, and ' +
-          'the version in the textbook is not. That is not a criticism of the textbook — the ' +
-          'presentation is about the *bound*, and the bound is unchanged — but it does mean the ' +
-          'implementation you write from the pseudocode will be slower than Dinic on most inputs, ' +
-          'and you will conclude the algorithm was overhyped. It was not; you left out the two ' +
-          'paragraphs after the pseudocode.',
+        detail: [
+          'Push-relabel is presented as the fast modern alternative to augmenting paths, and the ' +
+            'version in the textbook is not.',
+          'That is not a criticism of the textbook. The presentation is about the *bound*, and the ' +
+            'bound is unchanged.',
+          'But it does mean the implementation you write from the pseudocode will be slower than ' +
+            'Dinic on most inputs, and you will conclude the algorithm was overhyped. It was not — ' +
+            'you left out the two paragraphs after the pseudocode.'
+        ],
         example: 'On the same network: Ford-Fulkerson 607 arc visits, Edmonds-Karp 1 116, Dinic ' +
           '409, capacity scaling 1 164, push-relabel 1 030 tuned and 4 433 untuned.'
       }

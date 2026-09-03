@@ -42,44 +42,51 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**Push-relabel inverts the augmenting-path idea.** Instead of moving flow along a whole ' +
+        'source-to-sink path at once, it floods every arc out of the source. That leaves **excess** ' +
+        'sitting at vertices, and the algorithm then moves that excess one arc at a time.',
+      'A **preflow** is a flow that has given up on conservation. A vertex may hold more than it ' +
+        'sends on, and the algorithm is finished when no vertex except the source and sink does.',
+      'What decides where excess may go is a **height function**. A push along u → v needs residual ' +
+        'capacity *and* h(u) = h(v) + 1. A vertex with excess but no such arc is **relabelled** to ' +
+        'one above its lowest residual neighbour.',
+      'The source sits at height n from the start. So excess that cannot reach the sink eventually ' +
+        'climbs past n and flows back where it came from. That is why the algorithm terminates with ' +
+        'a genuine flow rather than a stranded one.',
+      '**The heuristics are not optional extras.** The *gap* rule notices that when no vertex is ' +
+        'left at some height h, nothing above h can still reach the sink. Every such vertex can then ' +
+        'be lifted straight past n instead of walking up one unit at a time.',
+      '*Global relabelling* periodically recomputes exact heights by a backward breadth-first ' +
+        'search. Both are switchable here, and the sweep below shows the relabel count falling by ' +
+        'several times.',
+      '**Saturating and non-saturating pushes have different bounds**, and the split is worth ' +
+        'watching.',
+      'A saturating push empties an arc, and there can be O(VE) of them. A non-saturating push ' +
+        'empties a *vertex*, and the bound is O(V²E).',
+      'A run dominated by the second is behaving the way the worse bound predicts, and the counters ' +
+        'say so long before a stopwatch would.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'Push-relabel inverts the augmenting-path idea. Instead of moving flow along a whole ' +
-          'source-to-sink path at once, it floods every arc out of the source, leaves **excess** ' +
-          'sitting at vertices, and then moves that excess one arc at a time. A **preflow** is a flow ' +
-          'that has given up on conservation: a vertex may hold more than it sends on, and the ' +
-          'algorithm is finished when no vertex except the source and sink does.',
-        'What decides where excess may go is a **height function**. A push along u → v needs residual ' +
-          'capacity *and* h(u) = h(v) + 1, and a vertex with excess but no such arc is **relabelled** ' +
-          'to one above its lowest residual neighbour. The source sits at height n from the start, so ' +
-          'excess that cannot reach the sink eventually climbs past n and flows back where it came ' +
-          'from — which is why the algorithm terminates with a genuine flow rather than a stranded one.',
-        '**The heuristics are not optional extras.** The *gap* rule notices that when no vertex is ' +
-          'left at some height h, nothing above h can still reach the sink, so every such vertex can ' +
-          'be lifted straight past n instead of walking up one unit at a time. *Global relabelling* ' +
-          'periodically recomputes exact heights by a backward breadth-first search. Both are ' +
-          'switchable here, and the sweep below shows the relabel count falling by several times.',
-        '**Saturating and non-saturating pushes have different bounds**, and the split is worth ' +
-          'watching. A saturating push empties an arc and there can be O(VE) of them; a ' +
-          'non-saturating push empties a *vertex* and the bound is O(V²E). A run dominated by the ' +
-          'second is behaving the way the worse bound predicts, and the counters say so long before a ' +
-          'stopwatch would.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — heights, excess, and what each heuristic removes',
         markup: root.PushRelabelTemplate.render()
       },
       diagram: diagram(),
       insight: 'Push-relabel is the family every serious max-flow library implements, and the reason ' +
-        'is not the asymptotic bound — it is that the heuristics work extremely well on the graphs ' +
-        'people actually have. That is also the trap: a correct textbook implementation with neither ' +
+        'is not the asymptotic bound. It is that the heuristics work extremely well on the graphs ' +
+        'people actually have. That is also the trap. A correct textbook implementation with neither ' +
         'heuristic is a genuinely slow program, and somebody benchmarking it against a tuned Dinic ' +
         'will conclude the wrong thing about the algorithm. When you compare implementations of ' +
-        'anything in this family, check first that both have their standard accelerations, because ' +
-        'the gap between "the algorithm" and "the algorithm as everybody ships it" is a factor here, ' +
-        'not a percentage.'
+        'anything in this family, check first that both have their standard accelerations. The gap ' +
+        'between "the algorithm" and "the algorithm as everybody ships it" is a factor here, not a ' +
+        'percentage.'
     };
   }
 
