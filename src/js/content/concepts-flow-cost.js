@@ -22,39 +22,48 @@
         formal: 'minimise sum over arcs of cost(e)·f(e) subject to capacity, conservation and |f| = k',
         readAs: 'Send exactly k units from source to sink as cheaply as possible: total cost is each arc\'s ' +
           'price times how much it carries, and the flow rules still apply.',
-        detail: 'Maximum flow has one objective and min-cost flow has two, ordered: the value is a ' +
-          'constraint and the cost is what gets minimised. That ordering is why "the min-cost ' +
-          'maximum flow" and "the minimum-cost flow of value 3" are different problems with ' +
-          'different answers, and why an implementation must be told which one it is solving. It ' +
-          'also means the answer is a *curve* — cost as a function of value — and reporting a single ' +
-          'number without saying which value it belongs to is ambiguous.',
+        detail: [
+          'Maximum flow has one objective. Min-cost flow has two, ordered: the value is a ' +
+            'constraint, and the cost is what gets minimised.',
+          'That ordering is why "the min-cost maximum flow" and "the minimum-cost flow of value 3" ' +
+            'are different problems with different answers. An implementation must be told which ' +
+            'one it is solving.',
+          'It also means the answer is a *curve* — cost as a function of value. Reporting a single ' +
+            'number without saying which value it belongs to is ambiguous.'
+        ],
         example: 'On the six-worker assignment the cost against flow 1 to 6 is 1, 2, 4, 9, 18, 28.'
       },
       {
         term: 'Send one unit at a time along the cheapest path',
         plain: 'Successive shortest paths: repeatedly find the cheapest residual route and saturate it.',
         formal: 'if f is a minimum-cost flow of value k, augmenting along a shortest residual path gives a minimum-cost flow of value k + 1',
-        readAs: 'Cheapest-path augmentation is safe at every step: get the cheapest flow of size k, push one ' +
-          'more unit along the cheapest remaining route, and you have the cheapest flow of size k+1. No ' +
-          'backtracking is ever needed.',
-        detail: 'The correctness argument is the useful part. If the current flow is optimal for its ' +
-          'value, then its residual graph has no negative-cost cycle; augmenting along a *shortest* ' +
-          'path cannot create one, so the next flow is optimal for the next value. That inductive ' +
-          'step is what makes a greedy sequence of shortest paths reach the global optimum, and it ' +
-          'is also why the marginal cost never falls — which is the convexity you can see in the ' +
-          'cost-against-value table.',
+        readAs: 'Cheapest-path augmentation is safe at every step. Take the cheapest flow of size k, ' +
+          'push one more unit along the cheapest remaining route, and you have the cheapest flow of ' +
+          'size k+1. No backtracking is ever needed.',
+        detail: [
+          'The correctness argument is the useful part.',
+          'If the current flow is optimal for its value, then its residual graph has no ' +
+            'negative-cost cycle. Augmenting along a *shortest* path cannot create one, so the next ' +
+            'flow is optimal for the next value.',
+          'That inductive step is what makes a greedy sequence of shortest paths reach the global ' +
+            'optimum. It is also why the marginal cost never falls, which is the convexity you can ' +
+            'see in the cost-against-value table.'
+        ],
         example: 'Seven Dijkstra runs and 582 relaxations produce the optimal assignment of cost 28.'
       },
       {
         term: 'The marginal cost never falls, and that is why one-at-a-time works',
         plain: 'Each extra unit costs at least as much as the one before it.',
         formal: 'the min-cost function is convex in the flow value',
-        detail: 'Convexity is what licenses the greedy. If a later unit could be cheaper than an ' +
-          'earlier one, then routing them in the other order would have been better and the ' +
-          'sequence of shortest paths would be leaving money on the table. Because the cost function ' +
-          'is convex, the cheapest way to send k units is always the cheapest way to send k − 1 ' +
-          'units plus the cheapest remaining path — and the marginal column is the demonstration ' +
-          'rather than the assertion.',
+        detail: [
+          'Convexity is what licenses the greedy.',
+          'If a later unit could be cheaper than an earlier one, then routing them in the other ' +
+            'order would have been better. The sequence of shortest paths would be leaving money on ' +
+            'the table.',
+          'Because the cost function is convex, the cheapest way to send k units is always the ' +
+            'cheapest way to send k − 1 units plus the cheapest remaining path. The marginal column ' +
+            'is the demonstration rather than the assertion.'
+        ],
         example: 'Marginal costs of 1, 1, 2, 5, 9, 10 for the six units — never falling.'
       },
       {
@@ -64,12 +73,15 @@
         readAs: 'Adding a potential to each vertex shifts every arc\'s price so none is negative — c′ is read ' +
           '"c prime". Every route between the same two ends shifts by the same total, so which route is ' +
           'cheapest does not change, and Dijkstra becomes usable.',
-        detail: 'The first shortest-path computation may need Bellman-Ford, because the input can ' +
-          'have negative costs. After that, the distances themselves become the potentials, every ' +
-          'reduced cost is non-negative, and Dijkstra takes over — which is the whole reason the ' +
-          'algorithm is practical. This is exactly the transform M13 introduced for all-pairs ' +
-          'shortest paths, and recognising it is what turns min-cost flow from a new algorithm into ' +
-          'Dijkstra in a loop.',
+        detail: [
+          'The first shortest-path computation may need Bellman-Ford, because the input can have ' +
+            'negative costs.',
+          'After that, the distances themselves become the potentials, every reduced cost is ' +
+            'non-negative, and Dijkstra takes over. That is the whole reason the algorithm is ' +
+            'practical.',
+          'This is exactly the transform M13 introduced for all-pairs shortest paths. Recognising it ' +
+            'is what turns min-cost flow from a new algorithm into Dijkstra in a loop.'
+        ],
         example: 'On non-negative costs no potential is needed at all: 7 Dijkstra runs and 0 ' +
           'Bellman-Ford passes.'
       },
@@ -79,11 +91,14 @@
         formal: 'a flow is minimum-cost for its value exactly when its residual graph has no negative-cost cycle',
         readAs: 'A complete test for optimality that does not need the algorithm that produced the answer: if ' +
           'you could go round a loop and come out cheaper, you are not optimal. If you cannot, you are.',
-        detail: 'That equivalence is the actual optimality theorem, and it is more useful than the ' +
-          'algorithm: it gives a check that owes nothing to how the flow was produced. Cycle ' +
-          'cancelling reaches the optimum from above rather than from below, which means it always ' +
-          'holds a feasible flow of the right value — attractive if you have one already and want to ' +
-          'improve it — at the price of a Bellman-Ford pass per cycle.',
+        detail: [
+          'That equivalence is the actual optimality theorem, and it is more useful than the ' +
+            'algorithm. It gives a check that owes nothing to how the flow was produced.',
+          'Cycle cancelling reaches the optimum from above rather than from below, so it always ' +
+            'holds a feasible flow of the right value.',
+          'That is attractive if you already have such a flow and want to improve it. The price is a ' +
+            'Bellman-Ford pass per cycle.'
+        ],
         example: 'Four cycles and 5 Bellman-Ford passes reach the same cost of 28 that successive ' +
           'shortest paths reached in 7 Dijkstra runs.'
       },
@@ -91,12 +106,14 @@
         term: 'A negative-cost cycle with spare capacity means there is no minimum',
         plain: 'Go round it for ever and the cost falls without bound.',
         formal: 'the problem is unbounded; the correct answer is a refusal, not a number',
-        detail: 'This is the case an implementation loops on for ever if nobody thought about it. ' +
-          'The instance is not merely hard, it has no optimum: each trip around the cycle reduces ' +
-          'the cost by a fixed amount and the capacity allows infinitely many trips. The right ' +
-          'behaviour is to detect it — one Bellman-Ford pass already runs, so the detection is free ' +
-          '— and return a refusal with the cycle attached, because a caller who built such a network ' +
-          'has a modelling bug and needs to see it.',
+        detail: [
+          'This is the case an implementation loops on for ever if nobody thought about it.',
+          'The instance is not merely hard: it has no optimum. Each trip around the cycle reduces ' +
+            'the cost by a fixed amount, and the capacity allows infinitely many trips.',
+          'The right behaviour is to detect it and return a refusal with the cycle attached. One ' +
+            'Bellman-Ford pass already runs, so the detection is free — and a caller who built such ' +
+            'a network has a modelling bug and needs to see it.'
+        ],
         example: 'The general-network panel builds negative costs deliberately: 5 negative arcs, and ' +
           'both methods still return 3 units at cost 81 because no negative cycle exists.'
       },
@@ -104,12 +121,14 @@
         term: 'The assignment problem is min-cost flow with every capacity 1',
         plain: 'n workers, n tasks, a cost matrix, and one perfect pairing to be chosen.',
         formal: 'minimise sum of c(i, sigma(i)) over permutations sigma; equivalently a min-cost flow of value n on a unit-capacity bipartite network',
-        detail: 'Seeing it as flow is what makes it obviously polynomial: there are n! permutations ' +
-          'and integrality means the flow optimum is one of them. The Hungarian algorithm is the ' +
-          'specialised O(n³) version — it is successive shortest paths with the potentials written ' +
-          'down explicitly as row and column duals — and it is worth knowing both framings, because ' +
-          'the flow one generalises (unequal counts, capacities above one, side constraints) and the ' +
-          'Hungarian one is faster on the square case.',
+        detail: [
+          'Seeing it as flow is what makes it obviously polynomial. There are n! permutations, and ' +
+            'integrality means the flow optimum is one of them.',
+          'The Hungarian algorithm is the specialised O(n³) version. It is successive shortest paths ' +
+            'with the potentials written down explicitly as row and column duals.',
+          'It is worth knowing both framings. The flow one generalises to unequal counts, capacities ' +
+            'above one and side constraints, and the Hungarian one is faster on the square case.'
+        ],
         example: 'Six workers: the Hungarian algorithm reaches 28 in 6 phases and 45 comparisons, ' +
           'against 720 permutations for brute force.'
       },
@@ -117,12 +136,15 @@
         term: 'Check the theorem, not the potential',
         plain: 'Verify that the residual has no negative cycle rather than that the duals look right.',
         formal: 'checkOptimal tests the characterisation directly; a potential is only maintained where the algorithm reached',
-        detail: 'A natural check is to scan every reduced cost and assert it is non-negative — and ' +
-          'it fails on provably optimal flows, because the algorithm only maintains potentials on ' +
-          'the vertices its searches reached. Vertices it never had to visit carry stale values and ' +
-          'produce phantom violations. Testing the theorem instead is both correct and stronger: it ' +
-          'is a property of the flow alone, so it validates a flow that arrived from anywhere, ' +
-          'including from a completely different algorithm.',
+        detail: [
+          'A natural check is to scan every reduced cost and assert it is non-negative. It fails on ' +
+            'provably optimal flows, because the algorithm only maintains potentials on the vertices ' +
+            'its searches reached.',
+          'Vertices it never had to visit carry stale values and produce phantom violations.',
+          'Testing the theorem instead is both correct and stronger. It is a property of the flow ' +
+            'alone, so it validates a flow that arrived from anywhere, including from a completely ' +
+            'different algorithm.'
+        ],
         example: 'The Hungarian dual certificate is checked separately: zero slack on every chosen ' +
           'cell and no negative reduced cost anywhere.'
       }

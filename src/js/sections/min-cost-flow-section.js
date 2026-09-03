@@ -46,44 +46,51 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**A minimum-cost flow problem adds a cost per unit to every arc**, and asks for the cheapest ' +
+        'way to send a required amount.',
+      '**Successive shortest paths** does the obvious thing: send each unit along the cheapest route ' +
+        'currently available. That is correct because after augmenting along a cheapest path, no ' +
+        'cheaper route to anything appears.',
+      'But doing it needs shortest paths in a graph that has negative arcs.',
+      '**The residual graph always has negative arcs.** The twin of a cost-c arc costs −c, because ' +
+        'undoing a routing decision refunds what it charged.',
+      'So Dijkstra is not merely slow here, it is invalid. The fix is exactly Johnson\'s reweighting ' +
+        'from the previous milestone.',
+      'One Bellman-Ford pass yields a potential h making every reduced cost `w + h(u) − h(v)` ' +
+        'non-negative. Every path between two vertices shifts by the same amount, so the cheapest ' +
+        'one is unchanged.',
+      '**Bellman-Ford is needed exactly once.** After each augmentation the potential is updated by ' +
+        'adding the distances Dijkstra just computed, which restores the non-negativity for the new ' +
+        'residual graph.',
+      'That is the whole algorithm: one slow pass, then a Dijkstra per unit of flow. And it is only ' +
+        'well posed when the input has no negative-cost *cycle* — flow could be routed round one for ' +
+        'ever, so the solver refuses rather than looping.',
+      '**The assignment problem is this in a costume.** A square cost matrix becomes a bipartite ' +
+        'network with unit capacities, a maximum flow is a perfect assignment, and the minimum-cost ' +
+        'one is the optimal assignment.',
+      'The Hungarian algorithm solves the same problem directly while maintaining a dual. That dual ' +
+        'is a value per row and per column, never exceeding the cell they meet at, and tight on ' +
+        'every chosen cell. It is a *certificate* rather than a second opinion.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'A minimum-cost flow problem adds a **cost per unit** to every arc and asks for the cheapest ' +
-          'way to send a required amount. **Successive shortest paths** does the obvious thing: send ' +
-          'each unit along the cheapest route currently available. That is correct because after ' +
-          'augmenting along a cheapest path, no cheaper route to anything appears — but doing it ' +
-          'needs shortest paths in a graph that has negative arcs.',
-        '**The residual graph always has negative arcs.** The twin of a cost-c arc costs −c, because ' +
-          'undoing a routing decision refunds what it charged. So Dijkstra is not merely slow here, ' +
-          'it is invalid — and the fix is exactly Johnson\'s reweighting from the previous milestone. ' +
-          'One Bellman-Ford pass yields a potential h making every reduced cost `w + h(u) − h(v)` ' +
-          'non-negative, and every path between two vertices shifts by the same amount, so the ' +
-          'cheapest one is unchanged.',
-        '**Bellman-Ford is needed exactly once.** After each augmentation the potential is updated by ' +
-          'adding the distances Dijkstra just computed, which restores the non-negativity for the new ' +
-          'residual graph. That is the whole algorithm: one slow pass, then a Dijkstra per unit of ' +
-          'flow. And it is only well posed when the input has no negative-cost *cycle* — flow could ' +
-          'be routed round one for ever, so the solver refuses rather than looping.',
-        '**The assignment problem is this in a costume.** A square cost matrix becomes a bipartite ' +
-          'network with unit capacities, a maximum flow is a perfect assignment, and the minimum-cost ' +
-          'one is the optimal assignment. The Hungarian algorithm solves the same problem directly ' +
-          'while maintaining a dual — a value per row and per column, never exceeding the cell they ' +
-          'meet at, and tight on every chosen cell — which is a *certificate* rather than a second ' +
-          'opinion.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — an assignment three ways, and the potential doing its work',
         markup: root.MinCostFlowTemplate.render()
       },
       diagram: diagram(),
-      insight: 'When a cost function makes a routing or matching problem look hard, the first question ' +
-        'is whether the costs can go negative and the second is whether a negative *cycle* can exist. ' +
-        'Negative arcs are fine and are handled by one reweighting; a negative cycle means there is ' +
-        'no minimum at all and the honest response is to refuse. That distinction is easy to state ' +
-        'and easy to skip, and skipping it is how a solver ends up running for ever on a cost model ' +
-        'somebody adjusted last Tuesday — which is why the module here detects it rather than ' +
+      insight: 'When a cost function makes a routing or matching problem look hard, the first ' +
+        'question is whether the costs can go negative. The second is whether a negative *cycle* can ' +
+        'exist. Negative arcs are fine and are handled by one reweighting. A negative cycle means ' +
+        'there is no minimum at all, and the honest response is to refuse. That distinction is easy ' +
+        'to state and easy to skip. Skipping it is how a solver ends up running for ever on a cost ' +
+        'model somebody adjusted last Tuesday. That is why the module here detects it rather than ' +
         'trusting the caller.'
     };
   }
