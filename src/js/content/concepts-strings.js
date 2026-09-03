@@ -20,12 +20,15 @@
         },
         plain: 'Not milliseconds, not iterations — the count of times two characters were compared.',
         formal: 'the measure every matcher in this milestone is trying to minimise, and the only one comparable across them',
-        detail: 'Milliseconds depend on a JIT, a cache and a machine, and they change between two ' +
-          'runs of the same code. Iterations are not comparable between a left-to-right matcher and ' +
-          'a right-to-left one, because their iterations do different amounts of work. Comparisons ' +
-          'are what each algorithm exists to avoid, they are deterministic, and they let a claim ' +
-          'like "Boyer-Moore is sublinear" be checked rather than repeated — because sublinear means ' +
-          'fewer than one comparison per text character, which is a number.',
+        detail: [
+          'Milliseconds depend on a JIT, a cache and a machine, and they change between two runs of ' +
+            'the same code.',
+          'Iterations are not comparable between a left-to-right matcher and a right-to-left one, ' +
+            'because their iterations do different amounts of work.',
+          'Comparisons are what each algorithm exists to avoid, they are deterministic, and they let ' +
+            'a claim like "Boyer-Moore is sublinear" be checked rather than repeated. Sublinear ' +
+            'means fewer than one comparison per text character, which is a number.'
+        ],
         example: 'On 4 000 characters of English the naive scan does 4 211 comparisons — 1.05 per ' +
           'character — and Boyer-Moore does 1 553.'
       },
@@ -43,11 +46,14 @@
         },
         plain: 'Every other matcher is checked against its occurrence list before its work is quoted.',
         formal: 'agreement on the full position list, plus a direct substring verification of each position',
-        detail: 'Matchers fail by finding *most* of the occurrences, and a comparison count beside a ' +
-          'wrong answer is worse than no count at all. So the naive scan runs on every corpus, its ' +
-          'positions are the reference, and each reported position is additionally checked against ' +
-          'the text directly — which catches the case where the matcher and the oracle share a bug. ' +
-          'Only then does the work column mean anything.',
+        detail: [
+          'Matchers fail by finding *most* of the occurrences, and a comparison count beside a wrong ' +
+            'answer is worse than no count at all.',
+          'So the naive scan runs on every corpus and its positions are the reference. Each reported ' +
+            'position is additionally checked against the text directly, which catches the case ' +
+            'where the matcher and the oracle share a bug.',
+          'Only then does the work column mean anything.'
+        ],
         example: 'Across seven corpora and eight matchers there are zero disagreements, which is ' +
           'what licenses everything else the milestone says.'
       },
@@ -58,23 +64,28 @@
         readAs: 'If two random characters match a fraction p of the time, the average alignment runs 1/(1−p) ' +
           'comparisons before failing. On English p is small, so that is barely above 1 — which is why ' +
           'the naive scan is nearly linear on real text.',
-        detail: 'The worst case is `n·m` and the typical case is close to `n`, and the distance ' +
-          'between those two facts is the whole of this milestone. On English 95.2% of alignments ' +
-          'fail immediately, so the average alignment costs just over one comparison. That is why ' +
-          '`indexOf` is not KMP: KMP would be slower on the inputs `indexOf` actually sees, and the ' +
-          'sophisticated matchers exist for the cases where this argument fails.',
+        detail: [
+          'The worst case is `n·m` and the typical case is close to `n`, and the distance between ' +
+            'those two facts is the whole of this milestone.',
+          'On English 95.2% of alignments fail immediately, so the average alignment costs just over ' +
+            'one comparison.',
+          'That is why `indexOf` is not KMP. KMP would be slower on the inputs `indexOf` actually ' +
+            'sees, and the sophisticated matchers exist for the cases where this argument fails.'
+        ],
         example: '1.05 comparisons per character on English against 11.97 on the adversarial corpus.'
       },
       {
         term: 'The adversarial input is one line long',
         plain: 'Search for aaa…aab in aaa…a and every alignment runs to the full pattern length.',
         formal: 'the input realising the O(nm) bound: the pattern agrees with the text everywhere but its last character',
-        detail: 'Nothing about the algorithm changes between the English row and this one. The ' +
-          'inner loop runs to completion at every alignment and finds nothing, so the cost is ' +
-          'exactly `n·m` rather than approximately `n`. That input is a single expression, which is ' +
-          'why any service that lets a caller choose both the pattern and the text on a naive matcher ' +
-          'has a denial-of-service hole in it — the same shape as the ReDoS in 15.10 and the hash ' +
-          'attack in 15.5.',
+        detail: [
+          'Nothing about the algorithm changes between the English row and this one.',
+          'The inner loop runs to completion at every alignment and finds nothing, so the cost is ' +
+            'exactly `n·m` rather than approximately `n`.',
+          'That input is a single expression. Any service that lets a caller choose both the pattern ' +
+            'and the text on a naive matcher has a denial-of-service hole in it. It is the same ' +
+            'shape as the ReDoS in 15.10 and the hash attack in 15.5.'
+        ],
         example: 'A 12-character pattern over 4 000 characters: 47 868 comparisons against 4 211 ' +
           'for the same length of English.'
       },
@@ -82,12 +93,16 @@
         term: 'A first-character filter saves no comparisons at all',
         plain: 'The filter performs exactly the comparison the inner loop would have made first.',
         formal: 'the comparison count is identical with and without the filter; what changes is the inner-loop entry count',
-        detail: 'This is the measurement that surprises people. Filtering on `text[i] != pattern[0]` ' +
-          'looks like it removes work, and in a comparison count it removes precisely nothing. What ' +
-          'it removes is *entries into the general inner loop*, and that matters because the filter ' +
-          'can be a `memchr` — a vectorised byte scan that examines sixteen characters per ' +
-          'instruction — while a general loop examines one. The saving is real and it is not in ' +
-          'this table\'s units, and saying so is more useful than pretending the count fell.',
+        detail: [
+          'This is the measurement that surprises people.',
+          'Filtering on `text[i] != pattern[0]` looks like it removes work, and in a comparison ' +
+            'count it removes precisely nothing. What it removes is *entries into the general inner ' +
+            'loop*.',
+          'That matters because the filter can be a `memchr` — a vectorised byte scan that examines ' +
+            'sixteen characters per instruction — while a general loop examines one. The saving is ' +
+            'real and it is not in this table\'s units, and saying so is more useful than pretending ' +
+            'the count fell.'
+        ],
         example: '4 211 comparisons either way, and 3 998 inner-loop entries fall to 191 — a 20.9× ' +
           'reduction in the loop that cannot be vectorised.'
       },
@@ -97,11 +112,14 @@
         formal: 'the occurrence set is every start position p with text[p..p+m) = pattern, without exclusion',
         readAs: 'Every position where the pattern starts counts, even where two occurrences overlap. The ' +
           'square-then-round bracket means the window includes p and stops just before p+m.',
-        detail: 'This is the first thing a hand-rolled matcher gets wrong, usually by advancing the ' +
-          'start position by `m` after a hit rather than by one. The bug is invisible on natural ' +
-          'language, where a pattern rarely overlaps itself, and catastrophic on the periodic data ' +
-          'where matching is actually used — DNA motifs, repeated log fields, binary framing. The ' +
-          'repeated corpus in the demo exists to make it visible.',
+        detail: [
+          'This is the first thing a hand-rolled matcher gets wrong, usually by advancing the start ' +
+            'position by `m` after a hit rather than by one.',
+          'The bug is invisible on natural language, where a pattern rarely overlaps itself. It is ' +
+            'catastrophic on the periodic data where matching is actually used: DNA motifs, ' +
+            'repeated log fields, binary framing.',
+          'The repeated corpus in the demo exists to make it visible.'
+        ],
         example: 'The pattern "aaaa" in 4 000 a\'s occurs 3 997 times, once at every position that ' +
           'admits it.'
       },
@@ -109,12 +127,15 @@
         term: 'The four families each avoid something different',
         plain: 'Re-reading the text, reading it at all, comparing characters, or making the decision.',
         formal: 'prefix-based, suffix-based, hashing, automaton — four bets about the shape of the input',
-        detail: 'Prefix-based matchers (KMP, Z) never re-read a text character, which is what makes ' +
-          'them usable on a stream. Suffix-based ones (Boyer-Moore) skip text unread, which makes ' +
-          'them faster as the pattern grows. Hashing compares one integer per window and only ' +
-          'touches characters on a hit. An automaton precomputes the decision into a table. Each is ' +
-          'a bet about the input, and the corpus table shows every one of them losing on some ' +
-          'corpus in the same demo.',
+        detail: [
+          'Prefix-based matchers (KMP, Z) never re-read a text character, which is what makes them ' +
+            'usable on a stream. Suffix-based ones (Boyer-Moore) skip text unread, which makes them ' +
+            'faster as the pattern grows.',
+          'Hashing compares one integer per window and only touches characters on a hit. An ' +
+            'automaton precomputes the decision into a table.',
+          'Each is a bet about the input, and the corpus table shows every one of them losing on ' +
+            'some corpus in the same demo.'
+        ],
         example: 'Sunday wins on English at 1 265 units, Boyer-Moore on DNA at 1 927, and KMP on ' +
           'the repeated corpus at 4 000 where Boyer-Moore pays 15 988.'
       },
@@ -122,12 +143,15 @@
         term: 'A pattern and a text are one input, not two',
         plain: 'The same pattern behaves completely differently depending on how often it occurs.',
         formal: 'matcher cost depends on the alphabet, the pattern length, the occurrence density and the pattern\'s own periodicity',
-        detail: 'Benchmarks that vary the text and fix the pattern, or vice versa, measure one ' +
-          'slice of a surface with at least four dimensions. A pattern that never occurs exercises ' +
-          'the skip machinery; one that occurs at every position exercises the match handling and ' +
-          'nothing else. A periodic pattern defeats the good-suffix rule; a pattern over a tiny ' +
-          'alphabet defeats the bad-character rule. Every corpus in this milestone is a *pair* for ' +
-          'that reason.',
+        detail: [
+          'Benchmarks that vary the text and fix the pattern, or vice versa, measure one slice of a ' +
+            'surface with at least four dimensions.',
+          'A pattern that never occurs exercises the skip machinery; one that occurs at every ' +
+            'position exercises the match handling and nothing else.',
+          'A periodic pattern defeats the good-suffix rule, and a pattern over a tiny alphabet ' +
+            'defeats the bad-character rule. Every corpus in this milestone is a *pair* for that ' +
+            'reason.'
+        ],
         example: 'On the repeated corpus the pattern occurs 3 997 times and every skipping matcher ' +
           'collapses to the naive cost of 15 988.'
       }

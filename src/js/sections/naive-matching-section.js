@@ -50,31 +50,39 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**Exact matching asks for every position where a pattern occurs in a text** — *every* one, ' +
+        'including overlapping occurrences, which is the first place a hand-rolled matcher goes ' +
+        'wrong.',
+      'The naive algorithm tries each of the `n − m + 1` alignments and compares left to right until ' +
+        'a mismatch. Its worst case is `n·m` and its typical case on natural language is close to ' +
+        '`n`.',
+      'The distance between those two facts is what the rest of this milestone is about.',
+      '**The currency here is character comparisons.** Not milliseconds, which depend on a JIT and a ' +
+        'cache; not iterations, which are not comparable between a left-to-right and a ' +
+        'right-to-left matcher.',
+      'Comparisons are what every algorithm in this milestone is trying to avoid, and counting them ' +
+        'is what makes "faster" a measurement rather than a claim.',
+      '**The adversarial input is `aaa…aab` in `aaa…a`.** Every alignment agrees on all but the ' +
+        'last character, so the inner loop runs to completion every time and finds nothing.',
+      'That is the input the `O(nm)` bound is about. On it the naive scan does twelve times the work ' +
+        'it does on English text of the same length, while every skipping matcher does a fraction ' +
+        'of it.',
+      '**A first-character filter is the standard library\'s answer**, and what it saves is not what ' +
+        'people think.',
+      'The filter compares the same character the inner loop would have compared first, so the ' +
+        'comparison count does not move at all.',
+      'What moves is the number of inner-loop *entries*. That matters because `memchr` is a ' +
+        'vectorised byte scan that does sixteen characters per instruction, while a general inner ' +
+        'loop does one.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'Exact matching asks for every position where a pattern occurs in a text — *every* one, ' +
-          'including overlapping occurrences, which is the first place a hand-rolled matcher goes ' +
-          'wrong. The naive algorithm tries each of the `n − m + 1` alignments and compares left to ' +
-          'right until a mismatch. Its worst case is `n·m` and its typical case on natural language ' +
-          'is close to `n`, and the distance between those two facts is what the rest of this ' +
-          'milestone is about.',
-        '**The currency here is character comparisons.** Not milliseconds, which depend on a JIT and ' +
-          'a cache; not iterations, which are not comparable between a left-to-right and a ' +
-          'right-to-left matcher. Comparisons are what every algorithm in this milestone is trying ' +
-          'to avoid, and counting them is what makes "faster" a measurement rather than a claim.',
-        '**The adversarial input is `aaa…aab` in `aaa…a`.** Every alignment agrees on all but the ' +
-          'last character, so the inner loop runs to completion every time and finds nothing. That ' +
-          'is the input the `O(nm)` bound is about, and on it the naive scan does twelve times the ' +
-          'work it does on English text of the same length — while every skipping matcher does a ' +
-          'fraction of it.',
-        '**A first-character filter is the standard library\'s answer**, and what it saves is not ' +
-          'what people think. The filter compares the same character the inner loop would have ' +
-          'compared first, so the comparison count does not move at all. What moves is the number ' +
-          'of inner-loop *entries*, and that matters because `memchr` is a vectorised byte scan that ' +
-          'does sixteen characters per instruction while a general inner loop does one.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — one alignment, the comparison profile, and seven corpora',
         markup: root.NaiveMatchingTemplate.render()
@@ -82,7 +90,7 @@
       diagram: diagram(),
       insight: 'The reason `indexOf` is not KMP is that KMP is slower on the inputs `indexOf` ' +
         'actually sees. A tuned naive scan with a vectorised first-character filter beats every ' +
-        'algorithm in this milestone on short patterns over natural language, and the sophisticated ' +
+        'algorithm in this milestone on short patterns over natural language. The sophisticated ' +
         'matchers exist for the cases it loses on: very long patterns, tiny alphabets, many patterns ' +
         'at once, and adversarial input. Knowing which of those you have is the whole decision, and ' +
         'it is a question about your data rather than about the algorithms.'
