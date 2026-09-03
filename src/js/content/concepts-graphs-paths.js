@@ -169,14 +169,18 @@
         },
         plain: 'If going through u is cheaper than what I have, take it.',
         formal: 'if d[u] + w(u, v) < d[v] then d[v] = d[u] + w(u, v), parent[v] = u',
-        readAs: 'Relaxation, the single operation behind every shortest-path algorithm here: if going via u ' +
-          'is cheaper than the best route to v found so far, take it and remember where you came from.',
-        detail: 'Every algorithm in this milestone is the same three lines wrapped in a different rule ' +
-          'about *when* to apply them. Dijkstra relaxes out of the closest unsettled vertex, ' +
-          'Bellman-Ford relaxes everything n − 1 times, DAG shortest paths relax in topological order, ' +
-          'A* changes the queue key and nothing else. Seeing that clearly is what makes the family ' +
-          'learnable: the differences are entirely in the ordering strategy, and each strategy comes ' +
-          'with a precondition that licenses it.',
+        readAs: 'Relaxation is the single operation behind every shortest-path algorithm here. If ' +
+          'going via u is cheaper than the best route to v found so far, take it and remember where ' +
+          'you came from.',
+        detail: [
+          'Every algorithm in this milestone is the same three lines wrapped in a different rule ' +
+            'about *when* to apply them.',
+          'Dijkstra relaxes out of the closest unsettled vertex. Bellman-Ford relaxes everything ' +
+            'n − 1 times, DAG shortest paths relax in topological order, and A* changes the queue ' +
+            'key and nothing else.',
+          'Seeing that clearly is what makes the family learnable. The differences are entirely in ' +
+            'the ordering strategy, and each strategy comes with a precondition that licenses it.'
+        ],
         example: 'Dijkstra performs 3 480 relaxations on the 900-cell grid — one per directed edge — ' +
           'and Bellman-Ford performs 20 880 doing the same job in 6 rounds.'
       },
@@ -186,12 +190,15 @@
         formal: 'settling u is sound iff every edge weight is >= 0; a negative edge can lower a total after the fact',
         readAs: 'Dijkstra declares a vertex final the moment it pops. That is only safe if no edge can reduce ' +
           'a total later — which is exactly what a negative weight does.',
-        detail: 'The greedy step is justified by an argument that mentions non-negativity exactly once ' +
-          'and depends on it completely: any other route to the closest unsettled vertex has to pass ' +
-          'through some vertex that is at least as far away, and with non-negative edges it cannot get ' +
-          'cheaper from there. Introduce one negative edge and that sentence is false — and the ' +
-          'algorithm does not notice, because nothing in the loop tests it. It simply settles a vertex ' +
-          'too early and returns a plausible number.',
+        detail: [
+          'The greedy step is justified by an argument that mentions non-negativity exactly once and ' +
+            'depends on it completely.',
+          'Any other route to the closest unsettled vertex has to pass through some vertex that is ' +
+            'at least as far away. With non-negative edges it cannot get cheaper from there.',
+          'Introduce one negative edge and that sentence is false. The algorithm does not notice, ' +
+            'because nothing in the loop tests it — it simply settles a vertex too early and returns ' +
+            'a plausible number.'
+        ],
         example: 'The demo\'s four-vertex counter-example returns d[3] = 3 where the truth is 2, with ' +
           'no error raised.'
       },
@@ -199,12 +206,16 @@
         term: 'The negative-edge counter-example has to propagate',
         plain: 'A tiny example gets the right answer by luck and demonstrates nothing.',
         formal: 'the vertex whose distance is later lowered must have an outgoing edge that was already relaxed',
-        detail: 'A lazy implementation still writes the improved distance into the array when the ' +
-          'negative edge is finally relaxed, so the vertex directly at the end of that edge often ends ' +
-          'up correct. The error only becomes visible one hop further on, at a vertex whose distance ' +
-          'was computed from the stale value and never revisited. Building a counter-example therefore ' +
-          'takes care, and the section\'s is deliberately arranged so that d[1] comes out right and ' +
-          'd[3] comes out wrong — which is exactly why this failure survives casual testing.',
+        detail: [
+          'A lazy implementation still writes the improved distance into the array when the negative ' +
+            'edge is finally relaxed. So the vertex directly at the end of that edge often ends up ' +
+            'correct.',
+          'The error only becomes visible one hop further on, at a vertex whose distance was ' +
+            'computed from the stale value and never revisited.',
+          'Building a counter-example therefore takes care. The section\'s is arranged so that d[1] ' +
+            'comes out right and d[3] comes out wrong, which is exactly why this failure survives ' +
+            'casual testing.'
+        ],
         example: 'Four vertices: 0→1 costs 2, 0→2 costs 3, 2→1 costs −2, 1→3 costs 1. d[1] ends correct ' +
           'at 1 and d[3] ends wrong at 3.'
       },
@@ -222,12 +233,15 @@
         },
         plain: 'Push a new entry instead of decreasing a key, and skip stale entries on the way out.',
         formal: 'heap holds up to m entries rather than n; a pop whose key exceeds d[v] is discarded',
-        detail: 'Decrease-key needs a handle per vertex and a heap that can find and sift an arbitrary ' +
-          'element, which is real code and real memory. The lazy alternative pushes a fresh entry on ' +
-          'every improvement and discards entries that are no longer current when they surface. It ' +
-          'costs extra pops and a slightly larger heap, and on sparse graphs it is almost always the ' +
-          'better trade — but the stale count should be *reported*, because it is the number that says ' +
-          'when the trade has stopped paying.',
+        detail: [
+          'Decrease-key needs a handle per vertex and a heap that can find and sift an arbitrary ' +
+            'element, which is real code and real memory.',
+          'The lazy alternative pushes a fresh entry on every improvement and discards entries that ' +
+            'are no longer current when they surface. It costs extra pops and a slightly larger ' +
+            'heap, and on sparse graphs it is almost always the better trade.',
+          'The stale count should still be *reported*, because it is the number that says when the ' +
+            'trade has stopped paying.'
+        ],
         example: 'On the 900-cell grid the heap holds 1 153 entries for 900 vertices and discards 253 ' +
           'stale pops — 21.9% of them.'
       },
@@ -235,15 +249,17 @@
         term: '0-1 BFS: a deque replaces the heap entirely',
         plain: 'Zero-weight edges go to the front, one-weight edges to the back.',
         formal: 'with weights in {0, 1} the frontier holds at most two distinct distances; Θ(n + m), no comparisons',
-        readAs: 'When every edge costs 0 or 1, the queue only ever holds two distance values at once, so a ' +
-          'deque replaces the heap: push 0-edges on the front, 1-edges on the back. No priority queue ' +
-          'and no log factor.',
-        detail: 'When every edge costs 0 or 1 the queue only ever contains two distance values, so a ' +
-          'deque keeps it sorted for free and no comparison is ever needed. This is worth recognising ' +
-          'because the shape appears constantly in disguise: toggling a state, entering or leaving a ' +
-          'region, a move that is free versus a move that is not. Recognising it turns an O(m log n) ' +
-          'search into a linear one, and the same idea generalises to small integer weights as a dial ' +
-          'queue.',
+        readAs: 'When every edge costs 0 or 1, the queue only ever holds two distance values at ' +
+          'once. A deque then replaces the heap: push 0-edges on the front, 1-edges on the back. No ' +
+          'priority queue and no log factor.',
+        detail: [
+          'When every edge costs 0 or 1 the queue only ever contains two distance values. A deque ' +
+            'keeps it sorted for free, and no comparison is ever needed.',
+          'This is worth recognising, because the shape appears constantly in disguise. Toggling a ' +
+            'state, entering or leaving a region, a move that is free versus a move that is not.',
+          'Recognising it turns an O(m log n) search into a linear one, and the same idea generalises ' +
+            'to small integer weights as a dial queue.'
+        ],
         example: 'On the same grid re-weighted to 0 and 1, the deque makes 0 comparisons where Dijkstra ' +
           'makes 1 142, for the identical 900 distances.'
       },
@@ -251,12 +267,15 @@
         term: 'Path reconstruction is a parent array, and it must be checked',
         plain: 'Store who improved you, then walk backwards — and re-add the weights.',
         formal: 'cost of the reconstructed path must equal the reported distance, edge by edge',
-        detail: 'A distance array with no path is half an answer, and a path that disagrees with the ' +
-          'distance is worse than either. Keeping a parent pointer costs one array and one assignment ' +
-          'inside the relaxation, and re-walking the returned path to confirm its cost is a two-line ' +
-          'check that catches an entire class of bug — an off-by-one in the parent update, a parent ' +
-          'left stale after a later improvement, a path that silently contains a cycle. This page runs ' +
-          'that check on every query.',
+        detail: [
+          'A distance array with no path is half an answer, and a path that disagrees with the ' +
+            'distance is worse than either.',
+          'Keeping a parent pointer costs one array and one assignment inside the relaxation. ' +
+            'Re-walking the returned path to confirm its cost is a two-line check.',
+          'That check catches an entire class of bug: an off-by-one in the parent update, or a ' +
+            'parent left stale after a later improvement. It also catches a path that silently ' +
+            'contains a cycle. This page runs it on every query.'
+        ],
         example: 'The re-walked path costs exactly 181, matching the distance the search reported.'
       },
       {
@@ -266,11 +285,15 @@
         readAs: 'Dijkstra explores outward in all directions equally, so by the time it reaches the target it ' +
           'has settled everything nearer than the target. For a long-distance query that is most of the ' +
           'map, and it is the cost the next section attacks.',
-        detail: 'Early termination is correct and rarely dramatic, because the algorithm has no idea ' +
-          'where the target is: it grows a ball of radius d(s, t) and everything inside that ball is ' +
-          'settled first. On a corner-to-corner grid query that ball is the whole grid. That single ' +
-          'observation is what motivates the next two sections — a heuristic deforms the ball into a ' +
-          'corridor, and searching from both ends replaces one ball with two smaller ones.',
+        detail: [
+          'Early termination is correct and rarely dramatic, because the algorithm has no idea where ' +
+            'the target is. It grows a ball of radius d(s, t), and everything inside that ball is ' +
+            'settled first.',
+          'On a corner-to-corner grid query that ball is the whole grid.',
+          'That single observation is what motivates the next two sections. A heuristic deforms the ' +
+            'ball into a corridor, and searching from both ends replaces one ball with two smaller ' +
+            'ones.'
+        ],
         example: 'A corner-to-corner query on the 900-cell grid settles all 900 vertices before the ' +
           'target pops.'
       },
@@ -278,12 +301,15 @@
         term: 'A slower reference implementation is not waste',
         plain: 'Keep Bellman-Ford around; it is the only way to know Dijkstra is right.',
         formal: 'compare distance vectors vertex by vertex and report the disagreement count as data',
-        detail: 'Shortest-path bugs do not throw. They return a well-formed array of plausible numbers, ' +
-          'and there is no internal consistency check that catches a distance which is merely too ' +
-          'large. The only real defence is a second implementation with a different derivation, ' +
-          'compared on every vertex — and the disagreement count belongs in the output rather than in ' +
-          'an assertion, because on a graph with negative edges the disagreement is the point of the ' +
-          'demonstration rather than a failure.',
+        detail: [
+          'Shortest-path bugs do not throw. They return a well-formed array of plausible numbers, ' +
+            'and there is no internal consistency check that catches a distance which is merely too ' +
+            'large.',
+          'The only real defence is a second implementation with a different derivation, compared on ' +
+            'every vertex.',
+          'The disagreement count belongs in the output rather than in an assertion. On a graph with ' +
+            'negative edges the disagreement is the point of the demonstration rather than a failure.'
+        ],
         example: 'Bellman-Ford, Dijkstra and SPFA all return 181 with 0 disagreements on the ' +
           'non-negative grid — and disagree loudly the moment a negative edge is added.'
       }

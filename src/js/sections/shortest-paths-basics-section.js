@@ -47,42 +47,48 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**On an unweighted graph, BFS is the shortest-path algorithm.** It settles vertices in ' +
+        'non-decreasing distance, because the queue holds at most two distinct distances at once.',
+      'Once weights appear that stops being true, and something has to keep the frontier sorted. ' +
+        'That is what the priority queue in Dijkstra is for.',
+      '**Dijkstra rests on one invariant**: the unsettled vertex with the smallest tentative ' +
+        'distance is final. Any remaining path to it must leave the settled set through a frontier ' +
+        'vertex at least as far away, and a non-negative edge cannot make it smaller.',
+      'That last clause carries the entire proof, and it is exactly what a negative edge takes away.',
+      '**A negative edge does not raise an error.** It returns a plausible number, and the failure ' +
+        'is subtler than it first looks.',
+      'A lazy implementation updates the distance array even for an already-settled vertex. So an ' +
+        'instance where the negative edge only lowers that vertex\'s own distance comes out right by ' +
+        'accident.',
+      'The error has to propagate past the settled vertex. The tell is that the vertex the negative ' +
+        'edge points at is *correct* while its successor is not. The panel below shows that instance ' +
+        'with the two answers side by side.',
+      '**When the weights are only 0 and 1, a deque replaces the heap entirely.** Push a zero edge ' +
+        'to the front and a one edge to the back, and the deque stays sorted with no comparisons at ' +
+        'all.',
+      'That is O(n + m) rather than O(m log n), and exact rather than approximate. It is a narrow ' +
+        'case and it is extremely common — "free" and "costs one" is what most ' +
+        'reachability-with-a-toll problems reduce to.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'On an unweighted graph, **BFS is the shortest-path algorithm** - it settles vertices in ' +
-          'non-decreasing distance because the queue holds at most two distinct distances at once. Once ' +
-          'weights appear that stops being true and something has to keep the frontier sorted, which is ' +
-          'what the priority queue in Dijkstra is for.',
-        '**Dijkstra rests on one invariant**: the unsettled vertex with the smallest tentative distance is ' +
-          'final. The argument is that any remaining path to it must leave the settled set through some ' +
-          'frontier vertex whose distance is at least as large, and adding a non-negative edge cannot make ' +
-          'it smaller. That last clause carries the entire proof, and it is exactly what a negative edge ' +
-          'takes away.',
-        '**A negative edge does not raise an error.** It returns a plausible number, and the failure is ' +
-          'subtler than it first looks: a lazy implementation updates the distance array even for an ' +
-          'already-settled vertex, so an instance where the negative edge only lowers that vertex\'s own ' +
-          'distance comes out right by accident. The error has to propagate past the settled vertex, and ' +
-          'the tell is that the vertex the negative edge points at is *correct* while its successor is ' +
-          'not. The panel below shows that instance with the two answers side by side.',
-        '**When the weights are only 0 and 1, a deque replaces the heap entirely.** Push a zero edge to ' +
-          'the front and a one edge to the back and the deque stays sorted with no comparisons at all: ' +
-          'O(n + m) rather than O(m log n), and exact rather than approximate. It is a narrow case and it ' +
-          'is extremely common - "free" and "costs one" is what most reachability-with-a-toll problems ' +
-          'reduce to.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — the settled set, the path re-walked, and the invariant broken',
         markup: root.ShortestPathsBasicsTemplate.render()
       },
       diagram: diagram(),
-      insight: 'Any quantity that can go negative — a refund, a rebate, a delta, a score that rewards as ' +
-        'well as penalises — makes Dijkstra unsound on that graph, and it will not tell you. The two ' +
-        'correct responses are Bellman-Ford, which is slower and handles it, or a potential transform that ' +
-        'shifts every weight non-negative while preserving shortest paths, which is what Johnson\'s ' +
-        'algorithm in the next section does. The wrong response, and the common one, is to notice that the ' +
-        'numbers look reasonable.'
+      insight: 'Any quantity that can go negative — a refund, a rebate, a delta, a score that rewards ' +
+        'as well as penalises — makes Dijkstra unsound on that graph. It will not tell you. There are ' +
+        'two correct responses: Bellman-Ford, which is slower and handles it, or a potential transform ' +
+        'that shifts every weight non-negative while preserving shortest paths. That transform is what ' +
+        'Johnson\'s algorithm in the next section does. The wrong response, and the common one, is to ' +
+        'notice that the numbers look reasonable.'
     };
   }
 
