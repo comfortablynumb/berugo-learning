@@ -5182,6 +5182,47 @@ counts…`).
 `--strict` exits non-zero on any section over budget. It is deliberately not
 wired into `npm test` yet; that happens when the last section lands.
 
+### Where the pass stopped (2026-09-03, second session)
+
+**57 of 364 sections are inside the budget**, and the tree is green: `npm test`
+passes, `npm run lint:size` passes at 1 917 files, and every section committed
+here printed `ok` from `node tools/readability.js <id>` plus the four
+content/notation unit tests and its own render-audit shard before its commit.
+
+Overall: mean sentence 22.6 -> **20.5** words, sentences over 30 words
+21.9% -> **15.7%**, single-block explanations 2 935 -> **2 471**.
+
+**A tooling fix landed first, and it moved the baseline.** 185 sections keep
+their orientation in an `orientation()` function, because a `config()` carrying
+six paragraphs crosses the 50-line limit; the config site then reads
+`orientation: orientation()`, which holds no string literals. `prose-scan`
+stopped at the key, found nothing, and reported those sections as having no
+orientation at all - so half the curriculum's opening prose was never measured.
+`proseFor` now falls back to the function body, and the same applies to the 47
+extracted `insight()` functions. Two tests pin both shapes.
+
+Done this session, in curriculum order: `bridges-and-cuts`,
+`shortest-paths-basics`, `negative-weights`, `heuristic-search`,
+`route-planning`, `minimum-spanning-trees`, `tree-path-queries`, `maximum-flow`,
+`minimum-cut`, `push-relabel`, `min-cost-flow`, `bipartite-matching`,
+`general-matching` - all of M13.4-M13.6 and the whole of M14.
+
+**Resume at `two-sat`** - it is section 58 in `Curriculum.teachingSections()`
+order. Run `node tools/readability.js` and work down the curriculum order;
+anything not printing `ok` is outstanding.
+
+Two things learned repacking these thirteen:
+
+- **The `example` line counts too.** Several sections were inside budget on
+  their explanations and over it on an example that packed three vectors of
+  figures into one 33-38 word sentence. Splitting the sentence keeps every
+  figure, and `worked-examples-*.test.js` still passes because it asserts the
+  numbers rather than the punctuation.
+- **A caption and its explanation can contradict each other**, and nobody
+  notices while both are walls of text. `maximum-flow`'s diagram caption said
+  the residual back edge "is not bookkeeping" directly above an explanation
+  calling it bookkeeping.
+
 ### Where the pass stopped (2026-09-03)
 
 **44 of 364 sections are inside the budget**, and the tree is green: `npm test`
