@@ -165,11 +165,14 @@
         readAs: 'Rolling the hash forward: subtract the departing character\'s contribution, multiply ' +
           'everything up one place, add the arriving character. Three operations regardless of window ' +
           'size — h′ is read "h prime", the next hash.',
-        detail: 'That constant-time update is what makes a fingerprint per position affordable at ' +
-          'all. Without it, hashing every window costs the same as comparing every window and the ' +
-          'whole approach is pointless. With it, matching becomes a stream of integer comparisons ' +
-          'and character comparisons happen only on a hit — which is a good trade exactly when hits ' +
-          'are rare, and a catastrophic one when an adversary can make them common.',
+        detail: [
+          'That constant-time update is what makes a fingerprint per position affordable at all.',
+          'Without it, hashing every window costs the same as comparing every window, and the whole ' +
+            'approach is pointless.',
+          'With it, matching becomes a stream of integer comparisons, and character comparisons ' +
+            'happen only on a hit. That is a good trade exactly when hits are rare, and a ' +
+            'catastrophic one when an adversary can make them common.'
+        ],
         example: 'On 4 000 characters the matcher does 3 997 rolling updates and 36 character ' +
           'comparisons.'
       },
@@ -180,12 +183,15 @@
         readAs: 'Two kinds of randomised algorithm. Las Vegas is always right and takes a variable amount of ' +
           'time; Monte Carlo runs in fixed time and is occasionally wrong. Checking each hash hit is ' +
           'what moves Rabin-Karp from the second to the first.',
-        detail: 'Rabin-Karp with the verification removed returns wrong answers at a rate you have ' +
-          'to reason about, and the rate depends on the modulus, the text and — if anybody is ' +
-          'choosing the text — on them. With verification a collision costs a comparison run and ' +
-          'never a wrong answer, so the modulus decides the *work* and never the *answer*. That ' +
-          'separation is what makes the modulus a tuning parameter rather than a correctness ' +
-          'assumption.',
+        detail: [
+          'Rabin-Karp with the verification removed returns wrong answers at a rate you have to ' +
+            'reason about. That rate depends on the modulus, the text and — if anybody is choosing ' +
+            'the text — on them.',
+          'With verification a collision costs a comparison run and never a wrong answer, so the ' +
+            'modulus decides the *work* and never the *answer*.',
+          'That separation is what makes the modulus a tuning parameter rather than a correctness ' +
+            'assumption.'
+        ],
         example: 'At moduli 101, 1 009, 1 000 003 and 999 999 937 the matcher finds exactly the ' +
           'same 12 occurrences, at 55, 40, 36 and 36 character comparisons.'
       },
@@ -195,11 +201,13 @@
         formal: 'expected spurious hits ≈ (n − m + 1)/M for a hash spreading uniformly',
         readAs: 'False hash matches happen about once per M windows, so the number is the window count over ' +
           'the modulus. At M around a million and a few thousand windows, that is essentially none.',
-        detail: 'That prediction is what makes the modulus choice a calculation rather than a ' +
-          'superstition, and comparing it against the measurement is what tells you whether the ' +
-          'hash actually spreads. A modulus of a million over four thousand windows predicts 0.004 ' +
-          'spurious hits, which is why nobody notices Rabin-Karp\'s failure mode until somebody ' +
-          'constructs one — the expected number is well below one.',
+        detail: [
+          'That prediction is what makes the modulus choice a calculation rather than a superstition.',
+          'Comparing it against the measurement is what tells you whether the hash actually spreads.',
+          'A modulus of a million over four thousand windows predicts 0.004 spurious hits. That is ' +
+            'why nobody notices Rabin-Karp\'s failure mode until somebody constructs one: the ' +
+            'expected number is well below one.'
+        ],
         example: 'At modulus 101 the prediction is 39.58 and the measurement is 19; at 1 000 003 ' +
           'both are 0.'
       },
@@ -210,11 +218,15 @@
         readAs: 'You do not need M tries to force a collision, only about the square root of M — the same ' +
           'reason 23 people in a room share a birthday. A million-sized modulus falls in a thousand ' +
           'attempts, which is instant.',
-        detail: 'The attacker needs no cleverness and no access — only the constants, which are in ' +
-          'the source. A second of work produces a colliding pair; repeating one half of it produces ' +
-          'a text on which every window hits and every verification fails, so the filter admits ' +
-          'everything and the matcher does the quadratic work it exists to avoid. This is the same ' +
-          'shape as the hash-flooding attacks that produced SipHash, and it has the same fix.',
+        detail: [
+          'The attacker needs no cleverness and no access — only the constants, which are in the ' +
+            'source.',
+          'A second of work produces a colliding pair. Repeating one half of it produces a text on ' +
+            'which every window hits and every verification fails. The filter then admits ' +
+            'everything, and the matcher does the quadratic work it exists to avoid.',
+          'This is the same shape as the hash-flooding attacks that produced SipHash, and it has the ' +
+            'same fix.'
+        ],
         example: 'A colliding pair of 16-character strings took 1 536 random tries against a ' +
           'birthday estimate of 1 000.'
       },
@@ -222,12 +234,15 @@
         term: 'Randomising the base per run is the fix, and it is one line',
         plain: 'The colliding pair was a solution for one base; a different base breaks it.',
         formal: 'choose b uniformly at process start; the adversary must now defeat a base they cannot see',
-        detail: 'It converts an attacker-controlled quadratic blow-up into a probabilistic ' +
-          'guarantee they cannot aim at, and it costs nothing at all — the hash is the same ' +
-          'arithmetic with a different constant. The only thing it takes away is reproducibility ' +
-          'across runs, which matters for a content-addressed store and not for a matcher. Any ' +
-          'deterministic hash of untrusted input is a promise that its worst case is reachable on ' +
-          'demand.',
+        detail: [
+          'It converts an attacker-controlled quadratic blow-up into a probabilistic guarantee they ' +
+            'cannot aim at, and it costs nothing at all. The hash is the same arithmetic with a ' +
+            'different constant.',
+          'The only thing it takes away is reproducibility across runs, which matters for a ' +
+            'content-addressed store and not for a matcher.',
+          'Any deterministic hash of untrusted input is a promise that its worst case is reachable ' +
+            'on demand.'
+        ],
         example: 'The attack text produces 200 spurious hits at the fixed base and 0 at the worst ' +
           'of 20 random ones.'
       },
@@ -235,14 +250,18 @@
         term: 'Content-defined chunking is the same hash asked a different question',
         plain: 'Cut wherever the rolling hash of the last few bytes has enough low zero bits.',
         formal: 'a boundary at position i iff hash(text[i−w..i]) mod 2^k = 0 — a property of the CONTENT, not the offset',
-        readAs: 'Cut the file wherever the rolling hash of the last w bytes ends in k zeros. Because the ' +
-          'decision depends only on the bytes themselves, inserting something at the start does not ' +
-          'move any later boundary — which is the whole point for deduplication.',
-        detail: 'Because the boundary depends on the bytes around it rather than on the distance ' +
-          'from the start of the file, inserting a byte moves one boundary and leaves every other ' +
-          'chunk byte-identical. A fixed-size chunker shifts every boundary after the insertion ' +
-          'point and every chunk after it becomes a different string. That single difference is why ' +
-          'rsync, restic, borg and every deduplicating store cut on content.',
+        readAs: 'Cut the file wherever the rolling hash of the last w bytes ends in k zeros. Because ' +
+          'the decision depends only on the bytes themselves, inserting something at the start does ' +
+          'not move any later boundary. That is the whole point for deduplication.',
+        detail: [
+          'The boundary depends on the bytes around it rather than on the distance from the start of ' +
+            'the file. So inserting a byte moves one boundary and leaves every other chunk ' +
+            'byte-identical.',
+          'A fixed-size chunker shifts every boundary after the insertion point, and every chunk ' +
+            'after it becomes a different string.',
+          'That single difference is why rsync, restic, borg and every deduplicating store cut on ' +
+            'content.'
+        ],
         example: 'After one inserted byte the content-defined chunker keeps 73 of its 75 chunks and ' +
           'a 64-byte fixed chunker keeps 20 of 63.'
       },
@@ -250,11 +269,14 @@
         term: 'The boundary-bit setting is the whole tuning dial',
         plain: 'Each extra bit halves the boundary probability and doubles the mean chunk.',
         formal: 'expected chunk length ≈ 2^k for a k-bit boundary condition',
-        detail: 'Smaller chunks find more duplicates and cost more index entries; larger chunks ' +
-          'cost less index and lose more when an edit lands inside one. That is the entire design ' +
-          'space of a deduplicating store, and it is one integer. Real implementations add a minimum ' +
-          'and a maximum chunk size on top, because the geometric distribution the rule produces has ' +
-          'a long tail in both directions and neither extreme is useful.',
+        detail: [
+          'Smaller chunks find more duplicates and cost more index entries. Larger chunks cost less ' +
+            'index and lose more when an edit lands inside one.',
+          'That is the entire design space of a deduplicating store, and it is one integer.',
+          'Real implementations add a minimum and a maximum chunk size on top. The geometric ' +
+            'distribution the rule produces has a long tail in both directions, and neither extreme ' +
+            'is useful.'
+        ],
         example: 'From 3 to 9 boundary bits the mean chunk goes from 23.3 bytes to 126.7 and the ' +
           'reuse fraction falls with it.'
       },
@@ -262,11 +284,14 @@
         term: 'The fingerprint decides the work and the verification decides the answer',
         plain: 'Two separate concerns, and conflating them is how the algorithm gets a reputation for being wrong.',
         formal: 'correctness depends only on the verification; the modulus, the base and the collision rate are all cost',
-        detail: 'Every criticism of Rabin-Karp that begins "but it can produce false positives" is ' +
-          'about an implementation that dropped the verification. With it, the algorithm is exactly ' +
-          'as correct as the naive scan and differs only in how much work it does to get there. ' +
-          'Keeping that boundary clear is what lets the modulus be tuned freely — and what makes ' +
-          'the attack a performance problem rather than a correctness one.',
+        detail: [
+          'Every criticism of Rabin-Karp that begins "but it can produce false positives" is about ' +
+            'an implementation that dropped the verification.',
+          'With it, the algorithm is exactly as correct as the naive scan, and differs only in how ' +
+            'much work it does to get there.',
+          'Keeping that boundary clear is what lets the modulus be tuned freely, and what makes the ' +
+            'attack a performance problem rather than a correctness one.'
+        ],
         example: 'Under the attack the matcher does 1 200 wasted character comparisons and still ' +
           'reports exactly 0 occurrences, which is the right answer.'
       }

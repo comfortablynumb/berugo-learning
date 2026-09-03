@@ -47,34 +47,40 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**A rolling hash turns "does the text match here?" into a single integer comparison**, and ' +
+        'keeps it a single comparison as the window slides along.',
+      'The hash of a window is a polynomial in a base: `c₀·bᵐ⁻¹ + c₁·bᵐ⁻² + … + cₘ₋₁`, all modulo ' +
+        'something. Sliding it one place is subtract, multiply, add — constant time whatever the ' +
+        'window length.',
+      'So matching becomes a stream of integer comparisons, with a character comparison only when a ' +
+        'fingerprint hits. The whole design rests on how often that hit is spurious.',
+      '**Verification is not optional.** Rabin-Karp with the verification removed is a Monte Carlo ' +
+        'algorithm that returns wrong answers at a rate you have to reason about.',
+      'With it, a collision costs a comparison run and never a wrong answer. The spurious-hit column ' +
+        'below is what that costs, and on a well-sized modulus it is zero.',
+      '**A fixed base and modulus is a published function, and a birthday search breaks it.** About ' +
+        '`√modulus` random strings suffice to find two with the same fingerprint — a second of ' +
+        'work, no cleverness.',
+      'Repeat one of them and every window of the text hashes to the pattern\'s value. The filter ' +
+        'then admits everything, and the matcher does the quadratic work it exists to avoid.',
+      'Randomising the base per run breaks the pair, because the pair was a solution for one base ' +
+        'only.',
+      '**Content-defined chunking is the same hash, asked a different question.** Cut wherever the ' +
+        'rolling hash of the last few bytes has enough low zero bits, and the boundaries follow the ' +
+        'content rather than the offsets.',
+      'Insert one byte and one chunk changes. Every other chunk is byte-identical and never needs to ' +
+        'be transferred, hashed or stored again.',
+      'A fixed-size chunker loses everything after the insertion point, and the panel measures both ' +
+        'on the same edit.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**A rolling hash turns "does the text match here?" into a single integer comparison, and ' +
-          'keeps it a single comparison as the window slides along.** ' +
-          'The hash of a window is a polynomial in a base: `c₀·bᵐ⁻¹ + c₁·bᵐ⁻² + … + cₘ₋₁`, all modulo ' +
-          'something. Sliding it one place is subtract, multiply, add — constant time whatever the ' +
-          'window length — so matching becomes a stream of integer comparisons with a character ' +
-          'comparison only when a fingerprint hits. The whole design rests on how often that hit is ' +
-          'spurious.',
-        '**Verification is not optional.** Rabin-Karp with the verification removed is a Monte Carlo ' +
-          'algorithm that returns wrong answers at a rate you have to reason about; with it, a ' +
-          'collision costs a comparison run and never a wrong answer. The spurious-hit column below ' +
-          'is what that costs, and on a well-sized modulus it is zero.',
-        '**A fixed base and modulus is a published function, and a birthday search breaks it.** About ' +
-          '`√modulus` random strings suffice to find two with the same fingerprint — a second of ' +
-          'work, no cleverness. Repeat one of them and every window of the text hashes to the ' +
-          'pattern\'s value, so the filter admits everything and the matcher does the quadratic work ' +
-          'it exists to avoid. Randomising the base per run breaks the pair, because the pair was a ' +
-          'solution for one base only.',
-        '**Content-defined chunking is the same hash, asked a different question.** Cut wherever the ' +
-          'rolling hash of the last few bytes has enough low zero bits, and the boundaries follow ' +
-          'the content rather than the offsets. Insert one byte and one chunk changes; every other ' +
-          'chunk is byte-identical and never needs to be transferred, hashed or stored again. A ' +
-          'fixed-size chunker loses everything after the insertion point, and the panel measures ' +
-          'both on the same edit.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — the moduli, the attack, and one inserted byte',
         markup: root.RollingHashesTemplate.render()
@@ -83,9 +89,8 @@
       insight: 'If a rolling hash is exposed to input somebody else chooses, randomise the base at ' +
         'process start. It is one line, it costs nothing, and it converts an attacker-controlled ' +
         'quadratic blow-up into a probabilistic guarantee they cannot aim at. The same reasoning ' +
-        'produced SipHash for hash tables after the 2011 flooding attacks, and it is the same ' +
-        'reasoning: a deterministic hash of untrusted input is a promise that the worst case is ' +
-        'reachable on demand.'
+        'produced SipHash for hash tables after the 2011 flooding attacks. A deterministic hash of ' +
+        'untrusted input is a promise that the worst case is reachable on demand.'
     };
   }
 
