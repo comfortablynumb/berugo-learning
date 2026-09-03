@@ -203,15 +203,17 @@
         },
         plain: 'Pick a root; the path between two nodes is up to their lowest common ancestor and down again.',
         formal: 'dist(a, b) = depth(a) + depth(b) − 2·depth(lca(a, b))',
-        readAs: 'The distance between two nodes is how far each is from the root, less twice the depth of ' +
-          'their lowest common ancestor — because the shared stretch from the root down to that ' +
+        readAs: 'The distance between two nodes is how far each is from the root, less twice the ' +
+          'depth of their lowest common ancestor. The shared stretch from the root down to that ' +
           'ancestor is counted in both and travelled in neither.',
-        detail: 'A tree has no distinguished vertex until you choose one, and choosing one is what makes ' +
-          'the rest of this section possible: parent, depth and subtree size all become well defined, ' +
-          'and every path decomposes at a single vertex. The distance formula falls straight out, and ' +
-          'so does path reconstruction, path aggregation and the observation that any query over a path ' +
-          'is two queries over root-to-node chains. Root iteratively, not recursively — a tree of ' +
-          'depth n is a stack overflow waiting to happen.',
+        detail: [
+          'A tree has no distinguished vertex until you choose one, and choosing one is what makes ' +
+            'the rest of this section possible. Parent, depth and subtree size all become well ' +
+            'defined, and every path decomposes at a single vertex.',
+          'The distance formula falls straight out, and so do path reconstruction, path aggregation, ' +
+            'and the observation that any query over a path is two queries over root-to-node chains.',
+          'Root iteratively, not recursively. A tree of depth n is a stack overflow waiting to happen.'
+        ],
         example: 'A 200-node random tree has depth 13, so every query is at most 26 pointer steps by ' +
           'the naive method.'
       },
@@ -221,12 +223,15 @@
         formal: 'Θ(depth) per query and Θ(1) preprocessing; correct by construction',
         readAs: 'Walking up from both nodes until they meet needs no preprocessing at all and costs the depth ' +
           'per query. On a shallow tree that beats every cleverer structure.',
-        detail: 'Keep it for two reasons. It is the only implementation of the four that cannot be ' +
-          'subtly wrong, so it is what everything else gets checked against — and a check against a ' +
-          'slow obvious version is worth more than any number of self-consistency assertions. And on ' +
-          'the shallow trees that most real hierarchies are, it is genuinely competitive: file systems, ' +
-          'org charts, category trees and DOM subtrees have depths in the dozens, and dozens of pointer ' +
-          'hops is not a bottleneck.',
+        detail: [
+          'Keep it for two reasons.',
+          'It is the only implementation of the four that cannot be subtly wrong, so it is what ' +
+            'everything else gets checked against. A check against a slow obvious version is worth ' +
+            'more than any number of self-consistency assertions.',
+          'And on the shallow trees that most real hierarchies are, it is genuinely competitive. ' +
+            'File systems, org charts, category trees and DOM subtrees have depths in the dozens, ' +
+            'and dozens of pointer hops is not a bottleneck.'
+        ],
         example: '2 400 queries across five tree shapes, with binary lifting, the sparse table, k-th ' +
           'ancestor and the chain decomposition all checked against it — 0 disagreements.'
       },
@@ -237,12 +242,15 @@
         readAs: 'The ancestor 2^k levels above v is the ancestor 2^(k−1) levels above the ancestor 2^(k−1) ' +
           'levels above v. Doubling like that lets any jump be assembled from powers of two, in log n ' +
           'steps.',
-        detail: 'The table is built by squaring: the 2^k-th ancestor is the 2^(k−1)-th ancestor of the ' +
-          '2^(k−1)-th ancestor. Answering LCA then has two phases — level the two nodes using the ' +
-          'binary representation of their depth difference, then jump both upward by the largest power ' +
-          'that keeps them apart, which deliberately stops one step below the answer. The reason to ' +
-          'choose it over the faster sparse table is generality: it answers *k-th ancestor*, and the ' +
-          'sparse table answers nothing but LCA.',
+        detail: [
+          'The table is built by squaring: the 2^k-th ancestor is the 2^(k−1)-th ancestor of the ' +
+            '2^(k−1)-th ancestor.',
+          'Answering LCA then has two phases. Level the two nodes using the binary representation of ' +
+            'their depth difference. Then jump both upward by the largest power that keeps them ' +
+            'apart, which deliberately stops one step below the answer.',
+          'The reason to choose it over the faster sparse table is generality. It answers *k-th ' +
+            'ancestor*, and the sparse table answers nothing but LCA.'
+        ],
         example: 'On a 200-node tree the table is 1 800 cells across 9 levels, and a typical query is ' +
           'four jumps.'
       },
@@ -252,12 +260,15 @@
         formal: 'if up[k][x] ≠ up[k][y] the ancestor is still above, so jump; afterwards lca = up[0][x]',
         readAs: 'Jump both nodes upward by the largest power of two that still leaves them under different ' +
           'ancestors. When no such jump remains, their parents are the answer.',
-        detail: 'Testing "have we reached the ancestor?" directly would require knowing the answer, so ' +
-          'the algorithm tests the opposite: two nodes whose 2^k-th ancestors differ are certainly still ' +
-          'below their common ancestor, so that jump is safe. Descending through the powers of two from ' +
-          'large to small leaves both nodes exactly one step below the LCA, and one final parent step ' +
-          'finishes it. That inversion — comparing rather than searching — is what makes the query ' +
-          'logarithmic instead of a scan.',
+        detail: [
+          'Testing "have we reached the ancestor?" directly would require knowing the answer, so the ' +
+            'algorithm tests the opposite.',
+          'Two nodes whose 2^k-th ancestors differ are certainly still below their common ancestor, ' +
+            'so that jump is safe. Descending through the powers of two from large to small leaves ' +
+            'both nodes exactly one step below the LCA, and one final parent step finishes it.',
+          'That inversion — comparing rather than searching — is what makes the query logarithmic ' +
+            'instead of a scan.'
+        ],
         example: 'The traced query jumps 2 to level the depths, then 2 and 1 while the nodes stay ' +
           'apart, then takes one final parent step.'
       },
@@ -268,12 +279,14 @@
         readAs: 'Write down the tree as a walk that visits each node on the way in and on the way back. The ' +
           'shallowest node between the two first appearances is their common ancestor — so an ancestor ' +
           'question becomes a range-minimum question.',
-        detail: 'The tour visits a node again every time the walk returns to it, so the segment between ' +
-          'two nodes\' first appearances contains exactly the vertices on the path between them plus ' +
-          'their subtrees — and the shallowest of those is the common ancestor. A sparse table over the ' +
-          'tour depths answers any range minimum in constant time after Θ(n log n) preprocessing, which ' +
-          'is the fastest of the four per query. It is also the least general: the table knows nothing ' +
-          'except the minimum depth in a range.',
+        detail: [
+          'The tour visits a node again every time the walk returns to it. So the segment between ' +
+            'two nodes\' first appearances contains exactly the vertices on the path between them, ' +
+            'plus their subtrees — and the shallowest of those is the common ancestor.',
+          'A sparse table over the tour depths answers any range minimum in constant time after ' +
+            'Θ(n log n) preprocessing, which is the fastest of the four per query.',
+          'It is also the least general. The table knows nothing except the minimum depth in a range.'
+        ],
         example: 'A 200-node tree gives a 399-entry tour and a 3 591-cell table, and each query is one ' +
           'lookup.'
       },
@@ -284,12 +297,15 @@
         readAs: 'From each node, follow the child with the biggest subtree. Those paths split the tree into ' +
           'chains with no vertex in two of them, which is what lets a path query become a handful of ' +
           'array ranges.',
-        detail: 'The decomposition lays the tree out as a set of paths, each of which is a contiguous ' +
-          'range in one array — so a segment tree, a Fenwick tree or any range structure applies ' +
-          'directly. That is what makes it the general answer to "range query over a tree path": sum ' +
-          'the weights on this route, find the maximum, add five to every edge between here and there. ' +
-          'Nothing simpler does those, and the whole construction is one pass for subtree sizes and one ' +
-          'pass to lay out the chains.',
+        detail: [
+          'The decomposition lays the tree out as a set of paths, each of which is a contiguous ' +
+            'range in one array. So a segment tree, a Fenwick tree or any range structure applies ' +
+            'directly.',
+          'That is what makes it the general answer to "range query over a tree path". Sum the ' +
+            'weights on this route, find the maximum, add five to every edge between here and there.',
+          'Nothing simpler does those, and the whole construction is one pass for subtree sizes and ' +
+            'one pass to lay out the chains.'
+        ],
         example: 'A 1 000-node random tree decomposes into 505 chains; a path decomposes into 1.'
       },
       {
@@ -298,12 +314,15 @@
         formal: 'a root-to-leaf path crosses <= log₂n light edges; a path between two nodes crosses <= 2 log₂n',
         readAs: 'Every time you step off a heavy chain the subtree at least halves, so you can only do it ' +
           'log₂ n times. That bound is why heavy-light decomposition is logarithmic rather than linear.',
-        detail: 'The counting argument is worth being able to state, because it is the reason the ' +
-          'technique works and it is one sentence: if a child were not the heaviest, its subtree is at ' +
-          'most half its parent\'s, so crossing a light edge at least halves the region you are in and ' +
-          'you can do that at most log₂n times. The factor of two in the path bound comes from the ' +
-          'path climbing to the common ancestor and descending again, which is the part people ' +
-          'misquote.',
+        detail: [
+          'The counting argument is worth being able to state, because it is the reason the ' +
+            'technique works.',
+          'If a child is not the heaviest, its subtree is at most half its parent\'s. So crossing a ' +
+            'light edge at least halves the region you are in, and you can do that at most log₂n ' +
+            'times.',
+          'The factor of two in the path bound comes from the path climbing to the common ancestor ' +
+            'and descending again, which is the part people misquote.'
+        ],
         example: 'At n = 1 000 the bound is about 20, and the worst measured decomposition over 400 ' +
           'queries is 14 on a caterpillar and 15 on a complete binary tree.'
       },
@@ -314,12 +333,15 @@
         readAs: 'Binary lifting has the better bound and a worse constant, plus a table to build. On a ' +
           'shallow tree the naive climb wins outright, which is why the choice is about shape rather ' +
           'than about the bounds.',
-        detail: 'Complexity tables compare log n against depth and quietly assume depth is n, which is ' +
-          'the worst case and almost never the case. On a random 200-node tree the depth is 13 and the ' +
-          'naive climb averages eight steps, while binary lifting averages nine jumps and needs 1 800 ' +
-          'cells to do it — the structure is slower *and* larger. On a path of the same size the same ' +
-          'comparison inverts by a factor of nineteen. Shape is the variable that decides, and it is ' +
-          'the one the asymptotics hide.',
+        detail: [
+          'Complexity tables compare log n against depth and quietly assume depth is n, which is the ' +
+            'worst case and almost never the case.',
+          'On a random 200-node tree the depth is 13 and the naive climb averages eight steps. ' +
+            'Binary lifting averages nine jumps and needs 1 800 cells to do it, so the structure is ' +
+            'slower *and* larger.',
+          'On a path of the same size the same comparison inverts by a factor of nineteen. Shape is ' +
+            'the variable that decides, and it is the one the asymptotics hide.'
+        ],
         example: 'On a 200-node random tree, 200 queries cost 1 630 naive steps against 1 916 lifting ' +
           'jumps; on a path of 200 they cost 11 783 against 621.'
       },
@@ -327,12 +349,16 @@
         term: 'Verify the segments cover the path, not merely that there are few of them',
         plain: 'Compare the union of the returned ranges against the actual vertices on the path.',
         formal: 'the set of positions covered by the segments must equal the set of positions of the path’s vertices',
-        detail: 'A decomposition that returns a plausible number of ranges is not a decomposition that ' +
-          'returns the right ranges, and an off-by-one at a chain boundary produces a segment list that ' +
-          'is the correct length and covers the wrong vertices — after which every aggregate computed ' +
-          'over it is wrong by an amount nobody can see. The check is to expand the ranges into a set ' +
-          'of positions and compare it with the path walked naively. It is quadratic and belongs in a ' +
-          'test, at test sizes, exactly like every other oracle in this milestone.',
+        detail: [
+          'A decomposition that returns a plausible number of ranges is not a decomposition that ' +
+            'returns the right ranges.',
+          'An off-by-one at a chain boundary produces a segment list that is the correct length and ' +
+            'covers the wrong vertices. After that, every aggregate computed over it is wrong by an ' +
+            'amount nobody can see.',
+          'The check is to expand the ranges into a set of positions and compare it with the path ' +
+            'walked naively. It is quadratic and belongs in a test, at test sizes, exactly like ' +
+            'every other oracle in this milestone.'
+        ],
         example: '2 400 queries over five shapes, each one\'s segment union compared against the naive ' +
           'walk — 0 mismatches.'
       }

@@ -53,42 +53,51 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**Root the tree and every question about a path becomes a question about the lowest common ' +
+        'ancestor.**',
+      'The distance between two nodes is `depth(a) + depth(b) − 2·depth(lca)`. The path itself is ' +
+        'the walk up from each node to that ancestor, so a query over the path is two queries over ' +
+        'the two halves.',
+      'The naive answer is to lift the deeper node until the depths match, then step both up ' +
+        'together. It costs the depth of the tree per query and needs no preprocessing at all.',
+      '**Binary lifting** stores `up[k][v]`, the 2^k-th ancestor, in n log n cells.',
+      'Every ancestor distance is a sum of distinct powers of two, so any k-th ancestor is at most ' +
+        'log₂n jumps. And *k-th ancestor* is the point, because the sparse-table method below is ' +
+        'faster and answers nothing else.',
+      'The **Euler tour with a sparse table** turns LCA into a range minimum over the tour depths, ' +
+        'and answers it in constant time at about 2n log 2n cells.',
+      '**Heavy-light decomposition** is the general answer to "range query on a tree path".',
+      'Each node continues its chain through its largest child, so every light edge at least halves ' +
+        'the subtree size. A path then decomposes into O(log n) contiguous ranges of one array, ' +
+        'which any segment tree can answer.',
+      'The bound is 2·log₂n rather than log₂n, because a path climbs to the common ancestor and ' +
+        'descends again.',
+      '**Which one is cheapest depends on the tree, and the answer is often "none of them".** On a ' +
+        '200-node random tree of depth 13 the naive climb costs 1 630 steps over 200 queries. Binary ' +
+        'lifting costs 1 916 jumps plus 1 800 cells of preprocessing, so the clever structure is ' +
+        'slower and larger.',
+      'On a path of 200 the same comparison is 11 783 against 621. Shape is the whole story, and it ' +
+        'is the variable that never appears in the complexity table.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'Root the tree and every question about a path becomes a question about the **lowest common ' +
-          'ancestor**. The distance between two nodes is `depth(a) + depth(b) − 2·depth(lca)`; the path ' +
-          'itself is the walk up from each to that ancestor; a query over the path is two queries over ' +
-          'the two halves. The naive answer — lift the deeper node until the depths match, then step ' +
-          'both up together — costs the depth of the tree per query and needs no preprocessing at all.',
-        '**Binary lifting** stores `up[k][v]`, the 2^k-th ancestor, in n log n cells. Every ancestor ' +
-          'distance is a sum of distinct powers of two, so any k-th ancestor is at most log₂n jumps — ' +
-          'and *k-th ancestor* is the point, because the sparse-table method below is faster and ' +
-          'answers nothing else. The **Euler tour with a sparse table** turns LCA into a range minimum ' +
-          'over the tour depths and answers it in constant time, at about 2n log 2n cells.',
-        '**Heavy-light decomposition** is the general answer to "range query on a tree path". Each node ' +
-          'continues its chain through its largest child, so every light edge at least halves the ' +
-          'subtree size and a path decomposes into O(log n) contiguous ranges of one array — which any ' +
-          'segment tree can then answer. The bound is 2·log₂n rather than log₂n because a path climbs ' +
-          'to the common ancestor and descends again.',
-        '**Which one is cheapest depends on the tree, and the answer is often "none of them".** On a ' +
-          '200-node random tree of depth 13 the naive climb costs 1 630 steps over 200 queries and ' +
-          'binary lifting costs 1 916 jumps plus 1 800 cells of preprocessing — the clever structure is ' +
-          'slower and larger. On a path of 200 the same comparison is 11 783 against 621. Shape is ' +
-          'the whole story, and it is the variable that never appears in the complexity table.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — one query opened up, and every structure against the naive climb',
         markup: root.TreePathQueriesTemplate.render()
       },
       diagram: diagram(),
       insight: 'Reach for heavy-light decomposition when the question is a *query over a path*, not ' +
-        'merely an ancestor — sum the weights on this route, find the maximum, add five to every edge ' +
-        'between here and there. Those turn into O(log n) segment-tree ranges and nothing simpler will ' +
-        'do them. But reach for the naive climb first and measure: on the shallow trees that most real ' +
-        'hierarchies are — file systems, org charts, category trees, DOM subtrees — the depth is a ' +
-        'dozen, and a structure whose preprocessing is n log n cells to save six pointer hops per query ' +
+        'merely an ancestor. Sum the weights on this route, find the maximum, add five to every edge ' +
+        'between here and there. Those turn into O(log n) segment-tree ranges, and nothing simpler ' +
+        'will do them. But reach for the naive climb first and measure. On the shallow trees that most ' +
+        'real hierarchies are — file systems, org charts, category trees, DOM subtrees — the depth is ' +
+        'a dozen. A structure whose preprocessing is n log n cells to save six pointer hops per query ' +
         'is a memory cost dressed up as an optimisation.'
     };
   }
