@@ -349,12 +349,16 @@
         },
         plain: 'The best complete solution found so far, and the thing every bound is compared against.',
         formal: 'a lower bound on the optimum for a maximisation, updated whenever a leaf improves on it',
-        detail: 'Branch and bound needs a solution before it can prune anything, so the order in which the ' +
-          'tree is explored matters for reasons that have nothing to do with the tree\'s shape: descending ' +
-          'the promising branch first produces a good incumbent immediately, and everything after that is ' +
-          'pruned against a strong number. A search that finds its best solution last does the same work as ' +
-          'exhaustive search however good its bound is, which is why depth-first with a greedy child order is ' +
-          'the usual arrangement.',
+        detail: [
+          'Branch and bound needs a solution before it can prune anything. So the order in which ' +
+            'the tree is explored matters for reasons that have nothing to do with the tree\'s ' +
+            'shape.',
+          'Descending the promising branch first produces a good incumbent immediately, and ' +
+            'everything after that is pruned against a strong number.',
+          'A search that finds its best solution last does the same work as exhaustive search, ' +
+            'however good its bound is. That is why depth-first with a greedy child order is the ' +
+            'usual arrangement.'
+        ],
         example: 'Taking the highest-density item first gives an incumbent at the very first leaf, and the ' +
           '22-item knapsack then needs 70 nodes in total.'
       },
@@ -371,13 +375,18 @@
         },
         plain: 'A bound may overestimate what a subtree can reach; it may never underestimate.',
         formal: 'for maximisation, bound(s) >= max{value(t) : t is a completion of s}',
-        readAs: 'The bound must be optimistic: never lower than the best any completion could actually reach. ' +
-          'An optimistic bound may waste time; a pessimistic one deletes the answer.',
-        detail: 'The asymmetry is the entire correctness condition and it is easy to get backwards. An ' +
-          'over-estimate is safe: the search descends into a subtree that turns out not to contain anything ' +
-          'better, which costs time. An under-estimate is fatal: the search skips a subtree that did contain ' +
-          'the optimum, and returns a smaller answer with nothing to indicate it. Every relaxation-based ' +
-          'bound is admissible by construction, which is the real reason relaxations are the standard source.',
+        readAs: 'The bound must be optimistic: never lower than the best any completion could ' +
+          'actually reach. An optimistic bound may waste time. A pessimistic one deletes the ' +
+          'answer.',
+        detail: [
+          'The asymmetry is the entire correctness condition, and it is easy to get backwards.',
+          'An over-estimate is safe. The search descends into a subtree that turns out not to ' +
+            'contain anything better, which costs time.',
+          'An under-estimate is fatal. The search skips a subtree that did contain the optimum, ' +
+            'and returns a smaller answer with nothing to indicate it.',
+          'Every relaxation-based bound is admissible by construction, which is the real reason ' +
+            'relaxations are the standard source.'
+        ],
         example: 'A bound set to 90% of the fractional relaxation explores the fewest nodes of the three here ' +
           '— 40 — and returns 640 where the optimum is 658.'
       },
@@ -385,11 +394,16 @@
         term: 'Tightness decides how much is pruned',
         plain: 'Two admissible bounds can differ by an order of magnitude in explored nodes.',
         formal: 'the pruning condition bound(s) <= incumbent fires earlier the closer bound(s) is to the true optimum',
-        detail: 'Admissibility makes a bound correct and tightness makes it useful, and the two are ' +
-          'independent. "Fill the remaining capacity at the best density seen" is admissible and weak; the ' +
-          'fractional relaxation is admissible and strong, because it is the exact optimum of a problem that ' +
-          'contains this one. The measured difference on the same instance is 282 nodes against 70. That gap ' +
-          'is worth far more than any constant-factor tuning of the traversal, which is the practical lesson.',
+        detail: [
+          'Admissibility makes a bound correct and tightness makes it useful. The two are ' +
+            'independent.',
+          '"Fill the remaining capacity at the best density seen" is admissible and weak. The ' +
+            'fractional relaxation is admissible and strong, because it is the exact optimum of a ' +
+            'problem that contains this one.',
+          'The measured difference on the same instance is 282 nodes against 70. That gap is worth ' +
+            'far more than any constant-factor tuning of the traversal, which is the practical ' +
+            'lesson.'
+        ],
         example: 'On the same knapsack: the density bound explores 282 nodes and the fractional relaxation ' +
           'explores 70, both returning 658.'
       },
@@ -397,13 +411,18 @@
         term: 'The LP relaxation as a bound',
         plain: 'Drop the integrality constraint, solve the easier problem, and use its optimum as the ceiling.',
         formal: 'max c·x subject to Ax <= b, x ∈ {0,1}ⁿ is bounded above by the same program over 0 <= x <= 1',
-        readAs: 'The integer problem forces each variable to be 0 or 1; letting them slide anywhere between ' +
-          'gives an easier problem whose answer is at least as good. That relaxed answer is the bound.',
-        detail: 'Relaxation is the general recipe for constructing an admissible bound and it always works ' +
-          'the same way: remove a constraint, so the feasible set grows, so the optimum can only improve, so ' +
-          'the relaxed optimum is a ceiling on the original. For 0/1 knapsack the relaxation is fractional ' +
-          'knapsack, which greedy solves exactly in one pass. The same idea gives the assignment-problem ' +
-          'bound for the TSP and Lagrangian bounds throughout integer programming.',
+        readAs: 'The integer problem forces each variable to be 0 or 1. Letting them slide ' +
+          'anywhere between gives an easier problem whose answer is at least as good, and that ' +
+          'relaxed answer is the bound.',
+        detail: [
+          'Relaxation is the general recipe for constructing an admissible bound, and it always ' +
+            'works the same way. Remove a constraint, so the feasible set grows, so the optimum ' +
+            'can only improve, so the relaxed optimum is a ceiling on the original.',
+          'For 0/1 knapsack the relaxation is fractional knapsack, which greedy solves exactly in ' +
+            'one pass.',
+          'The same idea gives the assignment-problem bound for the TSP, and Lagrangian bounds ' +
+            'throughout integer programming.'
+        ],
         example: 'The fractional optimum at the root of this instance is the integrality gap the search then ' +
           'has to close, and it is what the first table row reports.'
       },
@@ -411,14 +430,18 @@
         term: 'The gap is the progress measure',
         plain: 'The distance between the best bound and the incumbent is what tells you how far there is to go.',
         formal: 'gap = (bestBound − incumbent) / incumbent; zero means optimality is proved',
-        readAs: 'The gap between the best answer found and the best that could still exist, as a fraction. ' +
-          'When it reaches zero you have not just found a good answer — you have proved nothing better ' +
-          'exists.',
-        detail: 'Branch and bound does two things at once - it finds solutions and it proves that none is ' +
-          'better - and the gap is the only number that reflects both. A solver stopped early reports its ' +
-          'incumbent and its gap, and that pair is a genuine guarantee: "at most 3% below optimal" is usable ' +
-          'in a way that "the best I found" is not. It is also the right progress bar, because a search can ' +
-          'find the optimum in the first second and spend an hour proving it.',
+        readAs: 'The gap between the best answer found and the best that could still exist, as a ' +
+          'fraction. When it reaches zero you have not just found a good answer. You have proved ' +
+          'nothing better exists.',
+        detail: [
+          'Branch and bound does two things at once. It finds solutions, and it proves that none ' +
+            'is better. The gap is the only number that reflects both.',
+          'A solver stopped early reports its incumbent and its gap, and that pair is a genuine ' +
+            'guarantee. "At most 3% below optimal" is usable in a way that "the best I found" is ' +
+            'not.',
+          'It is also the right progress bar, because a search can find the optimum in the first ' +
+            'second and spend an hour proving it.'
+        ],
         example: 'A knapsack whose capacity is nearly the total weight has a small integrality gap and the ' +
           'tree collapses; a half-full one has the largest gap and the biggest tree.'
       },
@@ -426,11 +449,14 @@
         term: 'Best-first against depth-first',
         plain: 'Expanding the most promising node first explores fewest nodes and uses the most memory.',
         formal: 'best-first expands in order of bound and is node-optimal for a given bound; depth-first uses O(depth) memory',
-        detail: 'Best-first search never expands a node whose bound is worse than the optimum, which makes it ' +
-          'optimal in explored nodes for a given bounding function. It pays for that with a priority queue ' +
-          'that can hold an exponential number of open nodes, which is what makes it unusable on the ' +
-          'instances that matter. Depth-first explores more nodes and holds one path. Real solvers use hybrids ' +
-          '- best-first with a depth-first dive, or iterative broadening - for exactly this reason.',
+        detail: [
+          'Best-first search never expands a node whose bound is worse than the optimum, which ' +
+            'makes it optimal in explored nodes for a given bounding function.',
+          'It pays for that with a priority queue that can hold an exponential number of open ' +
+            'nodes, which is what makes it unusable on the instances that matter.',
+          'Depth-first explores more nodes and holds one path. Real solvers use hybrids for ' +
+            'exactly this reason: best-first with a depth-first dive, or iterative broadening.'
+        ],
         example: 'The depth-first search here holds at most 22 open decisions; the best-first version of the ' +
           'same search would hold thousands of partial solutions on the queue.'
       },
@@ -438,14 +464,18 @@
         term: 'The travelling salesman as a bound exercise',
         plain: 'Even a crude bound removes most of the permutation tree.',
         formal: 'travelled + Σ over unvisited cities of the cheapest edge leaving that city',
-        readAs: 'A bound for the travelling salesman: what you have spent already, plus the cheapest possible ' +
-          'way out of every city you still have to visit. It is optimistic, which is what makes it ' +
-          'valid.',
-        detail: 'The TSP is where bounding gets interesting because the obvious search is a factorial, so ' +
-          'the constant factor a bound buys is measured in cities rather than in percentages. The cheapest-' +
-          'edge bound is close to the weakest usable one and still removes most of the tree; a 1-tree or an ' +
-          'assignment-relaxation bound removes far more and costs far more per node. That trade - work per ' +
-          'node against nodes removed - is the same one every heuristic in this milestone makes.',
+        readAs: 'A bound for the travelling salesman: what you have spent already, plus the ' +
+          'cheapest possible way out of every city you still have to visit. It is optimistic, ' +
+          'which is what makes it valid.',
+        detail: [
+          'The TSP is where bounding gets interesting, because the obvious search is a factorial. ' +
+            'The constant factor a bound buys is measured in cities rather than in percentages.',
+          'The cheapest-edge bound is close to the weakest usable one, and it still removes most ' +
+            'of the tree. A 1-tree or an assignment-relaxation bound removes far more, and costs ' +
+            'far more per node.',
+          'That trade — work per node against nodes removed — is the same one every heuristic in ' +
+            'this milestone makes.'
+        ],
         example: 'Nine cities: 109 601 nodes without the bound and 2 502 with it, both returning the same ' +
           '226.019-long tour.'
       },
@@ -453,14 +483,19 @@
         term: 'Comparing against exhaustive search is the check',
         plain: 'On instances small enough to enumerate, the bounded search must agree exactly.',
         formal: 'assert bounded(I) = exhaustive(I) for all small I, and assert nodes(bounded) <= nodes(exhaustive)',
-        detail: 'The bound is the part that can be wrong in a way nothing else notices, so the test has to ' +
-          'target it directly. Enumerating all 2^n subsets is affordable up to about twenty items, which is ' +
-          'plenty to catch an inadmissible bound: a bound that under-estimates by any amount will eventually ' +
-          'discard an optimum on some instance, and a randomised sweep finds it quickly. Testing only that ' +
-          'the answer is "reasonable" would pass the deliberately wrong bound in this section.',
+        detail: [
+          'The bound is the part that can be wrong in a way nothing else notices, so the test has ' +
+            'to target it directly.',
+          'Enumerating all 2^n subsets is affordable up to about twenty items, which is plenty to ' +
+            'catch an inadmissible bound. A bound that under-estimates by any amount will ' +
+            'eventually discard an optimum on some instance, and a randomised sweep finds it ' +
+            'quickly.',
+          'Testing only that the answer is "reasonable" would pass the deliberately wrong bound in ' +
+            'this section.'
+        ],
         example: 'Exhaustive search over the 4 194 304 subsets of a 22-item instance gives 658, which is what ' +
           'both admissible bounds return and what the inadmissible one misses.'
       }
-    ]
+    ],
   });
 }(typeof self !== 'undefined' ? self : (typeof window !== 'undefined' ? window : null)));

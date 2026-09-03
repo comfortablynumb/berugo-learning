@@ -45,32 +45,34 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'Branch and bound is backtracking for optimisation. The search keeps the best complete solution found ' +
-          'so far - the incumbent - and refuses to descend into any subtree whose best possible value cannot ' +
-          'beat it. The requirement on the bound is one-sided: it may overestimate what a subtree can achieve ' +
-          'and it may never underestimate, because an underestimate discards the optimum and the search has ' +
-          'no way to notice.',
-        'The bound is the algorithm. On this 22-item knapsack the fractional relaxation explores 70 nodes ' +
-          'where exhaustive search explores 4 194 304; the lazy "best remaining density" bound is also ' +
-          'admissible and explores 282. Both return the same optimum of 658. A tighter bound is worth more ' +
-          'than any amount of tuning the traversal, and the reason is visible in the tree: a cut near the ' +
-          'root removes half the remaining search.',
-        'The third option is a bound that underestimates by ten per cent. It prunes harder than either ' +
-          'correct bound - 40 nodes - and returns 640 where the answer is 658. Nothing raises, no invariant ' +
-          'fails, and the result looks exactly like a well-tuned search. That is the failure mode worth ' +
-          'remembering: an optimisation search with a subtly wrong bound is a fast, confident, wrong answer.'
+        '**Branch and bound is backtracking for optimisation.** The search keeps the best ' +
+          'complete solution found so far — the incumbent — and refuses to descend into any ' +
+          'subtree whose best possible value cannot beat it.',
+        'The requirement on the bound is one-sided. It may overestimate what a subtree can ' +
+          'achieve, and it may never underestimate, because an underestimate discards the optimum ' +
+          'and the search has no way to notice.',
+        'The bound is the algorithm. On this 22-item knapsack the fractional relaxation explores ' +
+          '70 nodes where exhaustive search explores 4 194 304. The lazy "best remaining density" ' +
+          'bound is also admissible, and explores 282. Both return the same optimum of 658.',
+        'A tighter bound is worth more than any amount of tuning the traversal. The reason is ' +
+          'visible in the tree: a cut near the root removes half the remaining search.',
+        'The third option is a bound that underestimates by ten per cent. It prunes harder than ' +
+          'either correct bound — 40 nodes — and returns 640 where the answer is 658. Nothing ' +
+          'raises, no invariant fails, and the result looks exactly like a well-tuned search.',
+        'That is the failure mode worth remembering. An optimisation search with a subtly wrong ' +
+          'bound is a fast, confident, wrong answer.'
       ],
       demo: {
         title: 'Interactive demo — three bounds, an oracle, and the one that lies',
         markup: root.BranchAndBoundTemplate.render()
       },
       diagram: diagram(),
-      insight: 'Before optimising a branch-and-bound search, prove the bound admissible and then measure how ' +
-        'tight it is - the gap between the bound at the root and the final answer is the honest measure of ' +
-        'how much pruning to expect. In practice the bound comes from a relaxation: drop the integrality ' +
-        'constraint, drop a subset of the constraints, or solve a subproblem exactly. Every one of those is a ' +
-        'ceiling by construction, which is the part that makes the relaxation trustworthy rather than merely ' +
-        'convenient.'
+      insight: 'Before optimising a branch-and-bound search, prove the bound admissible and ' +
+        'then measure how tight it is. The gap between the bound at the root and the final ' +
+        'answer is the honest measure of how much pruning to expect. In practice the bound comes ' +
+        'from a relaxation: drop the integrality constraint, drop a subset of the constraints, ' +
+        'or solve a subproblem exactly. Every one of those is a ceiling by construction, which ' +
+        'is what makes the relaxation trustworthy rather than merely convenient.'
     };
   }
 
