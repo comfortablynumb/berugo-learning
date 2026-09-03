@@ -5181,3 +5181,37 @@ counts…`).
 
 `--strict` exits non-zero on any section over budget. It is deliberately not
 wired into `npm test` yet; that happens when the last section lands.
+
+### Where the pass stopped (2026-09-03)
+
+**44 of 364 sections are inside the budget**, and the tree is green: `npm test`
+passes, `npm run lint:size` passes at 1 917 files, and every section committed
+here was checked with `node tools/readability.js <id>` printing `ok` plus the
+four content/notation unit tests before its commit.
+
+Overall: mean sentence 22.6 → **21.0** words, sentences over 30 words
+21.9% → **17.2%**, single-block explanations 2 935 → **2 581**.
+
+Done, in curriculum order: `code-engine`, `js-systems`, the nine M01 sections
+(`asymptotic-notation` … `benchmarking`), the ten M10 sections
+(`sorting-contract` … `sorting-in-practice`), the nine M11 sections
+(`exhaustive-search` … `offline-processing`), the eleven M12 sections
+(`what-dp-is` … `expectation-dp`), and the first three of M13
+(`graph-representations`, `topological-order`, `strongly-connected`).
+
+**Resume at `bridges-and-cuts`** — it is section 44 in
+`Curriculum.teachingSections()` order, and its concepts live in
+`content/concepts-graphs-paths.js`. Run `node tools/readability.js` and work
+down the curriculum order; anything not printing `ok` is outstanding.
+
+One commit per section, pushed, with the before/after numbers in the message.
+The tooling that makes the loop cheap: `tools/readability.js` (report and
+per-section long-sentence list), `tools/prose-scan.js` (pulls the orientation
+and insight strings out of a section's IIFE), `tools/extract-orientation.js`
+(lifts an orientation array out of an oversized `config()`).
+
+**Also fixed in this session, unrelated to the prose:** the mobile top bar. At
+390px the section crumb painted over the search box and the tools spilled past
+the right edge; under 640px the header now wraps, stops being sticky, and the
+tab strip takes the top of the viewport instead. Swept in Chrome across widths
+320-640 and all seven text scales.
