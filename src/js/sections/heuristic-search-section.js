@@ -54,33 +54,40 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**Only the queue key changes.** A* orders by `g(v) + h(v)` rather than by `g(v)`, where `h` ' +
+        'estimates what remains.',
+      'Everything else is unchanged — the relaxation, the settled set, the parent pointers. That is ' +
+        'why A* inherits Dijkstra\'s correctness argument and only has to defend the new term.',
+      'Two properties defend it. **Admissible** means `h` never overestimates, and it buys ' +
+        'optimality. **Consistent** means `h(u) <= w(u, v) + h(v)` on every edge, and it buys the ' +
+        'right to close a node forever.',
+      'The two are not the same, and their consequences differ. An admissible but inconsistent ' +
+        'heuristic still returns the optimal path **provided closed nodes can be reopened**.',
+      'Drop the reopen check for speed and it returns a plausible, wrong, longer path with nothing ' +
+        'raised. On this page that is measured rather than argued: the same admissible heuristic ' +
+        'returns 128 with reopening on and 155 with it off, a gap of 21.09%.',
+      '**A heuristic that is merely admissible is not automatically useful.** The terrain here costs ' +
+        '1 to 9 per step, so a unit-step Manhattan distance is a true lower bound and a very weak ' +
+        'one.',
+      'A* expands all 1 600 cells, the same as Dijkstra, and the pruning is exactly zero.',
+      'What closes the gap is a heuristic in the same units as the edges. **ALT** precomputes exact ' +
+        'distances to a few landmarks and uses the triangle inequality, so it needs no geometry at ' +
+        'all — and it expands 98 cells for the same answer.',
+      'Weighted A* multiplies `h` by w > 1, giving up admissibility on purpose. The trade is real ' +
+        'and bounded: the returned cost is at most w times optimal.',
+      'Here x5 costs 18.47% more for 11x fewer expansions, and x9 costs 44.98% more for 19x fewer. ' +
+        '**On a uniform grid the same inflation costs nothing at all**, because every monotone path ' +
+        'ties. An experiment that only ever ran on unit costs would report that inadmissibility is ' +
+        'free.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'A* is Dijkstra with the queue key changed from `g(v)` to `g(v) + h(v)`, where `h` estimates ' +
-          'what remains. Everything else - the relaxation, the settled set, the parent pointers - is ' +
-          'unchanged, which is why A* inherits Dijkstra\'s correctness argument and only has to defend ' +
-          'the new term. Two properties defend it. **Admissible** means `h` never overestimates, and it ' +
-          'buys optimality. **Consistent** means `h(u) <= w(u, v) + h(v)` on every edge, and it buys ' +
-          'the right to close a node forever.',
-        'The two are not the same and their consequences differ. An admissible but inconsistent ' +
-          'heuristic still returns the optimal path **provided closed nodes can be reopened**; drop the ' +
-          'reopen check for speed and it returns a plausible, wrong, longer path with nothing raised. ' +
-          'On this page that is measured rather than argued: the same admissible heuristic returns 128 ' +
-          'with reopening on and 155 with it off, a gap of 21.09%.',
-        '**A heuristic that is merely admissible is not automatically useful.** The terrain here costs ' +
-          '1 to 9 per step, so a unit-step Manhattan distance is a true lower bound and a very weak one: ' +
-          'A* expands all 1 600 cells, the same as Dijkstra, and the pruning is exactly zero. What ' +
-          'closes the gap is a heuristic in the same units as the edges - **ALT**, which precomputes ' +
-          'exact distances to a few landmarks and uses the triangle inequality, needs no geometry at all ' +
-          'and expands 98 cells for the same answer.',
-        'Weighted A* multiplies `h` by w > 1, giving up admissibility on purpose. The trade is real and ' +
-          'bounded: the returned cost is at most w times optimal. Here x5 costs 18.47% more for 11x ' +
-          'fewer expansions and x9 costs 44.98% more for 19x fewer - **and on a uniform grid the same ' +
-          'inflation costs nothing at all**, because every monotone path ties, so an experiment that ' +
-          'only ever ran on unit costs would report that inadmissibility is free.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — the same query, six heuristics, and every claim checked',
         markup: root.HeuristicSearchTemplate.render()
@@ -88,12 +95,12 @@
       diagram: diagram(),
       insight: 'The question to ask about a heuristic is never "is it admissible?" on its own. It is ' +
         'two questions: does it ever overestimate, and is it in the same units as the edge weights? ' +
-        'The first decides correctness and the second decides whether the search is any faster than ' +
-        'the one you already had. Grid tutorials hide the second question because there the edges are ' +
-        'distances, so geometry answers it for free; on a road network with turn penalties, a build ' +
+        'The first decides correctness. The second decides whether the search is any faster than the ' +
+        'one you already had. Grid tutorials hide the second question, because there the edges are ' +
+        'distances and geometry answers it for free. On a road network with turn penalties, a build ' +
         'graph with task durations, or a state space with no coordinates at all, geometry answers ' +
-        'nothing and the useful heuristic is the one built from measured distances — which is what ALT ' +
-        'is, and why it is 16× better here than the heuristic everybody reaches for first.'
+        'nothing. The useful heuristic is then the one built from measured distances, which is what ' +
+        'ALT is. That is why it is 16× better here than the heuristic everybody reaches for first.'
     };
   }
 

@@ -22,12 +22,15 @@
         formal: 'f(v) = g(v) + h(v); Dijkstra is the special case h ≡ 0',
         readAs: 'A* orders its queue by the cost already spent plus an estimate of the cost remaining. Set ' +
           'the estimate to zero everywhere — the ≡ means "is identically" — and you have Dijkstra back.',
-        detail: 'Nothing else changes — the relaxation, the settled set, the parent pointers and the ' +
-          'termination test are identical. That is worth internalising because it means A* inherits ' +
-          'Dijkstra\'s correctness argument wholesale and only has to defend the new term, and it means ' +
-          'any Dijkstra implementation can become A* by changing one expression. It also means A* ' +
-          'cannot be *faster* in any sense other than expanding fewer nodes: if h contributes nothing, ' +
-          'the two searches are the same search with extra arithmetic.',
+        detail: [
+          'Nothing else changes. The relaxation, the settled set, the parent pointers and the ' +
+            'termination test are identical.',
+          'That is worth internalising, because it means A* inherits Dijkstra\'s correctness ' +
+            'argument wholesale and only has to defend the new term. It also means any Dijkstra ' +
+            'implementation can become A* by changing one expression.',
+          'It also means A* cannot be *faster* in any sense other than expanding fewer nodes. If h ' +
+            'contributes nothing, the two searches are the same search with extra arithmetic.'
+        ],
         example: 'On a weighted 40×40 grid Dijkstra settles 1 600 cells and A* with a unit-step ' +
           'Manhattan estimate expands exactly the same 1 600.'
       },
@@ -37,12 +40,15 @@
         formal: 'h(v) <= true cost from v to the goal, for every v',
         readAs: 'The estimate must never overstate what is left. Admissible means optimistic: an estimate ' +
           'that guesses too high makes A* fast and wrong.',
-        detail: 'The argument is short: when the goal is popped, its key is its true cost because ' +
-          'h(goal) = 0, and any cheaper route would have to sit in the queue under a key at or below ' +
-          'that true cost, so it would have been popped first. Admissibility is therefore the property ' +
-          'that decides *correctness*, and it is checkable at small sizes against exact distances — ' +
-          'which is what this page does rather than asserting it. Every heuristic here is verified ' +
-          'against a full Dijkstra from the goal.',
+        detail: [
+          'The argument is short. When the goal is popped, its key is its true cost, because ' +
+            'h(goal) = 0.',
+          'Any cheaper route would have to sit in the queue under a key at or below that true cost, ' +
+            'so it would have been popped first.',
+          'Admissibility is therefore the property that decides *correctness*, and it is checkable ' +
+            'at small sizes against exact distances. That is what this page does rather than ' +
+            'asserting it: every heuristic here is verified against a full Dijkstra from the goal.'
+        ],
         example: 'Manhattan ×1, Euclidean and ALT all return the optimal 249; Manhattan ×5 returns 295 ' +
           'and reports itself inadmissible.'
       },
@@ -53,12 +59,15 @@
         readAs: 'Consistency is the triangle inequality for the estimate: crossing one edge can never improve ' +
           'the estimate by more than the edge costs. It guarantees f never falls along a path, which is ' +
           'what lets a settled node stay settled.',
-        detail: 'Consistency is strictly stronger than admissibility and it is a statement about *edges* ' +
-          'rather than about vertices, which is why the two are so easy to conflate. Its consequence is ' +
-          'that f never decreases along a path, so when a node is popped its g is already final and it ' +
-          'never needs revisiting. Almost every heuristic derived from a metric — Manhattan on a grid, ' +
-          'straight-line distance, an ALT bound from real distances — is consistent automatically, ' +
-          'which is why the distinction so rarely bites and hurts so much when it does.',
+        detail: [
+          'Consistency is strictly stronger than admissibility, and it is a statement about *edges* ' +
+            'rather than about vertices. That is why the two are so easy to conflate.',
+          'Its consequence is that f never decreases along a path. So when a node is popped its g is ' +
+            'already final, and it never needs revisiting.',
+          'Almost every heuristic derived from a metric is consistent automatically — Manhattan on a ' +
+            'grid, straight-line distance, an ALT bound from real distances. That is why the ' +
+            'distinction so rarely bites, and hurts so much when it does.'
+        ],
         example: 'With a consistent heuristic the 20×20 demo expands 400 nodes and reopens 0, whether ' +
           'or not reopening is enabled.'
       },
@@ -66,12 +75,15 @@
         term: 'Admissible but inconsistent, with the reopen check off, is silently wrong',
         plain: 'Drop reopening for speed and you need consistency, not merely admissibility.',
         formal: 'an inconsistent h can settle v at a g above its true distance; without reopening that value is final',
-        detail: 'This is the trap the section is built around, because the failure produces no error ' +
-          'and a plausible answer. An inconsistent estimate can make a node look good early, close it ' +
-          'at a distance that is too large, and only later reveal a cheaper route to it — at which ' +
-          'point a search that never reopens has already propagated the wrong value onwards. The cost ' +
-          'is not a rounding error: the same search returns 128 with reopening on and 155 with it off, ' +
-          'and nothing in the run distinguishes the two.',
+        detail: [
+          'This is the trap the section is built around, because the failure produces no error and a ' +
+            'plausible answer.',
+          'An inconsistent estimate can make a node look good early, close it at a distance that is ' +
+            'too large, and only later reveal a cheaper route to it. By then a search that never ' +
+            'reopens has already propagated the wrong value onwards.',
+          'The cost is not a rounding error. The same search returns 128 with reopening on and 155 ' +
+            'with it off, and nothing in the run distinguishes the two.'
+        ],
         example: 'On the 20×20 demo, reopening on gives 128 from 840 expansions with 508 reopenings; ' +
           'reopening off gives 155 — a 21.09% gap — from 365.'
       },
@@ -79,12 +91,15 @@
         term: 'A stale heap entry is not a reopening, and counting it as one hides the real number',
         plain: 'A lazy heap leaves duplicates behind; discarding them is bookkeeping, not revisiting.',
         formal: 'stale iff the popped key exceeds the node’s current f; a genuine reopen has a key equal to it',
-        detail: 'Any A* built on a lazy heap pushes a fresh entry per improvement and meets the old ones ' +
-          'later. If every pop of a closed node is counted as a reopening, a perfectly consistent ' +
-          'heuristic appears to reopen hundreds of nodes and the consistency claim becomes ' +
-          'unfalsifiable. Separating the two — key above current f means stale, key equal to it means ' +
-          'g genuinely fell — is what turns "consistent heuristics never reopen" from a slogan into a ' +
-          'counter that reads zero.',
+        detail: [
+          'Any A* built on a lazy heap pushes a fresh entry per improvement and meets the old ones ' +
+            'later.',
+          'If every pop of a closed node is counted as a reopening, a perfectly consistent heuristic ' +
+            'appears to reopen hundreds of nodes, and the consistency claim becomes unfalsifiable.',
+          'Separating the two is what turns "consistent heuristics never reopen" from a slogan into ' +
+            'a counter that reads zero. A key above the current f means stale; a key equal to it ' +
+            'means g genuinely fell.'
+        ],
         example: 'The consistent Manhattan run reports 0 reopenings and 495 stale pops skipped; the ' +
           'inconsistent one reports 508 genuine reopenings.'
       },
@@ -92,12 +107,15 @@
         term: 'A heuristic in the wrong units is admissible and worthless',
         plain: 'Counting grid steps is a true lower bound on a graph whose steps cost up to nine — and a useless one.',
         formal: 'the pruning power of h is how close it is to the true remaining cost, not whether it is a bound',
-        detail: 'h ≡ 0 is admissible and consistent and prunes nothing, and a weak heuristic is closer ' +
-          'to that end of the scale than to a good one. This is the question grid tutorials never ask, ' +
-          'because on a unit-cost grid the geometry happens to be exactly the cost. As soon as edges ' +
-          'carry durations, tolls, turn penalties or transfer times, a distance-shaped heuristic ' +
-          'becomes a bound so loose that A* degenerates into Dijkstra with extra arithmetic. Measure ' +
-          'the expansion count; do not assume the estimate helps.',
+        detail: [
+          'A zero heuristic is admissible and consistent and prunes nothing, and a weak heuristic is ' +
+            'closer to that end of the scale than to a good one.',
+          'This is the question grid tutorials never ask, because on a unit-cost grid the geometry ' +
+            'happens to be exactly the cost.',
+          'As soon as edges carry durations, tolls, turn penalties or transfer times, a ' +
+            'distance-shaped heuristic becomes a bound so loose that A* degenerates into Dijkstra ' +
+            'with extra arithmetic. Measure the expansion count; do not assume the estimate helps.'
+        ],
         example: 'Manhattan and Euclidean both expand all 1 600 cells of the weighted grid — the same ' +
           'as Dijkstra — while ALT expands 98.'
       },
@@ -105,18 +123,21 @@
         term: 'ALT: the triangle inequality gives a heuristic with no geometry at all',
         plain: 'Precompute exact distances to a few landmarks; |d(L,t) − d(L,v)| is a valid lower bound.',
         formal: 'for any landmark L: |d(L, t) − d(L, v)| <= d(v, t); take the maximum over landmarks',
-        readAs: 'Precompute distances to a few fixed landmarks. The difference between two of those distances ' +
-          'is a lower bound on the distance between the vertices — the bars are absolute value — and ' +
-          'the best landmark gives the tightest bound.',
-        detail: 'ALT is the technique to reach for whenever the graph has no coordinates or its costs ' +
-          'are not distances — a road network with turn penalties, a transit network with transfer ' +
-          'times, a state space with no geometry whatsoever. Each landmark costs one full single-source ' +
-          'search to precompute and n stored distances, and the bound is the maximum over landmarks, ' +
-          'so it is only as good as the best-placed one for the query at hand. That is also why adding ' +
-          'landmarks stops helping: a landmark that is never the maximum contributes memory and ' +
-          'nothing else.',
-        example: 'One landmark expands 1 256 cells — a saving of only 1.27× — two expand 98, and four ' +
-          'and eight also expand 98: the third and later landmarks buy nothing on this query.'
+        readAs: 'Precompute distances to a few fixed landmarks. The difference between two of those ' +
+          'distances is a lower bound on the distance between the vertices, and the bars mean ' +
+          'absolute value. The best landmark gives the tightest bound.',
+        detail: [
+          'ALT is the technique to reach for whenever the graph has no coordinates, or its costs are ' +
+            'not distances. Think of a road network with turn penalties, a transit network with ' +
+            'transfer times, or a state space with no geometry whatsoever.',
+          'Each landmark costs one full single-source search to precompute and n stored distances. ' +
+            'The bound is the maximum over landmarks, so it is only as good as the best-placed one ' +
+            'for the query at hand.',
+          'That is also why adding landmarks stops helping. A landmark that is never the maximum ' +
+            'contributes memory and nothing else.'
+        ],
+        example: 'One landmark expands 1 256 cells, a saving of only 1.27×, while two expand 98. ' +
+          'Four and eight also expand 98, so the third and later landmarks buy nothing on this query.'
       },
       {
         term: 'Weighted A*: give up optimality by a factor you choose',
@@ -125,11 +146,14 @@
         readAs: 'Multiply the estimate by more than one and A* finds an answer faster, at the cost of it ' +
           'possibly being up to w times too long. The point is that the bound is known, and the actual ' +
           'gap is measured.',
-        detail: 'Inflating the heuristic makes the search greedier and the guarantee weaker in a way ' +
-          'that is bounded and controllable, which is the honest version of "good enough is fine". The ' +
-          'trap is testing it on the wrong instance: on a uniform grid every monotone route to the goal ' +
-          'costs the same, so no amount of inflation can return a worse path and the experiment reports ' +
-          'that inadmissibility is free. Vary the edge costs and the real trade appears immediately.',
+        detail: [
+          'Inflating the heuristic makes the search greedier and the guarantee weaker, in a way that ' +
+            'is bounded and controllable. That is the honest version of "good enough is fine".',
+          'The trap is testing it on the wrong instance. On a uniform grid every monotone route to ' +
+            'the goal costs the same, so no amount of inflation can return a worse path.',
+          'The experiment then reports that inadmissibility is free. Vary the edge costs and the ' +
+            'real trade appears immediately.'
+        ],
         example: '×5 costs 18.47% more for 11× fewer expansions and ×9 costs 44.98% more for 19× fewer ' +
           '— and on a uniform grid the same ×5 still returns the optimum.'
       },
@@ -140,14 +164,18 @@
         readAs: 'The two searches meeting does not mean the best route has been found — a cheaper one may ' +
           'still be forming. The correct stopping rule compares the two frontier keys against the best ' +
           'meeting found so far.',
-        detail: 'The saving is geometric and therefore entirely dependent on the shape of the search ' +
-          'space: in an open region two half-radius balls cover a fraction of one full ball, and ' +
-          'against a boundary they cover nearly all of it. The subtle part is the stopping condition — ' +
-          'the first vertex settled by both searches need not lie on a shortest path, so the best ' +
-          'meeting cost has to be tracked separately and the loop continues until the two frontier keys ' +
-          'sum to at least that cost.',
+        detail: [
+          'The saving is geometric, and therefore entirely dependent on the shape of the search ' +
+            'space. In an open region two half-radius balls cover a fraction of one full ball; ' +
+            'against a boundary they cover nearly all of it.',
+          'The subtle part is the stopping condition. The first vertex settled by both searches need ' +
+            'not lie on a shortest path.',
+          'So the best meeting cost has to be tracked separately, and the loop continues until the ' +
+            'two frontier keys sum to at least that cost.'
+        ],
         example: 'On an 80×80 grid, centre to a nearby cell saves 2.48×, centre to the far corner ' +
-          '2.32×, and corner to corner just 1.01× — the worst case, because both balls hit the walls.'
+          '2.32×, and corner to corner just 1.01×. That last is the worst case, because both balls ' +
+          'hit the walls.'
       },
       {
         term: 'IDA* trades the frontier for repeated work, and the trade is often terrible',
@@ -156,15 +184,18 @@
         readAs: 'IDA* keeps only the current path, so memory is tiny. The price is redoing every earlier ' +
           'round, and with real-valued costs the threshold barely moves each time — so the rounds ' +
           'multiply.',
-        detail: 'Iterative deepening on f is the right answer when the frontier genuinely cannot be ' +
-          'stored — puzzle state spaces with billions of positions and no room for a closed set. On a ' +
-          'graph that fits in memory it is a bad deal, and the reason is the threshold schedule: with ' +
-          'integer weights the bound creeps up by ones, so the number of rounds grows with the path ' +
-          'cost and each round redoes all the work of the previous ones. Knowing which situation you ' +
-          'are in is the entire decision.',
-        example: 'On a 6×6 weighted grid IDA* costs 1 068 expansions against A*\'s 34, on an 8×8 it ' +
-          'costs 34 164 against 64, and at 10×10 it exhausts a 120 000-expansion budget on a graph ' +
-          'A* finishes in 100.'
+        detail: [
+          'Iterative deepening on f is the right answer when the frontier genuinely cannot be ' +
+            'stored. Think of puzzle state spaces with billions of positions and no room for a ' +
+            'closed set.',
+          'On a graph that fits in memory it is a bad deal, and the reason is the threshold ' +
+            'schedule. With integer weights the bound creeps up by ones, so the number of rounds ' +
+            'grows with the path cost. Each round redoes all the work of the previous ones.',
+          'Knowing which situation you are in is the entire decision.'
+        ],
+        example: 'On a 6×6 weighted grid IDA* costs 1 068 expansions against A*\'s 34, and on an ' +
+          '8×8 it costs 34 164 against 64. At 10×10 it exhausts a 120 000-expansion budget on a ' +
+          'graph A* finishes in 100.'
       }
     ],
 
