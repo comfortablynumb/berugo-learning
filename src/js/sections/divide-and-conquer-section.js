@@ -52,33 +52,36 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'Divide and conquer is usually stated as split, solve, combine, with the combine step treated as ' +
-          'bookkeeping. It is the opposite: splitting is trivial in every algorithm here, and the combine step ' +
-          'is where the algorithm lives. Merge sort\'s merge, closest pair\'s strip, Karatsuba\'s subtraction ' +
-          'and Strassen\'s seven products are all the same slot in the same template, and all four are the ' +
-          'part that had to be invented.',
-        'Karatsuba multiplies two n-digit numbers with three half-size products instead of four, because the ' +
-          'middle term is recoverable by subtraction: (a+b)(c+d) − ac − bd. That gives T(n) = 3T(n/2) + O(n), ' +
-          'which is n^log₂3 ≈ n^1.585. Measured on 1 024-digit operands the schoolbook algorithm does ' +
-          '1 048 576 digit products and Karatsuba does 99 958 - a factor of 10.5 - and both answers agree ' +
-          'with BigInt exactly.',
-        'The exponent decides the algorithm and measurement decides the threshold. At 4 digits Karatsuba does ' +
-          '14 products against schoolbook\'s 16, and once the recursion\'s own additions are counted it is ' +
-          'slower there. Every bignum library therefore switches to schoolbook below a cutoff in the tens of ' +
-          'digits, and the cutoff is tuned per machine rather than derived. The cutoff slider is that ' +
-          'decision, and it moves the measured counts rather than a model of them.'
+        '**Divide and conquer is usually stated as split, solve, combine, with the combine step ' +
+          'treated as bookkeeping. It is the opposite.** Splitting is trivial in every algorithm ' +
+          'here, and the combine step is where the algorithm lives.',
+        'Merge sort\'s merge, closest pair\'s strip, Karatsuba\'s subtraction and Strassen\'s ' +
+          'seven products are all the same slot in the same template. All four are the part that ' +
+          'had to be invented.',
+        'Karatsuba multiplies two n-digit numbers with three half-size products instead of four, ' +
+          'because the middle term is recoverable by subtraction: (a+b)(c+d) − ac − bd. That ' +
+          'gives T(n) = 3T(n/2) + O(n), which is n^log₂3 ≈ n^1.585.',
+        'Measured on 1 024-digit operands, the schoolbook algorithm does 1 048 576 digit products ' +
+          'and Karatsuba does 99 958 — a factor of 10.5. Both answers agree with BigInt exactly.',
+        'The exponent decides the algorithm and measurement decides the threshold. At 4 digits ' +
+          'Karatsuba does 14 products against schoolbook\'s 16, and once the recursion\'s own ' +
+          'additions are counted it is slower there.',
+        'Every bignum library therefore switches to schoolbook below a cutoff in the tens of ' +
+          'digits, and the cutoff is tuned per machine rather than derived. The cutoff slider is ' +
+          'that decision, and it moves the measured counts rather than a model of them.'
       ],
       demo: {
         title: 'Interactive demo — three instances, and the oracle for each',
         markup: root.DivideAndConquerTemplate.render()
       },
       diagram: diagram(),
-      insight: 'The asymptotics tell you which algorithm and the measurement tells you where to switch to it. ' +
-        'That split is not special to multiplication: Strassen beats the triple loop on paper at every size ' +
-        'and beats it in practice somewhere in the hundreds, closest pair beats the quadratic scan at a few ' +
-        'dozen points, and in both cases the crossover moves with the cache and the constant. The failure ' +
-        'mode is shipping the asymptotically better algorithm without measuring, and discovering that every ' +
-        'real input is on the wrong side of the crossover.'
+      insight: 'The asymptotics tell you which algorithm, and the measurement tells you where ' +
+        'to switch to it. That split is not special to multiplication. Strassen beats the triple ' +
+        'loop on paper at every size and beats it in practice somewhere in the hundreds. Closest ' +
+        'pair beats the quadratic scan at a few dozen points. In both cases the crossover moves ' +
+        'with the cache and the constant. The failure mode is shipping the asymptotically better ' +
+        'algorithm without measuring, and discovering that every real input is on the wrong side ' +
+        'of the crossover.'
     };
   }
 

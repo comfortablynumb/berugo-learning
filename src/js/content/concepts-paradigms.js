@@ -186,14 +186,17 @@
         },
         plain: 'Splitting is trivial; what happens when the halves come back is where the idea lives.',
         formal: 'T(n) = a·T(n/b) + f(n), where f is the combine cost and the master theorem reads off the answer',
-        readAs: 'A problem of size n splits into a pieces of size n/b, plus f(n) to divide and recombine. ' +
-          'Those three numbers are all the master theorem needs.',
-        detail: 'Almost every divide-and-conquer algorithm splits its input in half by index or by coordinate, ' +
-          'which is a line of code. The invention is always in the combine: merge sort\'s merge, closest ' +
-          'pair\'s strip, Karatsuba\'s subtraction, Strassen\'s seven products. Reading a new algorithm in ' +
-          'this family therefore means reading the combine step first - and designing one means asking what ' +
-          'information from two solved halves is enough to answer the whole, which is usually the only hard ' +
-          'question.',
+        readAs: 'A problem of size n splits into a pieces of size n/b, plus f(n) to divide and ' +
+          'recombine. Those three numbers are all the master theorem needs.',
+        detail: [
+          'Almost every divide-and-conquer algorithm splits its input in half by index or by ' +
+            'coordinate, which is a line of code.',
+          'The invention is always in the combine: merge sort\'s merge, closest pair\'s strip, ' +
+            'Karatsuba\'s subtraction, Strassen\'s seven products.',
+          'So reading a new algorithm in this family means reading the combine step first. And ' +
+            'designing one means asking what information from two solved halves is enough to ' +
+            'answer the whole, which is usually the only hard question.'
+        ],
         example: 'Counting inversions is merge sort with one extra line in the merge: when the right element ' +
           'wins, every remaining left element is an inversion.'
       },
@@ -211,14 +214,18 @@
         },
         plain: 'The middle term of a product is recoverable by subtraction, so one multiplication disappears.',
         formal: '(aB + b)(cB + d) = acB² + ((a+b)(c+d) − ac − bd)B + bd, giving T(n) = 3T(n/2) + O(n)',
-        readAs: 'Karatsuba\'s trick: the middle term of the product can be recovered from the other two plus ' +
-          'one extra multiplication, instead of two. Three multiplications of half-size numbers rather ' +
-          'than four, which is where the speedup comes from.',
-        detail: 'The identity is the whole algorithm and it is one line of algebra. Four half-size products ' +
-          'are the obvious split; the middle coefficient ad + bc is the difference between (a+b)(c+d) and the ' +
-          'two products already computed, so three suffice and the extra additions are linear. The recurrence ' +
-          'solves to n^log₂3 ≈ n^1.585. That exponent is small enough that the constants decide everything ' +
-          'below a few dozen digits, which is why every real implementation has a threshold.',
+        readAs: 'Karatsuba\'s trick: the middle term of the product can be recovered from the ' +
+          'other two, plus one extra multiplication rather than two. Three multiplications of ' +
+          'half-size numbers instead of four, which is where the speedup comes from.',
+        detail: [
+          'The identity is the whole algorithm, and it is one line of algebra.',
+          'Four half-size products are the obvious split. The middle coefficient ad + bc is the ' +
+            'difference between (a+b)(c+d) and the two products already computed, so three ' +
+            'suffice, and the extra additions are linear.',
+          'The recurrence solves to n^log₂3 ≈ n^1.585. That exponent is small enough that the ' +
+            'constants decide everything below a few dozen digits, which is why every real ' +
+            'implementation has a threshold.'
+        ],
         example: 'On 1 024-digit operands, schoolbook does 1 048 576 digit products and Karatsuba does ' +
           '100 273 — a factor of 10.46, with both answers equal to the BigInt product.'
       },
@@ -226,14 +233,18 @@
         term: 'The crossover is measured, not derived',
         plain: 'Asymptotics choose the algorithm; a benchmark chooses where to switch to it.',
         formal: 'the threshold minimising c₁n² against c₂n^1.585 + additions depends on the machine, not the analysis',
-        readAs: 'Where the clever algorithm overtakes the simple one is set by the two constant factors, and ' +
-          'those come from the hardware. The exponents tell you a crossover exists; only measurement ' +
-          'tells you where.',
-        detail: 'Below the crossover the asymptotically better algorithm is worse, and the crossover is a ' +
-          'property of the constants rather than of the exponents. Karatsuba at four digits does more work ' +
-          'than schoolbook - measurably, 17 digit products against 16 - because the recursion pays for its ' +
-          'own additions and its own call overhead. Real libraries switch somewhere in the tens of digits, ' +
-          'tune the number per architecture, and re-tune it when the architecture changes.',
+        readAs: 'Where the clever algorithm overtakes the simple one is set by the two constant ' +
+          'factors, and those come from the hardware. The exponents tell you a crossover exists. ' +
+          'Only measurement tells you where.',
+        detail: [
+          'Below the crossover the asymptotically better algorithm is worse, and the crossover is ' +
+            'a property of the constants rather than of the exponents.',
+          'Karatsuba at four digits does more work than schoolbook — measurably, 17 digit products ' +
+            'against 16 — because the recursion pays for its own additions and its own call ' +
+            'overhead.',
+          'Real libraries switch somewhere in the tens of digits, tune the number per ' +
+            'architecture, and re-tune it when the architecture changes.'
+        ],
         example: 'At n = 4 the ratio is 0.94 (Karatsuba loses); at n = 16 it is 2.00; at n = 1 024 it is ' +
           '10.46.'
       },
@@ -241,15 +252,19 @@
         term: 'Strassen, and why the exponent is not the whole story',
         plain: 'Seven block products instead of eight, at the cost of eighteen block additions and some accuracy.',
         formal: 'T(n) = 7T(n/2) + O(n²) = O(n^log₂7) ≈ O(n^2.807)',
-        readAs: 'Strassen does seven half-size matrix multiplications instead of eight, so the exponent falls ' +
-          'from 3 to log base 2 of 7, about 2.807. The caret is "to the power of".',
-        detail: 'Strassen matters historically because it proved the cubic algorithm is not optimal, and ' +
-          'practically because it is the standard example of an asymptotic win that arrives late. The ' +
-          'measured product counts are exactly 7^k against 8^k, so the improvement is real and visible at ' +
-          'every size; the additions, the memory traffic and the loss of componentwise backward stability are ' +
-          'what push the practical crossover into the hundreds. The stability caveat is the one people skip: ' +
-          'the block subtractions cancel, so the error bound involves the matrix norms rather than the ' +
-          'entries that produced each result.',
+        readAs: 'Strassen does seven half-size matrix multiplications instead of eight, so the ' +
+          'exponent falls from 3 to log base 2 of 7, about 2.807. The caret is "to the power of".',
+        detail: [
+          'Strassen matters historically because it proved the cubic algorithm is not optimal, ' +
+            'and practically because it is the standard example of an asymptotic win that arrives ' +
+            'late.',
+          'The measured product counts are exactly 7^k against 8^k, so the improvement is real ' +
+            'and visible at every size. What pushes the practical crossover into the hundreds is ' +
+            'the additions, the memory traffic and the loss of componentwise backward stability.',
+          'The stability caveat is the one people skip. The block subtractions cancel, so the ' +
+            'error bound involves the matrix norms rather than the entries that produced each ' +
+            'result.'
+        ],
         example: 'At side 128, cubic does 2 097 152 scalar products and Strassen does 823 543 — a factor of ' +
           '2.55 — with a relative entrywise disagreement of 3.4 × 10⁻¹⁴.'
       },
@@ -257,15 +272,18 @@
         term: 'Closest pair: the strip and the constant',
         plain: 'Only points within the current best distance of the dividing line can beat it.',
         formal: 'in the strip, sorted by y, each point need be compared with at most seven successors',
-        readAs: 'Once the candidate strip is sorted vertically, geometry guarantees no point can have more ' +
-          'than seven others close enough to matter. That fixed number is what keeps the closest-pair ' +
-          'scan linear.',
-        detail: 'The combine step is a geometric argument rather than a bookkeeping one, which is what makes ' +
-          'this the standard demonstration of the pattern. If the best distance found so far is delta, a ' +
-          'crossing pair closer than delta must have both points within delta of the line, and within the ' +
-          'strip a delta-by-2delta rectangle can hold at most eight points that are pairwise delta apart. ' +
-          'That bounds the inner loop by a constant and makes the whole algorithm n log n. The bound is ' +
-          'worst-case; the measured maximum is usually two or three.',
+        readAs: 'Once the candidate strip is sorted vertically, geometry guarantees no point can ' +
+          'have more than seven others close enough to matter. That fixed number is what keeps ' +
+          'the closest-pair scan linear.',
+        detail: [
+          'The combine step is a geometric argument rather than a bookkeeping one, which is what ' +
+            'makes this the standard demonstration of the pattern.',
+          'If the best distance found so far is delta, a crossing pair closer than delta must have ' +
+            'both points within delta of the line. Within the strip, a delta-by-2delta rectangle ' +
+            'can hold at most eight points that are pairwise delta apart.',
+          'That bounds the inner loop by a constant and makes the whole algorithm n log n. The ' +
+            'bound is worst-case; the measured maximum is usually two or three.'
+        ],
         example: 'On 2 000 uniform points the divide-and-conquer version performs 2 314 distance checks ' +
           'against brute force\'s 1 999 000, and the longest strip run is 2.'
       },
@@ -273,11 +291,15 @@
         term: 'A brute-force oracle is not optional here',
         plain: 'A wrong closest pair is a plausible pair, and a wrong inversion count is a plausible number.',
         formal: 'validate against an O(n²) reference on randomised inputs, and report disagreements as a field',
-        detail: 'Every algorithm in this family returns something well-formed when it is wrong. A closest-pair ' +
-          'bug that mishandles the strip returns a real pair of points at a real distance; an inversion count ' +
-          'that misses the cross-pairs returns a plausible integer. Neither raises. The quadratic reference ' +
-          'costs nothing to write, runs on the sizes tests use, and turns "it looks right" into a count of ' +
-          'disagreements - which is the only form of evidence that survives a refactor.',
+        detail: [
+          'Every algorithm in this family returns something well-formed when it is wrong.',
+          'A closest-pair bug that mishandles the strip returns a real pair of points at a real ' +
+            'distance. An inversion count that misses the cross-pairs returns a plausible integer. ' +
+            'Neither raises.',
+          'The quadratic reference costs nothing to write and runs on the sizes tests use. It ' +
+            'turns "it looks right" into a count of disagreements, which is the only form of ' +
+            'evidence that survives a refactor.'
+        ],
         example: 'The inversion count over 2 000 values agrees exactly with the quadratic scan: 984 529, ' +
           'reached in 19 447 comparisons rather than 1 999 000.'
       },
@@ -285,14 +307,18 @@
         term: 'Reading an exponent off a log-log chart',
         plain: 'An asymptotic difference is a difference of slope; a constant factor is a vertical shift.',
         formal: 'log(cn^k) = k·log n + log c, so k is the slope and c is the intercept',
-        readAs: 'Take logs of a power law and it becomes a straight line — the exponent turns into the slope ' +
-          'and the constant into the intercept. That is why these curves are read on log-log axes.',
-        detail: 'This is the one reliable way to compare growth rates from measurements, and it is worth ' +
-          'stating explicitly because linear axes make an asymptotic difference and a large constant look ' +
-          'identical. On log axes the schoolbook line has slope 2, the Karatsuba line has slope 1.585, and ' +
-          'the gap between the measured Karatsuba line and the idealised n^1.585 reference is a shift rather ' +
-          'than a bend - which says the recursion\'s own additions cost a constant factor and not a worse ' +
-          'exponent.',
+        readAs: 'Take logs of a power law and it becomes a straight line. The exponent turns into ' +
+          'the slope and the constant into the intercept, which is why these curves are read on ' +
+          'log-log axes.',
+        detail: [
+          'This is the one reliable way to compare growth rates from measurements, and it is ' +
+            'worth stating explicitly. On linear axes an asymptotic difference and a large ' +
+            'constant look identical.',
+          'On log axes the schoolbook line has slope 2 and the Karatsuba line has slope 1.585.',
+          'The gap between the measured Karatsuba line and the idealised n^1.585 reference is a ' +
+            'shift rather than a bend. That says the recursion\'s own additions cost a constant ' +
+            'factor, and not a worse exponent.'
+        ],
         example: 'The measured Karatsuba counts sit about 1.7× above n^1.585 at every size, parallel to it ' +
           'rather than diverging from it.'
       },
@@ -300,11 +326,15 @@
         term: 'Divide and conquer on trees: centroid decomposition',
         plain: 'Split at the vertex whose removal leaves no component larger than half the tree.',
         formal: 'a centroid exists in every tree, and the decomposition has depth O(log n)',
-        detail: 'The same template applies to trees once "half" is defined properly. A centroid is a vertex ' +
-          'whose removal leaves every component with at most n/2 vertices, and one always exists; recursing ' +
-          'into each component gives a decomposition of depth log n in which every path in the original tree ' +
-          'passes through the centroid of exactly one level. Path-counting problems that look quadratic ' +
-          'become n log n by handling, at each centroid, only the paths that pass through it.',
+        detail: [
+          'The same template applies to trees once "half" is defined properly.',
+          'A centroid is a vertex whose removal leaves every component with at most n/2 vertices, ' +
+            'and one always exists. Recursing into each component gives a decomposition of depth ' +
+            'log n, in which every path in the original tree passes through the centroid of ' +
+            'exactly one level.',
+          'Path-counting problems that look quadratic become n log n, by handling only the paths ' +
+            'that pass through each centroid.'
+        ],
         example: 'Counting the tree paths of length exactly k: at each centroid, combine the depth ' +
           'distributions of its components, then recurse — O(n log n) rather than O(n²).'
       }
