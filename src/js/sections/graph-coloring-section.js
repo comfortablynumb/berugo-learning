@@ -46,47 +46,54 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**A proper colouring assigns each vertex a colour so that no edge joins two of the same.** ' +
+        'The **chromatic number** is the fewest colours that admit one, and computing it is NP-hard.',
+      'The panel below does it exhaustively, which is why the graph has to stay small.',
+      'Everything practical is therefore a heuristic, and the heuristic everybody uses is greedy. ' +
+        'Take the vertices in some order and give each the lowest colour none of its ' +
+        'already-coloured neighbours holds.',
+      '**The ordering is the algorithm.** Greedy in any order uses at most `Δ + 1` colours, which ' +
+        'is a weak bound.',
+      '**Degeneracy ordering** repeatedly removes a vertex of minimum degree, then colours in the ' +
+        'reverse of that removal order. It uses at most `degeneracy + 1`, and the degeneracy of a ' +
+        'graph can be much smaller than its maximum degree.',
+      '**Welsh-Powell** takes the highest degree first, which sounds like the same idea and is not. ' +
+        'On the bipartite shape below it uses twice the colours the graph needs, and the graph is ' +
+        'provably 2-colourable.',
+      '**Some graphs make greedy exact.** On an **interval graph** — vertices are bookings, edges ' +
+        'are overlaps — greedy in left-endpoint order uses exactly the maximum number of intervals ' +
+        'alive at once.',
+      'That is the largest clique, which is a lower bound on any colouring. So the answer is ' +
+        'optimal, and the algorithm is a sweep.',
+      'That is why meeting-room assignment is easy and register allocation is not: the interference ' +
+        'graph of a program is not an interval graph once control flow branches.',
+      '**Clique, independent set and vertex cover are one problem.** A clique in `G` is an ' +
+        'independent set in the complement of `G`, and the complement of a maximum independent set ' +
+        'is a minimum vertex cover.',
+      'So the three numbers sum to `n`, and one search answers all three. **Bron-Kerbosch** ' +
+        'enumerates every maximal clique, and **pivoting** prunes the branches that would find the ' +
+        'same clique twice — which the panel prices rather than asserting.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'A **proper colouring** assigns each vertex a colour so that no edge joins two of the same. ' +
-          'The **chromatic number** is the fewest colours that admit one, and computing it is ' +
-          'NP-hard — the panel below does it exhaustively, which is why the graph has to stay small. ' +
-          'Everything practical is therefore a heuristic, and the heuristic everybody uses is greedy: ' +
-          'take the vertices in some order and give each the lowest colour none of its already-' +
-          'coloured neighbours holds.',
-        '**The ordering is the algorithm.** Greedy in any order uses at most `Δ + 1` colours, which ' +
-          'is a weak bound. **Degeneracy ordering** — repeatedly remove a vertex of minimum degree, ' +
-          'then colour in the reverse of that removal order — is far better: it uses at most ' +
-          '`degeneracy + 1`, and the degeneracy of a graph can be much smaller than its maximum ' +
-          'degree. **Welsh-Powell** takes the highest degree first, which sounds like the same idea ' +
-          'and is not; on the bipartite shape below it uses twice the colours the graph needs, and ' +
-          'the graph is provably 2-colourable.',
-        '**Some graphs make greedy exact.** On an **interval graph** — vertices are bookings, edges ' +
-          'are overlaps — greedy in left-endpoint order uses exactly the maximum number of intervals ' +
-          'alive at once, which is the largest clique, which is a lower bound on any colouring. So ' +
-          'the answer is optimal, and the algorithm is a sweep. That is why meeting-room assignment ' +
-          'is easy and register allocation is not: the interference graph of a program is not an ' +
-          'interval graph once control flow branches.',
-        '**Clique, independent set and vertex cover are one problem.** A clique in `G` is an ' +
-          'independent set in the complement of `G`, and the complement of a maximum independent set ' +
-          'is a minimum vertex cover — so the three numbers sum to `n` and one search answers all ' +
-          'three. **Bron-Kerbosch** enumerates every maximal clique; **pivoting** prunes the branches ' +
-          'that would find the same clique twice, and the panel prices it rather than asserting it.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — orderings, the exact answer, the complement, and an allocator',
         markup: root.GraphColoringTemplate.render()
       },
       diagram: diagram(),
       insight: 'Register allocation is graph colouring, and the thing that makes it work in a real ' +
-        'compiler is not a better heuristic — it is that spilling exists. When the interference ' +
-        'graph needs more colours than the machine has registers, the allocator does not fail; it ' +
-        'picks a variable, writes it to memory, and tries again on a smaller graph. Almost every ' +
-        'practical use of an NP-hard problem has that shape: the escape hatch is the design, and the ' +
-        'heuristic only decides how often you take it. When M29 arrives and the allocator looks ' +
-        'strange, this is why.'
+        'compiler is not a better heuristic. It is that spilling exists. When the interference graph ' +
+        'needs more colours than the machine has registers, the allocator does not fail. It picks a ' +
+        'variable, writes it to memory, and tries again on a smaller graph. Almost every practical ' +
+        'use of an NP-hard problem has that shape: the escape hatch is the design, and the heuristic ' +
+        'only decides how often you take it. When M29 arrives and the allocator looks strange, this ' +
+        'is why.'
     };
   }
 

@@ -21,14 +21,17 @@
         },
         plain: 'Take the vertices in some order; give each the lowest colour none of its coloured neighbours holds.',
         formal: 'greedy uses at most Δ + 1 colours in any order, and the ordering decides where in that range it lands',
-        readAs: 'Δ is the largest number of neighbours any vertex has. However you order the vertices, greedy ' +
-          'never needs more than one colour beyond that — because a vertex can only ever be blocked by ' +
-          'its own neighbours.',
-        detail: 'The named methods in the literature are named *orderings*, not named algorithms — ' +
+        readAs: 'Δ is the largest number of neighbours any vertex has. However you order the ' +
+          'vertices, greedy never needs more than one colour beyond that. A vertex can only ever be ' +
+          'blocked by its own neighbours.',
+        detail: [
+          'The named methods in the literature are named *orderings*, not named algorithms.',
           'Welsh-Powell is largest-degree-first and smallest-last is degeneracy order, and the ' +
-          'colouring loop underneath them is identical. This matters because it tells you where to ' +
-          'spend effort: nothing about the assignment step can be improved, and everything about ' +
-          'the result depends on a sort you can change in one line.',
+            'colouring loop underneath them is identical.',
+          'This matters because it tells you where to spend effort. Nothing about the assignment ' +
+            'step can be improved, and everything about the result depends on a sort you can change ' +
+            'in one line.'
+        ],
         example: 'On one 18-vertex graph the three orderings use 5, 3 and 4 colours, and all three ' +
           'are proper colourings.'
       },
@@ -36,11 +39,14 @@
         term: 'Degeneracy bounds the colour count, and it can be far below the maximum degree',
         plain: 'Repeatedly remove a minimum-degree vertex; the largest degree seen on removal is the degeneracy.',
         formal: 'greedy in the reverse of the removal order uses at most degeneracy + 1 colours',
-        detail: 'The bound holds because when a vertex is coloured, only the neighbours that ' +
-          'survived longer than it are already coloured, and there are at most `degeneracy` of ' +
-          'them. That is a much better guarantee than Δ + 1: a star has maximum degree n − 1 and ' +
-          'degeneracy 1, so degeneracy ordering gives 2 colours where the naive bound allows n. The ' +
-          'degeneracy is also computable in linear time, so the bound costs almost nothing to know.',
+        detail: [
+          'The bound holds because when a vertex is coloured, only the neighbours that survived ' +
+            'longer than it are already coloured — and there are at most `degeneracy` of them.',
+          'That is a much better guarantee than Δ + 1. A star has maximum degree n − 1 and ' +
+            'degeneracy 1, so degeneracy ordering gives 2 colours where the naive bound allows n.',
+          'The degeneracy is also computable in linear time, so the bound costs almost nothing to ' +
+            'know.'
+        ],
         example: 'The default graph has degeneracy 3, so smallest-last order never needs more than ' +
           '4 colours — and the exact chromatic number is 3.'
       },
@@ -48,12 +54,15 @@
         term: 'A better-sounding ordering can be worse, measurably',
         plain: 'Largest-degree-first needs four colours on a graph that is provably two-colourable.',
         formal: 'no greedy ordering is optimal on every graph; there is always an ordering that achieves the chromatic number, and finding it is NP-hard',
-        detail: 'It is easy to reason that colouring the busiest vertices first must help, because ' +
-          'they are the constrained ones. On a bipartite graph that reasoning produces a colouring ' +
-          'twice as large as necessary, while the natural order and the degeneracy order both find ' +
-          'the optimum. Since some ordering always achieves the chromatic number — colour an optimal ' +
-          'colouring class by class — "find the right ordering" is exactly as hard as the original ' +
-          'problem, and every heuristic ordering is a guess.',
+        detail: [
+          'It is easy to reason that colouring the busiest vertices first must help, because they ' +
+            'are the constrained ones.',
+          'On a bipartite graph that reasoning produces a colouring twice as large as necessary, ' +
+            'while the natural order and the degeneracy order both find the optimum.',
+          'Some ordering always achieves the chromatic number — colour an optimal colouring class by ' +
+            'class. So "find the right ordering" is exactly as hard as the original problem, and ' +
+            'every heuristic ordering is a guess.'
+        ],
         example: 'On the bipartite shape at 18 vertices: natural 2, degree 4, degeneracy 2, and the ' +
           'chromatic number is 2.'
       },
@@ -64,12 +73,14 @@
         readAs: 'The largest group of mutually connected vertices (omega) is a floor on the colours needed ' +
           '(chi) — they all need different ones. On some graph families the floor is also the answer, ' +
           'and interval graphs are one of those families.',
-        detail: 'On an interval graph — vertices are bookings, edges are overlaps — greedy in ' +
-          'left-endpoint order uses exactly the maximum number of intervals alive at once, which is ' +
-          'the clique number, which is a lower bound on any colouring. So the answer is optimal and ' +
-          'the algorithm is a sweep. That is why meeting-room assignment is easy and register ' +
-          'allocation is not: a program\'s interference graph stops being an interval graph the ' +
-          'moment control flow branches.',
+        detail: [
+          'On an interval graph — vertices are bookings, edges are overlaps — greedy in ' +
+            'left-endpoint order uses exactly the maximum number of intervals alive at once.',
+          'That is the clique number, which is a lower bound on any colouring. So the answer is ' +
+            'optimal, and the algorithm is a sweep.',
+          'That is why meeting-room assignment is easy and register allocation is not. A program\'s ' +
+            'interference graph stops being an interval graph the moment control flow branches.'
+        ],
         example: 'On the default graph the largest clique is 3 and the chromatic number is 3, so ' +
           'the bound happens to be tight; on the wheel it is 3 against 4.'
       },
@@ -80,23 +91,29 @@
         readAs: 'Flip every edge to a non-edge and a largest clique becomes a largest set of mutually ' +
           'unconnected vertices. And the vertices not in that set are exactly a smallest vertex cover, ' +
           'so the two always add to n.',
-        detail: 'One search answers all three, and the three NP-hardness results are one result. ' +
-          'What does *not* transfer is approximation: a factor-2 vertex cover is not a factor-2 ' +
-          'independent set, because complementing a set does not complement its ratio — vertex ' +
-          'cover has a trivial 2-approximation while independent set has no constant-factor ' +
-          'approximation at all unless P = NP. Knowing which of the three names your problem wears ' +
-          'therefore decides what you can promise.',
+        detail: [
+          'One search answers all three, and the three NP-hardness results are one result.',
+          'What does *not* transfer is approximation. A factor-2 vertex cover is not a factor-2 ' +
+            'independent set, because complementing a set does not complement its ratio.',
+          'Vertex cover has a trivial 2-approximation, while independent set has no constant-factor ' +
+            'approximation at all unless P = NP. Knowing which of the three names your problem wears ' +
+            'therefore decides what you can promise.'
+        ],
         example: 'On the default graph: clique 3, independent set 8, cover 18 − 8 = 10.'
       },
       {
         term: 'Bron-Kerbosch enumerates every maximal clique, and the pivot prunes duplicates',
         plain: 'Every maximal clique either contains the pivot or excludes one of its non-neighbours, so only the non-neighbours need branching.',
         formal: 'the pivot changes the recursion tree and never the set of cliques found',
-        detail: 'The saving comes from density: a pivot with many neighbours among the candidates ' +
-          'excludes many branches, and on a sparse graph there is almost nothing to prune, so the ' +
-          'pivot is close to pure overhead. That is a useful shape to recognise — the optimisation ' +
-          'is not free and its value is a function of the input, so the honest way to present it is ' +
-          'a measured ratio on a stated graph rather than a claim.',
+        detail: [
+          'The saving comes from density. A pivot with many neighbours among the candidates excludes ' +
+            'many branches.',
+          'On a sparse graph there is almost nothing to prune, so the pivot is close to pure ' +
+            'overhead.',
+          'That is a useful shape to recognise. The optimisation is not free, and its value is a ' +
+            'function of the input. The honest way to present it is a measured ratio on a stated ' +
+            'graph rather than a claim.'
+        ],
         example: '41 recursion nodes with the pivot against 64 without, finding the same 24 maximal ' +
           'cliques — a 1.56× saving.'
       },
@@ -104,12 +121,14 @@
         term: 'Register allocation is colouring with an escape hatch',
         plain: 'Push any vertex with fewer than k neighbours onto a stack; when none is left, spill the busiest survivor.',
         formal: 'Chaitin: simplify, spill, select — the spill count is the price of k being too small',
-        detail: 'The thing that makes an NP-hard problem work in a production compiler is not a ' +
-          'better heuristic; it is that failure has a defined cost rather than being failure. When ' +
-          'the interference graph needs more colours than the machine has registers, the allocator ' +
-          'writes a value to memory and tries again on a smaller graph. Almost every practical use ' +
-          'of an intractable problem has that shape, and the heuristic only decides how often the ' +
-          'escape hatch is taken.',
+        detail: [
+          'The thing that makes an NP-hard problem work in a production compiler is not a better ' +
+            'heuristic. It is that failure has a defined cost rather than being failure.',
+          'When the interference graph needs more colours than the machine has registers, the ' +
+            'allocator writes a value to memory and tries again on a smaller graph.',
+          'Almost every practical use of an intractable problem has that shape, and the heuristic ' +
+            'only decides how often the escape hatch is taken.'
+        ],
         example: 'On the default graph at 2, 3 and 4 registers the allocator spills 5, 3 and 0 of ' +
           '18 values, and never produces an invalid allocation.'
       },
@@ -117,12 +136,15 @@
         term: 'Greedy never produces an improper colouring, whatever order it is given',
         plain: 'An ordering can cost you colours; it cannot cost you correctness.',
         formal: 'the assignment rule guarantees no neighbour conflict by construction',
-        detail: 'This is worth stating because it tells you what to test. The conflict count is zero ' +
-          'in every row of every ordering, always, so a test that asserts "the colouring is proper" ' +
-          'is testing the loop rather than the ordering and will never fail for an ordering bug. The ' +
-          'quantity that actually varies is the colour count, and the only way to know whether it is ' +
-          'good is to compute the chromatic number exhaustively on a graph small enough to afford ' +
-          'it.',
+        detail: [
+          'This is worth stating because it tells you what to test.',
+          'The conflict count is zero in every row of every ordering, always. So a test that asserts ' +
+            '"the colouring is proper" is testing the loop rather than the ordering, and will never ' +
+            'fail for an ordering bug.',
+          'The quantity that actually varies is the colour count. The only way to know whether it is ' +
+            'good is to compute the chromatic number exhaustively on a graph small enough to afford ' +
+            'it.'
+        ],
         example: 'All three orderings do 72 colour checks and report 0 conflicts; only the colour ' +
           'count differs, at 5, 3 and 4.'
       }
