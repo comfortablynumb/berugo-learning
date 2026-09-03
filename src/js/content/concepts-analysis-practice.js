@@ -26,73 +26,88 @@
         },
         plain: 'The input size where the asymptotically better algorithm actually becomes faster.',
         formal: 'smallest n with T_better(n) < T_worse(n)',
-        readAs: 'The crossover is the first input size at which the algorithm with the better complexity ' +
-          'class finally runs faster than the simpler one. Below it, the simpler one wins.',
-        detail: 'Two algorithms in different complexity classes still cross at a specific size, and ' +
-          'below it the worse class wins — asymptotics only promise an ordering eventually. The ' +
-          'crossover is set entirely by the constants: insertion sort does more comparisons than ' +
-          'merge sort in principle but no allocation, no recursion and a perfectly predictable ' +
-          'access pattern, so it stays ahead to somewhere around 30 elements on typical hardware. ' +
-          'The number is not a constant of nature; it moves with element size, comparison cost, ' +
-          'cache and compiler, which is why it is measured on the target rather than quoted from a ' +
-          'textbook.',
+        readAs: 'The crossover is the first input size at which the algorithm with the better ' +
+          'complexity class finally runs faster than the simpler one. Below it, the simpler one wins.',
+        detail: [
+          'Two algorithms in different complexity classes still cross at a specific size, and below ' +
+            'it the worse class wins. Asymptotics only promise an ordering eventually.',
+          'The crossover is set entirely by the constants. Insertion sort does more comparisons ' +
+            'than merge sort in principle, but it does no allocation, no recursion and has a ' +
+            'perfectly predictable access pattern. So it stays ahead to somewhere around 30 ' +
+            'elements on typical hardware.',
+          'That number is not a constant of nature. It moves with element size, comparison cost, ' +
+            'cache and compiler, which is why it is measured on the target rather than quoted from ' +
+            'a textbook.'
+        ],
         example: 'Insertion sort beats merge sort below roughly 30 elements.'
       },
       {
         term: 'Hidden constant',
         plain: 'Everything the notation drops: allocation, recursion, branch misses, cache misses.',
         formal: 'T(n) = c·f(n) + lower-order terms',
-        readAs: 'The real running time is some fixed multiplier c times the shape f(n), plus smaller terms ' +
-          'that stop mattering as n grows. The notation keeps f and throws away c — and c is ' +
+        readAs: 'The real running time is some fixed multiplier c times the shape f(n), plus smaller ' +
+          'terms that stop mattering as n grows. The notation keeps f and throws away c — and c is ' +
           'where most engineering effort actually goes.',
-        detail: 'Θ deliberately quotients out the multiplier so that algorithms can be compared ' +
-          'independently of the machine, and that multiplier is where most engineering lives. It ' +
-          'absorbs the cost of an allocation per node, a mispredicted branch per iteration, a cache ' +
-          'miss per access and an indirect call per comparison — differences of 5× between two ' +
-          'implementations of the same complexity class are ordinary. This is why "we rewrote it and ' +
-          'it got four times faster" and "the complexity is unchanged" are both true statements ' +
-          'about the same commit, and why the notation is a starting point for a performance ' +
-          'discussion rather than the end of one.',
+        detail: [
+          'Θ deliberately quotients out the multiplier, so that algorithms can be compared ' +
+            'independently of the machine. That multiplier is where most engineering lives.',
+          'It absorbs the cost of an allocation per node, a mispredicted branch per iteration, a ' +
+            'cache miss per access and an indirect call per comparison. Differences of 5× between ' +
+            'two implementations of the same complexity class are ordinary.',
+          'This is why "we rewrote it and it got four times faster" and "the complexity is ' +
+            'unchanged" are both true statements about the same commit. The notation is a starting ' +
+            'point for a performance discussion rather than the end of one.'
+        ],
         example: 'Two Θ(n log n) sorts can differ by 5×.'
       },
       {
         term: 'Hybrid algorithm',
         plain: 'Use the asymptotically better algorithm above the crossover and the simpler one below it.',
         formal: 'if n ≤ cutoff use A else B',
-        detail: 'Once you know a crossover exists, the obvious move is to use both algorithms on the ' +
-          'sides where each wins, and every production sort does exactly this. Recursive ' +
-          'divide-and-conquer makes it especially profitable, because the small cases are not rare — ' +
-          'they are the most numerous rows of the recursion tree, so switching to insertion sort ' +
-          'below a cutoff of 16 to 32 replaces the majority of the calls. Introsort adds a second ' +
-          'switch for a different reason: it counts recursion depth and falls back to heapsort when ' +
-          'the pivots go badly, buying a worst-case guarantee that quicksort alone does not have.',
+        detail: [
+          'Once you know a crossover exists, the obvious move is to use both algorithms on the ' +
+            'sides where each wins. Every production sort does exactly this.',
+          'Recursive divide-and-conquer makes it especially profitable, because the small cases are ' +
+            'not rare. They are the most numerous rows of the recursion tree, so switching to ' +
+            'insertion sort below a cutoff of 16 to 32 replaces the majority of the calls.',
+          'Introsort adds a second switch for a different reason. It counts recursion depth and ' +
+            'falls back to heapsort when the pivots go badly, buying a worst-case guarantee that ' +
+            'quicksort alone does not have.'
+        ],
         example: 'Timsort, introsort and pdqsort all do exactly this.'
       },
       {
         term: 'Cache locality',
         plain: 'Sequential access is far cheaper than jumping about, at the same operation count.',
         formal: 'cost per access depends on the access pattern',
-        detail: 'Two data structures can perform identical numbers of operations and differ by an ' +
-          'order of magnitude in time, because the memory system charges by pattern rather than by ' +
-          'count. A sequential walk reads a full cache line per fetch and the prefetcher sees the ' +
-          'stride coming, so the next line is already in flight; a pointer chase cannot even issue ' +
-          'the next load until the current one returns, which serialises the misses. That is why an ' +
-          'array outperforms a linked list at every size for traversal, despite both being Θ(n): the ' +
-          'asymptotics count the same n, and the hardware does not charge the same price for each of ' +
-          'them.',
+        detail: [
+          'Two data structures can perform identical numbers of operations and differ by an order ' +
+            'of magnitude in time, because the memory system charges by pattern rather than by ' +
+            'count.',
+          'A sequential walk reads a full cache line per fetch, and the prefetcher sees the stride ' +
+            'coming, so the next line is already in flight. A pointer chase cannot even issue the ' +
+            'next load until the current one returns, which serialises the misses.',
+          'That is why an array outperforms a linked list at every size for traversal, despite both ' +
+            'being Θ(n). The asymptotics count the same n; the hardware does not charge the same ' +
+            'price for each of them.'
+        ],
         example: 'An array beats a linked list at every size, despite identical asymptotics.'
       },
       {
         term: 'Operation count versus time',
         plain: 'Counting is machine-independent and does not predict time; timing predicts time and does not transfer.',
         formal: 'report both, never one',
-        detail: 'The two measurements have complementary defects. A count is exactly reproducible and ' +
-          'says nothing about how long an operation takes, so an algorithm can win on comparisons ' +
-          'and lose on the clock — merge sort does fewer comparisons than quicksort long before it ' +
-          'runs faster, because quicksort\'s are cheaper. A time is what you actually care about and ' +
-          'is valid only for the machine, build and afternoon that produced it. Reporting both makes ' +
-          'the gap between them visible, and that gap is where the interesting engineering is: it is ' +
-          'the constant, and it has a cause you can go and find.',
+        detail: [
+          'The two measurements have complementary defects.',
+          'A count is exactly reproducible and says nothing about how long an operation takes. So ' +
+            'an algorithm can win on comparisons and lose on the clock: merge sort does fewer ' +
+            'comparisons than quicksort long before it runs faster, because quicksort\'s are ' +
+            'cheaper.',
+          'A time is what you actually care about, and it is valid only for the machine, build and ' +
+            'afternoon that produced it.',
+          'Reporting both makes the gap between them visible, and that gap is where the interesting ' +
+            'engineering is. It is the constant, and it has a cause you can go and find.'
+        ],
         example: 'Merge sort counts fewer comparisons long before it runs faster.'
       },
       {
@@ -109,15 +124,18 @@
         },
         plain: 'Memory moves in cache lines, not bytes. What a program costs is how many lines it touches, and how much of each it uses.',
         formal: '64-byte line = 16 int32 values',
-        readAs: 'A cache line is 64 bytes and a 32-bit integer is 4 bytes, so one line carries sixteen of ' +
-          'them. Touch any one and the hardware has already fetched all sixteen.',
-        detail: 'The memory system has no way to move four bytes; the smallest transfer is a 64-byte ' +
-          'line, so touching one int32 costs the same as touching all sixteen in that line. Traffic ' +
-          'is therefore lines fetched, and efficiency is the fraction of each line you actually use ' +
-          'before it is evicted. A row-major sweep uses all sixteen values per line; the same sweep ' +
-          'by column uses one, so it moves sixteen times the bytes to do identical arithmetic. Every ' +
-          'layout technique in this track — struct-of-arrays, field reordering, hot/cold splitting, ' +
-          'blocking — is an attempt to raise that fraction.',
+        readAs: 'A cache line is 64 bytes and a 32-bit integer is 4 bytes, so one line carries ' +
+          'sixteen of them. Touch any one and the hardware has already fetched all sixteen.',
+        detail: [
+          'The memory system has no way to move four bytes. The smallest transfer is a 64-byte ' +
+            'line, so touching one int32 costs the same as touching all sixteen in that line.',
+          'Traffic is therefore lines fetched, and efficiency is the fraction of each line you ' +
+            'actually use before it is evicted.',
+          'A row-major sweep uses all sixteen values per line. The same sweep by column uses one, ' +
+            'so it moves sixteen times the bytes to do identical arithmetic. Every layout technique ' +
+            'in this track — struct-of-arrays, field reordering, hot/cold splitting, blocking — is ' +
+            'an attempt to raise that fraction.'
+        ],
         example: 'A row-major sweep uses all 16; the same sweep by column uses 1, and moves 16× the bytes.'
       },
       {
@@ -136,30 +154,36 @@
         },
         plain: 'Each level is roughly an order of magnitude slower and larger than the one above it.',
         formal: 'L1 ≈ 1 ns; L2 ≈ 4 ns; L3 ≈ 12 ns; DRAM ≈ 80 ns',
-        readAs: 'Four levels of memory with their typical access times, fastest first — L1, L2 and L3 being ' +
-          'progressively larger and slower caches, and DRAM the main memory behind them. A ' +
+        readAs: 'Four levels of memory with their typical access times, fastest first. L1, L2 and L3 ' +
+          'are progressively larger and slower caches, and DRAM is the main memory behind them. A ' +
           'nanosecond is a thousandth of a microsecond.',
-        detail: 'Caches exist because fast memory is small and large memory is slow, so the hardware ' +
-          'stages data through levels that trade capacity against latency. The ratios matter more ' +
-          'than the absolute figures: a DRAM access costs roughly eighty times an L1 hit, which is ' +
-          'about as long as eighty arithmetic instructions would take. That is the exchange rate ' +
-          'behind every "do more arithmetic to avoid a fetch" optimisation, including recomputing a ' +
-          'value rather than storing it. It also explains why a working set that fits in a level ' +
-          'behaves like a different algorithm from one that does not — the knee is a property of the ' +
-          'machine, not of the code.',
+        detail: [
+          'Caches exist because fast memory is small and large memory is slow. The hardware stages ' +
+            'data through levels that trade capacity against latency.',
+          'The ratios matter more than the absolute figures. A DRAM access costs roughly eighty ' +
+            'times an L1 hit, which is about as long as eighty arithmetic instructions would take.',
+          'That is the exchange rate behind every "do more arithmetic to avoid a fetch" ' +
+            'optimisation, including recomputing a value rather than storing it. It also explains ' +
+            'why a working set that fits in a level behaves like a different algorithm from one ' +
+            'that does not. The knee is a property of the machine, not of the code.'
+        ],
         example: 'One DRAM miss costs about as much as 80 arithmetic instructions.'
       },
       {
         term: 'Blocking',
         plain: 'Restructure the loops so the working set of the inner one fits a level of cache. The arithmetic does not change; the traffic does.',
         formal: 'tile so that tile bytes < cache bytes',
-        detail: 'A naive matrix multiply streams whole rows and columns, so by the time it returns to ' +
-          'a row it has been evicted and must be fetched again — the same data crosses the bus many ' +
-          'times. Blocking splits the iteration space into tiles small enough that the tile stays ' +
-          'resident, and does all the work involving that tile while it is there. The instruction ' +
-          'count is unchanged and the answer is identical; only the number of times each byte is ' +
-          'fetched drops. Sizing is the whole trick: a 64 × 64 tile of int32 is 16 KiB, which fits ' +
-          'comfortably in a 32 KiB L1 alongside the other tiles the inner loop needs.',
+        detail: [
+          'A naive matrix multiply streams whole rows and columns. By the time it returns to a row ' +
+            'that row has been evicted and must be fetched again, so the same data crosses the bus ' +
+            'many times.',
+          'Blocking splits the iteration space into tiles small enough that a tile stays resident, ' +
+            'and does all the work involving that tile while it is there.',
+          'The instruction count is unchanged and the answer is identical. Only the number of times ' +
+            'each byte is fetched drops.',
+          'Sizing is the whole trick. A 64 × 64 tile of int32 is 16 KiB, which fits comfortably in ' +
+            'a 32 KiB L1 alongside the other tiles the inner loop needs.'
+        ],
         example: 'A 64 × 64 int32 tile is 16 KiB, comfortably inside a 32 KiB L1.'
       }
     ],

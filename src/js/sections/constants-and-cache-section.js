@@ -24,12 +24,12 @@
     root.jQuery('#' + SECTION_ID + '-content').html(app.shell.render({
       sectionId: SECTION_ID,
       orientation: [
-        'Insertion sort is Θ(n²) and merge sort is Θ(n log n), and for small n insertion sort wins ' +
-          'anyway. The reason is everything the notation throws away: a tiny inner loop, sequential ' +
-          'access, no allocation, no recursion.',
+        '**Insertion sort is Θ(n²) and merge sort is Θ(n log n), and for small n insertion sort ' +
+          'wins anyway.** The reason is everything the notation throws away: a tiny inner loop, ' +
+          'sequential access, no allocation, no recursion.',
         'Measure it. The chart plots counted comparisons and measured medians for both algorithms ' +
-          'over the same seeded inputs. The two crossovers are in different places, which is the ' +
-          'point — operation counts do not predict time when the constants differ this much.',
+          'over the same seeded inputs. The two crossovers land in different places, and that is ' +
+          'the point. Operation counts do not predict time when the constants differ this much.',
         'This is why real library sorts are hybrids: merge or quicksort down to a cutoff, then ' +
           'insertion sort. Set the cutoff below and watch the measured curve move.'
       ],
@@ -45,9 +45,9 @@
           '    D --> A'
         ].join('\n')
       },
-      insight: 'The same asymptotic class can differ by 50× in practice, and a worse class can win ' +
-        'below the crossover. Ranking algorithms by exponent is a first filter, never a decision — ' +
-        'the decision needs the measurement this section makes.'
+      insight: 'The same asymptotic class can differ by 50× in practice, and a worse class can ' +
+        'win below the crossover. Ranking algorithms by exponent is a first filter, never a ' +
+        'decision. The decision needs the measurement this section makes.'
     }));
 
     app.shell.mount({ sectionId: SECTION_ID, app: app });
