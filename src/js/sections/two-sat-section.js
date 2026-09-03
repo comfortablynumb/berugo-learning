@@ -47,33 +47,39 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**A clause of two literals `(a OR b)` is an implication in both directions.** If `a` is false ' +
+        'then `b` must hold, and if `b` is false then `a` must hold.',
+      'Put a vertex in for every literal — `x` and `not x` are two different vertices — and an arc ' +
+        'for each implication. The whole formula becomes a directed graph.',
+      'Both arcs go in, always. The contrapositive is not optional, and a solver that adds only one ' +
+        'reports satisfiable on formulas that are not.',
+      '**The answer is a strongly connected component question.** If `x` and `not x` are in the same ' +
+        'component then each implies the other, so `x` implies `not x` implies `x`, and the formula ' +
+        'is unsatisfiable.',
+      'If they are in different components for every variable, a satisfying assignment can be read ' +
+        'off directly. Set `x` true exactly when its component comes *later* in the reverse ' +
+        'topological order that Tarjan already produces.',
+      'No search, no backtracking, one linear pass.',
+      '**The modelling idioms are the useful part.** "At most one of these" is a pairwise clause per ' +
+        'pair, which is quadratic in the group and why big groups need a different encoding.',
+      '"Force this literal" is the clause `(l OR l)`. "If a then b" is `(not a OR b)`. Two-slot ' +
+        'scheduling, interval selection with two placements each, and 2-colouring are all this ' +
+        'shape, and the instance panel below builds several of them.',
+      '**Then the wall.** A three-literal clause has no faithful implication encoding, because the ' +
+        'consequent would have to be a disjunction rather than a literal.',
+      'The only thing the machinery can do with one is throw a literal away, which makes the ' +
+        'constraint strictly stronger. So "satisfiable" stays trustworthy and "unsatisfiable" stops ' +
+        'being.',
+      'The last panel measures exactly how often that lies, and the answer is: constantly.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'A clause of two literals `(a OR b)` is an **implication in both directions**: if `a` is ' +
-          'false then `b` must hold, and if `b` is false then `a` must hold. Put a vertex in for ' +
-          'every literal — `x` and `not x` are two different vertices — and an arc for each ' +
-          'implication, and the whole formula becomes a directed graph. Both arcs go in, always; the ' +
-          'contrapositive is not optional, and a solver that adds only one reports satisfiable on ' +
-          'formulas that are not.',
-        '**The answer is a strongly connected component question.** If `x` and `not x` are in the ' +
-          'same component then each implies the other, so `x` implies `not x` implies `x`, and the ' +
-          'formula is unsatisfiable. If they are in different components for every variable, a ' +
-          'satisfying assignment can be read off directly: set `x` true exactly when its component ' +
-          'comes *later* in the reverse topological order that Tarjan already produces. No search, ' +
-          'no backtracking, one linear pass.',
-        '**The modelling idioms are the useful part.** "At most one of these" is a pairwise clause ' +
-          'per pair — quadratic in the group, which is why big groups need a different encoding. ' +
-          '"Force this literal" is the clause `(l OR l)`. "If a then b" is `(not a OR b)`. Two-slot ' +
-          'scheduling, interval selection with two placements each, and 2-colouring are all this ' +
-          'shape, and the instance panel below builds several of them.',
-        '**Then the wall.** A three-literal clause has no faithful implication encoding, because the ' +
-          'consequent would have to be a disjunction rather than a literal. The only thing the ' +
-          'machinery can do with one is throw a literal away, which makes the constraint strictly ' +
-          'stronger — so "satisfiable" stays trustworthy and "unsatisfiable" stops being. The last ' +
-          'panel measures exactly how often that lies, and the answer is: constantly.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — the implication graph, the read-out, and the three-literal wall',
         markup: root.TwoSatTemplate.render()
@@ -81,11 +87,11 @@
       diagram: diagram(),
       insight: '2-SAT is polynomial and 3-SAT is NP-complete, and this is the cleanest place in the ' +
         'whole curriculum to see *where* the difficulty enters. It is not the clause count or the ' +
-        'variable count; it is that two literals make an implication and three do not. When you meet ' +
+        'variable count. It is that two literals make an implication and three do not. When you meet ' +
         'a constraint problem in practice, the question worth asking first is whether every ' +
-        'constraint is binary — because if it is, there is a linear-time exact answer with a ' +
-        'certificate, and if it is not, you are in solver territory and should reach for one rather ' +
-        'than writing a search.'
+        'constraint is binary. If it is, there is a linear-time exact answer with a certificate. If ' +
+        'it is not, you are in solver territory and should reach for one rather than writing a ' +
+        'search.'
     };
   }
 

@@ -172,11 +172,15 @@
         readAs: '"a or b" is the same statement as "if not a then b, and if not b then a". The ∨ is or, ¬ is ' +
           'not, ∧ is and, and ≡ means the two sides say the identical thing. Rewriting every clause ' +
           'this way turns the formula into a graph.',
-        detail: 'Both arcs go in, always. The contrapositive is not an optimisation or a symmetry to ' +
-          'exploit later — it is half the clause, and a graph built with only the first arc has ' +
-          'components that no longer correspond to the formula. The solver then reports satisfiable ' +
-          'on formulas that are not, which is the worst possible direction for a satisfiability ' +
-          'checker to be wrong in, because the caller acts on the answer.',
+        detail: [
+          'Both arcs go in, always.',
+          'The contrapositive is not an optimisation or a symmetry to exploit later. It is half the ' +
+            'clause, and a graph built with only the first arc has components that no longer ' +
+            'correspond to the formula.',
+          'The solver then reports satisfiable on formulas that are not. That is the worst possible ' +
+            'direction for a satisfiability checker to be wrong in, because the caller acts on the ' +
+            'answer.'
+        ],
         example: 'The default scheduling instance turns 12 clauses into 24 implications, exactly two ' +
           'per clause.'
       },
@@ -195,26 +199,31 @@
         },
         plain: 'x and not-x are separate vertices, and the graph is skew-symmetric.',
         formal: 'reversing every arc and negating every literal maps the implication graph to itself',
-        detail: 'The doubling is what makes the method work, and the skew symmetry is what makes it ' +
-          'provable. Because the graph is its own mirror under negate-and-reverse, a path from x to ' +
-          'not-x guarantees a path from x back again through the mirror image — which is exactly the ' +
-          'statement that x and not-x are in the same strongly connected component. The whole ' +
-          'algorithm is one structural observation about a graph you build in three lines.',
+        detail: [
+          'The doubling is what makes the method work, and the skew symmetry is what makes it ' +
+            'provable.',
+          'Because the graph is its own mirror under negate-and-reverse, a path from x to not-x ' +
+            'guarantees a path from x back again through the mirror image. That is exactly the ' +
+            'statement that x and not-x are in the same strongly connected component.',
+          'The whole algorithm is one structural observation about a graph you build in three lines.'
+        ],
         example: '8 variables make 16 vertices; on the default instance they fall into 4 components.'
       },
       {
         term: 'Unsatisfiable is exactly "some variable shares a component with its own negation"',
         plain: 'If x implies not-x and not-x implies x, no assignment survives.',
         formal: 'the formula is satisfiable iff component(x) != component(¬x) for every variable x',
-        readAs: 'The formula is solvable exactly when no variable and its own negation end up in the same ' +
-          'strongly connected component — because being in one component means each implies the other, ' +
-          'so the variable would have to be both true and false.',
-        detail: 'The forward direction is easy: if the two are in one component then each implies ' +
-          'the other, so both values lead to a contradiction. The converse — that separate ' +
-          'components always admit an assignment — is where the condensation order comes in, and it ' +
-          'is constructive rather than merely existential. What makes this valuable in practice is ' +
-          'that the failing variables are *named*: a general SAT solver mostly returns "no", and ' +
-          'this returns "no, because of these three".',
+        readAs: 'The formula is solvable exactly when no variable and its own negation end up in ' +
+          'the same strongly connected component. Being in one component means each implies the ' +
+          'other, so the variable would have to be both true and false.',
+        detail: [
+          'The forward direction is easy. If the two are in one component then each implies the ' +
+            'other, so both values lead to a contradiction.',
+          'The converse — that separate components always admit an assignment — is where the ' +
+            'condensation order comes in, and it is constructive rather than merely existential.',
+          'What makes this valuable in practice is that the failing variables are *named*. A general ' +
+            'SAT solver mostly returns "no"; this returns "no, because of these three".'
+        ],
         example: 'Adding one more conflict to the default instance puts 7 variables in a component ' +
           'with their own negation, and the component count collapses from 4 to 3.'
       },
@@ -224,12 +233,14 @@
         formal: 'Tarjan numbers components in reverse topological order, so x is true iff component(x) < component(¬x)',
         readAs: 'The component numbering already encodes the answer: whichever of x and not-x sits later in ' +
           'the implication order is the one to make true. No extra pass is needed.',
-        detail: 'This is the step people expect to be a search and is not. Choosing the later ' +
-          'component means no implication ever points from a true literal to a false one, which is ' +
-          'precisely the condition for satisfying every clause. There is no backtracking, no unit ' +
-          'propagation and no restart — one linear pass produces the components and one more pass ' +
-          'reads the answer. The index convention is the only trap: Tarjan\'s numbering runs ' +
-          'backwards, so "later" means a smaller number.',
+        detail: [
+          'This is the step people expect to be a search, and it is not.',
+          'Choosing the later component means no implication ever points from a true literal to a ' +
+            'false one, which is precisely the condition for satisfying every clause.',
+          'There is no backtracking, no unit propagation and no restart: one linear pass produces ' +
+            'the components, and one more pass reads the answer. The index convention is the only ' +
+            'trap — Tarjan\'s numbering runs backwards, so "later" means a smaller number.'
+        ],
         example: 'The default instance assigns 5 variables true and 3 false, and the assignment ' +
           'breaks 0 of its 12 clauses.'
       },
@@ -239,23 +250,29 @@
         formal: 'at-most-one over k literals costs k(k−1)/2 clauses, which is why large groups need a different encoding',
         readAs: 'Saying "at most one of these k is true" pairwise needs a clause for every pair — about half ' +
           'of k squared. At k = 100 that is nearly five thousand clauses for one constraint.',
-        detail: 'Most real uses of 2-SAT are recognition problems: noticing that a scheduling ' +
-          'question with two slots, an interval-selection question with two placements each, or a ' +
-          'two-colouring question is already this shape. The quadratic cost of at-most-one is the ' +
-          'main practical limit, and it is why encodings with auxiliary variables exist — but a ' +
-          'group of four costs six clauses and nobody needs to be clever about that.',
+        detail: [
+          'Most real uses of 2-SAT are recognition problems.',
+          'The work is noticing that a scheduling question with two slots, an interval-selection ' +
+            'question with two placements each, or a two-colouring question is already this shape.',
+          'The quadratic cost of at-most-one is the main practical limit, and it is why encodings ' +
+            'with auxiliary variables exist. But a group of four costs six clauses, and nobody needs ' +
+            'to be clever about that.'
+        ],
         example: 'Eight tasks with 6 pairwise conflicts become 12 clauses and 24 implications.'
       },
       {
         term: 'Random instances have a satisfiability threshold, and benchmarks live on it',
         plain: 'Below about one clause per variable almost everything is satisfiable; above it, almost nothing.',
         formal: 'for random 2-SAT the threshold is at m/n = 1, and the transition sharpens as n grows',
-        detail: 'The practical consequence is about testing rather than about theory. "We evaluated ' +
-          'the solver on random instances" is a statement about which side of the ratio the ' +
-          'generator sat on: well below it, every instance is satisfiable for structural reasons and ' +
-          'the solver barely works; well above, every instance contains an obvious contradiction. ' +
+        detail: [
+          'The practical consequence is about testing rather than about theory.',
+          '"We evaluated the solver on random instances" is a statement about which side of the ' +
+            'ratio the generator sat on. Well below it, every instance is satisfiable for structural ' +
+            'reasons and the solver barely works; well above, every instance contains an obvious ' +
+            'contradiction.',
           'The instances that discriminate between implementations are the ones near the threshold, ' +
-          'and a benchmark that does not say where it sampled has not said anything.',
+            'and a benchmark that does not say where it sampled has not said anything.'
+        ],
         example: 'At 40 variables the satisfiable rate falls from 100% at 0.4 clauses per variable ' +
           'to 5% at 2.0, passing 95% at exactly 1.0.'
       },
@@ -263,11 +280,14 @@
         term: 'A three-literal clause has no implication encoding',
         plain: 'Not-a implies b-or-c, and a disjunction is not a vertex.',
         formal: '2-SAT is in P; 3-SAT is NP-complete (Cook, 1971)',
-        detail: 'This is the cleanest visible boundary between tractable and intractable in the ' +
-          'whole curriculum, and it is one literal wide. The implication graph works because a ' +
-          'two-literal clause has exactly one antecedent and one consequent, both single literals. ' +
+        detail: [
+          'This is the cleanest visible boundary between tractable and intractable in the whole ' +
+            'curriculum, and it is one literal wide.',
+          'The implication graph works because a two-literal clause has exactly one antecedent and ' +
+            'one consequent, both single literals.',
           'Three literals leave a disjunction on the right-hand side, and there is no vertex to ' +
-          'point the arc at. No encoding trick repairs this: if one existed, P would equal NP.',
+            'point the arc at. No encoding trick repairs this: if one existed, P would equal NP.'
+        ],
         example: 'The nearest thing to an encoding is to drop a literal, which makes the constraint ' +
           'strictly stronger.'
       },
@@ -278,12 +298,15 @@
         readAs: 'Dropping a literal from every clause makes the problem easier, so a solution to the harder ' +
           'original still solves the relaxation. The reverse does not follow — which is why this is a ' +
           'filter and not a solver.',
-        detail: 'Being wrong in only one direction is the useful property of a relaxation and the ' +
-          'reason they are worth building at all: a positive answer is a genuine certificate. The ' +
-          'measurement is what turns that from a formal remark into engineering advice — at twenty ' +
-          'three-literal clauses over ten variables the relaxation reports "unsatisfiable" on 46 of ' +
-          '100 satisfiable formulas. A filter that rejects nearly half of the valid inputs is not a ' +
-          'filter, and only counting shows that.',
+        detail: [
+          'Being wrong in only one direction is the useful property of a relaxation, and the reason ' +
+            'they are worth building at all: a positive answer is a genuine certificate.',
+          'The measurement is what turns that from a formal remark into engineering advice. At ' +
+            'twenty three-literal clauses over ten variables, the relaxation reports ' +
+            '"unsatisfiable" on 46 of 100 satisfiable formulas.',
+          'A filter that rejects nearly half of the valid inputs is not a filter, and only counting ' +
+            'shows that.'
+        ],
         example: 'Across clause counts 10 to 40 the relaxation is wrongly negative on 0, 11, 46, ' +
           '77, 93 and 85 of 100 — and wrongly positive on 0 in every row.'
       }
