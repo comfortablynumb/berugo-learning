@@ -59,34 +59,40 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**A minimum spanning tree connects every vertex at the least total edge weight.** Three ' +
+        'classic algorithms find one, and all three rest on a single fact.',
+      'That fact is the **cut property**: for any split of the vertices into two non-empty sides, ' +
+        'the lightest edge crossing that split belongs to some minimum spanning tree.',
+      'Kruskal sorts every edge and takes each one that joins two components. Prim grows a single ' +
+        'tree and always takes the lightest edge leaving it. Borůvka has every component pick its ' +
+        'own cheapest outgoing edge simultaneously, which is why it is the one that parallelises.',
+      '**They agree on weight, and often not on the tree.** That distinction is the difference ' +
+        'between a test that works and a test that fails whenever somebody changes a comparator.',
+      'With weights drawn from 1 to 3, none of twenty instances produced the same edge set from all ' +
+        'three algorithms. With effectively distinct weights, all twenty did.',
+      'Distinct weights are sufficient for a unique MST, and duplicate weights are the norm in real ' +
+        'data, where costs are round numbers.',
+      'The **cycle property** is the mirror image: the heaviest edge on any cycle is in no minimum ' +
+        'spanning tree.',
+      'It follows that the second-best spanning tree differs from the best by exactly one edge. ' +
+        'Finding it is therefore a scan over MST edges and their replacements, rather than a second ' +
+        'search. When weights repeat, the runner-up can tie the winner — and a tie means the MST was ' +
+        'never unique in the first place.',
+      '**The minimax path comes free.** The maximum edge on the MST path between two vertices is the ' +
+        'smallest maximum any path between them can achieve.',
+      'That is the real question in network design: minimise the worst hop, not the total. Here 136 ' +
+        'of 198 random pairs have a shortest path whose worst hop is worse than the minimax answer.',
+      'Two different questions, one structure — and the connection is checked below against a ' +
+        'brute-force threshold oracle.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'A minimum spanning tree connects every vertex at the least total edge weight. Three classic ' +
-          'algorithms find one and all three rest on a single fact, the **cut property**: for any split ' +
-          'of the vertices into two non-empty sides, the lightest edge crossing that split belongs to ' +
-          'some minimum spanning tree. Kruskal sorts every edge and takes each one that joins two ' +
-          'components; Prim grows a single tree and always takes the lightest edge leaving it; Borůvka ' +
-          'has every component pick its own cheapest outgoing edge simultaneously, which is why it is ' +
-          'the one that parallelises.',
-        '**They agree on weight, and often not on the tree.** That distinction is the difference ' +
-          'between a test that works and a test that fails whenever somebody changes a comparator. With ' +
-          'weights drawn from 1 to 3, none of twenty instances produced the same edge set from all ' +
-          'three algorithms; with effectively distinct weights, all twenty did. Distinct weights are ' +
-          'sufficient for a unique MST, and duplicate weights are the norm in real data, where costs ' +
-          'are round numbers.',
-        'The **cycle property** is the mirror image and explains the second-best tree: the heaviest ' +
-          'edge on any cycle is in no minimum spanning tree. It follows that the second-best spanning ' +
-          'tree differs from the best by exactly one edge, which is why finding it is a scan over MST ' +
-          'edges and their replacements rather than a second search. When weights repeat, the runner-up ' +
-          'can tie the winner — and a tie means the MST was never unique in the first place.',
-        '**The minimax path comes free.** The maximum edge on the MST path between two vertices is the ' +
-          'smallest maximum any path between them can achieve. That is the real question in network ' +
-          'design — minimise the worst hop, not the total — and here 136 of 198 random pairs have a ' +
-          'shortest path whose worst hop is worse than the minimax answer. Two different questions, one ' +
-          'structure, and the connection is checked below against a brute-force threshold oracle.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — three algorithms, the cut that justifies each edge, and the ' +
           'minimax path nobody asked for',
@@ -96,10 +102,10 @@
       insight: 'The reason to know that the MST answers the minimax question is that the minimax ' +
         'question is the one that gets asked. "Which links do we keep so everything stays connected as ' +
         'cheaply as possible" is the MST. "Route this traffic so the worst-quality hop is as good as ' +
-        'possible" sounds like a different problem, gets solved with a bespoke binary search over ' +
-        'thresholds, and is the same MST you already have. The same identity shows up as single-linkage ' +
-        'clustering, as maximum-capacity routing, and as the widest-path problem — all of them the MST ' +
-        'path, all of them usually reimplemented from scratch.'
+        'possible" sounds like a different problem. It gets solved with a bespoke binary search over ' +
+        'thresholds, and it is the same MST you already have. The same identity shows up as ' +
+        'single-linkage clustering, as maximum-capacity routing, and as the widest-path problem — all ' +
+        'of them the MST path, all of them usually reimplemented from scratch.'
     };
   }
 

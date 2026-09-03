@@ -23,12 +23,15 @@
         readAs: 'Split the vertices into any two groups — V∖S is "everything not in S" — and the cheapest ' +
           'edge crossing between them is safe to take. Every MST algorithm in this section is that one ' +
           'fact applied differently.',
-        detail: 'The proof is an exchange argument: take any MST, add the light crossing edge, and the ' +
-          'cycle that forms must contain another crossing edge, which is no lighter — so swapping them ' +
-          'gives a spanning tree of no greater weight. That single fact justifies Kruskal, Prim and ' +
-          'Borůvka at once, and the only difference between them is which cut they exploit next. ' +
+        detail: [
+          'The proof is an exchange argument. Take any MST, add the light crossing edge, and the ' +
+            'cycle that forms must contain another crossing edge, which is no lighter. Swapping them ' +
+            'gives a spanning tree of no greater weight.',
+          'That single fact justifies Kruskal, Prim and Borůvka at once, and the only difference ' +
+            'between them is which cut they exploit next.',
           'Learning it as one theorem with three applications is far less work than learning three ' +
-          'algorithms, and it is what lets you invent the fourth.',
+            'algorithms, and it is what lets you invent the fourth.'
+        ],
         example: 'Prim\'s tree after 20 edges is one side of a cut holding 21 nodes, and the edge it ' +
           'takes next weighs 5 — the lightest crossing it.'
       },
@@ -39,11 +42,14 @@
         readAs: 'Around any cycle, the single heaviest edge can always be dropped: the rest of the cycle ' +
           'already connects its ends more cheaply. "Unique" matters — with a tie, either edge may be in ' +
           'some optimal tree.',
-        detail: 'Where the cut property says which edges to take, the cycle property says which to ' +
-          'discard, and together they are why every faint edge on the demo\'s map is faint: each one is ' +
-          'the heaviest edge of some cycle. The cycle property is also what makes the second-best ' +
-          'spanning tree a one-edge change rather than a fresh search — remove any tree edge, and the ' +
-          'best replacement is the lightest edge that reconnects the two halves.',
+        detail: [
+          'Where the cut property says which edges to take, the cycle property says which to discard.',
+          'Together they are why every faint edge on the demo\'s map is faint: each one is the ' +
+            'heaviest edge of some cycle.',
+          'The cycle property is also what makes the second-best spanning tree a one-edge change ' +
+            'rather than a fresh search. Remove any tree edge, and the best replacement is the ' +
+            'lightest edge that reconnects the two halves.'
+        ],
         example: 'The default 60-node graph keeps 59 of 180 links; the other 121 are each the heaviest ' +
           'edge on some cycle.'
       },
@@ -51,16 +57,20 @@
         term: 'Kruskal sorts, Prim grows, Borůvka does everything at once',
         plain: 'Global lightest joining edge; lightest edge leaving one tree; every component picking simultaneously.',
         formal: 'Kruskal Θ(m log m) dominated by the sort; Prim Θ(m log n) with a heap; Borůvka Θ(m log n) in <= log₂n rounds',
-        readAs: 'Three algorithms with effectively the same bound, arrived at differently: Kruskal pays for a ' +
-          'sort, Prim for heap operations, and Borůvka halves the component count each round so it ' +
-          'finishes in log₂ n of them.',
-        detail: 'The three differ in which cut they apply the property to, and therefore in where their ' +
-          'cost lives. Kruskal\'s is the sort, paid whether or not the edges get used. Prim\'s is the ' +
-          'heap, and in the lazy form it pushes an entry per edge examined, so it degrades as the graph ' +
-          'fills in. Borůvka scans every edge once per round and halves the component count each time, ' +
-          'so its round count barely moves — and because each component decides independently, it is ' +
-          'the one that parallelises, which is why it is the basis of the distributed and GPU ' +
-          'implementations.',
+        readAs: 'Three algorithms with effectively the same bound, arrived at differently. Kruskal ' +
+          'pays for a sort and Prim for heap operations. Borůvka halves the component count each ' +
+          'round, so it finishes in log₂ n of them.',
+        detail: [
+          'The three differ in which cut they apply the property to, and therefore in where their ' +
+            'cost lives.',
+          'Kruskal\'s is the sort, paid whether or not the edges get used. Prim\'s is the heap, and ' +
+            'in the lazy form it pushes an entry per edge examined, so it degrades as the graph ' +
+            'fills in.',
+          'Borůvka scans every edge once per round and halves the component count each time, so its ' +
+            'round count barely moves. Each component decides independently, which is why it is the ' +
+            'one that parallelises — and why it is the basis of the distributed and GPU ' +
+            'implementations.'
+        ],
         example: 'On the same 60-node graph the three cost 1 666, 2 280 and 1 170 units, and Borůvka ' +
           'finishes in 3 rounds.'
       },
@@ -78,12 +88,15 @@
         },
         plain: 'With duplicate weights, the three return three different edge sets of identical cost.',
         formal: 'the MST is unique if all weights are distinct; equal weights admit several optimal trees',
-        detail: 'This is the difference between a test that means something and a test that fails every ' +
-          'time somebody touches a comparator. The invariant the algorithms actually guarantee is the ' +
-          'total weight and the spanning property; the particular edge set is decided by tie-breaks ' +
-          'nobody specified. Real network costs are round numbers — hop counts, tiers, latencies ' +
-          'rounded to the millisecond — so duplicates are the normal case rather than a corner one, ' +
-          'and asserting a particular tree is asserting the tie-break.',
+        detail: [
+          'This is the difference between a test that means something and a test that fails every ' +
+            'time somebody touches a comparator.',
+          'The invariant the algorithms actually guarantee is the total weight and the spanning ' +
+            'property. The particular edge set is decided by tie-breaks nobody specified.',
+          'Real network costs are round numbers — hop counts, tiers, latencies rounded to the ' +
+            'millisecond — so duplicates are the normal case rather than a corner one. Asserting a ' +
+            'particular tree is asserting the tie-break.'
+        ],
         example: 'Weights from 1 to 3: all 20 instances agree on weight and 0 of 20 agree on the edge ' +
           'set. Effectively distinct weights: 20 of 20 agree on both.'
       },
@@ -91,15 +104,18 @@
         term: 'The minimax path is the maximum edge on the MST path',
         plain: 'Minimising the worst hop is answered for free by a structure you built for something else.',
         formal: 'for all u, v: min over paths of max edge = max edge on the u–v path in any MST',
-        readAs: 'The bottleneck between two vertices — the smallest possible worst edge on a route between ' +
-          'them — is exactly the heaviest edge on the path joining them in the minimum spanning tree. ' +
-          'One tree answers the question for every pair.',
-        detail: 'The connection is the most useful thing in this section and almost nobody makes it. ' +
+        readAs: 'The bottleneck between two vertices is the smallest possible worst edge on a route ' +
+          'between them. It is exactly the heaviest edge on the path joining them in the minimum ' +
+          'spanning tree. One tree answers the question for every pair.',
+        detail: [
+          'The connection is the most useful thing in this section, and almost nobody makes it.',
           '"Minimise the total cost" and "minimise the worst link on the route" are different ' +
-          'questions with different answers, and the second one — which is what network design, ' +
-          'maximum-capacity routing, widest-path and single-linkage clustering all ask — is answered by ' +
-          'walking the MST. People routinely implement a bespoke binary search over weight thresholds ' +
-          'to compute something their existing spanning tree already knows.',
+            'questions with different answers. The second one is answered by walking the MST — and ' +
+            'it is what network design, maximum-capacity routing, widest-path and single-linkage ' +
+            'clustering all ask.',
+          'People routinely implement a bespoke binary search over weight thresholds to compute ' +
+            'something their existing spanning tree already knows.'
+        ],
         example: '198 random pairs, 0 disagreements against a threshold oracle — and on 136 of them the ' +
           'cheapest route has a worse worst hop than the minimax route does.'
       },
@@ -110,12 +126,14 @@
         readAs: 'The path with the smallest total is usually not the path with the smallest worst edge. ' +
           '"argmin" is "the path that minimises this", and the two questions genuinely have different ' +
           'answers.',
-        detail: 'It is easy to assume the two coincide, and on small examples they often do, which is ' +
-          'exactly why the demo counts how often they do not. If the quantity you care about is the ' +
-          'weakest link — a video call limited by its worst hop, a supply chain limited by its ' +
-          'narrowest road, a cluster linkage limited by its largest gap — then summing weights answers ' +
-          'a question you did not ask. The two computations differ by one line and the results differ ' +
-          'on most pairs.',
+        detail: [
+          'It is easy to assume the two coincide, and on small examples they often do. That is ' +
+            'exactly why the demo counts how often they do not.',
+          'If the quantity you care about is the weakest link, then summing weights answers a ' +
+            'question you did not ask. Think of a video call limited by its worst hop, a supply ' +
+            'chain limited by its narrowest road, or a cluster linkage limited by its largest gap.',
+          'The two computations differ by one line, and the results differ on most pairs.'
+        ],
         example: 'Pair 8 → 45: the minimax hop is 5, while the cheapest route costs 18 and contains a ' +
           'hop of 9.'
       },
@@ -123,12 +141,15 @@
         term: 'The second-best spanning tree differs by exactly one edge',
         plain: 'Remove each tree edge, take the best replacement, keep the cheapest swap.',
         formal: 'a consequence of the cycle property; the search is over the n − 1 tree edges, not over all trees',
-        detail: 'Knowing this turns "find the runner-up" from a search over exponentially many spanning ' +
-          'trees into a scan over the tree you already have. It also gives a free uniqueness test: if ' +
-          'the best swap costs nothing, then a second tree of equal weight exists and the MST was never ' +
-          'unique — which is a more honest way of discovering that than reading the weights and ' +
-          'guessing. The same one-edge-swap structure underlies sensitivity analysis: how much can this ' +
-          'link\'s cost rise before the answer changes?',
+        detail: [
+          'Knowing this turns "find the runner-up" from a search over exponentially many spanning ' +
+            'trees into a scan over the tree you already have.',
+          'It also gives a free uniqueness test. If the best swap costs nothing, then a second tree ' +
+            'of equal weight exists and the MST was never unique. That is a more honest way of ' +
+            'discovering it than reading the weights and guessing.',
+          'The same one-edge-swap structure underlies sensitivity analysis: how much can this ' +
+            'link\'s cost rise before the answer changes?'
+        ],
         example: 'With duplicate-heavy weights the runner-up ties the winner at 270; with distinct ' +
           'weights it is strictly worse and one edge different.'
       },
@@ -136,12 +157,16 @@
         term: 'The ranking changes with density, which is why all three survive',
         plain: 'Kruskal pays for the sort, lazy Prim pays per edge examined, Borůvka pays per round.',
         formal: 'sparse favours Kruskal and Prim; dense favours Borůvka, whose round count is nearly constant',
-        detail: 'A single "which is fastest" answer would be a sign that two of these algorithms should ' +
-          'have been deleted decades ago, and the reason all three are still taught is that their cost ' +
-          'curves cross. Kruskal sorts every edge whether or not it is used, so it loses when the graph ' +
-          'is dense and the tree is small. The lazy Prim here pushes a heap entry per edge examined, ' +
-          'which is the same problem with a different constant. Borůvka does log₂n scans and each round ' +
-          'at least halves the component count, so it wins as density grows.',
+        detail: [
+          'A single "which is fastest" answer would be a sign that two of these algorithms should ' +
+            'have been deleted decades ago. All three are still taught because their cost curves ' +
+            'cross.',
+          'Kruskal sorts every edge whether or not it is used, so it loses when the graph is dense ' +
+            'and the tree is small. The lazy Prim here pushes a heap entry per edge examined, which ' +
+            'is the same problem with a different constant.',
+          'Borůvka does log₂n scans, and each round at least halves the component count, so it wins ' +
+            'as density grows.'
+        ],
         example: 'At 60 edges the costs are 425 / 426 / 619 and at 900 they are 10 576 / 15 840 / 8 428 ' +
           '— the ranking inverts.'
       },
@@ -149,12 +174,15 @@
         term: 'Verify the forest, not the weight alone',
         plain: 'Check that the result is acyclic and connects everything the graph connects.',
         formal: 'union-find over the chosen edges must never reject one, and must end with the graph’s own components',
-        detail: 'A weight that matches a reference implementation is strong evidence and not a proof: ' +
-          'two implementations sharing a mistake produce two matching wrong numbers. The structural ' +
-          'check is cheap and independent — feed the chosen edges through a union-find and assert that ' +
-          'no edge closes a cycle, then assert that the resulting components match the graph\'s. On a ' +
-          'disconnected graph the answer is a spanning *forest*, and an implementation that reports ' +
-          'n − 1 edges on such a graph is wrong regardless of its weight.',
+        detail: [
+          'A weight that matches a reference implementation is strong evidence and not a proof. Two ' +
+            'implementations sharing a mistake produce two matching wrong numbers.',
+          'The structural check is cheap and independent. Feed the chosen edges through a union-find, ' +
+            'assert that no edge closes a cycle, then assert that the resulting components match the ' +
+            'graph\'s.',
+          'On a disconnected graph the answer is a spanning *forest*, and an implementation that ' +
+            'reports n − 1 edges on such a graph is wrong regardless of its weight.'
+        ],
         example: 'All three algorithms return 59 edges on a connected 60-node graph, and each result is ' +
           'checked acyclic and spanning rather than assumed.'
       }
