@@ -20,12 +20,14 @@
         },
         plain: 'A mismatch at the pattern\'s last position tells you about a character you have not otherwise looked at.',
         formal: 'within each alignment, compare pattern[m−1] down to pattern[0]',
-        detail: 'Every other matcher in this milestone reads the text left to right and can at best ' +
-          'look at each character once. Boyer-Moore starts at the far end of the window, so a ' +
-          'mismatch there is information about a character `m − 1` positions ahead of where a ' +
-          'left-to-right scan would be — and if that character occurs nowhere in the pattern, the ' +
-          'whole window can be skipped. That is the only way any matcher gets below one comparison ' +
-          'per text character.',
+        detail: [
+          'Every other matcher in this milestone reads the text left to right, and can at best look ' +
+            'at each character once.',
+          'Boyer-Moore starts at the far end of the window, so a mismatch there is information about ' +
+            'a character `m − 1` positions ahead of where a left-to-right scan would be. If that ' +
+            'character occurs nowhere in the pattern, the whole window can be skipped.',
+          'That is the only way any matcher gets below one comparison per text character.'
+        ],
         example: 'On English with a three-character pattern the matcher examines 0.388 characters ' +
           'per text character; at 32 characters it is 0.106.'
       },
@@ -36,11 +38,14 @@
         readAs: 'On a mismatch, slide the pattern so its last occurrence of the offending character lines up. ' +
           'If the character is absent entirely, last[c] is −1 and the whole pattern jumps past it. The ' +
           'max(1, …) stops the shift going backwards.',
-        detail: 'The big jumps come from the absent case. A pattern of length m contains at most m ' +
-          'distinct characters, so on a large alphabet most text characters are in no row of the ' +
-          'table at all and license a full m-position slide. Shrink the alphabet and that stops ' +
-          'being true — on DNA a mismatching character is in the table three times out of four — ' +
-          'which is exactly why the algorithm degrades as the alphabet does.',
+        detail: [
+          'The big jumps come from the absent case.',
+          'A pattern of length m contains at most m distinct characters. So on a large alphabet most ' +
+            'text characters are in no row of the table at all, and license a full m-position slide.',
+          'Shrink the alphabet and that stops being true. On DNA a mismatching character is in the ' +
+            'table three times out of four, which is exactly why the algorithm degrades as the ' +
+            'alphabet does.'
+        ],
         example: 'For the pattern "the": e slides by 1, h by 1, t by 2, and any other character by ' +
           'the whole 3.'
       },
@@ -48,12 +53,13 @@
         term: 'The good-suffix rule is the half people leave out',
         plain: 'Slide so that the suffix already matched reappears, or so that a prefix lands on its tail.',
         formal: 'a two-pass construction; the second pass handles the case where only a prefix of the pattern survives',
-        detail: 'The first pass covers a re-occurrence of the matched suffix elsewhere in the ' +
-          'pattern. The second covers the case where no such re-occurrence exists but a *prefix* of ' +
-          'the pattern matches the tail of the matched suffix, and omitting it produces an ' +
-          'implementation that is quietly wrong on periodic patterns — it shifts too far and skips ' +
-          'occurrences. That is the classic Boyer-Moore bug and it is invisible on non-periodic ' +
-          'test data.',
+        detail: [
+          'The first pass covers a re-occurrence of the matched suffix elsewhere in the pattern.',
+          'The second covers the case where no such re-occurrence exists, but a *prefix* of the ' +
+            'pattern matches the tail of the matched suffix. Omitting it produces an implementation ' +
+            'that is quietly wrong on periodic patterns: it shifts too far and skips occurrences.',
+          'That is the classic Boyer-Moore bug, and it is invisible on non-periodic test data.'
+        ],
         example: 'Both rules together cost 1 553 comparisons on English; the good-suffix rule alone ' +
           'costs 3 641 and the bad-character rule alone 1 615.'
       },
@@ -63,11 +69,15 @@
         formal: 'shift = max(badCharacter, goodSuffix); correctness follows from each being individually safe',
         readAs: 'Two rules propose a shift and you take the larger. Both are individually guaranteed never to ' +
           'skip an occurrence, so taking whichever is bigger is safe too.',
-        detail: 'This is a small and useful piece of reasoning: two independently sound lower bounds ' +
-          'on how far the pattern may move combine into a better one for free, with no interaction ' +
-          'to check. It is the same shape as taking the maximum of two admissible heuristics in A*, ' +
-          'and the same shape as combining two prefilters. The demo records which rule won each ' +
-          'shift, because that ratio decides whether the second table earns its construction cost.',
+        detail: [
+          'This is a small and useful piece of reasoning. Two independently sound lower bounds on ' +
+            'how far the pattern may move combine into a better one for free, with no interaction ' +
+            'to check.',
+          'It is the same shape as taking the maximum of two admissible heuristics in A*, and the ' +
+            'same shape as combining two prefilters.',
+          'The demo records which rule won each shift, because that ratio decides whether the second ' +
+            'table earns its construction cost.'
+        ],
         example: 'On English the bad-character rule decides 1 195 shifts and the good-suffix rule ' +
           '139, with 40 ties.'
       },
@@ -75,11 +85,14 @@
         term: 'It gets faster as the pattern gets longer',
         plain: 'The opposite of every other matcher here.',
         formal: 'the expected shift grows with m on a large alphabet, so comparisons per text character fall',
-        detail: 'A longer pattern means a longer possible jump and a lower chance that a given text ' +
-          'character appears in it, so both factors push the same way. Every other matcher is ' +
-          'bounded below by roughly one comparison per text character however long the pattern is. ' +
+        detail: [
+          'A longer pattern means a longer possible jump and a lower chance that a given text ' +
+            'character appears in it, so both factors push the same way.',
+          'Every other matcher is bounded below by roughly one comparison per text character, ' +
+            'however long the pattern is.',
           'That is why a long search term feels instant and a one-character one does not, and it is ' +
-          'the single most counter-intuitive fact in the milestone.',
+            'the single most counter-intuitive fact in the milestone.'
+        ],
         example: 'Comparisons per text character at pattern lengths 2, 4, 8, 16 and 32: 0.611, ' +
           '0.324, 0.165, 0.131, 0.106 — while KMP stays at 1.05 throughout.'
       },
@@ -87,12 +100,14 @@
         term: 'A small alphabet takes the skipping away',
         plain: 'On a two-symbol alphabet every mismatching character is in the pattern, so no jump is large.',
         formal: 'the expected bad-character shift falls towards 1 as the alphabet shrinks towards the pattern\'s own character set',
-        detail: 'The bad-character rule is a bet that the mismatching character is absent from the ' +
-          'pattern, and that bet is a function of the alphabet size relative to the pattern length. ' +
+        detail: [
+          'The bad-character rule is a bet that the mismatching character is absent from the ' +
+            'pattern, and that bet is a function of the alphabet size relative to the pattern length.',
           'On DNA, on binary framing, on a restricted symbol set, the bet loses most of the time and ' +
-          'the algorithm collapses towards the naive scan. This is why the corpus table matters more ' +
-          'than the complexity table: the same algorithm is sublinear on one row and linear on the ' +
-          'next.',
+            'the algorithm collapses towards the naive scan.',
+          'This is why the corpus table matters more than the complexity table: the same algorithm ' +
+            'is sublinear on one row and linear on the next.'
+        ],
         example: 'On the repeated corpus Boyer-Moore, Horspool and Sunday all pay 15 988 ' +
           'comparisons — exactly the naive cost — while KMP pays 4 000.'
       },
@@ -103,11 +118,14 @@
         readAs: 'Two simplifications of Boyer-Moore. Horspool looks at the character under the pattern\'s ' +
           'last position; Sunday looks one past the end, which lets it jump the entire pattern length ' +
           'plus one.',
-        detail: 'Both are shorter than full Boyer-Moore and neither is uniformly worse, which is ' +
-          'the interesting part. Horspool ignores where the mismatch happened and keys only on the ' +
-          'window\'s last character; Sunday looks one position beyond the window, which buys a ' +
-          'shift of up to `m + 1` at the cost of touching a character outside it. The corpus table ' +
-          'shows the ranking between the three inverting twice.',
+        detail: [
+          'Both are shorter than full Boyer-Moore, and neither is uniformly worse. That is the ' +
+            'interesting part.',
+          'Horspool ignores where the mismatch happened and keys only on the window\'s last ' +
+            'character. Sunday looks one position beyond the window, which buys a shift of up to ' +
+            '`m + 1` at the cost of touching a character outside it.',
+          'The corpus table shows the ranking between the three inverting twice.'
+        ],
         example: 'Sunday wins on English (1 265 against 1 553) and loses catastrophically on the ' +
           'adversarial corpus (23 940 against 3 989).'
       },
@@ -115,12 +133,15 @@
         term: 'Real strstr implementations are hybrids, and that is the honest conclusion',
         plain: 'A vectorised scan for short patterns, a skipping matcher for long ones, and a linear-time fallback.',
         formal: 'no single matcher dominates across pattern length, alphabet size and occurrence density',
-        detail: 'Every algorithm in this milestone has a corpus in the same demo on which it is the ' +
-          'worst available choice. A library cannot see its input before choosing, so it picks the ' +
-          'one with the best worst case and adds a fast path for the common case — which is exactly ' +
-          'what glibc, V8 and Rust all do. When you are choosing yourself you can see the input, and ' +
-          'that is the advantage worth using rather than defaulting to whatever the textbook ranked ' +
-          'first.',
+        detail: [
+          'Every algorithm in this milestone has a corpus in the same demo on which it is the worst ' +
+            'available choice.',
+          'A library cannot see its input before choosing, so it picks the one with the best worst ' +
+            'case and adds a fast path for the common case. That is exactly what glibc, V8 and Rust ' +
+            'all do.',
+          'When you are choosing yourself you can see the input, and that is the advantage worth ' +
+            'using rather than defaulting to whatever the textbook ranked first.'
+        ],
         example: 'Across seven corpora the best of Boyer-Moore, Horspool and Sunday changes hands ' +
           'four times.'
       }

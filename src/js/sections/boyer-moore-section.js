@@ -49,42 +49,49 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**Boyer-Moore compares the pattern right to left within each alignment**, and that one change ' +
+        'buys everything.',
+      'A mismatch at the last position tells you about a text character you have not otherwise ' +
+        'looked at. If that character does not occur in the pattern at all, the pattern can slide ' +
+        'past it completely. That is `m` positions at once, with `m − 1` text characters never ' +
+        'examined.',
+      '**The bad-character rule** slides so that the rightmost occurrence of the offending text ' +
+        'character lines up with it, or past the mismatch entirely when the character is absent.',
+      '**The good-suffix rule** slides so that the suffix already matched reappears, or so that a ' +
+        'prefix of the pattern lands on the tail of it.',
+      'Both are safe, so the algorithm takes the larger. The demo records which one won each time, ' +
+        'because on natural language the answer is almost always the first.',
+      '**It gets faster as the pattern gets longer**, which is the opposite of every other matcher ' +
+        'here.',
+      'The length sweep below is the claim: Boyer-Moore\'s characters-per-text-character falls as ' +
+        'the pattern grows, while KMP\'s and the naive scan\'s stay flat at just above one.',
+      'That is why a long search term feels instant and a one-character one does not.',
+      '**Horspool and Sunday drop machinery on purpose.** Horspool keys the bad-character rule on ' +
+        'the text character aligned with the pattern\'s last position, whatever the mismatch was: ' +
+        'one table, no good-suffix pass.',
+      'Sunday looks at the character just *past* the window, which can be shifted by up to `m + 1`. ' +
+        'Both are shorter than full Boyer-Moore and neither is uniformly worse, which the corpus ' +
+        'table shows by inverting the ranking twice.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'Boyer-Moore compares the pattern **right to left** within each alignment, and that one ' +
-          'change buys everything. A mismatch at the last position tells you about a text character ' +
-          'you have not otherwise looked at, and if that character does not occur in the pattern at ' +
-          'all, the pattern can slide past it completely — `m` positions at once, with `m − 1` text ' +
-          'characters never examined.',
-        '**The bad-character rule** slides so that the rightmost occurrence of the offending text ' +
-          'character lines up with it, or past the mismatch entirely when the character is absent. ' +
-          '**The good-suffix rule** slides so that the suffix already matched reappears, or so that ' +
-          'a prefix of the pattern lands on the tail of it. Both are safe, so the algorithm takes ' +
-          'the larger — and the demo records which one won each time, because on natural language ' +
-          'the answer is almost always the first.',
-        '**It gets faster as the pattern gets longer**, which is the opposite of every other matcher ' +
-          'here. The length sweep below is the claim: Boyer-Moore\'s characters-per-text-character ' +
-          'falls as the pattern grows while KMP\'s and the naive scan\'s stay flat at just above one. ' +
-          'That is why a long search term feels instant and a one-character one does not.',
-        '**Horspool and Sunday drop machinery on purpose.** Horspool keys the bad-character rule on ' +
-          'the text character aligned with the pattern\'s last position, whatever the mismatch was: ' +
-          'one table, no good-suffix pass. Sunday looks at the character just *past* the window, ' +
-          'which can be shifted by up to `m + 1`. Both are shorter than full Boyer-Moore and neither ' +
-          'is uniformly worse, which the corpus table shows by inverting the ranking twice.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — one alignment, the length sweep, and the two rules priced',
         markup: root.BoyerMooreTemplate.render()
       },
       diagram: diagram(),
       insight: 'Real `strstr` implementations are hybrids: a vectorised first-character scan for ' +
-        'short patterns, Horspool or two-way for longer ones, and a linear-time fallback so an ' +
-        'adversary cannot force the quadratic worst case. The reason is exactly the corpus table ' +
-        'below — every one of these algorithms has an input on which it is the worst available ' +
-        'choice, and a library cannot see its input in advance. When you are choosing one yourself, ' +
-        'you can, and that is the advantage worth using.'
+        'short patterns, Horspool or two-way for longer ones, and a linear-time fallback. The ' +
+        'fallback is there so an adversary cannot force the quadratic worst case. The reason is ' +
+        'exactly the corpus table below. Every one of these algorithms has an input on which it is ' +
+        'the worst available choice, and a library cannot see its input in advance. When you are ' +
+        'choosing one yourself, you can, and that is the advantage worth using.'
     };
   }
 
