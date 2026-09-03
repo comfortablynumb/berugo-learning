@@ -10,12 +10,16 @@
         term: 'Real data is not random, and that is the whole design',
         plain: 'Production sorts are built around the order that is already in the input.',
         formal: 'Timsort exploits existing runs; pdqsort detects and destroys adversarial patterns',
-        detail: 'A textbook sort is analysed on a uniformly random permutation because that is what the ' +
-          'analysis can handle. Real inputs are appended logs, re-sorted lists, concatenated batches and ' +
-          'status columns - all of which carry structure. Timsort and pdqsort are the two coherent answers: ' +
-          'one treats existing order as an opportunity and the other treats existing structure as a threat. ' +
-          'Both beat a textbook sort on real data, and they disagree about what real data looks like because ' +
-          'they were written for different workloads.',
+        detail: [
+          'A textbook sort is analysed on a uniformly random permutation, because that is what the ' +
+            'analysis can handle.',
+          'Real inputs are appended logs, re-sorted lists, concatenated batches and status ' +
+            'columns. All of them carry structure.',
+          'Timsort and pdqsort are the two coherent answers. One treats existing order as an ' +
+            'opportunity; the other treats existing structure as a threat. Both beat a textbook ' +
+            'sort on real data, and they disagree about what real data looks like because they ' +
+            'were written for different workloads.'
+        ],
         example: 'On 2 000 nearly-sorted elements Timsort does 3 099 comparisons and plain merge sort does 15 061.'
       },
       {
@@ -33,41 +37,52 @@
         },
         plain: 'Find the ascending stretches, and pad short ones up to a computed floor.',
         formal: 'minrun is the top 5 bits of n plus 1 if any lower bit is set, giving 16..32',
-        readAs: 'Timsort picks a minimum run length between 16 and 32, chosen so the number of runs is close ' +
-          'to a power of two — which is what keeps the merges balanced instead of repeatedly merging a ' +
-          'huge run with a tiny one.',
-        detail: 'Merging runs of wildly different lengths is wasteful, so Timsort establishes a floor: any ' +
-          'natural run shorter than minrun is extended to it with a binary insertion sort. The value is not ' +
-          'arbitrary. It is chosen so that n/minrun is just below a power of two, which makes the merge tree ' +
-          'balanced; a round number like 32 on n = 2 049 leaves a final run of 1 to be merged against 2 048, ' +
-          'and that single unbalanced merge costs more than every balanced one before it.',
+        readAs: 'Timsort picks a minimum run length between 16 and 32. The value is chosen so ' +
+          'the number of runs is close to a power of two. That keeps the merges balanced, instead ' +
+          'of repeatedly merging a huge run with a tiny one.',
+        detail: [
+          'Merging runs of wildly different lengths is wasteful, so Timsort establishes a floor. ' +
+            'Any natural run shorter than minrun is extended to it with a binary insertion sort.',
+          'The value is not arbitrary. It is chosen so that n/minrun is just below a power of two, ' +
+            'which makes the merge tree balanced.',
+          'A round number like 32 on n = 2 049 leaves a final run of 1 to be merged against 2 048. ' +
+            'That single unbalanced merge costs more than every balanced one before it.'
+        ],
         example: 'minrun(1 000) = 32, minrun(2 048) = 16, minrun(20 000) = 20.'
       },
       {
         term: 'The merge-stack invariants',
         plain: 'Two inequalities over the top three run lengths keep the stack shallow and the merges balanced.',
         formal: 'for runs X (newest), Y, Z: Z > Y + X and Y > X',
-        readAs: 'The stack invariant: each run on the stack must be larger than the two above it combined. It ' +
-          'keeps merges between comparable sizes, and getting it subtly wrong is what caused the ' +
-          'well-known Java and Python bug.',
-        detail: 'Runs are pushed on a stack and merged lazily, which raises the question of when to merge. ' +
-          'The invariants answer it: the lengths must grow at least as fast as the Fibonacci numbers going ' +
-          'down the stack, which forces the stack depth to be O(log n) and keeps merges between runs of ' +
-          'comparable size. After every push a collapse loop restores them by merging the smaller neighbour. ' +
-          'They are the reason Java could size its stack array at a fixed 40 entries, and that dependency is ' +
-          'what made the 2015 result matter.',
+        readAs: 'The stack invariant: each run on the stack must be larger than the two above it ' +
+          'combined. It keeps merges between comparable sizes, and getting it subtly wrong is what ' +
+          'caused the well-known Java and Python bug.',
+        detail: [
+          'Runs are pushed on a stack and merged lazily, which raises the question of when to ' +
+            'merge.',
+          'The invariants answer it. The lengths must grow at least as fast as the Fibonacci ' +
+            'numbers going down the stack. That forces the stack depth to be O(log n), and keeps ' +
+            'merges between runs of comparable size. After every push, a collapse loop restores ' +
+            'the invariants by merging the smaller neighbour.',
+          'They are the reason Java could size its stack array at a fixed 40 entries, and that ' +
+            'dependency is what made the 2015 result matter.'
+        ],
         example: 'A settled stack of 120, 80, 45, 30 violates the first: 120 is not greater than 80 + 45.'
       },
       {
         term: 'The 2015 verification result',
         plain: 'The original collapse rule checked only the top three runs, and a violation can survive one deeper.',
         formal: 'de Gouw, Rot, de Boer, Bubel and Hahnle, 2015; the fix adds a check on the fourth run',
-        detail: 'A team attempting to verify Java\'s Timsort could not prove the stack-depth bound, and the ' +
-          'reason was a real defect: the collapse loop examined runs at positions n-1, n-2 and n-3 but a ' +
-          'merge could leave the invariant broken at n-4. The fix is one extra clause. What makes it the best ' +
-          'argument in this milestone for verifying invariants is how it presented: the sort returned correct ' +
-          'output on every input, and the only observable symptom was an ArrayIndexOutOfBoundsException on ' +
-          'arrays of tens of millions of elements. It shipped in Java, Python and Android for years.',
+        detail: [
+          'A team attempting to verify Java\'s Timsort could not prove the stack-depth bound, and ' +
+            'the reason was a real defect. The collapse loop examined runs at positions n-1, n-2 ' +
+            'and n-3, but a merge could leave the invariant broken at n-4. The fix is one extra ' +
+            'clause.',
+          'What makes it the best argument in this milestone for verifying invariants is how it ' +
+            'presented. The sort returned correct output on every input.',
+          'The only observable symptom was an ArrayIndexOutOfBoundsException on arrays of tens of ' +
+            'millions of elements. It shipped in Java, Python and Android for years.'
+        ],
         example: 'Run lengths 120, 80, 25, 20, 30 - 275 elements - reproduce the broken invariant, and the array still sorts.'
       },
       {
@@ -84,55 +99,69 @@
         },
         plain: 'When one run keeps winning, binary-search for how far it keeps winning.',
         formal: 'switch after MIN_GALLOP consecutive wins; doubling search then binary search',
-        readAs: 'When one run keeps winning the comparison, stop comparing element by element and start ' +
-          'jumping: double the step until you overshoot, then binary search back. It turns a long ' +
-          'one-sided merge from linear into logarithmic.',
-        detail: 'Merging two runs one element at a time is optimal when they interleave and wasteful when ' +
-          'they do not. If one run wins seven comparisons in a row that is evidence a whole block of it ' +
-          'precedes the other run\'s head, so Timsort switches to a doubling search to find how large that ' +
-          'block is and moves it at once - turning k comparisons into log₂ k. The threshold adapts: it drops ' +
-          'while galloping pays and rises while it does not, so interleaved data stops paying for the ' +
-          'machinery almost immediately.',
+        readAs: 'When one run keeps winning the comparison, stop comparing element by element and ' +
+          'start jumping. Double the step until you overshoot, then binary search back. It turns a ' +
+          'long one-sided merge from linear into logarithmic.',
+        detail: [
+          'Merging two runs one element at a time is optimal when they interleave, and wasteful ' +
+            'when they do not.',
+          'If one run wins seven comparisons in a row, that is evidence a whole block of it ' +
+            'precedes the other run\'s head. Timsort switches to a doubling search to find how ' +
+            'large that block is and moves it at once, turning k comparisons into log₂ k.',
+          'The threshold adapts. It drops while galloping pays and rises while it does not, so ' +
+            'interleaved data stops paying for the machinery almost immediately.'
+        ],
         example: 'Concatenating two sorted halves of 1 000 elements each is one run detection and no merge at all.'
       },
       {
         term: 'pdqsort: an unbalanced partition is evidence, not luck',
         plain: 'When the split is bad, swap a few elements so the next pivot sample is uncorrelated with the pattern.',
         formal: 'if either side is below size/8, break the pattern with fixed-offset swaps inside each partition',
-        readAs: 'A partition that splits worse than one to seven is evidence of an adversarial pattern, so ' +
-          'pdqsort deliberately shuffles a few fixed positions to destroy it — no randomness needed, ' +
-          'and no way for an attacker to predict the result.',
-        detail: 'A deterministic pivot rule defeated once will be defeated the same way again, because the ' +
-          'thing that defeated it is a property of the arrangement. pdqsort responds by deliberately ' +
-          'disturbing the arrangement: a handful of swaps at fixed offsets, costing nothing, which decorrelate ' +
-          'the next sample from whatever produced this one. The swaps must stay strictly inside one partition ' +
-          '- reaching across the pivot mixes an element below it with one above and silently undoes the ' +
-          'partition just computed.',
+        readAs: 'A partition that splits worse than one to seven is evidence of an adversarial ' +
+          'pattern. So pdqsort deliberately shuffles a few fixed positions to destroy it — no ' +
+          'randomness needed, and no way for an attacker to predict the result.',
+        detail: [
+          'A deterministic pivot rule defeated once will be defeated the same way again, because ' +
+            'the thing that defeated it is a property of the arrangement.',
+          'pdqsort responds by deliberately disturbing the arrangement. A handful of swaps at ' +
+            'fixed offsets, costing nothing, decorrelate the next sample from whatever produced ' +
+            'this one.',
+          'The swaps have to stay strictly inside one partition. Reaching across the pivot mixes ' +
+            'an element below it with one above, and silently undoes the partition just computed.'
+        ],
         example: 'Organ-pipe input of 20 000 elements: 394 pattern breaks, and no heapsort fallback needed.'
       },
       {
         term: 'The bounded insertion sort: a bet that is cheap to lose',
         plain: 'If a partition came back already ordered, try to finish with an insertion sort limited to 8 moves.',
         formal: 'partial_insertion_sort: give up the moment the shift count passes the limit',
-        detail: 'An already-partitioned range is evidence the input may be nearly sorted, and insertion sort ' +
-          'finishes nearly-sorted data in linear time. The risk is that the evidence is wrong and insertion ' +
-          'sort costs O(n²). The bound removes the risk: attempt it, and abandon it after a small constant ' +
-          'number of shifts. Winning makes sorted input cost O(n); losing costs eight moves. The measured ' +
-          'give-up cost is identical at 200, 2 000 and 20 000 elements, which is what "cheap to lose" means.',
+        detail: [
+          'An already-partitioned range is evidence the input may be nearly sorted, and insertion ' +
+            'sort finishes nearly-sorted data in linear time.',
+          'The risk is that the evidence is wrong and insertion sort costs O(n²). The bound ' +
+            'removes the risk: attempt it, and abandon it after a small constant number of shifts.',
+          'Winning makes sorted input cost O(n). Losing costs eight moves. The measured give-up ' +
+            'cost is identical at 200, 2 000 and 20 000 elements, which is what "cheap to lose" ' +
+            'means.'
+        ],
         example: 'pdqsort on 20 000 sorted elements: 40 010 comparisons - two per element - at recursion depth 1.'
       },
       {
         term: 'A deterministic worst-case bound',
         plain: 'pdqsort reaches O(n log n) worst case without a random pivot.',
         formal: 'a depth budget of log2 n, then heapsort - and no randomness anywhere',
-        readAs: 'Introsort counts how deep the recursion has gone, and once it passes log₂ n it abandons ' +
-          'quicksort for heapsort. That gives an n log n worst case with no random number generator in ' +
-          'sight.',
-        detail: 'Randomised pivots give a probabilistic guarantee at the cost of reproducibility: two runs on ' +
-          'the same input do different work, which complicates benchmarking, debugging and any cache that ' +
-          'depends on the output being computed the same way twice. pdqsort gets the same worst-case bound ' +
-          'from pattern breaking plus a depth budget, both deterministic. That is a genuinely better trade ' +
-          'than "add randomness" and it is the part of the design most worth stealing.',
+        readAs: 'Introsort counts how deep the recursion has gone, and once it passes log₂ n it ' +
+          'abandons quicksort for heapsort. That gives an n log n worst case with no random number ' +
+          'generator in sight.',
+        detail: [
+          'Randomised pivots give a probabilistic guarantee at the cost of reproducibility. Two ' +
+            'runs on the same input do different work, which complicates benchmarking, debugging, ' +
+            'and any cache that depends on the output being computed the same way twice.',
+          'pdqsort gets the same worst-case bound from pattern breaking plus a depth budget, both ' +
+            'deterministic.',
+          'That is a genuinely better trade than "add randomness", and it is the part of the ' +
+            'design most worth stealing.'
+        ],
         example: 'On the anti-quicksort input at 4 096 elements: 59 470 comparisons at depth 14, and the same numbers every run.'
       }
     ],

@@ -47,39 +47,42 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'Timsort and pdqsort solve the same problem from opposite directions. Timsort asks what order is ' +
-          'already present and exploits it: it finds the ascending runs, pads short ones to minrun with a ' +
-          'binary insertion sort, and merges them under invariants that keep the run lengths balanced. On ' +
-          'nearly-sorted input of 2 000 elements it does 3 099 comparisons - 1.55 per element - where a plain ' +
-          'merge sort does 15 061. pdqsort asks what pattern is about to make it quadratic and destroys it: ' +
-          'when a partition comes back badly unbalanced it swaps a few elements so the next pivot sample is ' +
-          'uncorrelated with whatever produced that shape.',
-        'The merge-stack invariants are the interesting part of Timsort, and they are two inequalities over ' +
-          'the top three run lengths: Z > Y + X and Y > X. They are what bounds the stack depth, and that ' +
-          'bound is what Java sized its fixed-length stack array from. In 2015 de Gouw, Rot, de Boer, Bubel ' +
-          'and Hähnle tried to verify that bound and could not - because the collapse rule only checked the ' +
-          'top three runs, and a violation can survive one level further down. Run lengths of 120, 80, 25, 20 ' +
-          'and 30 are enough to produce it: the stack settles at 120, 80, 45, 30 and 120 is not greater than ' +
-          '80 + 45.',
-        'What makes that bug worth a section is how it presented. The sort was not wrong. Feed those run ' +
-          'lengths to the buggy version and it returns a perfectly sorted array, every time, while the ' +
-          'invariant its stack size was proved from no longer holds. The observable failure was an ' +
-          'ArrayIndexOutOfBoundsException on arrays of about 67 million elements, which is why it sat in ' +
-          'Java, Python and Android for years. A test of the output could not have found it; a check of the ' +
-          'invariant finds it in one run, and the demo below runs that check after every push.'
+        '**Timsort and pdqsort solve the same problem from opposite directions.** Timsort asks ' +
+          'what order is already present and exploits it. It finds the ascending runs, pads short ' +
+          'ones to minrun with a binary insertion sort, and merges them under invariants that ' +
+          'keep the run lengths balanced. On nearly-sorted input of 2 000 elements it does 3 099 ' +
+          'comparisons — 1.55 per element — where a plain merge sort does 15 061.',
+        'pdqsort asks what pattern is about to make it quadratic, and destroys it. When a ' +
+          'partition comes back badly unbalanced, it swaps a few elements so the next pivot ' +
+          'sample is uncorrelated with whatever produced that shape.',
+        'The merge-stack invariants are the interesting part of Timsort, and they are two ' +
+          'inequalities over the top three run lengths: Z > Y + X and Y > X. They bound the stack ' +
+          'depth, and that bound is what Java sized its fixed-length stack array from.',
+        'In 2015 de Gouw, Rot, de Boer, Bubel and Hähnle tried to verify that bound and could ' +
+          'not. The collapse rule only checked the top three runs, and a violation can survive ' +
+          'one level further down. Run lengths of 120, 80, 25, 20 and 30 are enough to produce ' +
+          'it. The stack settles at 120, 80, 45, 30, and 120 is not greater than 80 + 45.',
+        'What makes that bug worth a section is how it presented. The sort was not wrong. Feed ' +
+          'those run lengths to the buggy version and it returns a perfectly sorted array, every ' +
+          'time, while the invariant its stack size was proved from no longer holds.',
+        'The observable failure was an ArrayIndexOutOfBoundsException on arrays of about 67 ' +
+          'million elements, which is why it sat in Java, Python and Android for years. A test of ' +
+          'the output could not have found it. A check of the invariant finds it in one run, and ' +
+          'the demo below runs that check after every push.'
       ],
       demo: {
         title: 'Interactive demo — the run stack, the invariants, and the rule that broke them',
         markup: root.LibrarySortsTemplate.render()
       },
       diagram: diagram(),
-      insight: 'The Timsort bug is the best available argument for verifying an invariant rather than testing ' +
-        'an output. It survived years in three standard libraries, on billions of sorts, because every one of ' +
-        'those sorts returned the right answer - the broken invariant was invisible from outside and the ' +
-        'failure it enabled needed an input of tens of millions of elements. No amount of randomised output ' +
-        'testing finds that. Checking `Z > Y + X` after every push finds it on the first constructed input, ' +
-        'and costs two comparisons. When a data structure has a stated invariant, assert it in the code rather ' +
-        'than hoping the output implies it.'
+      insight: 'The Timsort bug is the best available argument for verifying an invariant ' +
+        'rather than testing an output. It survived years in three standard libraries, on ' +
+        'billions of sorts, because every one of those sorts returned the right answer. The ' +
+        'broken invariant was invisible from outside, and the failure it enabled needed an input ' +
+        'of tens of millions of elements. No amount of randomised output testing finds that. ' +
+        'Checking `Z > Y + X` after every push finds it on the first constructed input, and ' +
+        'costs two comparisons. When a data structure has a stated invariant, assert it in the ' +
+        'code rather than hoping the output implies it.'
     };
   }
 
