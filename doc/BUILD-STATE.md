@@ -5134,3 +5134,42 @@ in CI, which is why the assemble step is a Node script rather than four lines of
 The publish is the thing that was asked for and it is done: green, fast, and
 serving a site that is usable cold. M38 — cache coherence and memory
 consistency — is the next milestone, and nothing of it exists yet.
+
+---
+
+## Prose simplification pass (in progress)
+
+The Description tab was written the way a specification is written: long
+sentences several clauses deep, packed into one unbroken block per concept.
+`npm run lint:prose` measures it and is the source of truth for what is done —
+a section printed with `ok` is inside the budget, and the header line says how
+many of the 364 are.
+
+**Starting point (2026-09-02):** mean sentence 22.6 words, 21.9% of sentences
+over 30 words, and 2 935 of 2 935 explanations written as a single paragraph.
+
+**The budget:** mean ≤ 20 words, no sentence over 36, ≤ 12% over 30 words, and
+no concept whose `detail` is a single block.
+
+**The recipe, per section** — nothing is cut, only repacked:
+
+1. `node tools/readability.js <id>` lists every sentence over 30 words.
+2. Turn each `detail` string into an array of two or three paragraphs. The
+   renderer already prints one `<p>` per entry; the feature had never been
+   used, and that is most of why the tab reads as a wall.
+3. Split the long sentences. A sentence carrying two clauses joined by an em
+   dash is usually two sentences.
+4. Give the orientation the same treatment, and open its first paragraph with
+   a bold thesis, as the rest of the curriculum does.
+5. Re-run the tool: the section must print `ok`.
+6. `node --test tests/unit/content-coverage.test.js
+   tests/unit/content-rendering.test.js tests/unit/notation*.test.js`, then the
+   render-audit shard that carries the section.
+
+Do not open a sentence with a lowercase code identifier (`ops.view(array)
+wraps…`): the sentence splitter cannot see the boundary, and the section reads
+as over budget when it is not. Rephrase (`Wrapping an array in ops.view(array)
+counts…`).
+
+`--strict` exits non-zero on any section over budget. It is deliberately not
+wired into `npm test` yet; that happens when the last section lands.

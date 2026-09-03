@@ -33,9 +33,10 @@
     root.jQuery('#' + SECTION_ID + '-content').html(app.shell.render({
       sectionId: SECTION_ID,
       orientation: [
-        'Every runnable thing on this platform goes through one path: your code is compiled with ' +
-          'new Function inside a Web Worker, given four capabilities (log, a seeded rng, instrumented ' +
-          'ops counters and assert) and nothing else, and watched by a wall-clock budget.',
+        '**Every runnable thing on this platform goes through one path.** Your code is compiled ' +
+          'with new Function inside a Web Worker. It is handed four capabilities and nothing ' +
+          'else: log, a seeded rng, instrumented ops counters and assert. A wall-clock budget ' +
+          'watches the whole run.',
         'The budget matters because a bare infinite loop cannot be stopped from inside. The only ' +
           'reliable stop is terminate(), which is why the runner owns a watchdog and replaces the ' +
           'worker afterwards.',

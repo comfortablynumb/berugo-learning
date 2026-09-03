@@ -19,15 +19,18 @@
         },
         plain: 'Your code runs in a Web Worker with no access to the page, storage or the network.',
         formal: 'new Function(capabilities…, code) inside a dedicated worker',
-        detail: 'Isolation here is structural rather than a blacklist someone has to keep up to date. ' +
-          'A dedicated worker has its own global scope, and that scope simply has no document, no ' +
-          'localStorage and no page to reach — there is nothing to forbid. Inside it your code is ' +
-          'compiled with new Function rather than eval, so it cannot see the scope it was compiled ' +
-          'from, and it receives exactly four capabilities as parameters: log, a seeded rng, the ops ' +
-          'counters and assert. A further list of host names (require, window, document, fetch, ' +
-          'importScripts and the rest) is declared as unbound parameters so they shadow to undefined ' +
-          'inside the compiled function. That last part is hygiene, not a boundary: globalThis still ' +
-          'reaches everything, and closing that would need a parser. The boundary is the worker.',
+        detail: [
+          'Isolation here is structural. It is not a blacklist someone has to keep up to date. ' +
+            'A dedicated worker gets its own global scope, and that scope has no document, no ' +
+            'localStorage and no page. There is nothing to forbid, because there is nothing there.',
+          'Your code is compiled with new Function rather than eval, so it cannot see the scope it ' +
+            'was compiled from. It is handed exactly four capabilities as parameters: log, a ' +
+            'seeded rng, the ops counters and assert.',
+          'A list of host names — require, window, document, fetch, importScripts and the rest — ' +
+            'is declared as unbound parameters, so inside your function they read as undefined. ' +
+            'That part is hygiene rather than a boundary. globalThis still reaches everything, and ' +
+            'closing that would need a parser. The boundary is the worker.'
+        ],
         example: 'A lab that tries document.body sees a ReferenceError, not the page.'
       },
       {
@@ -35,13 +38,16 @@
         plain: 'Each run gets a deadline. Overrunning it terminates the worker, which is the only ' +
           'reliable way to stop an infinite loop.',
         formal: 'terminate() after timeoutMs; the worker is then replaced',
-        detail: 'A while (true) {} loop never yields, never checks a flag and never returns to an ' +
-          'event loop, so nothing running inside the worker can stop it. The only thing that can is ' +
-          'the host: it starts a timer when it posts the run, and when the timer fires first it calls ' +
-          'terminate() on the worker and reports a timeout. The worker is then discarded and a fresh ' +
-          'one takes its place, because a terminated worker keeps no usable state. The default budget ' +
-          'is 2 seconds. The cost of this design is that a timeout tells you the run did not finish ' +
-          'and nothing more — there is no stack, because there is no live worker left to ask.',
+        detail: [
+          'A while (true) {} loop never yields, never checks a flag and never returns to an event ' +
+            'loop. Nothing running inside the worker can stop it.',
+          'The host can. It starts a timer when it posts the run, and if that timer fires first it ' +
+            'calls terminate() on the worker and reports a timeout. The worker is then discarded ' +
+            'and a fresh one takes its place, because a terminated worker keeps no usable state. ' +
+            'The default budget is 2 seconds.',
+          'The cost of this design is that a timeout tells you the run did not finish, and nothing ' +
+            'more. There is no stack to show, because there is no live worker left to ask.'
+        ],
         example: 'A quadratic scan over 20 000 items exceeds a 1.2 s budget and reports "timed out".'
       },
       {
@@ -51,13 +57,16 @@
         formal: 'ops.count(name) throws StepBudgetExceeded past the limit',
         readAs: 'Every counted operation adds one to a running total, and the first call past the ' +
           'limit raises an error instead of doing its job.',
-        detail: 'Every instrumented primitive increments a total, and past the limit the next call ' +
-          'throws StepBudgetExceeded instead of returning. That gives you a named error at the ' +
-          'operation that went over, which is far more useful than a terminated worker — but it only ' +
-          'sees work routed through ops. A loop that compares with < directly, or one that does no ' +
-          'work at all, passes the step budget untouched and has to be caught by the wall clock ' +
-          'instead. The two limits are complementary on purpose: the step budget explains, the wall ' +
-          'clock guarantees. The default limit is 5 × 10⁷ operations — fifty million.',
+        detail: [
+          'Every instrumented primitive adds one to a running total. Past the limit, the next call ' +
+            'throws StepBudgetExceeded instead of returning. You get a named error at the ' +
+            'operation that went over, which is far more useful than a terminated worker.',
+          'It only sees work routed through ops. A loop that compares with < directly, or one that ' +
+            'does no work at all, passes the step budget untouched. The wall clock has to catch ' +
+            'that instead.',
+          'The two limits are complementary on purpose: the step budget explains, the wall clock ' +
+            'guarantees. The default limit is 5 × 10⁷ operations — fifty million.'
+        ],
         example: 'A runaway sort that keeps calling ops.cmp stops with a step-budget error.'
       },
       {
@@ -65,14 +74,17 @@
         plain: 'A counted operation the harness provides. The platform counts these instead of ' +
           'rewriting your code to guess at its cost.',
         formal: 'ops.cmp, ops.swap, ops.view(array).get/set',
-        detail: 'The alternative — parsing your code and inserting counters — would have to decide ' +
-          'what counts as a comparison in a language where < is also string collation and a[i] can ' +
-          'run a getter. Handing you counted primitives moves that decision to the exercise author, ' +
-          'where it belongs: the lab says which operations it charges for, and the count is exact ' +
-          'rather than inferred. ops.view(array) wraps an array so reads and writes are counted ' +
-          'individually, which is what lets a lab distinguish an algorithm that scans twice from one ' +
-          'that scans once. The trade is that uninstrumented work is invisible, so a lab that grades ' +
-          'on counts must name the primitives it expects the answer to go through.',
+        detail: [
+          'The alternative is to parse your code and insert counters. That has to decide what ' +
+            'counts as a comparison in a language where < is also string collation, and where ' +
+            'a[i] can run a getter.',
+          'Counted primitives move the decision to the exercise author, where it belongs. The lab ' +
+            'says which operations it charges for, and the count is exact rather than inferred. ' +
+            'Wrapping an array in ops.view(array) counts its reads and writes one at a time. ' +
+            'That is what lets a lab tell an algorithm that scans twice from one that scans once.',
+          'The trade is that uninstrumented work is invisible. A lab that grades on counts has to ' +
+            'name the primitives it expects the answer to go through.'
+        ],
         example: 'The binary-search lab asserts at most ⌈log₂ n⌉ + 1 calls to ops.cmp — the ' +
           'number of times you can halve n before reaching one item, rounded up, plus one.'
       },
@@ -81,13 +93,16 @@
         plain: 'Every run receives a seeded generator, so two runs with the same seed produce the ' +
           'same input and the same trace.',
         formal: 'rng = Random.seeded(seed)',
-        detail: 'Math.random() cannot be reproduced, which makes every measurement a fresh sample of ' +
-          'a different input and every bug a story about what probably happened. The sandbox instead ' +
-          'passes in a seeded generator, and each graded test gets seed + position so tests do not ' +
-          'share a stream and cannot be reordered into a different meaning. The practical effect is ' +
-          'that a difference between two runs has exactly one cause: your edit. It also makes a ' +
-          'failing case portable — the seed is the whole repro, so the same input can be replayed ' +
-          'here, in the node suite and on someone else\'s machine.',
+        detail: [
+          'Math.random() cannot be reproduced. That makes every measurement a fresh sample of a ' +
+            'different input, and every bug a story about what probably happened.',
+          'The sandbox passes in a seeded generator instead. Each graded test gets seed + ' +
+            'position, so tests do not share a stream and cannot be reordered into a different ' +
+            'meaning.',
+          'The practical effect is that a difference between two runs has exactly one cause: your ' +
+            'edit. It also makes a failing case portable. The seed is the whole repro, so the same ' +
+            'input replays here, in the node suite, and on someone else\'s machine.'
+        ],
         example: 'Change one line, run again, and any difference in the result is your change.'
       },
       {
@@ -95,16 +110,19 @@
         plain: 'A timing is reported as a median over repeated runs with the count shown, never as ' +
           'a single sample.',
         formal: 'median(t₁…tₙ) with n displayed',
-        readAs: 'Take the n timings, sort them, and report the one in the middle — then print n ' +
+        readAs: 'Take the n timings, sort them, and report the one in the middle. Then print n ' +
           'beside it, so a reader can see how many runs that middle came from.',
-        detail: 'A browser timing is a noisy sample: JIT warm-up, garbage collection, timer ' +
-          'quantisation — the clock only ticks in steps, so it rounds — and whatever else the ' +
-          'machine is doing all land on it, and they land ' +
-          'asymmetrically — interference only ever makes a run slower. The median throws away that ' +
-          'tail, where the mean chases it, so half the runs above and half below is the honest ' +
-          'summary of a one-sided noise distribution. Showing n alongside it is the other half of the ' +
-          'contract: "3.2 ms (median of 15)" can be argued with, because the reader can see how much ' +
-          'evidence is behind it. A bare number cannot.',
+        detail: [
+          'A browser timing is a noisy sample. JIT warm-up, garbage collection and whatever else ' +
+            'the machine is doing all land on it. So does timer quantisation: the clock ticks in ' +
+            'steps, so it rounds.',
+          'That noise is one-sided. Interference only ever makes a run slower, never faster. The ' +
+            'median throws the slow tail away where the mean chases it, so half above and half ' +
+            'below is the honest summary.',
+          'Showing n is the other half of the contract. "3.2 ms (median of 15)" can be argued ' +
+            'with, because the reader can see how much evidence is behind it. A bare number ' +
+            'cannot.'
+        ],
         example: '"3.2 ms (median of 15)" rather than "3.2 ms".'
       },
       {
@@ -112,14 +130,18 @@
         plain: 'The worker and the inline fallback run the same execution core, so a lab cannot pass ' +
           'in one and fail in the other for reasons of its own.',
         formal: 'both backends call Sandbox.execute(request, emit)',
-        detail: 'Two backends exist because they answer different needs: the worker gives isolation ' +
-          'and a real timeout, the inline backend gives a synchronous call the node test suite can ' +
-          'grade against without a browser. If each had its own execution path, the suite would be ' +
-          'testing something the learner never runs. Instead both post the identical message protocol ' +
-          'to one Sandbox.execute, so a disagreement can only come from the exercise. The two ' +
-          'guarantees the inline backend cannot honour — no enforced wall clock, and host globals ' +
-          'shadowed rather than absent — are returned in result.warnings rather than passed over, ' +
-          'because a fallback that quietly weakens a guarantee is worse than one that refuses to run.',
+        detail: [
+          'Two backends exist because they answer different needs. The worker gives isolation and ' +
+            'a real timeout. The inline backend gives a synchronous call the node test suite can ' +
+            'grade against without a browser.',
+          'If each had its own execution path, the suite would be testing something the learner ' +
+            'never runs. Instead both post the identical message protocol to one Sandbox.execute, ' +
+            'so a disagreement can only come from the exercise.',
+          'There are two guarantees the inline backend cannot honour: the wall clock is not ' +
+            'enforced, and host globals are shadowed rather than absent. Both come back in ' +
+            'result.warnings rather than being passed over. A fallback that quietly weakens a ' +
+            'guarantee is worse than one that refuses to run.'
+        ],
         example: 'The node suite grades every exercise inline; the browser grades it in the worker; ' +
           'a disagreement is a bug in the exercise, not in the backend.'
       },
@@ -128,17 +150,21 @@
         plain: 'A graded test is serialised to source text and rebuilt inside the sandbox, so it can ' +
           'use its two arguments and nothing else from the file it was written in.',
         formal: "String(spec.assert) → new Function('return (' + src + ')')()",
-        readAs: 'Turn the test function back into its source text, send the text across to the ' +
-          'worker, and compile it into a function again on the other side. The arrow is "becomes": ' +
+        readAs: 'Turn the test function back into its source text and send the text across to the ' +
+          'worker. Compile it into a function again on the other side. The arrow is "becomes": ' +
           'what arrives is a new function built from the same characters, and nothing else.',
-        detail: 'A worker is a separate realm, and the only thing that crosses to it is data. A ' +
-          'function is not data: it carries a closure, and the closure cannot be posted. So each test ' +
-          'is stringified, sent as source, and rebuilt on the far side with new Function — which ' +
-          'compiles in the worker\'s global scope, not in the file the test was written in. Everything ' +
-          'the test needs must therefore arrive through its two parameters: the learner\'s exported ' +
-          'entry point, and an api object carrying assert, ops, log, a per-test seeded rng and Random. ' +
-          'The failure is loud but reads oddly the first time: a helper defined right beside the test ' +
-          'is simply not defined once the test crosses the boundary.',
+        detail: [
+          'A worker is a separate realm, and the only thing that crosses to it is data. A function ' +
+            'is not data. It carries a closure, and a closure cannot be posted.',
+          'So each test is turned into source text, sent across, and rebuilt on the far side with ' +
+            'new Function. That compiles it in the worker\'s global scope, not in the file it was ' +
+            'written in.',
+          'Everything the test needs has to arrive through its two parameters: the learner\'s ' +
+            'exported entry point, and an api object carrying assert, ops, log, a per-test seeded ' +
+            'rng and Random. The failure is loud, but it reads oddly the first time. A helper ' +
+            'defined right beside the test is simply not defined once the test crosses the ' +
+            'boundary.'
+        ],
         example: 'A test that calls a helper defined beside it throws "helper is not defined" once it ' +
           'crosses into the worker.'
       },
@@ -156,19 +182,21 @@
         plain: 'Grading asserts operation counts rather than elapsed time, because a count is a ' +
           'property of the algorithm and a time is a property of the machine that ran it.',
         formal: 'assert on ops.snapshot(), not on durationMs',
-        detail: 'Timing-based grading has to pick a threshold, and any threshold is wrong on some ' +
-          'machine: too tight and a correct answer fails on a busy laptop, too loose and a quadratic ' +
-          'solution passes on a fast one. An operation count has no such dial. ⌈log₂ n⌉ + 1 — the ' +
-          'number of halvings it takes to reach a single item, rounded up, plus one — ' +
-          'comparisons is a claim about the algorithm that holds on every machine, at every ' +
-          'processor speed, under every JIT — which means a failed assertion says something true ' +
-          'about your code rather than something true about the afternoon. Times are still measured ' +
-          'and shown, because constants matter; they are just never what decides a pass.',
+        detail: [
+          'Timing-based grading has to pick a threshold, and any threshold is wrong on some ' +
+            'machine. Too tight and a correct answer fails on a busy laptop. Too loose and a ' +
+            'quadratic solution passes on a fast one.',
+          'An operation count has no such dial. "At most ⌈log₂ n⌉ + 1 comparisons" — the number ' +
+            'of halvings it takes to reach a single item, rounded up, plus one — is a claim about ' +
+            'the algorithm. It holds on every machine, at every processor speed, under every JIT.',
+          'So a failed assertion says something true about your code, rather than something true ' +
+            'about the afternoon. Times are still measured and shown, because constants matter. ' +
+            'They are just never what decides a pass.'
+        ],
         example: 'The binary-search lab asserts at most ⌈log₂ n⌉ + 1 comparisons; the same code on a slower ' +
           'laptop still passes.'
       }
     ],
-
     'js-systems': [
       {
         term: 'ArrayBuffer and views',
