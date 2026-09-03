@@ -344,26 +344,34 @@
         },
         plain: 'Put everything below the pivot before it and everything above after it, then repeat.',
         formal: 'T(n) = T(k) + T(n-k-1) + n, which is n log n when k is near n/2 and n^2 when it is not',
-        readAs: 'Quicksort\'s cost is the two sides plus the partition. Split near the middle and the ' +
-          'recursion is log deep; split off one element at a time and it is n deep — the same ' +
-          'algorithm, and the difference is entirely the pivot.',
-        detail: 'The recurrence is the whole analysis, and it says the split is everything. A pivot that lands ' +
-          'near the middle halves the problem twice per level and the recursion is log n deep; a pivot that ' +
-          'lands at one end removes one element per level and the recursion is n deep. Quicksort is not fast ' +
-          'because partitioning is clever - it is fast because partitioning is a single sequential pass with ' +
-          'almost no bookkeeping, and the whole difficulty is making sure the split is balanced.',
+        readAs: 'Quicksort\'s cost is the two sides plus the partition. Split near the middle and ' +
+          'the recursion is log deep. Split off one element at a time and it is n deep. Same ' +
+          'algorithm — the difference is entirely the pivot.',
+        detail: [
+          'The recurrence is the whole analysis, and it says the split is everything.',
+          'A pivot that lands near the middle halves the problem twice per level, so the recursion ' +
+            'is log n deep. A pivot that lands at one end removes one element per level, so the ' +
+            'recursion is n deep.',
+          'Quicksort is not fast because partitioning is clever. It is fast because partitioning ' +
+            'is a single sequential pass with almost no bookkeeping — and the whole difficulty is ' +
+            'making sure the split is balanced.'
+        ],
         example: 'On 2 000 identical elements Lomuto splits 1 999/0 every time: 2 004 997 comparisons and a recursion 2 000 deep.'
       },
       {
         term: 'Lomuto against Hoare',
         plain: 'One forward scan, or two pointers walking inwards - and they behave completely differently on duplicates.',
         formal: 'Lomuto: everything < pivot moves left. Hoare: swap the pairs that are on the wrong side.',
-        detail: 'Lomuto is the one people write first because it is a single loop with one index. It does ' +
-          'about three times Hoare\'s swaps, and - the part that matters - it puts every element that is not ' +
-          'strictly less than the pivot on the right, so an array of equal values splits n-1 to 0. Hoare\'s ' +
-          'two pointers *stop* on elements equal to the pivot, which splits equal input down the middle. On ' +
-          '2 000 identical elements that is 2 004 997 comparisons against 31 723, from the partition scheme ' +
-          'alone.',
+        detail: [
+          'Lomuto is the one people write first, because it is a single loop with one index. It ' +
+            'does about three times Hoare\'s swaps.',
+          'The part that matters is different, though. Lomuto puts every element that is not ' +
+            'strictly less than the pivot on the right, so an array of equal values splits n-1 to ' +
+            '0.',
+          'Hoare\'s two pointers *stop* on elements equal to the pivot, which splits equal input ' +
+            'down the middle. On 2 000 identical elements that is 2 004 997 comparisons against ' +
+            '31 723, from the partition scheme alone.'
+        ],
         example: 'All-equal input, 2 000 elements: Lomuto recurses 2 000 deep, Hoare 12 deep.'
       },
       {
@@ -382,77 +390,101 @@
         },
         plain: 'Split into less, equal and greater, and never recurse into the equal part.',
         formal: 'Dijkstra\'s Dutch national flag: one pass, three regions, one invariant',
-        detail: 'When duplicates are common - a status column, a category, a rounded score - the equal block ' +
-          'is a large fraction of the array, and a two-way partition keeps re-partitioning it. A three-way ' +
-          'partition places every element equal to the pivot in one contiguous block and recurses only into ' +
-          'the two sides, so an array of one distinct value is sorted by a single linear pass. That is the ' +
-          'difference between 676 647 comparisons and 3 389 on the same 2 000-element input, and it costs one ' +
-          'extra branch in the partition loop.',
+        detail: [
+          'When duplicates are common — a status column, a category, a rounded score — the equal ' +
+            'block is a large fraction of the array, and a two-way partition keeps re-partitioning ' +
+            'it.',
+          'A three-way partition places every element equal to the pivot in one contiguous block ' +
+            'and recurses only into the two sides. An array of one distinct value is then sorted ' +
+            'by a single linear pass.',
+          'That is the difference between 676 647 comparisons and 3 389 on the same 2 000-element ' +
+            'input, and it costs one extra branch in the partition loop.'
+        ],
         example: 'Few-unique input, 2 000 elements: three-way does 1 partition and 2 012 comparisons.'
       },
       {
         term: 'Pivot rules, and what each one is defeated by',
         plain: 'First, middle, median-of-three, ninther, random - each fails on a different input.',
         formal: 'a sample of s elements gives a pivot in the middle 1/(s+1) fraction with high probability',
-        readAs: 'Sampling more candidates narrows where the pivot can land: three samples put it in the ' +
-          'middle quarter or so, nine put it much nearer the centre. Each extra sample costs a ' +
-          'comparison and buys a better split.',
-        detail: 'Taking the first element is quadratic on sorted input, which is the most common real input ' +
-          'there is. Median-of-three fixes that and is still defeated by an organ-pipe arrangement or a ' +
-          'constructed one. The ninther - the median of three medians of three - samples nine points and is ' +
-          'what large arrays need, because three points out of a million is not a median of anything. A ' +
-          'random pivot is defeated only by guessing the seed, and pays for that with irreproducible runs.',
+        readAs: 'Sampling more candidates narrows where the pivot can land. Three samples put it ' +
+          'in the middle quarter or so; nine put it much nearer the centre. Each extra sample ' +
+          'costs a comparison and buys a better split.',
+        detail: [
+          'Taking the first element is quadratic on sorted input, which is the most common real ' +
+            'input there is.',
+          'Median-of-three fixes that, and is still defeated by an organ-pipe arrangement or a ' +
+            'constructed one.',
+          'The ninther — the median of three medians of three — samples nine points. That is what ' +
+            'large arrays need, because three points out of a million is not a median of anything.',
+          'A random pivot is defeated only by guessing the seed, and it pays for that with ' +
+            'irreproducible runs.'
+        ],
         example: 'Organ-pipe input, 2 000 elements: Lomuto with median-of-three does 323 989 comparisons; the ninther does 25 224.'
       },
       {
         term: 'The adversary: every deterministic rule has a killer input',
         plain: 'Answer the sort\'s comparisons adversarially and hand back the permutation that defeats it.',
         formal: 'McIlroy\'s anti-quicksort: values are decided lazily, always against the pivot in hand',
-        detail: 'The construction is elegant and worth understanding, because it proves the failure is not ' +
-          'bad luck. Run the sort against a comparator that has not yet decided the values; whenever it ' +
-          'compares two undecided elements, commit whichever one is *not* the current pivot to the next ' +
-          'smallest value. Every pivot the algorithm picks turns out to be extreme, and the result is a ' +
-          'permutation of 0..n-1 that drives that exact pivot rule quadratic. It defeats the configuration it ' +
-          'was built against and nothing else, which is precisely the point.',
+        detail: [
+          'The construction is elegant and worth understanding, because it proves the failure is ' +
+            'not bad luck.',
+          'Run the sort against a comparator that has not yet decided the values. Whenever it ' +
+            'compares two undecided elements, commit whichever one is *not* the current pivot to ' +
+            'the next smallest value.',
+          'Every pivot the algorithm picks then turns out to be extreme, and the result is a ' +
+            'permutation of 0..n-1 that drives that exact pivot rule quadratic. It defeats the ' +
+            'configuration it was built against and nothing else, which is precisely the point.'
+        ],
         example: 'Built against median-of-three: 2 048 elements cost 1 051 648 comparisons, above n²/4 = 1 048 576.'
       },
       {
         term: 'The quiet quadratic',
         plain: 'A bad pivot does not corrupt anything - it just takes n²/4 comparisons.',
         formal: 'correctness is independent of the pivot; only the cost is not',
-        detail: 'This is the failure mode worth internalising, because it does not look like a bug. The sort ' +
-          'returns correctly ordered data every time. What changes is that it takes a hundred times longer on ' +
-          'one particular input, which arrives as a latency alert on one tenant\'s data rather than as a ' +
-          'wrong answer anywhere. Nothing in a test suite of correctness assertions can see it, and nothing in ' +
-          'the output distinguishes a well-partitioned run from a catastrophic one.',
+        detail: [
+          'This is the failure mode worth internalising, because it does not look like a bug. The ' +
+            'sort returns correctly ordered data every time.',
+          'What changes is that it takes a hundred times longer on one particular input. That ' +
+            'arrives as a latency alert on one tenant\'s data, rather than as a wrong answer ' +
+            'anywhere.',
+          'Nothing in a test suite of correctness assertions can see it, and nothing in the output ' +
+            'distinguishes a well-partitioned run from a catastrophic one.'
+        ],
         example: 'Every configuration in the demo reports 0 elements out of place, including the ones taking n²/4 comparisons.'
       },
       {
         term: 'Introsort: a depth counter and an escape hatch',
         plain: 'Run quicksort, and if the recursion passes 2·log₂ n, finish that subarray with heapsort.',
         formal: 'O(n log n) worst case, with quicksort\'s average case untouched',
-        detail: 'Musser\'s observation is that the worst case does not need a better pivot rule, it needs a ' +
-          'detector. Count the recursion depth; a well-behaved quicksort never exceeds about 2·log₂ n, so ' +
-          'passing that is evidence the pivots are going badly. Switch that subarray to heapsort - slower on ' +
-          'average, O(n log n) always, in place - and the tail disappears while the common case is unchanged. ' +
-          'This is why every std::sort is some version of introsort, and why the bound is achieved without ' +
-          'giving up determinism.',
+        detail: [
+          'Musser\'s observation is that the worst case does not need a better pivot rule. It ' +
+            'needs a detector.',
+          'Count the recursion depth. A well-behaved quicksort never exceeds about 2·log₂ n, so ' +
+            'passing that is evidence the pivots are going badly.',
+          'Switch that subarray to heapsort — slower on average, O(n log n) always, in place — and ' +
+            'the tail disappears while the common case is unchanged.',
+          'This is why every std::sort is some version of introsort, and why the bound is achieved ' +
+            'without giving up determinism.'
+        ],
         example: 'On an input built against the ninther: depth 344 without a limit, 22 with one, and 1 heapsort escape.'
       },
       {
         term: 'Recurse into the smaller side, loop on the larger',
         plain: 'Tail-recursion elimination bounds the stack at O(log n) even when the recursion is not.',
         formal: 'recursing into the smaller half guarantees the stack depth is at most log2 n',
-        readAs: 'Always recurse into the smaller side and loop on the larger, and the stack can never exceed ' +
-          'log₂ n frames — because each recursion at least halves the remaining size. It costs nothing ' +
-          'and removes the stack overflow entirely.',
-        detail: 'A naive quicksort on an unlucky input recurses n deep and overflows the stack - which is a ' +
-          'crash rather than a slowdown, and a different failure from the quadratic one. The fix costs ' +
-          'nothing: after partitioning, recurse into the smaller side and loop on the larger by reassigning ' +
-          'the bounds. The smaller side is at most half the range, so the recursion depth is bounded by log₂ n ' +
-          'regardless of how unbalanced the splits are. The work is unchanged; only the stack is.',
+        readAs: 'Always recurse into the smaller side and loop on the larger, and the stack can ' +
+          'never exceed log₂ n frames, because each recursion at least halves the remaining size. ' +
+          'It costs nothing and removes the stack overflow entirely.',
+        detail: [
+          'A naive quicksort on an unlucky input recurses n deep and overflows the stack. That is ' +
+            'a crash rather than a slowdown, and a different failure from the quadratic one.',
+          'The fix costs nothing. After partitioning, recurse into the smaller side and loop on ' +
+            'the larger by reassigning the bounds.',
+          'The smaller side is at most half the range, so the recursion depth is bounded by log₂ n ' +
+            'however unbalanced the splits are. The work is unchanged; only the stack is.'
+        ],
         example: 'Lomuto on 2 000 identical elements reaches recursion depth 2 000 while its call stack stays logarithmic.'
       }
-    ]
+    ],
   });
 }(typeof window !== 'undefined' ? window : null));

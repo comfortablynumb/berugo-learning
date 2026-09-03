@@ -50,36 +50,42 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'Quicksort has no single cost. It has a partition scheme, a pivot rule and an input, and the three of ' +
-          'them together decide whether it is the fastest sort in the room or a quadratic one that still ' +
-          'returns the right answer. On 2 000 elements of three distinct values, Lomuto partitioning with a ' +
-          'median-of-three pivot does 676 647 comparisons and three-way partitioning does 3 389 - a factor of ' +
-          '200 from the partition scheme alone, with the same pivot rule and the same data.',
-        'The all-equal case is the one to understand first, because it is the one real data hits. Lomuto puts ' +
-          'every element that is not strictly less than the pivot on one side, so an array of identical values ' +
-          'splits n−1 to 0 and recurses n deep: 2 004 997 comparisons on 2 000 identical elements, and a stack ' +
-          '2 000 frames tall. Hoare\'s two pointers *stop* on elements equal to the pivot, which splits the ' +
-          'array down the middle and costs 31 723. Three-way partitioning places the whole equal block and ' +
+        '**Quicksort has no single cost.** It has a partition scheme, a pivot rule and an ' +
+          'input, and the three of them together decide whether it is the fastest sort in the ' +
+          'room or a quadratic one that still returns the right answer.',
+        'On 2 000 elements of three distinct values, Lomuto partitioning with a median-of-three ' +
+          'pivot does 676 647 comparisons, and three-way partitioning does 3 389. That is a ' +
+          'factor of 200 from the partition scheme alone, with the same pivot rule and the same ' +
+          'data.',
+        'The all-equal case is the one to understand first, because it is the one real data hits. ' +
+          'Lomuto puts every element that is not strictly less than the pivot on one side, so an ' +
+          'array of identical values splits n−1 to 0 and recurses n deep. That is 2 004 997 ' +
+          'comparisons on 2 000 identical elements, and a stack 2 000 frames tall.',
+        'Hoare\'s two pointers *stop* on elements equal to the pivot, which splits the array down ' +
+          'the middle and costs 31 723. Three-way partitioning places the whole equal block and ' +
           'never recurses into it at all: one partition, 2 012 comparisons, done.',
-        'The failure mode is what makes quicksort worth a section rather than a paragraph. It is not a crash ' +
-          'and not a wrong answer - the sort returns correctly ordered data, just slowly. That shows up as a ' +
-          'latency incident on one customer\'s data at 3am, not as a bug report, and the input that causes it ' +
-          'can be constructed: McIlroy\'s anti-quicksort answers comparisons adversarially while the sort runs ' +
-          'and hands back the permutation that defeats exactly the pivot rule you used. On 2 048 elements it ' +
-          'drives median-of-three to 1 051 648 comparisons, which is above n²/4.'
+        'The failure mode is what makes quicksort worth a section rather than a paragraph. It is ' +
+          'not a crash and not a wrong answer. The sort returns correctly ordered data, just ' +
+          'slowly, so it shows up as a latency incident on one customer\'s data at 3am rather ' +
+          'than as a bug report.',
+        'The input that causes it can be constructed. McIlroy\'s anti-quicksort answers ' +
+          'comparisons adversarially while the sort runs, and hands back the permutation that ' +
+          'defeats exactly the pivot rule you used. On 2 048 elements it drives median-of-three ' +
+          'to 1 051 648 comparisons, which is above n²/4.'
       ],
       demo: {
         title: 'Interactive demo — the scheme, the pivot, and the input built to defeat them',
         markup: root.QuicksortTemplate.render()
       },
       diagram: diagram(),
-      insight: 'Quicksort\'s failure mode is a *quiet* quadratic. Every other sort here fails loudly or not at ' +
-        'all; this one keeps returning correct output and simply takes n²/4 comparisons to do it, so it ' +
-        'surfaces as a timeout on one tenant\'s data rather than as a wrong answer anywhere. The engineering ' +
-        'answer is not a cleverer pivot - every deterministic rule has an input that defeats it, and the demo ' +
-        'builds one on request. It is a depth counter and an escape hatch: run quicksort, and if the recursion ' +
-        'passes 2·log₂ n, finish that subarray with heapsort. The average case is untouched and the worst case ' +
-        'is gone, which is why every std::sort on earth is some version of this.'
+      insight: 'Quicksort\'s failure mode is a *quiet* quadratic. Every other sort here fails ' +
+        'loudly or not at all. This one keeps returning correct output and simply takes n²/4 ' +
+        'comparisons to do it, so it surfaces as a timeout on one tenant\'s data rather than as ' +
+        'a wrong answer anywhere. The engineering answer is not a cleverer pivot: every ' +
+        'deterministic rule has an input that defeats it, and the demo builds one on request. It ' +
+        'is a depth counter and an escape hatch. Run quicksort, and if the recursion passes ' +
+        '2·log₂ n, finish that subarray with heapsort. The average case is untouched and the ' +
+        'worst case is gone, which is why every std::sort on earth is some version of this.'
     };
   }
 
