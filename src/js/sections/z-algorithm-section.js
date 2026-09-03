@@ -48,30 +48,38 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**`z[i]` is the length of the longest common prefix of the string and the suffix starting at ' +
+        '`i`.** Computing it by definition is quadratic.',
+      'Computing it in one pass takes an idea that is worth more than the array. Keep the interval ' +
+        '`[l, r]` that reaches furthest right among all the intervals already known to equal a ' +
+        'prefix, and *reuse it*.',
+      '**A position inside that interval has a mirror.** If `i` lies in `[l, r]`, then the ' +
+        'characters from `i` to `r` are the same as the characters from `i − l` onwards. And ' +
+        '`z[i − l]` was computed already.',
+      'When it is strictly shorter than the remaining box, the answer is exact and costs nothing at ' +
+        'all. When it reaches the edge, the answer is at least the remaining box and the extension ' +
+        'has to be measured.',
+      'The case column below counts both.',
+      '**The amortisation is the transferable part.** Every extension past `r` moves `r` right, and ' +
+        '`r` never moves left, so the total extension work over the whole run is at most `n` however ' +
+        'the string is shaped.',
+      'That argument — never re-examine what an earlier structure already proved — is the same one ' +
+        'behind Manacher\'s mirror in 15.7, and behind half a dozen other linear string algorithms.',
+      '**Matching is a concatenation.** Build `pattern + sentinel + text`, take the Z-array, and ' +
+        'every position with `z ≥ m` is an occurrence.',
+      'The sentinel must appear in neither string, or a run inside the text can be credited to the ' +
+        'pattern. A hard-coded `$` is a matcher that is wrong on any input containing a dollar sign. ' +
+        'That is a real bug in real code, and the reason the metric below names the character it ' +
+        'chose.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '`z[i]` is the length of the longest common prefix of the string and the suffix starting at ' +
-          '`i`. Computing it by definition is quadratic; computing it in one pass takes an idea that ' +
-          'is worth more than the array: keep the interval `[l, r]` that reaches furthest right among ' +
-          'all the intervals already known to equal a prefix, and *reuse it*.',
-        '**A position inside that interval has a mirror.** If `i` lies in `[l, r]`, then the ' +
-          'characters from `i` to `r` are the same as the characters from `i − l` onwards, and `z[i − ' +
-          'l]` was computed already. When it is strictly shorter than the remaining box the answer ' +
-          'is exact and costs nothing at all; when it reaches the edge the answer is at least the ' +
-          'remaining box and the extension has to be measured. The case column below counts both.',
-        '**The amortisation is the transferable part.** Every extension past `r` moves `r` right, and ' +
-          '`r` never moves left, so the total extension work over the whole run is at most `n` ' +
-          'however the string is shaped. That argument — never re-examine what an earlier structure ' +
-          'already proved — is the same one behind Manacher\'s mirror in 15.7 and behind half a dozen ' +
-          'other linear string algorithms.',
-        '**Matching is a concatenation.** Build `pattern + sentinel + text`, take the Z-array, and ' +
-          'every position with `z ≥ m` is an occurrence. The sentinel must appear in neither string ' +
-          'or a run inside the text can be credited to the pattern — and a hard-coded `$` is a ' +
-          'matcher that is wrong on any input containing a dollar sign, which is a real bug in real ' +
-          'code and the reason the metric below names the character it chose.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — the three cases, the window, and the periodicity lemma',
         markup: root.ZAlgorithmTemplate.render()
@@ -79,9 +87,9 @@
       diagram: diagram(),
       insight: 'If you have to write one of these from memory, write the Z-algorithm. The border ' +
         'array has an inner loop that walks a chain and an off-by-one at the start; the Z-array has ' +
-        'one window and three cases you can name out loud. They answer the same questions — a border ' +
-        'array is recoverable from a Z-array in linear time and vice versa — so the choice is about ' +
-        'which one you can get right at three in the morning, and it is not close.'
+        'one window and three cases you can name out loud. They answer the same questions, because a ' +
+        'border array is recoverable from a Z-array in linear time and vice versa. So the choice is ' +
+        'about which one you can get right at three in the morning, and it is not close.'
     };
   }
 

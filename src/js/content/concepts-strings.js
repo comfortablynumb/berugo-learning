@@ -319,11 +319,13 @@
         readAs: 'The Z-value at position i is how many characters starting there still match the start of the ' +
           'string. The braces and the colon read "the largest k such that", and the brackets mark a ' +
           'window that stops just short of its end.',
-        detail: 'It carries the same information as the border array — each is recoverable from the ' +
-          'other in linear time — and it is expressed in a way most people find easier to hold. ' +
+        detail: [
+          'It carries the same information as the border array, and each is recoverable from the ' +
+            'other in linear time. It is also expressed in a way most people find easier to hold.',
           'Where a border is "a prefix that is also a suffix", a Z value is "how much of the string ' +
-          'do I see again starting here", which is a question you can answer by pointing at two ' +
-          'places and reading forwards.',
+            'do I see again starting here".',
+          'That is a question you can answer by pointing at two places and reading forwards.'
+        ],
         example: 'For "aabxaabxcaabxaabxay" the array starts 19, 1, 0, 0, 4, 1, 0, 0, 0, 8.'
       },
       {
@@ -343,11 +345,13 @@
         formal: '[l, r] with s[l..r) = s[0..r−l); r is non-decreasing over the whole run',
         readAs: 'The algorithm remembers one window already known to match the string\'s own beginning. Its ' +
           'right edge only ever moves forward, never back, which is what caps the total work at linear.',
-        detail: 'Every position inside the window has a mirror whose answer is already computed, so ' +
-          'the only work the algorithm ever does is extending past `r`. Each successful extension ' +
-          'moves `r` right, `r` never moves left, and `r` is bounded by `n` — so the total ' +
-          'extension work is at most `n` however the string is shaped. That is the entire ' +
-          'complexity proof and it fits in one sentence.',
+        detail: [
+          'Every position inside the window has a mirror whose answer is already computed, so the ' +
+            'only work the algorithm ever does is extending past `r`.',
+          'Each successful extension moves `r` right, `r` never moves left, and `r` is bounded by ' +
+            '`n`. So the total extension work is at most `n` however the string is shaped.',
+          'That is the entire complexity proof, and it fits in one sentence.'
+        ],
         example: 'On a 19-character string, 11 of the 18 positions were answered from the window ' +
           'and only 14 characters were ever compared.'
       },
@@ -355,11 +359,14 @@
         term: 'Three cases, and two of them cost nothing',
         plain: 'Past the window, inside with a short mirror, or inside with a mirror that reaches the edge.',
         formal: 'i >= r: extend from 0. i < r and z[i−l] < r−i: exact copy. i < r otherwise: copy to the edge, then extend',
-        detail: 'The middle case is the one that makes the algorithm fast: the mirror\'s answer is ' +
-          'provably exact and the position costs zero character comparisons. The third case needs an ' +
-          'extension because the mirror ran into the edge of the window and the algorithm has no ' +
-          'information past it. Being able to name the three cases out loud is what makes the Z ' +
-          'construction easier to write correctly than the border array under pressure.',
+        detail: [
+          'The middle case is the one that makes the algorithm fast. The mirror\'s answer is ' +
+            'provably exact, and the position costs zero character comparisons.',
+          'The third case needs an extension, because the mirror ran into the edge of the window and ' +
+            'the algorithm has no information past it.',
+          'Being able to name the three cases out loud is what makes the Z construction easier to ' +
+            'write correctly than the border array under pressure.'
+        ],
         example: 'The demo counts each case per position; the "characters compared" column is zero ' +
           'at most positions.'
       },
@@ -370,10 +377,13 @@
         readAs: 'Glue the pattern, a separator and the text together, then any Z-value equal to the pattern ' +
           'length marks a match. Subtract the pattern length and the separator to get the real ' +
           'position.',
-        detail: 'The reduction is three lines and it is the reason the Z-algorithm is often the ' +
-          'fastest thing to write in a competitive setting. It also costs: the array is as long as ' +
-          'the text, so the memory is O(n) rather than O(m), and the whole text has to be available ' +
-          'before the scan starts — which means it is not a stream matcher the way KMP is.',
+        detail: [
+          'The reduction is three lines, and it is the reason the Z-algorithm is often the fastest ' +
+            'thing to write in a competitive setting.',
+          'It also costs. The array is as long as the text, so the memory is O(n) rather than O(m).',
+          'And the whole text has to be available before the scan starts, which means it is not a ' +
+            'stream matcher the way KMP is.'
+        ],
         example: 'The Z route costs 4 320 comparisons on English against KMP\'s 4 304, for the same ' +
           'occurrences.'
       },
@@ -381,12 +391,15 @@
         term: 'The sentinel must appear in neither string',
         plain: 'Hard-coding a dollar sign makes a matcher that is wrong on any input containing one.',
         formal: 'the separator must not occur in the pattern or the text, or a run inside the text can be credited to the pattern',
-        detail: 'This is a genuine bug in real code, and it is invisible in testing because test ' +
-          'fixtures are chosen from the same small vocabulary the developer had in mind. Searching ' +
-          'for a free character costs one pass over the alphabet and removes an entire class of ' +
-          'input-dependent wrongness. It is the same shape as the M06 lesson about the BWT sentinel ' +
-          'and the M03 lesson about a fixed hash multiplier: a constant chosen for convenience ' +
-          'becomes a correctness assumption about data you have not seen.',
+        detail: [
+          'This is a genuine bug in real code, and it is invisible in testing because test fixtures ' +
+            'are chosen from the same small vocabulary the developer had in mind.',
+          'Searching for a free character costs one pass over the alphabet, and removes an entire ' +
+            'class of input-dependent wrongness.',
+          'It is the same shape as the M06 lesson about the BWT sentinel and the M03 lesson about a ' +
+            'fixed hash multiplier. A constant chosen for convenience becomes a correctness ' +
+            'assumption about data you have not seen.'
+        ],
         example: 'The demo searches from character code 1 upwards for a code appearing in neither ' +
           'string, and reports which one it chose.'
       },
@@ -394,11 +407,14 @@
         term: 'The mirror argument transfers, the array does not',
         plain: 'Never re-examine what an earlier structure already proved.',
         formal: 'the same amortisation appears in Manacher, in two-pointer windows, and in Myers\'s furthest-reaching path',
-        detail: 'Very few systems need a Z-array. A great many need the argument: keep the ' +
-          'rightmost thing you have proved, reuse it for anything it covers, and pay only for what ' +
-          'it does not. Manacher (15.7) is the same argument about palindromes, the sliding-window ' +
-          'family is the same argument about intervals, and Myers\'s diff (15.9) is the same ' +
-          'argument about diagonals. Learning the shape once pays for all four.',
+        detail: [
+          'Very few systems need a Z-array. A great many need the argument: keep the rightmost thing ' +
+            'you have proved, reuse it for anything it covers, and pay only for what it does not.',
+          'Manacher (15.7) is the same argument about palindromes, the sliding-window family is the ' +
+            'same argument about intervals, and Myers\'s diff (15.9) is the same argument about ' +
+            'diagonals.',
+          'Learning the shape once pays for all four.'
+        ],
         example: 'Manacher\'s radius array reuses its mirror at 11 of 31 positions on the same kind ' +
           'of string.'
       },
@@ -409,12 +425,15 @@
         readAs: 'Fine and Wilf: a string long enough to have two periods must also have their greatest common ' +
           'divisor as a period. "Long enough" is exactly p + q − gcd — one character less and a ' +
           'counterexample exists.',
-        detail: 'The consequence worth carrying is that a string cannot have two unrelated ' +
-          '"almost-short" periods: two of them collapse into their greatest common divisor as soon ' +
-          'as the string is long enough. The tightness is a construction rather than a citation — ' +
-          'forcing both periods identifies positions, and union-find over those identifications ' +
-          'counts how many symbols are still free. At the bound the count collapses to gcd; one ' +
-          'character below it does not.',
+        detail: [
+          'The consequence worth carrying is that a string cannot have two unrelated "almost-short" ' +
+            'periods. Two of them collapse into their greatest common divisor as soon as the string ' +
+            'is long enough.',
+          'The tightness is a construction rather than a citation. Forcing both periods identifies ' +
+            'positions, and union-find over those identifications counts how many symbols are still ' +
+            'free.',
+          'At the bound the count collapses to gcd; one character below it does not.'
+        ],
         example: 'For p = 5 and q = 8 the bound is 12: at length 12 exactly one symbol is free, and ' +
           'at length 11 there are two.'
       },
@@ -425,11 +444,14 @@
         readAs: 'Build strings the way Fibonacci numbers are built — each one is the previous two joined — ' +
           'and their periods come out as Fibonacci numbers too. They are the standard worst case ' +
           'because the theorem\'s length requirement is never quite met.',
-        detail: 'They are the standard test for any periodicity or border-array implementation ' +
-          'because they are engineered to be awkward: long borders, no exact period, and a bound ' +
-          'that never quite applies. An implementation that is correct on `aaaa` and `abcabc` and ' +
-          'wrong on a Fibonacci word is the common case, and running one is a two-line test that ' +
-          'catches a large class of off-by-one errors.',
+        detail: [
+          'They are the standard test for any periodicity or border-array implementation, because ' +
+            'they are engineered to be awkward: long borders, no exact period, and a bound that ' +
+            'never quite applies.',
+          'An implementation that is correct on `aaaa` and `abcabc` and wrong on a Fibonacci word is ' +
+            'the common case.',
+          'Running one is a two-line test that catches a large class of off-by-one errors.'
+        ],
         example: 'The order-8 word has length 34 with proper periods 21 and 29; the bound is 49, so ' +
           'the lemma does not apply and gcd = 1 is not a period.'
       }
