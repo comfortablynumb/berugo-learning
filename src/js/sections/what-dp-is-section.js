@@ -49,39 +49,45 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'Dynamic programming needs exactly two things to be true, and neither of them is "the problem ' +
-          'looks like a table". **Optimal substructure** means an optimal answer is built from optimal ' +
-          'answers to subproblems; **overlapping subproblems** means the same subproblem is needed more ' +
-          'than once. The first makes the recurrence correct and the second makes remembering it worth ' +
-          'anything. Divide and conquer has the first and not the second, which is why merge sort is not ' +
-          'memoised - nothing recurs.',
-        'The measurement is on this page. Fibonacci at n = 25 takes 242 785 calls without a memo and ' +
-          'visits 26 distinct states with one, of which 23 are reached from more than one parent. Nothing ' +
-          'about the recurrence changed; the only difference is whether the answers were kept. The naive ' +
-          'run is capped, and when the cap fires the row says so rather than reporting a smaller number ' +
-          'as though the run had finished.',
-        '**States × transitions is the complexity, and it is available before any code is written.** ' +
-          'Fibonacci has n states and two transitions each, so it is O(n). A grid of r × c cells has ' +
-          'r·c states and two transitions each, so it is O(rc). Getting that product first is what stops ' +
-          'you writing an O(n³) solution to an O(n log n) problem and then optimising the constant. ' +
-          'The predicted column and the measured column on this page are the same claim, checked.',
-        'Memoisation and tabulation are the same algorithm with the evaluation order in different hands. ' +
-          'A memo works it out at run time by recursing until it hits a base case; a table requires you ' +
-          'to have worked it out in advance. Both are on the page, and so is the failure mode of the ' +
-          'second: run the states in an order that reads a cell before it is written and you get a ' +
-          'plausible number computed from zeros, with nothing raised. The last table counts exactly that.'
+        '**Dynamic programming needs exactly two things to be true, and neither of them is "the ' +
+          'problem looks like a table".** *Optimal substructure* means an optimal answer is built ' +
+          'from optimal answers to subproblems. *Overlapping subproblems* means the same ' +
+          'subproblem is needed more than once.',
+        'The first makes the recurrence correct, and the second makes remembering it worth ' +
+          'anything. Divide and conquer has the first and not the second, which is why merge sort ' +
+          'is not memoised: nothing recurs.',
+        'The measurement is on this page. Fibonacci at n = 25 takes 242 785 calls without a memo, ' +
+          'and visits 26 distinct states with one, of which 23 are reached from more than one ' +
+          'parent. Nothing about the recurrence changed. The only difference is whether the ' +
+          'answers were kept.',
+        'The naive run is capped, and when the cap fires the row says so, rather than reporting a ' +
+          'smaller number as though the run had finished.',
+        '**States × transitions is the complexity, and it is available before any code is ' +
+          'written.** Fibonacci has n states and two transitions each, so it is O(n). A grid of ' +
+          'r × c cells has r·c states and two transitions each, so it is O(rc).',
+        'Getting that product first is what stops you writing an O(n³) solution to an O(n log n) ' +
+          'problem and then optimising the constant. The predicted column and the measured column ' +
+          'on this page are the same claim, checked.',
+        'Memoisation and tabulation are the same algorithm with the evaluation order in different ' +
+          'hands. A memo works it out at run time by recursing until it hits a base case. A table ' +
+          'requires you to have worked it out in advance.',
+        'Both are on the page, and so is the failure mode of the second. Run the states in an ' +
+          'order that reads a cell before it is written and you get a plausible number computed ' +
+          'from zeros, with nothing raised. The last table counts exactly that.'
       ],
       demo: {
         title: 'Interactive demo — three evaluations, one recurrence',
         markup: root.WhatDpIsTemplate.render()
       },
       diagram: diagram(),
-      insight: 'Before writing a DP, say the state out loud and count it. "The state is (index, capacity ' +
-        'remaining), so there are n·C of them, and each looks at two predecessors" is a complexity ' +
-        'estimate, a memory estimate and a correctness argument in one sentence - and it takes ten ' +
-        'seconds. The habit that separates people who write DP quickly from people who write it slowly ' +
-        'is not fluency with the recurrences; it is refusing to write any code until that sentence is ' +
-        'true. If you cannot say it, you do not yet know what you are memoising.'
+      insight: 'Before writing a DP, say the state out loud and count it. "The state is ' +
+        '(index, capacity remaining), so there are n·C of them, and each looks at two ' +
+        'predecessors." That sentence is three things at once: a complexity estimate, a memory ' +
+        'estimate and a correctness argument. It takes ten seconds. The habit that separates ' +
+        'people who write DP ' +
+        'quickly from people who write it slowly is not fluency with the recurrences. It is ' +
+        'refusing to write any code until that sentence is true. If you cannot say it, you do ' +
+        'not yet know what you are memoising.'
     };
   }
 

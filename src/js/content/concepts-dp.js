@@ -20,15 +20,20 @@
         },
         plain: 'An optimal answer is built out of optimal answers to smaller versions of the same problem.',
         formal: 'opt(s) = best over transitions t of combine(cost(t), opt(child(s, t)))',
-        readAs: 'The best answer at a state is the best you can do over every move available from it: the ' +
-          'cost of the move, combined with the best answer at wherever it takes you. Every DP in this ' +
-          'milestone is that one sentence with different words for state, move and combine.',
-        detail: 'This is the property that makes the recurrence *correct*, and it is the one people assume ' +
-          'rather than check. It fails more often than it looks: burst balloons has no optimal substructure ' +
-          'under "which balloon do I pop first", because popping changes who is adjacent to whom and the two ' +
-          'sides stop being independent. The test is whether an optimal solution to the whole necessarily ' +
-          'contains an optimal solution to the part - if you can improve the part without disturbing the ' +
-          'rest, it holds; if improving the part changes what the rest even means, it does not.',
+        readAs: 'The best answer at a state is the best you can do over every move available ' +
+          'from it. Take the cost of the move, and combine it with the best answer at wherever ' +
+          'the move leads. Every DP in this milestone is that one sentence with different words ' +
+          'for state, move and combine.',
+        detail: [
+          'This is the property that makes the recurrence *correct*, and it is the one people ' +
+            'assume rather than check.',
+          'It fails more often than it looks. Burst balloons has no optimal substructure under ' +
+            '"which balloon do I pop first", because popping changes who is adjacent to whom and ' +
+            'the two sides stop being independent.',
+          'The test is whether an optimal solution to the whole necessarily contains an optimal ' +
+            'solution to the part. If you can improve the part without disturbing the rest, it ' +
+            'holds. If improving the part changes what the rest even means, it does not.'
+        ],
         example: 'The shortest path from A to C through B contains the shortest path from A to B, so shortest ' +
           'paths have it. The *longest simple* path does not: the longest A-to-B walk may use up vertices the ' +
           'B-to-C leg needed.'
@@ -37,12 +42,16 @@
         term: 'Overlapping subproblems',
         plain: 'The same subproblem is needed more than once, so remembering it is worth something.',
         formal: 'the subproblem graph is a DAG in which some node has in-degree greater than one',
-        detail: 'This is the property that makes memoisation *worth it*, and it is entirely separate from ' +
-          'optimal substructure. Merge sort has optimal substructure and no overlap: every subproblem is a ' +
-          'distinct slice, nothing recurs, and memoising it buys nothing but memory. Fibonacci has enormous ' +
-          'overlap - at n = 25 the memo answers 23 of its 49 calls from the table and 23 of the 26 states ' +
-          'have more than one parent. The measurement that distinguishes the two is the count of states with ' +
-          'in-degree above one, which is why this platform reports it as a number rather than a description.',
+        detail: [
+          'This is the property that makes memoisation *worth it*, and it is entirely separate ' +
+            'from optimal substructure.',
+          'Merge sort has optimal substructure and no overlap. Every subproblem is a distinct ' +
+            'slice, nothing recurs, and memoising it buys nothing but memory.',
+          'Fibonacci has enormous overlap. At n = 25 the memo answers 23 of its 49 calls from the ' +
+            'table, and 23 of the 26 states have more than one parent.',
+          'The measurement that distinguishes the two is the count of states with in-degree above ' +
+            'one, which is why this platform reports it as a number rather than a description.'
+        ],
         example: 'At n = 25, Fibonacci has 26 distinct states of which 23 are reached from more than one ' +
           'parent. Merge sort at any size has zero.'
       },
@@ -60,11 +69,15 @@
         },
         plain: 'A DP is a walk over a directed acyclic graph whose nodes are subproblems.',
         formal: 'nodes are states, edges are transitions, and the evaluation order is any reverse topological order',
-        detail: 'Drawing the DAG turns three separate questions into one picture. Is there overlap? Count the ' +
-          'nodes with several parents. What is the complexity? Count nodes and edges. What order must the ' +
-          'table be filled in? Any reverse topological order, and no other. It also explains why a cyclic ' +
-          'dependency is not a hard DP but a different kind of problem entirely - if a state can reach ' +
-          'itself, there is no topological order and no recursion, and the answer is a linear system.',
+        detail: [
+          'Drawing the DAG turns three separate questions into one picture.',
+          'Is there overlap? Count the nodes with several parents. What is the complexity? Count ' +
+            'nodes and edges. What order must the table be filled in? Any reverse topological ' +
+            'order, and no other.',
+          'It also explains why a cyclic dependency is not a hard DP but a different kind of ' +
+            'problem entirely. If a state can reach itself there is no topological order and no ' +
+            'recursion, and the answer is a linear system.'
+        ],
         example: 'The Fibonacci DAG is a ladder: F(n) points at F(n−1) and F(n−2), and F(n−1) points at ' +
           'F(n−2) as well — that shared edge is the whole reason the memo works.'
       },
@@ -82,15 +95,18 @@
         },
         plain: 'Multiply how many subproblems there are by how many predecessors each looks at.',
         formal: 'time = Θ(|S| · b) where b is the branching factor of the transition relation',
-        readAs: 'The running time is the number of distinct states times the moves available from each. The ' +
-          'bars mean "how many". That product is the whole cost model — which is why shrinking the ' +
-          'state is the only optimisation that matters.',
-        detail: 'This is the single most useful habit in the subject and it costs ten seconds. Say the state ' +
-          'out loud, count how many there are, count how many predecessors each one reads, and multiply. ' +
-          'That product is the running time, the memory (before any reduction) and a correctness argument ' +
-          'all at once, and having it *before* writing code is what stops you implementing an O(n³) ' +
-          'solution to an O(n log n) problem and then tuning the constant. If you cannot say the sentence, ' +
-          'you do not yet know what you are memoising.',
+        readAs: 'The running time is the number of distinct states times the moves available from ' +
+          'each. The bars mean "how many". That product is the whole cost model, which is why ' +
+          'shrinking the state is the only optimisation that matters.',
+        detail: [
+          'This is the single most useful habit in the subject, and it costs ten seconds.',
+          'Say the state out loud, count how many there are, count how many predecessors each one ' +
+            'reads, and multiply.',
+          'That product is the running time, the memory before any reduction, and a correctness ' +
+            'argument, all at once. Having it *before* writing code is what stops you implementing ' +
+            'an O(n³) solution to an O(n log n) problem and then tuning the constant.',
+          'If you cannot say the sentence, you do not yet know what you are memoising.'
+        ],
         example: '0/1 knapsack: the state is (items considered, capacity left), so n·C states, two ' +
           'transitions each — O(nC), which you can say before writing a line.'
       },
@@ -98,13 +114,17 @@
         term: 'Memoisation and tabulation are one algorithm',
         plain: 'A memo works the evaluation order out at run time; a table requires you to know it in advance.',
         formal: 'top-down with a cache, versus bottom-up in a topological order chosen by hand',
-        detail: 'The distinction is not about speed and barely about memory - it is about who is responsible ' +
-          'for the order. A memo recurses until it hits a base case, so the order is discovered and is ' +
-          'always correct. A tabulation demands that you have already worked out an order in which every ' +
-          'cell\'s dependencies are written before it is read, and getting that wrong does not raise: the ' +
-          'array was allocated full of zeros, so the run finishes and returns a number computed from cells ' +
-          'that did not exist yet. Tabulation is usually faster by a constant and it is where the ' +
-          'order bugs live.',
+        detail: [
+          'The distinction is not about speed and barely about memory. It is about who is ' +
+            'responsible for the order.',
+          'A memo recurses until it hits a base case, so the order is discovered and is always ' +
+            'correct.',
+          'A tabulation demands that you have already worked out an order in which every cell\'s ' +
+            'dependencies are written before it is read. Getting that wrong does not raise: the ' +
+            'array was allocated full of zeros, so the run finishes and returns a number computed ' +
+            'from cells that did not exist yet.',
+          'Tabulation is usually faster by a constant, and it is where the order bugs live.'
+        ],
         example: 'Filling the Fibonacci table from n down to 0 visits exactly the same 26 states and returns ' +
           '0, having read 48 cells before they were written.'
       },
@@ -112,30 +132,38 @@
         term: 'The state is the design; the recurrence follows',
         plain: 'Almost all the difficulty is in choosing what to remember, not in writing the transition.',
         formal: 'a state must be a sufficient statistic: everything the future depends on and nothing else',
-        readAs: 'A state has to carry every piece of the past that still affects what happens next, and ' +
-          'nothing more. Too little and the recurrence is wrong; too much and the table is larger than ' +
-          'it needs to be.',
-        detail: 'A state has to carry exactly the information the remaining decisions depend on. Too little ' +
-          'and the recurrence is wrong - it will conflate positions that behave differently. Too much and ' +
-          'the state space explodes for no benefit, which is the usual reason a correct DP is unusably slow. ' +
-          'The discipline is to write the state as an English sentence first: "the cheapest way to have ' +
-          'processed the first i items with j capacity left". If the sentence needs an "and also", that is ' +
-          'another dimension and it belongs in the state; if a dimension never appears on the right-hand ' +
-          'side of the recurrence, it does not belong there at all.',
-        example: 'The assignment problem\'s state looks like (worker, set of jobs used) and is really just ' +
-          '(set of jobs used) — the worker index is `popcount(mask)`, which takes the state space from ' +
-          'n·2ⁿ to 2ⁿ.'
+        readAs: 'A state has to carry every piece of the past that still affects what happens ' +
+          'next, and nothing more. Too little and the recurrence is wrong. Too much and the table ' +
+          'is larger than it needs to be.',
+        detail: [
+          'A state has to carry exactly the information the remaining decisions depend on.',
+          'Too little and the recurrence is wrong: it will conflate positions that behave ' +
+            'differently. Too much and the state space explodes for no benefit, which is the usual ' +
+            'reason a correct DP is unusably slow.',
+          'The discipline is to write the state as an English sentence first. "The cheapest way to ' +
+            'have processed the first i items with j capacity left."',
+          'If the sentence needs an "and also", that is another dimension and it belongs in the ' +
+            'state. If a dimension never appears on the right-hand side of the recurrence, it does ' +
+            'not belong there at all.'
+        ],
+        example: 'The assignment problem\'s state looks like (worker, set of jobs used) and ' +
+          'is really just (set of jobs used). The worker index is `popcount(mask)`, which takes ' +
+          'the state space from n·2ⁿ to 2ⁿ.'
       },
       {
         term: 'DP is not divide and conquer',
         plain: 'Both split a problem; only one of them has parts that recur.',
         formal: 'divide and conquer partitions into disjoint subproblems; DP revisits shared ones',
-        detail: 'Merge sort, quicksort and Karatsuba split into pieces that are never seen again, so there is ' +
-          'nothing to remember and no table. The confusion matters because it points at the wrong tool: ' +
-          'memoising a divide-and-conquer algorithm adds memory and a hash lookup and saves nothing, while ' +
-          'failing to memoise a genuine DP is the difference between 26 states and 242 785 calls. The ' +
-          'diagnostic is the DAG again — if every node has exactly one parent it is a tree, and a tree is ' +
-          'divide and conquer.',
+        detail: [
+          'Merge sort, quicksort and Karatsuba split into pieces that are never seen again, so ' +
+            'there is nothing to remember and no table.',
+          'The confusion matters because it points at the wrong tool. Memoising a ' +
+            'divide-and-conquer algorithm adds memory and a hash lookup and saves nothing, while ' +
+            'failing to memoise a genuine DP is the difference between 26 states and 242 785 ' +
+            'calls.',
+          'The diagnostic is the DAG again. If every node has exactly one parent it is a tree, and ' +
+            'a tree is divide and conquer.'
+        ],
         example: 'Merge sort on 2 000 elements creates 3 999 subproblems and revisits none of them; ' +
           'Fibonacci at n = 25 creates 26 and revisits them 23 times.'
       },
@@ -143,12 +171,15 @@
         term: 'A capped run must say it was capped',
         plain: 'An unfinished search reported as a number is worse than no number.',
         formal: 'report budgetExhausted alongside the count, and never treat a truncated count as a measurement',
-        detail: 'The exponential runs on this platform are bounded, because an unmemoised Fibonacci at ' +
-          'n = 45 is about a billion calls and a dead browser tab. The rule that makes the bound honest is ' +
-          'that the row says so: the answer reads "stopped" rather than a smaller number, and the call count ' +
-          'carries a plus sign. This is the same rule the sketches, the Sudoku matrix and the adversarial ' +
-          'searches elsewhere on this platform follow, and it exists because a truncated measurement ' +
-          'presented as a complete one is the most persuasive kind of wrong.',
+        detail: [
+          'The exponential runs on this platform are bounded, because an unmemoised Fibonacci at ' +
+            'n = 45 is about a billion calls and a dead browser tab.',
+          'The rule that makes the bound honest is that the row says so. The answer reads ' +
+            '"stopped" rather than a smaller number, and the call count carries a plus sign.',
+          'This is the same rule the sketches, the Sudoku matrix and the adversarial searches ' +
+            'elsewhere on this platform follow. It exists because a truncated measurement ' +
+            'presented as a complete one is the most persuasive kind of wrong.'
+        ],
         example: 'The naive Fibonacci row at n = 40 with a 100 000-call budget reports "stopped" and ' +
           '100 029+ calls, not a plausible-looking value.'
       }
