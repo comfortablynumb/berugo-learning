@@ -55,36 +55,40 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'An expected-value recurrence over an acyclic state graph is an ordinary DP: `E[s] = cost(s) + ' +
-          'Σ p(s→t)·E[t]`, evaluated in topological order. Every board game, queue and retry loop starts ' +
-          'out looking like this, and the recursion is the obvious implementation.',
-        '**Then the state graph gains a cycle and the recursion stops existing.** A square whose roll can ' +
-          'leave you where you are — the overshoot rule at the end of a board — makes E[s] depend on E[s], ' +
-          'and a memoised solver either recurses forever or, worse, returns whatever half-filled value was ' +
-          'in the memo. A snake back to an earlier square does the same thing over a longer loop. Neither ' +
-          'is an exotic rule; both are in the game as written.',
-        '**The fix is to stop treating it as a recursion.** `E[s] − Σ p(s→t)·E[t] = cost(s)` is one row of ' +
-          'a linear system, and n states give n equations. Gaussian elimination answers in twenty lines ' +
-          'what no amount of memoisation can. The solver on this page detects the cycle itself and reports ' +
-          'which route it took, and on acyclic boards the two routes are run side by side and agree to ' +
-          'nine decimal places.',
-        '**Partial pivoting is not optional here.** A chain whose first transient state has no self-loop ' +
-          'puts a zero on the diagonal; an unpivoted elimination divides by it, produces Infinity and then ' +
-          'NaN, and the NaN propagates through the back-substitution into a table of them — far from the ' +
-          'row that actually failed. Monte Carlo is the third opinion: it is too noisy to check the ' +
-          'arithmetic, but it is the only thing that checks the *model*.'
+        '**An expected-value recurrence over an acyclic state graph is an ordinary DP:** ' +
+          '`E[s] = cost(s) + Σ p(s→t)·E[t]`, evaluated in topological order. Every board game, ' +
+          'queue and retry loop starts out looking like this, and the recursion is the obvious ' +
+          'implementation.',
+        '**Then the state graph gains a cycle and the recursion stops existing.** A square whose ' +
+          'roll can leave you where you are — the overshoot rule at the end of a board — makes ' +
+          'E[s] depend on E[s]. A memoised solver then either recurses forever, or returns ' +
+          'whatever half-filled value was in the memo.',
+        'A snake back to an earlier square does the same thing over a longer loop. Neither is an ' +
+          'exotic rule. Both are in the game as written.',
+        '**The fix is to stop treating it as a recursion.** `E[s] − Σ p(s→t)·E[t] = cost(s)` is ' +
+          'one row of a linear system, and n states give n equations. Gaussian elimination ' +
+          'answers in twenty lines what no amount of memoisation can.',
+        'The solver on this page detects the cycle itself and reports which route it took. On ' +
+          'acyclic boards the two routes are run side by side, and agree to nine decimal places.',
+        '**Partial pivoting is not optional here.** A chain whose first transient state has no ' +
+          'self-loop puts a zero on the diagonal. An unpivoted elimination divides by it and ' +
+          'produces Infinity, then NaN. The NaN propagates through the back-substitution into a ' +
+          'table of them, far from the row that actually failed.',
+        'Monte Carlo is the third opinion. It is too noisy to check the arithmetic, and it is the ' +
+          'only thing that checks the *model*.'
       ],
       demo: {
         title: 'Interactive demo — a board with cycles, solved exactly and simulated',
         markup: root.ExpectationDpTemplate.render()
       },
       diagram: diagram(),
-      insight: 'The moment an expectation can return to a state it has already been in, stop writing the ' +
-        'recursion and start writing the matrix. Recognising that early is the difference between twenty ' +
-        'lines of elimination and an afternoon spent wondering why a memo returns different answers on ' +
-        'different runs. The tell is easy to check and easy to skip: run a topological sort over the ' +
-        'transition graph before writing the solver. If it fails, you do not have a DP — you have a system ' +
-        'of equations that happens to be written recursively.'
+      insight: 'The moment an expectation can return to a state it has already been in, stop ' +
+        'writing the recursion and start writing the matrix. Recognising that early is the ' +
+        'difference between twenty lines of elimination and an afternoon spent wondering why a ' +
+        'memo returns different answers on different runs. The tell is easy to check and easy to ' +
+        'skip. Run a topological sort over the transition graph before writing the solver. If it ' +
+        'fails, you do not have a DP. You have a system of equations that happens to be written ' +
+        'recursively.'
     };
   }
 

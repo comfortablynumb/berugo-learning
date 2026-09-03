@@ -322,11 +322,14 @@
         term: 'An expectation over a DAG is an ordinary DP',
         plain: 'E[s] = cost(s) + Σ p(s→t)·E[t], evaluated in topological order.',
         formal: 'for an absorbing chain with no transient cycles, E is computed by one reverse topological sweep',
-        detail: 'When every transition moves strictly forward, an expected-value recurrence is the same ' +
-          'shape as every other DP in this milestone: states, transitions, an evaluation order, and a ' +
-          'combine that happens to be a weighted sum. Board games, retry loops and queues all start out ' +
-          'looking like this, and the obvious memoised recursion is correct. Everything interesting starts ' +
-          'when the graph stops being acyclic.',
+        detail: [
+          'When every transition moves strictly forward, an expected-value recurrence has ' +
+            'the same shape as every other DP in this milestone. States, transitions, an ' +
+            'evaluation order, and a combine that happens to be a weighted sum.',
+          'Board games, retry loops and queues all start out looking like this, and the obvious ' +
+            'memoised recursion is correct.',
+          'Everything interesting starts when the graph stops being acyclic.'
+        ],
         example: 'A strictly forward chain over 21 states gives E[0] = 13.555555344 by recursion and the ' +
           'identical value by linear solve.'
       },
@@ -345,15 +348,19 @@
         },
         plain: 'If a state can reach itself, there is no topological order and no recursion.',
         formal: 'E[s] − Σ p(s→t)·E[t] = cost(s) is one row of a linear system in the transient states',
-        readAs: 'The expected cost from a state is its own cost plus the weighted average of the expected ' +
-          'costs of where it can go. Written out for every state, that is a system of linear equations ' +
-          '— which is why cyclic chains need elimination rather than a sweep.',
-        detail: 'This is the section\'s whole point. A memoised recursion on a cyclic chain either recurses ' +
-          'forever or returns whatever half-filled value was in the memo, which is worse. Rearranged, the ' +
-          'same equation moves E[s] to the left and becomes one row of an n × n system - and n states give ' +
-          'n equations, which Gaussian elimination solves in twenty lines. Recognising the shape early is ' +
-          'the difference between twenty lines and an afternoon of debugging a memo that returns different ' +
-          'answers on different runs.',
+        readAs: 'The expected cost from a state is its own cost plus the weighted average of the ' +
+          'expected costs of where it can go. Written out for every state, that is a system of ' +
+          'linear equations — which is why cyclic chains need elimination rather than a sweep.',
+        detail: [
+          'This is the section\'s whole point.',
+          'A memoised recursion on a cyclic chain either recurses forever, or returns whatever ' +
+            'half-filled value was in the memo — which is worse.',
+          'Rearranged, the same equation moves E[s] to the left and becomes one row of an ' +
+            'n × n system. So n states give n equations, and Gaussian elimination solves them in ' +
+            'twenty lines.',
+          'Recognising the shape early is the difference between twenty lines and an afternoon of ' +
+            'debugging a memo that returns different answers on different runs.'
+        ],
         example: 'A 20-square board with a six-sided die is already cyclic — the overshoot rule is a ' +
           'self-loop — and solves to 10.476469 expected rolls.'
       },
@@ -361,15 +368,18 @@
         term: 'Detect the cycle; do not be told about it',
         plain: 'Run a topological sort first and let the result choose the method.',
         formal: 'topologicalOrder(chain) = null ⟺ a transient cycle exists ⟹ use elimination',
-        readAs: 'Failing to find an ordering happens exactly when there is a cycle, and a cycle means the ' +
-          'sweep cannot work so you must solve the equations instead. The double arrow is "exactly ' +
-          'when"; the single one is "which means".',
-        detail: 'Whether a chain is cyclic is a property of the rules, and rules change - a board gains a ' +
-          '"miss a turn" square, a protocol gains a retry, a game gains a snake. Deciding the method by ' +
-          'inspection means the decision goes stale silently. Deciding it by running a topological sort ' +
-          'costs one linear pass and reports which route was taken, so the page and the tests can both see ' +
-          'it. The two routes are then run side by side on acyclic inputs, which is what licenses trusting ' +
-          'the harder one where no other check exists.',
+        readAs: 'Failing to find an ordering happens exactly when there is a cycle, and a cycle ' +
+          'means the sweep cannot work — so you must solve the equations instead. The double ' +
+          'arrow is "exactly when"; the single one is "which means".',
+        detail: [
+          'Whether a chain is cyclic is a property of the rules, and rules change. A board gains a ' +
+            '"miss a turn" square, a protocol gains a retry, a game gains a snake.',
+          'Deciding the method by inspection means the decision goes stale silently.',
+          'Deciding it by running a topological sort costs one linear pass, and reports which ' +
+            'route was taken, so the page and the tests can both see it.',
+          'The two routes are then run side by side on acyclic inputs, which is what licenses ' +
+            'trusting the harder one where no other check exists.'
+        ],
         example: 'The same solver reports "recursion" on a strictly forward chain and "elimination" on ' +
           'every board with an overshoot rule, without being told which is which.'
       },
@@ -377,14 +387,17 @@
         term: 'The overshoot rule is a self-loop',
         plain: 'A roll that would pass the end leaves you where you are, and that alone makes the chain cyclic.',
         formal: 'p(s→s) = |{r : s + r > n}| / faces > 0 for s > n − faces',
-        readAs: 'Near the end of the board most rolls overshoot and leave you where you are, so the state has ' +
-          'a genuine chance of transitioning to itself. That self-loop is what makes the chain cyclic ' +
-          'and defeats a topological sweep.',
-        detail: 'It is worth naming because it is so easy to miss: nobody thinks of "you must land exactly" ' +
-          'as introducing a cycle, and it does. Every square within one die-roll of the end names itself on ' +
-          'the right-hand side of its own equation, which is precisely the case a recursion cannot handle. ' +
-          'Snakes and ladders add longer cycles on top, but the board is already cyclic before any of them ' +
-          'are placed, which is the more surprising half of the fact.',
+        readAs: 'Near the end of the board most rolls overshoot and leave you where you are, so ' +
+          'the state has a genuine chance of transitioning to itself. That self-loop is what ' +
+          'makes the chain cyclic and defeats a topological sweep.',
+        detail: [
+          'It is worth naming because it is so easy to miss. Nobody thinks of "you must land ' +
+            'exactly" as introducing a cycle, and it does.',
+          'Every square within one die-roll of the end names itself on the right-hand side of its ' +
+            'own equation, which is precisely the case a recursion cannot handle.',
+          'Snakes and ladders add longer cycles on top. But the board is already cyclic before any ' +
+            'of them are placed, which is the more surprising half of the fact.'
+        ],
         example: 'On a 20-square board with a d6, squares 15 to 19 all have a self-loop, and the chain is ' +
           'cyclic with no snakes on it at all.'
       },
@@ -392,14 +405,18 @@
         term: 'Partial pivoting is not optional',
         plain: 'A zero on the diagonal produces Infinity, then NaN, far from where it went wrong.',
         formal: 'swap in the row with the largest absolute value in the current column before eliminating',
-        readAs: 'Partial pivoting. Dividing by a near-zero number amplifies floating-point error, so pick the ' +
-          'largest available pivot first. It costs a swap and it is the difference between an answer ' +
-          'and noise.',
-        detail: 'A transient state with no self-loop puts a zero on its own diagonal, and an unpivoted ' +
-          'elimination divides by it. The result is not an exception at the point of failure - it is an ' +
-          'Infinity that becomes a NaN and propagates through the back-substitution into a table of them, ' +
-          'so the symptom appears everywhere and the cause appears nowhere. Pivoting also improves ' +
-          'numerical stability, but its first job here is turning a silent corruption into a correct answer.',
+        readAs: 'Partial pivoting. Dividing by a near-zero number amplifies floating-point error, ' +
+          'so pick the largest available pivot first. It costs a swap, and it is the difference ' +
+          'between an answer and noise.',
+        detail: [
+          'A transient state with no self-loop puts a zero on its own diagonal, and an unpivoted ' +
+            'elimination divides by it.',
+          'The result is not an exception at the point of failure. It is an Infinity that becomes ' +
+            'a NaN and propagates through the back-substitution into a table of them, so the ' +
+            'symptom appears everywhere and the cause appears nowhere.',
+          'Pivoting also improves numerical stability. Its first job here is turning a silent ' +
+            'corruption into a correct answer.'
+        ],
         example: 'A 20-square board yields 20 pivot operations over its transient states, and every one of ' +
           'them is a swap that could otherwise have been a division by zero.'
       },
@@ -407,14 +424,18 @@
         term: 'Monte Carlo checks the model, not the arithmetic',
         plain: 'A simulation is far too noisy to verify algebra, and it is the only thing that verifies the rules.',
         formal: 'the standard error falls as 1/√trials, so four times the work halves the interval',
-        readAs: 'Monte Carlo accuracy improves with the square root of the sample count. Halving the error ' +
-          'costs four times the trials — which is why simulation is a way to get two digits, not six.',
-        detail: 'A transition table that does not describe the game produces an exact answer to the wrong ' +
-          'question, and no amount of checking the linear solver will notice. Simulating the rules as ' +
-          'written is the independent implementation that does. What it cannot do is confirm a fourth ' +
-          'decimal place: at forty thousand trials the interval is still several hundredths wide, so ' +
-          '"agrees" has to mean "inside the interval" rather than "looks similar", and the interval has to ' +
-          'be reported for that to mean anything.',
+        readAs: 'Monte Carlo accuracy improves with the square root of the sample count. Halving ' +
+          'the error costs four times the trials, which is why simulation is a way to get two ' +
+          'digits rather than six.',
+        detail: [
+          'A transition table that does not describe the game produces an exact answer to the ' +
+            'wrong question, and no amount of checking the linear solver will notice.',
+          'Simulating the rules as written is the independent implementation that does notice.',
+          'What it cannot do is confirm a fourth decimal place. At forty thousand trials ' +
+            'the interval is still several hundredths wide, so "agrees" has to mean "inside the ' +
+            'interval" rather than "looks similar". The interval has to be reported for that to ' +
+            'mean anything.'
+        ],
         example: 'The snakes board solves to 13.850548 exactly and simulates to 13.862425 ± 0.078203, so the ' +
           'exact value is inside the 95% interval.'
       },
@@ -422,13 +443,18 @@
         term: 'Rows must sum to one',
         plain: 'A chain whose probabilities do not sum to one is not a chain, and its answer is meaningless.',
         formal: 'Σ_t p(s→t) = 1 for every transient s, within floating-point tolerance',
-        readAs: 'Add up the probabilities of every move out of a state and they must come to exactly one — ' +
-          'something has to happen. Checking it catches the transition bugs nothing else notices.',
-        detail: 'This is the cheapest possible sanity check on a transition table and it catches the ' +
-          'commonest modelling error - a case the generator forgot, or a branch that returns early. The ' +
-          'linear solver will happily solve a system built from a defective table and return numbers that ' +
-          'look entirely reasonable, because nothing about the elimination cares whether the rows are ' +
-          'stochastic. One pass over the table, reported as a field rather than assumed.',
+        readAs: 'Add up the probabilities of every move out of a state and they must come to ' +
+          'exactly one. Something has to happen. Checking it catches the transition bugs nothing ' +
+          'else notices.',
+        detail: [
+          'This is the cheapest possible sanity check on a transition table, and it catches the ' +
+            'commonest modelling error: a case the generator forgot, or a branch that returns ' +
+            'early.',
+          'The linear solver will happily solve a system built from a defective table and return ' +
+            'numbers that look entirely reasonable. Nothing about the elimination cares whether ' +
+            'the rows are stochastic.',
+          'One pass over the table, reported as a field rather than assumed.'
+        ],
         example: 'Every board on this page reports its rows summing to one; a missing overshoot case would ' +
           'leave a row at 5/6 and still produce a plausible expectation.'
       },
@@ -436,17 +462,21 @@
         term: 'Optimal stopping: the threshold is the state',
         plain: 'The secretary problem is an expectation over one parameter, and the sweep finds n/e.',
         formal: 'P(best | observe k) = (k/n)·Σ_{i=k+1..n} 1/(i−1), maximised near k = n/e',
-        readAs: 'The secretary problem: watch the first k candidates without hiring, then take the next one ' +
-          'better than all of them. The vertical bar is "given that". The best k is n divided by e ' +
-          '(2.718…), about 37%, and it succeeds about 37% of the time.',
-        detail: 'The classic result - observe about 37% of the candidates, then take the first one better ' +
-          'than all of them, and you win about 37% of the time - is usually quoted and rarely computed. ' +
-          'Computing it is a one-parameter sweep over an exact formula, and doing so turns a remembered ' +
-          'constant into a checkable one. It also makes the shape visible: the curve is quite flat near the ' +
-          'optimum, so the practical advice is robust to getting the threshold somewhat wrong.',
+        readAs: 'The secretary problem: watch the first k candidates without hiring, then take ' +
+          'the next one better than all of them. The vertical bar is "given that". The best k is ' +
+          'n divided by e (2.718…), about 37%, and it succeeds about 37% of the time.',
+        detail: [
+          'The classic result is usually quoted and rarely computed. Observe about 37% of the ' +
+            'candidates, then take the first one better than all of them, and you win about 37% ' +
+            'of the time.',
+          'Computing it is a one-parameter sweep over an exact formula, and doing so turns a ' +
+            'remembered constant into a checkable one.',
+          'It also makes the shape visible. The curve is quite flat near the optimum, so the ' +
+            'practical advice is robust to getting the threshold somewhat wrong.'
+        ],
         example: 'At n = 100 the best threshold is k = 37 winning 0.371043 of the time, against n/e = 36.788 ' +
           'and 1/e = 0.367879.'
       }
-    ]
+    ],
   });
 }(typeof window !== 'undefined' ? window : null));
