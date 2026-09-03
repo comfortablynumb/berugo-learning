@@ -24,14 +24,14 @@
     root.jQuery('#' + SECTION_ID + '-content').html(app.shell.render({
       sectionId: SECTION_ID,
       orientation: [
-        'A comparison sort learns only from yes/no answers, so after k comparisons it can ' +
-          'distinguish at most 2^k orders. There are n! orders to distinguish, so any correct ' +
+        '**A comparison sort learns only from yes/no answers, so after k comparisons it can ' +
+          'distinguish at most 2^k orders.** There are n! orders to distinguish. So any correct ' +
           'comparison sort needs at least ⌈log₂ n!⌉ comparisons — about n log₂ n − 1.44n.',
-        'The demo makes that concrete. Ask a comparison and an adversary answers with whichever ' +
-          'reply keeps more permutations alive; the count on the right is what you still cannot ' +
-          'distinguish. It can never fall by more than half per question, which is the proof.',
+        'The demo makes that concrete. Ask a comparison, and an adversary answers with whichever ' +
+          'reply keeps more permutations alive. The count on the right is what you still cannot ' +
+          'distinguish, and it can never fall by more than half per question. That is the proof.',
         'The same technique bounds other problems. Finding the maximum needs n − 1 comparisons, ' +
-          'because every element except the answer must lose at least once — run it below and the ' +
+          'because every element except the answer must lose at least once. Run it below and the ' +
           'adversary will tell you whether your claim was earned.'
       ],
       demo: { title: 'Interactive demo — play the adversary', markup: root.LowerBoundsTemplate.render() },
@@ -52,7 +52,7 @@
           '    Rr -->|no| R4["2 1 0"]'
         ].join('\n')
       },
-      insight: 'A lower bound tells you when to stop tuning and start changing the model: radix ' +
+      insight: 'A lower bound tells you when to stop tuning and start changing the model. Radix ' +
         'sort beats ⌈log₂ n!⌉ by not being a comparison sort at all. Knowing the floor is what ' +
         'distinguishes "this is as good as it gets" from "we have not found the trick yet".'
     }));

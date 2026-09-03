@@ -693,13 +693,16 @@
         term: 'Comparison model',
         plain: 'The algorithm learns only from yes/no comparisons. That restriction is what makes a bound provable.',
         formal: 'each comparison yields one bit',
-        detail: 'You cannot prove that no algorithm does better without saying what an algorithm is ' +
-          'allowed to do — otherwise the claim quantifies over an unbounded space of tricks. The ' +
-          'comparison model fixes that by allowing exactly one primitive: ask whether a ≤ b and ' +
-          'receive one bit. Every ordering decision must be justified by those bits, which is what ' +
-          'makes the counting argument airtight. The restriction is also the escape hatch, and it is ' +
-          'not a loophole: an algorithm that reads the digits of a key is doing something the model ' +
-          'genuinely does not describe, so it is not a counterexample to the bound.',
+        detail: [
+          'You cannot prove that no algorithm does better without saying what an algorithm is ' +
+            'allowed to do. Otherwise the claim quantifies over an unbounded space of tricks.',
+          'The comparison model fixes that by allowing exactly one primitive: ask whether a ≤ b and ' +
+            'receive one bit. Every ordering decision has to be justified by those bits, which is ' +
+            'what makes the counting argument airtight.',
+          'The restriction is also the escape hatch, and it is not a loophole. An algorithm that ' +
+            'reads the digits of a key is doing something the model genuinely does not describe, ' +
+            'so it is not a counterexample to the bound.'
+        ],
         example: 'Radix sort escapes the bound by reading digits instead.'
       },
       {
@@ -719,33 +722,38 @@
         plain: 'Every execution is a root-to-leaf path; each leaf is one possible answer.',
         formal: 'height ≥ ⌈log₂(leaves)⌉',
         readAs: 'The longest root-to-leaf path is at least log base 2 of the number of leaves, ' +
-          'rounded up — because every extra comparison can at best double how many leaves you are ' +
-          'able to reach.',
-        detail: 'Model the algorithm as a binary tree: internal nodes are comparisons, the two edges ' +
-          'are the two answers, and a leaf is the point at which the algorithm commits to an output. ' +
-          'A run is a path, so the number of comparisons in the worst case is the height. Since the ' +
-          'algorithm must be able to produce every distinct answer, the tree needs at least that many ' +
-          'leaves, and a binary tree of height h has at most 2^h — so h ≥ log₂(leaves). Sorting has ' +
-          'n! possible answers, and that single inequality gives the whole Ω(n log n) result without ' +
-          'reference to any particular algorithm.',
+          'rounded up. Every extra comparison can at best double how many leaves you are able to ' +
+          'reach.',
+        detail: [
+          'Model the algorithm as a binary tree. Internal nodes are comparisons, the two edges are ' +
+            'the two answers, and a leaf is the point at which the algorithm commits to an output. ' +
+            'A run is a path, so the number of comparisons in the worst case is the height.',
+          'The algorithm has to be able to produce every distinct answer, so the tree needs at ' +
+            'least that many leaves. A binary tree of height h has at most 2^h leaves, so ' +
+            'h ≥ log₂(leaves).',
+          'Sorting has n! possible answers, and that single inequality gives the whole Ω(n log n) ' +
+            'result without reference to any particular algorithm.'
+        ],
         example: 'Sorting n items has n! leaves, so height ≥ ⌈log₂ n!⌉.'
       },
       {
         term: 'Information-theoretic bound',
         plain: 'k yes/no answers distinguish at most 2^k outcomes. Counting outcomes gives the floor.',
         formal: 'k ≥ log₂ n! ≈ n log₂ n − 1.44n',
-        readAs: 'You need at least log base 2 of n! comparisons, where n! — "n factorial" — is the ' +
-          'number of different orders n items can be put in. A standard approximation turns that ' +
-          'into roughly n log₂ n minus 1.44n.',
-        detail: 'Each comparison returns one bit, so k of them can distinguish at most 2^k cases; if ' +
-          'the answer must select among N possibilities then 2^k ≥ N and k ≥ log₂ N. For sorting, ' +
-          'N = n! — the number of orders n items can be in — and Stirling\'s approximation, the ' +
-          'standard closed form for a factorial, gives log₂ n! ≈ n log₂ n − n log₂ e = ' +
-          'n log₂ n − 1.4427n, which is ' +
-          'where the familiar n log n comes from and also where the −1.44n correction that people ' +
-          'forget comes from. The argument is entirely about counting outcomes, so it applies to any ' +
-          'problem you can count the answers of — searching among n items needs log₂ n, and finding ' +
-          'a duplicate needs its own count.',
+        readAs: 'You need at least log base 2 of n! comparisons. n! — "n factorial" — is the number ' +
+          'of different orders n items can be put in. A standard approximation turns that into ' +
+          'roughly n log₂ n minus 1.44n.',
+        detail: [
+          'Each comparison returns one bit, so k of them can distinguish at most 2^k cases. If the ' +
+            'answer has to select among N possibilities then 2^k ≥ N, and therefore k ≥ log₂ N.',
+          'For sorting, N = n! — the number of orders n items can be in. Stirling\'s ' +
+            'approximation, the standard closed form for a factorial, gives ' +
+            'log₂ n! ≈ n log₂ n − n log₂ e = n log₂ n − 1.4427n. That is where the familiar ' +
+            'n log n comes from, and also the −1.44n correction that people forget.',
+          'The argument is entirely about counting outcomes, so it applies to any problem whose ' +
+            'answers you can count. Searching among n items needs log₂ n, and finding a duplicate ' +
+            'needs its own count.'
+        ],
         example: 'n = 4: 24 orders, so at least 5 comparisons.'
       },
       {
@@ -763,71 +771,87 @@
         },
         plain: 'An opponent answers each query to keep as many answers alive as possible, without ever committing to an input.',
         formal: 'answers stay consistent with ≥ half the candidates',
-        detail: 'Instead of fixing an input, imagine an adversary that decides each answer on the ' +
-          'spot, choosing whichever reply leaves the largest set of inputs still consistent with ' +
-          'everything said so far. It never lies, because at the end at least one real input matches ' +
-          'the entire transcript. The algorithm cannot stop until only one candidate remains, so the ' +
-          'number of questions needed is however long the adversary can keep the set from collapsing. ' +
-          'This gives bounds that pure counting misses, because it can encode structure — for finding ' +
-          'a maximum, the adversary keeps every element that has never lost a comparison alive, ' +
-          'forcing n − 1 comparisons.',
+        detail: [
+          'Instead of fixing an input, imagine an adversary that decides each answer on the spot. ' +
+            'It chooses whichever reply leaves the largest set of inputs still consistent with ' +
+            'everything said so far.',
+          'It never lies, because at the end at least one real input matches the entire ' +
+            'transcript. The algorithm cannot stop until only one candidate remains, so the number ' +
+            'of questions needed is however long the adversary can keep the set from collapsing.',
+          'This gives bounds that pure counting misses, because it can encode structure. For ' +
+            'finding a maximum, the adversary keeps alive every element that has never lost a ' +
+            'comparison, which forces n − 1 comparisons.'
+        ],
         example: 'Finding the maximum needs n − 1 comparisons.'
       },
       {
         term: 'Beating a lower bound',
         plain: 'You never beat it inside the model. You change the model.',
         formal: 'different model, different floor',
-        detail: 'A proved lower bound is not a difficulty to be overcome by cleverness — inside its ' +
-          'model it is final. Every apparent counterexample is an algorithm operating outside the ' +
-          'model: counting sort and radix sort use keys as indices rather than comparing them, and ' +
-          'run in Θ(n + k) with no contradiction whatsoever. So the productive reading of a lower ' +
-          'bound is as a question about assumptions: which restriction is doing the work, and can my ' +
-          'data pay to escape it? Bounded integer keys, a known distribution, precomputation, extra ' +
-          'space and approximate answers are all model changes, and each has its own floor.',
+        detail: [
+          'A proved lower bound is not a difficulty to be overcome by cleverness. Inside its model ' +
+            'it is final.',
+          'Every apparent counterexample is an algorithm operating outside the model. Counting ' +
+            'sort and radix sort use keys as indices rather than comparing them, and run in ' +
+            'Θ(n + k) with no contradiction whatsoever.',
+          'So the productive reading of a lower bound is as a question about assumptions: which ' +
+            'restriction is doing the work, and can my data pay to escape it? Bounded integer ' +
+            'keys, a known distribution, precomputation, extra space and approximate answers are ' +
+            'all model changes, and each has its own floor.'
+        ],
         example: 'Counting sort is Θ(n + k) because it never compares.'
       },
       {
         term: 'Model of computation',
         plain: 'A lower bound is a statement about a model. Naming the model is half the theorem.',
         formal: 'comparison model, algebraic decision tree, cell-probe, …',
-        detail: 'Different models measure different resources and produce different floors for the ' +
-          'same problem, so a bound quoted without its model is unusable. The comparison model counts ' +
-          'comparisons; the algebraic decision tree model counts arithmetic tests and is what gives ' +
-          'lower bounds for geometric problems; the cell-probe model counts memory accesses and is ' +
-          'where data-structure lower bounds live, since it charges nothing for computation. ' +
+        detail: [
+          'Different models measure different resources and produce different floors for the same ' +
+            'problem, so a bound quoted without its model is unusable.',
+          'The comparison model counts comparisons. The algebraic decision tree model counts ' +
+            'arithmetic tests, and is what gives lower bounds for geometric problems. The ' +
+            'cell-probe model counts memory accesses and charges nothing for computation, which is ' +
+            'where data-structure lower bounds live.',
           'Ω(n log n) for sorting is a comparison-model result, full stop. Quoting it as "sorting ' +
-          'requires n log n" is the error that makes radix sort look impossible.',
+            'requires n log n" is the error that makes radix sort look impossible.'
+        ],
         example: 'Ω(n log n) is a comparison-model bound; radix sort is not a counterexample, it is a different model.'
       },
       {
         term: 'Adversary invariant',
         plain: 'The quantity the adversary keeps large. The bound is however many questions it takes to drive it to one.',
         formal: 'answer so as to maximise the surviving candidates',
-        detail: 'Every adversary argument rests on a measure of remaining uncertainty and a bound on ' +
-          'how fast one question can reduce it. Pick the measure — surviving permutations, elements ' +
-          'that have never lost, connected components — show it starts high, show a single comparison ' +
-          'can only shrink it by a fixed factor or amount, and the number of questions follows by ' +
-          'division. For sorting, the adversary always answers so that at least half the live ' +
-          'permutations survive, so the count falls from n! to 1 no faster than by halving, giving ' +
-          '⌈log₂ n!⌉. Choosing the right invariant is the entire creative step.',
+        detail: [
+          'Every adversary argument rests on a measure of remaining uncertainty, and on a bound on ' +
+            'how fast one question can reduce it.',
+          'Pick the measure — surviving permutations, elements that have never lost, connected ' +
+            'components. Show it starts high. Show a single comparison can only shrink it by a ' +
+            'fixed factor or amount. The number of questions then follows by division.',
+          'For sorting, the adversary always answers so that at least half the live permutations ' +
+            'survive. The count therefore falls from n! to 1 no faster than by halving, which ' +
+            'gives ⌈log₂ n!⌉. Choosing the right invariant is the entire creative step.'
+        ],
         example: 'Sorting: the live permutations halve at best per comparison, so ⌈log₂ n!⌉ questions are needed.'
       },
       {
         term: 'Facts, not comparisons',
         plain: 'Count what the answer requires the algorithm to know, then how much one operation can supply.',
         formal: '2n − 2 facts, ≤ 2 per comparison of two untouched elements',
-        readAs: 'Certifying both a minimum and a maximum takes 2n − 2 separate pieces of knowledge, ' +
-          'and one comparison supplies two of them only when both elements are still fresh — any ' +
-          'other comparison supplies just one.',
-        detail: 'The sharpest bounds come from accounting for information rather than operations. To ' +
-          'certify both a minimum and a maximum, every one of the other n − 2 elements must be known ' +
-          'to have lost at least once and won at least once: that is 2n − 2 facts. A comparison ' +
-          'between two elements neither of which has been touched yields two new facts, but any ' +
-          'other comparison yields at most one — so the algorithm must open with ⌊n/2⌋ pairings and ' +
-          'then spend single-fact comparisons, giving ⌈3n/2⌉ − 2. At n = 100 that is 148 against the ' +
-          '198 two independent scans would cost, and the bound proves no algorithm does better.',
+        readAs: 'Certifying both a minimum and a maximum takes 2n − 2 separate pieces of knowledge. ' +
+          'One comparison supplies two of them only when both elements are still fresh; any other ' +
+          'comparison supplies just one.',
+        detail: [
+          'The sharpest bounds come from accounting for information rather than operations.',
+          'Certify both a minimum and a maximum, and every one of the other n − 2 elements must ' +
+            'be known to have lost once and won once. That is 2n − 2 facts.',
+          'A comparison between two elements neither of which has been touched yields two new ' +
+            'facts. Any other comparison yields at most one. So the algorithm has to open with ' +
+            '⌊n/2⌋ pairings and then spend single-fact comparisons, giving ⌈3n/2⌉ − 2.',
+          'At n = 100 that is 148 comparisons, against the 198 two independent scans would cost — ' +
+            'and the bound proves no algorithm does better.'
+        ],
         example: 'Min and max together need ⌈3n/2⌉ − 2 comparisons — 148 for 100 elements, against 198 for two scans.'
       }
-    ]
+    ],
   });
 }(typeof window !== 'undefined' ? window : null));
