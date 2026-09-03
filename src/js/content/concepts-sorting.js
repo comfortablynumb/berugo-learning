@@ -189,28 +189,35 @@
         },
         plain: 'Two sorted runs into one, reading both forwards and writing forwards.',
         formal: 'merge two runs of a and b in a + b - 1 comparisons at worst',
-        readAs: 'Merging two sorted runs costs at most one comparison per element, less one — because the ' +
+        readAs: 'Merging two sorted runs costs at most one comparison per element, less one. The ' +
           'last element goes across without needing to be compared to anything.',
-        detail: 'Everything else in merge sort is a schedule for performing merges. The merge itself takes ' +
-          'the smaller of the two heads, and it is the access pattern rather than the comparison count that ' +
-          'matters: both inputs are read strictly forwards and the output is written strictly forwards, so it ' +
-          'works on data arriving as a stream and needs no random access at all. That single property is why ' +
-          'external sorting, log-structured merge trees and every shuffle stage in a data pipeline are merges ' +
-          'and not quicksorts.',
+        detail: [
+          'Everything else in merge sort is a schedule for performing merges. The merge itself ' +
+            'takes the smaller of the two heads.',
+          'What matters is the access pattern, not the comparison count. Both inputs are read ' +
+            'strictly forwards and the output is written strictly forwards, so the merge works on ' +
+            'data arriving as a stream and needs no random access at all.',
+          'That single property is why external sorting, log-structured merge trees and every ' +
+            'shuffle stage in a data pipeline are merges and not quicksorts.'
+        ],
         example: 'Merging two runs of 1 000 costs at most 1 999 comparisons and exactly 2 000 moves.'
       },
       {
         term: 'Stability is one character in the merge',
         plain: 'Take from the left run when the heads are equal.',
         formal: 'take right only when right < left, never when right <= left',
-        readAs: 'Break ties towards the left run and the merge is stable; break them towards the right and it ' +
-          'is not. One character in one comparison decides the property.',
-        detail: 'The left run holds the element that was originally earlier, so on a tie the left one must go ' +
-          'first. Changing that comparison from strict to non-strict leaves every other figure in the section ' +
-          'identical - the same comparisons, the same moves, the same correct ordering - and silently removes ' +
-          'stability. No test of the sorted output detects it, because the output is still sorted. The demo ' +
-          'ships both versions for exactly that reason: the only way to see the difference is to tag elements ' +
-          'with their original positions and look at the ties.',
+        readAs: 'Break ties towards the left run and the merge is stable. Break them towards the ' +
+          'right and it is not. One character in one comparison decides the property.',
+        detail: [
+          'The left run holds the element that was originally earlier, so on a tie the left one ' +
+            'must go first.',
+          'Changing that comparison from strict to non-strict silently removes stability. Every ' +
+            'other figure in the section stays identical: the same comparisons, the same moves, ' +
+            'the same correct ordering. No test of the sorted output detects it, because the ' +
+            'output is still sorted.',
+          'The demo ships both versions for exactly that reason. The only way to see the ' +
+            'difference is to tag elements with their original positions and look at the ties.'
+        ],
         example: 'The unstable merge sorts 500 tagged elements correctly and reorders the equal ones.'
       },
       {
@@ -226,75 +233,98 @@
         },
         plain: 'Recursion or a loop over widths 1, 2, 4, 8 - and the loop copies half as much.',
         formal: 'both do ceil(log2 n) passes; bottom-up alternates the buffer instead of copying back',
-        readAs: 'Top-down and bottom-up merge sort do the same number of passes — log base 2 of n, rounded ' +
-          'up. What differs is that bottom-up swaps which buffer it writes into rather than copying the ' +
-          'result back each time.',
-        detail: 'The textbook recursion merges into a buffer and copies the result back at every level, which ' +
-          'is a second pass over the data per level and buys nothing. The bottom-up loop swaps the roles of ' +
-          'the array and the buffer each pass, so nothing is copied back until the end, and it needs no ' +
-          'recursion or stack at all. Measured on 2 000 random elements the two do 19 407 and 19 420 ' +
-          'comparisons - the same merges - and 43 904 against 24 000 moves.',
+        readAs: 'Top-down and bottom-up merge sort do the same number of passes: log base 2 of n, ' +
+          'rounded up. What differs is that bottom-up swaps which buffer it writes into, rather ' +
+          'than copying the result back each time.',
+        detail: [
+          'The textbook recursion merges into a buffer and copies the result back at every level. ' +
+            'That is a second pass over the data per level, and it buys nothing.',
+          'The bottom-up loop swaps the roles of the array and the buffer each pass, so nothing is ' +
+            'copied back until the end. It needs no recursion and no stack at all.',
+          'Measured on 2 000 random elements the two do 19 407 and 19 420 comparisons — the same ' +
+            'merges — and 43 904 against 24 000 moves.'
+        ],
         example: 'Bottom-up: 24 000 moves. Top-down: 43 904. Identical comparison counts.'
       },
       {
         term: 'Natural runs: the order already in the data',
         plain: 'Start from the ascending stretches that exist rather than from runs of one.',
         formal: 'a run is a maximal ascending stretch; a strictly descending one is reversed in place',
-        detail: 'Random data has runs of about two elements and natural merge sort buys nothing there. Real ' +
-          'data is not random: an appended log, a re-sorted list, a partly-updated index all arrive with long ' +
-          'runs already present, and starting from them removes whole merge levels. On already-sorted input ' +
-          'the detector finds one run and the sort performs zero merges - one linear scan of n-1 comparisons. ' +
-          'This is the direct ancestor of Timsort, and the reason Timsort exists at all.',
+        detail: [
+          'Random data has runs of about two elements, and natural merge sort buys nothing there.',
+          'Real data is not random. An appended log, a re-sorted list, a partly-updated index all ' +
+            'arrive with long runs already present, and starting from them removes whole merge ' +
+            'levels.',
+          'On already-sorted input the detector finds one run and the sort performs zero merges: ' +
+            'one linear scan of n-1 comparisons.',
+          'This is the direct ancestor of Timsort, and the reason Timsort exists at all.'
+        ],
         example: '2 000 sorted elements: 1 run, 0 merge passes, 2 000 comparisons.'
       },
       {
         term: 'Strict descent is what makes the reversal safe',
         plain: 'Detect descending runs with `<`, never `<=`, or reversing them breaks stability.',
         formal: 'a strictly descending run contains no equal elements, so reversing it cannot reorder ties',
-        detail: 'Reversed input costs one pass rather than n/2 merges because a descending run is detected and ' +
-          'flipped in place. That flip is only safe if the run has no equal elements in it - otherwise ' +
-          'reversing puts a pair of equals in the wrong order and the sort is no longer stable. Using `<=` to ' +
-          'find a longer descending run is a tempting optimisation and it is exactly the bug: it makes the ' +
-          'runs longer and the sort unstable, and every test of the output still passes.',
+        detail: [
+          'Reversed input costs one pass rather than n/2 merges, because a descending run is ' +
+            'detected and flipped in place.',
+          'That flip is only safe if the run has no equal elements in it. Otherwise reversing puts ' +
+            'a pair of equals in the wrong order, and the sort is no longer stable.',
+          'Using `<=` to find a longer descending run is a tempting optimisation, and it is exactly ' +
+            'the bug. It makes the runs longer and the sort unstable, and every test of the output ' +
+            'still passes.'
+        ],
         example: 'Reversed input of 2 000 elements: 1 run after reversal, 0 merge passes, 2 000 comparisons.'
       },
       {
         term: 'In-place merging, and what O(1) space really costs',
         plain: 'Rotation-based merging needs no buffer and moves far more data.',
         formal: 'O(n log n) comparisons, O(n log^2 n) moves, O(1) auxiliary space',
-        readAs: 'In-place merging keeps the comparison count but pays an extra log factor in element moves — ' +
-          'the caret means "to the power of" — in exchange for needing no scratch buffer at all.',
-        detail: 'Merging without a buffer is done by rotation: split both runs at the point that lets each ' +
-          'side be rotated into position, then recurse. It is genuinely in place and it is genuinely stable - ' +
-          'the asymmetry between a lower bound on one side and an upper bound on the other is what preserves ' +
-          'tie order. What it costs is movement: 102 734 moves and 51 367 swaps on 2 000 random elements, ' +
-          'against 43 904 moves and no swaps for the buffered version. "Sorts in place" is a claim with a ' +
-          'price, and this is the price.',
+        readAs: 'In-place merging keeps the comparison count but pays an extra log factor in ' +
+          'element moves — the caret means "to the power of". In exchange it needs no scratch ' +
+          'buffer at all.',
+        detail: [
+          'Merging without a buffer is done by rotation. Split both runs at the point that lets ' +
+            'each side be rotated into position, then recurse.',
+          'It is genuinely in place and genuinely stable. The asymmetry between a lower bound on ' +
+            'one side and an upper bound on the other is what preserves tie order.',
+          'What it costs is movement: 102 734 moves and 51 367 swaps on 2 000 random elements, ' +
+            'against 43 904 moves and no swaps for the buffered version. "Sorts in place" is a ' +
+            'claim with a price, and this is the price.'
+        ],
         example: 'In-place merge on 2 000 random elements: 26 763 comparisons, 0 allocations, 51 367 swaps.'
       },
       {
         term: 'The k-way merge buys passes, not comparisons',
         plain: 'Merging k runs at once costs the same comparisons and touches the data far less often.',
         formal: 'a heap over k run cursors: log2(k) comparisons per element emitted, in one pass',
-        readAs: 'To merge k sorted runs at once, keep a heap of the k current positions. Each output element ' +
-          'costs one heap operation, so the whole merge is a single streaming pass.',
-        detail: 'Picking the smallest of k heads costs log₂ k comparisons however the merging is arranged, so ' +
-          'merging k runs at once and merging them pairwise in log₂ k rounds cost about the same total. What ' +
-          'differs is how many times the data is read and written: one pass against log₂ k passes. In memory ' +
-          'that is a modest cache effect; once the data is on disk a pass is a full read and a full write of ' +
-          'everything, and the merge order becomes the only parameter that matters.',
+        readAs: 'To merge k sorted runs at once, keep a heap of the k current positions. Each ' +
+          'output element costs one heap operation, so the whole merge is a single streaming pass.',
+        detail: [
+          'Picking the smallest of k heads costs log₂ k comparisons however the merging is ' +
+            'arranged. So merging k runs at once and merging them pairwise in log₂ k rounds cost ' +
+            'about the same total.',
+          'What differs is how many times the data is read and written: one pass against log₂ k ' +
+            'passes.',
+          'In memory that is a modest cache effect. Once the data is on disk a pass is a full read ' +
+            'and a full write of everything, and the merge order becomes the only parameter that ' +
+            'matters.'
+        ],
         example: 'Merging 64 runs: 2-way needs 6 passes, 8-way needs 2, and both do about the same comparisons.'
       },
       {
         term: 'Why merge sort survives when quicksort is faster',
         plain: 'Sequential access, a guaranteed bound, and stability - in that order of importance.',
         formal: 'O(n log n) worst case, stable, and streaming-compatible',
-        detail: 'Merge sort loses to a good quicksort in memory on most inputs: more moves, more allocation, ' +
-          'worse locality on the write side. It is still what every system uses once the data leaves RAM, ' +
-          'because quicksort partitions by seeking to both ends of a range and a merge does not seek at all. ' +
-          'The worst-case bound is a secondary reason and stability is a third - but the access pattern is the ' +
-          'one that cannot be engineered around, and it is the reason the algorithm is a hundred years of ' +
-          'tape sorting and still current.',
+        detail: [
+          'Merge sort loses to a good quicksort in memory on most inputs: more moves, more ' +
+            'allocation, worse locality on the write side.',
+          'It is still what every system uses once the data leaves RAM. Quicksort partitions by ' +
+            'seeking to both ends of a range, and a merge does not seek at all.',
+          'The worst-case bound is a secondary reason, and stability is a third. The access ' +
+            'pattern is the one that cannot be engineered around, and it is why the algorithm is a ' +
+            'hundred years of tape sorting and still current.'
+        ],
         example: 'External merge sort of a billion records with 10 million resident: 100 runs, 2 merge passes, 60 000 block transfers.'
       }
     ],
