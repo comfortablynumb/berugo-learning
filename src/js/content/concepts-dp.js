@@ -506,14 +506,17 @@
         },
         plain: 'Each cell is the cheapest of substitute, insert and remove.',
         formal: 'd[i][j] = min(d[i−1][j−1] + sub, d[i−1][j] + del, d[i][j−1] + ins)',
-        readAs: 'Each cell of the edit table is the cheapest of three moves: substitute (diagonal), delete ' +
-          '(from above), or insert (from the left). The cost of substituting is 0 when the characters ' +
-          'already match.',
-        detail: 'Edit distance is the two-dimensional DP everything else in the family varies. The diagonal ' +
-          'edge lines two characters up and costs nothing when they match; the two orthogonal edges each ' +
-          'consume one character against a gap. Because there are three edges and (m+1)(n+1) cells, the ' +
-          'cost is the product - which is fine at word lengths and is four million cells for two ' +
-          'two-thousand-character strings, which is where the space section of this topic starts.',
+        readAs: 'Each cell of the edit table is the cheapest of three moves: substitute ' +
+          '(diagonal), delete (from above), or insert (from the left). Substituting costs 0 when ' +
+          'the characters already match.',
+        detail: [
+          'Edit distance is the two-dimensional DP everything else in the family varies.',
+          'The diagonal edge lines two characters up and costs nothing when they match. The two ' +
+            'orthogonal edges each consume one character against a gap.',
+          'Because there are three edges and (m+1)(n+1) cells, the cost is the product. That is ' +
+            'fine at word lengths, and four million cells for two two-thousand-character strings — ' +
+            'which is where the space section of this topic starts.'
+        ],
         example: 'kitten → sitting is 3, from a 7 × 8 table of 56 cells, and exhaustive recursion over every ' +
           'edit sequence agrees.'
       },
@@ -521,12 +524,15 @@
         term: 'The traceback prefers the diagonal',
         plain: 'At a tie, one diagonal step beats a pair of gaps - it is one column instead of two.',
         formal: 'tie-breaking towards the diagonal minimises the alignment length at equal cost',
-        detail: 'Several tracebacks can achieve the same optimal cost, and they are not equally good ' +
-          'alignments. A diagonal step consumes one character from each string and produces one column; a ' +
-          'deletion followed by an insertion consumes the same characters and produces two. Preferring the ' +
-          'diagonal on ties therefore gives the shortest alignment of minimum cost, which is what a reader ' +
-          'expects and what a diff tool needs. It is a one-line ordering decision in the traceback and it is ' +
-          'invisible in the distance.',
+        detail: [
+          'Several tracebacks can achieve the same optimal cost, and they are not equally good ' +
+            'alignments.',
+          'A diagonal step consumes one character from each string and produces one column. A ' +
+            'deletion followed by an insertion consumes the same characters and produces two.',
+          'Preferring the diagonal on ties therefore gives the shortest alignment of minimum cost, ' +
+            'which is what a reader expects and what a diff tool needs. It is a one-line ordering ' +
+            'decision in the traceback, and it is invisible in the distance.'
+        ],
         example: 'kitten → sitting aligns as `kitten-` over `sitting` in seven columns; a traceback without ' +
           'the preference can produce a longer alignment of the same cost 3.'
       },
@@ -544,31 +550,38 @@
         },
         plain: 'The recurrence only reads the previous row, so one row is enough - for the number only.',
         formal: 'Θ(min(m, n)) space computes d, but the traceback needs the full Θ(mn) table',
-        readAs: 'You can find the distance while holding only one row, but recovering the actual alignment ' +
-          'needs the whole grid — unless you use the divide-and-conquer trick, which is what the next ' +
-          'concept is for.',
-        detail: 'This is the temptation the section is built around, because it is a three-line change that ' +
-          'keeps every distance test passing. The traceback walks backwards through cells that have been ' +
-          'overwritten, so code left in place after the reduction produces something shaped like an ' +
-          'alignment and related to nothing. An interface that returns no alignment is the honest outcome; ' +
-          'the check that catches the dishonest one is stripping the gaps from each row and demanding the ' +
-          'inputs back.',
-        example: 'For kitten and sitting the full table peaks at 56 cells and the two-row version at 16, both ' +
-          'reporting distance 3 — and only one of them can print the alignment.'
+        readAs: 'You can find the distance while holding only one row. Recovering the actual ' +
+          'alignment needs the whole grid, unless you use the divide-and-conquer trick — which is ' +
+          'what the next concept is for.',
+        detail: [
+          'This is the temptation the section is built around, because it is a three-line change ' +
+            'that keeps every distance test passing.',
+          'The traceback walks backwards through cells that have been overwritten. Code left in ' +
+            'place after the reduction produces something shaped like an alignment and related to ' +
+            'nothing.',
+          'An interface that returns no alignment is the honest outcome. The check that catches ' +
+            'the dishonest one is stripping the gaps from each row and demanding the inputs back.'
+        ],
+        example: 'For kitten and sitting the full table peaks at 56 cells and the two-row ' +
+          'version at 16. Both report distance 3, and only one can print the alignment.'
       },
       {
         term: "Hirschberg's algorithm: both, for twice the time",
         plain: 'Find where the optimal alignment crosses the midpoint, then recurse on the two halves.',
         formal: 'split a at m/2; the crossing column j minimises forward(j) + backward(n − j); recurse',
-        readAs: 'Hirschberg\'s method: compute one row forward from the top and one backward from the bottom, ' +
-          'find where they meet most cheaply, and recurse on the two halves. Linear space, twice the ' +
-          'time.',
-        detail: 'The row-only computation gives the distance from every prefix of one string to all of the ' +
-          'other. Run it forwards on the top half and backwards on the bottom half, and the column ' +
-          'minimising the sum is where the optimal alignment passes through the middle row. That splits the ' +
-          'problem into two independent alignments, and recursing gives the whole alignment in linear space ' +
-          'for about twice the work. It is one of the cleanest space-time trades in the subject and the ' +
-          'answer to "I need the alignment and cannot afford the table".',
+        readAs: 'Hirschberg\'s method: compute one row forward from the top and one backward from ' +
+          'the bottom, find where they meet most cheaply, and recurse on the two halves. Linear ' +
+          'space, twice the time.',
+        detail: [
+          'The row-only computation gives the distance from every prefix of one string to all of ' +
+            'the other.',
+          'Run it forwards on the top half and backwards on the bottom half. The column minimising ' +
+            'the sum is where the optimal alignment passes through the middle row.',
+          'That splits the problem into two independent alignments, and recursing gives the whole ' +
+            'alignment in linear space for about twice the work.',
+          'It is one of the cleanest space-time trades in the subject, and the answer to "I need ' +
+            'the alignment and cannot afford the table".'
+        ],
         example: 'kitten against sitting: five recursive splits, a peak of 16 cells rather than 56, and the ' +
           'identical alignment — checked by stripping the gaps.'
       },
@@ -576,11 +589,15 @@
         term: 'Check the alignment, not the distance',
         plain: 'Strip the gaps from each row; you must get the two inputs back.',
         formal: 'the rows are equal length, gap-free projections equal the inputs, and no column is gap-gap',
-        detail: 'Three assertions, a few lines each, and between them they catch every traceback bug there ' +
-          'is - including the one that matters most, a traceback over a table that was space-reduced after ' +
-          'the traceback was written. A distance test cannot see any of them, because the distance is ' +
-          'computed by code that is still correct. This is the same principle as verifying a knapsack\'s ' +
-          'chosen set: the witness is checkable against the problem statement and the score is not.',
+        detail: [
+          'Three assertions, a few lines each, and between them they catch every traceback bug ' +
+            'there is.',
+          'That includes the one that matters most: a traceback over a table that was ' +
+            'space-reduced after the traceback was written.',
+          'A distance test cannot see any of them, because the distance is computed by code that ' +
+            'is still correct. This is the same principle as verifying a knapsack\'s chosen set. ' +
+            'The witness is checkable against the problem statement, and the score is not.'
+        ],
         example: 'Both the full table and Hirschberg return alignments whose gap-stripped rows are exactly ' +
           '"kitten" and "sitting", over seven columns with no gap-against-gap.'
       },
@@ -588,13 +605,16 @@
         term: 'LCS is edit distance with substitution forbidden',
         plain: 'Take away the diagonal-on-mismatch edge and the same table computes a diff.',
         formal: 'lcs[i][j] = a_i = b_j ? lcs[i−1][j−1] + 1 : max(lcs[i−1][j], lcs[i][j−1])',
-        readAs: 'If the two characters match, extend the diagonal answer by one; if they do not, take the ' +
-          'better of dropping one character from either string.',
-        detail: 'This is why `git diff` and spell-checking are the same algorithm with different costs. A ' +
-          'diff cannot substitute a line - it can only add or remove - so the diagonal edge is available ' +
-          'only on a match, and everything not in the longest common subsequence is either an addition or a ' +
-          'removal. Seeing the two as one recurrence is worth more than knowing either separately, because ' +
-          'it makes the cost model the thing you are choosing rather than the algorithm.',
+        readAs: 'If the two characters match, extend the diagonal answer by one. If they do not, ' +
+          'take the better of dropping one character from either string.',
+        detail: [
+          'This is why `git diff` and spell-checking are the same algorithm with different costs.',
+          'A diff cannot substitute a line — it can only add or remove — so the diagonal edge is ' +
+            'available only on a match. Everything not in the longest common subsequence is either ' +
+            'an addition or a removal.',
+          'Seeing the two as one recurrence is worth more than knowing either separately. It makes ' +
+            'the cost model the thing you are choosing, rather than the algorithm.'
+        ],
         example: 'abcabba against cbabac has an LCS of 4 ("baba"), so the diff is 4 context lines, 2 ' +
           'additions and 3 removals — nine operations in total.'
       },
@@ -602,11 +622,15 @@
         term: 'Global against local: one Math.max apart',
         plain: 'Allowing a cell to fall to zero turns "align these strings" into "find the best region".',
         formal: 'Needleman-Wunsch initialises with gap penalties; Smith-Waterman clamps at 0 and reads the maximum cell',
-        detail: 'The two algorithms differ in the initial row and column and in one `Math.max(0, …)`, and ' +
-          'they answer genuinely different questions. Global alignment insists on consuming both strings end ' +
-          'to end, so a good match buried in poor surroundings is dragged down by the surroundings. Local ' +
-          'alignment lets the score reset, so it finds the best-matching region and ignores the rest - and ' +
-          'the answer is read from wherever the maximum cell is rather than from the corner.',
+        detail: [
+          'The two algorithms differ in the initial row and column, and in one `Math.max(0, …)`. ' +
+            'They answer genuinely different questions.',
+          'Global alignment insists on consuming both strings end to end, so a good match buried ' +
+            'in poor surroundings is dragged down by the surroundings.',
+          'Local alignment lets the score reset, so it finds the best-matching region and ignores ' +
+            'the rest. The answer is read from wherever the maximum cell is, rather than from the ' +
+            'corner.'
+        ],
         example: 'ACACACTA against AGCACACA scores 12 globally and 12 locally, with the local maximum found ' +
           'at row 8, column 8.'
       },
@@ -614,18 +638,22 @@
         term: 'Affine gaps need three tables',
         plain: '"Am I already inside a gap" is state, so it belongs in the state.',
         formal: 'M, X and Y for aligned, gap-in-b and gap-in-a; a run of k costs open + k·extend',
-        readAs: 'Three tables instead of one, so the algorithm knows whether it is currently inside a gap. ' +
-          'That is what lets a long gap cost an opening fee plus a small charge per position, rather ' +
-          'than a full charge for each — which is what biology actually needs.',
-        detail: 'With a linear penalty, k gaps cost k·g however they are arranged, so the aligner has no ' +
-          'reason to keep them together and produces alignments shredded into single-character holes - which ' +
-          'is biologically and textually wrong, because real indels are contiguous. Charging once to open a ' +
-          'gap and less to extend it fixes that, and it requires knowing whether the previous column was ' +
-          'already a gap. That is a third piece of state, so one table becomes three, and this is the ' +
-          'clearest small example of a state having to grow to express a cost model.',
+        readAs: 'Three tables instead of one, so the algorithm knows whether it is currently ' +
+          'inside a gap. That lets a long gap cost an opening fee plus a small charge per ' +
+          'position, rather than a full charge for each — which is what biology actually needs.',
+        detail: [
+          'With a linear penalty, k gaps cost k·g however they are arranged. So the aligner has no ' +
+            'reason to keep them together, and produces alignments shredded into single-character ' +
+            'holes.',
+          'That is biologically and textually wrong, because real indels are contiguous.',
+          'Charging once to open a gap and less to extend it fixes it, and that requires knowing ' +
+            'whether the previous column was already a gap. It is a third piece of state, so one ' +
+            'table becomes three — the clearest small example of a state having to grow to express ' +
+            'a cost model.'
+        ],
         example: 'The same ACACACTA / AGCACACA pair scores 12 with linear gaps and 6 with affine ones, ' +
           'because opening a gap now costs something it did not before.'
       }
-    ]
+    ],
   });
 }(typeof window !== 'undefined' ? window : null));

@@ -47,37 +47,42 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'Edit distance is the two-dimensional DP everything else in this family is a variation of. The ' +
-          'state is (prefix of a, prefix of b), the three transitions are substitute, insert and remove, ' +
-          'and the traceback turns the number into an alignment. Longest common subsequence is the same ' +
-          'table with substitution forbidden, which is why `git diff` and spell-checking are the same ' +
-          'algorithm wearing different costs.',
-        '**Dropping to two rows keeps the distance and deletes the alignment.** The recurrence only ever ' +
-          'reads the previous row, so keeping one is enough for the number - and the traceback needs the ' +
-          'whole table, because it walks backwards through cells that no longer exist. The methods table ' +
-          'below reports peak cells and whether each method can produce an alignment, and the two-row row ' +
-          'answers "no" rather than returning something that looks like one.',
-        '**Hirschberg\'s algorithm gets both.** Run the row-only distance forwards on the top half and ' +
-          'backwards on the bottom half; the column minimising the sum is where the optimal alignment ' +
-          'crosses the midpoint. Recurse on the two halves. The alignment comes back in O(min(m, n)) space ' +
-          'for about twice the time, which is one of the cleanest space-time trades in the subject.',
-        '**Affine gaps need three tables, because "am I already inside a gap" is state.** With a linear ' +
-          'penalty a run of k gaps costs k·g however it is arranged, so the aligner has no reason to keep ' +
-          'gaps together and produces alignments shredded into single-character holes. Charging an opening ' +
-          'cost once and an extension cost per character is what makes a real aligner produce contiguous ' +
-          'indels - and it needs a separate table for "in a gap in a", "in a gap in b" and "aligned".'
+        '**Edit distance is the two-dimensional DP everything else in this family is a ' +
+          'variation of.** The state is (prefix of a, prefix of b). The three transitions are ' +
+          'substitute, insert and remove, and the traceback turns the number into an alignment.',
+        'Longest common subsequence is the same table with substitution forbidden, which is why ' +
+          '`git diff` and spell-checking are the same algorithm wearing different costs.',
+        '**Dropping to two rows keeps the distance and deletes the alignment.** The recurrence ' +
+          'only ever reads the previous row, so keeping one is enough for the number. The ' +
+          'traceback needs the whole table, because it walks backwards through cells that no ' +
+          'longer exist.',
+        'The methods table below reports peak cells, and whether each method can produce an ' +
+          'alignment. The two-row row answers "no", rather than returning something that looks ' +
+          'like one.',
+        '**Hirschberg\'s algorithm gets both.** Run the row-only distance forwards on the top ' +
+          'half and backwards on the bottom half. The column minimising the sum is where the ' +
+          'optimal alignment crosses the midpoint, so recurse on the two halves. The alignment ' +
+          'comes back in O(min(m, n)) space for about twice the time.',
+        '**Affine gaps need three tables, because "am I already inside a gap" is state.** With a ' +
+          'linear penalty a run of k gaps costs k·g however it is arranged. So the aligner has no ' +
+          'reason to keep gaps together, and produces alignments shredded into single-character ' +
+          'holes.',
+        'Charging an opening cost once and an extension cost per character is what makes a real ' +
+          'aligner produce contiguous indels. It needs a separate table for "in a gap in a", "in ' +
+          'a gap in b" and "aligned".'
       ],
       demo: {
         title: 'Interactive demo — the table, the traceback, and the space trade',
         markup: root.SequenceAlignmentTemplate.render()
       },
       diagram: diagram(),
-      insight: 'The traceback is the part worth testing, and the test is not "is the distance right". Strip ' +
-        'the gaps from each row of the alignment: you must get the two inputs back, the rows must be the ' +
-        'same length, and no column may be a gap against a gap. Those three checks catch every traceback ' +
-        'bug there is, including the one that matters most - a traceback walked over a table that was space ' +
-        'reduced after the traceback was written. A distance test cannot see any of them, because the ' +
-        'distance is computed by code that is still correct.'
+      insight: 'The traceback is the part worth testing, and the test is not "is the distance ' +
+        'right". Strip the gaps from each row of the alignment. You must get the two inputs ' +
+        'back, the rows must be the same length, and no column may be a gap against a gap. Those ' +
+        'three checks catch every traceback bug there is, including the one that matters most: a ' +
+        'traceback walked over a table that was space reduced after the traceback was written. A ' +
+        'distance test cannot see any of them, because the distance is computed by code that is ' +
+        'still correct.'
     };
   }
 
