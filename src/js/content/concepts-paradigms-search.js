@@ -186,12 +186,16 @@
         },
         plain: 'The whole paradigm is three lines, and the third is where the bugs are.',
         formal: 'for each value v of variable x: assign(x, v); if consistent then recurse; unassign(x, v)',
-        detail: 'Backtracking is exhaustive search that reuses one mutable state instead of building a new ' +
-          'one per node, which is why it is fast and why it is fragile. Everything mutated on the way down ' +
-          'has to be restored exactly on the way up. A forgotten restore does not raise: the search continues ' +
-          'with a state that no longer describes the path it is on, and returns a wrong set of solutions that ' +
-          'looks entirely plausible. The discipline that survives refactoring is to make the undo consume a ' +
-          'record produced by the do, rather than recompute what should have changed.',
+        detail: [
+          'Backtracking is exhaustive search that reuses one mutable state instead of building a ' +
+            'new one per node. That is why it is fast, and why it is fragile.',
+          'Everything mutated on the way down has to be restored exactly on the way up. A ' +
+            'forgotten restore does not raise. The search continues with a state that no longer ' +
+            'describes the path it is on, and returns a wrong set of solutions that looks entirely ' +
+            'plausible.',
+          'The discipline that survives refactoring is to make the undo consume a record produced ' +
+            'by the do, rather than recompute what should have changed.'
+        ],
         example: 'Propagation here returns the list of cells it filled, and the caller empties exactly those ' +
           '— no code anywhere recomputes which cells "ought" to be cleared.'
       },
@@ -209,13 +213,18 @@
         },
         plain: 'Branch on the variable with the fewest legal values left.',
         formal: 'select argmin over unassigned x of |domain(x)|; ties broken by degree or by index',
-        readAs: '"argmin" means "the variable that minimises this". Pick whichever unassigned variable has ' +
-          'the fewest values left to try, so failures surface as early and as cheaply as possible.',
-        detail: 'The argument is that a variable with two options doubles the tree and one with nine ' +
-          'multiplies it by nine, so taking the small one first keeps the tree narrow near the top and finds ' +
-          'dead ends immediately. It is the single most valuable heuristic in constraint search and it is not ' +
-          'free: computing it means asking every unassigned variable how many values it has left, at every ' +
-          'node, which is why real solvers maintain domains incrementally rather than recomputing them.',
+        readAs: '"argmin" means "the variable that minimises this". Pick whichever unassigned ' +
+          'variable has the fewest values left to try, so failures surface as early and as cheaply ' +
+          'as possible.',
+        detail: [
+          'The argument is simple. A variable with two options doubles the tree, and one with nine ' +
+            'multiplies it by nine. Taking the small one first keeps the tree narrow near the top ' +
+            'and finds dead ends immediately.',
+          'It is the single most valuable heuristic in constraint search, and it is not free.',
+          'Computing it means asking every unassigned variable how many values it has left, at ' +
+            'every node. That is why real solvers maintain domains incrementally rather than ' +
+            'recomputing them.'
+        ],
         example: 'On Inkala\'s puzzle MRV takes 49 559 nodes down to 10 102, while doing more work at each ' +
           'of them.'
       },
@@ -223,14 +232,19 @@
         term: 'Forward checking',
         plain: 'After an assignment, check that nothing has been left with no options.',
         formal: 'after assigning x = v, fail immediately if any unassigned y has domain(y) = ∅',
-        readAs: 'After each assignment, check whether any other variable has run out of options — the ∅ is ' +
-          'the empty set. If one has, backtrack now rather than discovering it several levels deeper.',
-        detail: 'This is the cheapest form of lookahead: one scan of the remaining variables, rejecting the ' +
-          'branch as soon as any of them is stuck. It catches failures one level earlier than plain ' +
-          'consistency checking, which sounds small and is worth a constant factor rather than an order of ' +
-          'magnitude on most instances. Its real value is as the floor under propagation - it is what makes ' +
-          'the domains worth maintaining at all, and once they are maintained the stronger inference is ' +
-          'nearly free.',
+        readAs: 'After each assignment, check whether any other variable has run out of options — ' +
+          'the ∅ is the empty set. If one has, backtrack now, rather than discovering it several ' +
+          'levels deeper.',
+        detail: [
+          'This is the cheapest form of lookahead: one scan of the remaining variables, rejecting ' +
+            'the branch as soon as any of them is stuck.',
+          'It catches failures one level earlier than plain consistency checking. That sounds ' +
+            'small, and it is worth a constant factor rather than an order of magnitude on most ' +
+            'instances.',
+          'Its real value is as the floor under propagation. It is what makes the domains worth ' +
+            'maintaining at all, and once they are maintained the stronger inference is nearly ' +
+            'free.'
+        ],
         example: 'Forward checking takes Inkala\'s puzzle from 10 102 nodes to 9 180 — real, and an order of ' +
           'magnitude less than propagation buys.'
       },
@@ -238,12 +252,15 @@
         term: 'Constraint propagation to a fixed point',
         plain: 'Fill in everything the last assignment forces, repeatedly, before guessing again.',
         formal: 'iterate: any variable with a singleton domain is assigned, shrinking its neighbours, until nothing changes',
-        detail: 'Propagation is qualitatively different from checking: it makes deductions rather than ' +
-          'testing them, and a single assignment can cascade into dozens of forced ones. That is why it moves ' +
-          'the node count by an order of magnitude where forward checking moves it by a fraction. The cost is ' +
-          'a full sweep per node and, in a real solver, careful bookkeeping so the undo is exact. Every cell ' +
-          'it fills has to be recorded, because those cells were not chosen and nothing else knows they were ' +
-          'filled.',
+        detail: [
+          'Propagation is qualitatively different from checking. It makes deductions rather than ' +
+            'testing them, and a single assignment can cascade into dozens of forced ones.',
+          'That is why it moves the node count by an order of magnitude, where forward checking ' +
+            'moves it by a fraction.',
+          'The cost is a full sweep per node and, in a real solver, careful bookkeeping so the ' +
+            'undo is exact. Every cell it fills has to be recorded, because those cells were not ' +
+            'chosen and nothing else knows they were filled.'
+        ],
         example: 'Propagation takes Inkala from 9 180 nodes to 929, a factor of ten, with 39 059 forced ' +
           'assignments along the way on the harder instance.'
       },
@@ -251,12 +268,14 @@
         term: 'A heuristic is a bet about the instance distribution',
         plain: 'MRV is an enormous help on four of these five puzzles and a disaster on the fifth.',
         formal: 'no variable-ordering heuristic dominates: for any ordering there are instances where another is exponentially better',
-        detail: 'This is the reason the section shows a matrix rather than a row. Heuristics are chosen ' +
-          'because they win on the instances people actually solve, not because they win always, and the ' +
-          'instances where they lose are constructible. Presenting a heuristic with a single benchmark ' +
-          'number, or with a benchmark suite that shares a structure, hides exactly the case that will ' +
-          'eventually arrive. The honest presentation is the distribution, including the row where the ' +
-          'ranking inverts.',
+        detail: [
+          'This is the reason the section shows a matrix rather than a row.',
+          'Heuristics are chosen because they win on the instances people actually solve, not ' +
+            'because they win always. The instances where they lose are constructible.',
+          'Presenting a heuristic with a single benchmark number, or with a benchmark suite that ' +
+            'shares a structure, hides exactly the case that will eventually arrive. The honest ' +
+            'presentation is the distribution, including the row where the ranking inverts.'
+        ],
         example: 'On "platinum blonde" the first-empty-cell order finishes in 419 195 nodes and MRV does not ' +
           'finish inside 500 000.'
       },
@@ -264,14 +283,20 @@
         term: 'Iterative deepening',
         plain: 'Repeated depth-limited searches cost barely more than the deepest one and need no queue.',
         formal: 'sum over d of b^d = b^D · (1 + 1/b + 1/b² + …) ≈ b^D · b/(b−1)',
-        readAs: 'Adding up the nodes at every level of a tree comes to only a constant factor more than the ' +
-          'bottom level alone, because each level up is b times smaller. At b = 10 the whole tree is ' +
-          'about 1.11 times its last level — which is why iterative deepening costs so little.',
-        detail: 'Depth-first search uses memory proportional to the depth and can fall down an infinite ' +
-          'branch; breadth-first finds the shallowest answer and uses memory proportional to the frontier. ' +
-          'Iterative deepening takes both properties by re-running the depth-first search with an increasing ' +
-          'limit. The apparent waste is small because the last level dominates the sum: at branching factor ' +
-          'three the repetition costs fifty per cent, and the memory saving is exponential.',
+        readAs: 'Adding up the nodes at every level of a tree comes to only a constant factor more ' +
+          'than the bottom level alone, because each level up is b times smaller. At b = 10 the ' +
+          'whole tree is about 1.11 times its last level, which is why iterative deepening costs ' +
+          'so little.',
+        detail: [
+          'Depth-first search uses memory proportional to the depth, and can fall down an infinite ' +
+            'branch. Breadth-first finds the shallowest answer, and uses memory proportional to ' +
+            'the frontier.',
+          'Iterative deepening takes both properties by re-running the depth-first search with an ' +
+            'increasing limit.',
+          'The apparent waste is small, because the last level dominates the sum. At branching ' +
+            'factor three the repetition costs fifty per cent, and the memory saving is ' +
+            'exponential.'
+        ],
         example: 'At branching factor 3 and depth 8 the repeated levels add about 50% to the node count and ' +
           'reduce the frontier from thousands of nodes to eight.'
       },
@@ -279,11 +304,15 @@
         term: 'Symmetry inside a constraint problem',
         plain: 'Interchangeable variables or values multiply the search by a factorial for no new answers.',
         formal: 'break symmetry by imposing an arbitrary total order on interchangeable elements',
-        detail: 'Graph colouring with k interchangeable colours is the standard case: any solution has k! ' +
-          'relabellings, all of which the search will find. Forcing the colours to be introduced in order - ' +
-          'vertex i may only use a colour already used or the next unused one - removes the entire factorial ' +
-          'and cannot remove a genuinely distinct solution. The same trick applies wherever two variables ' +
-          'have identical constraints, and it is usually the largest single win available.',
+        detail: [
+          'Graph colouring with k interchangeable colours is the standard case. Any solution has ' +
+            'k! relabellings, all of which the search will find.',
+          'Force the colours to be introduced in order: vertex i may only use a colour already ' +
+            'used, or the next unused one. That removes the entire factorial, and it cannot ' +
+            'remove a genuinely distinct solution.',
+          'The same trick applies wherever two variables have identical constraints, and it is ' +
+            'usually the largest single win available.'
+        ],
         example: 'Colouring a 30-vertex graph with three colours: fixing the first vertex to colour 0 divides ' +
           'the search by three before any other pruning applies.'
       },
@@ -291,11 +320,14 @@
         term: 'The node budget and the honest table',
         plain: 'A search that ran out of budget reports a bound, not a number.',
         formal: 'annotate exhausted runs and refuse to compute ratios against them',
-        detail: 'Hard instances do not finish, and a table that prints the budget as though it were a ' +
-          'measurement invites a comparison that is not valid - the true figure is larger and unknown, and a ' +
-          'ratio against it is meaningless in a direction nobody can quantify. Marking those cells and ' +
-          'leaving the ratio blank costs a little clarity and buys the reader the ability to trust every ' +
-          'other cell in the table.',
+        detail: [
+          'Hard instances do not finish, and a table that prints the budget as though it were a ' +
+            'measurement invites a comparison that is not valid.',
+          'The true figure is larger and unknown, so a ratio against it is meaningless in a ' +
+            'direction nobody can quantify.',
+          'Marking those cells and leaving the ratio blank costs a little clarity, and buys the ' +
+            'reader the ability to trust every other cell in the table.'
+        ],
         example: 'The anti-brute-force puzzle shows "500 000+" for the naive order, and the row computes no ' +
           'improvement ratio.'
       }

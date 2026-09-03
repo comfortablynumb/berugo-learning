@@ -75,35 +75,39 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'Backtracking is exhaustive search with an undo. Choose a value for a variable, recurse, and if the ' +
-          'branch dies, put everything back exactly as it was and try the next value. The correctness risk is ' +
-          'entirely in that last clause: state mutated on the way down must be restored on the way up, and a ' +
-          'restore that is a recomputation rather than a replay of the removals will eventually disagree with ' +
-          'what was removed.',
-        'The heuristics are where the performance is. Choosing the most constrained variable first (MRV) ' +
-          'finds a dead branch at this level instead of eight levels down. Forward checking rejects a branch ' +
-          'the moment any variable has nowhere left to go. Constraint propagation fills in everything forced ' +
-          'by the last assignment before guessing again. Each costs more per node, and each is worth it only ' +
-          'if it removes more nodes than it costs - which is a measurement, not a principle.',
-        'On Inkala\'s puzzle the first-empty-cell solver visits 49 559 nodes, MRV visits 10 102, forward ' +
-          'checking takes that to 9 180 and propagation to 929 - a factor of 53 from the flags together. ' +
-          'On the anti-brute-force puzzle the naive order does not finish inside 500 000 nodes at all ' +
-          'while MRV needs 45 268. And on "platinum blonde" the ranking inverts: the naive order ' +
-          'finishes in 419 195 and MRV is the one that runs out of budget. All three rows are in the ' +
-          'matrix below, because a heuristic that is usually an enormous help and occasionally a disaster ' +
-          'is a different thing from a heuristic that always helps.'
+        '**Backtracking is exhaustive search with an undo.** Choose a value for a variable, ' +
+          'recurse, and if the branch dies, put everything back exactly as it was and try the ' +
+          'next value.',
+        'The correctness risk is entirely in that last clause. State mutated on the way down ' +
+          'must be restored on the way up. A restore that recomputes what changed, rather than ' +
+          'replaying the removals, will eventually disagree with what was removed.',
+        'The heuristics are where the performance is. Choosing the most constrained variable ' +
+          'first (MRV) finds a dead branch at this level instead of eight levels down. Forward ' +
+          'checking rejects a branch the moment any variable has nowhere left to go. Constraint ' +
+          'propagation fills in everything forced by the last assignment before guessing again.',
+        'Each costs more per node, and each is worth it only if it removes more nodes than it ' +
+          'costs. That is a measurement, not a principle.',
+        'On Inkala\'s puzzle the first-empty-cell solver visits 49 559 nodes and MRV visits ' +
+          '10 102. Forward checking takes that to 9 180 and propagation to 929 — a factor of 53 ' +
+          'from the flags together.',
+        'On the anti-brute-force puzzle the naive order does not finish inside 500 000 nodes at ' +
+          'all, while MRV needs 45 268. And on "platinum blonde" the ranking inverts: the naive ' +
+          'order finishes in 419 195 and MRV is the one that runs out of budget.',
+        'All three rows are in the matrix below. A heuristic that is usually an enormous help and ' +
+          'occasionally a disaster is a different thing from a heuristic that always helps.'
       ],
       demo: {
         title: 'Interactive demo — five puzzles, four heuristic stacks, one solver',
         markup: root.BacktrackingTemplate.render()
       },
       diagram: diagram(),
-      insight: 'The undo is the invariant, and the way to keep it honest is to make the undo consume a record ' +
-        'produced by the do. Propagation here returns the list of cells it filled, and the caller empties ' +
-        'exactly those; nothing recomputes what "should" have changed. That is the same argument the ' +
-        'persistent structures in M09 make from the other direction - if the state on the way down is ' +
-        'immutable, there is no undo to get wrong - and in a solver that runs millions of nodes a second the ' +
-        'record-and-replay version is usually the one that fits in cache.'
+      insight: 'The undo is the invariant, and the way to keep it honest is to make the undo ' +
+        'consume a record produced by the do. Propagation here returns the list of cells it ' +
+        'filled, and the caller empties exactly those. Nothing recomputes what "should" have ' +
+        'changed. The persistent structures in M09 make the same argument from the other ' +
+        'direction. If the state on the way down is immutable, there is no undo to get wrong. In ' +
+        'a solver that runs millions of nodes a second, the record-and-replay version is usually ' +
+        'the one that fits in cache.'
     };
   }
 
