@@ -24,30 +24,40 @@
     });
   }
 
+  function orientation() {
+    return [
+      '**Once the data does not fit in memory, the CPU stops being what you are spending.** ' +
+        'Aggarwal and Vitter\'s model says a sort of N records with M resident and B per block ' +
+        'costs (N/B)·log_{M/B}(N/B) block transfers.',
+      'The shape of that expression is the whole lesson. The only lever is the *base of the ' +
+        'logarithm*, which is the merge order. Doubling memory does not halve the work: it lets ' +
+        'one pass consume more runs, and each pass you remove is a full read and a full write ' +
+        'of everything.',
+      'Run generation is the other lever, and it is the surprising one. Filling memory, sorting ' +
+        'it and flushing gives runs of exactly M records — 100 runs from 10 000 records with ' +
+        '100 resident.',
+      'Replacement selection keeps a heap and emits the smallest record still greater than the ' +
+        'last one written, deferring the rest to the next run. Measured mean run length 196.1, ' +
+        'which is Knuth\'s 2M snowplough result.',
+      'That halves the run count, and halving the run count removed an entire merge pass here. ' +
+        'Four passes down to three, 100 000 record transfers down to 80 000, for no extra I/O ' +
+        'at all. On input that is already sorted it produces one run, and the merge phase ' +
+        'disappears.',
+      'A sorting network is the other end of the same idea: a fixed list of compare-exchange ' +
+        'pairs, no branches, no data dependence. Bitonic sort does more comparisons than merge ' +
+        'sort — 28 160 against about 10 240 at 1 024 elements. It does them in 55 rounds, and ' +
+        'every comparator in a round touches disjoint wires and can run simultaneously.',
+      'That is the trade a GPU wants and a single CPU does not. It also gives the only ' +
+        'exhaustive correctness argument in this milestone. By the zero-one principle, a ' +
+        'network sorts everything if it sorts all 2^n inputs of zeros and ones, so 16 wires are ' +
+        'verified completely by 65 536 runs.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'Once the data does not fit in memory the CPU stops being what you are spending. Aggarwal and ' +
-          'Vitter\'s model says a sort of N records with M resident and B per block costs (N/B)·log_{M/B}(N/B) ' +
-          'block transfers, and the shape of that expression is the whole lesson: the only lever is the *base ' +
-          'of the logarithm*, which is the merge order. Doubling memory does not halve the work - it lets one ' +
-          'pass consume more runs, and each pass you remove is a full read and a full write of everything.',
-        'Run generation is the other lever and it is the surprising one. Filling memory, sorting it and ' +
-          'flushing gives runs of exactly M records - 100 runs from 10 000 records with 100 resident. ' +
-          'Replacement selection keeps a heap and emits the smallest record still greater than the last one ' +
-          'written, deferring the rest to the next run: measured mean run length 196.1, which is Knuth\'s 2M ' +
-          'snowplough result. That halves the run count, and halving the run count removed an entire merge ' +
-          'pass here - four passes down to three, 100 000 record transfers down to 80 000, for no extra I/O ' +
-          'at all. On input that is already sorted it produces one run and the merge phase disappears.',
-        'A sorting network is the other end of the same idea: a fixed list of compare-exchange pairs, no ' +
-          'branches, no data dependence. Bitonic sort does more comparisons than merge sort - 28 160 against ' +
-          'about 10 240 at 1 024 elements - and does them in 55 rounds, where every comparator in a round ' +
-          'touches disjoint wires and can run simultaneously. That is the trade a GPU wants and a single CPU ' +
-          'does not. It also gives the only exhaustive correctness argument in this milestone: by the zero-one ' +
-          'principle a network sorts everything if it sorts all 2^n inputs of zeros and ones, so 16 wires are ' +
-          'verified completely by 65 536 runs.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — passes, run generation, and the comparator lattice',
         markup: root.ExternalSortingTemplate.render()
@@ -65,12 +75,12 @@
           '    B --> F["every comparator in a stage touches disjoint wires"]'
         ].join('\n')
       },
-      insight: 'External sorting is the ancestor of every shuffle stage in every data pipeline, and the ' +
-        'parameter that matters is not CPU - it is the number of merge passes. That is why a job that spills ' +
-        'to disk gets dramatically faster from more memory per worker and barely faster from more cores: ' +
-        'memory raises the merge order and the merge order is the base of a logarithm, while cores speed up ' +
-        'the part that was never the bottleneck. When a shuffle is slow, count the passes before profiling ' +
-        'the comparator.'
+      insight: 'External sorting is the ancestor of every shuffle stage in every data pipeline, ' +
+        'and the parameter that matters is not CPU. It is the number of merge passes. That is ' +
+        'why a job that spills to disk gets dramatically faster from more memory per worker and ' +
+        'barely faster from more cores. Memory raises the merge order, and the merge order is ' +
+        'the base of a logarithm, while cores speed up the part that was never the bottleneck. ' +
+        'When a shuffle is slow, count the passes before profiling the comparator.'
     };
   }
 

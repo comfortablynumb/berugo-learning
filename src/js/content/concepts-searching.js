@@ -331,65 +331,83 @@
         },
         plain: 'Count passes over the data, not comparisons.',
         formal: 'Aggarwal-Vitter: (N/B) log_{M/B}(N/B) block transfers',
-        readAs: 'External sorting costs block reads and writes rather than comparisons: N items in blocks of ' +
-          'B, with a memory of M. The log is to base M/B, which is large, so the number of passes is ' +
-          'small — usually two.',
-        detail: 'Once the array does not fit, the CPU is not what you are spending. The external-memory model ' +
-          'counts block transfers between fast and slow storage, and the expression it gives has one lever: ' +
-          'the base of the logarithm, which is the merge order. That is why doubling memory does not halve ' +
-          'the work - it raises the merge order, and each pass removed is a full read and a full write of ' +
-          'everything. A report that quotes comparisons for an external sort is measuring the wrong thing.',
+        readAs: 'External sorting costs block reads and writes rather than comparisons: N items in ' +
+          'blocks of B, with a memory of M. The log is to base M/B, which is large, so the number ' +
+          'of passes is small — usually two.',
+        detail: [
+          'Once the array does not fit, the CPU is not what you are spending.',
+          'The external-memory model counts block transfers between fast and slow storage, and ' +
+            'the expression it gives has one lever: the base of the logarithm, which is the merge ' +
+            'order.',
+          'That is why doubling memory does not halve the work. It raises the merge order, and ' +
+            'each pass removed is a full read and a full write of everything. A report that quotes ' +
+            'comparisons for an external sort is measuring the wrong thing.'
+        ],
         example: 'A billion records, ten million resident, 100 KB blocks: 100 runs, 2 merge passes, 60 000 block transfers.'
       },
       {
         term: 'Replacement selection makes runs twice the size of memory',
         plain: 'Keep a heap; emit the smallest record still above the last one written, and freeze the rest.',
         formal: 'expected run length 2M on random input - Knuth\'s snowplough argument',
-        detail: 'Filling memory, sorting and flushing gives runs of exactly M. Replacement selection keeps a ' +
-          'heap of M records and emits the smallest one that can still extend the current run, deferring ' +
-          'anything smaller to the next; the effect is runs averaging 2M. The argument is a snowplough going ' +
-          'round a circular road while snow falls uniformly: in the steady state it clears twice its own ' +
-          'capacity per circuit. It reads and writes each record exactly once, so the extra run length is ' +
-          'free.',
+        detail: [
+          'Filling memory, sorting and flushing gives runs of exactly M.',
+          'Replacement selection keeps a heap of M records and emits the smallest one that can ' +
+            'still extend the current run, deferring anything smaller to the next. The effect is ' +
+            'runs averaging 2M.',
+          'The argument is a snowplough going round a circular road while snow falls uniformly. In ' +
+            'the steady state it clears twice its own capacity per circuit.',
+          'It reads and writes each record exactly once, so the extra run length is free.'
+        ],
         example: '10 000 records with 100 resident: 100 runs by sort-and-flush, 51 runs at mean length 196.1 by replacement selection.'
       },
       {
         term: 'Halving the runs can remove an entire pass',
         plain: 'The pass count is log base k of the run count, so fewer runs is a discrete saving.',
         formal: 'passes = ceil(log_k(runs)); one fewer pass is 2N of I/O',
-        readAs: 'Each merge pass folds k runs into one, so the pass count is the log to base k of the run ' +
-          'count. Every pass reads and writes the entire dataset, so removing one saves two full sweeps ' +
-          'of I/O.',
-        detail: 'This is why the 2M result matters rather than being a curiosity. Pass count is a ceiling of a ' +
-          'logarithm, so it moves in whole steps: halving the run count sometimes changes nothing and ' +
-          'sometimes removes a complete pass over the dataset. Measured on 10 000 records with 100 resident ' +
-          'and a 4-way merge, it went from four passes to three - 100 000 record transfers down to 80 000 - ' +
-          'for exactly the same reads and writes during run generation.',
+        readAs: 'Each merge pass folds k runs into one, so the pass count is the log to base k of ' +
+          'the run count. Every pass reads and writes the entire dataset, so removing one saves ' +
+          'two full sweeps of I/O.',
+        detail: [
+          'This is why the 2M result matters, rather than being a curiosity.',
+          'Pass count is the ceiling of a logarithm, so it moves in whole steps. Halving the run ' +
+            'count sometimes changes nothing, and sometimes removes a complete pass over the ' +
+            'dataset.',
+          'Measured on 10 000 records with 100 resident and a 4-way merge, it went from four ' +
+            'passes to three. That is 100 000 record transfers down to 80 000, for exactly the ' +
+            'same reads and writes during run generation.'
+        ],
         example: 'Sorted input plus replacement selection gives one run and no merge phase at all.'
       },
       {
         term: 'A sorting network is a fixed list of comparators',
         plain: 'No branches, no data dependence - the same comparisons run whatever the input.',
         formal: 'a sequence of compare-exchange pairs (i, j), applied unconditionally',
-        detail: 'Every other sort here decides what to do next based on what it has seen. A network does not: ' +
-          'the identical 24 comparators run on a sorted array and on a reversed one. That is a bad trade for ' +
-          'a CPU and exactly what a GPU, an FPGA or a SIMD lane wants, because there is no branch to ' +
-          'mispredict and no dependency to stall on. It also makes the algorithm a static object that can be ' +
-          'drawn, analysed and verified as a whole.',
+        detail: [
+          'Every other sort here decides what to do next based on what it has seen. A network does ' +
+            'not. The identical 24 comparators run on a sorted array and on a reversed one.',
+          'That is a bad trade for a CPU, and exactly what a GPU, an FPGA or a SIMD lane wants. ' +
+            'There is no branch to mispredict and no dependency to stall on.',
+          'It also makes the algorithm a static object that can be drawn, analysed and verified as ' +
+            'a whole.'
+        ],
         example: 'Bitonic on 8 wires: 24 comparators, always, in 6 rounds.'
       },
       {
         term: 'Depth is the parallel running time',
         plain: 'Comparators in the same round touch disjoint wires and run simultaneously.',
         formal: 'bitonic depth is log2(n)(log2(n)+1)/2; total comparators are O(n log^2 n)',
-        readAs: 'A bitonic network has about half of log₂ n squared stages, and each stage holds n/2 ' +
-          'comparators. It does more total work than a comparison sort — and every comparison in a ' +
-          'stage runs at once, which is the whole point on a GPU.',
-        detail: 'The two numbers that describe a network answer different questions. The comparator count is ' +
-          'total work and it is worse than merge sort\'s - 28 160 against about 10 240 at n = 1 024. The ' +
-          'depth is the number of dependent steps, and with enough lanes it is the time: 55 rounds at ' +
-          'n = 1 024. More work, less time, given hardware to spend - which is the entire reason the shape ' +
-          'exists and the reason "how many comparisons" is the wrong figure to quote.',
+        readAs: 'A bitonic network has about half of log₂ n squared stages, and each stage holds ' +
+          'n/2 comparators. It does more total work than a comparison sort — and every comparison ' +
+          'in a stage runs at once, which is the whole point on a GPU.',
+        detail: [
+          'The two numbers that describe a network answer different questions.',
+          'The comparator count is total work, and it is worse than merge sort\'s: 28 160 against ' +
+            'about 10 240 at n = 1 024.',
+          'The depth is the number of dependent steps, and with enough lanes it is the time: 55 ' +
+            'rounds at n = 1 024.',
+          'More work, less time, given hardware to spend. That is the entire reason the shape ' +
+            'exists, and the reason "how many comparisons" is the wrong figure to quote.'
+        ],
         example: 'n = 1 024: bitonic 28 160 comparators at depth 55; odd-even 24 063 at the same depth.'
       },
       {
@@ -405,36 +423,45 @@
         },
         plain: 'A network sorts everything if and only if it sorts every input of zeros and ones.',
         formal: 'if a comparator network sorts all 2^n binary inputs, it sorts all inputs',
-        readAs: 'The zero-one principle: to verify a sorting network you only need to test it on inputs of ' +
-          'zeros and ones. That turns an infinite check into a finite one, and it is why these networks ' +
-          'can be proved correct by brute force.',
-        detail: 'This turns verification from an infinite question into a finite one, and it is the only ' +
-          'exhaustive correctness argument available anywhere in this milestone. Sixteen wires are settled ' +
-          'completely by 65 536 runs - a proof rather than a sample. The reason it holds is that any ' +
-          'monotone function applied to the inputs commutes with the comparators, so a counterexample on ' +
-          'arbitrary values can be turned into one on zeros and ones by thresholding.',
+        readAs: 'The zero-one principle: to verify a sorting network you only need to test it on ' +
+          'inputs of zeros and ones. That turns an infinite check into a finite one, and it is why ' +
+          'these networks can be proved correct by brute force.',
+        detail: [
+          'This turns verification from an infinite question into a finite one, and it is the only ' +
+            'exhaustive correctness argument available anywhere in this milestone.',
+          'Sixteen wires are settled completely by 65 536 runs — a proof rather than a sample.',
+          'The reason it holds is that any monotone function applied to the inputs commutes with ' +
+            'the comparators. So a counterexample on arbitrary values can be turned into one on ' +
+            'zeros and ones by thresholding.'
+        ],
         example: '65 536 binary inputs verify a 16-wire network completely; all three networks pass with zero failures.'
       },
       {
         term: 'Padding to a power of two is a cliff',
         plain: 'Bitonic sort needs 2^k wires, and 1 025 elements pay for 2 048.',
         formal: 'pad with +infinity to the next power of two, then discard the tail',
-        detail: 'The standard fix for a non-power-of-two length is to pad with sentinels, and it is not a ' +
-          'rounding - it is a doubling in the worst case. Going from 1 024 to 1 025 elements takes the ' +
-          'comparator count from 28 160 to 67 584 and the depth from 55 to 66, for one extra element. That ' +
-          'is a real constraint on where networks are usable, and it is the kind of thing an asymptotic ' +
-          'description hides completely.',
+        detail: [
+          'The standard fix for a non-power-of-two length is to pad with sentinels. It is not a ' +
+            'rounding — it is a doubling in the worst case.',
+          'Going from 1 024 to 1 025 elements takes the comparator count from 28 160 to 67 584, ' +
+            'and the depth from 55 to 66, for one extra element.',
+          'That is a real constraint on where networks are usable, and the kind of thing an ' +
+            'asymptotic description hides completely.'
+        ],
         example: 'n = 1 025 pads to 2 048: 1 023 sentinels and 2.4× the comparators.'
       },
       {
         term: 'Every comparator matters, and some by a single input',
         plain: 'Deleting one comparator from a correct network can be caught by exactly one of 256 inputs.',
         formal: 'deletion sensitivity: how many zero-one inputs a single missing comparator breaks',
-        detail: 'Running the zero-one check against every single-comparator deletion gives a distribution, ' +
-          'and the low end is the interesting part: on an 8-wire bitonic network the most forgiving deletion ' +
-          'is detected by one input out of 256. A randomised test would need to be lucky, and an exhaustive ' +
-          'one cannot miss. That is the concrete argument for exhaustive verification where it is affordable, ' +
-          'and networks are the rare case where it is.',
+        detail: [
+          'Running the zero-one check against every single-comparator deletion gives a ' +
+            'distribution, and the low end is the interesting part.',
+          'On an 8-wire bitonic network the most forgiving deletion is detected by one input out ' +
+            'of 256. A randomised test would need to be lucky; an exhaustive one cannot miss.',
+          'That is the concrete argument for exhaustive verification where it is affordable, and ' +
+            'networks are the rare case where it is.'
+        ],
         example: 'Bitonic(8): deletions are caught by between 1 and 225 of the 256 zero-one inputs.'
       }
     ],
