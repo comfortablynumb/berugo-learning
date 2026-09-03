@@ -12,6 +12,7 @@
     "test:render": "node tests/render-audit.js 1/4 && node tests/render-audit.js 2/4 && node tests/render-audit.js 3/4 && node tests/render-audit.js 4/4",
     "test:bundle": "node tests/bundle-audit.js _site",
     "lint:size": "node tests/file-size-check.js",
+    "lint:prose": "node tools/readability.js",
     "build:css": "tailwindcss -i src/css/tailwind-source.css -o lib/tailwind.css --minify",
     "build:site": "npm run build:css && node tools/assemble-site.js _site && node tools/bundle.js _site && npm run test:bundle"
   },
