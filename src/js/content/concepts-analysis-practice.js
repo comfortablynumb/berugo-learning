@@ -535,55 +535,67 @@
         },
         plain: 'Discarded runs that let the engine compile and the caches fill, so you measure steady state.',
         formal: 'discard the first k runs',
-        detail: 'A JavaScript engine begins in an interpreter, gathers type feedback, then optimises ' +
-          'the hot function and may deoptimise it again when an assumption breaks — so the first run ' +
-          'and the tenth are running different machine code. Caches, branch predictors and memory ' +
-          'allocators warm up alongside it. Discarding the first runs measures the steady state, ' +
-          'which is what a server in production is in. Note that steady state is a choice, not the ' +
-          'truth: if the code you care about runs once, at startup, then the cold number is the real ' +
-          'one and warming up hides your actual problem.',
+        detail: [
+          'A JavaScript engine begins in an interpreter, gathers type feedback, then optimises the ' +
+            'hot function. It may deoptimise it again when an assumption breaks. So the first run ' +
+            'and the tenth are running different machine code.',
+          'Caches, branch predictors and memory allocators warm up alongside it. Discarding the ' +
+            'first runs measures the steady state, which is what a server in production is in.',
+          'Steady state is a choice, though, not the truth. If the code you care about runs once, ' +
+            'at startup, then the cold number is the real one and warming up hides your actual ' +
+            'problem.'
+        ],
         example: 'The first run of a JIT-compiled loop can be 10× the tenth.'
       },
       {
         term: 'Sink',
         plain: 'Consuming the result so the compiler cannot prove the work is dead and remove it.',
         formal: 'keep a reference to the output',
-        detail: 'An optimiser is entitled to delete any computation whose result is never observed, ' +
-          'and a benchmark that throws its result away is precisely that computation. The symptom is ' +
-          'a suspiciously round, suspiciously tiny time that does not change when you make the ' +
-          'algorithm obviously worse — a very good reason to always sanity-check a benchmark by ' +
-          'slowing the subject down deliberately. The fix is a sink: accumulate the result into a ' +
-          'variable that escapes the measured region, and read it afterwards. It costs an addition ' +
-          'per iteration and it keeps the work alive.',
+        detail: [
+          'An optimiser is entitled to delete any computation whose result is never observed. A ' +
+            'benchmark that throws its result away is precisely that computation.',
+          'The symptom is a suspiciously round, suspiciously tiny time that does not change when ' +
+            'you make the algorithm obviously worse. That is a very good reason to sanity-check ' +
+            'every benchmark by slowing the subject down deliberately.',
+          'The fix is a sink. Accumulate the result into a variable that escapes the measured ' +
+            'region, and read it afterwards. It costs an addition per iteration, and it keeps the ' +
+            'work alive.'
+        ],
         example: 'Without one, a "0.001 ms" result usually means nothing ran.'
       },
       {
         term: 'Median and MAD',
         plain: 'A robust centre and a robust spread. The mean and standard deviation are moved by one outlier.',
         formal: 'MAD = median(|xᵢ − median|)',
-        readAs: 'Take how far each reading sits from the middle reading — the bars mean distance, so the ' +
-          'sign is dropped — and then take the middle of those distances. It is a spread that a ' +
+        readAs: 'Take how far each reading sits from the middle reading — the bars mean distance, so ' +
+          'the sign is dropped — and then take the middle of those distances. It is a spread that a ' +
           'handful of extreme runs cannot move.',
-        detail: 'Benchmark noise is one-sided — interference only ever makes a run slower — so the ' +
-          'sample has a long right tail and the mean chases it: one GC pause in fifteen runs can ' +
-          'move the mean several percent while leaving the median untouched. The median absolute ' +
-          'deviation plays the same role for spread that the median plays for centre, and neither is ' +
-          'moved by a minority of extreme values. Report both, and the reader learns the typical ' +
-          'cost and how repeatable it was. Keep the outliers in the data rather than trimming them: ' +
-          'they are real, and sometimes they are the finding.',
+        detail: [
+          'Benchmark noise is one-sided: interference only ever makes a run slower. So the sample ' +
+            'has a long right tail, and the mean chases it. One GC pause in fifteen runs can move ' +
+            'the mean several percent while leaving the median untouched.',
+          'The median absolute deviation plays the same role for spread that the median plays for ' +
+            'centre. Neither is moved by a minority of extreme values.',
+          'Report both, and the reader learns the typical cost and how repeatable it was. Keep the ' +
+            'outliers in the data rather than trimming them: they are real, and sometimes they are ' +
+            'the finding.'
+        ],
         example: 'One GC pause shifts the mean and leaves the median alone.'
       },
       {
         term: 'Timer resolution',
         plain: 'Browser clocks are deliberately coarse. Work below the resolution measures as zero.',
         formal: 'performance.now() is clamped',
-        detail: 'A high-resolution timer is a side channel — it is what Spectre-style attacks used to ' +
-          'read cache state — so browsers clamp performance.now() to a coarse grid, typically ' +
-          'somewhere between 5 µs and 100 µs depending on isolation headers. Anything faster than ' +
-          'the grid measures as zero or as one tick, so timing a single small operation yields ' +
-          'quantisation noise rather than a duration. The standard answer is to time a batch: run ' +
-          'the operation a thousand times inside one measured region and divide, which puts the ' +
-          'total safely above the resolution and amortises the timer call itself.',
+        detail: [
+          'A high-resolution timer is a side channel. It is what Spectre-style attacks used to ' +
+            'read cache state, so browsers clamp performance.now() to a coarse grid. The grid is ' +
+            'typically somewhere between 5 µs and 100 µs, depending on isolation headers.',
+          'Anything faster than the grid measures as zero, or as one tick. Timing a single small ' +
+            'operation therefore yields quantisation noise rather than a duration.',
+          'The standard answer is to time a batch. Run the operation a thousand times inside one ' +
+            'measured region and divide. That puts the total safely above the resolution, and ' +
+            'amortises the timer call itself.'
+        ],
         example: 'Time a batch of 1 000 iterations, not one.'
       },
       {
@@ -600,64 +612,78 @@
         },
         plain: 'A closed-loop generator stops sending while the system is slow, so it never measures the queue it caused.',
         formal: 'measure against intended send time',
-        detail: 'A load generator that waits for each response before sending the next one stops ' +
-          'issuing load exactly when the system stalls, so the requests that should have queued ' +
-          'during the stall are never sent and never timed. The result is a latency distribution ' +
-          'that omits its own worst cases, systematically and invisibly. The fix is to time each ' +
-          'request from when it was scheduled to be sent rather than from when it actually went out, ' +
-          'so a stall shows up in every request it delayed. Correcting for it commonly moves a ' +
-          'reported p99 by an order of magnitude, which is the size of the lie.',
+        detail: [
+          'A load generator that waits for each response before sending the next one stops issuing ' +
+            'load exactly when the system stalls. The requests that should have queued during the ' +
+            'stall are never sent, and never timed.',
+          'The result is a latency distribution that omits its own worst cases, systematically and ' +
+            'invisibly.',
+          'The fix is to time each request from when it was scheduled to be sent, rather than from ' +
+            'when it actually went out. A stall then shows up in every request it delayed. ' +
+            'Correcting for it commonly moves a reported p99 by an order of magnitude, which is the ' +
+            'size of the lie.'
+        ],
         example: 'Correcting for it commonly moves p99 by 10×.'
       },
       {
         term: 'Reporting',
         plain: 'A number nobody can refute is not a result: give the median, the spread, the run count and the conditions.',
         formal: 'median ± MAD over n runs',
-        readAs: 'Report the middle reading, how far readings typically sit either side of it, and how many ' +
-          'runs produced both. All three, or the number cannot be argued with.',
-        detail: 'A bare "3.2 ms" cannot be argued with, reproduced or compared, which makes it ' +
-          'rhetoric rather than measurement. The minimum that makes a claim checkable is the centre, ' +
-          'the spread, the number of runs and the conditions — machine, build, input size, warm or ' +
-          'cold. With those, a reader can judge whether the difference you are claiming is larger ' +
-          'than the noise you measured, and can reproduce the experiment to disagree. The discipline ' +
-          'also protects you from yourself: writing down the run count is when you notice that ' +
-          'fifteen runs cannot support the five-percent claim in the next sentence.',
+        readAs: 'Report the middle reading, how far readings typically sit either side of it, and ' +
+          'how many runs produced both. All three, or the number cannot be argued with.',
+        detail: [
+          'A bare "3.2 ms" cannot be argued with, reproduced or compared. That makes it rhetoric ' +
+            'rather than measurement.',
+          'The minimum that makes a claim checkable is the centre, the spread, the number of runs ' +
+            'and the conditions — machine, build, input size, warm or cold. With those, a reader ' +
+            'can judge whether the difference you claim is larger than the noise you measured, and ' +
+            'can reproduce the experiment to disagree.',
+          'The discipline also protects you from yourself. Writing down the run count is when you ' +
+            'notice that fifteen runs cannot support the five-percent claim in the next sentence.'
+        ],
         example: '"3.2 ms (median of 15)" rather than "3.2 ms".'
       },
       {
         term: 'Coefficient of variation',
         plain: 'The spread as a fraction of the middle. It is the one measured number that decides how many runs a claim needs.',
         formal: 'CV = sigma / mu',
-        readAs: 'The coefficient of variation is the standard deviation (sigma, the typical distance from ' +
-          'the average) divided by the mean (mu, the average itself). Dividing one by the other ' +
-          'cancels the units, which is what lets you compare noise between benchmarks of ' +
+        readAs: 'The coefficient of variation is the standard deviation (sigma, the typical distance ' +
+          'from the average) divided by the mean (mu, the average itself). Dividing one by the ' +
+          'other cancels the units, which is what lets you compare noise between benchmarks of ' +
           'completely different durations.',
-        detail: 'Absolute spread cannot be compared across benchmarks of different durations, so ' +
-          'divide it by the mean and you get a dimensionless noise level that can. The CV is what ' +
-          'converts a desired resolution into a sample size, because the number of runs needed ' +
-          'scales with (CV/delta)² — halve the effect you want to detect and you need four times the ' +
-          'runs. At a typical CV of 8%, resolving a 5% difference takes about 41 runs per arm; get ' +
-          'the environment quiet enough to reach CV = 3% and the same claim needs 6. Reducing noise ' +
-          'is almost always cheaper than adding runs.',
+        detail: [
+          'Absolute spread cannot be compared across benchmarks of different durations. Divide it ' +
+            'by the mean and you get a dimensionless noise level that can.',
+          'The CV is what converts a desired resolution into a sample size, because the number of ' +
+            'runs needed scales with (CV/delta)². Halve the effect you want to detect and you need ' +
+            'four times the runs.',
+          'At a typical CV of 8%, resolving a 5% difference takes about 41 runs per arm. Get the ' +
+            'environment quiet enough to reach CV = 3% and the same claim needs 6. Reducing noise ' +
+            'is almost always cheaper than adding runs.'
+        ],
         example: 'At CV = 8% a defensible 5% claim needs 41 runs per arm; at CV = 3% it needs 6.'
       },
       {
         term: 'Statistical power',
         plain: 'The chance of seeing a real difference of a given size. "No difference" from an underpowered run means nothing at all.',
         formal: 'n per arm = 2(z_a + z_b)^2 (CV/delta)^2',
-        readAs: 'The runs you need per side scales with the square of (your noise level divided by the ' +
-          'difference you want to detect). The z terms are fixed constants set by how confident ' +
-          'you want to be; everything that varies is in that ratio, and it is squared — so ' +
-          'halving the difference you want to resolve costs four times the runs.',
-        detail: 'Power is the probability that an experiment detects an effect that is genuinely ' +
-          'there. Run too few samples and the experiment is not capable of resolving the difference ' +
-          'you are looking for, so "we saw no regression" reports the design of the benchmark rather ' +
-          'than the behaviour of the code. The formula runs both ways and the useful direction is ' +
-          'backwards: given the runs you can afford and the CV you measured, what is the smallest ' +
-          'difference this experiment could have found? Fifteen runs at CV = 8% resolve about 8.2%, ' +
-          'so they can neither support nor refute a 5% claim — and saying so is the honest result.',
+        readAs: 'The runs you need per side scales with the square of your noise level divided by ' +
+          'the difference you want to detect. The z terms are fixed constants, set by how confident ' +
+          'you want to be. Everything that varies is in that ratio, and it is squared — so halving ' +
+          'the difference you want to resolve costs four times the runs.',
+        detail: [
+          'Power is the probability that an experiment detects an effect that is genuinely there.',
+          'Run too few samples and the experiment is not capable of resolving the difference you ' +
+            'are looking for. Then "we saw no regression" reports the design of the benchmark ' +
+            'rather than the behaviour of the code.',
+          'The formula runs both ways, and the useful direction is backwards. Given the runs you ' +
+            'can afford and the CV you measured, what is the smallest difference this experiment ' +
+            'could have found?',
+          'Fifteen runs at CV = 8% resolve about 8.2%. So they can neither support nor refute a 5% ' +
+            'claim — and saying so is the honest result.'
+        ],
         example: '15 runs at CV = 8% resolve 8.2%, so they cannot support a 5% claim in either direction.'
       }
-    ]
+    ],
   });
 }(typeof window !== 'undefined' ? window : null));

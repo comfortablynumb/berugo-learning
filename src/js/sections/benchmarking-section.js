@@ -27,14 +27,14 @@
     root.jQuery('#' + SECTION_ID + '-content').html(app.shell.render({
       sectionId: SECTION_ID,
       orientation: [
-        'A timing is a measurement, and a measurement without a protocol is an anecdote. The ' +
-          'protocol has four parts: warm up so you are not timing compilation, repeat so you have a ' +
-          'distribution, consume the result so the work cannot be deleted, and report a median with ' +
-          'its spread and its run count.',
-        'Each part is a switch below. Turn one off and the reported number improves — which is ' +
+        '**A timing is a measurement, and a measurement without a protocol is an anecdote.** The ' +
+          'protocol has four parts. Warm up, so you are not timing compilation. Repeat, so you ' +
+          'have a distribution. Consume the result, so the work cannot be deleted. And report a ' +
+          'median with its spread and its run count.',
+        'Each part is a switch below. Turn one off and the reported number improves, which is ' +
           'exactly why published microbenchmarks are so often wrong. The table at the bottom runs ' +
-          'the same workload under four configurations so the sizes of those lies are visible.',
-        'The most dangerous configuration is the one with no sink: the engine can prove the result ' +
+          'the same workload under four configurations, so the sizes of those lies are visible.',
+        'The most dangerous configuration is the one with no sink. The engine can prove the result ' +
           'is unused and remove the loop, and you end up reporting the cost of nothing.'
       ],
       demo: { title: 'Interactive demo — break the measurement on purpose', markup: root.BenchmarkingTemplate.render() },
