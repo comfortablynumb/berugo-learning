@@ -165,24 +165,31 @@
         },
         plain: 'Free, matched, free, matched, free — one more free edge than matched ones.',
         formal: 'Berge: a matching is maximum exactly when no augmenting path exists',
-        detail: 'Everything in this section is that one idea. The path starts and ends at unmatched ' +
-          'vertices, so it has odd length and therefore one more unmatched edge than matched ones; ' +
-          'flipping every edge on it keeps the result a matching, because each internal vertex ' +
-          'trades one partner for another, and the size rises by one. Berge\'s theorem supplies the ' +
-          'stopping rule: no augmenting path means maximum, so the algorithm needs no bound on how ' +
-          'good the answer should be.',
+        detail: [
+          'Everything in this section is that one idea.',
+          'The path starts and ends at unmatched vertices, so it has odd length and therefore one ' +
+            'more unmatched edge than matched ones. Flipping every edge on it keeps the result a ' +
+            'matching, because each internal vertex trades one partner for another, and the size ' +
+            'rises by one.',
+          'Berge\'s theorem supplies the stopping rule. No augmenting path means maximum, so the ' +
+            'algorithm needs no bound on how good the answer should be.'
+        ],
         example: 'The default 9-by-9 graph reaches a perfect matching of 9 in 9 augmenting paths.'
       },
       {
         term: 'Kuhn finds one path at a time and resets its visited set per vertex',
         plain: 'A depth-first search per unmatched left vertex, marking right vertices once each.',
         formal: 'O(VE): V searches, each linear in the edges',
-        detail: 'The per-vertex reset is what makes each individual search linear rather than ' +
-          'quadratic: within one search a right vertex is examined at most once, and across ' +
-          'searches the marks start clean. The bipartite structure is doing the work — a right ' +
-          'vertex reached once cannot usefully be reached again in the same search, because any ' +
-          'alternating continuation from it is the same continuation. That argument is exactly what ' +
-          'fails on a general graph with an odd cycle, which is the next section.',
+        detail: [
+          'The per-vertex reset is what makes each individual search linear rather than quadratic. ' +
+            'Within one search a right vertex is examined at most once, and across searches the ' +
+            'marks start clean.',
+          'The bipartite structure is doing the work. A right vertex reached once cannot usefully be ' +
+            'reached again in the same search, because any alternating continuation from it is the ' +
+            'same continuation.',
+          'That argument is exactly what fails on a general graph with an odd cycle, which is the ' +
+            'next section.'
+        ],
         example: 'On the default graph Kuhn examines 45 edges to find 9 augmenting paths.'
       },
       {
@@ -192,12 +199,15 @@
         readAs: 'Hopcroft-Karp augments along many disjoint shortest paths at once. After about the square ' +
           'root of V phases, the paths are long enough that few can remain — which is where the square ' +
           'root comes from.',
-        detail: 'The bound comes from a counting argument rather than from the search: after ' +
-          'sqrt(V) phases the shortest augmenting path is longer than sqrt(V), and vertex-disjoint ' +
-          'paths of that length cannot number more than sqrt(V), so at most sqrt(V) augmentations ' +
-          'remain. The phase count is therefore the whole difference from Kuhn, and on a small graph ' +
-          'it is often no difference at all — which is why the demonstration sweeps the size instead ' +
-          'of quoting the complexity.',
+        detail: [
+          'The bound comes from a counting argument rather than from the search.',
+          'After sqrt(V) phases the shortest augmenting path is longer than sqrt(V). ' +
+            'Vertex-disjoint paths of that length cannot number more than sqrt(V), so at most ' +
+            'sqrt(V) augmentations remain.',
+          'The phase count is therefore the whole difference from Kuhn, and on a small graph it is ' +
+            'often no difference at all. That is why the demonstration sweeps the size instead of ' +
+            'quoting the complexity.'
+        ],
         example: 'From 8 to 256 vertices a side the phase count moves 2, 2, 2, 3, 4, 4 while √V ' +
           'moves 2.83 to 16.'
       },
@@ -205,11 +215,14 @@
         term: 'The asymptotically better algorithm loses on small inputs, measurably',
         plain: 'Hopcroft-Karp examines 58 edges where Kuhn examines 20, and 4 530 where Kuhn examines 12 426.',
         formal: 'the crossover is a property of the instance size, not of the complexity classes',
-        detail: 'Every phase of Hopcroft-Karp pays for a breadth-first layering pass whether or not ' +
-          'that pass finds several paths, and on a small graph almost every phase finds one. The ' +
-          'layering is then pure overhead. Reporting the crossover rather than the asymptotics is ' +
-          'the honest way to present this: "O(E√V) beats O(VE)" is true and does not tell you which ' +
-          'to use for a graph of 30 vertices, which is the size most people actually have.',
+        detail: [
+          'Every phase of Hopcroft-Karp pays for a breadth-first layering pass, whether or not that ' +
+            'pass finds several paths. On a small graph almost every phase finds one, so the ' +
+            'layering is then pure overhead.',
+          'Reporting the crossover rather than the asymptotics is the honest way to present this.',
+          'The claim "O(E√V) beats O(VE)" is true, and it does not tell you which to use for a graph ' +
+            'of 30 vertices. That is the size most people actually have.'
+        ],
         example: 'At 8 vertices a side Kuhn examines 20 edges and Hopcroft-Karp 58; at 256 the ' +
           'numbers are 12 426 and 4 530, a 2.74× saving.'
       },
@@ -217,12 +230,15 @@
         term: 'A unit-capacity maximum flow is a matching',
         plain: 'Source to every left vertex, every edge, every right vertex to the sink, all at capacity one.',
         formal: 'integrality: a maximum flow of value k on a unit-capacity network is k edge-disjoint paths',
-        detail: 'The reduction is worth internalising because it goes both ways. Any matching ' +
-          'problem you can phrase as a bipartite graph can be solved with a flow library, and — more ' +
-          'usefully — any variation the matching library does not support can often be expressed by ' +
-          'changing a capacity. Allowing a worker to take three tasks is a capacity of three on one ' +
-          'arc. Requiring at least one task is a lower bound, which flow also handles. The matching ' +
-          'algorithms are faster and the flow framing is what generalises.',
+        detail: [
+          'The reduction is worth internalising because it goes both ways.',
+          'Any matching problem you can phrase as a bipartite graph can be solved with a flow ' +
+            'library. More usefully, any variation the matching library does not support can often ' +
+            'be expressed by changing a capacity.',
+          'Allowing a worker to take three tasks is a capacity of three on one arc. Requiring at ' +
+            'least one task is a lower bound, which flow also handles. The matching algorithms are ' +
+            'faster, and the flow framing is what generalises.'
+        ],
         example: 'The flow route gets the same 9 as Kuhn and Hopcroft-Karp, at 280 arc visits ' +
           'against 45 and 57 edge examinations.'
       },
@@ -233,12 +249,15 @@
         readAs: 'König\'s theorem: on a bipartite graph the largest matching and the smallest set of vertices ' +
           'touching every edge are the same number. Everything outside that cover is then the largest ' +
           'set of mutually unconnected vertices.',
-        detail: 'The construction is what makes the theorem usable rather than decorative: it hands ' +
-          'you the cover, not merely its size, from a search you already ran. And the restriction to ' +
-          'bipartite graphs is the important part — minimum vertex cover is NP-hard in general, so ' +
-          'the theorem is not a fact about covers but a fact about bipartiteness. The same boundary ' +
-          'reappears in colouring and independent set, and noticing that a graph is bipartite is ' +
-          'therefore worth real money.',
+        detail: [
+          'The construction is what makes the theorem usable rather than decorative. It hands you ' +
+            'the cover, not merely its size, from a search you already ran.',
+          'The restriction to bipartite graphs is the important part. Minimum vertex cover is ' +
+            'NP-hard in general, so the theorem is not a fact about covers but a fact about ' +
+            'bipartiteness.',
+          'The same boundary reappears in colouring and independent set, so noticing that a graph is ' +
+            'bipartite is worth real money.'
+        ],
         example: 'A matching of 9 and a cover of 9 on the default graph, verified to touch every one ' +
           'of the 25 edges.'
       },
@@ -249,12 +268,15 @@
         readAs: 'Hall\'s theorem: everyone on the left can be matched exactly when no group of them is ' +
           'collectively short of options. N(S) is everything that group is connected to, and the bars ' +
           'are "how many".',
-        detail: 'A search that fails tells an operator nothing; a witness tells them exactly which ' +
-          'demand to relax. The alternating search from an unmatched left vertex produces one for ' +
-          'free: every right vertex it reaches is already matched back into the set it reached it ' +
-          'from, so the reachable left set has a neighbourhood one short. There are exponentially ' +
-          'many subsets and the condition never has to be tested over all of them, because the ' +
-          'search finds a violating one directly whenever one exists.',
+        detail: [
+          'A search that fails tells an operator nothing. A witness tells them exactly which demand ' +
+            'to relax.',
+          'The alternating search from an unmatched left vertex produces one for free. Every right ' +
+            'vertex it reaches is already matched back into the set it reached it from, so the ' +
+            'reachable left set has a neighbourhood one short.',
+          'There are exponentially many subsets, and the condition never has to be tested over all ' +
+            'of them. The search finds a violating one directly whenever one exists.'
+        ],
         example: 'On the deficiency shape, 3 left vertices share 2 neighbours, so at least 1 must go ' +
           'unmatched — a proof rather than a failed search.'
       },
@@ -265,13 +287,16 @@
         readAs: 'Which side proposes is not a detail. Gale-Shapley gives the proposing side simultaneously ' +
           'their best possible stable outcome and the other side their worst — so choosing who proposes ' +
           'is a policy decision.',
-        detail: 'Three properties are constantly conflated: perfect (everyone is matched), maximum ' +
-          '(no larger matching exists) and stable (no blocking pair). Gale-Shapley guarantees the ' +
-          'first and third on complete preferences and says nothing about total satisfaction, so a ' +
-          'weighted algorithm will beat it on that measure whenever the measure exists. The ' +
-          'proposer-optimality result is not a tendency but a theorem, and running the algorithm ' +
-          'from both sides makes it a table: no proposer is ever worse off, and no receiver is ever ' +
-          'better.',
+        detail: [
+          'Three properties are constantly conflated: perfect (everyone is matched), maximum (no ' +
+            'larger matching exists) and stable (no blocking pair).',
+          'Gale-Shapley guarantees the first and third on complete preferences, and says nothing ' +
+            'about total satisfaction. A weighted algorithm will beat it on that measure whenever ' +
+            'the measure exists.',
+          'The proposer-optimality result is not a tendency but a theorem. Running the algorithm ' +
+            'from both sides makes it a table: no proposer is ever worse off, and no receiver is ' +
+            'ever better.'
+        ],
         example: 'Eight people a side: left-proposing gives the left side a total rank of 10 and ' +
           'right-proposing gives it 20, with 5 people strictly better off and 0 worse.'
       }

@@ -42,48 +42,56 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**A matching is a set of edges no two of which share a vertex.** On a bipartite graph — two ' +
+        'sides, every edge crossing between them — finding the largest one is easy.',
+      'Every algorithm here is the same idea. Find an **augmenting path**: a route from an unmatched ' +
+        'left vertex to an unmatched right one that alternates free, matched, free. Then flip every ' +
+        'edge on it.',
+      'The path has one more free edge than matched ones, so the flip gains exactly one. **Berge\'s ' +
+        'theorem** says that is enough: when no augmenting path exists, the matching is maximum.',
+      '**Kuhn** finds one augmenting path at a time, depth-first, resetting its visited set per left ' +
+        'vertex. That is O(VE).',
+      '**Hopcroft-Karp** finds a whole maximal set of *vertex-disjoint* shortest augmenting paths ' +
+        'per phase. The shortest augmenting path strictly lengthens each phase, so there are only ' +
+        'O(√V) phases, giving O(E√V).',
+      'The phase column below is the entire difference between the two, and on small graphs it is ' +
+        'often no difference at all. That is why the table sweeps the size instead of quoting a ' +
+        'complexity.',
+      '**Koenig\'s theorem** links this to a covering problem. On a bipartite graph the maximum ' +
+        'matching and the *minimum vertex cover* have the same size, and the cover can be read off ' +
+        'the alternating search directly.',
+      'That is not a curiosity. Minimum vertex cover is NP-hard in general, and bipartiteness is ' +
+        'exactly what makes it tractable.',
+      '**Hall\'s condition** is the other reading: a perfect matching exists exactly when no set S ' +
+        'of left vertices has fewer than |S| neighbours. When one fails, the search hands back the ' +
+        'offending set as a witness rather than a boolean.',
+      '**Stable matching is a different problem.** Gale-Shapley takes preference *orders* rather ' +
+        'than an edge set, and optimises something else entirely. It produces a matching with no ' +
+        '**blocking pair** — no two people who would both rather have each other than their current ' +
+        'partners.',
+      'It is always perfect on complete preferences, so its size is never in question. What is in ' +
+        'question is *whose* preferences it serves, and the panel runs it from both sides on ' +
+        'identical data to show that the proposing side gets the better half.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'A **matching** is a set of edges no two of which share a vertex. On a bipartite graph — two ' +
-          'sides, every edge crossing between them — finding the largest one is easy, and every ' +
-          'algorithm here is the same idea: find an **augmenting path**, a route from an unmatched ' +
-          'left vertex to an unmatched right one that alternates free, matched, free, and flip every ' +
-          'edge on it. The path has one more free edge than matched ones, so the flip gains exactly ' +
-          'one. **Berge\'s theorem** says that is enough: when no augmenting path exists, the matching ' +
-          'is maximum.',
-        '**Kuhn** finds one augmenting path at a time, depth-first, resetting its visited set per ' +
-          'left vertex — O(VE). **Hopcroft-Karp** finds a whole maximal set of *vertex-disjoint* ' +
-          'shortest augmenting paths per phase, and because the shortest augmenting path strictly ' +
-          'lengthens each phase, there are only O(√V) phases, giving O(E√V). The phase column below ' +
-          'is the entire difference between the two, and on small graphs it is often no difference at ' +
-          'all — which is why the table sweeps the size instead of quoting a complexity.',
-        '**Koenig\'s theorem** links this to a covering problem: on a bipartite graph the maximum ' +
-          'matching and the *minimum vertex cover* have the same size, and the cover can be read off ' +
-          'the alternating search directly. That is not a curiosity — minimum vertex cover is ' +
-          'NP-hard in general, and bipartiteness is exactly what makes it tractable. **Hall\'s ' +
-          'condition** is the other reading: a perfect matching exists exactly when no set S of left ' +
-          'vertices has fewer than |S| neighbours, and when one fails the search hands back the ' +
-          'offending set as a witness rather than a boolean.',
-        '**Stable matching is a different problem.** Gale-Shapley takes preference *orders* rather ' +
-          'than an edge set, and optimises something else entirely: it produces a matching with no ' +
-          '**blocking pair** — no two people who would both rather have each other than their current ' +
-          'partners. It is always perfect on complete preferences, so its size is never in question; ' +
-          'what is in question is *whose* preferences it serves, and the panel runs it from both ' +
-          'sides on identical data to show that the proposing side gets the better half.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — matching, cover, Hall witness and two stable runs',
         markup: root.BipartiteMatchingTemplate.render()
       },
       diagram: diagram(),
       insight: 'Two facts settle most arguments about "matching platforms". Gale-Shapley is stable, ' +
-        'not maximum-weight — it will happily produce a pairing that a weighted algorithm beats on ' +
-        'total satisfaction — and it is optimal for the *proposing* side, which means the choice of ' +
+        'not maximum-weight: it will happily produce a pairing that a weighted algorithm beats on ' +
+        'total satisfaction. And it is optimal for the *proposing* side, which means the choice of ' +
         'who proposes is a product decision with a measurable winner, not an implementation detail. ' +
         'The residency match famously switched proposing sides for exactly this reason. If your ' +
-        'problem is "assign these to those at least cost", you want 14.6\'s Hungarian algorithm; if ' +
+        'problem is "assign these to those at least cost", you want 14.6\'s Hungarian algorithm. If ' +
         'it is "nobody should want to defect", you want this one.'
     };
   }
