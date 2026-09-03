@@ -45,33 +45,38 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'The previous section left a question open: how do you know a greedy rule is right, rather than right ' +
-          'on the instances you tried? For a large class of problems there is an exact answer. If the feasible ' +
-          'sets form a *matroid*, the generic greedy algorithm finds the maximum-weight one for every ' +
-          'weighting; if they do not, some weighting defeats it. That is the Rado-Edmonds theorem, and it is ' +
-          'an if-and-only-if, which is what makes it usable in both directions.',
-        'A matroid needs two properties. Hereditary: every subset of an independent set is independent. ' +
-          'Exchange: if A and B are independent and B is larger, some element of B can be moved into A ' +
-          'keeping it independent. Acyclic edge sets satisfy both - which is why Kruskal works - and so do ' +
-          '"at most k elements" and "a quota per group". Matchings satisfy the first and fail the second on ' +
+        '**The previous section left a question open: how do you know a greedy rule is right, ' +
+          'rather than right on the instances you tried?** For a large class of problems there is ' +
+          'an exact answer.',
+        'If the feasible sets form a *matroid*, the generic greedy algorithm finds the ' +
+          'maximum-weight one for every weighting. If they do not, some weighting defeats it. ' +
+          'That is the Rado-Edmonds theorem, and it is an if-and-only-if, which is what makes it ' +
+          'usable in both directions.',
+        'A matroid needs two properties. Hereditary: every subset of an independent set is ' +
+          'independent. Exchange: if A and B are independent and B is larger, some element of B ' +
+          'can be moved into A keeping it independent.',
+        'Acyclic edge sets satisfy both, which is why Kruskal works, and so do "at most k ' +
+          'elements" and "a quota per group". Matchings satisfy the first and fail the second on ' +
           'four elements, and the demo exhibits that failing pair.',
-        'The checker below enumerates the 2^n subsets, asks the oracle about each, and then searches for a ' +
-          'violating pair. It returns the witness rather than a verdict, because a verdict cannot be argued ' +
-          'with and a witness ends the argument. The generic greedy algorithm underneath is the same twelve ' +
-          'lines for every system: sort by weight, take what keeps the set independent. Give it the ' +
-          'acyclicity oracle and it is Kruskal - not "like Kruskal", the same code.'
+        'The checker below enumerates the 2^n subsets, asks the oracle about each, and then ' +
+          'searches for a violating pair. It returns the witness rather than a verdict, because a ' +
+          'verdict can be argued with and a witness ends the argument.',
+        'The generic greedy algorithm underneath is the same twelve lines for every system: sort ' +
+          'by weight, take what keeps the set independent. Give it the acyclicity oracle and it ' +
+          'is Kruskal — not "like Kruskal", the same code.'
       ],
       demo: {
         title: 'Interactive demo — the checker, its witness, and greedy against the truth',
         markup: root.MatroidsTemplate.render()
       },
       diagram: diagram(),
-      insight: 'Most problems are not matroids, and knowing that early is worth more than the theorem itself. ' +
-        'The practical use of this section is the shape of the question: when someone proposes a greedy rule, ' +
-        'write the feasible sets down, check the exchange property on a ten-element model, and if it fails, ' +
-        'the counter-example you just found is the test case. Matroid intersection - the feasible sets of two ' +
-        'matroids at once - is still solvable in polynomial time but no longer by greedy, and three matroids ' +
-        'is NP-hard. The cliff is that close.'
+      insight: 'Most problems are not matroids, and knowing that early is worth more than the ' +
+        'theorem itself. The practical use of this section is the shape of the question. When ' +
+        'someone proposes a greedy rule, write the feasible sets down and check the exchange ' +
+        'property on a ten-element model. If it fails, the counter-example you just found is the ' +
+        'test case. Matroid intersection — the feasible sets of two matroids at once — is still ' +
+        'solvable in polynomial time, but no longer by greedy. Three matroids is NP-hard. The ' +
+        'cliff is that close.'
     };
   }
 

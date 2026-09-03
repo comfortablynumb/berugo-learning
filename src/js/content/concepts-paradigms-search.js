@@ -10,15 +10,19 @@
         term: 'An independence system',
         plain: 'A ground set, and a family of subsets called independent that is closed downwards.',
         formal: '(E, I) with I ⊆ 2^E, ∅ ∈ I, and A ⊆ B ∈ I implying A ∈ I',
-        readAs: 'A matroid is a ground set E plus a collection I of its subsets called independent. 2^E means ' +
-          '"all possible subsets of E", so I is some of them. Two rules: the empty set is always ' +
-          'independent, and any subset of an independent set is independent too — you can always throw ' +
-          'things away.',
-        detail: 'This is the weakest structure worth naming, and almost every feasibility notion satisfies ' +
-          'it: acyclic edge sets, matchings, subsets under a size cap, sets respecting a quota. Being ' +
-          'hereditary is what makes "extend the current set" a sensible move at all, because it guarantees ' +
-          'that nothing you have already committed to becomes infeasible on its own. It is not enough to ' +
-          'make greedy correct, which is exactly why the second property is the interesting one.',
+        readAs: 'A matroid is a ground set E plus a collection I of its subsets, called ' +
+          'independent. 2^E means "all possible subsets of E", so I is some of them. Two rules: ' +
+          'the empty set is always independent, and any subset of an independent set is ' +
+          'independent too. You can always throw things away.',
+        detail: [
+          'This is the weakest structure worth naming, and almost every feasibility notion ' +
+            'satisfies it: acyclic edge sets, matchings, subsets under a size cap, sets respecting ' +
+            'a quota.',
+          'Being hereditary is what makes "extend the current set" a sensible move at all. It ' +
+            'guarantees that nothing you have already committed to becomes infeasible on its own.',
+          'It is not enough to make greedy correct, which is exactly why the second property is ' +
+            'the interesting one.'
+        ],
         example: 'Matchings in a graph are hereditary: removing an edge from a matching leaves a matching.'
       },
       {
@@ -35,16 +39,20 @@
         },
         plain: 'A larger independent set can always donate an element to a smaller one.',
         formal: 'A, B ∈ I with |A| < |B| implies there is x ∈ B \\ A with A ∪ {x} ∈ I',
-        readAs: 'The exchange property. If one independent set is smaller than another, you can always find ' +
-          'something in the bigger one that is not in the smaller one — the backslash is "minus" — and ' +
-          'add it to the smaller one while keeping it independent. That is what stops greedy painting ' +
-          'itself into a corner.',
-        detail: 'This is the property that stops greedy from painting itself into a corner. It says a smaller ' +
-          'independent set is never stuck: whatever it has committed to, something in a larger set can still ' +
-          'be added. Two consequences follow immediately - every maximal independent set has the same size, ' +
-          'and the greedy prefix can always be extended to something at least as large as any rival. The ' +
-          'failure of this one property is the whole difference between Kruskal being a theorem and being a ' +
-          'heuristic.',
+        readAs: 'The exchange property. Take one independent set smaller than another. You can ' +
+          'always find something in the bigger one that is not in the smaller one — the backslash ' +
+          'is "minus". Add it to the smaller one and that set is still independent. This is what ' +
+          'stops greedy painting itself into a corner.',
+        detail: [
+          'This is the property that stops greedy from painting itself into a corner. It says a ' +
+            'smaller independent set is never stuck: whatever it has committed to, something in a ' +
+            'larger set can still be added.',
+          'Two consequences follow immediately. Every maximal independent set has the same size, ' +
+            'and the greedy prefix can always be extended to something at least as large as any ' +
+            'rival.',
+          'The failure of this one property is the whole difference between Kruskal being a ' +
+            'theorem and being a heuristic.'
+        ],
         example: 'For matchings on a three-edge path, the single middle edge cannot be extended from the two ' +
           'outer edges — the exchange property fails on four elements.'
       },
@@ -52,15 +60,20 @@
         term: 'The Rado-Edmonds theorem',
         plain: 'Greedy is optimal for every weighting if and only if the independence system is a matroid.',
         formal: 'greedy finds a maximum-weight basis for all weight functions ⇔ (E, I) satisfies the exchange property',
-        readAs: 'Greedy works for every possible set of weights exactly when the structure is a matroid — and ' +
-          'the "exactly when" runs both ways. So if greedy fails on even one weighting, the structure ' +
-          'is not a matroid, and if it is a matroid, greedy can never fail.',
-        detail: 'The theorem is what turns "does greedy work here?" from an argument into a check, and it is ' +
-          'an if-and-only-if, which makes it useful in both directions. If the structure is a matroid, no ' +
-          'weighting can defeat greedy and no proof needs writing. If it is not, some weighting does defeat ' +
-          'greedy - so a greedy implementation is a bug waiting for the right data rather than an ' +
-          'approximation with a known ratio. The forward direction is the useful one in design; the ' +
-          'contrapositive is the useful one in review.',
+        readAs: 'Greedy works for every possible set of weights exactly when the structure is a ' +
+          'matroid, and the "exactly when" runs both ways. So if greedy fails on even one ' +
+          'weighting the structure is not a matroid — and if it is a matroid, greedy can never ' +
+          'fail.',
+        detail: [
+          'The theorem turns "does greedy work here?" from an argument into a check, and it is an ' +
+            'if-and-only-if, which makes it useful in both directions.',
+          'If the structure is a matroid, no weighting can defeat greedy and no proof needs ' +
+            'writing.',
+          'If it is not, some weighting does defeat greedy. A greedy implementation is then a bug ' +
+            'waiting for the right data, rather than an approximation with a known ratio.',
+          'The forward direction is the useful one in design; the contrapositive is the useful one ' +
+            'in review.'
+        ],
         example: 'Acyclic edge sets form a matroid, so Kruskal is optimal on every weighting; matchings do ' +
           'not, and weights 2, 3, 2 on a three-edge path defeat greedy.'
       },
@@ -68,13 +81,18 @@
         term: 'The independence oracle',
         plain: 'The algorithm never inspects the structure — it only asks "is this set still independent?".',
         formal: 'greedy(E, oracle, w): sort E by w descending; keep x when oracle(kept ∪ {x}) holds',
-        readAs: 'The entire algorithm: sort by weight, then take each element if adding it to what you have ' +
-          'kept is still allowed. The ∪ is "together with". Everything difficult is inside the oracle.',
-        detail: 'Writing greedy against an oracle rather than against a graph is what makes the abstraction ' +
-          'pay. The same twelve lines become Kruskal, a scheduling algorithm with deadlines, or a quota-' +
-          'respecting selection, purely by changing the oracle. It also makes the cost model explicit: the ' +
-          'algorithm makes exactly |E| oracle calls, and whether the whole thing is fast depends entirely on ' +
-          'how fast one call is. Kruskal is fast because union-find answers it in near-constant time.',
+        readAs: 'The entire algorithm: sort by weight, then take each element if adding it to what ' +
+          'you have kept is still allowed. The ∪ is "together with". Everything difficult is ' +
+          'inside the oracle.',
+        detail: [
+          'Writing greedy against an oracle rather than against a graph is what makes the ' +
+            'abstraction pay.',
+          'The same twelve lines become Kruskal, a scheduling algorithm with deadlines, or a ' +
+            'quota-respecting selection, purely by changing the oracle.',
+          'It also makes the cost model explicit. The algorithm makes exactly |E| oracle calls, ' +
+            'and whether the whole thing is fast depends entirely on how fast one call is. Kruskal ' +
+            'is fast because union-find answers it in near-constant time.'
+        ],
         example: 'Greedy with an acyclicity oracle on eight edges makes eight calls and returns the ' +
           'maximum-weight forest, weight 46 — the same answer as enumerating all 62 independent sets.'
       },
@@ -82,11 +100,14 @@
         term: 'Checking is exponential and worth it once',
         plain: 'Verifying a matroid by enumeration costs 2^n oracle calls, on a model, once.',
         formal: 'enumerate I over 2^E, then search all pairs (A, B) with |A| < |B| for a failure of exchange',
-        detail: 'The checker is not a subroutine and does not need to be fast. It is a tool for settling an ' +
-          'argument about a ten-element model of a structure before that structure is built into a system, ' +
-          'and at that size 2^n is a thousand calls. What matters is that it returns the violating pair ' +
-          'rather than a verdict: a boolean can be disputed, and a concrete pair of sets where the exchange ' +
-          'fails ends the discussion and doubles as the first regression test.',
+        detail: [
+          'The checker is not a subroutine and does not need to be fast.',
+          'It is a tool for settling an argument about a ten-element model of a structure, before ' +
+            'that structure is built into a system. At that size 2^n is a thousand calls.',
+          'What matters is that it returns the violating pair rather than a verdict. A boolean can ' +
+            'be disputed; a concrete pair of sets where the exchange fails ends the discussion, ' +
+            'and doubles as the first regression test.'
+        ],
         example: 'A ground set of eight edges costs 256 oracle calls and reports 62 independent sets, which ' +
           'is a fraction of a second.'
       },
@@ -94,14 +115,17 @@
         term: 'Uniform and partition matroids',
         plain: '"At most k of anything" and "at most k_i from each group" are both matroids.',
         formal: 'uniform: I = {A : |A| <= k}; partition: I = {A : |A ∩ E_i| <= k_i for each block E_i}',
-        readAs: 'Two of the simplest matroids. Uniform: any set of at most k things is independent. ' +
-          'Partition: at most k_i things from each block. The colon reads "such that" and the bars are ' +
-          '"how many".',
-        detail: 'These two cover a surprising amount of practical scheduling and selection. Any problem that ' +
-          'reads "choose the highest-value items subject to a cap, or to a cap per category" is a matroid, so ' +
-          'sorting by value and taking greedily is provably optimal and needs no further argument. Recognising ' +
-          'them is worth more than the theory: they are the cases where an engineer\'s instinct to sort and ' +
-          'take is right, and knowing why means not reaching for a solver.',
+        readAs: 'Two of the simplest matroids. Uniform: any set of at most k things is ' +
+          'independent. Partition: at most k_i things from each block. The colon reads "such ' +
+          'that", and the bars are "how many".',
+        detail: [
+          'These two cover a surprising amount of practical scheduling and selection.',
+          'Any problem that reads "choose the highest-value items subject to a cap, or to a cap ' +
+            'per category" is a matroid. So sorting by value and taking greedily is provably ' +
+            'optimal, and needs no further argument.',
+          'Recognising them is worth more than the theory. They are the cases where an engineer\'s ' +
+            'instinct to sort and take is right, and knowing why means not reaching for a solver.'
+        ],
         example: 'Selecting the most valuable articles for a front page with at most three per section is a ' +
           'partition matroid, so the obvious greedy selection is optimal.'
       },
@@ -109,14 +133,18 @@
         term: 'Matroid intersection, and the cliff after it',
         plain: 'Two matroids at once is still polynomial; three is NP-hard.',
         formal: 'max |A| with A independent in both M₁ and M₂ is in P (Edmonds); for three matroids it is NP-hard',
-        readAs: 'Finding the largest set independent in two matroids at once is solvable in polynomial time. ' +
-          'Add a third and it becomes NP-hard — one of the sharpest easy-to-hard boundaries in the ' +
-          'subject.',
-        detail: 'The boundary is worth carrying because it is so close. Feasible sets that must satisfy two ' +
-          'independent structural constraints - a bipartite matching is a partition matroid intersected with ' +
-          'another - remain tractable, though no longer by greedy: the algorithm becomes an augmenting-path ' +
-          'search. Add a third constraint and the problem becomes NP-hard, which includes three-dimensional ' +
-          'matching. So "my constraints are all matroids" is good news exactly twice.',
+        readAs: 'Finding the largest set independent in two matroids at once is solvable in ' +
+          'polynomial time. Add a third and it becomes NP-hard — one of the sharpest easy-to-hard ' +
+          'boundaries in the subject.',
+        detail: [
+          'The boundary is worth carrying because it is so close.',
+          'Feasible sets that must satisfy two independent structural constraints remain ' +
+            'tractable, though no longer by greedy. A bipartite matching is one partition matroid ' +
+            'intersected with another, and the algorithm becomes an augmenting-path search.',
+          'Add a third constraint and the problem becomes NP-hard, which includes ' +
+            'three-dimensional matching. So "my constraints are all matroids" is good news exactly ' +
+            'twice.'
+        ],
         example: 'Bipartite matching is the intersection of two partition matroids, one per side, and is ' +
           'solved by augmenting paths rather than by greedy.'
       },
@@ -124,15 +152,19 @@
         term: 'When the structure is not a matroid',
         plain: 'Greedy becomes a heuristic with, at best, a known approximation ratio.',
         formal: 'for a k-system, greedy is a 1/k-approximation; for submodular maximisation under a cardinality constraint, 1 − 1/e',
-        readAs: 'When the structure is not quite a matroid you still get a guarantee, just a weaker one: at ' +
-          'least 1/k of the best possible. For submodular objectives the guarantee is 1 − 1/e, about ' +
-          '63%, and that figure is provably the best any efficient algorithm can promise.',
-        detail: 'A negative answer from the checker is not the end of greedy, it is the end of greedy as an ' +
-          'exact algorithm. Weaker structures still support guarantees - independence systems where every ' +
-          'maximal set is within a factor k of every other give greedy a 1/k ratio, and monotone submodular ' +
-          'objectives under a cardinality constraint give the famous 1 − 1/e. The point is that the guarantee ' +
-          'changes from "optimal" to "within a factor", and a system that reports an exact answer must not be ' +
-          'built on the second kind.',
+        readAs: 'When the structure is not quite a matroid you still get a guarantee, just a ' +
+          'weaker one: at least 1/k of the best possible. For submodular objectives the guarantee ' +
+          'is 1 − 1/e, about 63%, and that figure is provably the best any efficient algorithm can ' +
+          'promise.',
+        detail: [
+          'A negative answer from the checker is not the end of greedy. It is the end of greedy as ' +
+            'an exact algorithm.',
+          'Weaker structures still support guarantees. Independence systems where every ' +
+            'maximal set is within a factor k of every other give greedy a 1/k ratio. Monotone ' +
+            'submodular objectives under a cardinality constraint give the famous 1 − 1/e.',
+          'The point is that the guarantee changes from "optimal" to "within a factor". A system ' +
+            'that reports an exact answer must not be built on the second kind.'
+        ],
         example: 'Greedy on matchings weighted 2, 3, 2 returns 3 where the optimum is 4 — a ratio of 0.75, ' +
           'and the worst case for that structure is 0.5.'
       }
