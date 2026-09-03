@@ -46,23 +46,27 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'A bitmask DP puts a *set* in the state by writing it as an integer. Held-Karp\'s state is ' +
-          '(visited set, current city), which is 2ⁿ·n cells against (n − 1)! permutations — at n = 12 that ' +
-          'is 49 152 cells against 39 916 800 tours. The saving comes from a single observation: two routes ' +
-          'that have visited the same cities and end at the same city are interchangeable for everything ' +
-          'that follows, so only the cheaper one needs keeping.',
-        '**Submask enumeration totals 3ⁿ, and that identity is why the technique is feasible at all.** ' +
-          'The idiom `for (sub = mask; sub; sub = (sub - 1) & mask)` walks every subset of one mask; summed ' +
-          'over all masks it counts each (submask, mask) pair once, which is three choices per bit — in ' +
-          'neither, in the submask, or in the mask only. The obvious upper bound is 4ⁿ, and at n = 12 the ' +
-          'difference between 3ⁿ and 4ⁿ is 531 441 against 16 777 216. The demo counts the steps.',
-        '**Sum over subsets does the same job in n·2ⁿ.** Relaxing one bit at a time instead of walking ' +
-          'every submask gives the identical table at 1 024 operations where the submask loop needs 6 561 ' +
-          'at n = 8 — and the loop order is the algorithm. The bit loop must be *outside*; swapping the ' +
-          'loops gives a partly relaxed table that is entirely plausible and wrong.',
-        '**The wall is real and it is memory, not time.** At n = 25 the (mask, last) table is 838 million ' +
-          'cells and 6.7 GB at eight bytes each. No amount of cleverness inside the transition changes ' +
-          'that, which is why the practical answer past twenty-something cities is a different algorithm ' +
+        '**A bitmask DP puts a *set* in the state by writing it as an integer.** Held-Karp\'s ' +
+          'state is (visited set, current city), which is 2ⁿ·n cells against (n − 1)! ' +
+          'permutations. At n = 12 that is 49 152 cells against 39 916 800 tours.',
+        'The saving comes from a single observation. Two routes that have visited the same cities ' +
+          'and end at the same city are interchangeable for everything that follows, so only the ' +
+          'cheaper one needs keeping.',
+        '**Submask enumeration totals 3ⁿ, and that identity is why the technique is feasible at ' +
+          'all.** The idiom `for (sub = mask; sub; sub = (sub - 1) & mask)` walks every subset of ' +
+          'one mask. Summed over all masks it counts each (submask, mask) pair once, which is ' +
+          'three choices per bit: in neither, in the submask, or in the mask only.',
+        'The obvious upper bound is 4ⁿ, and at n = 12 the difference between 3ⁿ and 4ⁿ is 531 441 ' +
+          'against 16 777 216. The demo counts the steps.',
+        '**Sum over subsets does the same job in n·2ⁿ.** Relaxing one bit at a time instead of ' +
+          'walking every submask gives the identical table, at 1 024 operations where the submask ' +
+          'loop needs 6 561 at n = 8.',
+        'The loop order is the algorithm. The bit loop must be *outside*, and swapping the loops ' +
+          'gives a partly relaxed table that is entirely plausible and wrong.',
+        '**The wall is real and it is memory, not time.** At n = 25 the (mask, last) table is 838 ' +
+          'million cells and 6.7 GB at eight bytes each. No amount of cleverness inside the ' +
+          'transition changes that.',
+        'That is why the practical answer past twenty-something cities is a different algorithm ' +
           'entirely — branch and bound, or an approximation — rather than a faster bitmask DP.'
       ],
       demo: {
@@ -70,11 +74,12 @@
         markup: root.BitmaskDpTemplate.render()
       },
       diagram: diagram(),
-      insight: 'The moment a state contains a set, write down 2ⁿ times the rest of the state and multiply ' +
-        'by eight bytes before writing any code. That number decides whether the approach exists, and it ' +
-        'takes ten seconds. If it is over a gigabyte the answer is not "optimise the inner loop" — the ' +
-        'inner loop is not the problem — it is a different algorithm. The corollary is that bitmask DP is ' +
-        'the right tool in a narrow band: too small and brute force is simpler, too large and nothing fits.'
+      insight: 'The moment a state contains a set, write down 2ⁿ times the rest of the state ' +
+        'and multiply by eight bytes, before writing any code. That number decides whether the ' +
+        'approach exists, and it takes ten seconds. If it is over a gigabyte the answer is not ' +
+        '"optimise the inner loop". The inner loop is not the problem; a different algorithm is ' +
+        'the answer. The corollary is that bitmask DP is the right tool in a narrow band: too ' +
+        'small and brute force is simpler, too large and nothing fits.'
     };
   }
 

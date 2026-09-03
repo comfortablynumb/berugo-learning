@@ -344,28 +344,35 @@
         },
         plain: 'Subsets of n things are the integers below 2ⁿ, and bit operations are the set operations.',
         formal: 'mask ∈ [0, 2ⁿ); union is |, intersection is &, membership is mask & (1 << i)',
-        readAs: 'A subset is stored as a number whose bits say which elements are in it. Union is bitwise OR, ' +
-          'intersection is AND, and testing membership is shifting a 1 into position and masking. Set ' +
-          'operations become single instructions.',
-        detail: 'The representation is what makes the family practical: a set becomes an array index, so a ' +
-          'table over subsets is a flat array rather than a map, and the transitions are single ' +
-          'instructions. It is also what fixes the ceiling, because the table is 2ⁿ entries whatever is in ' +
-          'them. Everything in this section follows from those two facts - the technique is fast in a ' +
-          'narrow band of n and does not exist outside it.',
+        readAs: 'A subset is stored as a number whose bits say which elements are in it. Union is ' +
+          'bitwise OR, intersection is AND, and testing membership is shifting a 1 into position ' +
+          'and masking. Set operations become single instructions.',
+        detail: [
+          'The representation is what makes the family practical. A set becomes an array index, so ' +
+            'a table over subsets is a flat array rather than a map, and the transitions are ' +
+            'single instructions.',
+          'It is also what fixes the ceiling, because the table is 2ⁿ entries whatever is in them.',
+          'Everything in this section follows from those two facts. The technique is fast in a ' +
+            'narrow band of n, and does not exist outside it.'
+        ],
         example: 'Twelve cities give 4 096 masks and, with the current city, 49 152 table cells.'
       },
       {
         term: 'Held-Karp: (visited set, current city)',
         plain: 'Two routes visiting the same cities and ending in the same place are interchangeable.',
         formal: 'best[mask][last] = min over prev in mask of best[mask ^ (1<<last)][prev] + d(prev, last)',
-        readAs: 'To reach a set of visited cities ending at `last`, come from some earlier city, having ' +
-          'visited everything except `last` — which is that set with the `last` bit XORed off.',
-        detail: 'The saving comes from one observation about the *future*: everything that happens after a ' +
-          'partial tour depends only on which cities remain and where you are standing, not on the order ' +
-          'the visited ones were taken in. So all (k−1)! orderings that reach the same set and endpoint ' +
-          'collapse into one state, and (n−1)! tours become 2ⁿ·n cells. That is the general move - find the ' +
-          'sufficient statistic and the factorial becomes exponential, which is an enormous improvement and ' +
-          'still exponential.',
+        readAs: 'To reach a set of visited cities ending at `last`, come from some earlier ' +
+          'city, having visited everything except `last`. That is the same set with the `last` ' +
+          'bit XORed off.',
+        detail: [
+          'The saving comes from one observation about the *future*. Everything that happens after ' +
+            'a partial tour depends only on which cities remain and where you are standing, not on ' +
+            'the order the visited ones were taken in.',
+          'So all (k−1)! orderings that reach the same set and endpoint collapse into one state, ' +
+            'and (n−1)! tours become 2ⁿ·n cells.',
+          'That is the general move. Find the sufficient statistic and the factorial becomes ' +
+            'exponential — an enormous improvement, and still exponential.'
+        ],
         example: 'Twelve cities: 49 152 cells against 39 916 800 tours, and at ten cities the table\'s ' +
           'answer matches every permutation enumerated.'
       },
@@ -373,27 +380,34 @@
         term: 'Submask enumeration totals 3ⁿ',
         plain: 'The idiom `sub = (sub - 1) & mask` walks every subset of a mask, and the total over all masks is 3ⁿ.',
         formal: 'Σ over masks of 2^popcount(mask) = 3ⁿ, since each bit is in neither, in the submask, or in the mask only',
-        readAs: 'Enumerating every subset of every subset costs 3 to the power n, not 4 — because each ' +
-          'element is in exactly one of three situations. That single observation is what makes submask ' +
-          'enumeration affordable.',
-        detail: 'The loop looks like it is 2ⁿ inside 2ⁿ, and the natural bound people reach for is 4ⁿ. The ' +
-          'true count is 3ⁿ, by a one-line counting argument: summing over (submask, mask) pairs, each of ' +
-          'the n bits independently has three states. At n = 12 that is 531 441 against 16 777 216 - a ' +
-          'factor of 32 - and the identity is exactly why submask DP is feasible at all. It is also exact ' +
-          'rather than asymptotic, which makes it checkable.',
+        readAs: 'Enumerating every subset of every subset costs 3 to the power n, not 4. Each ' +
+          'element is in exactly one of three situations, and that single observation is what ' +
+          'makes submask enumeration affordable.',
+        detail: [
+          'The loop looks like it is 2ⁿ inside 2ⁿ, and the natural bound people reach for is 4ⁿ.',
+          'The true count is 3ⁿ, by a one-line counting argument. Summing over (submask, mask) ' +
+            'pairs, each of the n bits independently has three states.',
+          'At n = 12 that is 531 441 against 16 777 216, a factor of 32, and the identity is ' +
+            'exactly why submask DP is feasible at all. It is also exact rather than asymptotic, ' +
+            'which makes it checkable.'
+        ],
         example: 'Measured: 81 steps at n = 4, 6 561 at n = 8, 531 441 at n = 12 — equal to 3ⁿ at every size.'
       },
       {
         term: 'Sum over subsets is n·2ⁿ, not 3ⁿ',
         plain: 'Relax one bit at a time instead of walking every submask.',
         formal: 'for each bit b, for each mask with b set: f[mask] += f[mask ^ (1<<b)]',
-        readAs: 'The subset-sum transform: one pass per bit, each folding in the value of the mask with that ' +
-          'bit removed. It computes every subset total in n·2ⁿ rather than 3ⁿ.',
-        detail: 'The submask loop computes "the aggregate over all subsets of each mask" directly, in 3ⁿ. ' +
-          'SOS computes the identical table by absorbing one bit at a time, so after round b every entry ' +
-          'has taken in the submasks differing only in bits 0…b. That is n·2ⁿ, and at n = 10 the difference ' +
-          'is 5 120 operations against 59 049. The loop order is the algorithm: the bit loop must be ' +
-          'outside, and swapping the two gives a partly relaxed table that looks entirely ordinary.',
+        readAs: 'The subset-sum transform: one pass per bit, each folding in the value of the mask ' +
+          'with that bit removed. It computes every subset total in n·2ⁿ rather than 3ⁿ.',
+        detail: [
+          'The submask loop computes "the aggregate over all subsets of each mask" directly, in ' +
+            '3ⁿ.',
+          'SOS computes the identical table by absorbing one bit at a time. After round b every ' +
+            'entry has taken in the submasks differing only in bits 0…b, so the total is n·2ⁿ. At ' +
+            'n = 10 the difference is 5 120 operations against 59 049.',
+          'The loop order is the algorithm. The bit loop must be outside, and swapping the two ' +
+            'gives a partly relaxed table that looks entirely ordinary.'
+        ],
         example: 'At 10 bits, SOS does 5 120 transitions and the submask walk does 59 049, and the two ' +
           'tables agree on all 1 024 entries.'
       },
@@ -401,12 +415,15 @@
         term: 'Drop the redundant dimension',
         plain: 'If part of the state is a function of the rest, it is not part of the state.',
         formal: 'in the assignment problem, the worker index equals popcount(mask)',
-        detail: 'Workers are filled in order, so after k jobs have been assigned exactly k workers have been ' +
-          'used, and the worker index carries no information the mask does not already have. Removing it ' +
-          'takes the table from n·2ⁿ to 2ⁿ - a factor of n in both time and memory, from an observation ' +
-          'that takes ten seconds. In a family with a hard memory ceiling that factor is often the ' +
-          'difference between the approach existing and not, which is why the state deserves a second look ' +
-          'before any code is written.',
+        detail: [
+          'Workers are filled in order, so after k jobs have been assigned exactly k workers have ' +
+            'been used. The worker index carries no information the mask does not already have.',
+          'Removing it takes the table from n·2ⁿ to 2ⁿ — a factor of n in both time and memory, ' +
+            'from an observation that takes ten seconds.',
+          'In a family with a hard memory ceiling, that factor is often the difference ' +
+            'between the approach existing and not. So the state deserves a second look before ' +
+            'any code is written.'
+        ],
         example: 'Eight workers and eight jobs: 256 states rather than 2 048, and the optimum of 36 matches ' +
           'exhaustive enumeration of all 40 320 assignments.'
       },
@@ -414,38 +431,47 @@
         term: 'Broken profile: the frontier is the state',
         plain: 'Fill cell by cell and carry the boundary between filled and unfilled as a mask.',
         formal: 'the state is (cell index, profile of the m-cell frontier), so 2^m states per column',
-        readAs: 'Broken-profile DP carries the boundary between the solved and unsolved parts as a bitmask. ' +
-          'The cost is exponential in the width of that boundary and linear in the length, so you ' +
-          'orient the grid to make the width the smaller dimension.',
-        detail: 'Tiling problems look like they need the whole partial board in the state and need only the ' +
-          'frontier - the cells whose fate is not yet settled. That is m bits for an m-wide board, and it ' +
-          'is why the *narrow* side must be the one in the state: a 2 × 12 board has 4 profiles and a ' +
-          '12 × 2 board has 4 096. Transposing the input is a one-line decision worth three orders of ' +
-          'magnitude, and it is the kind of thing only noticed by writing down the state size first.',
+        readAs: 'Broken-profile DP carries the boundary between the solved and unsolved parts as a ' +
+          'bitmask. The cost is exponential in the width of that boundary and linear in the ' +
+          'length, so you orient the grid to make the width the smaller dimension.',
+        detail: [
+          'Tiling problems look like they need the whole partial board in the state, and need only ' +
+            'the frontier — the cells whose fate is not yet settled.',
+          'That is m bits for an m-wide board, and it is why the *narrow* side must be the one in ' +
+            'the state. A 2 × 12 board has 4 profiles and a 12 × 2 board has 4 096.',
+          'Transposing the input is a one-line decision worth three orders of magnitude, and it is ' +
+            'the kind of thing only noticed by writing down the state size first.'
+        ],
         example: 'A 2 × 12 board has 233 tilings — Fibonacci(13) — and an 8 × 8 board has 12 988 816.'
       },
       {
         term: 'The wall is memory, and it is a number',
         plain: '2ⁿ·n cells at eight bytes is 6.7 GB by n = 25.',
         formal: 'bytes = 8 · n · 2ⁿ; the ceiling is set by allocation, not by time',
-        readAs: 'The table is n times 2 to the n entries, eight bytes each. At n = 20 that is 168 MB — you ' +
-          'run out of memory long before you run out of patience.',
-        detail: '"It does not scale" is unfalsifiable and useless for deciding. The table is 393 KB at ' +
-          'n = 12, 168 MB at n = 20, 738 MB at n = 22 and 6.7 GB at n = 25 - and no improvement to the ' +
-          'inner loop moves any of those. Working the number out before writing code tells you whether the ' +
-          'approach exists at all, and past the ceiling the answer is a different algorithm - branch and ' +
-          'bound, or an approximation - rather than a faster bitmask DP.',
+        readAs: 'The table is n times 2 to the n entries, eight bytes each. At n = 20 that is ' +
+          '168 MB. You run out of memory long before you run out of patience.',
+        detail: [
+          '"It does not scale" is unfalsifiable and useless for deciding.',
+          'The table is 393 KB at n = 12, 168 MB at n = 20, 738 MB at n = 22 and 6.7 GB at n = 25. ' +
+            'No improvement to the inner loop moves any of those.',
+          'Working the number out before writing code tells you whether the approach exists at ' +
+            'all. Past the ceiling the answer is a different algorithm — branch and bound, or an ' +
+            'approximation — rather than a faster bitmask DP.'
+        ],
         example: 'n = 20 is 20 971 520 cells and 168 MB; n = 25 is 838 860 800 cells and 6.7 GB.'
       },
       {
         term: 'Popcount is not free, and often is not needed',
         plain: 'Counting bits inside the inner loop is a cost; deriving it from the loop index is not.',
         formal: 'iterate masks in increasing order and popcount is either precomputed or implied by the order',
-        detail: 'The assignment DP needs popcount(mask) at every state, and calling a bit-counting loop there ' +
-          'multiplies the transition cost by n. Precomputing the whole popcount array is 2ⁿ integers and ' +
-          'one pass, or the value can be carried along the transition since adding one bit adds one to the ' +
-          'count. This is the same class of decision as choosing the narrow side of a tiling board: small, ' +
-          'mechanical, and decisive in a family where the state count is already at the limit.',
+        detail: [
+          'The assignment DP needs popcount(mask) at every state, and calling a bit-counting loop ' +
+            'there multiplies the transition cost by n.',
+          'Precomputing the whole popcount array is 2ⁿ integers and one pass. Or the value can be ' +
+            'carried along the transition, since adding one bit adds one to the count.',
+          'This is the same class of decision as choosing the narrow side of a tiling board. ' +
+            'Small, mechanical, and decisive where the state count is already at the limit.'
+        ],
         example: 'Eight workers: the popcount is needed at every one of the 256 states, and computing it ' +
           'from the transition rather than by counting bits removes a factor of eight.'
       }
