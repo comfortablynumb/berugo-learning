@@ -52,37 +52,42 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'Every sort in this milestone wins on some input and loses on another, and the chooser below is what ' +
-          'that means in practice: pick the shape, the size and whether stability is required, and the ' +
-          'ranking rearranges. On 2 000 nearly-sorted elements Timsort does 3 099 comparisons and Lomuto ' +
-          'quicksort does 104 120; on 2 000 elements with three distinct values three-way quicksort does 3 389 ' +
-          'and Lomuto does 676 647. Neither of those is a fact about quicksort - they are facts about ' +
-          'quicksort *and that input*, which is why "which sort is fastest" has no answer and "which sort for ' +
-          'this workload" does.',
-        'JavaScript has two specifics worth knowing. `Array.prototype.sort` has been required to be stable ' +
-          'since ES2019 - before that V8 used an unstable quicksort below 10 elements and code that relied on ' +
-          'stability was relying on an accident. And the default comparator converts every element to a string ' +
-          'and compares UTF-16 code units, so `[1, 2, 10].sort()` returns `[1, 10, 2]`. That is not a rounding ' +
-          'error, it is a different order, and it survives review because a sorted-looking array of small ' +
-          'numbers looks sorted.',
-        'Sorting objects means sorting one extracted field, and the extraction has a cost that the comparison ' +
-          'count hides: a comparator that calls `toLowerCase()` or `localeCompare` runs that work O(n log n) ' +
-          'times. The Schwartzian transform - decorate with the computed key, sort on it, undecorate - moves ' +
-          'that to O(n), and `Intl.Collator` exists precisely because locale-aware comparison is expensive ' +
-          'enough to want hoisted out of the inner loop. Multi-key ordering is the same idea: write the ' +
-          'tie-break chain down explicitly rather than sorting three times and hoping stability carries it.'
+        '**Every sort in this milestone wins on some input and loses on another.** The chooser ' +
+          'below is what that means in practice: pick the shape, the size and whether stability ' +
+          'is required, and the ranking rearranges.',
+        'On 2 000 nearly-sorted elements Timsort does 3 099 comparisons and Lomuto quicksort does ' +
+          '104 120. On 2 000 elements with three distinct values, three-way quicksort does 3 389 ' +
+          'and Lomuto does 676 647. Neither of those is a fact about quicksort. They are facts ' +
+          'about quicksort *and that input*, which is why "which sort is fastest" has no answer ' +
+          'and "which sort for this workload" does.',
+        'JavaScript has two specifics worth knowing. `Array.prototype.sort` has been required ' +
+          'to be stable only since ES2019. Before that V8 used an unstable quicksort below 10 ' +
+          'elements, and code that relied on stability was relying on an accident.',
+        'The other is that the default comparator converts every element to a string and compares ' +
+          'UTF-16 code units, so `[1, 2, 10].sort()` returns `[1, 10, 2]`. That is not a rounding ' +
+          'error, it is a different order, and it survives review because a sorted-looking array ' +
+          'of small numbers looks sorted.',
+        'Sorting objects means sorting one extracted field, and the extraction has a cost the ' +
+          'comparison count hides. A comparator that calls `toLowerCase()` or `localeCompare` ' +
+          'runs that work O(n log n) times.',
+        'The Schwartzian transform — decorate with the computed key, sort on it, undecorate — ' +
+          'moves that to O(n). `Intl.Collator` exists precisely because locale-aware comparison ' +
+          'is expensive enough to want hoisted out of the inner loop. Multi-key ordering is the ' +
+          'same idea: write the tie-break chain down explicitly, rather than sorting three times ' +
+          'and hoping stability carries it.'
       ],
       demo: {
         title: 'Interactive demo — the chooser, and the default that sorts numbers as strings',
         markup: root.SortingInPracticeTemplate.render()
       },
       diagram: diagram(),
-      insight: 'The default `sort` comparing stringified numbers is still one of the most common bugs in ' +
-        'JavaScript, and it survives review because `[1, 2, 10]` looks sorted until it is `[1, 10, 2]`. The ' +
-        'general lesson is bigger than the language: a sort that produces *almost* the right order is far ' +
-        'more dangerous than one that crashes, and almost every failure mode in this milestone has that ' +
-        'shape - the unstable merge, the unstable radix pass, the broken comparator, the quiet quadratic. ' +
-        'When output looks nearly right, suspect the ordering contract before the algorithm.'
+      insight: 'The default `sort` comparing stringified numbers is still one of the most ' +
+        'common bugs in JavaScript. It survives review because `[1, 2, 10]` looks sorted until ' +
+        'it is `[1, 10, 2]`. The general lesson is bigger than the language. A sort that ' +
+        'produces *almost* the right order is far more dangerous than one that crashes. Almost ' +
+        'every failure mode in this milestone has that shape: the unstable merge, the unstable ' +
+        'radix pass, the broken comparator, the quiet quadratic. When output looks nearly right, ' +
+        'suspect the ordering contract before the algorithm.'
     };
   }
 

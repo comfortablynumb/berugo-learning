@@ -471,22 +471,29 @@
         term: 'The ranking is a function of the workload',
         plain: 'State the shape, the size and the requirements, and the answer follows from measurement.',
         formal: 'no total order on sorts exists; every one wins on some input',
-        detail: 'This is the milestone\'s conclusion made operational. Timsort wins on nearly-sorted data and ' +
-          'loses to pdqsort on uniform random; three-way quicksort wins on duplicates by a factor of 200 and ' +
-          'is unstable; radix sort does no comparisons at all and needs integer keys. A benchmark on one ' +
-          'input measures one column and reports it as the table, which is why the chooser takes the workload ' +
-          'as input rather than producing a ranking.',
+        detail: [
+          'This is the milestone\'s conclusion made operational.',
+          'Timsort wins on nearly-sorted data and loses to pdqsort on uniform random. Three-way ' +
+            'quicksort wins on duplicates by a factor of 200, and is unstable. Radix sort does no ' +
+            'comparisons at all, and needs integer keys.',
+          'A benchmark on one input measures one column and reports it as the table. That is why ' +
+            'the chooser takes the workload as input, rather than producing a ranking.'
+        ],
         example: 'On 2 000 elements: Timsort leads on nearly-sorted at 3 099 comparisons and three-way quicksort on few-unique at 3 389.'
       },
       {
         term: 'JavaScript\'s sort is stable, and only since ES2019',
         plain: 'Before that, V8 used an unstable quicksort below a size threshold.',
         formal: 'ECMAScript 2019 requires Array.prototype.sort to be stable',
-        detail: 'Code written before 2019 that relied on stability was relying on an accident, and worse, on ' +
-          'an accident that depended on array length - V8 used insertion sort for short arrays and an ' +
-          'unstable quicksort above a threshold, so the same code was stable in testing and unstable in ' +
-          'production. Modern engines ship a Timsort derivative and the guarantee is now in the specification. ' +
-          'It is worth knowing which guarantees are specified and which are observed behaviour.',
+        detail: [
+          'Code written before 2019 that relied on stability was relying on an accident.',
+          'Worse, on an accident that depended on array length. V8 used insertion sort for short ' +
+            'arrays and an unstable quicksort above a threshold, so the same code was stable in ' +
+            'testing and unstable in production.',
+          'Modern engines ship a Timsort derivative, and the guarantee is now in the ' +
+            'specification. It is worth knowing which guarantees are specified and which are ' +
+            'observed behaviour.'
+        ],
         example: 'V8 now uses TimSort for Array.prototype.sort; the stability guarantee is normative.'
       },
       {
@@ -502,11 +509,15 @@
         },
         plain: '`[1, 2, 10].sort()` returns `[1, 10, 2]`.',
         formal: 'the default comparator converts elements to strings and compares UTF-16 code units',
-        detail: 'This is still one of the most common bugs in JavaScript, and its persistence is a lesson in ' +
-          'itself: it survives review because a sorted-looking array of small numbers looks sorted. `[1, 2, ' +
-          '3]` is identical under both orderings, so the test passes; `[5, 40, 300]` comes back as `[300, 40, ' +
-          '5]`. Nothing throws, nothing warns, and the failure only appears once the data crosses a digit ' +
-          'boundary.',
+        detail: [
+          'This is still one of the most common bugs in JavaScript, and its persistence is a ' +
+            'lesson in itself. It survives review because a sorted-looking array of small numbers ' +
+            'looks sorted.',
+          '`[1, 2, 3]` is identical under both orderings, so the test passes. `[5, 40, 300]` comes ' +
+            'back as `[300, 40, 5]`.',
+          'Nothing throws and nothing warns. The failure only appears once the data crosses a ' +
+            'digit boundary.'
+        ],
         example: '`[5, 40, 300].sort()` returns `[300, 40, 5]`.'
       },
       {
@@ -522,60 +533,80 @@
         },
         plain: 'Any work inside it - lowercasing, parsing, property lookup - is multiplied by the comparison count.',
         formal: 'the Schwartzian transform moves key computation from O(n log n) to O(n)',
-        readAs: 'Compute each element\'s sort key once up front, sort the pairs, then throw the keys away. ' +
-          'Without it an expensive key function runs once per comparison rather than once per element.',
-        detail: 'A comparator that calls `toLowerCase()`, parses a date or walks a property path does that ' +
-          'work once per comparison, which is about 20 000 times for a thousand elements. Decorating each ' +
-          'element with its computed key, sorting on the key and undecorating does it n times. The idea is ' +
-          'older than the language and worth reaching for whenever the key is more expensive than the ' +
-          'comparison - which, for anything involving strings or dates, it usually is.',
+        readAs: 'Compute each element\'s sort key once up front, sort the pairs, then throw the ' +
+          'keys away. Without it, an expensive key function runs once per comparison rather than ' +
+          'once per element.',
+        detail: [
+          'A comparator that calls `toLowerCase()`, parses a date or walks a property path does ' +
+            'that work once per comparison. For a thousand elements that is about 20 000 times.',
+          'Decorating each element with its computed key, sorting on the key and undecorating does ' +
+            'it n times.',
+          'The idea is older than the language, and worth reaching for whenever the key is more ' +
+            'expensive than the comparison. For anything involving strings or dates, it usually ' +
+            'is.'
+        ],
         example: 'Sorting 1 000 rows does about 10 000 comparisons and would call an expensive key function that many times.'
       },
       {
         term: 'Locale-aware collation, and its cost',
         plain: '`Intl.Collator` compares by language rules; `<` compares UTF-16 code units.',
         formal: 'construct the collator once, outside the comparator',
-        detail: 'Comparing strings with `<` orders by code unit, which puts every accented character after ' +
-          '`z` and every uppercase letter before every lowercase one - so `Ángel` sorts after `zebra` and ' +
-          '`apple` after `Zebra`. `Intl.Collator` implements the Unicode collation algorithm and gets this ' +
-          'right, at a cost worth respecting: construct it once and reuse it, because building a collator ' +
-          'inside a comparator builds one per comparison.',
+        detail: [
+          'Comparing strings with `<` orders by code unit. That puts every accented character ' +
+            'after `z` and every uppercase letter before every lowercase one, so `Ángel` sorts ' +
+            'after `zebra` and `apple` after `Zebra`.',
+          '`Intl.Collator` implements the Unicode collation algorithm and gets this right.',
+          'The cost is worth respecting. Construct it once and reuse it, because building a ' +
+            'collator inside a comparator builds one per comparison.'
+        ],
         example: 'With a base-sensitivity collator, `Ángel` sorts next to `ana` rather than after `z`.'
       },
       {
         term: 'Write the tie-break chain, do not rely on stability for it',
         plain: 'One comparator with the full ordering beats three sorts that assume the earlier ones survive.',
         formal: 'compare key1; if equal compare key2; if equal compare key3',
-        detail: 'Sorting three times and relying on stability to preserve the earlier passes does work, and ' +
-          'it makes the ordering an emergent property of three separate calls rather than a stated one. It ' +
-          'also costs three sorts instead of one, breaks silently if any of them is replaced by an unstable ' +
-          'sort, and cannot be read off a single function. An explicit chain is faster, self-documenting and ' +
-          'robust to the sort changing underneath it.',
+        detail: [
+          'Sorting three times and relying on stability to preserve the earlier passes does work. ' +
+            'It also makes the ordering an emergent property of three separate calls, rather than ' +
+            'a stated one.',
+          'It costs three sorts instead of one, it breaks silently if any of them is replaced by ' +
+            'an unstable sort, and it cannot be read off a single function.',
+          'An explicit chain is faster, self-documenting, and robust to the sort changing ' +
+            'underneath it.'
+        ],
         example: 'Team ascending, then points descending, then name by collator - one comparator, one sort.'
       },
       {
         term: 'Pagination needs a total order',
         plain: 'If the sort key has ties, two pages can show the same row or skip one.',
         formal: 'append a unique tie-breaker - the primary key - to make the ordering total',
-        detail: 'Sorting by a non-unique column and paginating with limit and offset is a real and common ' +
-          'bug: rows that compare equal have no defined relative order, and a database is free to return ' +
-          'them differently between the query for page one and the query for page two. The result is a row ' +
-          'appearing twice, or never. Stability does not help across separate queries. Appending a unique ' +
-          'column to the sort key makes the order total and the pagination reproducible.',
+        detail: [
+          'Sorting by a non-unique column and paginating with limit and offset is a real and ' +
+            'common bug.',
+          'Rows that compare equal have no defined relative order, and a database is free to ' +
+            'return them differently between the query for page one and the query for page two. ' +
+            'The result is a row appearing twice, or never.',
+          'Stability does not help across separate queries. Appending a unique column to the sort ' +
+            'key makes the order total and the pagination reproducible.'
+        ],
         example: 'Sorting by "points descending" alone leaves rows with equal points free to move between pages.'
       },
       {
         term: 'Almost-right is the dangerous failure',
         plain: 'Every failure mode in this milestone produces plausible output rather than an error.',
         formal: 'unstable merges, unstable radix passes, broken comparators and quiet quadratics all return',
-        detail: 'Collecting the failure modes together makes the pattern obvious. The unstable merge returns ' +
-          'sorted data with the ties wrong. The unstable radix pass returns data that is almost ordered. The ' +
-          'broken comparator returns an array. The quadratic quicksort returns the correct answer slowly. The ' +
-          'buggy Timsort collapse returns the correct answer with a broken invariant. Not one of them throws, ' +
-          'and that is the single most useful thing to carry out of this milestone: when sorted output looks ' +
-          'nearly right, suspect the ordering contract before the algorithm.',
+        detail: [
+          'Collecting the failure modes together makes the pattern obvious.',
+          'The unstable merge returns sorted data with the ties wrong. The unstable radix pass ' +
+            'returns data that is almost ordered. The broken comparator returns an array. The ' +
+            'quadratic quicksort returns the correct answer slowly. The buggy Timsort collapse ' +
+            'returns the correct answer with a broken invariant.',
+          'Not one of them throws. That is the single most useful thing to carry out of this ' +
+            'milestone: when sorted output looks nearly right, suspect the ordering contract ' +
+            'before the algorithm.'
+        ],
         example: 'Every configuration in the quicksort demo reports 0 elements out of place, including the quadratic ones.'
       }
-    ]
+    ],
   });
 }(typeof window !== 'undefined' ? window : null));
