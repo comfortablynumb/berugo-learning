@@ -180,13 +180,17 @@
         },
         plain: 'Nothing is sorted except the trues and falses the feasibility check produces.',
         formal: 'feasible: [lo, hi] -> bool, monotone false-then-true; find the first true',
-        readAs: 'Binary search does not need a sorted array — it needs a yes/no test that is false for a ' +
-          'while and then true forever after. Find where it flips, and that is your answer.',
-        detail: 'This is the reframe that makes the technique visible. There is no sorted array anywhere - ' +
-          'what is ordered is the boolean sequence induced over the candidate answers, and that sequence is ' +
-          'false, false, ..., false, true, true, ..., true. Once you see that, "the smallest capacity that ' +
-          'works" is exactly the same operation as "the first index whose element is at least x", and the ' +
-          'same invariant and the same loop apply unchanged.',
+        readAs: 'Binary search does not need a sorted array. It needs a yes/no test that is false ' +
+          'for a while and then true forever after. Find where it flips, and that is your answer.',
+        detail: [
+          'This is the reframe that makes the technique visible. There is no sorted array ' +
+            'anywhere.',
+          'What is ordered is the boolean sequence induced over the candidate answers, and that ' +
+            'sequence is false, false, ..., false, true, true, ..., true.',
+          'Once you see that, "the smallest capacity that works" is exactly the same operation as ' +
+            '"the first index whose element is at least x". The same invariant and the same loop ' +
+            'apply unchanged.'
+        ],
         example: 'Ten packages in five days: the predicate is false for capacities 10..14 and true from 15 up.'
       },
       {
@@ -201,88 +205,114 @@
         },
         plain: 'If feasible(x) implies feasible(x+1), the search is licensed. Otherwise it is not.',
         formal: 'a monotone predicate flips exactly once across the range',
-        detail: 'This is the step people skip, and skipping it does not produce an error. A binary search ' +
-          'over a predicate that flips three times returns one of the boundaries - confidently, with no ' +
-          'diagnostic - and which one depends on where the probes happened to land. Checking is usually an ' +
-          'argument about the problem rather than code, but the demo does it exhaustively because these ' +
-          'ranges are small enough to sweep in a test and too large to sweep in production, which is exactly ' +
-          'the situation the technique exists for.',
+        detail: [
+          'This is the step people skip, and skipping it does not produce an error.',
+          'A binary search over a predicate that flips three times returns one of the ' +
+            'boundaries, confidently and with no diagnostic. Which one depends on where the ' +
+            'probes happened to land.',
+          'Checking is usually an argument about the problem rather than code. The demo does ' +
+            'it exhaustively: these ranges are small enough to sweep in a test and too large to ' +
+            'sweep in production, which is the situation the technique exists for.'
+        ],
         example: '"x = 3 or x >= 7" flips three times over [0, 10], and the binary search returns 7 where the truth is 3.'
       },
       {
         term: 'Minimise the maximum',
         plain: 'The classic shape: split a sequence into k parts so the largest part is as small as possible.',
         formal: 'feasible(limit) = greedily packing with cap `limit` uses at most k parts',
-        detail: 'Ship capacity, book allocation and painter partitioning are the same problem in different ' +
-          'clothes, and they share a structure worth recognising: the objective is a maximum, the feasibility ' +
-          'check is a greedy pass, and the greedy pass is obviously correct in a way the original ' +
-          'optimisation is not. That is the real gain. You replace an optimisation you would have to think ' +
-          'hard about with a linear scan you can verify by reading it, plus a search you have already written.',
+        detail: [
+          'Ship capacity, book allocation and painter partitioning are the same problem in ' +
+            'different clothes.',
+          'They share a structure worth recognising. The objective is a maximum, the feasibility ' +
+            'check is a greedy pass, and the greedy pass is obviously correct in a way the ' +
+            'original optimisation is not.',
+          'That is the real gain. You replace an optimisation you would have to think hard about ' +
+            'with a linear scan you can verify by reading it, plus a search you have already ' +
+            'written.'
+        ],
         example: 'Packages 1..10 in 5 days: 5 feasibility checks over a range of 46 candidate capacities.'
       },
       {
         term: 'First-true and last-true are different loops',
         plain: 'Maximising needs its own invariant and a midpoint that rounds up.',
         formal: 'last-true: mid = lo + ceil((hi - lo)/2), and lo = mid on success',
-        readAs: 'When you want the last position that answers true rather than the first, the midpoint has to ' +
-          'round up instead of down — otherwise the loop stops making progress and hangs.',
-        detail: 'Writing the maximising search as a minimising search on the negated predicate is the classic ' +
-          'off-by-one: it is correct until the entire range is feasible, and then it is one too small. And ' +
-          'the midpoint must round *up*: with `lo = mid` and a rounded-down midpoint, an interval of width ' +
-          'one gives `mid = lo`, the interval never shrinks and the loop never ends. That is the same trap as ' +
-          'the `low = mid` binary-search mutation, reached from the opposite direction.',
+        readAs: 'When you want the last position that answers true rather than the first, the ' +
+          'midpoint has to round up instead of down. Otherwise the loop stops making progress and ' +
+          'hangs.',
+        detail: [
+          'Writing the maximising search as a minimising search on the negated predicate is the ' +
+            'classic off-by-one. It is correct until the entire range is feasible, and then it is ' +
+            'one too small.',
+          'The midpoint must also round *up*. With `lo = mid` and a rounded-down midpoint, an ' +
+            'interval of width one gives `mid = lo`, the interval never shrinks, and the loop ' +
+            'never ends.',
+          'That is the same trap as the `low = mid` binary-search mutation, reached from the ' +
+            'opposite direction.'
+        ],
         example: 'Aggressive cows on stalls 1, 2, 4, 8, 9 with 3 cows: the answer is 3, found in 3 checks.'
       },
       {
         term: 'The feasibility check is the only thing you write',
         plain: 'A simple linear pass, obviously correct, and the search is boilerplate around it.',
         formal: 'O(log(range)) calls to an O(n) predicate',
-        detail: 'The division of labour is what makes the technique pleasant to use and easy to test. The ' +
-          'predicate is a greedy loop over the input with no cleverness in it, and it can be checked by ' +
-          'reading it or by brute force. The search never changes. So the entire risk sits in one small ' +
-          'function that is easy to reason about, rather than being spread through a bespoke optimisation ' +
-          'algorithm - and the total cost is log(range) times the predicate, which is usually nothing.',
+        detail: [
+          'The division of labour is what makes the technique pleasant to use and easy to test.',
+          'The predicate is a greedy loop over the input with no cleverness in it, and it can be ' +
+            'checked by reading it or by brute force. The search never changes.',
+          'So the entire risk sits in one small function that is easy to reason about, rather than ' +
+            'being spread through a bespoke optimisation algorithm. The total cost is log(range) ' +
+            'times the predicate, which is usually nothing.'
+        ],
         example: 'A billion candidate answers is 30 feasibility checks.'
       },
       {
         term: 'Ternary search for a unimodal function',
         plain: 'No monotone predicate, but a single peak - two probes discard a third.',
         formal: 'compare f at two interior points; log base 1.5 rather than log base 2',
-        readAs: 'Ternary search on a single-peaked function compares two inner points and discards one third ' +
-          'of the range each time, rather than one half. Slower per step, and the only option when ' +
-          'there is no yes/no test to binary search on.',
-        detail: 'When the thing being searched is a function with one maximum rather than a predicate that ' +
-          'flips once, binary search does not apply - knowing f(mid) tells you nothing about which side the ' +
-          'peak is on. Two probes do: if f(a) < f(b) the peak cannot be at or below a. Each round discards a ' +
-          'third for two evaluations, so it is about 1.7× the probes of a binary search, which is the price ' +
-          'of having a weaker structural assumption to exploit.',
+        readAs: 'Ternary search on a single-peaked function compares two inner points and discards ' +
+          'one third of the range each time, rather than one half. Slower per step, and the only ' +
+          'option when there is no yes/no test to binary search on.',
+        detail: [
+          'When the thing being searched is a function with one maximum, rather than a predicate ' +
+            'that flips once, binary search does not apply. Knowing f(mid) tells you nothing about ' +
+            'which side the peak is on.',
+          'Two probes do tell you. If f(a) < f(b), the peak cannot be at or below a.',
+          'Each round discards a third for two evaluations, so it is about 1.7× the probes of a ' +
+            'binary search. That is the price of having a weaker structural assumption to exploit.'
+        ],
         example: 'The peak of −(x−37)² + 500 over [0, 1 000] is found at 37 in 30 probes.'
       },
       {
         term: 'Floating-point termination is by iteration count, not tolerance',
         plain: '`while (high - low > 1e-9)` can spin forever; a fixed 200 rounds cannot.',
         formal: 'once the interval approaches the ULP, the midpoint can equal an endpoint and the width stops shrinking',
-        readAs: 'On floating-point values the midpoint eventually rounds to one of the two ends, and the ' +
-          'interval stops narrowing. Loop until the width is small enough, or for a fixed count — never ' +
-          'until the ends are equal.',
-        detail: 'This is the floating-point trap in an otherwise integer technique. As the interval narrows ' +
-          'toward the limit of double precision, `(lo + hi) / 2` can round to exactly `lo` or `hi`, the ' +
-          'interval stops shrinking, and a loop conditioned on the width never exits. A fixed iteration count ' +
-          'is both simpler and strictly better: 200 halvings reduce any starting interval past every ' +
-          'representable double, so the answer is as exact as the type allows and the loop is guaranteed to ' +
-          'stop.',
+        readAs: 'On floating-point values the midpoint eventually rounds to one of the two ends, ' +
+          'and the interval stops narrowing. Loop until the width is small enough, or for a fixed ' +
+          'count — never until the ends are equal.',
+        detail: [
+          'This is the floating-point trap in an otherwise integer technique.',
+          'As the interval narrows toward the limit of double precision, `(lo + hi) / 2` can round ' +
+            'to exactly `lo` or `hi`. The interval stops shrinking, and a loop conditioned on the ' +
+            'width never exits.',
+          'A fixed iteration count is both simpler and strictly better. 200 halvings reduce any ' +
+            'starting interval past every representable double, so the answer is as exact as the ' +
+            'type allows and the loop is guaranteed to stop.'
+        ],
         example: '200 rounds on [0, 10] closes the interval to 4.44e-16 - the ULP at that magnitude.'
       },
       {
         term: 'Recognising the shape',
         plain: 'Most "smallest x that works" questions are binary searches in disguise.',
         formal: 'objective is monotone in the parameter, and feasibility is cheap to test',
-        detail: 'The two conditions to look for are that the answer is a single number over a bounded range, ' +
-          'and that succeeding at one value implies succeeding at the next. Rate limits, buffer sizes, ' +
-          'timeouts, thread counts, capacity planning and scheduling deadlines all have that shape. The ' +
-          'failure to watch for is a predicate that is *nearly* monotone - a feasibility check with a ' +
-          'threshold effect or a rounding artefact - because the search will still return an answer and ' +
-          'nothing in the output says it is the wrong one.',
+        detail: [
+          'Two conditions to look for. The answer is a single number over a bounded range, and ' +
+            'succeeding at one value implies succeeding at the next.',
+          'Rate limits, buffer sizes, timeouts, thread counts, capacity planning and scheduling ' +
+            'deadlines all have that shape.',
+          'The failure to watch for is a predicate that is *nearly* monotone — a feasibility check ' +
+            'with a threshold effect or a rounding artefact. The search will still return an ' +
+            'answer, and nothing in the output says it is the wrong one.'
+        ],
         example: 'Smallest divisor, allocate books, aggressive cows and ship capacity are one search with four stories.'
       }
     ],

@@ -5163,8 +5163,16 @@ no concept whose `detail` is a single block.
    a bold thesis, as the rest of the curriculum does.
 5. Re-run the tool: the section must print `ok`.
 6. `node --test tests/unit/content-coverage.test.js
-   tests/unit/content-rendering.test.js tests/unit/notation*.test.js`, then the
-   render-audit shard that carries the section.
+   tests/unit/content-rendering.test.js tests/unit/notation*.test.js`, then
+   **`npm run lint:size`**, then the render-audit shard that carries the
+   section.
+
+Run `lint:size` every time. Splitting one orientation paragraph in two costs
+the enclosing function two lines, and several `config()` functions sit within a
+few lines of the 50-line limit; three of them crossed it before this was part
+of the loop. The fix is `python tools/../extract_orientation.py` in spirit —
+move the orientation array into its own `orientation()` function, which is pure
+prose with no locals.
 
 Do not open a sentence with a lowercase code identifier (`ops.view(array)
 wraps…`): the sentence splitter cannot see the boundary, and the section reads

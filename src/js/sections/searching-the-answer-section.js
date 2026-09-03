@@ -50,37 +50,43 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'Nothing in this section searches a sorted array. What is sorted is the boolean array the *predicate* ' +
-          'induces: if a ship of capacity c can deliver the packages in D days then so can a ship of capacity ' +
-          'c + 1, so "is capacity c enough" reads false, false, …, false, true, true, …, true across the whole ' +
-          'range of capacities. That monotonicity is the only precondition, and with it the smallest working ' +
-          'capacity is findable in log₂(range) feasibility checks instead of a sweep - 5 checks over a range ' +
-          'of 46 for the ten-package instance, and 30 checks over a range of a billion.',
-        'The discipline is four steps and the third is the one people skip. Name the answer and its range; ' +
-          'write `feasible(x)` and nothing else; *check that it is monotone*; then binary-search for the ' +
-          'boundary. Skipping the third step does not produce an error - a binary search over a predicate that ' +
-          'flips more than once returns one of the boundaries, confidently, and which one depends on where ' +
-          'the probes happened to land. The demo runs an exhaustive monotonicity check because these ranges ' +
-          'are small enough to sweep in a test and too large to sweep in production, which is exactly the ' +
-          'situation the technique is for.',
-        'The four problems in the demo are the same problem. "Minimum ship capacity", "allocate books to ' +
-          'readers" and "smallest divisor" all search for the smallest feasible value; aggressive cows ' +
-          'searches for the *largest*, which is a different loop and not a negated predicate. Writing the ' +
-          'last-true search as a first-true search on `!feasible` is the classic off-by-one: it is correct ' +
-          'until the entire range is feasible, and then it is one too small. It also needs its midpoint to ' +
-          'round up, or the interval stops shrinking and the loop never ends.'
+        '**Nothing in this section searches a sorted array.** What is sorted is the boolean ' +
+          'array the *predicate* induces. If a ship of capacity c can deliver the packages in D ' +
+          'days, then so can a ship of capacity c + 1. So "is capacity c enough" reads false, ' +
+          'false, …, false, true, true, …, true across the whole range of capacities.',
+        'That monotonicity is the only precondition. With it, the smallest working capacity is ' +
+          'findable in log₂(range) feasibility checks instead of a sweep. That is 5 checks over ' +
+          'a range of 46 for the ten-package instance, and 30 over a range of a billion.',
+        'The discipline is four steps, and the third is the one people skip. Name the answer and ' +
+          'its range. Write `feasible(x)` and nothing else. *Check that it is monotone.* Then ' +
+          'binary-search for the boundary.',
+        'Skipping the third step does not produce an error. A binary search over a predicate that ' +
+          'flips more than once returns one of the boundaries, confidently, and which one depends ' +
+          'on where the probes happened to land. The demo runs an exhaustive monotonicity ' +
+          'check. These ranges are small enough to sweep in a test and too large to sweep in ' +
+          'production, which is exactly the situation the technique is for.',
+        'The four problems in the demo are the same problem. "Minimum ship capacity", "allocate ' +
+          'books to readers" and "smallest divisor" all search for the smallest feasible value. ' +
+          'Aggressive cows searches for the *largest*, which is a different loop and not a ' +
+          'negated predicate.',
+        'Writing the last-true search as a first-true search on `!feasible` is the classic ' +
+          'off-by-one. It is correct until the entire range is feasible, and then it is one too ' +
+          'small. It also needs its midpoint to round up, or the interval stops shrinking and the ' +
+          'loop never ends.'
       ],
       demo: {
         title: 'Interactive demo — the predicate, the boolean array it induces, and the search',
         markup: root.SearchingTheAnswerTemplate.render()
       },
       diagram: diagram(),
-      insight: 'The reframe is the skill, and it is worth naming so you recognise it: any question of the ' +
-        'form "the smallest x that works" or "minimise the maximum" is a binary search wearing a costume, ' +
-        'provided working at x implies working at x + 1. What you write is the feasibility check - a simple, ' +
-        'obviously-correct linear function - and the search is four lines of boilerplate around it. The ' +
-        'failure mode to watch for is a predicate that is *nearly* monotone, because the search will still ' +
-        'return an answer and there is nothing in the output to say it is the wrong one.'
+      insight: 'The reframe is the skill, and it is worth naming so you recognise it. Any ' +
+        'question of the form "the smallest x that works" or "minimise the maximum" is a binary ' +
+        'search wearing a costume. The condition is that working at x implies working at x + 1. ' +
+        'What you ' +
+        'write is the feasibility check — a simple, obviously-correct linear function — and the ' +
+        'search is four lines of boilerplate around it. The failure mode to watch for is a ' +
+        'predicate that is *nearly* monotone. The search will still return an answer, and there ' +
+        'is nothing in the output to say it is the wrong one.'
     };
   }
 
