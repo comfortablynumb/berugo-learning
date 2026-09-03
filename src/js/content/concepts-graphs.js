@@ -183,14 +183,17 @@
         },
         plain: 'Every edge points forwards, so everything a vertex depends on is already settled.',
         formal: 'an ordering v1..vn such that every edge (vi, vj) has i < j; exists iff the graph is acyclic',
-        readAs: 'Line the vertices up so every edge points forwards. Such an ordering exists exactly when ' +
-          'there are no cycles — a cycle would need an edge pointing back.',
-        detail: 'The list itself is rarely the goal. What the order buys is the right to process ' +
-          'vertices in one sweep with no memoisation, no priority queue and no fixpoint iteration, ' +
-          'because when you reach a vertex every predecessor is finished. That single guarantee turns ' +
-          'longest path — NP-hard on a general graph — into one linear pass, makes negative edge ' +
-          'weights harmless, and is the reason a build system computes an order before doing anything ' +
-          'else. Validate it the only way that means anything: check that every edge points forwards.',
+        readAs: 'Line the vertices up so every edge points forwards. Such an ordering exists ' +
+          'exactly when there are no cycles, because a cycle would need an edge pointing back.',
+        detail: [
+          'The list itself is rarely the goal. What the order buys is the right to process ' +
+            'vertices in one sweep, with no memoisation, no priority queue and no fixpoint ' +
+            'iteration. When you reach a vertex, every predecessor is finished.',
+          'That single guarantee turns longest path — NP-hard on a general graph — into one linear ' +
+            'pass. It makes negative edge weights harmless. It is the reason a build system ' +
+            'computes an order before doing anything else.',
+          'Validate it the only way that means anything: check that every edge points forwards.'
+        ],
         example: 'Every method in the demo is validated edge by edge on 40 packages, and all three ' +
           'orders place all 40.'
       },
@@ -210,14 +213,17 @@
         },
         plain: 'Count incoming edges, start from the zeroes, and decrement as you go.',
         formal: 'maintain in-degrees; a vertex joins the ready set when its count reaches zero; Θ(n + m)',
-        readAs: 'Count how many unmet dependencies each vertex has. Every time one is satisfied, decrement; ' +
-          'when it hits zero the vertex is ready. One visit per vertex and per edge.',
-        detail: 'Kahn\'s algorithm is the one to reach for when the order has to mean something ' +
-          'operationally, because its ready set is literally "what can be built right now". That makes ' +
-          'it the natural fit for a scheduler: hand ready vertices to workers, decrement on completion, ' +
-          'and the algorithm and the build are the same loop. It also fails informatively — when the ' +
-          'ready set empties with vertices left over, every one of those vertices is downstream of a ' +
-          'cycle, which is a far more useful message than a boolean.',
+        readAs: 'Count how many unmet dependencies each vertex has. Every time one is satisfied, ' +
+          'decrement it; when it hits zero the vertex is ready. One visit per vertex and per edge.',
+        detail: [
+          'Kahn\'s algorithm is the one to reach for when the order has to mean something ' +
+            'operationally, because its ready set is literally "what can be built right now".',
+          'That makes it the natural fit for a scheduler. Hand ready vertices to workers, ' +
+            'decrement on completion, and the algorithm and the build are the same loop.',
+          'It also fails informatively. When the ready set empties with vertices left over, every ' +
+            'one of those vertices is downstream of a cycle — a far more useful message than a ' +
+            'boolean.'
+        ],
         example: 'On 40 packages with 2 dependencies each, Kahn places all 40 and the ready set is ' +
           'what the four-worker schedule consumes.'
       },
@@ -225,12 +231,15 @@
         term: 'DFS finish order, reversed, is also a topological order',
         plain: 'A vertex finishes only after everything it points at has finished.',
         formal: 'push v on finish; the reversed finish sequence is a valid order; a back edge proves a cycle',
-        detail: 'The two derivations answer different questions and both are worth knowing. Kahn is ' +
-          'incremental and matches a scheduler; the depth-first version drops out of a walk you are ' +
-          'often doing anyway and is the foundation of Kosaraju\'s strongly-connected-components ' +
-          'algorithm, which uses exactly this finish order on the reversed graph. The cycle test is ' +
-          'different too: Kahn detects a cycle by stalling, DFS by meeting a back edge, and the back ' +
-          'edge hands you the cycle directly.',
+        detail: [
+          'The two derivations answer different questions, and both are worth knowing.',
+          'Kahn is incremental and matches a scheduler. The depth-first version drops out of a ' +
+            'walk you are often doing anyway. It is also the foundation of Kosaraju\'s ' +
+            'strongly-connected-components algorithm, which uses this finish order on the ' +
+            'reversed graph.',
+          'The cycle test is different too. Kahn detects a cycle by stalling; DFS detects one by ' +
+            'meeting a back edge, and the back edge hands you the cycle directly.'
+        ],
         example: 'The DFS order and both Kahn orders all place 40 of 40 packages and every one passes ' +
           'the edge-by-edge check.'
       },
@@ -249,12 +258,15 @@
         },
         plain: 'Return the cycle. It costs one parent map and it is the only thing the caller can act on.',
         formal: 'on detecting a back edge (u, v), walk parents from u to v; the resulting list is the cycle',
-        detail: '"Circular dependency detected" in a build log is the difference between a five-minute ' +
-          'fix and an afternoon of bisecting imports, and the whole difference is one array the ' +
-          'algorithm already maintains. This is the general shape: when a routine can fail because of a ' +
-          'property of the input, the useful return value is the witness, not the verdict. The same ' +
-          'sentence covers the odd cycle in a two-colouring, the negative loop in a rate table, and the ' +
-          'pair of vertices where an ordering assumption broke.',
+        detail: [
+          '"Circular dependency detected" in a build log is the difference between a five-minute ' +
+            'fix and an afternoon of bisecting imports. The whole difference is one array the ' +
+            'algorithm already maintains.',
+          'This is the general shape. When a routine can fail because of a property of the input, ' +
+            'the useful return value is the witness, not the verdict.',
+          'The same sentence covers the odd cycle in a two-colouring, the negative loop in a rate ' +
+            'table, and the pair of vertices where an ordering assumption broke.'
+        ],
         example: 'The demo injects one back edge — one new import, added last — and reports the exact ' +
           'cycle rather than a boolean.'
       },
@@ -262,12 +274,15 @@
         term: 'The critical path is the floor no worker count breaks',
         plain: 'The longest chain of dependent tasks is the fastest a build can possibly go.',
         formal: 'makespan >= longest weighted path in the DAG, for any number of workers',
-        detail: 'Total work divided by workers is a lower bound people quote and it is the wrong one, ' +
-          'because dependent tasks cannot overlap however many machines you buy. The real floor is the ' +
-          'longest chain, and the ratio between total work and that chain is the maximum speedup ' +
-          'available — a number worth computing before authorising a bigger CI fleet. Everything above ' +
-          'that ratio is spend with no return, and the schedule table shows exactly where the curve ' +
-          'goes flat.',
+        detail: [
+          'Total work divided by workers is a lower bound people quote, and it is the wrong one. ' +
+            'Dependent tasks cannot overlap however many machines you buy.',
+          'The real floor is the longest chain. The ratio between total work and that chain is the ' +
+            'maximum speedup available — a number worth computing before authorising a bigger CI ' +
+            'fleet.',
+          'Everything above that ratio is spend with no return, and the schedule table shows ' +
+            'exactly where the curve goes flat.'
+        ],
         example: '40 packages totalling 118 units of work have a critical path of 25 over 7 packages, ' +
           'so no worker count beats a 4.72× speedup.'
       },
@@ -275,12 +290,15 @@
         term: 'Adding workers stops helping long before you notice',
         plain: 'The makespan flattens at the critical path, and the extra workers idle.',
         formal: 'makespan(k) falls until k reaches the peak parallel width, then is constant at the critical path',
-        detail: 'The interesting column in a schedule table is not the makespan but the number of ' +
-          'workers actually busy, because that is what separates "we need more machines" from "we need ' +
-          'to break this dependency". Once the width of the widest independent set is reached, more ' +
-          'workers change nothing at all — and the fix is a graph change, not a capacity change. This ' +
-          'is why a build that takes 25 minutes on eight machines still takes 25 on sixty-four, and ' +
-          'why the answer is to split the package on the critical path.',
+        detail: [
+          'The interesting column in a schedule table is not the makespan. It is the number of ' +
+            'workers actually busy, because that separates "we need more machines" from "we need ' +
+            'to break this dependency".',
+          'Once the width of the widest independent set is reached, more workers change nothing at ' +
+            'all. The fix is a graph change, not a capacity change.',
+          'This is why a build that takes 25 minutes on eight machines still takes 25 on ' +
+            'sixty-four, and why the answer is to split the package on the critical path.'
+        ],
         example: 'One worker takes 118, two take 59, four take 36, eight take 25 — and sixty-four also ' +
           'take 25, with at most 11 ever busy.'
       },
@@ -288,28 +306,35 @@
         term: 'DAG shortest paths need no priority queue',
         plain: 'Relax edges in topological order, once each, and negative weights are fine.',
         formal: 'Θ(n + m) rather than Θ(m log n); Dijkstra’s non-negativity requirement disappears entirely',
-        readAs: 'On a DAG the topological order already tells you the right sequence, so no priority queue is ' +
-          'needed — and because nothing is ever settled early, negative weights are fine.',
-        detail: 'Dijkstra needs a heap because it has to decide which vertex is safe to settle next; on ' +
-          'a DAG the topological order has already decided, so the heap is pure overhead. More ' +
-          'importantly the non-negativity restriction goes with it: the order guarantees every ' +
-          'predecessor is final before a vertex is relaxed, so a negative edge cannot invalidate a ' +
-          'settled distance. Any problem whose state space is acyclic — a build, a pipeline, a version ' +
-          'history, a layered network — should use this rather than reaching for Dijkstra out of habit.',
+        readAs: 'On a DAG the topological order already tells you the right sequence, so no ' +
+          'priority queue is needed. And because nothing is ever settled early, negative weights ' +
+          'are fine.',
+        detail: [
+          'Dijkstra needs a heap because it has to decide which vertex is safe to settle next. On ' +
+            'a DAG the topological order has already decided, so the heap is pure overhead.',
+          'More importantly the non-negativity restriction goes with it. The order guarantees ' +
+            'every predecessor is final before a vertex is relaxed, so a negative edge cannot ' +
+            'invalidate a settled distance.',
+          'Any problem whose state space is acyclic — a build, a pipeline, a version history, a ' +
+            'layered network — should use this rather than reaching for Dijkstra out of habit.'
+        ],
         example: 'From package 0 the sweep reaches 19 packages with no priority queue at all.'
       },
       {
         term: 'Longest path is easy here and NP-hard everywhere else',
         plain: 'Negate the weights and run the same sweep; on a general graph the problem is intractable.',
         formal: 'longest path in a DAG is Θ(n + m); longest simple path in a general graph is NP-hard',
-        readAs: 'The same question is linear on an acyclic graph and intractable on a general one. Cycles are ' +
-          'what makes the difference: without them there is nothing to go round twice.',
-        detail: 'The gap between those two facts is the sharpest illustration of what acyclicity buys, ' +
-          'and it is worth being able to state in a design review. On a DAG the recurrence "longest ' +
-          'path ending here = the best of my predecessors, plus my weight" terminates because there is ' +
-          'no cycle to loop around; on a general graph the same recurrence has no base case and the ' +
-          'problem contains Hamiltonian path. So "is this graph acyclic?" is not a formality — it is ' +
-          'the question that decides whether the problem is linear or hopeless.',
+        readAs: 'The same question is linear on an acyclic graph and intractable on a general one. ' +
+          'Cycles are what makes the difference: without them there is nothing to go round twice.',
+        detail: [
+          'The gap between those two facts is the sharpest illustration of what acyclicity buys, ' +
+            'and it is worth being able to state in a design review.',
+          'On a DAG the recurrence "longest path ending here = the best of my predecessors, plus ' +
+            'my weight" terminates, because there is no cycle to loop around.',
+          'On a general graph the same recurrence has no base case, and the problem contains ' +
+            'Hamiltonian path. So "is this graph acyclic?" is not a formality. It is the question ' +
+            'that decides whether the problem is linear or hopeless.'
+        ],
         example: 'The critical path of 25 is a longest-path computation done in a single sweep over ' +
           '40 packages.'
       }

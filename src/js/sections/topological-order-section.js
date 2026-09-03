@@ -52,39 +52,44 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'A topological order is a listing in which every edge points forwards, and it exists exactly when ' +
-          'the graph is acyclic. Two algorithms produce one. **Kahn\'s** peels sources - vertices with no ' +
-          'remaining incoming edges - and stalls when none are left; **the DFS finish order**, reversed, is ' +
-          'also valid and fails instead by finding a back edge. They are not interchangeable: Kahn\'s ' +
-          'partial output is meaningful, and it can be made lexicographically smallest by taking the ' +
-          'smallest available source.',
-        '**"Returns null on a cycle" is a useless error.** A build tool that says "your dependencies are ' +
-          'circular" has told you nothing you did not already suspect. One that says "a → b → c → a" has ' +
-          'told you where to look, and the difference costs one parent map and a walk. Every function here ' +
-          'that can fail on a cycle returns the cycle, and the demo verifies it edge by edge against the ' +
-          'graph rather than trusting the extraction.',
-        '**The critical path is a floor.** The longest chain of dependencies is the makespan no number of ' +
-          'workers can beat, because each link waits for the previous one. One worker takes the total ' +
-          'work; enough workers take the critical path; every worker past that point buys nothing. The ' +
-          'table below sweeps the worker count and the curve visibly flattens - which is the number to ' +
-          'quote when somebody proposes buying more build machines.',
-        'The order also makes three otherwise-awkward problems linear. **Longest path** is NP-hard on a ' +
-          'general graph and a single sweep on a DAG. **Shortest paths** need no priority queue at all, ' +
-          'and unlike Dijkstra they tolerate negative weights, because the order already settles each ' +
-          'vertex before it is relaxed. **Counting the distinct orders** is a subset DP - the same shape ' +
-          'as M12.7 - and it is exponential, which is worth seeing.'
+        '**A topological order is a listing in which every edge points forwards, and it exists ' +
+          'exactly when the graph is acyclic.** Two algorithms produce one.',
+        '**Kahn\'s** peels sources — vertices with no remaining incoming edges — and stalls when ' +
+          'none are left. **The DFS finish order**, reversed, is also valid, and fails instead by ' +
+          'finding a back edge. They are not interchangeable: Kahn\'s partial output is ' +
+          'meaningful, and it can be made lexicographically smallest by taking the smallest ' +
+          'available source.',
+        '**"Returns null on a cycle" is a useless error.** A build tool that says "your ' +
+          'dependencies are circular" has told you nothing you did not already suspect. One that ' +
+          'says "a → b → c → a" has told you where to look, and the difference costs one parent ' +
+          'map and a walk.',
+        'Every function here that can fail on a cycle returns the cycle, and the demo verifies it ' +
+          'edge by edge against the graph rather than trusting the extraction.',
+        '**The critical path is a floor.** The longest chain of dependencies is the makespan no ' +
+          'number of workers can beat, because each link waits for the previous one. One worker ' +
+          'takes the total work. Enough workers take the critical path. Every worker past that ' +
+          'point buys nothing.',
+        'The table below sweeps the worker count and the curve visibly flattens. That is the ' +
+          'number to quote when somebody proposes buying more build machines.',
+        'The order also makes three otherwise-awkward problems linear. **Longest path** is NP-hard ' +
+          'on a general graph and a single sweep on a DAG. **Shortest paths** need no priority ' +
+          'queue at all, and unlike Dijkstra they tolerate negative weights, because the order ' +
+          'already settles each vertex before it is relaxed.',
+        '**Counting the distinct orders** is a subset DP, the same shape as M12.7. It is ' +
+          'exponential, which is worth seeing.'
       ],
       demo: {
         title: 'Interactive demo — a build graph, its cycle, and the workers that stop helping',
         markup: root.TopologicalOrderTemplate.render()
       },
       diagram: diagram(),
-      insight: 'Whenever an algorithm can fail on a structural property of its input, return the witness ' +
-        'rather than the verdict. A cycle, an odd cycle, the pair of indices where an inequality broke, ' +
-        'the two vertices a bridge separates — each of them takes a few extra lines at the point of ' +
-        'detection and saves an afternoon at the point of diagnosis. The general form is that a boolean ' +
-        'answer to a structural question is almost always the wrong return type, because the caller ' +
-        'already suspected the answer and needed the evidence.'
+      insight: 'Whenever an algorithm can fail on a structural property of its input, return ' +
+        'the witness rather than the verdict. A cycle, an odd cycle, the pair of indices where ' +
+        'an inequality broke, the two vertices a bridge separates. Each of them takes a few ' +
+        'extra lines at the point of detection, and saves an afternoon at the point of ' +
+        'diagnosis. The general form is that a boolean answer to a structural question is almost ' +
+        'always the wrong return type. The caller already suspected the answer and needed the ' +
+        'evidence.'
     };
   }
 
