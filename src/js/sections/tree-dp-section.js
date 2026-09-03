@@ -48,36 +48,40 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'A rooted tree DP evaluates children before parents, which is a post-order traversal, and that is ' +
-          'the whole evaluation-order question answered. Maximum-weight independent set, subtree sums and ' +
-          'subtree sizes are all one pass. The interesting problems start when the answer is wanted for ' +
-          '*every* root rather than one.',
-        '**Rerooting is the tree analogue of prefix sums.** Compute once downwards, once upwards, and every ' +
-          'root is answered in O(n) total instead of O(n²). For the sum of distances the upward step is a ' +
-          'single line: moving the root from a parent to a child brings `size(child)` nodes one step closer ' +
-          'and pushes the other `n − size(child)` one step further, so ' +
-          '`answer[child] = answer[parent] + n − 2·size(child)`. Everything else is bookkeeping.',
-        '**The prefix/suffix trick is not an optimisation, it is the algorithm.** Each node has to hand ' +
-          'every child "the combination of all my other children", and computing that per child by looping ' +
-          'is O(deg²). On a random tree nobody notices; on a **star** the root has degree n − 1 and the ' +
-          'loop is the entire quadratic cost the technique claims to remove. The demo runs both counts on ' +
-          'four shapes, and the star row is where they separate.',
-        '**Every traversal here is iterative.** A path of 20 000 nodes is a recursion 20 000 deep, and the ' +
-          'sizes on this page reach that. This is the same rule the M04 search trees learned: on the ' +
-          'inputs a section actually replays, a recursive traversal is a stack overflow rather than a slow ' +
-          'answer.'
+        '**A rooted tree DP evaluates children before parents, which is a post-order ' +
+          'traversal.** That is the whole evaluation-order question answered. Maximum-weight ' +
+          'independent set, subtree sums and subtree sizes are all one pass. The interesting ' +
+          'problems start when the answer is wanted for *every* root rather than one.',
+        '**Rerooting is the tree analogue of prefix sums.** Compute once downwards, once ' +
+          'upwards, and every root is answered in O(n) total instead of O(n²).',
+        'For the sum of distances the upward step is a single line. Moving the root from a ' +
+          'parent to a child brings `size(child)` nodes one step closer, and pushes the other ' +
+          '`n − size(child)` one step further. So ' +
+          '`answer[child] = answer[parent] + n − 2·size(child)`, and everything else is ' +
+          'bookkeeping.',
+        '**The prefix/suffix trick is not an optimisation, it is the algorithm.** Each node has ' +
+          'to hand every child "the combination of all my other children", and computing that per ' +
+          'child by looping is O(deg²).',
+        'On a random tree nobody notices. On a **star** the root has degree n − 1, and the loop ' +
+          'is the entire quadratic cost the technique claims to remove. The demo runs both counts ' +
+          'on four shapes, and the star row is where they separate.',
+        '**Every traversal here is iterative.** A path of 20 000 nodes is a recursion 20 000 ' +
+          'deep, and the sizes on this page reach that. It is the same rule the M04 search trees ' +
+          'learned: on the inputs a section actually replays, a recursive traversal is a stack ' +
+          'overflow rather than a slow answer.'
       ],
       demo: {
         title: 'Interactive demo — rerooting against an n-BFS oracle, on four shapes',
         markup: root.TreeDpTemplate.render()
       },
       diagram: diagram(),
-      insight: 'When a per-node answer needs "everything except me", reach for prefix and suffix arrays ' +
-        'before writing the loop. It is the same move whether the items are children of a tree node, ' +
-        'elements of an array, or shards of a dataset, and the loop version is quadratic in exactly the ' +
-        'case that is easiest to forget to test - one item with a very large fan-out. A random test tree ' +
-        'has maximum degree around log n and will never show it; a star shows it immediately, which is why ' +
-        'the star belongs in the test set rather than in the appendix.'
+      insight: 'When a per-node answer needs "everything except me", reach for prefix and ' +
+        'suffix arrays before writing the loop. It is the same move whether the items are ' +
+        'children of a tree node, elements of an array, or shards of a dataset. The loop version ' +
+        'is quadratic in exactly the case that is easiest to forget to test: one item with a ' +
+        'very large fan-out. A random test tree has maximum degree around log n and will never ' +
+        'show it. A star shows it immediately, which is why the star belongs in the test set ' +
+        'rather than in the appendix.'
     };
   }
 

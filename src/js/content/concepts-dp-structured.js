@@ -182,12 +182,15 @@
         },
         plain: 'A rooted tree DP is a post-order traversal, and that settles the evaluation order.',
         formal: 'any reverse of a pre-order is a valid order; a node reads only its children',
-        detail: 'The evaluation-order question that dominates interval DP is trivial on a tree: a node ' +
-          'depends only on its subtrees, so settling nodes in reverse discovery order is always correct. ' +
-          'That leaves the state design as the entire difficulty, which is why the interesting tree DPs are ' +
-          'the ones where a node needs more than one number - "best with me taken" and "best with me ' +
-          'skipped" is the smallest example and generalises to any constraint between a node and its ' +
-          'children.',
+        detail: [
+          'The evaluation-order question that dominates interval DP is trivial on a tree. A node ' +
+            'depends only on its subtrees, so settling nodes in reverse discovery order is always ' +
+            'correct.',
+          'That leaves the state design as the entire difficulty.',
+          'So the interesting tree DPs are the ones where a node needs more than one number. ' +
+            '"Best with me taken" and "best with me skipped" is the smallest example, and it ' +
+            'generalises to any constraint between a node and its children.'
+        ],
         example: 'Maximum-weight independent set keeps two values per node and settles a 2 000-node tree in ' +
           'one pass.'
       },
@@ -205,13 +208,17 @@
         },
         plain: 'A path of 20 000 nodes is a recursion 20 000 deep.',
         formal: 'replace the call stack with an explicit stack; depth is Θ(n) in the worst case',
-        readAs: 'A path-shaped tree is n deep, and n recursive calls will overflow the engine stack. Keeping ' +
-          'your own stack in an array removes the limit entirely.',
-        detail: 'A random tree has depth around log n and a path has depth n, and both are legitimate inputs. ' +
-          'On the sizes these sections replay, a recursive traversal is a stack overflow rather than a slow ' +
-          'answer - the same lesson the M04 search trees learned when a sorted build produced a spine. The ' +
-          'fix is mechanical: compute a discovery order with an explicit stack once, then walk that array ' +
-          'forwards for the downward pass and backwards for the upward one.',
+        readAs: 'A path-shaped tree is n deep, and n recursive calls will overflow the engine ' +
+          'stack. Keeping your own stack in an array removes the limit entirely.',
+        detail: [
+          'A random tree has depth around log n and a path has depth n, and both are legitimate ' +
+            'inputs.',
+          'On the sizes these sections replay, a recursive traversal is a stack overflow rather ' +
+            'than a slow answer. It is the same lesson the M04 search trees learned when a sorted ' +
+            'build produced a spine.',
+          'The fix is mechanical. Compute a discovery order with an explicit stack once, then walk ' +
+            'that array forwards for the downward pass and backwards for the upward one.'
+        ],
         example: 'The path shape at 2 000 nodes has depth 1 999; the star has depth 1 and degree 1 999. Both ' +
           'are handled by the same iterative walk.'
       },
@@ -219,12 +226,15 @@
         term: 'Rerooting is prefix sums on a tree',
         plain: 'One pass down and one pass up answers for every possible root.',
         formal: 'down[v] over v\'s subtree; up[v] over everything else; answer[v] = combine(down[v], up[v])',
-        detail: 'Running a tree DP from each of n roots is O(n²). Rerooting observes that moving the root ' +
-          'across a single edge changes the answer in a way that can be computed from the parent\'s answer ' +
-          'and the child\'s subtree, so one extra downward pass produces every root. It is the same idea as ' +
-          'a prefix-sum array - compute once in each direction and every query is answered - and it is one ' +
-          'of the highest-leverage patterns in the subject because "run it from every node" is such a ' +
-          'natural first implementation.',
+        detail: [
+          'Running a tree DP from each of n roots is O(n²).',
+          'Rerooting observes that moving the root across a single edge changes the answer in a ' +
+            'way that can be computed from the parent\'s answer and the child\'s subtree. So one ' +
+            'extra downward pass produces every root.',
+          'It is the same idea as a prefix-sum array: compute once in each direction, and every ' +
+            'query is answered. It is one of the highest-leverage patterns in the subject, because ' +
+            '"run it from every node" is such a natural first implementation.'
+        ],
         example: 'Sum of distances on 2 000 nodes: 1 999 combine operations and two passes, against 2 000 ' +
           'separate breadth-first searches.'
       },
@@ -232,15 +242,18 @@
         term: 'The reroot step for sum of distances',
         plain: 'Moving the root to a child brings size(child) nodes closer and pushes the rest further.',
         formal: 'answer[child] = answer[parent] + n − 2·size(child)',
-        readAs: 'Rerooting in one line: moving the root from a parent to a child brings every node in the ' +
-          'child\'s subtree one step closer and every other node one step further. That is n minus ' +
-          'twice the subtree size.',
-        detail: 'This single line is the whole upward pass, and it is worth deriving rather than memorising ' +
-          'because the derivation is the pattern. Every node inside the child\'s subtree is one edge nearer ' +
-          'once the root moves across that edge, and every node outside it is one edge further; there are ' +
-          'size(child) of the first and n − size(child) of the second, so the change is ' +
-          '−size + (n − size). Any rerooting problem has an equivalent line, and finding it is the ' +
-          'difference between an O(n) solution and an O(n²) one.',
+        readAs: 'Rerooting in one line. Moving the root from a parent to a child brings every ' +
+          'node in the child\'s subtree one step closer, and every other node one step further. ' +
+          'That is n minus twice the subtree size.',
+        detail: [
+          'This single line is the whole upward pass, and it is worth deriving rather than ' +
+            'memorising, because the derivation is the pattern.',
+          'Every node inside the child\'s subtree is one edge nearer once the root moves across ' +
+            'that edge, and every node outside it is one edge further. There are size(child) of ' +
+            'the first and n − size(child) of the second, so the change is −size + (n − size).',
+          'Any rerooting problem has an equivalent line, and finding it is the difference between ' +
+            'an O(n) solution and an O(n²) one.'
+        ],
         example: 'On a 400-node random tree the root\'s answer is 2 159, and every other node\'s follows from ' +
           'that one line — checked against a BFS from all 400.'
       },
@@ -248,14 +261,17 @@
         term: 'Prefix and suffix, not "all but one"',
         plain: 'Each node must give every child the combination of its other children, in O(deg) not O(deg²).',
         formal: 'without[k] = combine(prefix[k−1], suffix[k+1]); both arrays are one pass each',
-        readAs: 'To get the combination of everything except item k, combine what came before it with what ' +
-          'comes after. Two sweeps rather than one recomputation per item.',
-        detail: 'This is the part that makes rerooting linear, and skipping it reintroduces the quadratic ' +
-          'cost the technique exists to remove. Recomputing "everything except this child" by looping over ' +
-          'the siblings is O(deg²) at that node, which on a random tree is invisible and on a star is the ' +
-          'entire O(n²). Prefix and suffix arrays give all of them in two passes. The pattern generalises ' +
-          'well beyond trees - it is the same move for "the product of all elements except this one" and ' +
-          'for leave-one-out aggregates over shards.',
+        readAs: 'To get the combination of everything except item k, combine what came before it ' +
+          'with what comes after. Two sweeps, rather than one recomputation per item.',
+        detail: [
+          'This is the part that makes rerooting linear, and skipping it reintroduces the ' +
+            'quadratic cost the technique exists to remove.',
+          'Recomputing "everything except this child" by looping over the siblings is O(deg²) at ' +
+            'that node. On a random tree that is invisible; on a star it is the entire O(n²).',
+          'Prefix and suffix arrays give all of them in two passes. The pattern generalises well ' +
+            'beyond trees: it is the same move for "the product of all elements except this one", ' +
+            'and for leave-one-out aggregates over shards.'
+        ],
         example: 'At 2 000 nodes the rerooting costs 11 994 combines on every shape; the loop version costs ' +
           '3 998 000 on the star and only 7 994 on the path.'
       },
@@ -263,15 +279,18 @@
         term: 'Prefix/suffix is insurance, and it has a premium',
         plain: 'On low-degree trees the naive loop is actually cheaper.',
         formal: 'prefix/suffix is Θ(deg) with a larger constant; the loop is Θ(deg²) with a small one',
-        readAs: 'Two ways to combine all children except one. Prefix/suffix arrays scale linearly in the ' +
-          'number of children but allocate; the nested loop is quadratic with almost no overhead. For ' +
-          'small degrees the quadratic one wins.',
-        detail: 'The honest measurement is that on a path the loop costs 7 994 operations and the ' +
-          'prefix/suffix machinery costs 11 994 - it loses. On a caterpillar it loses too. It wins by 333× ' +
-          'on a star, and the star is the shape a random test-tree generator will never produce. That is ' +
-          'the actual trade: a constant-factor premium on the common case in exchange for not being ' +
-          'quadratic on the uncommon one, and stating it that way is more useful than claiming the ' +
-          'technique is uniformly better.',
+        readAs: 'Two ways to combine all children except one. Prefix/suffix arrays scale linearly ' +
+          'in the number of children, and allocate. The nested loop is quadratic with almost no ' +
+          'overhead. For small degrees the quadratic one wins.',
+        detail: [
+          'The honest measurement is that on a path the loop costs 7 994 operations and the ' +
+            'prefix/suffix machinery costs 11 994. It loses. On a caterpillar it loses too.',
+          'It wins by 333× on a star, and the star is the shape a random test-tree generator will ' +
+            'never produce.',
+          'That is the actual trade: a constant-factor premium on the common case, in exchange for ' +
+            'not being quadratic on the uncommon one. Stating it that way is more useful than ' +
+            'claiming the technique is uniformly better.'
+        ],
         example: 'At 2 000 nodes the ratio of naive to rerooting combines is 0.7 on a path, 0.8 on a ' +
           'caterpillar, 1.0 on a random tree and 333.3 on a star.'
       },
@@ -279,12 +298,15 @@
         term: 'The oracle is a BFS from every node',
         plain: 'A rerooting bug is right at the root it was computed from and wrong everywhere else.',
         formal: 'compare answer[v] against an independent single-source computation for all v',
-        detail: 'This failure mode is why checking one node proves nothing. The downward pass is usually ' +
-          'correct - it is an ordinary tree DP - so the root\'s answer comes out right and gives every ' +
-          'confidence, while the upward pass, which is the new and subtle part, is wrong for the other ' +
-          'n − 1. The only check that sees it is running the problem independently from every node, which ' +
-          'is exactly the O(n²) cost the technique avoids. So the oracle runs on a smaller tree, and the ' +
-          'disagreement count is a reported field rather than an exception.',
+        detail: [
+          'This failure mode is why checking one node proves nothing.',
+          'The downward pass is usually correct — it is an ordinary tree DP — so the root\'s ' +
+            'answer comes out right and gives every confidence. The upward pass, which is the new ' +
+            'and subtle part, is wrong for the other n − 1.',
+          'The only check that sees it is running the problem independently from every node, which ' +
+            'is exactly the O(n²) cost the technique avoids. So the oracle runs on a smaller tree, ' +
+            'and the disagreement count is a reported field rather than an exception.'
+        ],
         example: 'On a 400-node tree, all 400 rerooted answers are compared against 400 separate traversals ' +
           'and 0 disagree.'
       },
@@ -292,11 +314,15 @@
         term: 'Not everything on a tree is a DP',
         plain: 'The diameter is two traversals and no table at all.',
         formal: 'the farthest node from any vertex is an endpoint of some diameter; BFS twice',
-        detail: 'The diameter can be computed with a tree DP - keep the two deepest child depths at each ' +
-          'node - and it is more simply computed by a graph-theory argument: pick any vertex, find the ' +
-          'farthest node from it, and the farthest node from *that* is the other end. Recognising when a ' +
-          'problem has a structural argument that beats the table is as valuable as writing the table, and ' +
-          'it is worth asking before reaching for a recurrence.',
+        detail: [
+          'The diameter can be computed with a tree DP, by keeping the two deepest child depths at ' +
+            'each node.',
+          'It is more simply computed by a graph-theory argument. Pick any vertex, find the ' +
+            'farthest node from it, and the farthest node from *that* is the other end.',
+          'Recognising when a problem has a structural argument that beats the table is as ' +
+            'valuable as writing the table, and it is worth asking before reaching for a ' +
+            'recurrence.'
+        ],
         example: 'The 2 000-node random tree has diameter 32, found by two traversals with no per-node state ' +
           'at all.'
       }
