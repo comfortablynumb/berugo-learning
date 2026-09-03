@@ -47,32 +47,35 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        '"Can I see all the queries before answering any of them?" is a question worth asking explicitly, ' +
-          'because the answer changes what is achievable. An online structure has to be ready for the worst ' +
-          'order it might be asked in. Given the whole workload up front, the order becomes a free variable, ' +
-          'and choosing it well turns problems with no efficient online structure into a linear-ish sweep.',
-        'Mo\'s algorithm is the canonical case. Distinct values in a range has no simple online structure - ' +
-          'the answer is not decomposable, so a segment tree does not help. Offline, sort the queries by the ' +
-          'block of their left endpoint and then by their right endpoint, keep two pointers, and walk them to ' +
-          'each query in turn. The left pointer never leaves its block and the right pointer sweeps forward ' +
-          'once per block, which is q·b + n²/b moves, minimised at b = n/√q.',
-        'The measurement is the argument. On 4 000 elements with 600 queries the ordered sweep costs 121 956 ' +
-          'pointer moves and the same queries in arrival order cost 1 420 156 - a factor of 11.6 - and both ' +
-          'produce answers identical to brute force. The bound (n + q)·√n is 290 930, comfortably above the ' +
-          'measurement, which is what a correct bound looks like: an over-estimate that does not grow apart ' +
-          'from the truth.'
+        '**"Can I see all the queries before answering any of them?"** is a question worth ' +
+          'asking explicitly, because the answer changes what is achievable.',
+        'An online structure has to be ready for the worst order it might be asked in. Given the ' +
+          'whole workload up front, the order becomes a free variable, and choosing it well turns ' +
+          'problems with no efficient online structure into a linear-ish sweep.',
+        'Mo\'s algorithm is the canonical case. Distinct values in a range has no simple online ' +
+          'structure: the answer is not decomposable, so a segment tree does not help.',
+        'Offline, sort the queries by the block of their left endpoint and then by their right ' +
+          'endpoint, keep two pointers, and walk them to each query in turn. The left pointer ' +
+          'never leaves its block and the right pointer sweeps forward once per block, which is ' +
+          'q·b + n²/b moves, minimised at b = n/√q.',
+        'The measurement is the argument. On 4 000 elements with 600 queries the ordered sweep ' +
+          'costs 121 956 pointer moves. The same queries in arrival order cost 1 420 156, a ' +
+          'factor of 11.6, and both produce answers identical to brute force.',
+        'The bound (n + q)·√n is 290 930, comfortably above the measurement. That is what a ' +
+          'correct bound looks like: an over-estimate that does not grow apart from the truth.'
       ],
       demo: {
         title: 'Interactive demo — the ordering, the block size and the bound',
         markup: root.OfflineProcessingTemplate.render()
       },
       diagram: diagram(),
-      insight: 'The condition Mo\'s algorithm actually needs is not "offline" but "an O(1) incremental ' +
-        'update": adding or removing one element at an end must be cheap, because the sweep does that ' +
-        'hundreds of thousands of times. Distinct counts, frequency modes and sums all qualify; anything ' +
-        'needing a rebuild does not. And when the question *is* decomposable - sums, minima, gcds - a ' +
-        'segment tree answers it online in log n and reordering buys nothing. Ask both questions in that ' +
-        'order: is it decomposable, and if not, can I see the queries first.'
+      insight: 'The condition Mo\'s algorithm actually needs is not "offline" but "an O(1) ' +
+        'incremental update". Adding or removing one element at an end must be cheap, because ' +
+        'the sweep does that hundreds of thousands of times. Distinct counts, frequency modes ' +
+        'and sums all qualify; anything needing a rebuild does not. And when the question *is* ' +
+        'decomposable — sums, minima, gcds — a segment tree answers it online in log n, and ' +
+        'reordering buys nothing. Ask both questions in that order. Is it decomposable? And if ' +
+        'not, can I see the queries first?'
     };
   }
 

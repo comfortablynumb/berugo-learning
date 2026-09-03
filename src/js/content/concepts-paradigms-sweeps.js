@@ -335,11 +335,15 @@
         },
         plain: 'Seeing every query before answering any of them changes what is achievable.',
         formal: 'an offline algorithm may permute the query sequence; an online one must answer each before seeing the next',
-        detail: 'The distinction is worth making explicitly because it is usually left implicit in a system ' +
-          'design and then discovered late. An online structure must be prepared for the worst order; an ' +
-          'offline one chooses the order, and that freedom is sometimes worth a whole complexity class. In ' +
-          'batch systems the answer to "can we see all the queries first" is usually yes, and nobody asked. ' +
-          'M21 formalises the competitive-ratio side of this; here the point is just to ask the question.',
+        detail: [
+          'The distinction is worth making explicitly, because it is usually left implicit in a ' +
+            'system design and then discovered late.',
+          'An online structure must be prepared for the worst order. An offline one chooses the ' +
+            'order, and that freedom is sometimes worth a whole complexity class.',
+          'In batch systems the answer to "can we see all the queries first" is usually yes, and ' +
+            'nobody asked. M21 formalises the competitive-ratio side of this; here the point is ' +
+            'just to ask the question.'
+        ],
         example: 'Distinct-values-in-a-range has no simple online structure and a straightforward offline ' +
           'sweep.'
       },
@@ -347,14 +351,18 @@
         term: 'Mo\'s ordering',
         plain: 'Sort queries by the block of the left endpoint, then by the right endpoint.',
         formal: 'key(q) = (⌊q.left / b⌋, q.right); two pointers then walk to each query in turn',
-        readAs: 'Mo\'s algorithm sorts the queries by which block their left end falls in, then by their ' +
-          'right end. Answering them in that order means the two window pointers travel a total ' +
-          'distance that is far less than answering them as they came.',
-        detail: 'The ordering is the entire algorithm - the sweep underneath is four while-loops that could ' +
-          'be written by anyone. Inside a block the right pointer only advances, so it costs n per block ' +
-          'across all queries in it; the left pointer stays within its block, so it costs at most b per ' +
-          'query. Everything else follows from those two sentences, including the block size, which is just ' +
-          'the minimiser of their sum.',
+        readAs: 'Mo\'s algorithm sorts the queries by which block their left end falls in, then ' +
+          'by their right end. Answering them in that order means the two window pointers travel ' +
+          'far less than answering them as they came.',
+        detail: [
+          'The ordering is the entire algorithm. The sweep underneath is four while-loops that ' +
+            'could be written by anyone.',
+          'Inside a block the right pointer only advances, so it costs n per block across all the ' +
+            'queries in it. The left pointer stays within its block, so it costs at most b per ' +
+            'query.',
+          'Everything else follows from those two sentences, including the block size, which is ' +
+            'just the minimiser of their sum.'
+        ],
         example: 'Six hundred queries over 4 000 elements: 121 956 pointer moves in Mo\'s order against ' +
           '1 420 156 in arrival order.'
       },
@@ -362,15 +370,19 @@
         term: 'The block size is n/√q, not √n',
         plain: 'Minimising q·b + n²/b gives n/√q, and the two coincide only when q = n.',
         formal: 'd/db (q·b + n²/b) = 0 at b = n/√q, giving total 2n√q',
-        readAs: 'Differentiate the cost with respect to the block size and set it to zero — the standard way ' +
-          'to find a minimum. The best block size is n over the square root of the query count, and the ' +
-          'total movement is 2n√q.',
-        detail: 'The folklore choice of √n is the minimiser for the case q = n and is measurably worse ' +
-          'otherwise - with six hundred queries over four thousand elements it costs about 1.7× the ' +
-          'minimum. The curve is broad, so being roughly right is enough and nobody should tune this ' +
-          'parameter repeatedly; but computing it correctly once costs a line and the difference is real. ' +
-          'The two terms are visible on either side of the minimum, which is what makes the sweep worth ' +
-          'plotting.',
+        readAs: 'Differentiate the cost with respect to the block size and set it to zero — the ' +
+          'standard way to find a minimum. The best block size is n over the square root of the ' +
+          'query count, and the total movement is 2n√q.',
+        detail: [
+          'The folklore choice of √n is the minimiser for the case q = n, and is measurably worse ' +
+            'otherwise. With six hundred queries over four thousand elements it costs about 1.7× ' +
+            'the minimum.',
+          'The curve is broad, so being roughly right is enough, and nobody should tune this ' +
+            'parameter repeatedly. But computing it correctly once costs a line, and the ' +
+            'difference is real.',
+          'The two terms are visible on either side of the minimum, which is what makes the sweep ' +
+            'worth plotting.'
+        ],
         example: 'n = 4 000, q = 600: the minimiser is 163 and costs 121 956 moves, while √n = 63 costs ' +
           '210 636.'
       },
@@ -378,11 +390,15 @@
         term: 'The precondition is an O(1) incremental update',
         plain: 'Adding or removing one element at an end must be cheap, because it happens hundreds of thousands of times.',
         formal: 'the aggregate must support add(x), remove(x) and answer() in O(1) or near it',
-        detail: '"Offline" is not the real requirement; cheap incremental maintenance is. Distinct counts ' +
-          'qualify - a counter array and a running total - as do frequency modes with care and sums ' +
-          'trivially. Anything needing a rebuild, a sort or a logarithmic structure per step multiplies the ' +
-          'whole sweep by that factor and usually loses to a simpler approach. Checking this before reaching ' +
-          'for the technique is the difference between a clever solution and a slow one.',
+        detail: [
+          '"Offline" is not the real requirement. Cheap incremental maintenance is.',
+          'Distinct counts qualify, with a counter array and a running total. So do frequency ' +
+            'modes with care, and sums trivially.',
+          'Anything needing a rebuild, a sort or a logarithmic structure per step multiplies the ' +
+            'whole sweep by that factor, and usually loses to a simpler approach. Checking this ' +
+            'before reaching for the technique is the difference between a clever solution and a ' +
+            'slow one.'
+        ],
         example: 'The distinct-count hooks are a counts array and one integer, so each pointer move is two ' +
           'array operations.'
       },
@@ -390,14 +406,18 @@
         term: 'Decomposable questions do not need this',
         plain: 'If the answer for a range follows from the answers for two halves, a segment tree wins online.',
         formal: 'decomposable: f(A ∪ B) = f(A) ⊕ f(B) for an associative ⊕',
-        readAs: 'The aggregate must be computable from partial answers: work out each piece separately and ' +
-          'combine. Sums and maxima qualify; a median does not, which is why these techniques do not ' +
-          'apply to it.',
-        detail: 'Sums, minima, maxima and gcds are decomposable, so a segment tree answers them online in ' +
-          'log n and reordering buys nothing at all. Distinct counts are not: knowing the distinct counts of ' +
-          'two halves says nothing about their union, because the overlap is unknown. That property, rather ' +
-          'than difficulty or size, is what decides whether Mo\'s algorithm is the right tool - and asking it ' +
-          'first saves implementing a sweep that a simpler structure beats.',
+        readAs: 'The aggregate has to be computable from partial answers: work out each piece ' +
+          'separately and combine. Sums and maxima qualify. A median does not, which is why these ' +
+          'techniques do not apply to it.',
+        detail: [
+          'Sums, minima, maxima and gcds are decomposable, so a segment tree answers them online ' +
+            'in log n, and reordering buys nothing at all.',
+          'Distinct counts are not. Knowing the distinct counts of two halves says nothing about ' +
+            'their union, because the overlap is unknown.',
+          'That property — rather than difficulty or size — is what decides whether Mo\'s ' +
+            'algorithm is the right tool. Asking it first saves implementing a sweep that a ' +
+            'simpler structure beats.'
+        ],
         example: 'The same sweep answers range sums at the same cost, and a prefix-sum array answers them in ' +
           'constant time per query.'
       },
@@ -405,11 +425,14 @@
         term: 'Answers come out permuted',
         plain: 'The sweep produces answers in its own order and writes them back into the caller\'s slots.',
         formal: 'carry the original index through the sort and scatter the results at the end',
-        detail: 'This is a small implementation detail with a large systems consequence: nothing downstream ' +
-          'can consume an answer until the whole batch is done. That is fine in a batch job and fatal in an ' +
-          'interactive path, and it is the concrete form of the online/offline distinction rather than a ' +
-          'coding inconvenience. It also means the technique cannot be applied incrementally as queries ' +
-          'arrive - the batch boundary is real.',
+        detail: [
+          'This is a small implementation detail with a large systems consequence. Nothing ' +
+            'downstream can consume an answer until the whole batch is done.',
+          'That is fine in a batch job and fatal in an interactive path. It is the concrete form ' +
+            'of the online/offline distinction, rather than a coding inconvenience.',
+          'It also means the technique cannot be applied incrementally as queries arrive. The ' +
+            'batch boundary is real.'
+        ],
         example: 'The first twelve queries answered are numbers 3, 41, 17 and so on from the caller\'s list, ' +
           'in whatever order the blocks put them.'
       },
@@ -417,14 +440,18 @@
         term: 'Sqrt decomposition as the parent idea',
         plain: 'Split into √n blocks so that per-block work and per-element work balance.',
         formal: 'block updates in O(1) and queries touching O(√n) blocks plus O(√n) elements',
-        readAs: 'Square-root decomposition splits the array into about √n blocks of about √n elements. A ' +
-          'query touches a handful of whole blocks and a handful of loose elements, so both halves come ' +
-          'to √n — which is why that block size is the one chosen.',
-        detail: 'Mo\'s algorithm is one member of a family whose organising principle is the same: choose a ' +
-          'block size so that the two costs a design trades off become equal. Range updates with lazy block ' +
-          'tags, offline dynamic connectivity over time blocks and small-to-large merging all follow it. The ' +
-          'square root is not magic - it is what falls out of setting q·b equal to n²/b - and recognising the ' +
-          'shape means being able to derive the right block size rather than remembering one.',
+        readAs: 'Square-root decomposition splits the array into about √n blocks of about √n ' +
+          'elements. A query touches a handful of whole blocks and a handful of loose elements. ' +
+          'Both halves come to √n, which is why that block size is the one chosen.',
+        detail: [
+          'Mo\'s algorithm is one member of a family whose organising principle is the same: ' +
+            'choose a block size so that the two costs a design trades off become equal.',
+          'Range updates with lazy block tags, offline dynamic connectivity over time blocks and ' +
+            'small-to-large merging all follow it.',
+          'The square root is not magic. It is what falls out of setting q·b equal to n²/b, and ' +
+            'recognising the shape means being able to derive the right block size rather than ' +
+            'remembering one.'
+        ],
         example: 'The same balancing gives block size √n for range-update range-query, where the two costs ' +
           'are per-block and per-element rather than per-query and per-reset.'
       },
@@ -432,16 +459,19 @@
         term: 'The bound is an over-estimate that does not diverge',
         plain: '(n + q)·√n bounds the sweep; the measurement sits comfortably below it and tracks it.',
         formal: 'measured moves <= (n + q)·√n, with the ratio roughly constant as n and q grow',
-        readAs: 'The pointer movement stays under the predicted bound, and the ratio between measured and ' +
-          'predicted holds steady as the problem grows — which is what makes the bound a usable ' +
-          'estimate rather than just a true statement.',
-        detail: 'A bound is useful when the measurement stays a stable fraction of it, and useless when the ' +
-          'ratio drifts - the second case means the bound is describing a worst case the workload never ' +
-          'reaches, and it will mislead any capacity plan built on it. Reporting both, and the ratio, is what ' +
-          'turns a quoted complexity into a usable number. Here the sweep uses about 42% of the bound and ' +
-          'stays there as the workload grows.',
+        readAs: 'The pointer movement stays under the predicted bound, and the ratio between ' +
+          'measured and predicted holds steady as the problem grows. That is what makes the bound ' +
+          'a usable estimate rather than just a true statement.',
+        detail: [
+          'A bound is useful when the measurement stays a stable fraction of it, and useless when ' +
+            'the ratio drifts.',
+          'A drifting ratio means the bound is describing a worst case the workload never reaches, ' +
+            'and it will mislead any capacity plan built on it.',
+          'Reporting both, and the ratio, is what turns a quoted complexity into a usable number. ' +
+            'Here the sweep uses about 42% of the bound and stays there as the workload grows.'
+        ],
         example: 'n = 4 000, q = 600: 121 956 measured against a bound of 290 930.'
       }
-    ]
+    ],
   });
 }(typeof self !== 'undefined' ? self : (typeof window !== 'undefined' ? window : null)));
