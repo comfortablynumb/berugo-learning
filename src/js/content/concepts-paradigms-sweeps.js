@@ -19,14 +19,17 @@
         },
         plain: 'Each element enters the structure once and leaves once, so the nested loop is linear.',
         formal: 'total work = Σ pushes + Σ pops <= 2n, however the inner loop is distributed',
-        readAs: 'Every element enters the window once and leaves once, so the inner loop runs at most 2n ' +
-          'times in total — no matter how uneven any single iteration looks. That is amortised ' +
-          'counting, and it is why a nested loop here is still linear.',
-        detail: 'This is the only idea in the section, and everything else is a disguise for it. The inner ' +
-          'loop of a two-pointer sweep can run for a long time at one position and not at all at the next, ' +
-          'so per-iteration reasoning gives no bound; the total does, because every element can only be ' +
-          'removed as many times as it was added. That is why every figure here is a total rather than a ' +
-          'rate: a maximum inner-loop length says nothing, and 2n says everything.',
+        readAs: 'Every element enters the window once and leaves once, so the inner loop runs at ' +
+          'most 2n times in total — no matter how uneven any single iteration looks. That is ' +
+          'amortised counting, and it is why a nested loop here is still linear.',
+        detail: [
+          'This is the only idea in the section, and everything else is a disguise for it.',
+          'The inner loop of a two-pointer sweep can run for a long time at one position and not ' +
+            'at all at the next, so per-iteration reasoning gives no bound. The total does, ' +
+            'because every element can only be removed as many times as it was added.',
+          'That is why every figure here is a total rather than a rate. A maximum inner-loop ' +
+            'length says nothing, and 2n says everything.'
+        ],
         example: 'Five thousand elements through a window of 50: 5 000 pushes and 4 994 pops, whatever the ' +
           'data looks like.'
       },
@@ -34,11 +37,15 @@
         term: 'The recognition test',
         plain: 'A quadratic loop whose inner index never moves backwards can become two pointers.',
         formal: 'if the inner loop\'s start index is monotone non-decreasing in the outer index, hoist it into a second cursor',
-        detail: 'This is the mechanical part, and it is worth applying deliberately rather than by ' +
-          'recognising remembered problems. Look at the inner loop and ask whether, when the outer index ' +
-          'advances, the inner one ever needs to go back. If it does not, the inner loop is a cursor that has ' +
-          'not been hoisted out yet and the transformation is routine. If it does, no amount of cleverness ' +
-          'makes the sweep linear and a different technique is needed.',
+        detail: [
+          'This is the mechanical part, and it is worth applying deliberately rather than by ' +
+            'recognising remembered problems.',
+          'Look at the inner loop and ask whether, when the outer index advances, the inner one ' +
+            'ever needs to go back.',
+          'If it does not, the inner loop is a cursor that has not been hoisted out yet, and the ' +
+            'transformation is routine. If it does, no amount of cleverness makes the sweep ' +
+            'linear, and a different technique is needed.'
+        ],
         example: '"Shortest subarray summing to at least k" over non-negative values passes the test; over ' +
           'values that can be negative it fails, and needs a prefix-sum structure instead.'
       },
@@ -56,14 +63,17 @@
         },
         plain: 'Keep the window\'s candidates in decreasing order; the front is always the answer.',
         formal: 'maintain indices i₁ < i₂ < … with a[i₁] > a[i₂] > …, dropping expired fronts and dominated backs',
-        readAs: 'Keep a deque of positions whose values decrease left to right. Drop from the front what has ' +
-          'fallen out of the window, and from the back anything a newer larger value has made ' +
-          'irrelevant. The front is then always the window maximum.',
-        detail: 'The invariant does two jobs. Dropping the front when it leaves the window handles expiry; ' +
-          'dropping the back while it is no larger than the arriving element handles domination, because an ' +
-          'earlier smaller element can never be the maximum again while a later larger one is present. What ' +
-          'remains is exactly the set of indices that could still become the maximum, in order, so the answer ' +
-          'is the front and no scan is needed.',
+        readAs: 'Keep a deque of positions whose values decrease left to right. Drop from the ' +
+          'front what has fallen out of the window, and from the back anything a newer larger ' +
+          'value has made irrelevant. The front is then always the window maximum.',
+        detail: [
+          'The invariant does two jobs.',
+          'Dropping the front when it leaves the window handles expiry. Dropping the back ' +
+            'while it is no larger than the arriving element handles domination. An earlier ' +
+            'smaller element can never be the maximum again once a larger one arrives.',
+          'What remains is exactly the set of indices that could still become the maximum, in ' +
+            'order. So the answer is the front, and no scan is needed.'
+        ],
         example: 'On ascending input the deque never holds more than one index; on descending input it holds ' +
           'the whole window of 50.'
       },
@@ -71,14 +81,18 @@
         term: 'Time and space are different claims',
         plain: 'The operation total does not move with the data; the largest deque does.',
         formal: 'work is Θ(n) for every input; peak size ranges over [1, k] depending on the input shape',
-        readAs: 'The time is linear whatever the data. What the data changes is how large the deque grows — ' +
-          'anywhere from one element to the full window — so the memory is input-dependent and the time ' +
-          'is not.',
-        detail: 'Reporting only the total hides the memory behaviour and reporting only the peak suggests the ' +
-          'work varies when it does not. Both belong in the table because they answer different questions - ' +
-          'how long will this take, and how much will it hold - and they respond to different properties of ' +
-          'the input. This is the same discipline as reporting comparisons and moves separately for a sort: ' +
-          'one number for two budgets is a number that hides one of them.',
+        readAs: 'The time is linear whatever the data. What the data changes is how large the ' +
+          'deque grows — anywhere from one element to the full window. So the memory is ' +
+          'input-dependent and the time is not.',
+        detail: [
+          'Reporting only the total hides the memory behaviour. Reporting only the peak suggests ' +
+            'the work varies when it does not.',
+          'Both belong in the table, because they answer different questions: how long will this ' +
+            'take, and how much will it hold. They also respond to different properties of the ' +
+            'input.',
+          'This is the same discipline as reporting comparisons and moves separately for a sort. ' +
+            'One number for two budgets is a number that hides one of them.'
+        ],
         example: 'Four shapes at n = 5 000, k = 50: totals of 9 994 to 9 999, peak deque sizes of 1, 2, 11 ' +
           'and 50.'
       },
@@ -86,22 +100,29 @@
         term: 'The monotonic stack',
         plain: 'Keep bars in increasing height; a shorter arrival settles everything taller.',
         formal: 'maintain a stack of indices with non-decreasing values; on a smaller value, pop and settle each',
-        detail: 'The stack answers "for each element, where is the nearest smaller one on each side" in one ' +
-          'pass, and a surprising number of problems reduce to that: next greater element, largest rectangle ' +
-          'in a histogram, maximal rectangles in a binary matrix, stock spans. The moment a shorter bar ' +
-          'arrives, every taller bar on the stack has found its right boundary and its left boundary is ' +
-          'whatever sits below it - so each is settled exactly once, which is the same 2n as before.',
+        detail: [
+          'The stack answers "for each element, where is the nearest smaller one on each side" in ' +
+            'one pass.',
+          'A surprising number of problems reduce to that: next greater element, largest rectangle ' +
+            'in a histogram, maximal rectangles in a binary matrix, stock spans.',
+          'The moment a shorter bar arrives, every taller bar on the stack has found its right ' +
+            'boundary, and its left boundary is whatever sits below it. Each is settled exactly ' +
+            'once, which is the same 2n as before.'
+        ],
         example: 'The histogram [2, 1, 5, 6, 2, 3] has largest rectangle 10, found in 12 stack operations.'
       },
       {
         term: 'The sentinel',
         plain: 'A final impossible element makes the drain part of the main loop.',
         formal: 'append a value below every other so the loop settles the remaining stack without a second copy of the logic',
-        detail: 'Without a sentinel the stack still holds elements when the input ends, and the code has to ' +
-          'drain it with a second loop that duplicates the settling logic. Duplicated logic drifts: the two ' +
-          'copies end up computing the boundary slightly differently, and the bug appears only on inputs ' +
-          'whose tail is increasing. One extra iteration with a value smaller than everything removes the ' +
-          'duplication entirely, which is a correctness argument rather than a tidiness one.',
+        detail: [
+          'Without a sentinel the stack still holds elements when the input ends, and the code has ' +
+            'to drain it with a second loop that duplicates the settling logic.',
+          'Duplicated logic drifts. The two copies end up computing the boundary slightly ' +
+            'differently, and the bug appears only on inputs whose tail is increasing.',
+          'One extra iteration with a value smaller than everything removes the duplication ' +
+            'entirely. That is a correctness argument rather than a tidiness one.'
+        ],
         example: 'The trace runs to i = 6 on a six-element histogram; that last row is the sentinel settling ' +
           'the remaining stack.'
       },
@@ -109,14 +130,18 @@
         term: 'The sortedness precondition',
         plain: 'The classic two-pointer pair search assumes a sorted array and is silently wrong without one.',
         formal: 'with a[lo] + a[hi] compared against the target, correctness depends on a being non-decreasing',
-        readAs: 'Two pointers converging from the ends work only because the array is sorted: too small means ' +
-          'move the left pointer up, too large means move the right one down. On unsorted data the ' +
-          'moves are meaningless.',
-        detail: 'The inward-moving pair search is the first two-pointer algorithm anyone learns, and its ' +
-          'precondition is invisible in the code: nothing about the loop mentions order, and on unsorted ' +
-          'input it terminates and returns "not found" for pairs that exist. This is the same class of ' +
-          'failure as binary search on an unsorted array - a confident wrong answer with no diagnostic - and ' +
-          'the same remedy applies, which is to assert the precondition in debug builds.',
+        readAs: 'Two pointers converging from the ends work only because the array is sorted. Too ' +
+          'small means move the left pointer up; too large means move the right one down. On ' +
+          'unsorted data the moves are meaningless.',
+        detail: [
+          'The inward-moving pair search is the first two-pointer algorithm anyone learns, and its ' +
+            'precondition is invisible in the code.',
+          'Nothing about the loop mentions order, and on unsorted input it terminates and returns ' +
+            '"not found" for pairs that exist.',
+          'This is the same class of failure as binary search on an unsorted array — a confident ' +
+            'wrong answer with no diagnostic — and the same remedy applies. Assert the ' +
+            'precondition in debug builds.'
+        ],
         example: 'Two pointers on an unsorted array miss pairs at a rate that depends on the data, and never ' +
           'raise.'
       },
@@ -124,11 +149,14 @@
         term: 'The window with a shrink condition',
         plain: 'Grow the window on the right, shrink from the left while the condition still holds.',
         formal: 'for each right: extend; while (window minus a[left]) still satisfies the constraint, advance left',
-        detail: 'The shape generalises the fixed-width window to constraints like "sum at least k" or "at ' +
-          'most two distinct values". Both pointers only advance, so the sweep is linear. The subtlety is ' +
-          'in the shrink condition: it must be tested against the window *without* the left element rather ' +
-          'than against the current window, or the loop shrinks one element too far and reports a window that ' +
-          'does not satisfy the constraint.',
+        detail: [
+          'The shape generalises the fixed-width window to constraints like "sum at least k" or ' +
+            '"at most two distinct values". Both pointers only advance, so the sweep is linear.',
+          'The subtlety is in the shrink condition. It has to be tested against the window ' +
+            '*without* the left element, rather than against the current window.',
+          'Test it the other way and the loop shrinks one element too far, and reports a window ' +
+            'that does not satisfy the constraint.'
+        ],
         example: '"Shortest window summing to at least the target" advances left while the sum minus a[left] ' +
           'is still at least the target — not while the sum is.'
       }

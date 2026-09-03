@@ -47,34 +47,38 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'Four techniques, one argument. Two pointers, sliding windows, monotonic deques and monotonic stacks ' +
-          'are all cases of "each element enters the structure once and leaves once", which makes a loop that ' +
-          'reads as nested cost 2n rather than n². The tell in a quadratic solution is an inner loop whose ' +
-          'index never moves backwards - when that is true, the inner loop is a second pointer that has not ' +
-          'been hoisted out yet.',
-        'The window maximum is the sharpest example. The deque holds indices whose values are strictly ' +
-          'decreasing, so its front is always the window\'s maximum; anything smaller that arrived earlier ' +
-          'can never be the maximum again, because it expires first and is dominated in the meantime. The ' +
-          'measurement is that pushes plus pops stay just under 2n on every input shape - 9 994 of a ' +
-          'possible 10 000 on random input, 9 999 on ascending - while the deque\'s size varies from 1 to ' +
-          'k depending on the data.',
-        'The two facts have to be reported separately, because they answer different questions. The total ' +
-          'bounds the time; the largest deque bounds the memory, and only the second one moves with the ' +
-          'input. Ascending input keeps one element; descending input keeps the whole window. A section that ' +
-          'reported only the total would be hiding the memory behaviour, and one that reported only the ' +
-          'maximum size would suggest the work varies when it does not.'
+        '**Four techniques, one argument.** Two pointers, sliding windows, monotonic deques and ' +
+          'monotonic stacks are all cases of "each element enters the structure once and leaves ' +
+          'once". That makes a loop which reads as nested cost 2n rather than n².',
+        'The tell in a quadratic solution is an inner loop whose index never moves backwards. ' +
+          'When that is true, the inner loop is a second pointer that has not been hoisted out ' +
+          'yet.',
+        'The window maximum is the sharpest example. The deque holds indices whose values are ' +
+          'strictly decreasing, so its front is always the window\'s maximum. Anything smaller ' +
+          'that arrived earlier can never be the maximum again: it expires first, and is ' +
+          'dominated in the meantime.',
+        'The measurement is that pushes plus pops stay just under 2n on every input shape: ' +
+          '9 994 of a possible 10 000 on random input, and 9 999 on ascending. Meanwhile the ' +
+          'deque\'s size varies from 1 to k depending on the data.',
+        'The two facts have to be reported separately, because they answer different questions. ' +
+          'The total bounds the time. The largest deque bounds the memory, and only the second ' +
+          'one moves with the input: ascending input keeps one element, descending input keeps ' +
+          'the whole window.',
+        'A section that reported only the total would be hiding the memory behaviour, and one ' +
+          'that reported only the maximum size would suggest the work varies when it does not.'
       ],
       demo: {
         title: 'Interactive demo — the totals, the shapes, and the brute-force oracle',
         markup: root.TwoPointersTemplate.render()
       },
       diagram: diagram(),
-      insight: 'When a nested loop is quadratic and its inner index only ever moves forwards, the collapse to ' +
-        'two pointers is mechanical - and when it does not only move forwards, no amount of cleverness makes ' +
-        'it linear. That is the whole recognition test, and it is worth applying explicitly rather than by ' +
-        'pattern matching against remembered problems. The corollary for reviews: a linear-looking solution ' +
-        'whose inner loop can revisit an index is not linear, and the way to settle it is to count the ' +
-        'operations rather than to read the code.'
+      insight: 'When a nested loop is quadratic and its inner index only ever moves forwards, ' +
+        'the collapse to two pointers is mechanical. When the inner index can go back, no amount ' +
+        'of cleverness makes it linear. That is the whole recognition test, and it is worth ' +
+        'applying explicitly rather than by pattern matching against remembered problems. The ' +
+        'corollary for reviews is that a linear-looking solution whose inner loop can revisit ' +
+        'an index is not linear. The way to settle it is to count the operations, rather than to ' +
+        'read the code.'
     };
   }
 
