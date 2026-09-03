@@ -51,37 +51,42 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'One-dimensional DP is the family where the state is a single index, and almost every mistake in it ' +
-          'is an *order* mistake rather than a recurrence mistake. Climbing stairs, house robber, maximum ' +
-          'subarray and coin change are all "dp[i] depends on a bounded number of earlier entries", and the ' +
-          'work is in naming what dp[i] means precisely enough that the transitions are forced.',
-        'Kadane\'s algorithm is the clearest case of a recurrence disguised as a trick. dp[i] is the best sum ' +
-          'of a subarray *ending at i*, and once that sentence is written the algorithm is immediate: either ' +
-          'extend the previous best or start again at i. The table is never stored because only the last ' +
-          'entry is needed, which is why it does not look like DP at all.',
-        '**The patience-sorting `tails` array is not the answer, and it looks exactly like it.** It is ' +
-          'increasing, it is precisely the right length, and it is what most implementations return. The ' +
-          'demo below prints the piles beside the reconstructed subsequence and checks each against the ' +
-          'input: the piles are usually not a subsequence of it. That is why this section\'s exercise asks ' +
-          'for reconstruction rather than length - a length is not a witness, and a wrong witness is worse ' +
-          'than none.',
-        '**Coin change\'s loop order decides which question is being answered.** Coin outside, amount ' +
-          'inside counts combinations - {1,2,2} once. Amount outside, coin inside counts permutations - ' +
-          '{1,2,2}, {2,1,2} and {2,2,1} separately. For 5 from {1, 2, 5} the two answers are 4 and 9. ' +
-          'Neither raises, both are correct answers to *different* questions, and the only way to know ' +
-          'which one you wrote is to check it against an enumeration.'
+        '**One-dimensional DP is the family where the state is a single index**, and almost ' +
+          'every mistake in it is an *order* mistake rather than a recurrence mistake.',
+        'Climbing stairs, house robber, maximum subarray and coin change are all "dp[i] depends ' +
+          'on a bounded number of earlier entries". The work is in naming what dp[i] means ' +
+          'precisely enough that the transitions are forced.',
+        'Kadane\'s algorithm is the clearest case of a recurrence disguised as a trick. Here ' +
+          'dp[i] is the best sum of a subarray *ending at i*. Once that sentence is written the ' +
+          'algorithm is immediate: either extend the previous best, or start again at i. The ' +
+          'table is never stored because only the last entry is needed, which is why it does not ' +
+          'look like DP at all.',
+        '**The patience-sorting `tails` array is not the answer, and it looks exactly like it.** ' +
+          'It is increasing, it is precisely the right length, and it is what most ' +
+          'implementations return.',
+        'The demo below prints the piles beside the reconstructed subsequence and checks each ' +
+          'against the input. The piles are usually not a subsequence of it. That is why this ' +
+          'section\'s exercise asks for reconstruction rather than length: a length is not a ' +
+          'witness, and a wrong witness is worse than none.',
+        '**Coin change\'s loop order decides which question is being answered.** Coin outside, ' +
+          'amount inside counts combinations — {1,2,2} once. Amount outside, coin inside counts ' +
+          'permutations — {1,2,2}, {2,1,2} and {2,2,1} separately.',
+        'For 5 from {1, 2, 5} the two answers are 4 and 9. Neither raises. Both are correct ' +
+          'answers to *different* questions, and the only way to know which one you wrote is to ' +
+          'check it against an enumeration.'
       ],
       demo: {
         title: 'Interactive demo — LIS twice over, and the loop order that changes the question',
         markup: root.OneDimensionalDpTemplate.render()
       },
       diagram: diagram(),
-      insight: 'When a DP is asked for an answer rather than a value, write the reconstruction first and the ' +
-        'value second. The reconstruction is the part that fails loudly - a subsequence that is not a ' +
-        'subsequence, an item list that overfills the sack, an alignment whose rows do not strip back to the ' +
-        'inputs - and the value is the part that fails silently. Most DP bugs that reach production are in ' +
-        'code that only ever returned a number, because nothing downstream could tell that the number was ' +
-        'the optimum of a slightly different problem.'
+      insight: 'When a DP is asked for an answer rather than a value, write the reconstruction ' +
+        'first and the value second. The reconstruction is the part that fails loudly. A ' +
+        'subsequence that is not a subsequence. An item list that overfills the sack. An ' +
+        'alignment whose rows do not strip back to the inputs. The value is the part that fails ' +
+        'silently. Most DP bugs that reach production are in code that only ever returned a ' +
+        'number: nothing downstream could tell that the number was the optimum of a slightly ' +
+        'different problem.'
     };
   }
 

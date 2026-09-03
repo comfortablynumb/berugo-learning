@@ -200,27 +200,34 @@
         },
         plain: 'Write down exactly what dp[i] means, and the transitions become forced.',
         formal: 'define dp: index → value, then derive transitions from the definition rather than from intuition',
-        detail: 'Every recurrence in this section is immediate once its state sentence is precise, and ' +
-          'impossible to get right when it is vague. "The best answer using the first i elements" and "the ' +
-          'best answer *ending at* i" are different definitions with different recurrences and different ' +
-          'answers, and confusing them is the most common one-dimensional DP bug. The sentence is also what ' +
-          'tells you where the final answer is: the first definition puts it at dp[n], the second requires ' +
-          'a maximum over all i.',
-        example: 'Kadane\'s dp[i] is "the best sum of a subarray ending at i", so the answer is the maximum ' +
-          'over all i — not dp[n], which is a different and usually wrong number.'
+        detail: [
+          'Every recurrence in this section is immediate once its state sentence is precise, and ' +
+            'impossible to get right when it is vague.',
+          '"The best answer using the first i elements" and "the best answer *ending at* i" are ' +
+            'different definitions, with different recurrences and different answers. Confusing ' +
+            'them is the most common one-dimensional DP bug.',
+          'The sentence is also what tells you where the final answer is. The first definition ' +
+            'puts it at dp[n]; the second requires a maximum over all i.'
+        ],
+        example: 'Kadane\'s dp[i] is "the best sum of a subarray ending at i". So the answer ' +
+          'is the maximum over all i, not dp[n] — a different and usually wrong number.'
       },
       {
         term: 'Kadane is a recurrence, not a trick',
         plain: 'Maximum subarray is a one-line DP with the table thrown away.',
         formal: 'dp[i] = max(a[i], dp[i−1] + a[i]); answer = max over i of dp[i]',
-        readAs: 'At each position, either start a fresh run here or extend the previous one — whichever is ' +
-          'larger. The answer is the best value any position reached, not the last one.',
-        detail: 'It is taught as a clever scan and it is an ordinary DP whose table happens to be a single ' +
-          'variable, because dp[i] depends only on dp[i−1]. Seeing it that way is worth more than memorising ' +
-          'it: the same collapse applies to any recurrence with bounded look-back, and recognising when a ' +
-          'table can be dropped to O(1) is exactly the skill the knapsack section needs. It also makes the ' +
-          'reconstruction obvious - track where the current run started, because the value alone does not ' +
-          'say which subarray achieved it.',
+        readAs: 'At each position, either start a fresh run here or extend the previous one — ' +
+          'whichever is larger. The answer is the best value any position reached, not the last ' +
+          'one.',
+        detail: [
+          'It is taught as a clever scan, and it is an ordinary DP whose table happens to be a ' +
+            'single variable, because dp[i] depends only on dp[i−1].',
+          'Seeing it that way is worth more than memorising it. The same collapse applies to any ' +
+            'recurrence with bounded look-back, and recognising when a table can be dropped to ' +
+            'O(1) is exactly the skill the knapsack section needs.',
+          'It also makes the reconstruction obvious. Track where the current run started, because ' +
+            'the value alone does not say which subarray achieved it.'
+        ],
         example: 'On a 2 000-element sequence the answer is 502 781 over the range [0, 1999], and the ' +
           'quadratic scan over every (i, j) pair agrees exactly.'
       },
@@ -228,38 +235,50 @@
         term: 'Coin change: the loop order is the question',
         plain: 'Coin outside counts combinations; amount outside counts permutations. One line apart.',
         formal: 'combinations: for each coin, for each amount. permutations: for each amount, for each coin',
-        detail: 'This is the cleanest example in the milestone of a change that is invisible in the code and ' +
-          'total in the semantics. With the coin loop outside, each coin is offered to every amount once and ' +
-          'the multiset {1, 2, 2} is counted a single time. With the amount loop outside, every amount ' +
-          'considers every coin, so the orderings 1+2+2, 2+1+2 and 2+2+1 are three different ways. Neither ' +
-          'raises. Both are correct answers to different questions, and the only way to know which one you ' +
-          'wrote is to check it against an enumeration.',
+        detail: [
+          'This is the cleanest example in the milestone of a change that is invisible in the code ' +
+            'and total in the semantics.',
+          'With the coin loop outside, each coin is offered to every amount once, and the multiset ' +
+            '{1, 2, 2} is counted a single time.',
+          'With the amount loop outside, every amount considers every coin, so the orderings ' +
+            '1+2+2, 2+1+2 and 2+2+1 are three different ways.',
+          'Neither raises. Both are correct answers to different questions, and the only way to ' +
+            'know which one you wrote is to check it against an enumeration.'
+        ],
         example: 'Making 5 from {1, 2, 5}: 4 combinations, 9 permutations. At 20 it is 29 against 26 547.'
       },
       {
         term: 'The patience piles are not the answer',
         plain: 'The `tails` array is increasing and exactly the right length, and usually not a subsequence.',
         formal: 'tails[k] is the smallest value ending an increasing subsequence of length k+1, not a member of any one of them',
-        detail: 'This is the trap the LIS exercise exists for. Patience sorting maintains an array that is ' +
-          'increasing, whose length is the answer, and whose contents are individually all from the input - ' +
-          'so it passes a length check, a sortedness check and a casual read. It is nevertheless a summary ' +
-          'of what is achievable rather than a witness of it: the values may come from positions that ' +
-          'cannot coexist in one subsequence. Reconstruction needs predecessor links recorded as the piles ' +
-          'are updated, and the check that separates the two is whether the returned list is a genuine ' +
-          'subsequence of the input.',
-        example: 'On the default 2 000-element sequence, the piles start 0, 3, 6, 8 and the real answer ' +
-          'starts 1, 5, 11, 18 — same length, and only one of them is a subsequence.'
+        detail: [
+          'This is the trap the LIS exercise exists for.',
+          'Patience sorting maintains an array that is increasing, whose length is the answer, and ' +
+            'whose contents are individually all from the input. So it passes a length check, a ' +
+            'sortedness check and a casual read.',
+          'It is nevertheless a summary of what is achievable rather than a witness of it. The ' +
+            'values may come from positions that cannot coexist in one subsequence.',
+          'Reconstruction needs predecessor links recorded as the piles are updated, and the check ' +
+            'that separates the two is whether the returned list is a genuine subsequence of the ' +
+            'input.'
+        ],
+        example: 'On the default 2 000-element sequence, the piles start 0, 3, 6, 8 and the ' +
+          'real answer starts 1, 5, 11, 18. Same length, and only one is a subsequence.'
       },
       {
         term: 'Reconstruction fails loudly; values fail silently',
         plain: 'Ask a DP for its answer, not only its score, because the answer can be checked.',
         formal: 'a witness admits an independent verification predicate; an optimum does not',
-        detail: 'An optimal value is a single number with nothing to compare it against short of another ' +
-          'implementation. A reconstructed answer can be checked against the problem statement directly: is ' +
-          'this list increasing, is it a subsequence of the input, does this item set fit the capacity, do ' +
-          'these alignment rows strip back to the two strings. Every one of those checks is a few lines and ' +
-          'each of them catches a class of bug the value never will - which is why the exercises in this ' +
-          'milestone grade the witness rather than the score.',
+        detail: [
+          'An optimal value is a single number with nothing to compare it against, short of ' +
+            'another implementation.',
+          'A reconstructed answer can be checked against the problem statement directly. Is this ' +
+            'list increasing? Is it a subsequence of the input? Does this item set fit the ' +
+            'capacity? Do these alignment rows strip back to the two strings?',
+          'Every one of those checks is a few lines, and each catches a class of bug the value ' +
+            'never will. That is why the exercises in this milestone grade the witness rather than ' +
+            'the score.'
+        ],
         example: 'A patience-sorting implementation returning `tails` has the right length on every input and ' +
           'fails "is this a subsequence" on most of them.'
       },
@@ -267,27 +286,34 @@
         term: 'Rolling the table down to O(1)',
         plain: 'When dp[i] reads only a bounded window, keep the window instead of the table.',
         formal: 'a recurrence with look-back k needs Θ(k) live state, not Θ(n)',
-        readAs: 'If each entry only reads the last k entries, only k of them need to still exist. The rest of ' +
-          'the table is history you are paying to keep.',
-        detail: 'Fibonacci needs two variables, house robber needs two, Kadane needs one. The saving is real ' +
-          'and it costs exactly one thing: the traceback, which walks backwards through cells that no longer ' +
-          'exist. Deciding up front whether the caller wants the answer or only its value is what keeps that ' +
-          'trade honest, because a reduced table with the traceback code left in place returns a plausible ' +
-          'reconstruction of nothing at all.',
+        readAs: 'If each entry only reads the last k entries, only k of them need to still exist. ' +
+          'The rest of the table is history you are paying to keep.',
+        detail: [
+          'Fibonacci needs two variables, house robber needs two, Kadane needs one.',
+          'The saving is real, and it costs exactly one thing: the traceback, which walks ' +
+            'backwards through cells that no longer exist.',
+          'Deciding up front whether the caller wants the answer or only its value is what keeps ' +
+            'that trade honest. A reduced table with the traceback code left in place returns a ' +
+            'plausible reconstruction of nothing at all.'
+        ],
         example: 'Fibonacci at n = 25 holds 21 cells as a table and 2 rolling, and returns 75 025 either way.'
       },
       {
         term: 'Impossible is not a large number',
         plain: 'Report unreachable as null rather than as Infinity or a sentinel.',
         formal: 'the codomain of a min-DP is value ∪ {⊥}, and ⊥ must not be comparable with values',
-        readAs: 'A minimising table holds either a real value or "unreachable" — the ⊥ — and the two must ' +
-          'never be compared. Using a large number for unreachable instead is what makes an impossible ' +
-          'path win a minimum.',
-        detail: 'Coin change with an amount no coin combination can make, and jump games where the end is ' +
-          'unreachable, both need an answer that is not a number. Using Infinity works inside the recurrence ' +
-          'and leaks the moment it is returned: a caller that formats it, sums it or compares it against a ' +
-          'budget silently treats "impossible" as "very expensive". Returning null forces the caller to ' +
-          'decide, which is the correct place for that decision.',
+        readAs: 'A minimising table holds either a real value or "unreachable" — the ⊥ — and the ' +
+          'two must never be compared. Using a large number for unreachable instead is what makes ' +
+          'an impossible path win a minimum.',
+        detail: [
+          'Coin change with an amount no coin combination can make, and jump games where the end ' +
+            'is unreachable, both need an answer that is not a number.',
+          'Using Infinity works inside the recurrence and leaks the moment it is returned. A ' +
+            'caller that formats it, sums it or compares it against a budget silently treats ' +
+            '"impossible" as "very expensive".',
+          'Returning null forces the caller to decide, which is the correct place for that ' +
+            'decision.'
+        ],
         example: 'Making 3 from {2, 5} returns null and an empty coin list, not Infinity and a list ' +
           'reconstructed from a sentinel.'
       },
@@ -295,12 +321,14 @@
         term: 'The quadratic version is not obsolete',
         plain: 'Keep the O(n²) LIS: it is the oracle for the fast one.',
         formal: 'a reference implementation whose failure mode differs from the optimised one is a test, not dead code',
-        detail: 'The O(n²) table and the O(n log n) piles compute the same answer by completely different ' +
-          'means, so a bug in one is extremely unlikely to be present in the other. That makes the slow ' +
-          'version the cheapest correctness check available, and the transition counts alongside it are what ' +
-          'justify the fast version being there at all. This is the same argument the brute-force oracles ' +
-          'elsewhere on this platform make, and it is why "delete the slow one, it is redundant" is ' +
-          'usually a mistake.',
+        detail: [
+          'The O(n²) table and the O(n log n) piles compute the same answer by completely ' +
+            'different means. A bug in one is extremely unlikely to be present in the other.',
+          'That makes the slow version the cheapest correctness check available, and the ' +
+            'transition counts alongside it are what justify the fast version being there at all.',
+          'This is the same argument the brute-force oracles elsewhere on this platform make, and ' +
+            'it is why "delete the slow one, it is redundant" is usually a mistake.'
+        ],
         example: 'At n = 2 000 both report length 85, from 1 999 000 transitions and 11 411 respectively — a ' +
           'factor of 175.'
       }
