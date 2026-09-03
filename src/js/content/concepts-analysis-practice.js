@@ -193,28 +193,34 @@
         term: 'Peak memory',
         plain: 'The most live bytes at any instant. This is the number that fails a machine.',
         formal: 'max over time of live allocation',
-        detail: 'Processes are killed by the high-water mark, not by the total they have ever ' +
-          'allocated, so peak is the figure that decides whether a job runs. The two numbers can be ' +
-          'wildly different: a streaming pipeline may allocate gigabytes over its lifetime while ' +
-          'never holding more than a few kilobytes at once, and a job that materialises one list ' +
-          'allocates far less in total yet needs all of it simultaneously. Peak is also the number a ' +
-          'garbage-collected runtime makes hardest to see, since freed-but-uncollected memory still ' +
-          'counts against the process. Profile the maximum of live bytes over time, not the sum of ' +
-          'allocations.',
+        detail: [
+          'Processes are killed by the high-water mark, not by the total they have ever allocated. ' +
+            'So peak is the figure that decides whether a job runs.',
+          'The two numbers can be wildly different. A streaming pipeline may allocate gigabytes ' +
+            'over its lifetime while never holding more than a few kilobytes at once. A job that ' +
+            'materialises one list allocates far less in total, and needs all of it ' +
+            'simultaneously.',
+          'Peak is also the number a garbage-collected runtime makes hardest to see, since ' +
+            'freed-but-uncollected memory still counts against the process. Profile the maximum of ' +
+            'live bytes over time, not the sum of allocations.'
+        ],
         example: 'Total allocated may be gigabytes while the peak stays kilobytes.'
       },
       {
         term: 'Auxiliary space',
         plain: 'What the algorithm needs beyond its input. "In-place" is a claim about this.',
         formal: 'space excluding the input',
-        detail: 'The input has to exist regardless, so the interesting quantity is the extra space the ' +
-          'algorithm demands on top of it — that is what auxiliary space measures and what "in ' +
-          'place" claims is O(1). Heapsort qualifies: it rearranges the array it was given and needs ' +
-          'a handful of indices. Merge sort does not: the merge step needs somewhere to write, and ' +
-          'the standard implementation asks for a second array of n elements, which is why sorting a ' +
-          'list that only just fits in memory is a different problem from sorting a small one. The ' +
-          'term is worth stating precisely because it is routinely claimed for algorithms whose ' +
-          'recursion quietly uses Θ(log n) of stack.',
+        detail: [
+          'The input has to exist regardless, so the interesting quantity is the extra space the ' +
+            'algorithm demands on top of it. That is what auxiliary space measures, and what "in ' +
+            'place" claims is O(1).',
+          'Heapsort qualifies. It rearranges the array it was given and needs a handful of indices.',
+          'Merge sort does not. The merge step needs somewhere to write, and the standard ' +
+            'implementation asks for a second array of n elements. That is why sorting a list which ' +
+            'only just fits in memory is a different problem from sorting a small one.',
+          'The term is worth stating precisely, because it is routinely claimed for algorithms ' +
+            'whose recursion quietly uses Θ(log n) of stack.'
+        ],
         example: 'Heapsort is O(1) auxiliary; merge sort is O(n).'
       },
       {
@@ -230,30 +236,35 @@
         },
         plain: 'Hold one item, not the collection. Peak memory stops depending on input size.',
         formal: 'O(1) peak, O(n) time',
-        readAs: 'Peak memory stays at some fixed amount no matter how large the input is, while the time ' +
-          'still grows in step with it.',
-        detail: 'If each item can be processed and discarded, peak memory becomes a constant and the ' +
-          'input size stops being a limit at all — the difference between a job that handles a ' +
-          'hundred-gigabyte file on a laptop and one that needs a bigger machine. The requirement is ' +
-          'that the computation be expressible incrementally: sums, counts, maxima, running hashes ' +
-          'and sketches all are; sorting and exact distinct-counting are not, and need either a pass ' +
-          'structure or an approximation. The second benefit is latency, since output can begin ' +
-          'before the input ends, and the usual cost is throughput, since per-item overhead is paid ' +
-          'n times.',
+        readAs: 'Peak memory stays at some fixed amount no matter how large the input is, while the ' +
+          'time still grows in step with it.',
+        detail: [
+          'If each item can be processed and discarded, peak memory becomes a constant and the ' +
+            'input size stops being a limit at all. That is the difference between a job that ' +
+            'handles a hundred-gigabyte file on a laptop and one that needs a bigger machine.',
+          'The requirement is that the computation be expressible incrementally. Sums, counts, ' +
+            'maxima, running hashes and sketches all are. Sorting and exact distinct-counting are ' +
+            'not, and need either a pass structure or an approximation.',
+          'The second benefit is latency, since output can begin before the input ends. The usual ' +
+            'cost is throughput, since per-item overhead is paid n times.'
+        ],
         example: 'Summing a file line by line rather than reading it all in.'
       },
       {
         term: 'Chunking',
         plain: 'The middle ground: bounded memory, better throughput than one item at a time.',
         formal: 'O(chunk) peak',
-        detail: 'Item-at-a-time processing pays every fixed cost — a syscall, a round trip, a ' +
-          'transaction — once per item, which is why the memory-optimal choice is often the slowest. ' +
-          'Chunking amortises those fixed costs over a batch while keeping peak memory bounded by ' +
-          'the chunk rather than the input, so you get most of the throughput of the materialised ' +
-          'version with a memory ceiling you choose. The chunk size is the dial: large enough that ' +
-          'per-batch overhead is amortised, small enough to stay in cache and to keep latency and ' +
-          'retry cost acceptable. A thousand rows per insert is the usual starting point precisely ' +
-          'because the curve is flat there.',
+        detail: [
+          'Item-at-a-time processing pays every fixed cost — a syscall, a round trip, a ' +
+            'transaction — once per item. That is why the memory-optimal choice is often the ' +
+            'slowest.',
+          'Chunking amortises those fixed costs over a batch, while keeping peak memory bounded by ' +
+            'the chunk rather than the input. You get most of the throughput of the materialised ' +
+            'version, with a memory ceiling you choose.',
+          'The chunk size is the dial. Large enough that per-batch overhead is amortised, small ' +
+            'enough to stay in cache and to keep latency and retry cost acceptable. A thousand rows ' +
+            'per insert is the usual starting point, precisely because the curve is flat there.'
+        ],
         example: 'Batch inserts of 1 000 rows instead of one or all.'
       },
       {
@@ -270,55 +281,68 @@
         },
         plain: 'Recursion depth is memory. Deep recursion overflows even when the heap is empty.',
         formal: 'depth × frame size',
-        detail: 'Each live call holds a frame — return address, saved registers, locals, alignment ' +
-          'padding — so recursion depth is a memory cost on a region that was sized once, at thread ' +
-          'creation, and cannot grow. A frame of about 96 bytes and a stack of 1 MiB means roughly ' +
-          'ten thousand frames, which is far less headroom than people assume. Recursing once per ' +
-          'element of a list therefore fails well before the heap is troubled, and it fails with a ' +
-          'stack overflow rather than an allocation error, which is why the fix is structural: ' +
-          'recurse on the smaller side, convert to an explicit stack, or make the call a loop.',
+        detail: [
+          'Each live call holds a frame: return address, saved registers, locals, alignment ' +
+            'padding. So recursion depth is a memory cost, charged to a region that was sized once ' +
+            'at thread creation and cannot grow.',
+          'A frame of about 96 bytes and a stack of 1 MiB means roughly ten thousand frames. That ' +
+            'is far less headroom than people assume.',
+          'Recursing once per element of a list therefore fails well before the heap is troubled, ' +
+            'and it fails with a stack overflow rather than an allocation error. The fix is ' +
+            'structural: recurse on the smaller side, convert to an explicit stack, or make the ' +
+            'call a loop.'
+        ],
         example: 'Recursing per list element dies at a few hundred thousand items.'
       },
       {
         term: 'Time to first result',
         plain: 'Streaming produces output immediately; materialising produces nothing until the end.',
         formal: 'latency versus throughput',
-        detail: 'The same total work can be delivered on two very different schedules, and which one ' +
-          'is right depends entirely on who is waiting. A user interface needs the first row now, so ' +
-          'a streaming pipeline that emits as it goes feels fast even if it finishes later. A batch ' +
-          'job has no one watching until the end, so it should choose whatever minimises total ' +
-          'time — usually materialising, sorting, and processing in bulk. The mistake is inheriting ' +
-          'one pattern for both: a report that streams row by row into an interactive page is right, ' +
-          'and the same code driving an overnight export is leaving throughput on the table.',
+        detail: [
+          'The same total work can be delivered on two very different schedules, and which one is ' +
+            'right depends entirely on who is waiting.',
+          'A user interface needs the first row now, so a streaming pipeline that emits as it goes ' +
+            'feels fast even if it finishes later. A batch job has no one watching until the end, ' +
+            'so it should choose whatever minimises total time — usually materialising, sorting, ' +
+            'and processing in bulk.',
+          'The mistake is inheriting one pattern for both. A report that streams row by row into an ' +
+            'interactive page is right; the same code driving an overnight export is leaving ' +
+            'throughput on the table.'
+        ],
         example: 'A UI wants the first row; a batch job wants the last one soonest.'
       },
       {
         term: 'Working set',
         plain: 'The bytes actually touched in a window of time. It, not the allocation, is what a cache sees.',
         formal: 'W(t, τ) = pages referenced in [t − τ, t]',
-        readAs: 'The working set at time t is every page the program touched during the window of length τ ' +
-          'ending at t. The square brackets denote that window, from t − τ up to and including t.',
-        detail: 'Caches respond to what is being referenced now, not to what has been allocated, so ' +
-          'the quantity that decides hit rate is the set of bytes touched within a recent window. A ' +
-          'structure much larger than cache performs perfectly well if each phase touches a small ' +
-          'part of it; a small structure walked in a scattered order can thrash. The classic failure ' +
-          'is a column-major sweep of a row-major matrix: 4 MiB walked by column touches 1 024 ' +
-          'distinct lines per pass with no reuse before eviction, so a 512-line cache misses on ' +
-          'every access even though the same total data would fit if it were traversed the other ' +
-          'way.',
+        readAs: 'The working set at time t is every page the program touched during the window of ' +
+          'length τ ending at t. The square brackets denote that window, from t − τ up to and ' +
+          'including t.',
+        detail: [
+          'Caches respond to what is being referenced now, not to what has been allocated. So the ' +
+            'quantity that decides hit rate is the set of bytes touched within a recent window.',
+          'A structure much larger than cache performs perfectly well if each phase touches a small ' +
+            'part of it. A small structure walked in a scattered order can thrash.',
+          'The classic failure is a column-major sweep of a row-major matrix. 4 MiB walked by ' +
+            'column touches 1 024 distinct lines per pass, with no reuse before eviction. A ' +
+            '512-line cache therefore misses on every access, even though the same total data ' +
+            'would fit if it were traversed the other way.'
+        ],
         example: 'A 4 MiB matrix walked by column has a working set of 1024 lines per pass and thrashes a 512-line cache.'
       },
       {
         term: 'In place is about the array',
         plain: '"In place" bounds the auxiliary heap, and says nothing about the stack the recursion needs.',
         formal: 'auxiliary O(1), stack O(depth)',
-        detail: 'Quicksort is described as in-place because it partitions within the input array and ' +
-          'allocates nothing — and it still needs a frame per live recursive call. Recursing on both ' +
-          'halves without care allows a depth of n on adversarial input: at n = 10⁶ and a 96-byte ' +
-          'frame that is 91.6 MiB of stack, against a default thread stack of about 1 MiB, so the ' +
-          'program dies of a memory cost its complexity table does not list. The standard fix is to ' +
-          'recurse on the smaller partition and loop on the larger, which caps depth at log₂ n and ' +
-          'brings the same input down to under 2 KiB.',
+        detail: [
+          'Quicksort is described as in-place because it partitions within the input array and ' +
+            'allocates nothing. It still needs a frame per live recursive call.',
+          'Recursing on both halves without care allows a depth of n on adversarial input. At ' +
+            'n = 10⁶ and a 96-byte frame that is 91.6 MiB of stack, against a default thread stack ' +
+            'of about 1 MiB. The program dies of a memory cost its complexity table does not list.',
+          'The standard fix is to recurse on the smaller partition and loop on the larger. That ' +
+            'caps depth at log₂ n, and brings the same input down to under 2 KiB.'
+        ],
         example: 'Quicksort that recurses on both sides needs 91.6 MiB of stack at n = 10⁶ — and the thread has 1 MiB.'
       }
     ],

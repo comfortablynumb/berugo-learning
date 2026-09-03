@@ -24,9 +24,9 @@
     root.jQuery('#' + SECTION_ID + '-content').html(app.shell.render({
       sectionId: SECTION_ID,
       orientation: [
-        'Space is usually the constraint that actually bites, and it is the one interview-style ' +
-          'algorithm practice ignores. The number that matters is the peak — the most live bytes at ' +
-          'any instant — not the total ever allocated.',
+        '**Space is usually the constraint that actually bites, and it is the one ' +
+          'interview-style algorithm practice ignores.** The number that matters is the peak: the ' +
+          'most live bytes at any instant, not the total ever allocated.',
         'Three shapes of the same pipeline: materialise every stage, process in chunks, or stream ' +
           'one item through. Their time complexity is identical. Their peak memory is Θ(n·stages), ' +
           'Θ(chunk), and Θ(1) respectively.',
