@@ -49,37 +49,43 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'The 0/1 knapsack state is (items considered, capacity remaining) and each cell has two incoming ' +
-          'edges, so the cost is items × capacity. That product is the whole analysis, and it is available ' +
-          'before writing anything - which is the habit 12.1 argues for, applied.',
-        '**Collapsing the table to one row keeps the value and destroys the answer.** Iterating the capacity ' +
-          'downwards means each item is read from the previous row and used once; iterating upwards means it ' +
-          'is read from the row being written and used unboundedly - one character between 0/1 and unbounded ' +
-          'knapsack. Either way the reconstruction has nowhere to walk, and a solver that keeps its traceback ' +
-          'code returns an item list that does not add up to its own answer. The demo verifies the chosen ' +
-          'set rather than trusting it.',
-        '**Bounded knapsack is where the expansion strategy shows up as two orders of magnitude.** Expanding ' +
-          '40 copies of an item into 40 separate rows is correct and wasteful; binary splitting bundles ' +
-          '1, 2, 4, … copies so any count from 0 to 40 is a subset of six bundles; the monotonic-deque ' +
-          'version removes the dependence on the copy count entirely. All three return the same value, and ' +
-          'the transitions column is the reason to prefer the third.',
-        '**Pseudo-polynomial is a statement about which input you measure.** O(n·C) is linear in the ' +
-          'capacity written as a number and exponential in the capacity written as *digits*, which is how ' +
-          'inputs are actually sized. Add one decimal digit to the capacity and the table gets ten times ' +
-          'bigger while the input file gets three characters longer. That is the sense in which knapsack ' +
-          'is hard, and it is why a capacity of 10^9 is not a large number but is an impossible table.'
+        '**The 0/1 knapsack state is (items considered, capacity remaining), and each cell has ' +
+          'two incoming edges.** So the cost is items × capacity. That product is the whole ' +
+          'analysis, and it is available before writing anything — the habit 12.1 argues for, ' +
+          'applied.',
+        '**Collapsing the table to one row keeps the value and destroys the answer.** Iterating ' +
+          'the capacity downwards means each item is read from the previous row and used once. ' +
+          'Iterating upwards means it is read from the row being written, and used unboundedly. ' +
+          'One character between 0/1 and unbounded knapsack.',
+        'Either way the reconstruction has nowhere to walk, and a solver that keeps its traceback ' +
+          'code returns an item list that does not add up to its own answer. The demo verifies ' +
+          'the chosen set rather than trusting it.',
+        '**Bounded knapsack is where the expansion strategy shows up as two orders of ' +
+          'magnitude.** Expanding 40 copies of an item into 40 separate rows is correct and ' +
+          'wasteful. Binary splitting bundles 1, 2, 4, … copies, so any count from 0 to 40 is a ' +
+          'subset of six bundles. The monotonic-deque version removes the dependence on the copy ' +
+          'count entirely.',
+        'All three return the same value, and the transitions column is the reason to prefer the ' +
+          'third.',
+        '**Pseudo-polynomial is a statement about which input you measure.** O(n·C) is linear in ' +
+          'the capacity written as a number, and exponential in the capacity written as ' +
+          '*digits* — which is how inputs are actually sized.',
+        'Add one decimal digit to the capacity and the table gets ten times bigger while the ' +
+          'input file gets three characters longer. That is the sense in which knapsack is hard, ' +
+          'and why a capacity of 10^9 is not a large number but is an impossible table.'
       ],
       demo: {
         title: 'Interactive demo — the table, the space trade, and the capacity in bits',
         markup: root.KnapsackFamilyTemplate.render()
       },
       diagram: diagram(),
-      insight: 'Whenever a DP is space-reduced, decide *first* whether the caller needs the answer or only ' +
-        'its value, and write that decision down next to the code. Reduced tables are the single most common ' +
-        'place where a correct optimum ships beside a reconstruction that quietly stopped being valid, ' +
-        'because the value keeps agreeing with the tests and the item list is only ever eyeballed. If the ' +
-        'answer is needed and the memory is not affordable, the technique is Hirschberg\'s - divide the ' +
-        'problem at the midpoint and recompute - not a traceback over a table that no longer exists.'
+      insight: 'Whenever a DP is space-reduced, decide *first* whether the caller needs the ' +
+        'answer or only its value, and write that decision down next to the code. Reduced tables ' +
+        'are the single most common place where a correct optimum ships beside a reconstruction ' +
+        'that quietly stopped being valid. The value keeps agreeing with the tests, and the item ' +
+        'list is only ever eyeballed. If the answer is needed and the memory is not ' +
+        'affordable, the technique is Hirschberg\'s: divide the problem at the midpoint and ' +
+        'recompute. Not a traceback over a table that no longer exists.'
     };
   }
 

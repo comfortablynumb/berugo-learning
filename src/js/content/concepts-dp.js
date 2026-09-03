@@ -339,13 +339,17 @@
         term: 'The state is (items considered, capacity left)',
         plain: 'Two axes, two incoming edges per cell, and the complexity falls out of that.',
         formal: 'best[i][c] = max(best[i−1][c], best[i−1][c − w_i] + v_i)',
-        readAs: 'For each item and each capacity, take the better of skipping the item or taking it — and ' +
-          'taking it means looking up the best answer with that much less capacity left.',
-        detail: 'Every member of the family is this recurrence with one thing changed. The two edges are ' +
-          '"skip item i", which is the cell directly above, and "take item i", which is one row up and ' +
-          'w_i columns left. Because there are exactly two, the running time is the number of cells: items ' +
-          'times capacity. Writing that down before coding is the habit 12.1 argues for, and here it also ' +
-          'tells you immediately that a capacity of 10⁹ is not a slow program but an impossible table.',
+        readAs: 'For each item and each capacity, take the better of skipping the item or taking ' +
+          'it. Taking it means looking up the best answer with that much less capacity left.',
+        detail: [
+          'Every member of the family is this recurrence with one thing changed.',
+          'The two edges are "skip item i", which is the cell directly above, and "take item i", ' +
+            'which is one row up and w_i columns left.',
+          'Because there are exactly two, the running time is the number of cells: items ' +
+            'times capacity. Writing that down before coding is the habit 12.1 argues for. It ' +
+            'also tells you immediately that a capacity of 10⁹ is not a slow program but an ' +
+            'impossible table.'
+        ],
         example: 'Twelve items and a capacity of 60 is 793 cells and an optimal value of 571, which ' +
           'exhaustive enumeration over all 4 096 subsets confirms.'
       },
@@ -363,12 +367,15 @@
         },
         plain: 'Descending capacity is 0/1; ascending is unbounded. One character apart.',
         formal: 'descending reads best[c − w] from the previous row; ascending reads it from the row being written',
-        detail: 'Once the table is collapsed to one row, the iteration direction decides whether an item can ' +
-          'be used more than once, because it decides whether `best[c − w]` still holds the previous row\'s ' +
-          'value or has already been updated with this item. Descending preserves the previous row and gives ' +
-          '0/1; ascending lets an item feed itself and gives unbounded. Neither direction raises, both ' +
-          'produce a sensible-looking optimum, and the difference is invisible in review unless you know to ' +
-          'look for it.',
+        detail: [
+          'Once the table is collapsed to one row, the iteration direction decides whether an item ' +
+            'can be used more than once. It decides whether `best[c − w]` still holds the previous ' +
+            'row\'s value, or has already been updated with this item.',
+          'Descending preserves the previous row and gives 0/1. Ascending lets an item feed ' +
+            'itself, and gives unbounded.',
+          'Neither direction raises, both produce a sensible-looking optimum, and the difference ' +
+            'is invisible in review unless you know to look for it.'
+        ],
         example: 'The same twelve items and capacity 60 give 571 descending and a larger value ascending, ' +
           'because the ascending run may take one item repeatedly.'
       },
@@ -376,27 +383,35 @@
         term: 'Space reduction deletes the reconstruction',
         plain: 'One row keeps the value exactly and destroys the information a traceback walks.',
         formal: 'a traceback requires every column of best[i−1] at every i; a rolling array holds only the current row',
-        detail: 'This is the failure in the family that produces a plausible answer rather than an error. The ' +
-          'one-row version is correct about the optimum and has no rows to walk backwards through, so ' +
-          'traceback code left unchanged after the reduction returns an item list that does not sum to the ' +
-          'reported value and may not even fit the sack. The honest interface returns no chosen set at all ' +
-          'rather than a wrong one, and the check that catches it in either case is recomputing the weight ' +
-          'and value of whatever was returned.',
-        example: 'Twelve items at capacity 60: the full table holds 793 cells and reconstructs 8 items ' +
-          'weighing 59; the one-row version holds 61 cells, reports the same 571, and returns no set.'
+        detail: [
+          'This is the failure in the family that produces a plausible answer rather than an ' +
+            'error.',
+          'The one-row version is correct about the optimum, and has no rows to walk backwards ' +
+            'through. Traceback code left unchanged after the reduction returns an item list that ' +
+            'does not sum to the reported value, and may not even fit the sack.',
+          'The honest interface returns no chosen set at all rather than a wrong one. The check ' +
+            'that catches it in either case is recomputing the weight and value of whatever was ' +
+            'returned.'
+        ],
+        example: 'Twelve items at capacity 60. The full table holds 793 cells and ' +
+          'reconstructs 8 items weighing 59. The one-row version holds 61 cells, reports the ' +
+          'same 571, and returns no set.'
       },
       {
         term: 'Pseudo-polynomial: polynomial in the wrong input',
         plain: 'O(n·C) is linear in the capacity\'s value and exponential in its number of digits.',
         formal: 'input size is Θ(log C) bits, so Θ(nC) = Θ(n·2^(log C)) is exponential in the input length',
-        readAs: 'The capacity C is written down in about log C digits, so a running time proportional to C is ' +
-          'exponential in how long the input actually is. That is what "pseudo-polynomial" means, and ' +
-          'it is why knapsack is still NP-hard.',
-        detail: 'Complexity is measured against the length of the input, and a capacity is written down in ' +
-          'about log₂C bits rather than in C of anything. So a table proportional to C grows by a factor of ' +
-          'ten each time the capacity gains one decimal digit, while the input file grows by one character. ' +
-          'That is what "weakly NP-hard" names, and stating it as the two columns - digits and cells - makes ' +
-          'it a fact you can read rather than a phrase you have to trust.',
+        readAs: 'The capacity C is written down in about log C digits, so a running time ' +
+          'proportional to C is exponential in how long the input actually is. That is what ' +
+          '"pseudo-polynomial" means, and why knapsack is still NP-hard.',
+        detail: [
+          'Complexity is measured against the length of the input, and a capacity is written down ' +
+            'in about log₂C bits rather than in C of anything.',
+          'So a table proportional to C grows by a factor of ten each time the capacity gains one ' +
+            'decimal digit, while the input file grows by one character.',
+          'That is what "weakly NP-hard" names. Stating it as the two columns — digits and cells — ' +
+            'makes it a fact you can read rather than a phrase you have to trust.'
+        ],
         example: 'Twelve items: capacity 10 is 132 cells and 4 bits; capacity 100 000 is 1 200 012 cells and ' +
           '17 bits. Four more characters of input, ten thousand times the work.'
       },
@@ -404,13 +419,18 @@
         term: 'Binary splitting for bounded counts',
         plain: 'Bundle 1, 2, 4, … copies so any count is a subset of ⌊log₂k⌋+1 bundles.',
         formal: 'every integer in [0, k] is representable as a subset sum of {1, 2, 4, …, k − 2^m + 1}',
-        readAs: 'Any count up to k can be built from powers of two plus one remainder, so an item available k ' +
-          'times can be replaced by about log k items. That turns a bounded knapsack into a 0/1 one.',
-        detail: 'Expanding forty copies of an item into forty 0/1 items is correct and pays forty times over. ' +
-          'Binary splitting bundles them into powers of two plus a remainder, which is enough to represent ' +
-          'every achievable count exactly - so the answer does not change and the item list shrinks ' +
-          'logarithmically. It is the same idea as binary representation of integers, applied to "how many ' +
-          'of this thing", and it is the standard first move whenever a multiplicity appears in a DP.',
+        readAs: 'Any count up to k can be built from powers of two plus one remainder. So an item ' +
+          'available k times can be replaced by about log k items, which turns a bounded knapsack ' +
+          'into a 0/1 one.',
+        detail: [
+          'Expanding forty copies of an item into forty 0/1 items is correct, and pays forty times ' +
+            'over.',
+          'Binary splitting bundles them into powers of two plus a remainder. That is enough to ' +
+            'represent every achievable count exactly, so the answer does not change and the item ' +
+            'list shrinks logarithmically.',
+          'It is the same idea as binary representation of integers, applied to "how many of this ' +
+            'thing". It is the standard first move whenever a multiplicity appears in a DP.'
+        ],
         example: 'Six item types with forty copies each: 240 expanded items and 11 800 transitions, against ' +
           '36 bundles and 621 — the same optimal value of 910.'
       },
@@ -418,15 +438,18 @@
         term: 'The monotonic queue removes the count entirely',
         plain: 'Cells sharing a residue modulo the weight form a chain, and the best predecessor is a sliding maximum.',
         formal: 'for fixed w, {c : c ≡ r mod w} is a chain in which the transition is a window maximum of width k',
-        readAs: 'Capacities that leave the same remainder when divided by the item weight form an independent ' +
-          'chain, and along each chain the recurrence is a sliding-window maximum. That is what removes ' +
-          'a factor of k.',
-        detail: 'This is the point at which bounded knapsack stops depending on the copy count at all. For ' +
-          'one item, only cells whose capacities differ by multiples of its weight can reach each other, so ' +
-          'the table decomposes into independent chains; within a chain, "the best of the previous k ' +
-          'positions" is exactly the sliding-window maximum that M11.7 solves in amortised O(1). The result ' +
-          'is O(capacity) per item whether it has three copies or three million, which neither expansion ' +
-          'strategy can match.',
+        readAs: 'Capacities that leave the same remainder when divided by the item weight form an ' +
+          'independent chain. Along each chain the recurrence is a sliding-window maximum, and ' +
+          'that is what removes a factor of k.',
+        detail: [
+          'This is the point at which bounded knapsack stops depending on the copy count at all.',
+          'For one item, only cells whose capacities differ by multiples of its weight can reach ' +
+            'each other, so the table decomposes into independent chains.',
+          'Within a chain, "the best of the previous k positions" is exactly the sliding-window ' +
+            'maximum that M11.7 solves in amortised O(1).',
+          'The result is O(capacity) per item whether it has three copies or three million, which ' +
+            'neither expansion strategy can match.'
+        ],
         example: 'The same six item types at forty copies: 366 transitions and no expansion at all, against ' +
           '621 for binary splitting and 11 800 for full expansion.'
       },
@@ -434,14 +457,17 @@
         term: 'Subset sum is the same table without the values',
         plain: 'Reachability instead of optimisation, and the recurrence does not change.',
         formal: 'reachable[c] = reachable[c] ∨ reachable[c − w_i], over the same iteration order',
-        readAs: 'Subset sum is knapsack with the values thrown away: a capacity is reachable if it already ' +
-          'was, or if it is reachable after removing this item. The ∨ is "or", and it is a boolean ' +
-          'table rather than a numeric one.',
-        detail: 'Dropping the value column turns the knapsack into "which totals can be made", which is ' +
-          'subset sum, equal partition and the coin-change feasibility question all at once. It is worth ' +
-          'seeing as one recurrence rather than three problems, because everything learned about the ' +
-          'knapsack - the loop direction, the space reduction, the traceback, the pseudo-polynomial ' +
-          'caveat - transfers unchanged. Equal partition is then just subset sum aimed at half the total.',
+        readAs: 'Subset sum is knapsack with the values thrown away. A capacity is reachable if it ' +
+          'already was, or if it is reachable after removing this item. The ∨ is "or", and the ' +
+          'table is boolean rather than numeric.',
+        detail: [
+          'Dropping the value column turns the knapsack into "which totals can be made". That is ' +
+            'subset sum, equal partition and the coin-change feasibility question, all at once.',
+          'It is worth seeing as one recurrence rather than three problems, because everything ' +
+            'learned about the knapsack transfers unchanged: the loop direction, the space ' +
+            'reduction, the traceback, the pseudo-polynomial caveat.',
+          'Equal partition is then just subset sum aimed at half the total.'
+        ],
         example: 'The twelve items\' weights total 109, so no equal split exists; the closest reachable half ' +
           'is 54, leaving a difference of 1.'
       },
@@ -449,13 +475,17 @@
         term: 'Verify the set, not the number',
         plain: 'Recompute the weight and value of whatever was returned, every time.',
         formal: 'assert Σw(chosen) ≤ C and Σv(chosen) = reported value',
-        readAs: 'Two checks on the reconstructed answer: the chosen items really do fit, and their values ' +
-          'really do add up to the number reported. A traceback bug fails one or the other.',
-        detail: 'A knapsack solver has two outputs and only one of them can be checked cheaply against the ' +
-          'problem statement. The value is a bare number; the chosen set can be re-summed in three lines, ' +
-          'and that check catches a traceback walked over a reduced table, an off-by-one in the decision ' +
-          'array, and a tie broken towards the wrong item. It costs nothing and it is the difference ' +
-          'between a test that would notice a space reduction going wrong and one that would not.',
+        readAs: 'Two checks on the reconstructed answer. The chosen items really do fit, and their ' +
+          'values really do add up to the number reported. A traceback bug fails one or the other.',
+        detail: [
+          'A knapsack solver has two outputs, and only one of them can be checked cheaply against ' +
+            'the problem statement.',
+          'The value is a bare number. The chosen set can be re-summed in three lines. That ' +
+            'check catches a traceback walked over a reduced table, an off-by-one in the ' +
+            'decision array, and a tie broken towards the wrong item.',
+          'It costs nothing, and it is the difference between a test that would notice a space ' +
+            'reduction going wrong and one that would not.'
+        ],
         example: 'The default instance reports 571; re-summing the eight chosen items gives weight 59 against ' +
           'a capacity of 60 and value 571 exactly.'
       }
