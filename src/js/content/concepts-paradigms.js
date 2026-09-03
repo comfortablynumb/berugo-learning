@@ -18,16 +18,20 @@
             '    B --> B1["then c"]',
             '    A1 --> L["a complete candidate<br/>sits at a leaf"]'
           ].join('\n'),
-          caption: 'Seeing the search as a tree of partial decisions rather than a bag of finished candidates is what makes pruning possible: you can delete a branch, but you cannot delete a bag.'
+          caption: 'See the search as a tree of partial decisions rather than a bag of finished candidates, and pruning becomes possible. You can delete a branch. You cannot delete a bag.'
         },
         plain: 'Every partial decision is a node; every way of extending it is a child.',
         formal: 'a search space (S, root, successors, isGoal), explored depth-first with an explicit or implicit stack',
-        detail: 'Writing a problem as a state space is usually a five-minute job and it is the step that makes ' +
-          'everything else possible. The value is not that it produces a correct program - a nested loop would ' +
-          'too - but that it produces a program with somewhere to put the prunings. A node is a partial ' +
-          'assignment, its children are the ways of extending it by one decision, and a subtree is every ' +
-          'completion of that partial assignment. Once the problem is in that shape, "no solution lives under ' +
-          'this node" becomes a sentence you can write code for.',
+        detail: [
+          'Writing a problem as a state space is usually a five-minute job, and it is the step ' +
+            'that makes everything else possible.',
+          'The value is not that it produces a correct program — a nested loop would too. It is ' +
+            'that it produces a program with somewhere to put the prunings.',
+          'A node is a partial assignment. Its children are the ways of extending it by one ' +
+            'decision, and a subtree is every completion of that partial assignment. Once the ' +
+            'problem is in that shape, "no solution lives under this node" becomes a sentence you ' +
+            'can write code for.'
+        ],
         example: 'For n-queens, a node is a list of column choices for the first k rows; the root is the empty ' +
           'list and a goal is a list of length n.'
       },
@@ -35,13 +39,17 @@
         term: 'Pruning is an argument, not an optimisation',
         plain: 'A pruning claims no solution lies below a node, and a wrong claim removes answers silently.',
         formal: 'a predicate p on partial states is admissible when p(s) false implies no completion of s is a goal',
-        readAs: 'A pruning test is safe only if a "no" guarantees that nothing built on top of this partial ' +
-          'answer could ever work. A test that is merely usually right silently deletes real solutions.',
-        detail: 'The difference between a pruning and a bug is a proof. Both make the search faster and only ' +
-          'one of them keeps the answer, and the failure is not an exception - the search returns a smaller set ' +
-          'of solutions and looks like it worked. That is why every configuration in this section reports its ' +
-          'solution count beside its node count: the count is the check, and a pruning that changes it is a ' +
-          'defect however much faster it made things.',
+        readAs: 'A pruning test is safe only if a "no" guarantees that nothing built on top of ' +
+          'this partial answer could ever work. A test that is merely usually right silently ' +
+          'deletes real solutions.',
+        detail: [
+          'The difference between a pruning and a bug is a proof.',
+          'Both make the search faster and only one of them keeps the answer. The failure is not ' +
+            'an exception: the search returns a smaller set of solutions and looks like it worked.',
+          'That is why every configuration in this section reports its solution count beside its ' +
+            'node count. The count is the check, and a pruning that changes it is a defect however ' +
+            'much faster it made things.'
+        ],
         example: 'The n-queens diagonal check is admissible: two queens on a diagonal in the first k rows stay ' +
           'on that diagonal in every completion, so no goal lies below.'
       },
@@ -58,15 +66,20 @@
         },
         plain: 'The same test at the placement instead of the leaf removes a subtree instead of a candidate.',
         formal: 'moving a feasibility test from depth n to depth k removes b^(n−k) descendants per rejection',
-        readAs: 'Rejecting a bad partial answer early kills everything below it — b branches per level, for ' +
-          'the levels you skipped. That is why testing at depth 3 instead of depth 8 is not a small ' +
-          'improvement.',
-        detail: 'This is the most reliable order-of-magnitude in the milestone and it needs no new idea at all. ' +
-          'The leaf-only configuration enumerates every permutation and rejects the illegal ones at the end; ' +
-          'the pruned configuration performs the identical test the moment a queen is placed. Same test, same ' +
-          'answer, and at eight queens 109 601 nodes become 2 057. At ten queens it is 9 864 101 against ' +
-          '35 539. The lesson generalises: when a predicate is monotone in the partial state, evaluate it as ' +
-          'early as it becomes decidable.',
+        readAs: 'Rejecting a bad partial answer early kills everything below it: b branches per ' +
+          'level, for the levels you skipped. That is why testing at depth 3 instead of depth 8 is ' +
+          'not a small improvement.',
+        detail: [
+          'This is the most reliable order-of-magnitude in the milestone, and it needs no new idea ' +
+            'at all.',
+          'The leaf-only configuration enumerates every permutation and rejects the illegal ones ' +
+            'at the end. The pruned configuration performs the identical test the moment a queen ' +
+            'is placed.',
+          'Same test, same answer. At eight queens 109 601 nodes become 2 057; at ten queens ' +
+            '9 864 101 become 35 539.',
+          'The lesson generalises. When a predicate is monotone in the partial state, evaluate it ' +
+            'as early as it becomes decidable.'
+        ],
         example: 'At n = 8 the leaf-only control visits 109 601 nodes and the early check visits 2 057 — a ' +
           'factor of 53, with both finding all 92 solutions.'
       },
@@ -74,38 +87,53 @@
         term: 'Prunings multiply',
         plain: 'Two independent prunings that leave a half and a fiftieth leave a hundredth, not a third.',
         formal: 'for independent prunings, the surviving fraction is the product of the individual fractions',
-        readAs: 'Two prunings that each keep a tenth of the tree together keep a hundredth — the fractions ' +
-          'multiply rather than add. Compounding is why stacking cheap prunings beats one clever one.',
-        detail: 'This is the argument for adding a weak second constraint. A pruning that removes only a third ' +
-          'of the tree still removes a third of whatever the first one left, so its value is multiplicative ' +
-          'rather than additive. Dependent prunings do worse than the product - they cut some of the same ' +
-          'branches - but never worse than either alone, so the direction of the inequality is always in your ' +
-          'favour. It also explains why removing a pruning to "simplify" a solver is so often catastrophic.',
-        example: 'At n = 8: the early diagonal check leaves 1.88% of the control, symmetry breaking leaves ' +
-          '50.00%, and both together leave 0.9389% against the 0.9384% their product predicts — near enough to '+
-          'agree at two decimal places, and not equal, because the two prunings overlap slightly.'
+        readAs: 'Two prunings that each keep a tenth of the tree together keep a hundredth. The ' +
+          'fractions multiply rather than add, and that compounding is why stacking cheap prunings ' +
+          'beats one clever one.',
+        detail: [
+          'This is the argument for adding a weak second constraint.',
+          'A pruning that removes only a third of the tree still removes a third of whatever the ' +
+            'first one left, so its value is multiplicative rather than additive.',
+          'Dependent prunings do worse than the product, because they cut some of the same ' +
+            'branches. They are never worse than either alone, though, so the direction of the ' +
+            'inequality is always in your favour.',
+          'It also explains why removing a pruning to "simplify" a solver is so often ' +
+            'catastrophic.'
+        ],
+        example: 'At n = 8: the early diagonal check leaves 1.88% of the control and symmetry ' +
+          'breaking leaves 50.00%. Both together leave 0.9389%, against the 0.9384% their ' +
+          'product predicts. Near enough to agree at two decimal places, and not equal, because ' +
+          'the two prunings overlap slightly.'
       },
       {
         term: 'Symmetry breaking, and putting the solutions back',
         plain: 'Search one representative per symmetry class, then generate the rest by applying the symmetry.',
         formal: 'restrict the first choice to a fundamental domain; recover the full solution set by the group action',
-        detail: 'A board and its mirror are the same board in every respect the problem cares about, so ' +
-          'searching both is exactly twice the work for none of the answers. Restricting the first row to the ' +
-          'left half halves the tree exactly. The recovery step is where the care is needed: mirroring every ' +
-          'solution found and de-duplicating keeps the count exact even for odd n, where a middle-column ' +
-          'solution can be its own mirror and naive doubling would over-count.',
-        example: 'At n = 8, symmetry breaking visits 1 029 nodes rather than 2 057 and still reports all 92 ' +
-          'solutions, because the boards it skipped are precisely the mirrors of the ones it visited.'
+        detail: [
+          'A board and its mirror are the same board in every respect the problem cares about, so ' +
+            'searching both is exactly twice the work for none of the answers.',
+          'Restricting the first row to the left half halves the tree exactly.',
+          'The recovery step is where the care is needed. Mirroring every solution found and ' +
+            'de-duplicating keeps the count exact even for odd n, where a middle-column solution ' +
+            'can be its own mirror and naive doubling would over-count.'
+        ],
+        example: 'At n = 8, symmetry breaking visits 1 029 nodes rather than 2 057 and still ' +
+          'reports all 92 solutions. The boards it skipped are precisely the mirrors of the ones ' +
+          'it visited.'
       },
       {
         term: 'Ordering is not pruning',
         plain: 'Choosing what to try first changes nothing when you want every solution.',
         formal: 'a permutation of the successor order preserves the explored set when the search is exhaustive',
-        detail: 'Most-constrained-first, degree ordering and least-constraining-value are all reorderings of ' +
-          'the same children. When the search enumerates every solution it walks the same tree in a different ' +
-          'sequence and the node count is identical. They pay only when the search can stop early - the first ' +
-          'solution, or a bound that improves as soon as an incumbent exists - because then the order decides ' +
-          'how much of the tree is left when the stopping condition fires.',
+        detail: [
+          'Most-constrained-first, degree ordering and least-constraining-value are all ' +
+            'reorderings of the same children.',
+          'When the search enumerates every solution it walks the same tree in a different ' +
+            'sequence, and the node count is identical.',
+          'They pay only when the search can stop early — the first solution, or a bound that ' +
+            'improves as soon as an incumbent exists. Then the order decides how much of the tree ' +
+            'is left when the stopping condition fires.'
+        ],
         example: 'Finding all 92 solutions at n = 8 costs 2 057 nodes with or without most-constrained-first; ' +
           'finding the first costs 114 without it and 9 with it.'
       },
@@ -113,11 +141,15 @@
         term: 'Constraint propagation as a stronger feasibility test',
         plain: 'Deduce what the last decision forces before making the next one.',
         formal: 'arc consistency: remove from each domain every value with no support in a neighbouring domain',
-        detail: 'A feasibility check asks whether the current state is still possible. Propagation asks what ' +
-          'the current state implies, and repeats until nothing new follows. It is strictly stronger and ' +
-          'strictly more expensive per node, which makes it a trade rather than an improvement. The right way ' +
-          'to decide is to measure both counts on the instances that matter, because propagation that fires ' +
-          'rarely is pure overhead and propagation that cascades is the difference between finishing and not.',
+        detail: [
+          'A feasibility check asks whether the current state is still possible. Propagation asks ' +
+            'what the current state implies, and repeats until nothing new follows.',
+          'It is strictly stronger and strictly more expensive per node, which makes it a trade ' +
+            'rather than an improvement.',
+          'The right way to decide is to measure both counts on the instances that matter. ' +
+            'Propagation that fires rarely is pure overhead; propagation that cascades is the ' +
+            'difference between finishing and not.'
+        ],
         example: 'On a hard Sudoku, propagation takes the search from 9 180 nodes to 929 while doing far more ' +
           'work at each of them.'
       },
@@ -125,11 +157,15 @@
         term: 'A node budget is part of the report',
         plain: 'A search that ran out of budget must say so rather than return what it had.',
         formal: 'report (result, nodesVisited, budgetExhausted) rather than result alone',
-        detail: 'Exhaustive search on a hard instance does not finish, and the honest response is a flag, not ' +
-          'a smaller answer. A solver that returns its incumbent without saying the budget ran out turns an ' +
-          '"unknown" into a confident wrong answer, and a table that prints that number beside completed runs ' +
-          'invites a comparison that is not valid. Every count in this section that hit its budget is marked, ' +
-          'and no ratio is computed against a marked figure.',
+        detail: [
+          'Exhaustive search on a hard instance does not finish, and the honest response is a ' +
+            'flag, not a smaller answer.',
+          'A solver that returns its incumbent without saying the budget ran out turns an ' +
+            '"unknown" into a confident wrong answer. A table that prints that number beside ' +
+            'completed runs invites a comparison that is not valid.',
+          'Every count in this section that hit its budget is marked, and no ratio is computed ' +
+            'against a marked figure.'
+        ],
         example: 'The leaf-only control at n = 12 exceeds twenty million nodes; the table shows "20 000 000+" ' +
           'and computes no ratio from it.'
       }

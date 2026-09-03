@@ -52,34 +52,39 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'Exhaustive search is not a fallback, it is a shape: a state space with a root, successors and a test ' +
-          'for a goal. Almost every hard combinatorial problem can be written that way in a few minutes, and ' +
-          'the resulting program is correct and useless. What makes it usable is not a faster inner loop - it ' +
-          'is refusing to build parts of the tree, and every refusal has to be justified by an argument that ' +
-          'no solution lives there.',
-        'The demo is n-queens with the arguments switchable one at a time. The control checks the diagonals ' +
-          'only when the board is full: it visits 109 601 nodes at n = 8. Moving that identical check to the ' +
-          'moment a queen is placed visits 2 057 - a factor of 53 - and finds the same 92 solutions. ' +
-          'Restricting the first row to the left half and mirroring the results halves it again, exactly, ' +
-          'because the boards not visited are precisely the mirrors of the ones that were.',
-        'The last control is the one that behaves differently from the others. Ordering the columns ' +
-          'most-constrained-first changes nothing when every solution is wanted - the same tree is walked in a ' +
-          'different order - and changes a great deal when the first solution is enough: 114 nodes become 9. ' +
-          'An ordering heuristic is not a pruning, and a section that reports one number for both goals hides ' +
-          'the distinction.'
+        '**Exhaustive search is not a fallback, it is a shape:** a state space with a root, ' +
+          'successors and a test for a goal. Almost every hard combinatorial problem can be ' +
+          'written that way in a few minutes, and the resulting program is correct and useless.',
+        'What makes it usable is not a faster inner loop. It is refusing to build parts of the ' +
+          'tree, and every refusal has to be justified by an argument that no solution lives ' +
+          'there.',
+        'The demo is n-queens with the arguments switchable one at a time. The control checks the ' +
+          'diagonals only when the board is full, and visits 109 601 nodes at n = 8. Moving that ' +
+          'identical check to the moment a queen is placed visits 2 057 — a factor of 53 — and ' +
+          'finds the same 92 solutions.',
+        'Restricting the first row to the left half and mirroring the results halves it again, ' +
+          'exactly, because the boards not visited are precisely the mirrors of the ones that ' +
+          'were.',
+        'The last control behaves differently from the others. Ordering the columns ' +
+          'most-constrained-first changes nothing when every solution is wanted, because the same ' +
+          'tree is walked in a different order. It changes a great deal when the first solution ' +
+          'is enough: 114 nodes become 9.',
+        'An ordering heuristic is not a pruning, and a section that reports one number for both ' +
+          'goals hides the distinction.'
       ],
       demo: {
         title: 'Interactive demo — prunings, one at a time, on the same board',
         markup: root.ExhaustiveSearchTemplate.render()
       },
       diagram: diagram(),
-      insight: 'Prunings multiply, they do not add. At n = 8 the early diagonal check leaves 1.88% of the ' +
-        'control\'s nodes and symmetry breaking leaves 50.00%; together they leave 0.94%, which is the product ' +
-        'to four decimal places. That is why a second constraint that only cuts a third of the remaining tree ' +
-        'is still worth adding - it cuts a third of whatever the first one left. The corollary is the ' +
-        'discipline: add prunings one at a time and measure each, because a pruning that is subtly wrong ' +
-        'removes solutions, and a solution count that silently drops from 92 to 88 looks exactly like a ' +
-        'pruning that worked.'
+      insight: 'Prunings multiply, they do not add. At n = 8 the early diagonal check leaves ' +
+        '1.88% of the control\'s nodes and symmetry breaking leaves 50.00%. Together they leave ' +
+        '0.94%, which is the product to four decimal places. That is why a second constraint ' +
+        'that only cuts a third of the remaining tree is still worth adding: it cuts a third of ' +
+        'whatever the first one left. The corollary is the discipline. Add prunings one at a ' +
+        'time and measure each. A pruning that is subtly wrong removes solutions, and a ' +
+        'solution count that silently drops from 92 to 88 looks exactly like a pruning that ' +
+        'worked.'
     };
   }
 
