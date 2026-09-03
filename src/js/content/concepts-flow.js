@@ -192,26 +192,30 @@
         readAs: 'The largest possible flow equals the cheapest way to sever the source from the sink. Two ' +
           'completely different questions with provably the same answer, and every application in this ' +
           'section uses one to answer the other.',
-        detail: 'Weak duality is obvious: every unit of flow crosses every cut, so no flow exceeds ' +
-          'any cut. Strong duality — that they are exactly equal — is the theorem, and it is what ' +
-          'makes the cut usable as an answer rather than merely as a bound. In practice the cut is ' +
-          'almost always the thing you actually wanted: which links to cut, which pixels are ' +
-          'foreground, which projects to fund. The flow is the machinery, and the cut is the ' +
-          'product.',
-        example: 'Across five network shapes the flow values are 23, 10, 4, 7 and 6, the cut ' +
-          'capacities are identical, and 5, 5, 4, 1 and 6 arcs cross, all saturated.'
+        detail: [
+          'Weak duality is obvious: every unit of flow crosses every cut, so no flow exceeds any cut.',
+          'Strong duality — that they are exactly equal — is the theorem, and it is what makes the ' +
+            'cut usable as an answer rather than merely as a bound.',
+          'In practice the cut is almost always the thing you actually wanted: which links to cut, ' +
+            'which pixels are foreground, which projects to fund. The flow is the machinery, and ' +
+            'the cut is the product.'
+        ],
+        example: 'Across five network shapes the flow values are 23, 10, 4, 7 and 6, and the cut ' +
+          'capacities are identical. The 5, 5, 4, 1 and 6 arcs that cross are all saturated.'
       },
       {
         term: 'Image segmentation is a cut',
         plain: 'Source arcs are how much a pixel looks like foreground, sink arcs how much like background, and neighbour arcs are how much you want them to agree.',
         formal: 'minimise sum of unary disagreement + sum over neighbours of smoothness·[label(u) != label(v)]',
-        detail: 'Every pixel gets an arc from the source weighted by its foreground evidence and an ' +
-          'arc to the sink weighted by its background evidence; any cut must sever exactly one of ' +
-          'the two, which is what makes a cut a labelling. Then a smoothness-weighted arc between ' +
-          'each neighbouring pair is severed exactly when the two pixels end up on different sides, ' +
-          'so the cut capacity is the total disagreement. Minimising it is therefore minimising a ' +
-          'stated objective — the model — rather than finding truth, and the difference between ' +
-          'those two things is the section.',
+        detail: [
+          'Every pixel gets an arc from the source weighted by its foreground evidence, and an arc ' +
+            'to the sink weighted by its background evidence. Any cut must sever exactly one of the ' +
+            'two, which is what makes a cut a labelling.',
+          'Then a smoothness-weighted arc between each neighbouring pair is severed exactly when the ' +
+            'two pixels end up on different sides, so the cut capacity is the total disagreement.',
+          'Minimising it is therefore minimising a stated objective — the model — rather than ' +
+            'finding truth. The difference between those two things is the section.'
+        ],
         example: 'An 8×8 image with 20% noise at smoothness 3: cut 159, and 4 of 64 pixels ' +
           'misclassified.'
       },
@@ -219,13 +223,16 @@
         term: 'The objective is a model, and improving it can look like getting worse',
         plain: 'Raising the smoothness makes the answer better and the cut capacity larger the whole way.',
         formal: 'the cut minimises the model; the misclassification count measures the truth, and they are different functions',
-        detail: 'This is the single most useful thing in the section and it is invisible unless the ' +
-          'generator carries a ground truth. As smoothness rises the neighbour arcs get heavier, so ' +
-          'any cut costs more — the minimum cut capacity rises monotonically. Meanwhile the labelling ' +
-          'gets better, because the smoothness term is exactly what suppresses the noise. Anyone ' +
-          'watching only the objective would conclude the parameter was hurting. Optimisation ' +
-          'literature is full of this: the number the solver reports is the number the modeller ' +
-          'chose, not the number the user cares about.',
+        detail: [
+          'This is the single most useful thing in the section, and it is invisible unless the ' +
+            'generator carries a ground truth.',
+          'As smoothness rises the neighbour arcs get heavier, so any cut costs more and the minimum ' +
+            'cut capacity rises monotonically. Meanwhile the labelling gets better, because the ' +
+            'smoothness term is exactly what suppresses the noise.',
+          'Anyone watching only the objective would conclude the parameter was hurting. Optimisation ' +
+            'literature is full of this: the number the solver reports is the number the modeller ' +
+            'chose, not the number the user cares about.'
+        ],
         example: 'Smoothness 0 to 12 gives cuts of 92, 123, 145, 159, 182, 210, 242 while ' +
           'misclassification falls 10, 8, 5, 4, 2, 0, 0 — from 15.6% to 0.0%.'
       },
@@ -233,26 +240,32 @@
         term: 'Project selection is maximum closure',
         plain: 'Choose a set closed under prerequisites to maximise profit; the answer is the total positive profit minus a minimum cut.',
         formal: 'source arc of profit p for each profitable item, sink arc of cost |p| for each costly one, infinite-capacity arc for each prerequisite',
-        detail: 'The infinite-capacity prerequisite arc is the whole trick: no finite cut can sever ' +
-          'it, so any finite cut respects every prerequisite automatically, and the constraint is ' +
-          'enforced by the structure rather than by a checker. Cutting a source arc means declining ' +
-          'that profit; cutting a sink arc means paying that cost. The minimum cut therefore ' +
-          'minimises profit-forgone plus cost-paid, and subtracting it from the total available ' +
-          'profit gives the best achievable. This same construction is the standard reduction for ' +
-          'a large family of "select a downward-closed set" problems.',
+        detail: [
+          'The infinite-capacity prerequisite arc is the whole trick. No finite cut can sever it, so ' +
+            'any finite cut respects every prerequisite automatically, and the constraint is ' +
+            'enforced by the structure rather than by a checker.',
+          'Cutting a source arc means declining that profit. Cutting a sink arc means paying that ' +
+            'cost.',
+          'The minimum cut therefore minimises profit-forgone plus cost-paid, and subtracting it ' +
+            'from the total available profit gives the best achievable. This same construction is ' +
+            'the standard reduction for a large family of "select a downward-closed set" problems.'
+        ],
         example: 'Eight projects across five seeds: positive profit 43, 27, 20, 25, 31; cuts 3, 5, ' +
-          '8, 7, 4; realised 40, 22, 12, 18, 27 — and brute force agrees on all five.'
+          '8, 7, 4; realised 40, 22, 12, 18, 27. Brute force agrees on all five.'
       },
       {
         term: 'Koenig\'s theorem is the bipartite special case',
         plain: 'On a bipartite graph the minimum vertex cover has exactly the size of the maximum matching.',
         formal: 'in a bipartite graph, max matching = min vertex cover; in a general graph this is false and the problem is NP-hard',
-        detail: 'The cut in the matching network is a vertex cover, and reading it off is the whole ' +
-          'proof. That the equality fails on general graphs is the important half: minimum vertex ' +
-          'cover is one of Karp\'s original NP-complete problems, and bipartiteness is exactly what ' +
-          'collapses it to a flow computation. Recognising that a graph is bipartite is therefore ' +
-          'not a stylistic observation, it is the difference between a polynomial answer and a ' +
-          'search, and the same boundary governs colouring and independent set.',
+        detail: [
+          'The cut in the matching network is a vertex cover, and reading it off is the whole proof.',
+          'That the equality fails on general graphs is the important half. Minimum vertex cover is ' +
+            'one of Karp\'s original NP-complete problems, and bipartiteness is exactly what ' +
+            'collapses it to a flow computation.',
+          'Recognising that a graph is bipartite is therefore not a stylistic observation. It is the ' +
+            'difference between a polynomial answer and a search, and the same boundary governs ' +
+            'colouring and independent set.'
+        ],
         example: 'Four seeds at 13, 14, 14 and 15 edges: matchings of 5, 7, 6, 6 and covers of 5, ' +
           '7, 6, 6, every cover verified to cover every edge.'
       },
@@ -263,12 +276,15 @@
         readAs: 'When the algorithm stops, take everything still reachable from the source in the residual ' +
           'graph. Every pipe leaving that set is completely full and every pipe entering it is ' +
           'completely empty — which is what makes it a minimum cut.',
-        detail: 'This is the structural check that makes a reported cut trustworthy, and it is ' +
-          'cheap. A cut is just a set of vertices; any set of vertices has a capacity, and reporting ' +
-          'the wrong set produces a number that is too large rather than an error. Verifying that ' +
-          'every crossing arc is full and every returning arc is empty confirms both that the cut ' +
-          'is minimum and that the flow is maximum, without recomputing either. If an arc leaving ' +
-          'the source side has residual capacity, the search that built the set had a bug.',
+        detail: [
+          'This is the structural check that makes a reported cut trustworthy, and it is cheap.',
+          'A cut is just a set of vertices. Any set of vertices has a capacity, so reporting the ' +
+            'wrong set produces a number that is too large rather than an error.',
+          'Verifying that every crossing arc is full and every returning arc is empty confirms both ' +
+            'that the cut is minimum and that the flow is maximum, without recomputing either. If an ' +
+            'arc leaving the source side has residual capacity, the search that built the set had a ' +
+            'bug.'
+        ],
         example: 'Across the five shapes at seed 2, all 5, 5, 4, 1 and 6 crossing arcs are ' +
           'saturated in every case.'
       },
@@ -276,13 +292,16 @@
         term: 'Modelling is the hard part; the algorithm is a library call',
         plain: 'Which vertices, which capacities, which two terminals — get those wrong and no algorithm helps.',
         formal: 'the reduction is problem-specific and the solver is not',
-        detail: 'Every application in this section is one page of graph construction followed by an ' +
-          'identical call. The construction is where the thinking is: deciding that a pixel is a ' +
-          'vertex and a neighbouring pair is an arc, that a prerequisite must be infinite rather ' +
-          'than merely large, that the two terminals mean foreground and background. Almost every ' +
-          'real engineering use of maximum flow looks like this, and the failure mode is a wrong ' +
-          'model producing a correct answer to the wrong question — which no amount of testing the ' +
-          'solver will catch.',
+        detail: [
+          'Every application in this section is one page of graph construction followed by an ' +
+            'identical call.',
+          'The construction is where the thinking is. A pixel is a vertex and a neighbouring pair is ' +
+            'an arc; a prerequisite must be infinite rather than merely large; the two terminals ' +
+            'mean foreground and background.',
+          'Almost every real engineering use of maximum flow looks like this. The failure mode is a ' +
+            'wrong model producing a correct answer to the wrong question, which no amount of ' +
+            'testing the solver will catch.'
+        ],
         example: 'Segmentation, project selection and vertex cover are three different sentences ' +
           'and the same twenty lines of solver.'
       },
@@ -290,13 +309,16 @@
         term: 'A brute-force oracle is the only real check on a reduction',
         plain: 'Enumerate every closed set, or every cover, and compare.',
         formal: 'exponential, but exact, and it owes nothing to the reduction it is checking',
-        detail: 'A reduction can be wrong in a way that produces valid-looking output: a cut is ' +
-          'always a cut, a labelling is always a labelling. The only independent check is to solve ' +
-          'the original problem directly on instances small enough to afford it, and to report the ' +
-          'disagreement count as a field rather than as an exception. Small here means eight ' +
-          'projects — 256 subsets — which is enough to catch a sign error, a missing infinite arc, ' +
-          'or a terminal wired the wrong way round, and all three are mistakes that survive every ' +
-          'test that only checks the flow.',
+        detail: [
+          'A reduction can be wrong in a way that produces valid-looking output. A cut is always a ' +
+            'cut, and a labelling is always a labelling.',
+          'The only independent check is to solve the original problem directly, on instances small ' +
+            'enough to afford it. Report the disagreement count as a field rather than as an ' +
+            'exception.',
+          'Small here means eight projects — 256 subsets. That is enough to catch a sign error, a ' +
+            'missing infinite arc, or a terminal wired the wrong way round. All three are mistakes ' +
+            'that survive every test that only checks the flow.'
+        ],
         example: 'The project panel brute-forces all five instances; the Koenig panel verifies every ' +
           'cover against every edge.'
       }

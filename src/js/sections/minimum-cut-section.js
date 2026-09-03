@@ -53,43 +53,50 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**An s-t cut splits the vertices** so the source is on one side and the sink on the other. ' +
+        'Its capacity is the total of the arcs pointing across it.',
+      'Every unit of flow has to cross, so no flow can exceed any cut. **Max-flow min-cut** says the ' +
+        'smallest cut is exactly achievable.',
+      'The proof is the residual graph. When no augmenting path is left, take everything still ' +
+        'reachable from the source: every original arc leaving that set is saturated by construction.',
+      'That makes the cut *constructible* rather than merely existent, which is what turns the ' +
+        'theorem into an engineering tool. The flow value answers "how much"; the cut answers "which ' +
+        'links, and what would I have to change".',
+      'Note that arcs pointing *back* across the split contribute nothing to the capacity. That is ' +
+        'why a cut in a directed network is not symmetric, and why the reachable set is taken from ' +
+        'the source rather than the sink.',
+      '**Image segmentation is a minimum cut.** Give every pixel a source arc worth its likeness to ' +
+        'the foreground, and a sink arc worth its likeness to the background. Then give neighbouring ' +
+        'pixels an arc worth the penalty for disagreeing.',
+      'The minimum cut is then the labelling that trades measurement against smoothness optimally. ' +
+        'The smoothness term is what makes the result robust to noise, rather than a per-pixel ' +
+        'threshold with speckles.',
+      '**Project selection is a minimum cut too**, and this is the reduction worth carrying.',
+      'Each profitable item gets a source arc worth its profit, and each costly one a sink arc worth ' +
+        'its cost. Each prerequisite gets an arc of *infinite* capacity, which is what forces any ' +
+        'finite cut to respect it.',
+      'The best achievable profit is then the total positive profit minus the minimum cut, and the ' +
+        'chosen set is read straight off the source side.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'An **s-t cut** splits the vertices so the source is on one side and the sink on the other, ' +
-          'and its capacity is the total of the arcs pointing across it. Every unit of flow has to ' +
-          'cross, so no flow can exceed any cut — and **max-flow min-cut** says the smallest cut is ' +
-          'exactly achievable. The proof is the residual graph: when no augmenting path is left, take ' +
-          'everything still reachable from the source, and every original arc leaving that set is ' +
-          'saturated by construction.',
-        'That makes the cut *constructible* rather than merely existent, which is what turns the ' +
-          'theorem into an engineering tool. The flow value answers "how much"; the cut answers ' +
-          '"which links, and what would I have to change". Note that arcs pointing *back* across the ' +
-          'split contribute nothing to the capacity, which is why a cut in a directed network is not ' +
-          'symmetric and why the reachable set is taken from the source rather than the sink.',
-        '**Image segmentation is a minimum cut.** Give every pixel a source arc worth its likeness to ' +
-          'the foreground, a sink arc worth its likeness to the background, and give neighbouring ' +
-          'pixels an arc worth the penalty for disagreeing. The minimum cut is then the labelling that ' +
-          'trades measurement against smoothness optimally, and the smoothness term is what makes the ' +
-          'result robust to noise rather than a per-pixel threshold with speckles.',
-        '**Project selection is a minimum cut too**, and this is the reduction worth carrying. Each ' +
-          'profitable item gets a source arc worth its profit, each costly one a sink arc worth its ' +
-          'cost, and each prerequisite an arc of *infinite* capacity — which is what forces any finite ' +
-          'cut to respect it. The best achievable profit is then the total positive profit minus the ' +
-          'minimum cut, and the chosen set is read straight off the source side.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — a segmentation, a project portfolio, and a vertex cover',
         markup: root.MinimumCutTemplate.render()
       },
       diagram: diagram(),
       insight: 'The skill this section is really about is noticing that a problem *is* a cut. Nobody ' +
-        'arrives at work with a flow network; they arrive with "which features do we ship given the ' +
+        'arrives at work with a flow network. They arrive with "which features do we ship given the ' +
         'dependencies", "which pixels are the subject", "which of these accounts do we keep given ' +
         'that closing one closes its children". Each of those is maximum closure or a labelling ' +
         'problem, both of which are minimum cuts, and the whole difficulty is the modelling. Once the ' +
-        'network is right, the algorithm is a library call and the answer is exact — which is a rare ' +
+        'network is right, the algorithm is a library call and the answer is exact. That is a rare ' +
         'and valuable thing to be able to say about an optimisation problem.'
     };
   }
