@@ -345,13 +345,18 @@
         term: 'The greedy-choice property',
         plain: 'Some locally best choice is part of some optimal solution.',
         formal: 'there exists an optimal solution containing the greedy first choice',
-        readAs: 'The property that makes greedy safe: whatever the best answer is, there is a best answer ' +
-          'that agrees with your first move. Prove that and induction does the rest.',
-        detail: 'This is the precondition, and it is a statement about the problem rather than about the ' +
-          'algorithm. It is also weaker than it looks: it does not say every locally best choice is safe, or ' +
-          'that the greedy solution is the only optimum. It says one optimum agrees with greedy at the first ' +
-          'step - which, combined with optimal substructure, licenses the induction. Both halves are needed, ' +
-          'and problems that satisfy one without the other are exactly where greedy quietly fails.',
+        readAs: 'The property that makes greedy safe: whatever the best answer is, there is a ' +
+          'best answer that agrees with your first move. Prove that, and induction does the rest.',
+        detail: [
+          'This is the precondition, and it is a statement about the problem rather than about ' +
+            'the algorithm.',
+          'It is also weaker than it looks. It does not say every locally best choice is safe, or ' +
+            'that the greedy solution is the only optimum. It says one optimum agrees with greedy ' +
+            'at the first step, which — combined with optimal substructure — licenses the ' +
+            'induction.',
+          'Both halves are needed. Problems that satisfy one without the other are exactly where ' +
+            'greedy quietly fails.'
+        ],
         example: 'For interval scheduling, the interval finishing earliest is in some optimal schedule, ' +
           'because swapping it for that schedule\'s first interval cannot cause a conflict.'
       },
@@ -370,11 +375,15 @@
         },
         plain: 'Transform any optimal solution into the greedy one, one step at a time, without making it worse.',
         formal: 'given OPT differing from greedy at position k, construct OPT\' agreeing at k with value(OPT\') >= value(OPT)',
-        detail: 'The exchange argument is the workhorse proof for greedy algorithms and it has a fixed shape ' +
-          'worth memorising. Take any optimal solution; find the first place it disagrees with greedy; show ' +
-          'that swapping greedy\'s choice in keeps it feasible and no worse. Induction then gives an optimal ' +
-          'solution agreeing with greedy everywhere, so greedy is optimal. Writing it out forces you to say ' +
-          'exactly why the swap is safe, and that sentence is usually where a wrong greedy rule falls apart.',
+        detail: [
+          'The exchange argument is the workhorse proof for greedy algorithms, and it has a fixed ' +
+            'shape worth memorising.',
+          'Take any optimal solution. Find the first place it disagrees with greedy. Show that ' +
+            'swapping greedy\'s choice in keeps it feasible and no worse. Induction then gives an ' +
+            'optimal solution agreeing with greedy everywhere, so greedy is optimal.',
+          'Writing it out forces you to say exactly why the swap is safe, and that sentence is ' +
+            'usually where a wrong greedy rule falls apart.'
+        ],
         example: 'Swapping the earliest-finishing interval into an optimal schedule works because it ends no ' +
           'later than the interval it replaces, so nothing later conflicts.'
       },
@@ -382,12 +391,15 @@
         term: 'Staying ahead',
         plain: 'After k choices, greedy is at least as well placed as any competitor.',
         formal: 'for every k and every feasible solution S, greedy\'s k-th choice finishes no later than S\'s k-th',
-        detail: 'The second standard proof, and often the easier one to write. Rather than transforming a ' +
-          'rival solution, it shows greedy dominates every rival at every prefix by some measure, so it can ' +
-          'never be the one that runs out first. The measure has to be chosen carefully - for interval ' +
-          'scheduling it is the finishing time of the k-th chosen interval - and the induction is then ' +
-          'mechanical. When both proofs are available, this one usually produces a table you can compute and ' +
-          'check, which the exchange argument does not.',
+        detail: [
+          'The second standard proof, and often the easier one to write.',
+          'Rather than transforming a rival solution, it shows greedy dominates every rival at ' +
+            'every prefix by some measure. So greedy can never be the one that runs out first.',
+          'The measure has to be chosen carefully — for interval scheduling it is the finishing ' +
+            'time of the k-th chosen interval — and the induction is then mechanical.',
+          'When both proofs are available, this one usually produces a table you can compute and ' +
+            'check. The exchange argument does not.'
+        ],
         example: 'Greedy\'s third interval finishes at 9 where the optimal schedule\'s third finishes at 11, ' +
           'so greedy has strictly more of the timeline left.'
       },
@@ -405,12 +417,15 @@
         },
         plain: 'A wrong greedy rule returns a valid, sub-optimal answer, and nothing raises.',
         formal: 'the output is feasible but not optimal; detection requires computing the optimum independently',
-        detail: 'This is the reason greedy is the most dangerous paradigm in the milestone. A wrong ' +
-          'backtracking search hangs, a wrong bound makes a search return an answer that disagrees with the ' +
-          'exhaustive one, and both are visible. A wrong greedy criterion produces a schedule that is a ' +
-          'schedule, a change that is change, a route that is a route. The only detection is an oracle, and ' +
-          'the only prevention is a proof - which is why "we benchmarked it and it was fine" is not evidence ' +
-          'of correctness here.',
+        detail: [
+          'This is the reason greedy is the most dangerous paradigm in the milestone.',
+          'A wrong backtracking search hangs. A wrong bound makes a search return an answer that ' +
+            'disagrees with the exhaustive one. Both are visible.',
+          'A wrong greedy criterion produces a schedule that is a schedule, a change that is ' +
+            'change, a route that is a route.',
+          'The only detection is an oracle, and the only prevention is a proof. That is why "we ' +
+            'benchmarked it and it was fine" is not evidence of correctness here.'
+        ],
         example: 'Earliest-start scheduling loses to the optimum on an instance of four intervals, returning ' +
           'a perfectly valid schedule of one where two fit.'
       },
@@ -418,12 +433,15 @@
         term: 'How hard a counter-example is to find is itself a measurement',
         plain: 'Some wrong criteria fail on the fifth random instance; others survive tens of thousands.',
         formal: 'report the number of random instances searched before the first disagreement with the oracle',
-        detail: 'A criterion whose counter-example takes a hundred thousand random instances to find will ' +
-          'pass every hand-written test, every property test with a small generator, and a year in ' +
-          'production. That number is the honest measure of how much a test suite tells you, and it varies ' +
-          'enormously between rules that all look equally plausible. It is also the argument for the ' +
-          'structural check in the next section: a search that has not found a counter-example has not found ' +
-          'a proof either.',
+        detail: [
+          'A criterion whose counter-example takes a hundred thousand random instances to find ' +
+            'will pass every hand-written test, every property test with a small generator, and a ' +
+            'year in production.',
+          'That number is the honest measure of how much a test suite tells you, and it varies ' +
+            'enormously between rules that all look equally plausible.',
+          'It is also the argument for the structural check in the next section. A search that has ' +
+            'not found a counter-example has not found a proof either.'
+        ],
         example: 'Earliest-start fails after 5 random instances of four intervals; fewest-conflicts needs ' +
           'nine intervals and 94 996 instances.'
       },
@@ -431,15 +449,19 @@
         term: 'Fractional against 0/1',
         plain: 'Greedy by value density is optimal when items can be cut and wrong when they cannot.',
         formal: 'the LP relaxation of 0/1 knapsack is fractional knapsack, and its optimum is an upper bound',
-        readAs: 'Allow items to be taken in fractions and the problem becomes easy — and because you relaxed ' +
-          'a constraint, its answer can only be better than the real one. That makes it a ceiling you ' +
-          'can compute cheaply and prune against.',
-        detail: 'These two problems differ by one word in the statement and by a complexity class in the ' +
-          'answer. Sorting by value per unit weight and filling is provably optimal for the fractional ' +
-          'version by an exchange argument, and it is not optimal for the integral one - the last item either ' +
-          'fits or does not, and the greedy prefix can leave capacity that a different subset would use. The ' +
-          'relationship is not wasted: the fractional optimum is a ceiling on the integral one, which is ' +
-          'exactly the bound the branch-and-bound section uses.',
+        readAs: 'Allow items to be taken in fractions and the problem becomes easy. Because you ' +
+          'relaxed a constraint, its answer can only be better than the real one — which makes it ' +
+          'a ceiling you can compute cheaply and prune against.',
+        detail: [
+          'These two problems differ by one word in the statement, and by a complexity class in ' +
+            'the answer.',
+          'Sorting by value per unit weight and filling is provably optimal for the fractional ' +
+            'version, by an exchange argument. It is not optimal for the integral one: the last ' +
+            'item either fits or does not, and the greedy prefix can leave capacity that a ' +
+            'different subset would use.',
+          'The relationship is not wasted. The fractional optimum is a ceiling on the integral ' +
+            'one, which is exactly the bound the branch-and-bound section uses.'
+        ],
         example: 'Three items and a capacity of 50: fractional greedy achieves 240 and the best integral ' +
           'solution is 220.'
       },
@@ -447,12 +469,15 @@
         term: 'Canonical coin systems',
         plain: 'Greedy change-making is optimal for some denomination sets and not others, and inspection does not tell you which.',
         formal: 'a system is canonical when greedy is optimal for every amount; non-canonicity has a witness below the sum of the two largest coins',
-        detail: 'This is the cleanest small example of a greedy rule whose correctness depends on data rather ' +
-          'than on structure. 1, 5, 10, 25 is canonical and 1, 3, 4 is not, and nothing about the two sets ' +
-          'looks different. The saving grace is Pearson\'s result: if a counter-example exists, one exists ' +
-          'below the sum of the two largest coins, so a finite sweep decides the question. That is the shape ' +
-          'to look for whenever a greedy rule is proposed - not "does it work on my examples" but "is there a ' +
-          'bounded region where a counter-example must live".',
+        detail: [
+          'This is the cleanest small example of a greedy rule whose correctness depends on data ' +
+            'rather than on structure. 1, 5, 10, 25 is canonical and 1, 3, 4 is not, and nothing ' +
+            'about the two sets looks different.',
+          'The saving grace is Pearson\'s result. If a counter-example exists, one exists below ' +
+            'the sum of the two largest coins, so a finite sweep decides the question.',
+          'That is the shape to look for whenever a greedy rule is proposed. Not "does it work on ' +
+            'my examples", but "is there a bounded region where a counter-example must live".'
+        ],
         example: '1, 3, 4 fails at 6: greedy pays 4 + 1 + 1 and the answer is 3 + 3. 1, 15, 25 fails at 30: ' +
           'six coins against two.'
       },
@@ -460,16 +485,21 @@
         term: 'Huffman coding as a greedy proof',
         plain: 'Repeatedly merging the two least frequent symbols is optimal, and the proof is an exchange argument.',
         formal: 'the two least frequent symbols are siblings at maximum depth in some optimal prefix code',
-        readAs: 'The two rarest symbols can always be placed together at the very bottom of some optimal ' +
-          'tree. That single fact is the whole proof of Huffman coding, and the whole algorithm.',
-        detail: 'Huffman is worth carrying as the canonical non-trivial greedy proof because the exchange step ' +
-          'is genuinely surprising: it is not obvious that the two rarest symbols can be assumed to be ' +
-          'siblings, and the argument that swapping them down cannot increase the weighted path length is the ' +
-          'whole result. Once that is established the induction is routine. It is also the example that shows ' +
-          'greedy solving a problem whose brute-force version - all binary trees on n leaves - is enormous.',
+        readAs: 'The two rarest symbols can always be placed together at the very bottom of some ' +
+          'optimal tree. That single fact is the whole proof of Huffman coding, and the whole ' +
+          'algorithm.',
+        detail: [
+          'Huffman is worth carrying as the canonical non-trivial greedy proof, because the ' +
+            'exchange step is genuinely surprising.',
+          'It is not obvious that the two rarest symbols can be assumed to be siblings. The ' +
+            'argument that swapping them down cannot increase the weighted path length is the ' +
+            'whole result, and once it is established the induction is routine.',
+          'It is also the example that shows greedy solving a problem whose brute-force version — ' +
+            'all binary trees on n leaves — is enormous.'
+        ],
         example: 'With frequencies 5, 9, 12, 13, 16, 45 the merges are (5, 9) then (12, 13) then (14, 16), ' +
           'producing the optimal code with expected length 2.24 bits per symbol.'
       }
-    ]
+    ],
   });
 }(typeof self !== 'undefined' ? self : (typeof window !== 'undefined' ? window : null)));

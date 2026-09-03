@@ -43,35 +43,38 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'A greedy algorithm commits to a locally best choice and never reconsiders. That is the whole ' +
-          'definition, and it is why greedy algorithms are short, fast, and the paradigm most often applied ' +
-          'without proof. The proof is not optional: the failure mode is not a crash or a hang, it is a valid ' +
-          'answer that is not the best one, returned confidently and indistinguishable from a correct answer ' +
-          'unless somebody computes the optimum.',
-        'Interval scheduling is the standard demonstration because four plausible criteria exist and exactly ' +
-          'one is optimal. Earliest start, shortest duration and fewest conflicts all schedule sensibly on ' +
-          'most instances; each has an instance where it loses, and the demo finds those instances by search. ' +
-          'Earliest start loses on four intervals after five random instances. Fewest conflicts needs nine ' +
-          'intervals and tens of thousands of instances - which is exactly how a wrong criterion survives ' +
-          'testing and reaches production.',
-        'Two proof techniques certify a greedy algorithm. An exchange argument transforms any optimal ' +
-          'solution into the greedy one without making it worse. A staying-ahead argument shows that after k ' +
-          'choices greedy is at least as well placed as any competitor - for interval scheduling, that its ' +
-          'k-th interval finishes no later, so it never runs out of room first. The table below is that ' +
-          'comparison, computed rather than asserted.'
+        '**A greedy algorithm commits to a locally best choice and never reconsiders.** That is ' +
+          'the whole definition, and it is why greedy algorithms are short, fast, and the ' +
+          'paradigm most often applied without proof.',
+        'The proof is not optional. The failure mode is not a crash or a hang. It is a valid ' +
+          'answer that is not the best one, returned confidently, and indistinguishable from a ' +
+          'correct answer unless somebody computes the optimum.',
+        'Interval scheduling is the standard demonstration, because four plausible criteria exist ' +
+          'and exactly one is optimal. Earliest start, shortest duration and fewest conflicts all ' +
+          'schedule sensibly on most instances. Each has an instance where it loses, and the demo ' +
+          'finds those instances by search.',
+        'Earliest start loses on four intervals after five random instances. Fewest conflicts ' +
+          'needs nine intervals and tens of thousands of instances — which is exactly how a wrong ' +
+          'criterion survives testing and reaches production.',
+        'Two proof techniques certify a greedy algorithm. An exchange argument transforms any ' +
+          'optimal solution into the greedy one without making it worse. A staying-ahead argument ' +
+          'shows that after k choices greedy is at least as well placed as any competitor.',
+        'For interval scheduling that means greedy\'s k-th interval finishes no later, so it ' +
+          'never runs out of room first. The table below is that comparison, computed rather than ' +
+          'asserted.'
       ],
       demo: {
         title: 'Interactive demo — four criteria, an oracle, and the instances that break three of them',
         markup: root.GreedyAlgorithmsTemplate.render()
       },
       diagram: diagram(),
-      insight: 'When somebody proposes a greedy rule, ask for the certificate before asking for the ' +
-        'benchmark. If they cannot produce an exchange or staying-ahead argument, the rule is a heuristic, ' +
-        'and a heuristic in a place that reports an exact answer is a defect waiting for the right input. ' +
-        'The cheap version of this discipline is what the demo does: implement the exponential-but-correct ' +
-        'oracle, run both on random instances in a test, and let the search look for the disagreement. It ' +
-        'costs an hour and it is the difference between "greedy works here" and "greedy worked on the ' +
-        'instances I tried".'
+      insight: 'When somebody proposes a greedy rule, ask for the certificate before asking for ' +
+        'the benchmark. If they cannot produce an exchange or staying-ahead argument, the rule ' +
+        'is a heuristic. A heuristic in a place that reports an exact answer is a defect ' +
+        'waiting for the right input. The cheap version of this discipline is what the demo ' +
+        'does. Implement the exponential-but-correct oracle, run both on random instances in a ' +
+        'test, and let the search look for the disagreement. It costs an hour, and it is the ' +
+        'difference between "greedy works here" and "greedy worked on the instances I tried".'
     };
   }
 
