@@ -20,17 +20,20 @@
           ].join('\n'),
           caption: 'Both are called randomised and they fail in opposite ways. One misses a deadline; the other returns a wrong answer on time.'
         },
-        plain: 'One has a fixed runtime and may be wrong; the other is always right and may take a long time.',
+        plain: 'One has a fixed runtime and may be wrong. The other is always right and may take a long time.',
         formal: 'Monte Carlo: fixed time, Pr[wrong] ≤ p. Las Vegas: always correct, E[time] finite.',
         readAs: 'For Monte Carlo the time is fixed and the probability of being wrong is at ' +
-          'most p; for Las Vegas the answer is certain and the expected running time is finite.',
-        detail: 'The distinction decides what you can put in a service-level objective. A Monte ' +
-          'Carlo algorithm gives you a latency guarantee and an error budget; a Las Vegas one ' +
-          'gives you a correctness guarantee and a latency distribution. Converting a Las Vegas ' +
-          'algorithm into a Monte Carlo one is free — stop it at a deadline and return whatever ' +
-          'you have — and the error probability of the result is exactly the chance of ' +
-          'overrunning. Going the other way needs a way to check an answer, which is why 19.5 ' +
-          'sits where it does in this milestone.',
+          'most p. For Las Vegas the answer is certain and the expected running time is finite.',
+        detail: [
+          'The distinction decides what you can put in a service-level objective.',
+          'A Monte Carlo algorithm gives you a latency guarantee and an error budget. A Las Vegas ' +
+            'one gives you a correctness guarantee and a latency distribution.',
+          'Converting a Las Vegas algorithm into a Monte Carlo one is free: stop it at a deadline ' +
+            'and return whatever you have. The error probability of the result is exactly the ' +
+            'chance of overrunning.',
+          'Going the other way needs a way to check an answer, which is why 19.5 sits where it does ' +
+            'in this milestone.'
+        ],
         example: 'Randomised quicksort is Las Vegas: the output is sorted whatever the pivots ' +
           'were, and only the comparison count varies. A k-round Miller–Rabin test is Monte ' +
           'Carlo: it always finishes in k modular exponentiations and is occasionally wrong.'
@@ -49,48 +52,55 @@
         },
         plain: 'If the algorithm can only ever err in one direction, any round that disagrees settles the question.',
         formal: 'Pr[k rounds all fail] = pᵏ for one-sided error; two-sided error needs a majority over O(log(1/δ)/γ²) rounds',
-        readAs: 'The chance that all k rounds fail is p multiplied by itself k times; a ' +
+        readAs: 'The chance that all k rounds fail is p multiplied by itself k times. A ' +
           'two-sided test instead needs a majority vote over about log of one-over-delta ' +
           'divided by the gap squared rounds.',
-        detail: 'A composite that passes one Miller–Rabin round may pass another, but the two ' +
-          'events are independent given the composite, so the failure probabilities multiply and ' +
-          'nothing has to be counted or averaged. That is why repetition here has no tuning ' +
-          'and no trade-off: another round costs another round and buys another factor. With ' +
-          'two-sided error a single disagreeing round proves nothing, the answer is the majority ' +
-          'of many rounds, and the required count grows as the inverse square of the advantage — ' +
-          'which is the difference between five rounds and five hundred.',
+        detail: [
+          'A composite that passes one Miller–Rabin round may pass another, but the two events are ' +
+            'independent given the composite. So the failure probabilities multiply, and nothing ' +
+            'has to be counted or averaged.',
+          'That is why repetition here has no tuning and no trade-off. Another round costs another ' +
+            'round and buys another factor.',
+          'With two-sided error a single disagreeing round proves nothing, and the answer is the ' +
+            'majority of many rounds. The required count grows as the inverse square of the ' +
+            'advantage, which is the difference between five rounds and five hundred.'
+        ],
         example: 'The demo measures the failure rate falling from 1.385e-2 at one round to ' +
-          '4.000e-4 at two — a factor of 35, close to the 1.43% liar density — while no round ' +
-          'ever wrongly rejects a prime.'
+          '4.000e-4 at two, a factor of 35 that is close to the 1.43% liar density. No round ever ' +
+          'wrongly rejects a prime.'
       },
       {
         term: 'The proven bound and the measured rate are different numbers',
-        plain: 'A theorem promises a ceiling on the error; the instance in front of you is usually far below it.',
+        plain: 'A theorem promises a ceiling on the error. The instance in front of you is usually far below it.',
         formal: 'Rabin: at most 1/4 of bases are liars for any composite; measured on 561, 8 of 558 bases are',
-        detail: 'Quoting the bound as though it described behaviour makes an algorithm look ' +
-          'twenty times worse than it is, and quoting the measurement as though it were a ' +
-          'guarantee makes it look safe on inputs nobody has tried. Both numbers belong in the ' +
-          'design note: the bound is what you can defend in review, and the measurement is what ' +
-          'sets the round count you actually ship. The gap also tells you something real — a ' +
-          'measured rate close to the bound means you have found a worst case, and one far below ' +
-          'it means the bound is worst-case over a family your inputs are not in.',
-        example: 'On 561 the demo reports 1.43% measured against a 25% ceiling, so three rounds ' +
-          'predict 2.95e-6 rather than the 1.56e-2 the universal bound allows — a factor of ' +
+        detail: [
+          'Quoting the bound as though it described behaviour makes an algorithm look twenty times ' +
+            'worse than it is. Quoting the measurement as though it were a guarantee makes it look ' +
+            'safe on inputs nobody has tried.',
+          'Both numbers belong in the design note. The bound is what you can defend in review, and ' +
+            'the measurement is what sets the round count you actually ship.',
+          'The gap also tells you something real. A measured rate close to the bound means you have ' +
+            'found a worst case. One far below it means the bound is worst-case over a family your ' +
+            'inputs are not in.'
+        ],
+        example: 'On 561 the demo reports 1.43% measured against a 25% ceiling. So three rounds ' +
+          'predict 2.95e-6 rather than the 1.56e-2 the universal bound allows, a factor of ' +
           'five thousand between the promise and the reality.'
       },
       {
         term: 'Randomising the algorithm is not assuming a random input',
-        plain: 'One is a claim about your coins and holds on every input; the other is a claim about the world and an adversary can break it.',
+        plain: 'One is a claim about your coins and holds on every input. The other is a claim about the world, and an adversary can break it.',
         formal: 'E over the algorithm’s coins, for every input x, rather than E over inputs',
         readAs: 'The expectation is taken over the algorithm’s own random choices, holding for ' +
           'every input, rather than over a distribution of inputs.',
-        detail: 'Quicksort with a first-element pivot is O(n log n) on average over random ' +
-          'permutations and O(n²) on sorted input, which real data supplies constantly. ' +
-          'Quicksort with a randomly chosen pivot is O(n log n) in expectation on every input ' +
-          'including the sorted one, because the randomness is now yours rather than the ' +
-          'caller’s. The code differs by one line and the guarantee differs completely, and the ' +
-          'same distinction is what separates a hash table that can be flooded from one that ' +
-          'cannot.',
+        detail: [
+          'Quicksort with a first-element pivot is O(n log n) on average over random permutations ' +
+            'and O(n²) on sorted input, which real data supplies constantly.',
+          'Quicksort with a randomly chosen pivot is O(n log n) in expectation on every input, ' +
+            'including the sorted one. The randomness is now yours rather than the caller’s.',
+          'The code differs by one line and the guarantee differs completely. The same distinction ' +
+            'is what separates a hash table that can be flooded from one that cannot.'
+        ],
         example: 'The universal hashing section (3.2) prices the same distinction from the ' +
           'attacker’s side: a fixed hash function admits a constructed flood, and a seed drawn ' +
           'at start-up does not.'
@@ -100,17 +110,21 @@
         plain: 'Repeating until success gives a mean of 1/p, and a small but real chance of taking many times that.',
         formal: 'Pr[more than t attempts] = (1 − p)ᵗ, so the 99th percentile is ln 100 / −ln(1 − p)',
         readAs: 'The chance of needing more than t attempts is one minus p, multiplied by itself ' +
-          't times; the ninety-ninth percentile is the natural log of a hundred divided by ' +
+          't times. The ninety-ninth percentile is the natural log of a hundred divided by ' +
           'minus the natural log of one minus p.',
-        detail: 'The mean is the least useful number in the distribution because the geometric ' +
-          'tail is heavy relative to it: at p = 0.2 the mean is 5 and the 99th percentile is 21, ' +
-          'so a timeout at twice the mean kills more than one run in ten. Every retry budget, ' +
-          'every "give up after N attempts" and every deadline on a randomised routine is a ' +
-          'quantile question rather than a mean question, and treating it as a mean question is ' +
-          'how an error rate settles at a small non-zero number that nobody can explain.',
-        example: 'The demo measures a mean of 5.07 attempts against a predicted 5.00, a 99th ' +
-          'percentile of 21 against 20.64, a worst run of 36, and 11.3% of runs over a budget ' +
-          'of 10.'
+        detail: [
+          'The mean is the least useful number in the distribution, because the geometric tail is ' +
+            'heavy relative to it.',
+          'At p = 0.2 the mean is 5 and the 99th percentile is 21, so a timeout at twice the mean ' +
+            'kills more than one run in ten.',
+          'Every retry budget, every "give up after N attempts" and every deadline on a randomised ' +
+            'routine is a quantile question rather than a mean question. Treating it as a mean ' +
+            'question is how an error rate settles at a small non-zero number that nobody can ' +
+            'explain.'
+        ],
+        example: 'The demo measures a mean of 5.07 attempts against a predicted 5.00, and a 99th ' +
+          'percentile of 21 against 20.64. The worst run took 36 attempts, and 11.3% of runs went ' +
+          'over a budget of 10.'
       },
       {
         term: 'Amplification makes "it might be wrong" stop being an objection',
@@ -118,14 +132,17 @@
         formal: '4⁻²⁰ ≈ 9.1e-13, against a measured DRAM soft-error rate of roughly 10⁻¹² per bit-hour',
         readAs: 'A quarter multiplied by itself twenty times is about nine times ten to the ' +
           'minus thirteen.',
-        detail: 'The comparison is the point rather than the number: at some round count the ' +
-          'probability that the randomised algorithm is wrong falls below the probability that ' +
-          'the deterministic alternative was miscompiled, mistyped or corrupted in flight. Below ' +
-          'that line the argument is over, and knowing where the line is turns an aesthetic ' +
-          'objection into an engineering decision. It also tells you when to stop adding rounds, ' +
-          'because rounds past that point buy nothing measurable and cost real time.',
+        detail: [
+          'The comparison is the point rather than the number. At some round count the probability ' +
+            'that the randomised algorithm is wrong falls below the probability that the ' +
+            'deterministic alternative was miscompiled, mistyped or corrupted in flight.',
+          'Below that line the argument is over. Knowing where the line is turns an aesthetic ' +
+            'objection into an engineering decision.',
+          'It also tells you when to stop adding rounds, because rounds past that point buy nothing ' +
+            'measurable and cost real time.'
+        ],
         example: 'Every serious cryptographic library uses probabilistic primality testing for ' +
-          'key generation — the deterministic alternatives are far slower, and 64 rounds put the ' +
+          'key generation. The deterministic alternatives are far slower, and 64 rounds put the ' +
           'error below anything else in the system.'
       },
       {
@@ -133,15 +150,18 @@
         plain: 'Knowing the average tells you nothing about how often a single run is near it.',
         formal: 'Markov: Pr[X ≥ aE[X]] ≤ 1/a; Chernoff needs independence and gives an exponential tail',
         readAs: 'Markov says the chance X is at least a times its expectation is at most one ' +
-          'over a; Chernoff needs the terms to be independent and gives a bound that shrinks ' +
+          'over a. Chernoff needs the terms to be independent and gives a bound that shrinks ' +
           'exponentially.',
-        detail: 'A single expectation is compatible with almost any distribution, so an algorithm ' +
-          'quoted only by its expected behaviour may be near it almost always or almost never. ' +
-          'Getting from an expectation to a statement about individual runs requires a ' +
-          'concentration inequality, and each has a price: Markov needs nothing and is very weak, ' +
-          'Chebyshev needs a variance, and Chernoff needs independence and pays back an ' +
-          'exponentially small tail. The 19.9 section shows what happens without one — a bound ' +
-          'held in expectation and missed by half the individual runs.',
+        detail: [
+          'A single expectation is compatible with almost any distribution. An algorithm quoted only ' +
+            'by its expected behaviour may be near it almost always or almost never.',
+          'Getting from an expectation to a statement about individual runs requires a concentration ' +
+            'inequality, and each has a price. Markov needs nothing and is very weak, Chebyshev ' +
+            'needs a variance, and Chernoff needs independence and pays back an exponentially small ' +
+            'tail.',
+          'The 19.9 section shows what happens without one: a bound held in expectation and missed ' +
+            'by half the individual runs.'
+        ],
         example: 'M19.9 draws 500 random MAX-CUT assignments whose mean is 18.67 against a ' +
           'predicted 18.5, and 232 of them fall below that mean.'
       },
@@ -151,14 +171,17 @@
         formal: 'n is Carmichael if aⁿ⁻¹ ≡ 1 (mod n) for every a coprime to n',
         readAs: 'n is a Carmichael number if a raised to the n minus one is congruent to one ' +
           'modulo n, for every a that shares no factor with n.',
-        detail: 'Amplification fails completely against a Carmichael number: the liar density is ' +
-          'not merely high, it is everything except the bases that share a factor, so repeating ' +
-          'the Fermat test converges to certainty about the wrong answer. Miller–Rabin adds one ' +
-          'check — that no non-trivial square root of 1 appeared during the squaring chain — and ' +
-          'that single extra condition takes the liar density from 57.0% to 1.43% on the same ' +
-          'number. It is the clearest example in the milestone of a repetition bound being ' +
-          'worthless without a per-round guarantee behind it.',
-        example: '561 = 3 · 11 · 17 is the smallest; the demo counts 318 Fermat liars among its ' +
+        detail: [
+          'Amplification fails completely against a Carmichael number. The liar density is not ' +
+            'merely high, it is everything except the bases that share a factor, so repeating the ' +
+            'Fermat test converges to certainty about the wrong answer.',
+          'Miller–Rabin adds one check: that no non-trivial square root of 1 appeared during the ' +
+            'squaring chain. That single extra condition takes the liar density from 57.0% to 1.43% ' +
+            'on the same number.',
+          'It is the clearest example in the milestone of a repetition bound being worthless without ' +
+            'a per-round guarantee behind it.'
+        ],
+        example: '561 = 3 · 11 · 17 is the smallest. The demo counts 318 Fermat liars among its ' +
           '558 candidate bases and only 8 Miller–Rabin liars.'
       }
     ],

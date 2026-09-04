@@ -54,36 +54,37 @@
   }
 
   const ORIENTATION = [
-        '**Monte Carlo and Las Vegas differ in which of the two things is random.** A Monte ' +
-          'Carlo algorithm runs for a fixed time and may return the wrong answer; a Las Vegas ' +
-          'algorithm returns the right answer and may take a long time. Randomised quicksort is ' +
-          'Las Vegas — the output is sorted whatever the pivots were — and a primality test that ' +
-          'checks k random bases is Monte Carlo. Converting one way is free: run the Las Vegas ' +
-          'algorithm with a deadline and you have a Monte Carlo one whose error probability is ' +
-          'the chance of overrunning. The other direction needs a way to *check* an answer, ' +
-          'which is exactly what 19.5 is about.',
-        '**One-sided error is worth much more than two-sided error.** A test that only ever ' +
-          'errs in one direction — this one says "prime" about a composite, never "composite" ' +
-          'about a prime — amplifies by simple repetition: any round that says composite settles ' +
-          'it, so k rounds fail only if all k fail, and the probability is the product. Two-sided ' +
-          'error needs a majority vote over many more rounds, and the analysis is a Chernoff ' +
+        '**Monte Carlo and Las Vegas differ in which of the two things is random.** A Monte Carlo ' +
+          'algorithm runs for a fixed time and may return the wrong answer. A Las Vegas algorithm ' +
+          'returns the right answer and may take a long time.',
+        'Randomised quicksort is Las Vegas, because the output is sorted whatever the pivots were. ' +
+          'A primality test that checks k random bases is Monte Carlo.',
+        'Converting one way is free. Run the Las Vegas algorithm with a deadline and you have a ' +
+          'Monte Carlo one whose error probability is the chance of overrunning.',
+        'The other direction needs a way to *check* an answer, which is exactly what 19.5 is about.',
+        '**One-sided error is worth much more than two-sided error.** A test that only ever errs in ' +
+          'one direction says "prime" about a composite, but never "composite" about a prime.',
+        'Such a test amplifies by simple repetition. Any round that says composite settles it, so k ' +
+          'rounds fail only if all k fail, and the probability is the product.',
+        'Two-sided error needs a majority vote over many more rounds, and the analysis is a Chernoff ' +
           'bound rather than a multiplication.',
         '**The per-instance rate and the universal bound are different numbers, and the gap is ' +
           'usually enormous.** Rabin proved at most a quarter of the bases below n can fool ' +
-          'Miller–Rabin on a composite, so 4⁻ᵏ is the guarantee. The demo measures the actual ' +
-          'density on the hardest small composites and finds it around 1%, so the true failure ' +
-          'rate at three rounds is nearer 10⁻⁶ than 10⁻². You quote the bound in a design ' +
-          'document and you measure the rate before choosing k.',
-        '**Randomising the algorithm is not the same as assuming a random input.** Quicksort on ' +
-          'a random permutation is an average-case claim that an adversary can violate; ' +
-          'quicksort with a random pivot is a claim about *your* coins that holds on every ' +
-          'input, including the one the adversary chose. The second is a guarantee and the first ' +
-          'is a hope, and the code differs by one line.',
-        '**Amplification makes a defensible engineering position.** Twenty Miller–Rabin rounds ' +
-          'put the failure probability under 4⁻²⁰ ≈ 10⁻¹², which is below the rate at which ' +
-          'cosmic rays flip bits in the RAM the deterministic algorithm would run in. "It might ' +
-          'be wrong" stops being an objection somewhere around there, and knowing where is the ' +
-          'point of measuring.'
+          'Miller–Rabin on a composite, so 4⁻ᵏ is the guarantee.',
+        'The demo measures the actual density on the hardest small composites and finds it around ' +
+          '1%. So the true failure rate at three rounds is nearer 10⁻⁶ than 10⁻².',
+        'You quote the bound in a design document, and you measure the rate before choosing k.',
+        '**Randomising the algorithm is not the same as assuming a random input.** Quicksort on a ' +
+          'random permutation is an average-case claim that an adversary can violate.',
+        'Quicksort with a random pivot is a claim about *your* coins that holds on every input, ' +
+          'including the one the adversary chose.',
+        'The second is a guarantee and the first is a hope, and the code differs by one line.',
+        '**Amplification makes a defensible engineering position.** Twenty Miller–Rabin rounds put ' +
+          'the failure probability under 4⁻²⁰ ≈ 10⁻¹².',
+        'That is below the rate at which cosmic rays flip bits in the RAM the deterministic ' +
+          'algorithm would run in.',
+        '"It might be wrong" stops being an objection somewhere around there, and knowing where is ' +
+          'the point of measuring.'
   ];
 
   function config() {
@@ -95,15 +96,15 @@
         markup: root.RandomisedDesignTemplate.render()
       },
       diagram: diagram(),
-      insight: '**Do not argue about whether a randomised algorithm is acceptable; compute the ' +
-        'number and compare it to something.** The demo puts three quantities in one table — the ' +
-        'measured failure rate, this instance’s bound and Rabin’s universal 4⁻ᵏ — and ' +
-        'they span several orders of magnitude at every round count. Twenty rounds is under ' +
-        '10⁻¹², which is smaller than the probability that the deterministic implementation you ' +
-        'were going to write instead has a bug in it. The Las Vegas half carries the other ' +
-        'lesson: a mean of five attempts sounds safe until you look at the tail, where the 99th ' +
-        'percentile is four times the mean and a timeout set at twice the mean kills about one ' +
-        'run in eight. **Randomised algorithms are sized from their tails, not their means.**'
+      insight: '**Do not argue about whether a randomised algorithm is acceptable. Compute the ' +
+        'number and compare it to something.** The demo puts three quantities in one table: the ' +
+        'measured failure rate, this instance’s bound and Rabin’s universal 4⁻ᵏ. They span ' +
+        'several orders of magnitude at every round count. Twenty rounds is under 10⁻¹², which is ' +
+        'smaller than the probability that the deterministic implementation you were going to ' +
+        'write instead has a bug in it. The Las Vegas half carries the other lesson. A mean of ' +
+        'five attempts sounds safe until you look at the tail. There the 99th percentile is four ' +
+        'times the mean, and a timeout set at twice the mean kills more than one run in ten. ' +
+        '**Randomised algorithms are sized from their tails, not their means.**'
     };
   }
 
