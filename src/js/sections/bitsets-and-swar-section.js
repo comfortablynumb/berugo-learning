@@ -51,47 +51,54 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**A bitset stores a set of small integers as one bit per possible element**, in a typed ' +
+        'array.',
+      'Membership is a shift and a mask. Union, intersection and difference are one word-wise OR, ' +
+        'AND or AND-NOT per word, with no comparisons, no hashing and no pointers.',
+      'A million-element universe is 125 000 bytes — 122 KB — which fits in L2 cache on any machine ' +
+        'made this decade. A `Set` holding half of those elements is 15 MB and misses on every ' +
+        'lookup.',
+      '**The deciding question is density, and the answer is a number.** A bitset costs the same ' +
+        'whatever it holds; a hash set costs per element.',
+      'So there is exactly one crossing point, and at a million-element universe it is around 0.4% ' +
+        'occupancy. Below that the `Set` really is smaller, and using a bitset is a mistake.',
+      'This is the reasoning behind Roaring bitmaps in M09, which switch representation per ' +
+        '65 536-element block precisely because real data is dense in some blocks and sparse in ' +
+        'others.',
+      '**Iterating a bitset must not scan the universe.** The naive loop tests every possible ' +
+        'element and costs the universe size.',
+      'The loop built on `x & −x` and `x & (x − 1)` visits one position per *set bit*, and costs ' +
+        'the population plus one step per word. On a thousand elements in a million-element ' +
+        'universe that is the difference between 32 250 steps and 1 000 000.',
+      '**A bitboard is the same idea on a fixed 8 × 8 grid**, and it is where the technique is most ' +
+        'visibly worth it.',
+      'A chess position is a handful of 64-bit words, and "where can this knight move" is eight ' +
+        'shifts and eight masks producing all destinations at once.',
+      'The masks are the entire difficulty. Shifting east moves a piece off the h file and back on ' +
+        'at a. Forgetting to mask that does not look like a bug — it looks like a rook that ' +
+        'occasionally teleports.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'A bitset stores a set of small integers as **one bit per possible element**, in a typed ' +
-          'array. Membership is a shift and a mask; union, intersection and difference are one ' +
-          'word-wise OR, AND or AND-NOT per word, with no comparisons, no hashing and no ' +
-          'pointers. A million-element universe is 125 000 bytes — 122 KB — which fits in L2 ' +
-          'cache on any machine made this decade, while a `Set` holding half of those elements is ' +
-          '15 MB and misses on every lookup.',
-        '**The deciding question is density, and the answer is a number.** A bitset costs the ' +
-          'same whatever it holds; a hash set costs per element. So there is exactly one ' +
-          'crossing point, and at a million-element universe it is around 0.4% occupancy — below ' +
-          'that the `Set` really is smaller and using a bitset is a mistake. This is the ' +
-          'reasoning behind Roaring bitmaps in M09, which switch representation per 65 536-element ' +
-          'block precisely because real data is dense in some blocks and sparse in others.',
-        '**Iterating a bitset must not scan the universe.** The naive loop tests every possible ' +
-          'element and costs the universe size; the loop built on `x & −x` and `x & (x − 1)` ' +
-          'visits one position per *set bit* and costs the population plus one step per word. On ' +
-          'a thousand elements in a million-element universe that is the difference between ' +
-          '32 250 steps and 1 000 000.',
-        '**A bitboard is the same idea on a fixed 8 × 8 grid**, and it is where the technique is ' +
-          'most visibly worth it. A chess position is a handful of 64-bit words, and "where can ' +
-          'this knight move" is eight shifts and eight masks producing all destinations at once. ' +
-          'The masks are the entire difficulty: shifting east moves a piece off the h file and ' +
-          'back on at a, and forgetting to mask that does not look like a bug, it looks like a ' +
-          'rook that occasionally teleports.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — density, word operations, a sieve and a board',
         markup: root.BitsetsAndSwarTemplate.render()
       },
       diagram: diagram(),
       insight: 'The mistake worth naming is reaching for a bitset because the elements are ' +
-        'integers. They have to be integers *and* dense *and* bounded — and the bound has to be ' +
-        'one you can defend, because a bitset over user ids is fine until the ids become UUIDs ' +
-        'and the universe becomes 2¹²⁸. When the density is unknown or varies across the range, ' +
-        'do not choose: use a structure that chooses per block. And when a bitset is right, the ' +
-        'thing that makes it fast is not the memory saving alone — it is that the word loop has ' +
-        'no branches to mispredict and a perfectly predictable access pattern, which is worth ' +
-        'more on modern hardware than the byte count suggests.'
+        'integers. They have to be integers *and* dense *and* bounded. And the bound has to be one ' +
+        'you can defend, because a bitset over user ids is fine until the ids become UUIDs and the ' +
+        'universe becomes 2¹²⁸. When the density is unknown or varies across the range, do not ' +
+        'choose: use a structure that chooses per block. And when a bitset is right, the thing that ' +
+        'makes it fast is not the memory saving alone. It is that the word loop has no branches to ' +
+        'mispredict and a perfectly predictable access pattern, which is worth more on modern ' +
+        'hardware than the byte count suggests.'
     };
   }
 

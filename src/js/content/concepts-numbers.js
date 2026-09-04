@@ -316,13 +316,17 @@
         plain: 'One is flat in the number of elements present and the other is proportional to it, so they cross exactly once.',
         formal: 'bitset bytes = ⌈universe / 8⌉ regardless of contents; Set bytes grow with the count',
         readAs: 'The bitset needs one bit for every value that could be in it, rounded up to whole ' +
-          'bytes, and that total never changes; a hash set needs an entry for each value actually stored.',
-        detail: 'This single sentence is the whole decision. Because one line is flat and the other ' +
-          'is a straight diagonal, there is exactly one crossing point and it can be solved for ' +
-          'rather than guessed at. Above it the bitset wins by up to two orders of magnitude; ' +
-          'below it the hash set is genuinely smaller and reaching for a bitset is a mistake. The ' +
-          'crossing depends on the per-entry cost of the hash set, so any claim about it has to ' +
-          'state that number or it is not a measurement.',
+          'bytes, and that total never changes. A hash set needs an entry for each value actually ' +
+          'stored.',
+        detail: [
+          'This single sentence is the whole decision.',
+          'Because one line is flat and the other is a straight diagonal, there is exactly one ' +
+            'crossing point, and it can be solved for rather than guessed at.',
+          'Above it the bitset wins by up to two orders of magnitude. Below it the hash set is ' +
+            'genuinely smaller, and reaching for a bitset is a mistake. The crossing depends on the ' +
+            'per-entry cost of the hash set, so any claim about it has to state that number or it is ' +
+            'not a measurement.'
+        ],
         example: 'At a million-element universe the demo puts the crossing at 3 906 elements — a ' +
           'density of 0.391% — under a stated model of 32 bytes for a Set entry.'
       },
@@ -330,12 +334,15 @@
         term: 'The memory comparison is a model, and the model is stated',
         plain: 'JavaScript will not tell you how large a Set is, so the per-entry cost is an assumption carried through every figure.',
         formal: 'every ratio here is derived from SET_BYTES_PER_ENTRY = 32, one hash slot plus one entry record',
-        detail: 'A number that cannot be measured has to be declared, and declaring it is what ' +
-          'makes the conclusion checkable: halve the estimate and the crossing density doubles, ' +
-          'and a reader who thinks V8 costs more per entry can move it themselves. Quoting a ' +
-          'memory ratio without saying what a Set entry was assumed to cost would be inventing a ' +
-          'measurement, which is a different failure from getting one wrong — nobody can tell it ' +
-          'is happening.',
+        detail: [
+          'A number that cannot be measured has to be declared, and declaring it is what makes the ' +
+            'conclusion checkable.',
+          'Halve the estimate and the crossing density doubles, and a reader who thinks V8 costs ' +
+            'more per entry can move it themselves.',
+          'Quoting a memory ratio without saying what a Set entry was assumed to cost would be ' +
+            'inventing a measurement. That is a different failure from getting one wrong — nobody ' +
+            'can tell it is happening.'
+        ],
         example: 'The demo reports the crossing as "3 906 elements — 0.391%" and names the 32-byte ' +
           'assumption in the same note.'
       },
@@ -343,16 +350,18 @@
         term: 'Word operations cost the universe whatever the answer is',
         plain: 'An intersection reads every word even when it returns four hundred elements out of forty thousand.',
         formal: 'union, intersection and difference each touch ⌈universe / 32⌉ words, independent of both populations',
-        readAs: 'All three operations run one pass over the same number of machine words, found by ' +
-          'dividing the universe size by thirty-two and rounding up, no matter how many elements ' +
-          'either side actually holds.',
-        detail: 'This is the strength and the weakness in one property. The loop has no branches to ' +
-          'mispredict and a perfectly sequential access pattern, so it runs at memory bandwidth ' +
-          'and the processor prefetches it flawlessly — which is worth more on modern hardware ' +
-          'than the byte count alone suggests. It is also why intersecting two ten-element sets ' +
-          'over a million-element universe reads 31 250 words to produce an answer a hash-set ' +
-          'probe would find in ten, and that case is the one where the general-purpose structure ' +
-          'wins on speed as well as on memory.',
+        readAs: 'All three operations run one pass over the same number of machine words. That ' +
+          'number is the universe size divided by thirty-two and rounded up, no matter how many ' +
+          'elements either side actually holds.',
+        detail: [
+          'This is the strength and the weakness in one property.',
+          'The loop has no branches to mispredict and a perfectly sequential access pattern, so it ' +
+            'runs at memory bandwidth and the processor prefetches it flawlessly. That is worth more ' +
+            'on modern hardware than the byte count alone suggests.',
+          'It is also why intersecting two ten-element sets over a million-element universe reads ' +
+            '31 250 words to produce an answer a hash-set probe would find in ten. That case is the ' +
+            'one where the general-purpose structure wins on speed as well as on memory.'
+        ],
         example: 'The demo’s three operations each touch 31 250 words while returning 417, ' +
           '39 583 and 19 583 elements, with 0 disagreements against a real `Set`.'
       },
@@ -360,12 +369,15 @@
         term: 'Iterate the population, never the universe',
         plain: 'Testing every possible element costs the universe size; isolating and clearing the lowest set bit costs the population.',
         formal: 'the fast walk is one step per set bit plus one per word; the scan is one step per possible element',
-        detail: 'The naive loop is the one everybody writes first and it silently makes a sparse ' +
-          'bitset useless: a thousand elements in a million-element universe cost a million tests. ' +
-          'The fast walk uses `x & −x` to isolate the lowest set bit, `Math.clz32` to turn that ' +
-          'power of two into an index, and `x & (x − 1)` to clear it, so it visits exactly the ' +
-          'positions that are set. This is the single most important reason the bit tricks of 17.2 ' +
-          'are in a data-structures course at all.',
+        detail: [
+          'The naive loop is the one everybody writes first, and it silently makes a sparse bitset ' +
+            'useless. A thousand elements in a million-element universe cost a million tests.',
+          'The fast walk isolates the lowest set bit with `x & −x`, and turns that power of two into ' +
+            'an index with `Math.clz32`. Then `x & (x − 1)` clears it, so the walk visits exactly ' +
+            'the positions that are set.',
+          'This is the single most important reason the bit tricks of 17.2 are in a data-structures ' +
+            'course at all.'
+        ],
         example: 'At 20 000 elements in a million-element universe the demo measures 51 031 steps ' +
           'against 1 000 000 — a saving of 19.6×.'
       },
@@ -373,12 +385,15 @@
         term: 'A sieve is the friendliest case a bitset has',
         plain: 'The set is dense by construction and the universe is known before the first write.',
         formal: 'the sieve of Eratosthenes to 10⁶ marks 921 501 composites, and both representations write the same marks',
-        detail: 'Both implementations run the identical algorithm and perform the identical number ' +
-          'of writes, so the comparison isolates the representation exactly: nothing about the ' +
-          'work differs, only where the bits live. That makes it the clean demonstration of the ' +
-          'memory argument, and it is also the shape that makes a bitset obviously right — the ' +
-          'bound is known in advance, the occupancy is over ninety per cent, and every element is ' +
-          'touched. Real workloads rarely offer all three.',
+        detail: [
+          'Both implementations run the identical algorithm and perform the identical number of ' +
+            'writes, so the comparison isolates the representation exactly. Nothing about the work ' +
+            'differs, only where the bits live.',
+          'That makes it the clean demonstration of the memory argument, and it is also the shape ' +
+            'that makes a bitset obviously right.',
+          'The bound is known in advance, the occupancy is over ninety per cent, and every element ' +
+            'is touched. Real workloads rarely offer all three.'
+        ],
         example: 'The demo measures 2 122 048 marks written by both, at 122.1 KB against 28.1 MB — ' +
           'a ratio of 235.9× under the stated model.'
       },
@@ -386,25 +401,30 @@
         term: 'Density is not uniform, which is why real bitmaps switch representation',
         plain: 'Data is dense in some regions of the key space and sparse in others, and one choice cannot suit both.',
         formal: 'Roaring partitions the universe into 65 536-element blocks and picks array, bitmap or run per block',
-        detail: 'The crossing density is a property of a whole set, and a whole set is the wrong ' +
-          'granularity for real data: user ids cluster, timestamps cluster, document ids cluster. ' +
-          'Choosing one representation for the entire universe means being wrong about most of ' +
-          'it. Roaring bitmaps — built in M09 — make the choice per block, which is why they beat ' +
-          'both a plain bitset and a sorted array on data that has any structure at all, and lose ' +
-          'to a plain bitmap on data that is uniformly dense.',
+        detail: [
+          'The crossing density is a property of a whole set, and a whole set is the wrong ' +
+            'granularity for real data. User ids cluster, timestamps cluster, document ids cluster.',
+          'Choosing one representation for the entire universe means being wrong about most of it.',
+          'Roaring bitmaps — built in M09 — make the choice per block. That is why they beat both a ' +
+            'plain bitset and a sorted array on data that has any structure at all. They lose to a ' +
+            'plain bitmap on data that is uniformly dense.'
+        ],
         example: 'The M09 measurements have Roaring at 41 232 bytes on sparse data where a raw ' +
-          'bitmap is 630 784, and losing outright on dense data at 8 208 against 8 192.'
+          'bitmap is 630 784. On dense data it loses outright, at 8 208 against 8 192.'
       },
       {
         term: 'A bitboard is the same idea on a fixed 8 × 8 grid',
         plain: 'One 64-bit word per piece type, and every destination computed at once by shifting and masking.',
         formal: 'a knight’s eight destinations are eight shifts of the source board, each masked to the files it may not wrap onto',
-        detail: 'Shifting a board left by one moves every piece one file east, including the piece ' +
-          'on the h file, which reappears on the a file of the next rank. The mask after the shift ' +
-          'is what removes it, and the mask is different for the one-file jumps than for the ' +
-          'two-file ones: a knight leaving the g file eastwards lands two files over, so both g ' +
-          'and h have to be excluded. Getting this wrong does not look like a bug — it looks like ' +
-          'a piece that occasionally teleports across the board.',
+        detail: [
+          'Shifting a board left by one moves every piece one file east, including the piece on the ' +
+            'h file, which reappears on the a file of the next rank.',
+          'The mask after the shift is what removes it, and the mask is different for the one-file ' +
+            'jumps than for the two-file ones. A knight leaving the g file eastwards lands two files ' +
+            'over, so both g and h have to be excluded.',
+          'Getting this wrong does not look like a bug. It looks like a piece that occasionally ' +
+            'teleports across the board.'
+        ],
         example: 'The demo computes a knight’s destinations from d4 in 16 shift-and-mask ' +
           'operations against a 64-square walk, with 0 disagreements.'
       },
@@ -412,13 +432,16 @@
         term: 'The bound has to be one you can defend',
         plain: 'Integers, dense and bounded — all three, and the third is the one that changes underneath you.',
         formal: 'a bitset over 32-bit ids is 512 MB; over UUIDs the universe is 2¹²⁸ and the structure does not exist',
-        detail: 'A bitset over user ids is entirely reasonable while the ids are a sequence and ' +
-          'entirely impossible the day they become UUIDs, and that migration happens for reasons ' +
-          'that have nothing to do with this data structure — which is exactly what makes it a ' +
-          'trap. The bound is a coupling to a decision made elsewhere, and it should be written ' +
-          'down where the structure is chosen rather than discovered when the allocation fails. ' +
-          'Where the bound is genuinely fixed — squares on a board, days in a year, flags in a ' +
-          'protocol — the structure is unimprovable.',
+        detail: [
+          'A bitset over user ids is entirely reasonable while the ids are a sequence, and entirely ' +
+            'impossible the day they become UUIDs.',
+          'That migration happens for reasons that have nothing to do with this data structure, ' +
+            'which is exactly what makes it a trap.',
+          'The bound is a coupling to a decision made elsewhere, and it should be written down where ' +
+            'the structure is chosen rather than discovered when the allocation fails. Where the ' +
+            'bound is genuinely fixed — squares on a board, days in a year, flags in a protocol — ' +
+            'the structure is unimprovable.'
+        ],
         example: '17.10 measures exactly that migration from the other side: random UUIDs touch 64 ' +
           'index pages in a 64-insert window where a sequential id touches 14.'
       }
