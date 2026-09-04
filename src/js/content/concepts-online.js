@@ -22,14 +22,17 @@
         formal: 'ALG is c-competitive when ALG(σ) ≤ c·OPT(σ) + b for every request sequence σ and some constant b',
         readAs: 'The algorithm costs at most c times the offline optimum plus a constant, on ' +
           'every request sequence rather than on average over them.',
-        detail: 'The quantifier is the whole content. A mean ratio over inputs nobody chose says ' +
-          'nothing about the input an adversary would choose, and the demo shows the gap ' +
-          'directly: "buy immediately" has a better MEAN ratio than the break-even rule and a ' +
-          'worst case ten times worse. The additive constant matters too — it is why a bound can ' +
-          'look violated on a small instance and hold in the limit, which is exactly what ' +
-          'happens to first-fit in the bin-packing section.',
-        example: 'The demo sweeps every season length and reports the maximum: 1.9000 for the ' +
-          'break-even rule against a mean of 1.6300.'
+        detail: [
+          'The quantifier is the whole content. A mean ratio over inputs nobody chose says nothing ' +
+            'about the input an adversary would choose.',
+          'The demo shows the gap directly. "Buy immediately" has a better MEAN ratio than the ' +
+            'break-even rule, and a worst case ten times worse.',
+          'The additive constant matters too. It is why a bound can look violated on a small ' +
+            'instance and hold in the limit, which is exactly what happens to first-fit in the ' +
+            'bin-packing section.'
+        ],
+        example: 'The demo sweeps every season length and reports the maximum. That is 1.9000 for ' +
+          'the break-even rule, against a mean of 1.6300.'
       },
       {
         term: 'Ski rental is the whole problem in two lines',
@@ -46,11 +49,14 @@
         },
         plain: 'Rent at 1 a day or buy once for B, and the season ends when the adversary says.',
         formal: 'OPT = min(days, B); renting until day B and then buying costs at most (B − 1) + B',
-        detail: 'Every "keep it warm or tear it down" decision is this problem: keep a connection ' +
-          'open or reconnect, keep a cache hot or refill it, keep a VM running or reboot it. The ' +
-          'structure is always the same — a recurring cost against a one-off one, with an ' +
-          'unknown horizon — and recognising it means the answer is known rather than guessed.',
-        example: 'At a purchase price of 10 the demo measures the break-even rule at 1.9000 with ' +
+        detail: [
+          'Every "keep it warm or tear it down" decision is this problem. Keep a connection open or ' +
+            'reconnect, keep a cache hot or refill it, keep a VM running or reboot it.',
+          'The structure is always the same: a recurring cost against a one-off one, with an unknown ' +
+            'horizon.',
+          'Recognising it means the answer is known rather than guessed.'
+        ],
+        example: 'At a purchase price of 10 the demo measures the break-even rule at 1.9000, with ' +
           'the worst case falling exactly on day 10.'
       },
       {
@@ -58,13 +64,15 @@
         plain: 'Rent until you have spent what buying costs, then buy.',
         formal: 'the worst case is the season ending on the purchase day: (B − 1 + B)/B = 2 − 1/B',
         readAs: 'The worst ratio is B minus one plus B, all over B, which is two minus one over B.',
-        detail: 'The lower bound meets the upper bound, so the problem is closed: for any ' +
-          'deterministic rule the adversary knows the buy day and ends the season there, so no ' +
-          'rule does better. That is worth knowing before spending a week on a cleverer ' +
-          'heuristic — and the demo attains the bound at every purchase price rather than ' +
-          'approaching it, which is what "tight" means.',
+        detail: [
+          'The lower bound meets the upper bound, so the problem is closed. For any deterministic ' +
+            'rule the adversary knows the buy day and ends the season there, so no rule does better.',
+          'That is worth knowing before spending a week on a cleverer heuristic.',
+          'The demo attains the bound at every purchase price rather than approaching it, which is ' +
+            'what "tight" means.'
+        ],
         example: 'At purchase prices of 2, 4, 10, 25 and 100 the demo measures 1.5000, 1.7500, ' +
-          '1.9000, 1.9600 and 1.9900 — 2 − 1/B in every row.'
+          '1.9000, 1.9600 and 1.9900. That is 2 − 1/B in every row.'
       },
       {
         term: 'Randomisation helps against an oblivious adversary and not an adaptive one',
@@ -72,24 +80,30 @@
         formal: 'buying on day i with probability proportional to ((B − 1)/B)^(B − i) gives e/(e − 1) ≈ 1.582 against an oblivious adversary',
         readAs: 'Buy on day i with probability proportional to B minus one over B, raised to the ' +
           'power B minus i, and the expected ratio is e over e minus one.',
-        detail: 'An oblivious adversary fixes the whole input before the algorithm runs; an ' +
-          'adaptive one chooses each request after seeing what the algorithm just did. Against ' +
-          'the second, a randomised strategy is no better than the best deterministic one and ' +
-          'usually worse, because the opponent simply ends the season the day the coin says to ' +
-          'buy. Which adversary you face is a modelling claim about your own system, and it is ' +
-          'the claim that decides whether randomisation is an improvement.',
+        detail: [
+          'An oblivious adversary fixes the whole input before the algorithm runs. An adaptive one ' +
+            'chooses each request after seeing what the algorithm just did.',
+          'Against the second, a randomised strategy is no better than the best deterministic one ' +
+            'and usually worse. The opponent simply ends the season the day the coin says to buy.',
+          'Which adversary you face is a modelling claim about your own system, and it is the claim ' +
+            'that decides whether randomisation is an improvement.'
+        ],
         example: 'The demo measures 1.5625 against the oblivious adversary and 3.1428 against the ' +
-          'adaptive one, where the deterministic rule is 1.9000.'
+          'adaptive one. The deterministic rule is 1.9000.'
       },
       {
         term: 'The offline optimum is the denominator, and sometimes it is NP-hard',
         plain: 'A ratio needs something to be a ratio to, and it should be the real optimum.',
         formal: 'optimal offline list update with free moves is NP-hard, so the reference here is the best STATIC order',
-        detail: 'Where the exact optimum is cheap — ski rental, small scheduling instances — the ' +
-          'demo computes it. Where it is not, it uses an explicit lower bound or a named weaker ' +
-          'reference and says which. That distinction is not pedantry: a ratio against a lower ' +
-          'bound is an over-estimate of the true ratio, so an algorithm scored that way looks ' +
-          'worse than it is, and a bound checked that way always looks satisfied.',
+        detail: [
+          'Where the exact optimum is cheap, as in ski rental and small scheduling instances, the ' +
+            'demo computes it.',
+          'Where it is not, it uses an explicit lower bound or a named weaker reference, and says ' +
+            'which.',
+          'That distinction is not pedantry. A ratio against a lower bound is an over-estimate of ' +
+            'the true ratio, so an algorithm scored that way looks worse than it is. A bound ' +
+            'checked that way always looks satisfied.'
+        ],
         example: 'The list-update table is scored against the best static order and labelled as ' +
           'such, because the true offline optimum for that problem is NP-hard.'
       },
@@ -99,37 +113,45 @@
         formal: 'the potential-function proof: MTF(σ) ≤ 2·OPT(σ) − |σ|, with the potential being the number of inversions',
         readAs: 'Move-to-front costs at most twice the offline optimum minus the number of ' +
           'requests, proved by counting inversions between the two lists.',
-        detail: 'The proof is the classic amortised argument and it is worth knowing because the ' +
-          'potential — inversions between the algorithm’s list and the optimum’s — is the same ' +
-          'device that prices splay trees and union-find. The practical content is different: ' +
-          'the guarantee holds always, and whether the policy is worth its moves depends ' +
-          'entirely on whether the distribution changes.',
+        detail: [
+          'The proof is the classic amortised argument, and it is worth knowing because of the ' +
+            'potential it uses.',
+          'That potential is the number of inversions between the algorithm’s list and the ' +
+            'optimum’s, and it is the same device that prices splay trees and union-find.',
+          'The practical content is different. The guarantee holds always, and whether the policy is ' +
+            'worth its moves depends entirely on whether the distribution changes.'
+        ],
         example: 'On the demo’s reverse sweep, built to defeat it, move-to-front measures 1.8964 ' +
-          'against the best static order — the bound being approached.'
+          'against the best static order. That is the bound being approached.'
       },
       {
         term: 'An online policy can beat the best static offline order',
         plain: 'Because a static order cannot follow a working set that moves.',
         formal: 'on a bursty trace, MTF costs 0.31× the best static order — the reference is offline and still worse',
-        detail: 'This is the result that makes the whole comparison interesting rather than a ' +
-          'ranking. "Offline" means knowing the whole sequence in advance, and it does not mean ' +
-          'unbeatable — a static order chosen with perfect knowledge is still one order, and a ' +
-          'sequence whose hot set moves has no single best order. Adaptation is a purchase, and ' +
-          'the thing it buys is exactly this.',
-        example: 'The demo’s bursty family: 0.3113 for move-to-front, 0.7278 for transpose, ' +
-          '1.0000 for the static reference.'
+        detail: [
+          'This is the result that makes the whole comparison interesting rather than a ranking.',
+          '"Offline" means knowing the whole sequence in advance, and it does not mean unbeatable. A ' +
+            'static order chosen with perfect knowledge is still one order, and a sequence whose ' +
+            'hot set moves has no single best order.',
+          'Adaptation is a purchase, and the thing it buys is exactly this.'
+        ],
+        example: 'On the demo’s bursty family the ratios are 0.3113 for move-to-front, 0.7278 for ' +
+          'transpose, and 1.0000 for the static reference.'
       },
       {
         term: 'Which policy wins depends on whether the distribution moves',
         plain: 'Transpose beats move-to-front on a stationary trace and loses badly on a bursty one.',
         formal: 'transpose moves an item one position per access; MTF moves it to the front, so MTF adapts faster and overshoots more',
-        detail: 'Transpose is conservative: it needs many accesses to promote an item, so it ' +
-          'settles near the static optimum and stays there. Move-to-front is aggressive: one ' +
-          'access is enough, so it tracks a moving working set and is thrown off by a single ' +
-          'anomalous request. Neither is better in the abstract, and the demo runs three request ' +
-          'families precisely so that no single row can be quoted as the answer.',
+        detail: [
+          'Transpose is conservative. It needs many accesses to promote an item, so it settles near ' +
+            'the static optimum and stays there.',
+          'Move-to-front is aggressive. One access is enough, so it tracks a moving working set and ' +
+            'is thrown off by a single anomalous request.',
+          'Neither is better in the abstract, and the demo runs three request families precisely so ' +
+            'that no single row can be quoted as the answer.'
+        ],
         example: 'On the Zipf family the demo measures transpose at 1.0679 and move-to-front at ' +
-          '1.2399; on the bursty family it measures 0.7278 and 0.3113.'
+          '1.2399. On the bursty family it measures 0.7278 and 0.3113.'
       }
     ],
 

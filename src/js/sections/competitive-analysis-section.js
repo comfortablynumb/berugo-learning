@@ -52,45 +52,63 @@
     };
   }
 
-  function orientation() {
+  function orientationSkiRental() {
     return [
       '**An online algorithm makes irrevocable decisions without the future, and is scored ' +
         'against an offline optimum that had it.** The competitive ratio is the worst that ' +
-        'quotient can be over every input. It is not an average and not a typical case: an ' +
-        'algorithm is c-competitive when NO adversary can push it past c, which makes the number ' +
-        'a promise you can rely on rather than a summary of one experiment.',
+        'quotient can be over every input.',
+      'It is not an average and not a typical case. An algorithm is c-competitive when NO ' +
+        'adversary can push it past c, which makes the number a promise you can rely on rather ' +
+        'than a summary of one experiment.',
       '**Ski rental is the smallest problem where anything happens.** Renting costs 1 a day, ' +
-        'buying costs B once, and the season ends on a day the adversary chooses. Rent too long ' +
-        'and you have paid more than B; buy too early and the season ends tomorrow. Every ' +
-        '"should I keep this connection open or reconnect later" decision is this problem.',
-      '**The optimal deterministic rule is one line and its bound is exactly 2 − 1/B.** Rent ' +
-        'until you have spent what buying costs, then buy. The adversary’s worst case is the ' +
-        'season ending the day you buy: you pay B − 1 in rent plus B, against an optimum of B. ' +
-        'The demo measures that ratio at five purchase prices and it is attained exactly at ' +
-        'every one.',
+        'buying costs B once, and the season ends on a day the adversary chooses.',
+      'Rent too long and you have paid more than B. Buy too early and the season ends tomorrow.',
+      'Every "should I keep this connection open or reconnect later" decision is this problem.',
+      '**The optimal deterministic rule is one line and its bound is exactly 2 − 1/B.** Rent until ' +
+        'you have spent what buying costs, then buy.',
+      'The adversary’s worst case is the season ending the day you buy. You pay B − 1 in rent plus ' +
+        'B, against an optimum of B.',
+      'The demo measures that ratio at five purchase prices, and it is attained exactly at every ' +
+        'one.',
       '**Nothing deterministic does better, and that is a theorem rather than an absence of ' +
         'ideas.** For any deterministic rule the adversary knows the buy day in advance and ends ' +
-        'the season there. The lower bound and the upper bound meet at 2 − 1/B, so the problem is ' +
-        'closed — which is worth knowing before spending a week on a cleverer heuristic.',
+        'the season there.',
+      'The lower bound and the upper bound meet at 2 − 1/B, so the problem is closed. That is ' +
+        'worth knowing before spending a week on a cleverer heuristic.'
+    ];
+  }
+
+  function orientationListUpdate() {
+    return [
       '**Randomisation genuinely helps, against one kind of opponent.** Drawing the buy day from ' +
         'the distribution proportional to ((B − 1)/B)^(B − i) gives an expected ratio of ' +
-        'e/(e − 1) ≈ 1.582 against an OBLIVIOUS adversary — one that fixes the season before the ' +
-        'coin is flipped. The demo measures 1.5625 at B = 10, inside the bound.',
+        'e/(e − 1) ≈ 1.582 against an OBLIVIOUS adversary.',
+      'That is an adversary which fixes the season before the coin is flipped. The demo measures ' +
+        '1.5625 at B = 10, inside the bound.',
       '**Against an ADAPTIVE adversary it is worth nothing at all.** An opponent that watches the ' +
         'coin ends the season the day the buy happens, and the measured ratio is worse than the ' +
-        'deterministic rule’s. Which adversary you face is a modelling decision about your ' +
-        'own system, and it decides whether randomisation is an improvement or a regression.',
+        'deterministic rule’s.',
+      'Which adversary you face is a modelling decision about your own system, and it decides ' +
+        'whether randomisation is an improvement or a regression.',
       '**List update is the second classic and it makes a different point.** Requests arrive for ' +
         'items in a list, accessing position i costs i, and moving the item forward afterwards is ' +
-        'free. Move-to-front is 2-competitive against the best offline reordering — but that ' +
-        'offline optimum is NP-hard, so the demo scores against the best STATIC order and says ' +
-        'so rather than calling a convenient reference OPT.',
-      '**An online algorithm can beat the best static offline order, and the demo shows it.** On ' +
-        'a bursty trace whose working set moves, move-to-front costs 0.31 times what the best ' +
-        'static order costs — it is adapting to something a static order cannot express. On a ' +
-        'stationary Zipf trace it is worse than doing nothing. Adaptation is a purchase, and what ' +
-        'it buys depends entirely on whether the distribution moves.'
+        'free.',
+      'Move-to-front is 2-competitive against the best offline reordering, but that offline ' +
+        'optimum is NP-hard.',
+      'So the demo scores against the best STATIC order and says so, rather than calling a ' +
+        'convenient reference OPT.',
+      '**An online algorithm can beat the best static offline order, and the demo shows it.** On a ' +
+        'bursty trace whose working set moves, move-to-front costs 0.31 times what the best static ' +
+        'order costs.',
+      'It is adapting to something a static order cannot express. On a stationary Zipf trace it is ' +
+        'worse than doing nothing.',
+      'Adaptation is a purchase, and what it buys depends entirely on whether the distribution ' +
+        'moves.'
     ];
+  }
+
+  function orientation() {
+    return orientationSkiRental().concat(orientationListUpdate());
   }
 
   function config() {
@@ -105,11 +123,11 @@
       insight: '**"Spend until you have spent what committing would cost, then commit" is a ' +
         'genuinely useful default, and it is 2-competitive.** Keep the connection open until the ' +
         'idle cost equals a reconnect; keep the cache warm until the refresh cost equals a cold ' +
-        'start; keep the VM running until the idle bill equals a boot. In every case the rule ' +
-        'costs at most twice the best decision you could have made knowing the future, no ' +
+        'start. Keep the VM running until the idle bill equals a boot. In every case the rule ' +
+        'costs at most twice the best decision you could have made knowing the future. No ' +
         'workload can do worse than that, and it needs no tuning, no prediction and no history. ' +
-        'The times it is wrong to use are the times you genuinely can predict the future — and ' +
-        'the honest version of that claim is a measurement, not a feeling.'
+        'The times it is wrong to use are the times you genuinely can predict the future. The ' +
+        'honest version of that claim is a measurement, not a feeling.'
     };
   }
 
