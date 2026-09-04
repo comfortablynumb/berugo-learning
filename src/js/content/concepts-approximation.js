@@ -340,12 +340,15 @@
         formal: 'E[cut] = |E|/2 for a uniform random assignment, and Pr[cut < |E|/2] is around a half',
         readAs: 'The expected cut is half the edge count, and the chance that one particular ' +
           'random assignment falls below that is roughly one half.',
-        detail: 'The probabilistic method uses the expectation to prove that a good assignment ' +
-          'exists — if the average is |E|/2 then something is at least |E|/2 — and that is an ' +
-          'existence proof with no algorithm attached. Running the random assignment once gives ' +
-          'you a draw from a distribution centred on the bound rather than a solution meeting ' +
-          'it, and the difference matters exactly when somebody depends on the guarantee.',
-        example: 'The demo draws 500 random assignments on a 37-edge graph: the mean is 18.67 ' +
+        detail: [
+          'The probabilistic method uses the expectation to prove that a good assignment exists. If ' +
+            'the average is |E|/2 then something is at least |E|/2.',
+          'That is an existence proof with no algorithm attached.',
+          'Running the random assignment once gives you a draw from a distribution centred on the ' +
+            'bound, rather than a solution meeting it. The difference matters exactly when somebody ' +
+            'depends on the guarantee.'
+        ],
+        example: 'The demo draws 500 random assignments on a 37-edge graph. The mean is 18.67 ' +
           'against a predicted 18.5, the worst is far below it, and 232 of the 500 miss the ' +
           'bound. On MAX-SAT the same experiment gives a mean of 35.10 against an expectation ' +
           'of 35.00, with a worst draw at 70.0% of the optimum.'
@@ -356,59 +359,70 @@
         formal: 'E[X | decided] = ½·E[X | decided, next = 0] + ½·E[X | decided, next = 1], so one branch is ≥ the average',
         readAs: 'The current conditional expectation is the average of the two branches, so at ' +
           'least one branch is at least as large as it is.',
-        detail: 'The expectation therefore never falls, and when every variable is decided there ' +
-          'is nothing left to average over — so the expectation IS the answer and the answer is ' +
-          'at least where the walk started. The whole argument is one inequality applied n times, ' +
-          'and it needs only that the conditional expectation is computable in polynomial time. ' +
-          'That condition is the real requirement and it is often easy to check: for MAX-CUT it ' +
-          'is edges-already-cut plus half the undecided ones.',
+        detail: [
+          'The expectation therefore never falls. When every variable is decided there is nothing ' +
+            'left to average over, so the expectation IS the answer, and the answer is at least ' +
+            'where the walk started.',
+          'The whole argument is one inequality applied n times, and it needs only that the ' +
+            'conditional expectation is computable in polynomial time.',
+          'That condition is the real requirement, and it is often easy to check. For MAX-CUT it is ' +
+            'edges-already-cut plus half the undecided ones.'
+        ],
         example: 'The demo’s walk table shows the conditional expectation rising monotonically ' +
-          'from 18.50 to the final cut of 25 — and vertex 0, where both branches are 0 and the ' +
-          'expectation is unchanged, shows the argument only needs "at least as good".'
+          'from 18.50 to the final cut of 25. At vertex 0 both branches are 0 and the expectation ' +
+          'is unchanged, which shows the argument only needs "at least as good".'
       },
       {
         term: 'The result is a greedy algorithm whose proof is the expectation argument',
         plain: 'For MAX-CUT the rule collapses to "go opposite the majority of your already-placed neighbours".',
         formal: 'choose side(v) to maximise the weight of edges to already-decided vertices on the other side',
-        detail: 'Anyone would have guessed that rule; guessing it gives no bound and deriving it ' +
-          'gives |E|/2 on every input. That is the general lesson about derandomisation — the ' +
-          'code it produces is usually unremarkable and the guarantee it carries is not, and the ' +
-          'guarantee comes entirely from where the code came from. It also means the technique ' +
-          'is worth knowing even when you already have the algorithm, because it supplies the ' +
-          'proof you were missing.',
+        detail: [
+          'Anyone would have guessed that rule. Guessing it gives no bound, and deriving it gives ' +
+            '|E|/2 on every input.',
+          'That is the general lesson about derandomisation. The code it produces is usually ' +
+            'unremarkable and the guarantee it carries is not, and the guarantee comes entirely ' +
+            'from where the code came from.',
+          'It also means the technique is worth knowing even when you already have the algorithm, ' +
+            'because it supplies the proof you were missing.'
+        ],
         example: 'The demo’s conditional walk reaches 25 on a graph whose true maximum cut is 28 ' +
-          'and whose |E|/2 bound is 18.5 — well above the bound and short of optimal, which is ' +
-          'exactly what the guarantee promises.'
+          'and whose |E|/2 bound is 18.5. That is well above the bound and short of optimal, ' +
+          'which is exactly what the guarantee promises.'
       },
       {
         term: 'Ask how much independence the analysis actually used',
         plain: 'The MAX-CUT expectation needs each edge’s two endpoints independent, never three vertices at once.',
         formal: 'E[cut] = Σ_edges Pr[endpoints differ], and each term involves exactly two coordinates',
         readAs: 'The expected cut is a sum over edges of the chance their two endpoints land on ' +
-          'different sides, and each of those terms mentions only two of the variables.',
-        detail: 'Because the expectation is a sum of terms each involving two coordinates, ' +
-          'linearity means only pairwise independence is required for the whole calculation to ' +
-          'go through. That observation is the general move: read the analysis, find the largest ' +
-          'number of variables any single term touches, and you have the amount of independence ' +
-          'the algorithm needs. Everything beyond that is randomness you are paying for and not ' +
-          'using.',
-        example: 'The same question in M07 gives a different answer — a Bloom filter needs no ' +
+          'different sides. Each of those terms mentions only two of the variables.',
+        detail: [
+          'The expectation is a sum of terms each involving two coordinates, so by linearity only ' +
+            'pairwise independence is required for the whole calculation to go through.',
+          'That observation is the general move. Read the analysis, find the largest number of ' +
+            'variables any single term touches, and you have the amount of independence the ' +
+            'algorithm needs.',
+          'Everything beyond that is randomness you are paying for and not using.'
+        ],
+        example: 'The same question in M07 gives a different answer. A Bloom filter needs no ' +
           'independence between probes, while count-min sketches need genuine pairwise ' +
-          'independence per row, and getting that wrong put the measured error 2.5 times over ' +
-          'its stated bound.'
+          'independence per row. Getting that wrong put the measured error 2.5 times over its ' +
+          'stated bound.'
       },
       {
         term: 'A pairwise-independent family has O(n) members instead of 2ⁿ',
         plain: 'The parities of every non-empty subset of ⌈log₂(n+1)⌉ random bits are pairwise independent.',
         formal: 'x_S = ⊕_{i ∈ S} s_i for each non-empty S ⊆ [k]; any two coordinates are uniform and independent',
-        readAs: 'Each coordinate is the exclusive-or of the seed bits in its own index set; any ' +
+        readAs: 'Each coordinate is the exclusive-or of the seed bits in its own index set. Any ' +
           'two such coordinates are uniform and independent of each other.',
-        detail: 'Two different index sets differ in at least one position, and the seed bit at ' +
-          'that position appears in exactly one of the two parities — so conditioning on one ' +
-          'coordinate leaves the other uniform. The family therefore has 2^⌈log₂(n+1)⌉ members, ' +
-          'which is O(n), and enumerating all of them is a polynomial-time deterministic ' +
-          'algorithm. This construction is also where k-wise independent hash families come from, ' +
-          'so the payoff is not limited to this one problem.',
+        detail: [
+          'Two different index sets differ in at least one position, and the seed bit at that ' +
+            'position appears in exactly one of the two parities. So conditioning on one coordinate ' +
+            'leaves the other uniform.',
+          'The family therefore has 2^⌈log₂(n+1)⌉ members, which is O(n), and enumerating all of ' +
+            'them is a polynomial-time deterministic algorithm.',
+          'This construction is also where k-wise independent hash families come from, so the payoff ' +
+            'is not limited to this one problem.'
+        ],
         example: 'For 16 vertices the demo builds a family of 32 assignments from 5 seed bits, ' +
           'against a full space of 65 536.'
       },
@@ -417,15 +431,19 @@
         plain: 'The family’s average is exactly |E|/2, so its best member is at least that.',
         formal: 'the average over the family equals E[cut] under full independence, because the expectation only used pairs',
         readAs: 'Average the cut size over every assignment in this small family and you get exactly ' +
-          'the same number as E[cut] — the long-run average you would get by flipping a fair coin ' +
-          'for every vertex, forever. The two agree because the calculation of that average never ' +
-          'looked at more than two vertices at a time, and the family already gets every pair right.',
-        detail: 'This is the payoff of the previous two concepts and it is a genuinely surprising ' +
-          'result: exponentially many coin flips are replaced by a logarithmic seed, and then by ' +
-          'none at all, with no loss in the guarantee. The average being exactly the bound rather ' +
-          'than approximately it is the pairwise independence doing its work, and the demo ' +
-          'reports it to four decimal places precisely so that it can be read rather than ' +
-          'trusted.',
+          'the same number as E[cut]. That is the long-run average you would get by flipping a ' +
+          'fair coin for every vertex, forever. The two agree because the calculation of that ' +
+          'average never looked at more than two vertices at a time, and the family already gets ' +
+          'every pair right.',
+        detail: [
+          'This is the payoff of the previous two concepts, and it is a genuinely surprising result. ' +
+            'Exponentially many coin flips are replaced by a logarithmic seed, and then by none at ' +
+            'all, with no loss in the guarantee.',
+          'The average being exactly the bound rather than approximately it is the pairwise ' +
+            'independence doing its work.',
+          'The demo reports it to four decimal places precisely so that it can be read rather than ' +
+            'trusted.'
+        ],
         example: 'The demo enumerates 32 assignments and measures their average cut at exactly ' +
           '18.5000 against a bound of 18.5, with the best at 24.'
       },
@@ -434,14 +452,17 @@
         plain: 'Three coordinates whose index sets exclusive-or to zero always have parities summing to zero.',
         formal: 'if S ⊕ T ⊕ U = ∅ then x_S ⊕ x_T ⊕ x_U = 0 always, so only 4 of the 8 patterns occur',
         readAs: 'When three index sets exclusive-or together to the empty set, the exclusive-or ' +
-          'of their three parities is always zero, so half the eight possible patterns never ' +
+          'of their three parities is always zero. So half the eight possible patterns never ' +
           'appear.',
-        detail: 'Knowing exactly which triples fail is the same as knowing which analyses the ' +
-          'family may be substituted into — it is not a defect but the boundary of the ' +
-          'construction, and the sample space is small precisely because it is only pairwise. ' +
-          'Substituting a pairwise-independent family into an analysis that needs a triple ' +
-          'produces a wrong bound with no error message, which is why the deviation is measured ' +
-          'here rather than described.',
+        detail: [
+          'Knowing exactly which triples fail is the same as knowing which analyses the family may ' +
+            'be substituted into.',
+          'It is not a defect but the boundary of the construction, and the sample space is small ' +
+            'precisely because it is only pairwise.',
+          'Substituting a pairwise-independent family into an analysis that needs a triple produces ' +
+            'a wrong bound with no error message. That is why the deviation is measured here rather ' +
+            'than described.'
+        ],
         example: 'The demo measures a worst pairwise deviation of exactly 0.0000 and a worst ' +
           'triple deviation of 0.1250, failing first at coordinates (0, 1, 2).'
       },
@@ -449,16 +470,20 @@
         term: 'Derandomising also makes the algorithm reproducible, which is often worth more',
         plain: 'A deterministic algorithm gives the same answer on the same input, every time, forever.',
         formal: 'no seed, no seed management, no "it only fails sometimes"',
-        detail: 'The guarantee is the reason derandomisation appears in the theory; ' +
-          'reproducibility is usually the reason it is worth doing in production. An incident ' +
-          'you cannot re-run is an incident you cannot debug, and a test that fails one time in ' +
-          'twenty gets marked flaky and disabled. The best of many random draws is often better ' +
-          'than the deterministic answer — the demo measures exactly that — and it is still the ' +
-          'wrong thing to ship, because it has no floor and no repeatability.',
+        detail: [
+          'The guarantee is the reason derandomisation appears in the theory. Reproducibility is ' +
+            'usually the reason it is worth doing in production.',
+          'An incident you cannot re-run is an incident you cannot debug, and a test that fails one ' +
+            'time in twenty gets marked flaky and disabled.',
+          'The best of many random draws is often better than the deterministic answer, and the demo ' +
+            'measures exactly that. It is still the wrong thing to ship, because it has no floor ' +
+            'and no repeatability.'
+        ],
         example: 'The demo’s comparison table puts the best of 500 random draws at 26 against ' +
-          'the conditional walk’s 25, and labels the first as having no guarantee at all: it is ' +
-          'a maximum over an experiment rather than a bound. The MAX-SAT optimum beside it comes ' +
-          'from enumerating 16 384 assignments, which is the price of certainty at 14 variables.'
+          'the conditional walk’s 25. It labels the first as having no guarantee at all, because ' +
+          'it is a maximum over an experiment rather than a bound. The MAX-SAT optimum beside it ' +
+          'comes from enumerating 16 384 assignments, which is the price of certainty at 14 ' +
+          'variables.'
       }
     ]
   });

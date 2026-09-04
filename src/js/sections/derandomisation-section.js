@@ -55,54 +55,63 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**"In expectation" is a statement about an average, and about half of your runs will be ' +
+        'below it.** A random assignment cuts |E|/2 edges in expectation.',
+      'The demo draws hundreds of them and finds close to half falling short, with the worst at a ' +
+        'small fraction of the bound.',
+      'That is not a defect of the analysis. It is what an expectation means, and it is why an ' +
+        'existence proof is not yet an algorithm.',
+      '**The method of conditional expectations converts one into the other mechanically.** Keep ' +
+        'the conditional expectation of the objective given the decisions made so far.',
+      'Deciding the next variable splits it into two branches whose average is the current value, ' +
+        'so one branch is at least as good. Take it.',
+      'When every variable is decided the expectation equals the answer, and the answer is at least ' +
+        'where the walk started.',
+      '**The resulting code is a greedy algorithm whose proof is the expectation argument.** For ' +
+        'MAX-CUT the rule collapses to "put each vertex on the side opposite the majority of its ' +
+        'already-placed neighbours".',
+      'Anyone would have guessed that. But guessing it gives no bound, and deriving it gives |E|/2 ' +
+        'on every input.',
+      'The derivation is what makes it an algorithm rather than a heuristic.',
+      '**The other route asks how much independence the analysis actually used.** The MAX-CUT ' +
+        'expectation only needs each EDGE’s two endpoints to be independent, never three vertices ' +
+        'at once.',
+      'A family in which any two coordinates are independent therefore has the same average.',
+      'One exists with only 2^⌈log₂(n+1)⌉ members: the parities of every non-empty subset of ' +
+        '⌈log₂(n+1)⌉ random bits.',
+      '**Enumerating that family is a deterministic algorithm.** Its average is exactly |E|/2, so ' +
+        'its best member is at least that.',
+      'The demo enumerates 32 assignments in place of 65 536 and reports both the best and the ' +
+        'average. The average lands on the bound to four decimal places, which is the pairwise ' +
+        'independence being observed rather than asserted.',
+      '**The family is provably not three-wise independent, and the demo measures where it ' +
+        'breaks.** Coordinates whose index sets XOR to zero always have even parity, so those ' +
+        'triples hit only four of the eight patterns.',
+      'Pairwise deviation is exactly zero, and triple deviation is 0.125.',
+      'Knowing which triples fail is the same as knowing which analyses the family may be ' +
+        'substituted into.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**"In expectation" is a statement about an average, and about half of your runs will be ' +
-          'below it.** A random assignment cuts |E|/2 edges in expectation; the demo draws ' +
-          'hundreds of them and finds close to half falling short, with the worst at a small ' +
-          'fraction of the bound. That is not a defect of the analysis — it is what an ' +
-          'expectation means, and it is why an existence proof is not yet an algorithm.',
-        '**The method of conditional expectations converts one into the other mechanically.** ' +
-          'Keep the conditional expectation of the objective given the decisions made so far. ' +
-          'Deciding the next variable splits it into two branches whose average is the current ' +
-          'value, so one branch is at least as good; take it. When every variable is decided the ' +
-          'expectation equals the answer, and the answer is at least where the walk started.',
-        '**The resulting code is a greedy algorithm whose proof is the expectation argument.** ' +
-          'For MAX-CUT the rule collapses to "put each vertex on the side opposite the majority ' +
-          'of its already-placed neighbours", which anyone would have guessed — but guessing it ' +
-          'gives no bound, and deriving it gives |E|/2 on every input. The derivation is what ' +
-          'makes it an algorithm rather than a heuristic.',
-        '**The other route asks how much independence the analysis actually used.** The MAX-CUT ' +
-          'expectation only needs each EDGE’s two endpoints to be independent — never three ' +
-          'vertices at once. A family in which any two coordinates are independent therefore has ' +
-          'the same average, and one exists with only 2^⌈log₂(n+1)⌉ members: the parities of ' +
-          'every non-empty subset of ⌈log₂(n+1)⌉ random bits.',
-        '**Enumerating that family is a deterministic algorithm.** Its average is exactly |E|/2, ' +
-          'so its best member is at least that. The demo enumerates 32 assignments in place of ' +
-          '65 536 and reports both the best and the average, and the average lands on the bound ' +
-          'to four decimal places — which is the pairwise independence being observed rather than ' +
-          'asserted.',
-        '**The family is provably not three-wise independent, and the demo measures where it ' +
-          'breaks.** Coordinates whose index sets XOR to zero always have even parity, so those ' +
-          'triples hit only four of the eight patterns. Pairwise deviation is exactly zero; ' +
-          'triple deviation is 0.125. Knowing which triples fail is the same as knowing which ' +
-          'analyses the family may be substituted into.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — a distribution, a deterministic run, and a sample space of 32',
         markup: root.DerandomisationTemplate.render()
       },
       diagram: diagram(),
-      insight: '**The probabilistic method proves things exist; these two constructions go and ' +
+      insight: '**The probabilistic method proves things exist. These two constructions go and ' +
         'get them, and both are short enough to use.** The practical reading is a question to ask ' +
         'of any randomised algorithm you are about to ship: *how much independence does the ' +
         'analysis actually use?* If the answer is "pairwise", the randomness can be replaced by ' +
-        'a logarithmic seed and then by nothing at all; if it is "the conditional expectation is ' +
+        'a logarithmic seed and then by nothing at all. If it is "the conditional expectation is ' +
         'computable", the coins can be walked out one at a time. Both moves also make the ' +
         'algorithm **reproducible**, which in production is usually worth more than the ' +
-        'guarantee — an incident you cannot re-run is an incident you cannot debug.'
+        'guarantee. An incident you cannot re-run is an incident you cannot debug.'
     };
   }
 
