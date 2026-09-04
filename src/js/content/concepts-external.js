@@ -160,11 +160,13 @@
         },
         plain: 'M records fit in memory, B move per transfer, and cost is the transfer count.',
         formal: 'the cost of an algorithm is the number of block transfers between fast and slow memory; computation on resident data is free',
-        detail: 'It is a crude model and it predicts extremely well, because once the data ' +
-          'exceeds memory the transfer count dominates everything else by orders of magnitude. ' +
-          'The same two parameters describe a cache line against L1, a page against RAM and a ' +
-          'disk block against a buffer pool; only the numbers change, which is why one model ' +
-          'covers all three levels of the hierarchy.',
+        detail: [
+          'It is a crude model and it predicts extremely well, because once the data exceeds memory ' +
+            'the transfer count dominates everything else by orders of magnitude.',
+          'The same two parameters describe a cache line against L1, a page against RAM and a disk ' +
+            'block against a buffer pool.',
+          'Only the numbers change, which is why one model covers all three levels of the hierarchy.'
+        ],
         example: 'The demo runs at M = 64 to 4 096 records and B = 16 to 256, and the measured ' +
           'transfer count matches the formula exactly at every setting.'
       },
@@ -172,25 +174,31 @@
         term: 'Three bounds carry almost everything',
         plain: 'A scan is N/B, a sort is that times the pass count, a search is log base B.',
         formal: 'scan = N/B · sort = (N/B)·log_{M/B}(N/B) · search = log_B N',
-        readAs: 'A scan costs N over B transfers; a sort costs that times the logarithm of N over ' +
-          'B to the base M over B; a search costs the logarithm of N to the base B.',
-        detail: 'The base of the sorting logarithm is the FAN-OUT rather than two, which is why ' +
-          'doubling memory does not halve the passes — it changes the base of a logarithm, and ' +
-          'with a realistic M/B of a few hundred that means two passes for almost any data size. ' +
-          'The search bound is why a database index has a fan-out of hundreds instead of two: it ' +
-          'is the same tree with the branching factor chosen to match B.',
-        example: 'At M = 4 096 and B = 64 the demo reports a scan of 1 562 500 and a sort of ' +
-          '12 500 000 at a hundred million records, with a search of 4.43.'
+        readAs: 'A scan costs N over B transfers. A sort costs that times the logarithm of N over ' +
+          'B to the base M over B. A search costs the logarithm of N to the base B.',
+        detail: [
+          'The base of the sorting logarithm is the FAN-OUT rather than two, which is why doubling ' +
+            'memory does not halve the passes.',
+          'It changes the base of a logarithm, and with a realistic M/B of a few hundred that means ' +
+            'two passes for almost any data size.',
+          'The search bound is why a database index has a fan-out of hundreds instead of two. It is ' +
+            'the same tree with the branching factor chosen to match B.'
+        ],
+        example: 'At M = 4 096 and B = 64, and a hundred million records, the demo reports a scan ' +
+          'of 1 562 500 and a sort of 12 500 000. The search costs 4.43.'
       },
       {
         term: 'The gap between the models is a factor of B, not a constant',
         plain: 'One transfer per record against one per block is exactly the block size.',
         formal: 'an algorithm with random access costs N transfers; the same work blockwise costs N/B',
-        detail: 'B is 512 or 4 096, not 8, so this is not a constant anybody can optimise away. ' +
-          'It is also why a hash join — optimal in the RAM model — is terrible once its table ' +
-          'spills: every probe becomes a random block, and the algorithm that was asymptotically ' +
-          'best becomes asymptotically worst. "It is fast on my laptop" stops predicting anything ' +
-          'at exactly the point the working set leaves memory.',
+        detail: [
+          'B is 512 or 4 096, not 8, so this is not a constant anybody can optimise away.',
+          'It is also why a hash join, optimal in the RAM model, is terrible once its table spills. ' +
+            'Every probe becomes a random block, and the algorithm that was asymptotically best ' +
+            'becomes asymptotically worst.',
+          '"It is fast on my laptop" stops predicting anything at exactly the point the working set ' +
+            'leaves memory.'
+        ],
         example: 'The demo’s bounds table reports the naive-over-scan ratio as 64× in every row, ' +
           'which is B exactly.'
       },
@@ -200,49 +208,59 @@
         formal: 'transfers = 2·(N/B)·(1 + ⌈log_{M/B−1}(N/M)⌉)',
         readAs: 'Two times N over B, times one plus the ceiling of the logarithm of N over M to ' +
           'the base M over B minus one.',
-        detail: 'Each pass reads every block once and writes every block once, so a pass costs ' +
-          'exactly 2N/B and the whole cost is that times the pass count. One block per run must ' +
-          'be resident plus one for output, which is where the fan-out of M/B − 1 comes from. ' +
-          'Every part of the formula is a physical thing rather than an asymptotic, which is why ' +
-          'the measurement can match it exactly rather than approximately.',
-        example: 'At M = 1 024 and B = 64 the demo builds 8 runs, merges them in 1 pass at a ' +
-          'fan-out of 15, and measures 512 transfers against a prediction of 512.'
+        detail: [
+          'Each pass reads every block once and writes every block once, so a pass costs exactly ' +
+            '2N/B, and the whole cost is that times the pass count.',
+          'One block per run must be resident plus one for output, which is where the fan-out of ' +
+            'M/B − 1 comes from.',
+          'Every part of the formula is a physical thing rather than an asymptotic, which is why the ' +
+            'measurement can match it exactly rather than approximately.'
+        ],
+        example: 'At M = 1 024 and B = 64 the demo builds 8 runs and merges them in 1 pass, at a ' +
+          'fan-out of 15. It measures 512 transfers against a prediction of 512.'
       },
       {
         term: 'A memory budget has to be enforced, not assumed',
         plain: 'An external algorithm that quietly buffers everything reports an impossible I/O count.',
         formal: 'the simulator throws when the live record count exceeds M',
-        detail: 'This is the commonest way an external-memory measurement comes out too good: ' +
-          'the implementation holds a map, or an index, or the whole input, and the transfer ' +
-          'counter never notices. Refusing rather than warning means a study that returns at all ' +
-          'has stayed inside its budget, and the peak-held column is that check reported rather ' +
-          'than asserted.',
-        example: 'The demo reports peak held equal to M exactly at every setting — 64 of 64, ' +
-          '1 024 of 1 024.'
+        detail: [
+          'This is the commonest way an external-memory measurement comes out too good. The ' +
+            'implementation holds a map, or an index, or the whole input, and the transfer counter ' +
+            'never notices.',
+          'Refusing rather than warning means a study that returns at all has stayed inside its ' +
+            'budget.',
+          'The peak-held column is that check reported rather than asserted.'
+        ],
+        example: 'The demo reports peak held equal to M exactly at every setting. That is 64 of ' +
+          '64, and 1 024 of 1 024.'
       },
       {
         term: 'A nested-loop join costs one transfer per row',
         plain: 'Every probe of the inner table is a random block.',
         formal: 'transfers = |outer| for an index probe per row, against 2·sort + 2·scan for a sort-merge',
-        detail: 'The two costs grow differently: the nested loop is linear in rows with a ' +
-          'constant of one, and the sort-merge is linear in BLOCKS with a constant of a few. So ' +
-          'the crossover depends on B and on the fan-out, and with a realistic M/B the sort-merge ' +
-          'wins by a factor that grows. That comparison is most of what a query planner does, and ' +
-          'it is why anything that makes a side already sorted removes most of the cost rather ' +
-          'than a constant factor of it.',
+        detail: [
+          'The two costs grow differently. The nested loop is linear in rows with a constant of one, ' +
+            'and the sort-merge is linear in BLOCKS with a constant of a few.',
+          'So the crossover depends on B and on the fan-out, and with a realistic M/B the sort-merge ' +
+            'wins by a factor that grows.',
+          'That comparison is most of what a query planner does. It is why anything that makes a ' +
+            'side already sorted removes most of the cost rather than a constant factor of it.'
+        ],
         example: 'At 128 000 rows a side the demo measures 128 000 transfers for the nested loop ' +
-          'and 20 000 for the sort-merge — 16 000 of sorting and 4 000 of walking.'
+          'and 20 000 for the sort-merge. That is 16 000 of sorting and 4 000 of walking.'
       },
       {
         term: 'A B-tree exists because of log_B N',
         plain: 'A node holds a block, so the branching factor is the block size.',
         formal: 'a binary search over a sorted array costs log₂ N − log₂ B transfers; a B-tree costs log_B N',
         readAs: 'A binary search costs the base-two logarithm of N minus the base-two logarithm ' +
-          'of B; a B-tree costs the base-B logarithm of N.',
-        detail: 'The saving is a factor of log₂ B, which at a fan-out of 256 is eight — so a ' +
-          'lookup that would cost 27 transfers costs 3 or 4. That is the whole reason index ' +
-          'nodes are page-sized rather than cache-line-sized, and it is the same argument the ' +
-          'cache-oblivious section reaches by a different route.',
+          'of B. A B-tree costs the base-B logarithm of N.',
+        detail: [
+          'The saving is a factor of log₂ B, which at a fan-out of 256 is eight.',
+          'So a lookup that would cost 27 transfers costs 3 or 4.',
+          'That is the whole reason index nodes are page-sized rather than cache-line-sized, and it ' +
+            'is the same argument the cache-oblivious section reaches by a different route.'
+        ],
         example: 'The demo’s bounds table shows the search cost going from 2.21 to 4.43 as the ' +
           'data goes from ten thousand records to a hundred million.'
       },
@@ -250,14 +268,16 @@
         term: 'This is why a query planner counts pages rather than rows',
         plain: 'Every choice it makes is a comparison of transfer counts.',
         formal: 'work_mem is M, the page size is B, and the cost model is the DAM model with constants fitted per storage device',
-        detail: 'Index scan against sequential scan, hash join against sort-merge, when to spill ' +
-          'and when to keep a hash table resident — every one of those is this model with real ' +
-          'numbers in it. Reading a plan that way makes its decisions predictable rather than ' +
-          'mysterious, and it also explains why raising work_mem changes plans rather than ' +
-          'merely making the chosen one faster: it changes M, which changes the fan-out, which ' +
-          'changes the pass count.',
-        example: 'The demo sweeps M and B directly and shows the pass count falling from 5 to 1 ' +
-          'as the memory grows, which is exactly what a work_mem change does to a plan.'
+        detail: [
+          'Index scan against sequential scan, hash join against sort-merge, when to spill and when ' +
+            'to keep a hash table resident. Every one of those is this model with real numbers in ' +
+            'it.',
+          'Reading a plan that way makes its decisions predictable rather than mysterious.',
+          'It also explains why raising work_mem changes plans rather than merely making the chosen ' +
+            'one faster. It changes M, which changes the fan-out, which changes the pass count.'
+        ],
+        example: 'The demo sweeps M and B directly, and shows the pass count falling from 5 to 1 ' +
+          'as the memory grows. That is exactly what a work_mem change does to a plan.'
       }
     ],
 

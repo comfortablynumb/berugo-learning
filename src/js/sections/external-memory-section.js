@@ -51,41 +51,55 @@
     };
   }
 
-  function orientation() {
+  function orientationModel() {
     return [
       '**The RAM model assumes every memory access costs the same, and once the data exceeds ' +
-        'memory that assumption stops predicting anything.** The model that replaces it keeps ' +
-        'two parameters: M, the records that fit in fast memory, and B, the records moved by one ' +
-        'transfer. Cost is the transfer count; computation on resident data is free.',
-      '**Three bounds carry almost everything.** A scan is N/B. A sort is (N/B)·log_{M/B}(N/B) — ' +
-        'one scan per merge pass, and the pass count is a logarithm base the FAN-OUT rather than ' +
-        'base two. A search is log_B N, which is the B-tree bound and the reason a database index ' +
-        'has a fan-out of hundreds instead of two.',
+        'memory that assumption stops predicting anything.** The model that replaces it keeps two ' +
+        'parameters: M, the records that fit in fast memory, and B, the records moved by one ' +
+        'transfer.',
+      'Cost is the transfer count, and computation on resident data is free.',
+      '**Three bounds carry almost everything.** A scan is N/B.',
+      'A sort is (N/B)·log_{M/B}(N/B), which is one scan per merge pass, with the pass count a ' +
+        'logarithm base the FAN-OUT rather than base two.',
+      'A search is log_B N, which is the B-tree bound and the reason a database index has a ' +
+        'fan-out of hundreds instead of two.',
       '**The gap between the models is a factor of B, not a constant.** An algorithm that touches ' +
-        'a random record per row costs one transfer per row; the same work done blockwise costs ' +
-        'one per B rows. B is 512 or 4 096, not 8, so "it is fast on my laptop" stops predicting ' +
-        'anything the moment the working set leaves memory.',
+        'a random record per row costs one transfer per row, and the same work done blockwise ' +
+        'costs one per B rows.',
+      'B is 512 or 4 096, not 8, so "it is fast on my laptop" stops predicting anything the moment ' +
+        'the working set leaves memory.',
       '**The merge fan-out is where the model earns its keep.** With M/B − 1 runs merged at once, ' +
-        'the pass count is log base M/B rather than base 2 — so doubling memory does not halve ' +
-        'the passes, it divides the logarithm’s base, and a realistic M/B of a few hundred means ' +
-        'two passes for almost any data size.',
-      '**The demo enforces the memory budget rather than assuming it.** The simulator throws if ' +
-        'an algorithm holds more than M records, which is deliberate: an external algorithm that ' +
-        'quietly buffers everything reports an I/O count that looks superb and describes a ' +
-        'different program. The peak-held column is that check, reported.',
-      '**The measured transfer count matches the formula exactly, not approximately.** Ratio ' +
-        '1.0000 at four settings. That is what a correctly charged simulator produces, and it ' +
-        'means a disagreement in future is a bug rather than noise — which is the point of having ' +
-        'the formula alongside the measurement at all.',
-      '**A nested-loop join is the RAM model’s answer and it costs one transfer per row.** The ' +
-        'sort-merge alternative costs two sorts and two scans, so its cost per record falls as ' +
-        'the data grows while the nested loop’s does not. The demo sweeps the size and the ratio ' +
-        'settles around six to ten times.',
-      '**This is why a query planner’s cost model counts pages rather than rows.** Every choice ' +
-        'it makes — index scan against sequential scan, hash join against sort-merge, when to ' +
-        'spill — is a comparison of transfer counts under exactly this model, with M as the work ' +
-        'memory setting and B as the page size.'
+        'the pass count is log base M/B rather than base 2.',
+      'So doubling memory does not halve the passes, it divides the logarithm’s base. A realistic ' +
+        'M/B of a few hundred means two passes for almost any data size.'
     ];
+  }
+
+  function orientationMeasurement() {
+    return [
+      '**The demo enforces the memory budget rather than assuming it.** The simulator throws if an ' +
+        'algorithm holds more than M records, and that is deliberate.',
+      'An external algorithm that quietly buffers everything reports an I/O count that looks superb ' +
+        'and describes a different program.',
+      'The peak-held column is that check, reported.',
+      '**The measured transfer count matches the formula exactly, not approximately.** The ratio ' +
+        'is 1.0000 at four settings.',
+      'That is what a correctly charged simulator produces, and it means a disagreement in future ' +
+        'is a bug rather than noise.',
+      'That is the point of having the formula alongside the measurement at all.',
+      '**A nested-loop join is the RAM model’s answer and it costs one transfer per row.** The ' +
+        'sort-merge alternative costs two sorts and two scans, so its cost per record falls as the ' +
+        'data grows while the nested loop’s does not.',
+      'The demo sweeps the size, and the ratio settles around six to ten times.',
+      '**This is why a query planner’s cost model counts pages rather than rows.** Index scan ' +
+        'against sequential scan, hash join against sort-merge, when to spill: every choice it ' +
+        'makes is a comparison of transfer counts.',
+      'It is exactly this model, with M as the work memory setting and B as the page size.'
+    ];
+  }
+
+  function orientation() {
+    return orientationModel().concat(orientationMeasurement());
   }
 
   function config() {
@@ -98,13 +112,13 @@
       },
       diagram: diagram(),
       insight: '**When the data stops fitting in memory, stop counting operations and start ' +
-        'counting transfers — and the first thing that changes is which algorithm you pick, not ' +
-        'how fast it runs.** A hash join is optimal in the RAM model and terrible in this one ' +
+        'counting transfers.** The first thing that changes is which algorithm you pick, not ' +
+        'how fast it runs. A hash join is optimal in the RAM model and terrible in this one ' +
         'once the hash table spills, because every probe is a random block. The practical ' +
-        'version of the model is three questions asked in order: does the working set fit in ' +
-        'memory, is the access pattern blockwise or random, and how many passes over the data ' +
-        'does the algorithm make. Those three answers predict the runtime to within a small ' +
-        'factor, and no amount of profiling the inner loop will tell you the same thing.'
+        'version of the model is three questions asked in order. Does the working set fit in ' +
+        'memory? Is the access pattern blockwise or random? How many passes over the data does ' +
+        'the algorithm make? Those three answers predict the runtime to within a small factor, ' +
+        'and no amount of profiling the inner loop will tell you the same thing.'
     };
   }
 
