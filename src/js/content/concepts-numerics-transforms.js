@@ -22,12 +22,15 @@
         plain: 'The signal and its spectrum are the same information written two ways, and the transform is invertible exactly.',
         formal: 'Xₖ = Σⱼ xⱼ e^(−2πijk/n), a matrix–vector product costing n² operations',
         readAs: 'The k-th spectrum entry is the sum over every sample of that sample times a ' +
-          'complex exponential whose angle steps by k each time — n such sums, each over n terms.',
-        detail: 'Because it is a change of basis rather than a fit, filtering in the frequency ' +
-          'domain and transforming back is a legitimate exact operation rather than a lossy one. ' +
+          'complex exponential whose angle steps by k each time. That is n such sums, each over n ' +
+          'terms.',
+        detail: [
+          'Because it is a change of basis rather than a fit, filtering in the frequency domain and ' +
+            'transforming back is a legitimate exact operation rather than a lossy one.',
           'The complex exponential is the natural basis here because it is an eigenfunction of ' +
-          'shifting — delay a sinusoid and you get the same sinusoid with a phase change — which ' +
-          'is exactly why convolution becomes multiplication in this basis.',
+            'shifting. Delay a sinusoid and you get the same sinusoid with a phase change.',
+          'That is exactly why convolution becomes multiplication in this basis.'
+        ],
         example: 'The demo checks the FFT against the naive DFT at every size and finds them equal ' +
           'to 2.89e-12 at n = 256, which is accumulated rounding and nothing else.'
       },
@@ -36,25 +39,31 @@
         plain: 'Splitting the sum into even and odd samples gives two half-size transforms plus a twiddle multiply.',
         formal: 'the butterfly count is exactly (n/2)log₂n, not approximately it',
         readAs: 'Half the sample count multiplied by the number of times you can halve n before '
-          + 'reaching one — that many two-input combining steps, exactly.',
-        detail: 'The n² multiplications in the direct form contain only n distinct values, because ' +
-          'the exponentials repeat — and the recursion is the arrangement that shares them. Each ' +
-          'level halves the problem and costs n/2 butterflies, giving log₂n levels. The demo puts ' +
-          'the measured count beside (n/2)log₂n so the equality can be read rather than trusted, ' +
-          'and beside n² so the saving is a ratio rather than an asymptotic claim.',
+          + 'reaching one. That is how many two-input combining steps there are, exactly.',
+        detail: [
+          'The n² multiplications in the direct form contain only n distinct values, because the ' +
+            'exponentials repeat. The recursion is the arrangement that shares them.',
+          'Each level halves the problem and costs n/2 butterflies, giving log₂n levels.',
+          'The demo puts the measured count beside (n/2)log₂n so the equality can be read rather ' +
+            'than trusted. It also puts it beside n², so the saving is a ratio rather than an ' +
+            'asymptotic claim.'
+        ],
         example: 'At n = 256 the demo counts 1 024 butterflies against the naive DFT’s 65 536 ' +
-          'operations, a saving of 64.0×, and a forward-then-inverse round trip at ' +
-          'n = 65 536 returns the input to 1.29e-12.'
+          'operations, a saving of 64.0×. A forward-then-inverse round trip at n = 65 536 returns ' +
+          'the input to 1.29e-12.'
       },
       {
         term: 'The bit-reversal permutation is what makes the iterative version in-place',
         plain: 'Splitting even from odd repeatedly lands each sample at the position given by its index with the bits reversed.',
         formal: 'sample j ends at the position whose binary digits are those of j read backwards',
-        detail: 'The recursive form is easy to write and allocates an array per level. Permuting ' +
-          'the input by bit-reversal up front puts every pair a butterfly needs adjacent at the ' +
-          'right moment, so the iterative version runs in the original array with no recursion and ' +
-          'no allocation. That is why production FFTs are loops rather than recursions, and the ' +
-          'permutation is where the index arithmetic from 17.2 earns its keep.',
+        detail: [
+          'The recursive form is easy to write and allocates an array per level.',
+          'Permuting the input by bit-reversal up front puts every pair a butterfly needs adjacent ' +
+            'at the right moment. So the iterative version runs in the original array with no ' +
+            'recursion and no allocation.',
+          'That is why production FFTs are loops rather than recursions, and the permutation is ' +
+            'where the index arithmetic from 17.2 earns its keep.'
+        ],
         example: 'The demo’s diagram shows the permutation before the first stage, and every stage ' +
           'afterwards pairing elements a fixed distance apart.'
       },
@@ -62,22 +71,29 @@
         term: 'Leakage comes from the segment’s ends, not from the resolution',
         plain: 'The transform assumes your segment repeats forever, so a wave that does not fit a whole number of times has a jump at the wrap-around.',
         formal: 'a frequency between bins produces a discontinuity in the periodic extension, and a discontinuity has energy at every frequency',
-        detail: 'This is the surprise: a pure sine wave smeared across the whole spectrum is not a ' +
-          'resolution problem, and more samples do not fix it. The fault is at the boundary, where ' +
-          'the last sample and the first no longer join smoothly. Once you see it that way the fix ' +
-          'is obvious — change how the segment ends — and that is exactly what a window does.',
+        detail: [
+          'This is the surprise. A pure sine wave smeared across the whole spectrum is not a ' +
+            'resolution problem, and more samples do not fix it.',
+          'The fault is at the boundary, where the last sample and the first no longer join ' +
+            'smoothly.',
+          'Once you see it that way the fix is obvious: change how the segment ends. That is exactly ' +
+            'what a window does.'
+        ],
         example: 'With a component at 10.5 Hz in a 256-sample record at 256 Hz, the demo shows a ' +
           'single tone spread across every bin.'
       },
       {
         term: 'A window trades resolution for dynamic range, and there is no best one',
-        plain: 'Taper the segment to zero at both ends and the skirt collapses; the peak gets lower and wider in exchange.',
+        plain: 'Taper the segment to zero at both ends and the skirt collapses. The peak gets lower and wider in exchange.',
         formal: 'each window is a different taper, scored by the ratio of the peak to the worst distant sidelobe',
-        detail: 'The trade is unavoidable because tapering discards signal at the edges, which is ' +
-          'what widens the main lobe. Which window is best depends on what you are looking for: ' +
-          'Hamming flattens the first sidelobe and pays with a slower roll-off further out, while ' +
-          'Hann and Blackman give up nearer resolution for far better distant rejection. That is ' +
-          'why libraries ship a dozen of them rather than one.',
+        detail: [
+          'The trade is unavoidable because tapering discards signal at the edges, which is what ' +
+            'widens the main lobe.',
+          'Which window is best depends on what you are looking for. Hamming flattens the first ' +
+            'sidelobe and pays with a slower roll-off further out.',
+          'Hann and Blackman give up nearer resolution for far better distant rejection. That is why ' +
+            'libraries ship a dozen of them rather than one.'
+        ],
         example: 'On the same signal the demo measures peak-to-sidelobe ratios of 74× rectangular, ' +
           '642× Hamming, 22 244× Hann and 54 709× Blackman.'
       },
@@ -86,13 +102,15 @@
         plain: 'Anything above half the sample rate folds back and becomes indistinguishable from a real component at the lower frequency.',
         formal: 'a component at f appears at |((f + r/2) mod r) − r/2| for sample rate r; at the sampling instants the two waves take identical values',
         readAs: 'Fold the frequency about half the sample rate and keep folding until it lands ' +
-          'below; that is where it appears, and no later processing can tell it apart from a real ' +
+          'below. That is where it appears, and no later processing can tell it apart from a real ' +
           'component there.',
-        detail: 'The information is not obscured, it is absent: the samples of a 1 100 Hz tone at ' +
-          '1 kHz are numerically identical to those of a 100 Hz tone, so no filter, no window and ' +
-          'no amount of analysis can separate them afterwards. That is why an anti-aliasing filter ' +
-          'is analogue and sits before the converter — it is the last moment at which the ' +
-          'distinction still exists.',
+        detail: [
+          'The information is not obscured, it is absent. The samples of a 1 100 Hz tone at 1 kHz ' +
+            'are numerically identical to those of a 100 Hz tone.',
+          'So no filter, no window and no amount of analysis can separate them afterwards.',
+          'That is why an anti-aliasing filter is analogue and sits before the converter. It is the ' +
+            'last moment at which the distinction still exists.'
+        ],
         example: 'At a 1 kHz sample rate the demo shows 700 Hz appearing at 300, 900 at 100, ' +
           '1 100 at 100 and 1 300 at 300.'
       },
@@ -100,15 +118,18 @@
         term: 'Convolution becomes multiplication, and the crossover is real',
         plain: 'Transform both, multiply pointwise, transform back — and check the operation count before assuming it is faster.',
         formal: 'convolution costs n² directly and about 3·(n/2)log₂n through three transforms',
-        readAs: 'Done directly it costs the square of the length; done through the transform it '
+        readAs: 'Done directly it costs the square of the length. Done through the transform it '
           + 'costs three transforms, each of which is half the length times the number of '
           + 'halvings.',
-        detail: 'The asymptotic win is real and the constant is three transforms, so on short ' +
-          'inputs the quadratic method is faster — the demo measures 48 operations for schoolbook ' +
-          'against 96 butterflies through the transform on eight-by-six inputs. Every library that ' +
-          'uses this has a length threshold below which it calls the quadratic routine instead, ' +
-          'which is the same shape as the introsort and hybrid-root-finder pattern: fast ' +
-          'asymptotics with a small-case fallback.',
+        detail: [
+          'The asymptotic win is real and the constant is three transforms, so on short inputs the ' +
+            'quadratic method is faster.',
+          'The demo measures 48 operations for schoolbook against 96 butterflies through the ' +
+            'transform on eight-by-six inputs.',
+          'Every library that uses this has a length threshold below which it calls the quadratic ' +
+            'routine instead. That is the same shape as the introsort and hybrid-root-finder ' +
+            'pattern: fast asymptotics with a small-case fallback.'
+        ],
         example: 'The demo shows the schoolbook route at 48 operations and the transform route at ' +
           '96 on the same inputs, with identical answers.'
       },
@@ -116,12 +137,16 @@
         term: 'The number-theoretic transform does the same algorithm without rounding',
         plain: 'Run the FFT in modular integer arithmetic and the convolution is exact, not roundable.',
         formal: 'a root of unity of the right order exists modulo a suitable prime, so the same butterflies work over integers',
-        detail: 'Floating-point convolution gives an answer that has to be rounded back to ' +
-          'integers, and whether that rounding is safe depends on the inputs — the demo measures ' +
-          '1.42e-14 here, which is comfortable and is not a guarantee. The NTT replaces the complex ' +
-          'exponential with a modular root of unity and is exact by construction, valid while the ' +
-          'largest possible coefficient stays under the modulus. This is how large integers are ' +
-          'multiplied, and it connects directly back to Karatsuba in 17.8.',
+        detail: [
+          'Floating-point convolution gives an answer that has to be rounded back to integers, and ' +
+            'whether that rounding is safe depends on the inputs. The demo measures 1.42e-14 here, ' +
+            'which is comfortable and is not a guarantee.',
+          'The NTT replaces the complex exponential with a modular root of unity and is exact by ' +
+            'construction. It is valid while the largest possible coefficient stays under the ' +
+            'modulus.',
+          'This is how large integers are multiplied, and it connects directly back to Karatsuba in ' +
+            '17.8.'
+        ],
         example: 'The demo reports the largest possible coefficient as 432 against a modulus of ' +
           '998 244 353, with 2.31M× of headroom.'
       }

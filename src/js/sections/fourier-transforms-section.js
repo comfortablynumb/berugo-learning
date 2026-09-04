@@ -55,50 +55,55 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**The DFT asks one question n times: how much of frequency k is in this signal?** Each ' +
+        'answer is a sum over all n samples multiplied by a complex exponential, so the whole ' +
+        'transform is a matrix–vector product costing n².',
+      'It is also perfectly invertible, because the signal and its spectrum are the same ' +
+        'information in two bases.',
+      'That is why filtering in the frequency domain and transforming back is a legitimate ' +
+        'operation rather than an approximation.',
+      '**The FFT computes exactly that, in (n/2)log₂n butterflies.** Splitting the sum into ' +
+        'even-indexed and odd-indexed samples produces two half-size transforms plus a twiddle ' +
+        'multiply.',
+      'Recursing gives log₂n stages of n/2 butterflies each. The result is the same numbers to ' +
+        'rounding, and the demo checks it against the naive DFT.',
+      'At n = 256 it costs 64 times fewer operations. This algorithm is the reason real-time ' +
+        'spectral processing exists at all.',
+      '**Leakage is what happens when a frequency does not land exactly on a bin.** The transform ' +
+        'assumes the segment you gave it repeats forever.',
+      'If the wave does not fit a whole number of times, the wrap-around has a discontinuity, and a ' +
+        'discontinuity has energy at every frequency.',
+      'The result is a pure tone smeared across the entire spectrum. Windows fix it by tapering the ' +
+        'segment to zero at both ends, which removes the jump.',
+      '**Aliasing is not recoverable and the fix has to happen before sampling.** Anything above ' +
+        'half the sample rate folds back and appears as a lower frequency, indistinguishable from ' +
+        'a real component at that frequency.',
+      'Once the samples are taken the information is gone. No filter afterwards can separate them.',
+      'That is why an anti-aliasing filter is analogue and sits before the converter, and why the ' +
+        'same problem in a metrics pipeline has to be fixed at collection.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**The DFT asks one question n times: how much of frequency k is in this signal?** Each ' +
-          'answer is a sum over all n samples multiplied by a complex exponential, so the whole ' +
-          'transform is a matrix–vector product costing n². It is also perfectly invertible — the ' +
-          'signal and its spectrum are the same information in two bases — which is why filtering ' +
-          'in the frequency domain and transforming back is a legitimate operation rather than an ' +
-          'approximation.',
-        '**The FFT computes exactly that, in (n/2)log₂n butterflies.** Splitting the sum into ' +
-          'even-indexed and odd-indexed samples produces two half-size transforms plus a twiddle ' +
-          'multiply, and recursing gives log₂n stages of n/2 butterflies each. The result is the ' +
-          'same numbers to rounding — the demo checks it against the naive DFT — and at n = 256 it ' +
-          'costs 64 times fewer operations. This algorithm is the reason real-time spectral ' +
-          'processing exists at all.',
-        '**Leakage is what happens when a frequency does not land exactly on a bin.** The ' +
-          'transform assumes the segment you gave it repeats forever, so if the wave does not fit ' +
-          'a whole number of times, the wrap-around has a discontinuity — and a discontinuity has ' +
-          'energy at every frequency. The result is a pure tone smeared across the entire ' +
-          'spectrum. Windows fix it by tapering the segment to zero at both ends, which removes ' +
-          'the jump.',
-        '**Aliasing is not recoverable and the fix has to happen before sampling.** Anything above ' +
-          'half the sample rate folds back and appears as a lower frequency, indistinguishable ' +
-          'from a real component at that frequency. Once the samples are taken the information is ' +
-          'gone; no filter afterwards can separate them. That is why an anti-aliasing filter is ' +
-          'analogue and sits before the converter, and why the same problem in a metrics pipeline ' +
-          'has to be fixed at collection.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — butterflies, windows, aliasing and exact convolution',
         markup: root.FourierTransformsTemplate.render()
       },
       diagram: diagram(),
-      insight: 'Aliasing is not an audio curiosity — an undersampled metrics dashboard shows ' +
+      insight: 'Aliasing is not an audio curiosity. An undersampled metrics dashboard shows ' +
         'phantom periodicity for exactly the same reason, and the fix is exactly the same: filter ' +
         'before you sample. A CPU spike every 55 seconds, scraped once a minute, appears as a slow ' +
-        'oscillation with a period of about eleven minutes, and no amount of analysis on the ' +
-        'stored series can distinguish that from a real eleven-minute cycle, because at the ' +
-        'sampling instants they are the same numbers. The general rule is worth carrying beyond ' +
-        'signals: **when you reduce the rate of anything — sampling, logging, polling — average ' +
-        'over the interval rather than taking an instantaneous reading**. The average is a ' +
-        'low-pass filter, and it is the difference between a downsampled series and a fictional ' +
-        'one.'
+        'oscillation with a period of about eleven minutes. No amount of analysis on the stored ' +
+        'series can distinguish that from a real eleven-minute cycle, because at the sampling ' +
+        'instants they are the same numbers. The general rule is worth carrying beyond signals. ' +
+        '**When you reduce the rate of anything — sampling, logging, polling — average over the ' +
+        'interval rather than taking an instantaneous reading.** The average is a low-pass filter, ' +
+        'and it is the difference between a downsampled series and a fictional one.'
     };
   }
 
