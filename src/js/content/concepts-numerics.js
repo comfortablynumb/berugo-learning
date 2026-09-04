@@ -340,29 +340,35 @@
         plain: 'A pivot that is merely small is enough to destroy the answer, and nothing checks for small.',
         formal: 'the multiplier is aᵢₖ / aₖₖ, so a small pivot makes it huge and the elimination adds huge numbers to ordinary ones',
         readAs: 'Each row below the pivot is scaled by its own leading entry divided by the pivot ' +
-          'entry, so when the pivot is tiny that scale factor is enormous and the numbers it ' +
-          'creates swamp everything already in the row.',
-        detail: 'The textbook reason to swap rows is to avoid dividing by zero, and that reason is ' +
-          'almost never the one that matters. With a pivot of 1e-18 the first multiplier is 1e18, ' +
-          'so every entry it creates is astronomically larger than what was already in the row — ' +
-          'and adding a huge number to an ordinary one rounds the ordinary one away entirely. The ' +
-          'information is gone before any division by zero could have occurred, and no singularity ' +
-          'check fires because the pivot is not singular.',
+          'entry. When the pivot is tiny that scale factor is enormous, and the numbers it creates ' +
+          'swamp everything already in the row.',
+        detail: [
+          'The textbook reason to swap rows is to avoid dividing by zero, and that reason is almost ' +
+            'never the one that matters.',
+          'With a pivot of 1e-18 the first multiplier is 1e18, so every entry it creates is ' +
+            'astronomically larger than what was already in the row. Adding a huge number to an ' +
+            'ordinary one rounds the ordinary one away entirely.',
+          'The information is gone before any division by zero could have occurred. No singularity ' +
+            'check fires, because the pivot is not singular.'
+        ],
         example: 'On [[1e-18, 1], [1, 1]] x = [1, 2] the demo returns [0, 1] without pivoting and ' +
-          '[1, 1] with it, at a growth factor of 1e18 against 1.'
+          '[1, 1] with it. The growth factor is 1e18 against 1.'
       },
       {
         term: 'The growth factor is the term an algorithm can actually control',
         plain: 'It measures how much bigger the intermediate entries got than the original ones.',
         formal: 'ρ = max|aᵢⱼ^(k)| / max|aᵢⱼ|, and the backward error bound is proportional to ρ',
-        readAs: 'Rho is the largest entry that appeared at any point during elimination divided by ' +
-          'the largest entry the matrix started with, and the error bound is proportional to it.',
-        detail: 'The condition number is fixed by the problem, so the growth factor is the only ' +
-          'knob in the error bound that pivoting or any other choice can move. Partial pivoting ' +
-          'bounds every multiplier by one, which caps growth at 2ⁿ⁻¹ — a bound that sounds useless ' +
-          'and in practice is a small constant. That gap between the bound and reality is why ' +
-          'partial pivoting rather than complete pivoting is the default: complete pivoting has a ' +
-          'far better bound and costs an O(n³) search, and nobody needs it.',
+        readAs: 'Rho is the largest entry that appeared at any point during elimination, divided by ' +
+          'the largest entry the matrix started with. The error bound is proportional to it.',
+        detail: [
+          'The condition number is fixed by the problem. So the growth factor is the only knob in ' +
+            'the error bound that pivoting, or any other choice, can move.',
+          'Partial pivoting bounds every multiplier by one, which caps growth at 2ⁿ⁻¹. That bound ' +
+            'sounds useless, and in practice growth is a small constant.',
+          'That gap between the bound and reality is why partial pivoting rather than complete ' +
+            'pivoting is the default. Complete pivoting has a far better bound and costs an O(n³) ' +
+            'search, and nobody needs it.'
+        ],
         example: 'Wilkinson’s matrix attains the bound exactly: the demo measures growth of 2ⁿ⁻¹ at ' +
           'every size from 4 to 24, with zero row swaps performed.'
       },
@@ -370,12 +376,14 @@
         term: 'LU is the factorisation, and the point of it is reuse',
         plain: 'The expensive part depends only on the matrix, so extra right-hand sides are cheap.',
         formal: 'PA = LU costs about n³/3 operations; each solve afterwards is two triangular substitutions at n² each',
-        detail: 'This is why every serious library separates `factor` from `solve` in its API — ' +
-          'the split is the entire performance story, not an implementation detail leaking out. ' +
-          'Code that calls a one-shot `solve(A, b)` inside a loop pays the cubic cost on every ' +
-          'pass, and the fix is one line. It is also the reason a determinant is computed as the ' +
-          'product of the LU diagonal rather than by cofactor expansion, which is factorially ' +
-          'expensive and no more accurate.',
+        detail: [
+          'This is why every serious library separates `factor` from `solve` in its API. The split ' +
+            'is the entire performance story, not an implementation detail leaking out.',
+          'Code that calls a one-shot `solve(A, b)` inside a loop pays the cubic cost on every pass, ' +
+            'and the fix is one line.',
+          'It is also the reason a determinant is computed as the product of the LU diagonal rather ' +
+            'than by cofactor expansion, which is factorially expensive and no more accurate.'
+        ],
         example: 'The demo’s reuse study performs 1 factorisation for 20 right-hand sides against ' +
           '20 for the same answers, at identical accuracy.'
       },
@@ -383,26 +391,32 @@
         term: 'Never invert a matrix to solve a system — it is slower and less accurate',
         plain: 'The explicit inverse costs more to build and gives worse answers than the factorisation it came from.',
         formal: 'A⁻¹ requires n solves to build, and applying it accumulates their rounding before the caller asks anything',
-        detail: 'This is a numerical rule rather than a stylistic one, and the demo prices it. ' +
-          'Every column of the inverse is itself a solve that has already been rounded, so ' +
-          'multiplying by it applies n rounded answers instead of one; the factorisation, by ' +
-          'contrast, rounds once per solve. It is also more work: n solves to build, and then the ' +
-          'same n² to apply as a triangular substitution pair. `inv(A) @ b` is worse than ' +
-          '`solve(A, b)` on both axes in every library that offers both.',
+        detail: [
+          'This is a numerical rule rather than a stylistic one, and the demo prices it.',
+          'Every column of the inverse is itself a solve that has already been rounded. Multiplying ' +
+            'by it applies n rounded answers instead of one, where the factorisation rounds once ' +
+            'per solve.',
+          'It is also more work: n solves to build, and then the same n² to apply as a triangular ' +
+            'substitution pair. So `inv(A) @ b` is worse than `solve(A, b)` on both axes in every ' +
+            'library that offers both.'
+        ],
         example: 'The demo measures the inverse route at several times the worst relative error '
-          + 'of the factorisation it was built from - 8.4x on one engine and 6.0x on another, '
+          + 'of the factorisation it was built from. It is 8.4x on one engine and 6.0x on another, '
           + 'which is why the claim is a band.'
       },
       {
         term: 'Cholesky is half the work when the matrix is symmetric positive definite',
         plain: 'A symmetric matrix with positive curvature factors as LLᵀ, at half the cost and with no pivoting needed.',
         formal: 'A = LLᵀ costs about n³/6 operations, and the factorisation exists precisely when A is positive definite',
-        detail: 'It is the standard example of a structured algorithm beating a general one by ' +
-          'exploiting a property, and it comes with a bonus: the factorisation is provably stable ' +
-          'without any pivoting, because the diagonal dominates by construction. The failure mode ' +
-          'is also useful — attempting Cholesky and hitting a negative square root is the standard ' +
-          'test for positive definiteness, used in optimisation to check that a Hessian describes ' +
-          'a minimum rather than a saddle.',
+        detail: [
+          'It is the standard example of a structured algorithm beating a general one by exploiting ' +
+            'a property, and it comes with a bonus. The factorisation is provably stable without ' +
+            'any pivoting, because the diagonal dominates by construction.',
+          'The failure mode is useful too. Attempting Cholesky and hitting a negative square root is ' +
+            'the standard test for positive definiteness.',
+          'Optimisation uses exactly that to check whether a Hessian describes a minimum rather than ' +
+            'a saddle.'
+        ],
         example: 'The covariance matrices behind least squares and the Hessians in 18.10 are the ' +
           'usual customers, and both are symmetric positive definite by construction.'
       },
@@ -410,29 +424,35 @@
         term: 'Stationary iterations trade an exact finish for a cheap step',
         plain: 'Jacobi and Gauss–Seidel need only a matrix-vector product per sweep and never create fill-in.',
         formal: 'Jacobi uses the previous sweep’s values throughout; Gauss–Seidel uses each new value immediately',
-        detail: 'Direct factorisation of a sparse matrix creates entries where there were zeros — ' +
-          'fill-in — and on a large sparse system that can exhaust memory long before it exhausts ' +
-          'patience. An iterative method touches only the non-zeros, so its cost per step is ' +
-          'proportional to the number of them. Jacobi’s updates are independent, which is why it ' +
-          'parallelises perfectly and converges slowest; Gauss–Seidel uses each value as soon as ' +
-          'it has it, converges faster, and is inherently sequential.',
+        detail: [
+          'Direct factorisation of a sparse matrix creates entries where there were zeros — fill-in ' +
+            '— and on a large sparse system that can exhaust memory long before it exhausts patience.',
+          'An iterative method touches only the non-zeros, so its cost per step is proportional to ' +
+            'the number of them.',
+          'Jacobi’s updates are independent, which is why it parallelises perfectly and converges ' +
+            'slowest. Gauss–Seidel uses each value as soon as it has it, converges faster, and is ' +
+            'inherently sequential.'
+        ],
         example: 'On the demo’s Poisson system of size 40, Jacobi takes 7 621 sweeps and ' +
           'Gauss–Seidel 2 711 — the same arithmetic, differing only in when a value is used. ' +
           'Over-relaxing Gauss–Seidel by a factor ω takes its 2 163 sweeps on the size-32 system ' +
-          'down to 153 at the swept optimum of ω = 1.85.'
+          'down to 153. The swept optimum is ω = 1.85.'
       },
       {
         term: 'Conjugate gradient’s rate depends on the square root of the condition number',
         plain: 'It is the reason preconditioning is worth more than tuning the iteration.',
         formal: 'the error after k steps is bounded by 2((√κ − 1)/(√κ + 1))^k, and in exact arithmetic it terminates in n steps',
         readAs: 'The error shrinks by a factor built from the square root of the condition number ' +
-          'each step, and after n steps of exact arithmetic it would be zero.',
-        detail: 'The square root is what makes preconditioning so valuable: reducing κ by a factor ' +
-          'of a hundred speeds convergence by a factor of ten, which no amount of optimising the ' +
-          'inner loop can match. CG applies only to symmetric positive definite systems, which ' +
-          'sounds restrictive and covers most of what large-scale computation actually solves — ' +
-          'finite element stiffness matrices, graph Laplacians, and the normal equations behind ' +
-          'every least-squares problem.',
+          'each step. After n steps of exact arithmetic it would be zero.',
+        detail: [
+          'The square root is what makes preconditioning so valuable. Reducing κ by a factor of a ' +
+            'hundred speeds convergence by a factor of ten, which no amount of optimising the inner ' +
+            'loop can match.',
+          'CG applies only to symmetric positive definite systems. That sounds restrictive, and it ' +
+            'covers most of what large-scale computation actually solves.',
+          'Finite element stiffness matrices, graph Laplacians, and the normal equations behind ' +
+            'every least-squares problem are all in that class.'
+        ],
         example: 'The demo plots the measured residual against this bound; the measurement sits ' +
           'below it, because the bound assumes the worst possible spectrum.'
       },
@@ -440,13 +460,17 @@
         term: 'A preconditioner is only worth anything against the structure it was chosen for',
         plain: 'Jacobi preconditioning rescales each row by its own diagonal, so on a uniform diagonal it does nothing at all.',
         formal: 'solve M⁻¹Ax = M⁻¹b where M approximates A and is cheap to invert; Jacobi takes M = diag(A)',
-        detail: 'The whole art is picking an M that is close to A and easy to invert, and those ' +
-          'two goals pull in opposite directions: M = A converges in one step and costs as much as ' +
-          'the original problem, while M = I costs nothing and changes nothing. The demo makes the ' +
-          'honest case visible by defaulting to a matrix whose diagonal is already uniform, where ' +
-          'Jacobi preconditioning is exactly the identity and the condition number does not move.',
+        detail: [
+          'The whole art is picking an M that is close to A and easy to invert, and those two goals ' +
+            'pull in opposite directions.',
+          'M = A converges in one step and costs as much as the original problem. M = I costs ' +
+            'nothing and changes nothing.',
+          'The demo makes the honest case visible by defaulting to a matrix whose diagonal is ' +
+            'already uniform. There Jacobi preconditioning is exactly the identity, and the ' +
+            'condition number does not move.'
+        ],
         example: 'With the rows scaled, the demo’s condition number falls from 1.75e7 to 6.81e2 ' +
-          'and CG goes from 196 iterations to 40; without scaling, both numbers are unchanged.'
+          'and CG goes from 196 iterations to 40. Without scaling, both numbers are unchanged.'
       }
     ]
   });

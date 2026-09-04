@@ -51,34 +51,39 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**Elimination without pivoting can return a confidently wrong answer with no warning.** The ' +
+        'moment a pivot is small — not zero, just small — the multipliers below it are huge.',
+      'The entries those multipliers create swamp everything already in the row. That information ' +
+        'is gone: it was added to a number a billion times larger and rounded away.',
+      'Partial pivoting swaps the largest available entry into the pivot position, which bounds ' +
+        'every multiplier by one and stops the process at its source.',
+      '**The growth factor is what pivoting actually controls, and its bound is a worst case.** ' +
+        'Growth is how large the intermediate entries get relative to the original matrix, and it ' +
+        'is the term in the error bound an algorithm can influence.',
+      'Partial pivoting bounds it by 2ⁿ⁻¹, which sounds useless. In practice it is a small constant.',
+      'Wilkinson\'s matrix is the famous exception. It attains the bound exactly while never ' +
+        'triggering a single swap.',
+      '**Factor once, solve many times — and never form the inverse.** LU costs about n³/3 ' +
+        'operations and depends only on the matrix, so a second right-hand side costs two ' +
+        'triangular solves at n² each.',
+      'The explicit inverse costs more to build, costs the same n² to apply, and gives a worse ' +
+        'answer than the factorisation it was built from. It accumulates the rounding of n solves ' +
+        'before you ask it anything.',
+      '**Iterative methods trade an exact finish for a cheap step, and that is the right trade when ' +
+        'the matrix is sparse.** Jacobi and Gauss–Seidel need only a matrix-vector product per ' +
+        'sweep, never touching the fill-in that direct factorisation creates.',
+      'Conjugate gradient converges at a rate set by the square root of the condition number. That ' +
+        'is why preconditioning — changing the problem to one with a smaller condition number — is ' +
+        'worth more than any amount of tuning the iteration itself.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**Elimination without pivoting can return a confidently wrong answer with no warning.** ' +
-          'The moment a pivot is small — not zero, just small — the multipliers below it are ' +
-          'huge, and the entries they create swamp everything already in the row. The information ' +
-          'in those entries is gone: it was added to a number a billion times larger and rounded ' +
-          'away. Partial pivoting swaps the largest available entry into the pivot position, ' +
-          'which bounds every multiplier by one and stops the process at its source.',
-        '**The growth factor is what pivoting actually controls, and its bound is a worst case.** ' +
-          'Growth is how large the intermediate entries get relative to the original matrix, and ' +
-          'it is the term in the error bound that an algorithm can influence. Partial pivoting ' +
-          'bounds it by 2ⁿ⁻¹, which sounds useless; in practice it is a small constant, and ' +
-          'Wilkinson\'s matrix is the famous exception that attains the bound exactly while never ' +
-          'triggering a single swap.',
-        '**Factor once, solve many times — and never form the inverse.** LU costs about n³/3 ' +
-          'operations and depends only on the matrix, so a second right-hand side costs two ' +
-          'triangular solves at n² each. The explicit inverse costs more to build, costs the same ' +
-          'n² to apply, and gives a worse answer than the factorisation it was built from, ' +
-          'because it accumulates the rounding of n solves before you ask it anything.',
-        '**Iterative methods trade an exact finish for a cheap step, and that is the right trade ' +
-          'when the matrix is sparse.** Jacobi and Gauss–Seidel need only a matrix-vector product ' +
-          'per sweep, never touching the fill-in that direct factorisation creates. Conjugate ' +
-          'gradient converges at a rate set by the square root of the condition number, which is ' +
-          'why preconditioning — changing the problem to one with a smaller condition number — is ' +
-          'worth more than any amount of tuning the iteration itself.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — pivoting, growth, reuse and four iterative methods',
         markup: root.LinearSystemsTemplate.render()
@@ -86,11 +91,11 @@
       diagram: diagram(),
       insight: 'Two rules carry almost all of the practical value here, and both are about calling ' +
         'the library rather than writing one. **Never invert a matrix to solve a system** — ' +
-        '`solve(A, b)`, not `inv(A) @ b` — because the inverse is more work and a worse answer, ' +
-        'and the demo prices the penalty rather than asserting it. **Factor once when the matrix ' +
-        'is reused**, because a `solve` in a loop pays the cubic cost on every pass. Then, when a ' +
+        '`solve(A, b)`, not `inv(A) @ b` — because the inverse is more work and a worse answer. ' +
+        'The demo prices that penalty rather than asserting it. **Factor once when the matrix is ' +
+        'reused**, because a `solve` in a loop pays the cubic cost on every pass. Then, when a ' +
         'system is large and sparse, reach for an iterative method and spend your effort on the ' +
-        'preconditioner: halving the condition number buys more than any rewrite of the inner ' +
+        'preconditioner. Halving the condition number buys more than any rewrite of the inner ' +
         'loop, since the convergence rate depends on its square root.'
     };
   }
