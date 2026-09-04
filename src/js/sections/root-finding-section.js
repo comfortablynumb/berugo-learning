@@ -57,33 +57,37 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**Bisection is the only method here with a guarantee, and it is a strong one.** If the ' +
+        'endpoints disagree in sign then a continuous function has a root between them, and ' +
+        'halving cannot lose it.',
+      'The cost is one bit per iteration, always — no faster on an easy function, no slower on a ' +
+        'hard one. That is both why it is slow and why it never surprises anybody.',
+      '**Newton is fast when it works and silently divergent when it does not.** It follows the ' +
+        'tangent to the axis, doubling the number of correct digits each step.',
+      'It also has three distinct failure modes. A flat derivative throws the iterate far away, and ' +
+        'a symmetric function can cycle between two points forever. Worst of all, it can converge ' +
+        'perfectly to a root that is not the one near where you started.',
+      'None of the three raises an error.',
+      '**The convergence order is measurable, and it is not the same question as speed.** Fitting ' +
+        'the iterate errors gives Newton about 2 and the secant method about 1.618, the golden ' +
+        'ratio, which falls out of its error recurrence and is not a coincidence.',
+      'But Newton needs two evaluations per step and the secant needs one. So on a function whose ' +
+        'derivative is expensive, the lower order wins on the cost that is actually paid.',
+      '**Every production root finder is a hybrid, for exactly this reason.** Brent tries inverse ' +
+        'quadratic interpolation, falls back to the secant, and falls back to bisection whenever ' +
+        'the interpolated step fails a progress test.',
+      'So it has the speed of an open method and the guarantee of a bracketing one.',
+      'False position is the cautionary tale in between. It keeps a bracket and interpolates, and ' +
+        'on a convex function one endpoint sticks forever and it degrades to worse than bisection.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**Bisection is the only method here with a guarantee, and it is a strong one.** If the ' +
-          'endpoints disagree in sign then a continuous function has a root between them, and ' +
-          'halving cannot lose it. The cost is one bit per iteration, always — no faster on an ' +
-          'easy function, no slower on a hard one — which is both why it is slow and why it never ' +
-          'surprises anybody.',
-        '**Newton is fast when it works and silently divergent when it does not.** It follows the ' +
-          'tangent to the axis, doubling the number of correct digits each step, and it has three ' +
-          'distinct failure modes: a flat derivative throws the iterate far away, a symmetric ' +
-          'function can cycle between two points forever, and — worst of all — it can converge ' +
-          'perfectly to a root that is not the one near where you started. None of the three ' +
-          'raises an error.',
-        '**The convergence order is measurable, and it is not the same question as speed.** ' +
-          'Fitting the iterate errors gives Newton about 2 and the secant method about 1.618, ' +
-          'the golden ratio — which falls out of its error recurrence and is not a coincidence. ' +
-          'But Newton needs two evaluations per step and the secant needs one, so on a function ' +
-          'whose derivative is expensive the lower order wins on the cost that is actually paid.',
-        '**Every production root finder is a hybrid, for exactly this reason.** Brent tries ' +
-          'inverse quadratic interpolation, falls back to the secant, and falls back to bisection ' +
-          'whenever the interpolated step fails a progress test — so it has the speed of an open ' +
-          'method and the guarantee of a bracketing one. False position is the cautionary tale in ' +
-          'between: it keeps a bracket and interpolates, and on a convex function one endpoint ' +
-          'sticks forever and it degrades to worse than bisection.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — five methods, three failure modes and two rearrangements',
         markup: root.RootFindingTemplate.render()
@@ -91,12 +95,12 @@
       diagram: diagram(),
       insight: 'Use the library’s hybrid unless you have a reason not to, and when you write one ' +
         'yourself, the bracket is the part that matters. The pattern worth internalising is not ' +
-        '"Newton is fast" — it is that a fast method with no guarantee plus a slow method with ' +
-        'one, combined by a progress test, is better than either, and that shape recurs far ' +
-        'beyond root finding: introsort is quicksort with a heapsort floor, a JIT is an ' +
-        'interpreter with a compiler on top, and an adaptive integrator is the same idea again. ' +
-        'And if you are ever tempted to ship bare Newton, remember the third failure: it does not ' +
-        'return an error, it returns a root, and it is the wrong one.'
+        '"Newton is fast". It is that a fast method with no guarantee plus a slow method with one, ' +
+        'combined by a progress test, is better than either. That shape recurs far beyond root ' +
+        'finding. Introsort is quicksort with a heapsort floor, a JIT is an interpreter with a ' +
+        'compiler on top, and an adaptive integrator is the same idea again. And if you are ever ' +
+        'tempted to ship bare Newton, remember the third failure. It does not return an error, it ' +
+        'returns a root, and it is the wrong one.'
     };
   }
 

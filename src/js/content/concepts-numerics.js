@@ -179,12 +179,16 @@
         plain: 'A sign change brackets a root, and halving cannot lose it.',
         formal: 'if f is continuous and f(a)f(b) < 0 then a root lies in [a, b]; bisection gains exactly one bit per step',
         readAs: 'If the function is continuous and its values at the two ends have opposite signs, ' +
-          'a root is between them, and each halving pins down one more bit of its position.',
-        detail: 'This is the intermediate value theorem turned into an algorithm, and its cost is ' +
-          'fixed: reaching 10⁻¹² from a bracket of width one takes about forty steps regardless of ' +
-          'what the function looks like in between. That predictability is its whole value — no ' +
-          'starting-point sensitivity, no divergence, no wrong basin. It is also why it is the ' +
-          'fallback inside every hybrid rather than a method anyone runs alone.',
+          'then a root lies between them. Each halving pins down one more bit of its position.',
+        detail: [
+          'This is the intermediate value theorem turned into an algorithm, and its cost is fixed. ' +
+            'Reaching 10⁻¹² from a bracket of width one takes about forty steps regardless of what ' +
+            'the function looks like in between.',
+          'That predictability is its whole value: no starting-point sensitivity, no divergence, no ' +
+            'wrong basin.',
+          'It is also why it is the fallback inside every hybrid rather than a method anyone runs ' +
+            'alone.'
+        ],
         example: 'The demo measures bisection at 41 iterations with a bracket contraction of ' +
           'exactly 0.5000 per step, on the same cubic where Newton takes 6.'
       },
@@ -194,12 +198,15 @@
         formal: 'x_{k+1} = x_k − f(x_k)/f′(x_k), with |e_{k+1}| ≈ C|e_k|²',
         readAs: 'Step from the current guess to where the tangent line crosses the axis; the new ' +
           'error is proportional to the square of the old one.',
-        detail: 'The tangent is the first two terms of the Taylor series, so the error left over ' +
-          'is the quadratic term — that is where the exponent comes from, and it is why the ' +
-          'convergence is so fast once you are close. The demo fits the exponent from the actual ' +
-          'iterate errors rather than quoting 2, which matters: a measured order well below the ' +
-          'claim is the standard symptom of a repeated root, where the derivative vanishes at the ' +
-          'root and the convergence degrades to linear.',
+        detail: [
+          'The tangent is the first two terms of the Taylor series, so the error left over is the ' +
+            'quadratic term. That is where the exponent comes from, and it is why the convergence ' +
+            'is so fast once you are close.',
+          'The demo fits the exponent from the actual iterate errors rather than quoting 2, and that ' +
+            'matters.',
+          'A measured order well below the claim is the standard symptom of a repeated root, where ' +
+            'the derivative vanishes at the root and the convergence degrades to linear.'
+        ],
         example: 'The demo fits 1.957 for Newton and 1.580 for the secant method on x³ − 2x − 5, ' +
           'against theoretical values of 2 and 1.618.'
       },
@@ -219,12 +226,14 @@
         },
         plain: 'A flat derivative throws it away, a symmetric function makes it cycle, and a nearby root may not be the one it finds.',
         formal: 'a small f′(x_k) makes the step enormous; some functions admit a 2-cycle; the basin boundary is where f′ = 0',
-        detail: 'The third is the one that costs real time, because the returned value is a ' +
-          'genuine root correct to fifteen digits and simply not the root anywhere near where you ' +
-          'started. Nothing in the return value records which basin it came from. On x³ − 2x, ' +
-          'whose derivative vanishes at ±√(2/3) ≈ 0.8165, starting at 0.75 lands on −1.414 — ' +
-          'crossing the root at zero to get there — and the boundary flips within a thousandth of ' +
-          'that point.',
+        detail: [
+          'The third is the one that costs real time. The returned value is a genuine root correct ' +
+            'to fifteen digits, and simply not the root anywhere near where you started.',
+          'Nothing in the return value records which basin it came from.',
+          'On x³ − 2x, whose derivative vanishes at ±√(2/3) ≈ 0.8165, starting at 0.75 lands on ' +
+            '−1.414, crossing the root at zero to get there. The boundary flips within a thousandth ' +
+            'of that point.'
+        ],
         example: 'Three of the demo’s nine starting points converge to a root that is not the ' +
           'nearest one, and the switch happens between 0.8150 and 0.8165.'
       },
@@ -234,11 +243,14 @@
         formal: 'the secant error satisfies |e_{k+1}| ≈ C|e_k||e_{k−1}|, whose order is the golden ratio φ = 1.618',
         readAs: 'The new error is proportional to the product of the previous two errors, and ' +
           'solving that recurrence gives an exponent of one point six one eight.',
-        detail: 'The golden ratio is not a coincidence: substituting a power law into that ' +
-          'recurrence gives p² = p + 1, whose positive root is φ. The practical point is the ' +
-          'accounting. Newton needs f and f′ at every step; the secant needs only f, reusing the ' +
-          'previous value. On a function whose derivative is expensive — or unavailable, which is ' +
-          'common — the lower order finishes first on the metric that is actually paid.',
+        detail: [
+          'The golden ratio is not a coincidence. Substituting a power law into that recurrence ' +
+            'gives p² = p + 1, whose positive root is φ.',
+          'The practical point is the accounting. Newton needs f and f′ at every step; the secant ' +
+            'needs only f, reusing the previous value.',
+          'On a function whose derivative is expensive — or unavailable, which is common — the lower ' +
+            'order finishes first on the metric that is actually paid.'
+        ],
         example: 'The demo has Newton at 6 iterations and 12 evaluations against the secant’s 8 ' +
           'iterations and 9 evaluations, and the secant is the cheapest method in the table.'
       },
@@ -246,12 +258,15 @@
         term: 'False position keeps a bracket and can still be worse than bisection',
         plain: 'It interpolates towards the root, and on a convex function one endpoint sticks forever.',
         formal: 'the retained endpoint never moves when f is convex, so the bracket width tends to a non-zero limit',
-        detail: 'It looks strictly better than bisection — same guarantee, smarter step — and ' +
-          'that intuition is wrong in a way worth seeing measured. Because the interpolated point ' +
-          'always lands on the same side of a convex function, one end of the bracket is never ' +
-          'replaced, and the interval stops shrinking even though the iterate converges. The ' +
-          'contraction rate is the diagnostic: bisection is exactly 0.5 and false position is ' +
-          'essentially 1.0, meaning it is not contracting at all.',
+        detail: [
+          'It looks strictly better than bisection — same guarantee, smarter step — and that ' +
+            'intuition is wrong in a way worth seeing measured.',
+          'The interpolated point always lands on the same side of a convex function, so one end of ' +
+            'the bracket is never replaced. The interval stops shrinking even though the iterate ' +
+            'converges.',
+          'The contraction rate is the diagnostic. Bisection is exactly 0.5 and false position is ' +
+            'essentially 1.0, meaning it is not contracting at all.'
+        ],
         example: 'The demo measures false position’s bracket contraction at 1.0000, and on eˣ − 4 ' +
           'it stalls on 99 of its 100 iterations.'
       },
@@ -259,12 +274,16 @@
         term: 'Brent is a hybrid with a progress test, not a fast method with a safety net',
         plain: 'It tries the fastest available step and bisects whenever that step fails to make guaranteed progress.',
         formal: 'the interpolated step is accepted only if it lands in the bracket’s upper quarter and has halved the interval since the last bisection',
-        detail: 'The two acceptance conditions are what make the guarantee hold, and they are the ' +
-          'transferable idea. Without them, "interpolate, and fall back if it fails" would inherit ' +
-          'false position’s stalling. With them, the bracket is forced to shrink at a bounded rate ' +
-          'whatever the function does, so the method has the speed of an open method and the ' +
-          'worst-case behaviour of a bracketing one. This shape — fast path plus a floor enforced ' +
-          'by a progress test — recurs in introsort, in JIT compilation and in adaptive quadrature.',
+        detail: [
+          'The two acceptance conditions are what make the guarantee hold, and they are the ' +
+            'transferable idea.',
+          'Without them, "interpolate, and fall back if it fails" would inherit false position’s ' +
+            'stalling. With them, the bracket is forced to shrink at a bounded rate whatever the ' +
+            'function does.',
+          'So the method has the speed of an open method and the worst-case behaviour of a ' +
+            'bracketing one. This shape — fast path plus a floor enforced by a progress test — ' +
+            'recurs in introsort, in JIT compilation and in adaptive quadrature.'
+        ],
         example: 'The demo has Brent at 9 iterations, taking 7 interpolated steps and 1 bisection, ' +
           'with a measured bracket contraction of 0.7273.'
       },
@@ -273,13 +292,16 @@
         plain: 'Rewrite f(x) = 0 as x = g(x) and iterate; whether it works is decided by |g′| at the root.',
         formal: 'the iteration converges locally if |g′(x*)| < 1, and the error falls by that factor each step',
         readAs: 'If the size of the derivative of g at the root is below one, each step multiplies ' +
-          'the error by that number and the iteration closes in; at one or above it does not.',
-        detail: 'The valuable part is that the test is available before you run anything: the same ' +
-          'equation rearranged two ways gives two iterations with different derivatives, and ' +
-          'differentiating tells you which will work. It also unifies the section — Newton is ' +
-          'fixed-point iteration with g(x) = x − f/f′, whose derivative vanishes at a simple root, ' +
-          'and a contraction factor of zero is exactly what quadratic convergence looks like from ' +
-          'this angle.',
+          'the error by that number and the iteration closes in. At one or above it does not.',
+        detail: [
+          'The valuable part is that the test is available before you run anything. The same ' +
+            'equation rearranged two ways gives two iterations with different derivatives, and ' +
+            'differentiating tells you which will work.',
+          'It also unifies the section. Newton is fixed-point iteration with g(x) = x − f/f′, whose ' +
+            'derivative vanishes at a simple root.',
+          'A contraction factor of zero is exactly what quadratic convergence looks like from this ' +
+            'angle.'
+        ],
         example: 'Both of the demo’s iterations solve x² − x − 1 = 0; the one with |g′| = 0.3820 ' +
           'converges in 28 steps and the one with 3.2361 never does.'
       },
@@ -287,12 +309,15 @@
         term: 'A tolerance on the step is not a tolerance on the error',
         plain: 'Stopping when the iterates stop moving says the method slowed down, not that you are close.',
         formal: 'near a flat function a small |f(x)| can accompany a large |x − x*|, and vice versa near a steep one',
-        detail: 'Both stopping tests are wrong on their own and for opposite reasons. Stopping on ' +
-          '|f(x)| being small accepts anything on a nearly flat stretch, which can be far from the ' +
-          'root; stopping on the step being small accepts a method that has merely stalled, which ' +
-          'is exactly what false position does. Production root finders test both, add an absolute ' +
-          'floor so a root at zero is reachable, and cap the iterations — which is three guards ' +
-          'because there are three distinct ways to be fooled.',
+        detail: [
+          'Both stopping tests are wrong on their own, and for opposite reasons.',
+          'Stopping on |f(x)| being small accepts anything on a nearly flat stretch, which can be ' +
+            'far from the root. Stopping on the step being small accepts a method that has merely ' +
+            'stalled, which is exactly what false position does.',
+          'Production root finders test both, add an absolute floor so a root at zero is reachable, ' +
+            'and cap the iterations. That is three guards, because there are three distinct ways to ' +
+            'be fooled.'
+        ],
         example: 'False position in the demo satisfies a step-size test long before its bracket ' +
           'has contracted at all; its contraction of 1.0000 is the evidence.'
       }
