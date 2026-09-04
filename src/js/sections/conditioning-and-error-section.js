@@ -52,46 +52,53 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**A small residual does not mean a correct answer.** The residual ‖Ax − b‖ asks whether your ' +
+        'answer satisfies the equations as written. The error ‖x − x*‖ asks whether it is the ' +
+        'answer.',
+      'On a well-conditioned problem those two travel together, and the habit of checking the ' +
+        'residual is harmless.',
+      'On an ill-conditioned one they separate completely. And the residual is the one you can ' +
+        'compute without knowing the answer, which is exactly why it is the one people report.',
+      '**The condition number is a property of the problem, not of the code.** It is the factor by ' +
+        'which a relative perturbation of the input can be magnified in the output, and it is ' +
+        'defined before any algorithm is chosen.',
+      'The input is already perturbed by the rounding that stored it — about 10⁻¹⁶. So a condition ' +
+        'number of 10⁸ means you may lose half your digits no matter what you do, and 10¹⁶ means ' +
+        'you may lose all of them.',
+      '**Stability is the separate question of whether the algorithm adds more error than that.** A ' +
+        'stable algorithm returns the exact answer to a slightly perturbed problem — that is what ' +
+        'backward stability means.',
+      'So its error is bounded by the condition number times the rounding, and no better.',
+      'Gaussian elimination with partial pivoting is stable. The answer it gives on a Hilbert matrix ' +
+        'is still worthless, and both of those statements are true at once.',
+      '**So there are two separate diagnoses and they need different fixes.** If the algorithm is ' +
+        'unstable, replace it — that is what the next three sections are about.',
+      'If the problem is ill-conditioned, no algorithm helps. The answer is not determined by the ' +
+        'data, and the fix is to change the problem: reformulate, regularise, or collect better ' +
+        'data.',
+      'Telling the two apart is the skill, and the condition number is how.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**A small residual does not mean a correct answer.** The residual ‖Ax − b‖ asks whether ' +
-          'your answer satisfies the equations as written; the error ‖x − x*‖ asks whether it is ' +
-          'the answer. On a well-conditioned problem those two travel together and the habit of ' +
-          'checking the residual is harmless. On an ill-conditioned one they separate ' +
-          'completely — and the residual is the one you can compute without knowing the answer, ' +
-          'which is exactly why it is the one people report.',
-        '**The condition number is a property of the problem, not of the code.** It is the factor ' +
-          'by which a relative perturbation of the input can be magnified in the output, and it ' +
-          'is defined before any algorithm is chosen. Since the input is already perturbed by the ' +
-          'rounding that stored it — about 10⁻¹⁶ — a condition number of 10⁸ means you may lose ' +
-          'half your digits no matter what you do, and 10¹⁶ means you may lose all of them.',
-        '**Stability is the separate question of whether the algorithm adds more error than ' +
-          'that.** A stable algorithm returns the exact answer to a slightly perturbed problem — ' +
-          'that is what backward stability means — so its error is bounded by the condition ' +
-          'number times the rounding, and no better. Gaussian elimination with partial pivoting ' +
-          'is stable; the answer it gives on a Hilbert matrix is still worthless, and both of ' +
-          'those statements are true at once.',
-        '**So there are two separate diagnoses and they need different fixes.** If the algorithm ' +
-          'is unstable, replace it — that is what the next three sections are about. If the ' +
-          'problem is ill-conditioned, no algorithm helps: the answer is not determined by the ' +
-          'data, and the fix is to change the problem — reformulate, regularise, or collect ' +
-          'better data. Telling the two apart is the skill, and the condition number is how.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — the residual, the error, and the gap between them',
         markup: root.ConditioningAndErrorTemplate.render()
       },
       diagram: diagram(),
       insight: 'When a numerical result looks wrong, compute the condition number before ' +
-        'suspecting the code. It is one SVD and it settles the question: if it is large, the ' +
+        'suspecting the code. It is one SVD and it settles the question. If it is large, the ' +
         'answer you are unhappy with may be the best answer the data supports, and no amount of ' +
         'algorithm-swapping will improve it. The corollary is the one that saves the most time: ' +
         '**never report a residual as evidence of correctness**. It is evidence that the solver ' +
         'ran, and on exactly the problems where you most want reassurance it is reassuring and ' +
         'meaningless. If you cannot compute the error because you do not know the answer, say ' +
-        'that — a stated uncertainty is worth more than a residual quoted as though it were one.'
+        'that. A stated uncertainty is worth more than a residual quoted as though it were one.'
     };
   }
 

@@ -23,14 +23,18 @@
         plain: 'One asks whether your answer satisfies the equations; the other asks whether it is the answer.',
         formal: 'the residual is ‖Ax − b‖ and the error is ‖x − x*‖, and only the first is computable without x*',
         readAs: 'The residual is how far the equations are from being satisfied by the answer you ' +
-          'produced; the error is how far that answer is from the true one, which you would need ' +
+          'produced. The error is how far that answer is from the true one, which you would need ' +
           'to already know to measure.',
-        detail: 'On a well-conditioned problem the two move together and the habit of reporting a ' +
-          'residual is harmless. On an ill-conditioned one they separate completely: the demo ' +
-          'holds the residual at machine precision across nine orders of conditioning while the ' +
-          'error climbs from 1.65e-16 to 1.89e-1. The asymmetry that makes this dangerous is that ' +
-          'the residual is the one you can compute without knowing the answer, so it is the one ' +
-          'that ends up in the log line, the assertion and the dashboard.',
+        detail: [
+          'On a well-conditioned problem the two move together, and the habit of reporting a ' +
+            'residual is harmless.',
+          'On an ill-conditioned one they separate completely. The demo holds the residual at ' +
+            'machine precision across nine orders of conditioning while the error climbs from ' +
+            '1.65e-16 to 1.89e-1.',
+          'The asymmetry that makes this dangerous is that the residual is the one you can compute ' +
+            'without knowing the answer. So it is the one that ends up in the log line, the ' +
+            'assertion and the dashboard.'
+        ],
         example: 'At κ = 1.07e16 the demo reports a relative residual of 1.93e-16 beside a relative ' +
           'error of 1.89e-1 — the residual is 9.8e14 times smaller than the error.'
       },
@@ -52,27 +56,32 @@
         readAs: 'Kappa of A is the largest singular value divided by the smallest, and the ' +
           'relative error you should expect is that number multiplied by however inaccurate the ' +
           'input already was.',
-        detail: 'Defining it before any algorithm is chosen is the whole point: it says what is ' +
-          'achievable, so it tells you whether an answer you dislike is a bug or the best the data ' +
-          'supports. Because storing the input already perturbed it by about 10⁻¹⁶, a condition ' +
-          'number of 10⁸ means half your digits may be gone before any code runs, and 10¹⁶ means ' +
-          'all of them. Nothing about the implementation appears anywhere in that sentence.',
+        detail: [
+          'Defining it before any algorithm is chosen is the whole point. It says what is ' +
+            'achievable, so it tells you whether an answer you dislike is a bug or the best the ' +
+            'data supports.',
+          'Storing the input already perturbed it by about 10⁻¹⁶. So a condition number of 10⁸ ' +
+            'means half your digits may be gone before any code runs, and 10¹⁶ means all of them.',
+          'Nothing about the implementation appears anywhere in that sentence.'
+        ],
         example: 'The Hilbert ladder in the demo goes from κ = 5.24e2 at n = 3 to 1.73e18 at ' +
-          'n = 13, and the relative error goes from 8.02e-15 to 2.01e0 alongside it.'
+          'n = 13. The relative error goes from 8.02e-15 to 2.01e0 alongside it.'
       },
       {
         term: 'Backward stability is a claim about the problem you actually solved',
         plain: 'A stable algorithm returns the exact answer to a slightly different question.',
         formal: 'a backward-stable algorithm returns x̂ that exactly solves (A + δA)x̂ = b with ‖δA‖ / ‖A‖ ≈ ε',
         readAs: 'The computed answer is the perfect answer to a problem within rounding distance ' +
-          'of the one you asked, where that distance is about machine epsilon relative to the size ' +
-          'of the matrix.',
-        detail: 'This is the right definition of "the code is not the problem", and it is worth ' +
-          'internalising because it explains why a stable algorithm on an ill-conditioned problem ' +
-          'still gives a bad answer without that being a contradiction. The perturbation δA is ' +
-          'tiny; the condition number multiplies it; the product is the error you see. Gaussian ' +
-          'elimination with partial pivoting is backward stable, and its answer on a Hilbert ' +
-          'matrix is worthless — both statements are true at once.',
+          'of the one you asked. That distance is about machine epsilon relative to the size of ' +
+          'the matrix.',
+        detail: [
+          'This is the right definition of "the code is not the problem".',
+          'It is worth internalising because it explains why a stable algorithm on an ' +
+            'ill-conditioned problem still gives a bad answer without that being a contradiction.',
+          'The perturbation δA is tiny, the condition number multiplies it, and the product is the ' +
+            'error you see. Gaussian elimination with partial pivoting is backward stable, and its ' +
+            'answer on a Hilbert matrix is worthless — both statements are true at once.'
+        ],
         example: 'Every row of the demo’s sweep sits inside the bound εκ, which is exactly what ' +
           'the definition promises, including the row where the answer has no correct digits.'
       },
@@ -82,13 +91,15 @@
         formal: 'digits kept ≈ 16 − log₁₀ κ',
         readAs: 'Take sixteen, subtract the number of zeros in the condition number, and what is ' +
           'left is roughly how many correct digits the answer can have.',
-        detail: 'It is a rule of thumb rather than a theorem and it is accurate enough to plan ' +
-          'with, which makes it one of the most useful numbers in the subject. It tells you before ' +
-          'you write anything whether double precision is enough, and it turns "should I use ' +
-          'extended precision here" from a matter of taste into arithmetic. It also tells you when ' +
-          'the answer is not to reach for more precision: at κ above 10¹⁶ the data does not ' +
-          'determine the answer, and quadruple precision buys you a more precisely computed ' +
-          'meaningless result.',
+        detail: [
+          'It is a rule of thumb rather than a theorem, and it is accurate enough to plan with, ' +
+            'which makes it one of the most useful numbers in the subject.',
+          'It tells you before you write anything whether double precision is enough, and it turns ' +
+            '"should I use extended precision here" from a matter of taste into arithmetic.',
+          'It also tells you when the answer is not to reach for more precision. At κ above 10¹⁶ the ' +
+            'data does not determine the answer, and quadruple precision buys you a more precisely ' +
+            'computed meaningless result.'
+        ],
         example: 'The demo shows six digits lost at κ = 10⁶, and eighteen at the Hilbert matrix of ' +
           'size 13, where the answer has none left.'
       },
@@ -96,14 +107,18 @@
         term: 'Catastrophic cancellation destroys digits that were never wrong',
         plain: 'Subtracting two nearly equal numbers keeps the difference and throws away the significance.',
         formal: 'if a and b agree to k digits, a − b loses k significant digits even though a and b were exact',
-        detail: 'The subtraction itself is exact — IEEE arithmetic rounds the true difference — ' +
-          'and the loss happens because the leading digits that cancelled were the ones carrying ' +
-          'the precision. What remains is normalised, so the result looks like a full-precision ' +
-          'number and is not one. This is why the quadratic formula is rewritten for the root that ' +
-          'would cancel, why variance is never computed as E[x²] − E[x]², and why the reference ' +
-          'answer in the pivoting demo had to be derived in the one arrangement that avoids it.',
-        example: 'The exact solution to the tiny-pivot system must be derived as x₁ = 1/(1 − ε); ' +
-          'the algebraically identical (1 − x₂)/ε cancels to zero at ε = 1e-18 and returns the ' +
+        detail: [
+          'The subtraction itself is exact — IEEE arithmetic rounds the true difference — and the ' +
+            'loss happens because the leading digits that cancelled were the ones carrying the ' +
+            'precision.',
+          'What remains is normalised, so the result looks like a full-precision number and is not ' +
+            'one.',
+          'This is why the quadratic formula is rewritten for the root that would cancel, and why ' +
+            'variance is never computed as E[x²] − E[x]². It is also why the reference answer in ' +
+            'the pivoting demo had to be derived in the one arrangement that avoids it.'
+        ],
+        example: 'The exact solution to the tiny-pivot system must be derived as x₁ = 1/(1 − ε). ' +
+          'The algebraically identical (1 − x₂)/ε cancels to zero at ε = 1e-18 and returns the ' +
           'wrong answer.'
       },
       {
@@ -112,12 +127,15 @@
         formal: 'forward error ≲ κ(problem) × backward error',
         readAs: 'How wrong the answer is, is at most how wrong the question was, multiplied by ' +
           'how sensitive the question is.',
-        detail: 'Almost everything in this milestone is an application of this one inequality. It ' +
-          'says the two diagnoses are separable: measure the backward error to judge the code, ' +
-          'and the condition number to judge the problem, and their product explains the forward ' +
-          'error you observed. If the backward error is at machine precision the algorithm has ' +
-          'done everything available to it, and any remaining inaccuracy is the problem’s ' +
-          'property — which means the fix is reformulation or better data, never a rewrite.',
+        detail: [
+          'Almost everything in this milestone is an application of this one inequality.',
+          'It says the two diagnoses are separable. Measure the backward error to judge the code, ' +
+            'and the condition number to judge the problem, and their product explains the forward ' +
+            'error you observed.',
+          'If the backward error is at machine precision the algorithm has done everything available ' +
+            'to it. Any remaining inaccuracy is the problem’s property, which means the fix is ' +
+            'reformulation or better data, never a rewrite.'
+        ],
         example: 'The sweep’s fourth column is εκ, the bound this inequality produces, and every ' +
           'measured error sits under it.'
       },
@@ -125,13 +143,15 @@
         term: 'Relative error is the one that means anything across scales',
         plain: 'Being off by a millimetre matters differently on a screw and on a bridge.',
         formal: 'relative error = |x̂ − x| / |x|, which is dimensionless and comparable',
-        detail: 'Floating point itself is built around relative error — the spacing between ' +
-          'representable numbers grows with magnitude, so a double gives you roughly sixteen ' +
-          'significant digits whatever the exponent. That makes relative error the natural ' +
-          'currency: it is what machine epsilon bounds, what the condition number multiplies, and ' +
-          'what a tolerance should be expressed in. The exception worth knowing is near zero, ' +
-          'where the denominator vanishes and a mixed absolute-plus-relative tolerance is the ' +
-          'standard fix.',
+        detail: [
+          'Floating point itself is built around relative error. The spacing between representable ' +
+            'numbers grows with magnitude, so a double gives you roughly sixteen significant digits ' +
+            'whatever the exponent.',
+          'That makes relative error the natural currency: it is what machine epsilon bounds, what ' +
+            'the condition number multiplies, and what a tolerance should be expressed in.',
+          'The exception worth knowing is near zero, where the denominator vanishes and a mixed ' +
+            'absolute-plus-relative tolerance is the standard fix.'
+        ],
         example: 'Every column in this section’s tables is a relative quantity, which is why they ' +
           'can be compared across systems of different sizes and scalings.'
       },
@@ -139,12 +159,15 @@
         term: 'Interval arithmetic gives you a certified bound and usually a useless one',
         plain: 'Carry a low and a high through every operation and the answer arrives with a proven range.',
         formal: '[a, b] + [c, d] = [a + c, b + d], with each endpoint rounded outwards',
-        detail: 'It is the only technique here that produces a guarantee rather than an estimate, ' +
-          'and it is genuinely valuable as a diagnostic: run a computation in intervals and a wide ' +
-          'output localises where the precision was lost. The catch is the dependency problem — ' +
-          'the interval does not know that the x in two places is the same x, so x − x comes out ' +
-          'as a range around zero rather than zero, and widths grow pessimistically through any ' +
-          'long computation. That is why it diagnoses rather than replaces.',
+        detail: [
+          'It is the only technique here that produces a guarantee rather than an estimate, and it ' +
+            'is genuinely valuable as a diagnostic. Run a computation in intervals, and a wide ' +
+            'output localises where the precision was lost.',
+          'The catch is the dependency problem. The interval does not know that the x in two places ' +
+            'is the same x, so x − x comes out as a range around zero rather than zero. Widths grow ' +
+            'pessimistically through any long computation.',
+          'That is why it diagnoses rather than replaces.'
+        ],
         example: 'On an ill-conditioned solve the interval width grows to cover the whole answer, ' +
           'which is a correct statement that the data does not determine the result.'
       }
