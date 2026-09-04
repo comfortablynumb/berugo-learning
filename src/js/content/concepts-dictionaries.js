@@ -275,11 +275,14 @@
         term: 'A compressor is a model and a coder, and only one of them is still hard',
         plain: 'The coder spends −log₂(p) bits; the model decides p.',
         formal: 'bits = cross-entropy of the message under the model; the coder adds O(1) per message',
-        detail: 'Arithmetic coding solved the coder in 1980. Every improvement in compression ' +
-          'since then is an improvement in prediction, which makes "compression is prediction" a ' +
-          'statement about arithmetic rather than a slogan — and it makes the compression ' +
-          'literature and the language-modelling literature two vocabularies for one measurement. ' +
-          'A model that predicts text well IS a compressor of text.',
+        detail: [
+          'Arithmetic coding solved the coder in 1980. Every improvement in compression since then ' +
+            'is an improvement in prediction.',
+          'That makes "compression is prediction" a statement about arithmetic rather than a slogan. ' +
+            'It also makes the compression literature and the language-modelling literature two ' +
+            'vocabularies for one measurement.',
+          'A model that predicts text well IS a compressor of text.'
+        ],
         example: 'The demo’s mixed model reaches 2.996 bits per symbol where an order-0 model ' +
           'spends 4.618, with no change to the coder at all.'
       },
@@ -297,12 +300,15 @@
         },
         plain: 'The plain order-k model bottoms out and then gets worse.',
         formal: 'each context reserves probability for every unseen symbol, so a sparse model spends most of its mass on nothing',
-        detail: 'With add-one smoothing over an alphabet of thirty, a context that has seen two ' +
-          'symbols still assigns twenty-eight of them a probability each. That reserved mass is ' +
-          'the cost, and it grows with the order faster than the extra context is worth. The ' +
-          'turnaround is a measurement rather than a rule of thumb — it moves with the alphabet ' +
-          'size and the amount of data — which is why the demo reports the observations per ' +
-          'context beside every row.',
+        detail: [
+          'With add-one smoothing over an alphabet of thirty, a context that has seen two symbols ' +
+            'still assigns twenty-eight of them a probability each.',
+          'That reserved mass is the cost, and it grows with the order faster than the extra context ' +
+            'is worth.',
+          'The turnaround is a measurement rather than a rule of thumb, because it moves with the ' +
+            'alphabet size and the amount of data. That is why the demo reports the observations ' +
+            'per context beside every row.'
+        ],
         example: 'The demo measures 3.0088 bits at order 2 and 3.1418 at order 4, with 13.4 and ' +
           '8.3 observations per context.'
       },
@@ -310,37 +316,44 @@
         term: 'PPM escapes to a shorter context instead of paying for the alphabet',
         plain: 'When the longest context has never seen this symbol, spend an escape and drop an order.',
         formal: 'method A: the escape has probability 1/(total + 1), the estimate that one more novel symbol is coming',
-        detail: 'That single mechanism turns the curve around. The escape costs real bits — it is ' +
-          'a symbol like any other — so the best maximum order is still a measurement, but with ' +
-          'escapes the model keeps improving far longer because a sparse context contributes ' +
-          'nothing rather than costing everything. It is the difference between a model that ' +
-          'must have an opinion about every symbol and one that can say "ask someone shorter".',
-        example: 'The demo measures PPM at 1.1009 bits per symbol at order 4 against the plain ' +
-          'model’s 3.1418 — 0.350× — at 0.1027 escapes per symbol.'
+        detail: [
+          'That single mechanism turns the curve around.',
+          'The escape costs real bits, because it is a symbol like any other, so the best maximum ' +
+            'order is still a measurement. But with escapes the model keeps improving far longer, ' +
+            'because a sparse context contributes nothing rather than costing everything.',
+          'It is the difference between a model that must have an opinion about every symbol and one ' +
+            'that can say "ask someone shorter".'
+        ],
+        example: 'The demo measures PPM at 1.1009 bits per symbol at order 4, against the plain ' +
+          'model’s 3.1418. That is 0.350×, at 0.1027 escapes per symbol.'
       },
       {
         term: 'Exclusion is the detail that makes PPM work',
         plain: 'A symbol ruled out by a longer context cannot be predicted by a shorter one.',
         formal: 'after escaping from a context, remove every symbol it had seen from the shorter contexts’ distributions',
-        detail: 'The escape already told the decoder that the symbol is none of the ones the long ' +
-          'context knew about, so leaving probability mass on them in the fallback wastes exactly ' +
-          'the information the escape just conveyed. Redistributing it is free — both sides can ' +
-          'compute the exclusion set — and without it PPM measurably loses to a plain model at ' +
-          'the same order, which is the kind of detail that separates a working implementation ' +
-          'from a described one.',
+        detail: [
+          'The escape already told the decoder that the symbol is none of the ones the long context ' +
+            'knew about. Leaving probability mass on them in the fallback wastes exactly the ' +
+            'information the escape just conveyed.',
+          'Redistributing it is free, because both sides can compute the exclusion set.',
+          'Without it PPM measurably loses to a plain model at the same order. That is the kind of ' +
+            'detail that separates a working implementation from a described one.'
+        ],
         example: 'The demo implements exclusions and measures PPM at 0.350× the plain model at ' +
-          'order 4; without them the advantage largely disappears.'
+          'order 4. Without them the advantage largely disappears.'
       },
       {
         term: 'Mixing does not choose, and the weights say who is carrying the prediction',
         plain: 'Several models predict, a mixer blends, and the blend adapts.',
         formal: 'each weight is scaled by 1 + rate·(model probability / mixture probability − 1), then normalised',
-        detail: 'The weights move towards whichever model gave the symbol that actually arrived a ' +
-          'high probability, so the mixture tracks a file whose character changes partway ' +
-          'through. That is the practical advantage over choosing an order: there is no ' +
-          'hyperparameter to fit, and the answer is allowed to be different at the start of the ' +
-          'file and at the end. PAQ does this in the logistic domain over binary decisions and ' +
-          'runs dozens of models at once.',
+        detail: [
+          'The weights move towards whichever model gave the symbol that actually arrived a high ' +
+            'probability, so the mixture tracks a file whose character changes partway through.',
+          'That is the practical advantage over choosing an order. There is no hyperparameter to ' +
+            'fit, and the answer is allowed to be different at the start of the file and at the end.',
+          'PAQ does this in the logistic domain over binary decisions, and runs dozens of models at ' +
+            'once.'
+        ],
         example: 'The demo’s weights start equal at 0.2500 and end with order 2 carrying 76.6% of ' +
           'the prediction.'
       },
@@ -348,23 +361,28 @@
         term: 'The model costs nothing in the stream and everything in the CPU',
         plain: 'Encoder and decoder update identically, so nothing is transmitted.',
         formal: 'both sides observe the same symbol and apply the same update, so the model is shared state that never travels',
-        detail: 'That is what makes a hundred-model mixture practical at all: none of it appears ' +
-          'in the output. The price is symmetric work — the decoder runs the same models as the ' +
-          'encoder, so decoding is as slow as encoding, which is the opposite of every other ' +
-          'codec in this milestone. It is why PAQ compresses at kilobytes per second in both ' +
-          'directions and why nothing ships it.',
+        detail: [
+          'That is what makes a hundred-model mixture practical at all. None of it appears in the ' +
+            'output.',
+          'The price is symmetric work. The decoder runs the same models as the encoder, so decoding ' +
+            'is as slow as encoding, which is the opposite of every other codec in this milestone.',
+          'It is why PAQ compresses at kilobytes per second in both directions, and why nothing ' +
+            'ships it.'
+        ],
         example: 'The demo runs four models over 1 500 symbols and transmits no table of any kind.'
       },
       {
         term: 'The equivalence with language modelling is exact',
         plain: 'A model’s training loss and a compressor’s output size are the same number.',
         formal: 'cross-entropy in bits per symbol × symbol count = the compressed size in bits',
-        detail: 'A language model reporting 1.8 bits per character IS a compressor achieving 1.8 ' +
-          'bits per character, and an arithmetic coder driven by it would produce a file of ' +
-          'exactly that size. The Hutter Prize turns that into a competition on a gigabyte of ' +
-          'Wikipedia. It also means the whole apparatus of this section — context, sparsity, ' +
-          'smoothing, mixing — is the same apparatus, with different names, that a tokeniser and ' +
-          'an attention mechanism address.',
+        detail: [
+          'A language model reporting 1.8 bits per character IS a compressor achieving 1.8 bits per ' +
+            'character. An arithmetic coder driven by it would produce a file of exactly that size.',
+          'The Hutter Prize turns that into a competition on a gigabyte of Wikipedia.',
+          'It also means the whole apparatus of this section — context, sparsity, smoothing, mixing ' +
+            '— is the same apparatus, with different names, that a tokeniser and an attention ' +
+            'mechanism address.'
+        ],
         example: 'The demo’s bits-per-symbol column is a cross-entropy, computed exactly as a ' +
           'training loss would be.'
       },
@@ -372,12 +390,14 @@
         term: 'Tokenisation is the same decision as choosing a model order',
         plain: 'Both trade context length against evidence per context.',
         formal: 'a longer token is a longer context, and it is seen fewer times',
-        detail: 'A byte-level model has few contexts with plenty of evidence and little reach; a ' +
-          'word-level one has enormous reach and a sparsity problem; subword tokenisation is a ' +
-          'fitted compromise between exactly those two. The sparsity curve this section measures ' +
-          'is the same curve, and the answers the field has found — back-off, smoothing, mixing, ' +
-          'sharing strength between similar contexts — are the same answers in different ' +
-          'vocabulary.',
+        detail: [
+          'A byte-level model has few contexts with plenty of evidence and little reach. A ' +
+            'word-level one has enormous reach and a sparsity problem.',
+          'Subword tokenisation is a fitted compromise between exactly those two.',
+          'The sparsity curve this section measures is the same curve. The answers the field has ' +
+            'found — back-off, smoothing, mixing, sharing strength between similar contexts — are ' +
+            'the same answers in different vocabulary.'
+        ],
         example: 'The demo’s order sweep is that curve: 4.618 bits at order 0, 3.009 at order 2, ' +
           '3.142 at order 4.'
       }

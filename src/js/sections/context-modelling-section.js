@@ -53,39 +53,51 @@
     };
   }
 
-  function orientation() {
+  function orientationSparsity() {
     return [
       '**A compressor is two separable things: a model that predicts and a coder that spends ' +
         '−log₂(p) bits on what arrives.** The coder has been solved since arithmetic coding, so ' +
-        'every improvement since 1980 is an improvement in prediction. "Compression is ' +
-        'prediction" is arithmetic rather than a slogan.',
+        'every improvement since 1980 is an improvement in prediction.',
+      '"Compression is prediction" is arithmetic rather than a slogan.',
       '**More context is not automatically better, and the demo shows where it turns around.** A ' +
-        'plain order-k model improves to order 2 on this corpus and gets worse after it, because ' +
-        'each context must reserve probability for the symbols it has never seen — and a sparse ' +
-        'model spends most of its mass on nothing.',
+        'plain order-k model improves to order 2 on this corpus and gets worse after it.',
+      'Each context must reserve probability for the symbols it has never seen, and a sparse model ' +
+        'spends most of its mass on nothing.',
       '**PPM answers sparsity with an escape.** Predict from the longest context that has seen ' +
-        'anything; when the symbol is new there, spend an escape symbol and drop an order. The ' +
-        'escape costs bits, so the best maximum order is a measurement rather than "as high as ' +
-        'possible" — though with escapes it keeps improving far longer than the plain model does.',
+        'anything. When the symbol is new there, spend an escape symbol and drop an order.',
+      'The escape costs bits, so the best maximum order is a measurement rather than "as high as ' +
+        'possible". With escapes it keeps improving far longer than the plain model does.',
       '**Exclusion is the detail that makes PPM work.** A symbol already ruled out by a longer ' +
         'context cannot be predicted by a shorter one, so its probability mass is redistributed ' +
-        'rather than wasted. Without exclusions PPM measurably loses to a plain model at the same ' +
-        'order.',
-      '**Context mixing does not choose — it blends.** Several models predict, a mixer combines ' +
-        'them, and the weights move by gradient descent on the coding loss after every symbol. ' +
-        'The demo shows the weights migrating from the low orders to the high ones as the file ' +
-        'goes past and the deeper contexts accumulate evidence.',
-      '**The model costs nothing in the stream and everything in the CPU.** Encoder and decoder ' +
-        'update identically, so no table is transmitted — which is why the PAQ family can afford ' +
-        'dozens of models and why it compresses at kilobytes per second.',
-      '**The equivalence with language modelling is exact, not metaphorical.** The bits a message ' +
-        'costs under a model are its cross-entropy; a language model’s training loss is the same ' +
-        'quantity in the same units. A model that predicts text well IS a compressor of text, and ' +
-        'the Hutter Prize is that observation turned into a competition.',
-      '**Tokenisation is the same decision as choosing a model order.** Both are about what the ' +
-        'prediction is conditioned on, and both trade context length against how much evidence ' +
-        'each context gets — which is the sparsity problem this section measures.'
+        'rather than wasted.',
+      'Without exclusions PPM measurably loses to a plain model at the same order.'
     ];
+  }
+
+  function orientationMixing() {
+    return [
+      '**Context mixing does not choose. It blends.** Several models predict, a mixer combines ' +
+        'them, and the weights move by gradient descent on the coding loss after every symbol.',
+      'The demo shows the weights migrating from the low orders to the high ones as the file goes ' +
+        'past and the deeper contexts accumulate evidence.',
+      '**The model costs nothing in the stream and everything in the CPU.** Encoder and decoder ' +
+        'update identically, so no table is transmitted.',
+      'That is why the PAQ family can afford dozens of models, and why it compresses at kilobytes ' +
+        'per second.',
+      '**The equivalence with language modelling is exact, not metaphorical.** The bits a message ' +
+        'costs under a model are its cross-entropy, and a language model’s training loss is the ' +
+        'same quantity in the same units.',
+      'A model that predicts text well IS a compressor of text, and the Hutter Prize is that ' +
+        'observation turned into a competition.',
+      '**Tokenisation is the same decision as choosing a model order.** Both are about what the ' +
+        'prediction is conditioned on.',
+      'Both trade context length against how much evidence each context gets, which is the ' +
+        'sparsity problem this section measures.'
+    ];
+  }
+
+  function orientation() {
+    return orientationSparsity().concat(orientationMixing());
   }
 
   function config() {
@@ -98,13 +110,13 @@
       },
       diagram: diagram(),
       insight: '**Every compressor is a prediction machine, and the model is where the ratio ' +
-        'comes from — which means the compression literature and the language-modelling ' +
+        'comes from. That means the compression literature and the language-modelling ' +
         'literature are measuring the same quantity in the same units.** The practical reading ' +
-        'is the sparsity trade-off: a longer context predicts better when it has evidence and ' +
+        'is the sparsity trade-off. A longer context predicts better when it has evidence and ' +
         'catastrophically worse when it does not, so the useful question is never "what order" ' +
         'but "how much data per context". PPM answers it with an escape hatch, mixing answers it ' +
         'by keeping the short contexts alive, and a transformer answers it by sharing statistical ' +
-        'strength between contexts that look alike — three answers to one problem.'
+        'strength between contexts that look alike. Three answers to one problem.'
     };
   }
 
