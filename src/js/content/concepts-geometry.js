@@ -356,12 +356,16 @@
         },
         plain: 'Sort left to right, sweep forward for the lower hull and backward for the upper, popping right turns.',
         formal: 'O(n log n) dominated by the sort, with no angular comparison anywhere',
-        detail: 'Graham\'s scan sorts by angle around an extreme point, which means a trigonometric ' +
-          'or cross-product comparator, a tie rule for equal angles and a special case for the pivot ' +
-          'itself. Andrew\'s monotone chain replaces all of that with a lexicographic sort on the ' +
-          'coordinates, which any language sorts correctly by default. Two identical sweeps in ' +
-          'opposite directions then build the two halves, and the only rule is: pop while the last ' +
-          'three points do not turn the right way. That is why it is the version worth memorising.',
+        detail: [
+          'Graham\'s scan sorts by angle around an extreme point. That means a trigonometric or ' +
+            'cross-product comparator, a tie rule for equal angles, and a special case for the pivot ' +
+            'itself.',
+          'Andrew\'s monotone chain replaces all of that with a lexicographic sort on the ' +
+            'coordinates, which any language sorts correctly by default.',
+          'Two identical sweeps in opposite directions then build the two halves, and the only rule ' +
+            'is to pop while the last three points do not turn the right way. That is why it is the ' +
+            'version worth memorising.'
+        ],
         example: 'On 200 points it used 789 orientation tests and 1 262 sort comparisons — the fewest ' +
           'orientation tests of the four algorithms.'
       },
@@ -369,26 +373,34 @@
         term: 'O(n log n) and O(n·h) are different bounds, not better and worse',
         plain: 'Gift wrapping costs one scan per hull vertex, so it wins when the hull is tiny and loses catastrophically when it is not.',
         formal: 'gift wrapping is output-sensitive: h scans of n points, and h is the answer\'s size',
-        detail: 'This is the clearest example in the milestone of a bound you cannot rank without ' +
-          'knowing the data. A clustered cloud of a thousand points might have sixteen hull vertices, ' +
-          'and sixteen scans is nothing; a thousand points on a circle have a thousand hull vertices, ' +
-          'and the same algorithm now does a million orientation tests for the same n. The sorting ' +
-          'algorithms barely notice the difference, because their cost depends on n alone. Choosing ' +
-          'gift wrapping is a bet on h being small, and it should be written down as one.',
+        detail: [
+          'This is the clearest example in the milestone of a bound you cannot rank without knowing ' +
+            'the data.',
+          'A clustered cloud of a thousand points might have sixteen hull vertices, and sixteen ' +
+            'scans is nothing. A thousand points on a circle have a thousand hull vertices, and the ' +
+            'same algorithm now does a million orientation tests for the same n.',
+          'The sorting algorithms barely notice the difference, because their cost depends on n ' +
+            'alone. Choosing gift wrapping is a bet on h being small, and it should be written down ' +
+            'as one.'
+        ],
         example: 'At 1 024 points, gift wrapping costs 16 384 tests on a cloud with 16 hull vertices ' +
-          'and 1 047 552 on a circle with 1 024 — a 63.9× difference at the same n, while the ' +
-          'monotone chain goes 4 077 against 4 090.'
+          'and 1 047 552 on a circle with 1 024. That is a 63.9× difference at the same n, while ' +
+          'the monotone chain goes 4 077 against 4 090.'
       },
       {
         term: 'Four algorithms, one hull, four different bills',
         plain: 'They all return the identical vertices; what differs is the mix of comparisons and orientation tests paid for them.',
         formal: 'the hull is unique, so any disagreement between two implementations is a bug in one of them',
-        detail: 'The uniqueness is worth leaning on. Unlike a triangulation or a shortest-path tree, ' +
-          'the convex hull of a point set is a single well-defined answer, so cross-checking ' +
-          'implementations is a real test rather than a heuristic one. That makes the comparison ' +
-          'table honest: every row computes the same thing, and the columns are purely what each one ' +
-          'spent. Gift wrapping does no sorting at all and pays entirely in orientation tests; ' +
-          'quickhull sorts nothing either but partitions instead, and lands in between.',
+        detail: [
+          'The uniqueness is worth leaning on.',
+          'Unlike a triangulation or a shortest-path tree, the convex hull of a point set is a ' +
+            'single well-defined answer. So cross-checking implementations is a real test rather ' +
+            'than a heuristic one.',
+          'That makes the comparison table honest: every row computes the same thing, and the ' +
+            'columns are purely what each one spent. Gift wrapping does no sorting at all and pays ' +
+            'entirely in orientation tests; quickhull sorts nothing either but partitions instead, ' +
+            'and lands in between.'
+        ],
         example: 'All four returned the identical 12-vertex hull from 200 points, at 789, 1 314, ' +
           '1 651 and 2 400 orientation tests — the dearest is 3.04× the cheapest.'
       },
@@ -396,13 +408,16 @@
         term: 'The collinear policy is a parameter, and it must be documented',
         plain: 'Points lying exactly on a hull edge can be kept or dropped, and both are correct answers to different questions.',
         formal: 'the strict test pops on orientation ≤ 0; the permissive one pops only on orientation < 0',
-        detail: 'One character in the comparison decides it, which is exactly why it gets chosen by ' +
-          'accident. Dropping collinear points gives the minimal vertex set, which is what area, ' +
-          'rotating calipers and a containment test want. Keeping them gives every input point on the ' +
-          'boundary, which is what a renderer tracing an outline or a downstream algorithm matching ' +
-          'hull vertices back to input indices wants. The failure is not choosing wrong, it is not ' +
-          'knowing which was chosen, and finding out from a bug report about a shape with a ' +
-          'duplicated corner.',
+        detail: [
+          'One character in the comparison decides it, which is exactly why it gets chosen by ' +
+            'accident.',
+          'Dropping collinear points gives the minimal vertex set, which is what area, rotating ' +
+            'calipers and a containment test want. Keeping them gives every input point on the ' +
+            'boundary, which is what a renderer tracing an outline wants — or a downstream algorithm ' +
+            'matching hull vertices back to input indices.',
+          'The failure is not choosing wrong. It is not knowing which was chosen, and finding out ' +
+            'from a bug report about a shape with a duplicated corner.'
+        ],
         example: 'On 60 collinear points the two policies give 2 vertices and 60; on a 60-point grid ' +
           'they give 5 and 24.'
       },
@@ -410,12 +425,16 @@
         term: 'Degenerate input is where implementations diverge, so test it first',
         plain: 'All collinear, all coincident, on a grid, on a circle: these are the five inputs that separate a correct hull from a plausible one.',
         formal: 'every algorithm must agree with every other under BOTH collinear policies',
-        detail: 'That is a stronger contract than "each one computes a convex hull", and it is the ' +
-          'one that prevents a surprise downstream. Points on a grid sit exactly on hull edges along ' +
-          'every side; a fully collinear set has no interior at all, so the hull is a segment under ' +
-          'the strict policy and the whole sorted run under the permissive one; coincident points ' +
-          'test whether duplicates are removed before or after the sort. An implementation that ' +
-          'passes on random clouds and fails here is the normal case, not the exception.',
+        detail: [
+          'That is a stronger contract than "each one computes a convex hull", and it is the one ' +
+            'that prevents a surprise downstream.',
+          'Points on a grid sit exactly on hull edges along every side. A fully collinear set has no ' +
+            'interior at all, so the hull is a segment under the strict policy and the whole sorted ' +
+            'run under the permissive one.',
+          'Coincident points test whether duplicates are removed before or after the sort. An ' +
+            'implementation that passes on random clouds and fails here is the normal case, not the ' +
+            'exception.'
+        ],
         example: 'Five degenerate sets of 60 points each, and all four algorithms agree on every one ' +
           'of them under both policies.'
       },
@@ -423,13 +442,15 @@
         term: 'The oracle is "is every point inside", not "does it look convex"',
         plain: 'Check that no input point lies outside the returned ring and that no hull vertex is a reflex turn.',
         formal: 'two conditions: every input point is inside or on the ring, and every ring turn has the same sign',
-        detail: 'Either condition alone is satisfiable by a wrong answer. A ring that is convex but ' +
-          'too small — the tolerance-test failure from the primitives section — passes the turn ' +
-          'check and fails containment. A ring that includes every point but zigzags passes ' +
-          'containment and fails the turn check. Together they pin the hull down, and they are cheap ' +
-          'enough to run inside a property test on every random input rather than on a fixture. This ' +
-          'is the pattern the whole milestone uses: a slow, obviously-correct check run against a ' +
-          'fast, subtle one.',
+        detail: [
+          'Either condition alone is satisfiable by a wrong answer.',
+          'A ring that is convex but too small — the tolerance-test failure from the primitives ' +
+            'section — passes the turn check and fails containment. A ring that includes every ' +
+            'point but zigzags passes containment and fails the turn check.',
+          'Together they pin the hull down, and they are cheap enough to run inside a property test ' +
+            'on every random input rather than on a fixture. This is the pattern the whole milestone ' +
+            'uses: a slow, obviously-correct check run against a fast, subtle one.'
+        ],
         example: 'The oracle passes for all four algorithms on the 200-point default scene and on ' +
           'every degenerate fixture.'
       },
@@ -437,13 +458,15 @@
         term: 'Quickhull is quicksort\'s shape, with quicksort\'s worst case',
         plain: 'Split on the line between two extremes, recurse on the point furthest from it, discard everything inside the triangle.',
         formal: 'O(n log n) expected and O(n²) worst case, on adversarial input rather than random input',
-        detail: 'The discard is what makes it fast in practice: every point inside the triangle formed ' +
-          'by the two extremes and the furthest point can never be on the hull, and on a uniform ' +
-          'cloud that removes most of the input immediately. The worst case arrives when almost every ' +
-          'point is on the hull, because nothing is ever discarded and the recursion peels off one ' +
-          'vertex at a time — points on a circle again. Its apex choice must use the exact predicate ' +
-          'like everything else here, since a furthest-point tie broken by rounding puts a vertex ' +
-          'inside its own hull.',
+        detail: [
+          'The discard is what makes it fast in practice. Every point inside the triangle formed by ' +
+            'the two extremes and the furthest point can never be on the hull. On a uniform cloud ' +
+            'that removes most of the input immediately.',
+          'The worst case arrives when almost every point is on the hull, because nothing is ever ' +
+            'discarded and the recursion peels off one vertex at a time. Points on a circle again.',
+          'Its apex choice must use the exact predicate like everything else here, since a ' +
+            'furthest-point tie broken by rounding puts a vertex inside its own hull.'
+        ],
         example: 'Quickhull reached the same 12-vertex hull in 1 314 orientation tests and 0 sort ' +
           'comparisons.'
       },
@@ -451,12 +474,15 @@
         term: 'The hull of a hull is the hull, which is what makes it composable',
         plain: 'Hull each chunk, concatenate the results, hull that: the answer is identical and the input is far smaller.',
         formal: 'the hull of a union equals the hull of the union of the parts\' hulls',
-        detail: 'This is the property that lets hulls be computed in parallel, incrementally or over ' +
-          'data that does not fit in memory, and it holds exactly rather than approximately. It is ' +
-          'also the reason a hull is a good summary to store: a spatial index can keep the hull of ' +
-          'each leaf and answer "could anything in this leaf be relevant" without touching the ' +
-          'points. Merging two hulls directly is faster still — the two tangent lines can be found in ' +
-          'logarithmic time — and that is the basis of the divide-and-conquer and dynamic variants.',
+        detail: [
+          'This is the property that lets hulls be computed in parallel, incrementally or over data ' +
+            'that does not fit in memory, and it holds exactly rather than approximately.',
+          'It is also the reason a hull is a good summary to store. A spatial index can keep the ' +
+            'hull of each leaf and answer "could anything in this leaf be relevant" without touching ' +
+            'the points.',
+          'Merging two hulls directly is faster still, because the two tangent lines can be found in ' +
+            'logarithmic time. That is the basis of the divide-and-conquer and dynamic variants.'
+        ],
         example: 'The 200-point scene reduces to 12 hull vertices, so a second pass over merged ' +
           'chunks works on 6.0% of the original points.'
       }

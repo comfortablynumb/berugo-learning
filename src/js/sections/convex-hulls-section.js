@@ -59,39 +59,45 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**The convex hull is the smallest convex shape containing every point** — the shape a rubber ' +
+        'band would take if you stretched it round them.',
+      'Every algorithm here computes the same answer, so the choice between them is entirely about ' +
+        'cost. That cost is counted in **orientation tests**: the predicate from the previous ' +
+        'section, called over and over.',
+      '**`O(n log n)` and `O(nh)` are different bounds, not better and worse ones.** Gift wrapping ' +
+        'walks from one hull vertex to the next, scanning every point each time, so it costs `n` ' +
+        'per vertex found.',
+      'When the hull has four vertices that beats sorting. When every point is on the hull it ' +
+        'degenerates to `n²`. The point set decides, and `h` is not something you know before you ' +
+        'start.',
+      '**Andrew\'s monotone chain is the practical default.** Sort once, sweep twice.',
+      'It has no angular sort, so no trigonometry and no comparator that can be made inconsistent ' +
+        'by a bad predicate. That is exactly how Graham scan fails: its *sort* calls the orientation ' +
+        'test, and an inconsistent comparator can crash the sort itself.',
+      '**"Keep or drop collinear points" must be a documented parameter.** A point lying exactly on ' +
+        'a hull edge is legitimately on the hull and legitimately not a corner.',
+      'Both answers are defensible and each breaks something downstream, so the decision belongs in ' +
+        'the signature rather than in whichever loop happened to be written first.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'The convex hull is the smallest convex shape containing every point — the shape a rubber ' +
-          'band would take if you stretched it round them. Every algorithm here computes the same ' +
-          'answer, so the choice between them is entirely about cost, and the cost is counted in ' +
-          '**orientation tests**: the predicate from the previous section, called over and over.',
-        '**`O(n log n)` and `O(nh)` are different bounds, not better and worse ones.** Gift wrapping ' +
-          'walks from one hull vertex to the next, scanning every point each time, so it costs `n` ' +
-          'per vertex found. When the hull has four vertices that beats sorting; when every point ' +
-          'is on the hull it degenerates to `n²`. The point set decides, and `h` is not something ' +
-          'you know before you start.',
-        '**Andrew\'s monotone chain is the practical default.** Sort once, sweep twice. It has no ' +
-          'angular sort, so no trigonometry and no comparator that can be made inconsistent by a ' +
-          'bad predicate — which is exactly how Graham scan fails, since its *sort* calls the ' +
-          'orientation test and an inconsistent comparator can crash the sort itself.',
-        '**"Keep or drop collinear points" must be a documented parameter.** A point lying exactly ' +
-          'on a hull edge is legitimately on the hull and legitimately not a corner. Both answers ' +
-          'are defensible and each breaks something downstream, so the decision belongs in the ' +
-          'signature rather than in whichever loop happened to be written first.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — four algorithms, seven point sets, and the collinear policy',
         markup: root.ConvexHullsTemplate.render()
       },
       diagram: diagram(),
       insight: 'When someone says a hull algorithm is `O(n log n)` and another is `O(nh)`, they ' +
-        'have told you almost nothing about which to use, because `h` is a property of your data ' +
-        'and not of your code. Measure it. If your points come from a sensor sweep or a circular ' +
-        'boundary, nearly all of them are on the hull and gift wrapping is quadratic; if they are ' +
-        'a cloud, `h` is tiny and it wins. And whichever you pick, write the collinear policy down ' +
-        'in the function signature — the bug it causes always appears in a different file.'
+        'have told you almost nothing about which to use. `h` is a property of your data and not of ' +
+        'your code. Measure it. If your points come from a sensor sweep or a circular boundary, ' +
+        'nearly all of them are on the hull and gift wrapping is quadratic. If they are a cloud, ' +
+        '`h` is tiny and it wins. And whichever you pick, write the collinear policy down in the ' +
+        'function signature — the bug it causes always appears in a different file.'
     };
   }
 
