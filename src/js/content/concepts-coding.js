@@ -310,11 +310,15 @@
         formal: 'the final interval has width Π p(xᵢ), so naming a point costs −Σ log₂ p(xᵢ) bits',
         readAs: 'The surviving interval is as wide as the product of the symbol probabilities, ' +
           'so the bits needed are minus the sum of their base-two logarithms.',
-        detail: 'Nothing rounds to a whole bit anywhere in the process, which is the entire ' +
-          'difference from a symbol code. A symbol of probability 0.99 narrows the interval by a ' +
-          'factor of 0.99 and costs 0.0145 bits — not one bit, not a bit that gets amortised, ' +
-          'but genuinely a hundredth of a bit added to the total width. The message as a whole ' +
-          'costs its own information content, and the only overhead is terminating the interval.',
+        detail: [
+          'Nothing rounds to a whole bit anywhere in the process, which is the entire difference ' +
+            'from a symbol code.',
+          'A symbol of probability 0.99 narrows the interval by a factor of 0.99 and costs 0.0145 ' +
+            'bits. Not one bit, not a bit that gets amortised, but genuinely a hundredth of a bit ' +
+            'added to the total width.',
+          'The message as a whole costs its own information content, and the only overhead is ' +
+            'terminating the interval.'
+        ],
         example: 'The demo codes "bananas" to a final interval of width 1.31e-4, which needs ' +
           '12.90 bits, and emits 14.'
       },
@@ -334,26 +338,32 @@
         formal: 'the coder emits ⌈−log₂(width)⌉ + 2 bits at most; the +2 terminates the interval',
         readAs: 'The output is at most the ceiling of minus the base-two logarithm of the final ' +
           'interval width, plus two bits to name a point inside it.',
-        detail: 'Compare that with Huffman’s up-to-one-bit-per-symbol and the difference is the ' +
-          'whole subject. On a three-thousand-byte corpus the arithmetic coder measures about one ' +
-          'bit above the information content of the entire file, a rounding error, while a ' +
-          'Huffman code over the same frequencies is a hundred and sixty-five bits above it. The ' +
-          'per-message constant is why arithmetic coding is only ever worse than Huffman on ' +
-          'messages of a handful of symbols.',
+        detail: [
+          'Compare that with Huffman’s up-to-one-bit-per-symbol, and the difference is the whole ' +
+            'subject.',
+          'On a three-thousand-byte corpus the arithmetic coder measures about one bit above the ' +
+            'information content of the entire file, which is a rounding error. A Huffman code over ' +
+            'the same frequencies is a hundred and sixty-five bits above it.',
+          'The per-message constant is why arithmetic coding is only ever worse than Huffman on ' +
+            'messages of a handful of symbols.'
+        ],
         example: 'The demo measures +1.03 bits for arithmetic and +165.0 for Huffman over 3 000 ' +
-          'bytes — 0.00034 and 0.055 bits per symbol.'
+          'bytes. That is 0.00034 and 0.055 bits per symbol.'
       },
       {
         term: 'The integer implementation renormalises, and the underflow counter is not optional',
         plain: 'When low and high agree on a leading bit, emit it and shift both left.',
         formal: 'if low ≥ ¼ and high < ¾ neither end has decided its leading bit; remember a pending bit and emit its complement later',
-        detail: 'This is the part that is easy to omit and fatal to omit. The interval can ' +
-          'straddle the midpoint and keep shrinking with neither end committing to a leading bit; ' +
-          'without the pending counter the coder either loses precision or emits nothing while ' +
-          'the interval collapses. The failure mode is the worst kind — the count stays at zero ' +
-          'on short inputs, so a hand-written coder passes its tests and corrupts real files.',
-        example: 'The demo reports as many as 10 bits pending at once over a 3 000-byte corpus, ' +
-          'and reports it as a metric precisely because it is invisible otherwise.'
+        detail: [
+          'This is the part that is easy to omit and fatal to omit.',
+          'The interval can straddle the midpoint and keep shrinking with neither end committing to ' +
+            'a leading bit. Without the pending counter the coder either loses precision or emits ' +
+            'nothing while the interval collapses.',
+          'The failure mode is the worst kind. The count stays at zero on short inputs, so a ' +
+            'hand-written coder passes its tests and corrupts real files.'
+        ],
+        example: 'The demo reports as many as 10 bits pending at once over a 3 000-byte corpus. It ' +
+          'reports that as a metric precisely because it is invisible otherwise.'
       },
       {
         term: 'An adaptive model transmits nothing at all',
@@ -361,12 +371,15 @@
         formal: 'p(x) = (count(x) + 1) / (total + |Σ|), updated after every symbol on both sides',
         readAs: 'A symbol’s probability is its count plus one, divided by the total plus the ' +
           'alphabet size.',
-        detail: 'The model never goes in the stream, which removes the header entirely — and the ' +
-          'price is a learning curve, because the first few hundred symbols are coded under a ' +
-          'nearly uniform model. That is a real cost on short messages and disappears on long ' +
-          'ones. It also means encoder and decoder must update in exactly the same way; a ' +
-          'floating-point discrepancy between two machines is enough to desynchronise them, which ' +
-          'is why real implementations use integer counts.',
+        detail: [
+          'The model never goes in the stream, which removes the header entirely. The price is a ' +
+            'learning curve, because the first few hundred symbols are coded under a nearly uniform ' +
+            'model.',
+          'That is a real cost on short messages, and it disappears on long ones.',
+          'It also means encoder and decoder must update in exactly the same way. A floating-point ' +
+            'discrepancy between two machines is enough to desynchronise them, which is why real ' +
+            'implementations use integer counts.'
+        ],
         example: 'The demo’s adaptive coder ends at 4.5971 bits per symbol against the static ' +
           '4.5623, having sent no table.'
       },
@@ -376,11 +389,14 @@
         formal: 'x ← ⌊x / f(s)⌋·M + (x mod f(s)) + c(s), where M is the frequency total and c the cumulative count',
         readAs: 'The new state is the old state divided by the symbol’s frequency, times the ' +
           'total, plus the remainder, plus the symbol’s cumulative count.',
-        detail: 'Because the state is a stack, the decoder recovers symbols in the reverse of the ' +
-          'order the encoder pushed them. That is not a quirk to work around — it is why an ANS ' +
-          'encoder buffers its input and emits the stream to be read from the far end. In ' +
-          'exchange the inner loop is a multiply, a divide and a table lookup with no serial ' +
-          'dependency chain through a renormalisation, which is where the speed comes from.',
+        detail: [
+          'Because the state is a stack, the decoder recovers symbols in the reverse of the order ' +
+            'the encoder pushed them.',
+          'That is not a quirk to work around. It is why an ANS encoder buffers its input and emits ' +
+            'the stream to be read from the far end.',
+          'In exchange the inner loop is a multiply, a divide and a table lookup, with no serial ' +
+            'dependency chain through a renormalisation. That is where the speed comes from.'
+        ],
         example: 'The demo’s rANS run measures 13 712 bits against arithmetic coding’s 13 688 on ' +
           'the same model.'
       },
@@ -388,11 +404,14 @@
         term: 'rANS needs a power-of-two frequency total',
         plain: 'So the slot lookup is a mask and the division a shift.',
         formal: 'the counts are normalised to sum to exactly 2^k, with every symbol held at 1 or more',
-        detail: 'Normalising is part of the codec rather than a convenience, and it introduces a ' +
-          'rounding error: a symbol whose true probability is not a multiple of 2^-k is coded ' +
-          'against a slightly wrong one. That is one of the two reasons rANS measures marginally ' +
-          'worse than an arithmetic coder here; the other is the fixed cost of flushing the ' +
-          '32-bit state at the end. Both are constants, and on a real file they disappear.',
+        detail: [
+          'Normalising is part of the codec rather than a convenience, and it introduces a rounding ' +
+            'error. A symbol whose true probability is not a multiple of 2^-k is coded against a ' +
+            'slightly wrong one.',
+          'That is one of the two reasons rANS measures marginally worse than an arithmetic coder ' +
+            'here. The other is the fixed cost of flushing the 32-bit state at the end.',
+          'Both are constants, and on a real file they disappear.'
+        ],
         example: 'The demo normalises to 2^12 = 4 096 and measures rANS at +25 bits over the ' +
           'information content, of which 32 is the state flush.'
       },
@@ -400,12 +419,14 @@
         term: 'A model must never assign zero probability to a codeable symbol',
         plain: 'A probability of zero needs infinitely many bits.',
         formal: 'every symbol keeps a count of at least one; the frequency total is capped so scaling cannot round one to zero',
-        detail: 'This is the failure that turns a working coder into one that throws or, worse, ' +
-          'silently emits an unrecoverable stream. It arrives through the back door: counts grow, ' +
-          'the total exceeds the coder’s precision, the implementation rescales, and a rare ' +
-          'symbol rounds to zero. The defence is a cap on the total and a floor of one on every ' +
-          'count, applied together, and it is why real coders halve all counts periodically ' +
-          'rather than letting them grow.',
+        detail: [
+          'This is the failure that turns a working coder into one that throws or, worse, silently ' +
+            'emits an unrecoverable stream.',
+          'It arrives through the back door. Counts grow, the total exceeds the coder’s precision, ' +
+            'the implementation rescales, and a rare symbol rounds to zero.',
+          'The defence is a cap on the total and a floor of one on every count, applied together. It ' +
+            'is why real coders halve all counts periodically rather than letting them grow.'
+        ],
         example: 'The demo caps the model total at 16 384 and holds every symbol at one or more ' +
           'when it rescales.'
       },
@@ -413,12 +434,15 @@
         term: 'This is why modern codecs switched',
         plain: 'Arithmetic-coding ratios at Huffman-like speed.',
         formal: 'zstd’s FSE, LZFSE and JPEG XL all use table-driven ANS in place of a Huffman stage',
-        detail: 'Before ANS the entropy stage was a choice between a fast coder that wastes up to ' +
-          'a bit per symbol and an accurate one with a multiply, a divide and a serial ' +
-          'dependency, and formats mostly shipped the fast one. tANS collapses that: the whole ' +
-          'coder becomes a state-machine table lookup, so the decoder is a load and a shift per ' +
-          'symbol. The remaining question is not ratio against speed but whether the decoder can ' +
-          'afford to run the symbol stream backwards.',
+        detail: [
+          'Before ANS the entropy stage was a choice between two coders. One was fast and wasted up ' +
+            'to a bit per symbol, and the other was accurate but cost a multiply, a divide and a ' +
+            'serial dependency. Formats mostly shipped the fast one.',
+          'tANS collapses that. The whole coder becomes a state-machine table lookup, so the decoder ' +
+            'is a load and a shift per symbol.',
+          'The remaining question is not ratio against speed. It is whether the decoder can afford ' +
+            'to run the symbol stream backwards.'
+        ],
         example: 'The demo measures rANS within 0.2% of arithmetic coding’s bit count while ' +
           'replacing its inner loop with a table lookup.'
       }

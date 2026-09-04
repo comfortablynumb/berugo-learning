@@ -49,40 +49,55 @@
     };
   }
 
-  function orientation() {
+  function orientationInterval() {
     return [
       '**Arithmetic coding codes the whole message as one number.** Narrow the interval [0, 1) by ' +
         'each symbol’s probability in turn, then emit enough bits to name a point inside what is ' +
-        'left. The interval’s width is the product of the probabilities, so the bits needed are ' +
-        'the sum of −log₂(p) — the information content, exactly.',
+        'left.',
+      'The interval’s width is the product of the probabilities, so the bits needed are the sum of ' +
+        '−log₂(p). That is the information content, exactly.',
       '**The overhead is a constant per MESSAGE, not per symbol.** Terminating the interval costs ' +
-        'about two bits however long the message was, which is why the demo’s measured output is ' +
-        'roughly one bit above the information content on a three-thousand-byte corpus. Compare ' +
-        'that to Huffman’s up-to-one-bit-per-symbol and the difference is the whole subject.',
+        'about two bits however long the message was.',
+      'That is why the demo’s measured output is roughly one bit above the information content on ' +
+        'a three-thousand-byte corpus. Compare it to Huffman’s up-to-one-bit-per-symbol and the ' +
+        'difference is the whole subject.',
       '**A real implementation is integer arithmetic with renormalisation.** Keep a 16- or 32-bit ' +
-        'low and high, and whenever their leading bits agree, that bit of the answer is decided — ' +
-        'emit it and shift both left. No floating point appears anywhere in a production coder.',
+        'low and high, and whenever their leading bits agree, that bit of the answer is decided.',
+      'Emit it and shift both left. No floating point appears anywhere in a production coder.',
       '**The underflow counter is the part that is easy to omit and fatal to omit.** When low is ' +
         'above a quarter and high below three quarters, the interval straddles the midpoint and ' +
-        'NEITHER end has decided its leading bit, so nothing can be emitted while the interval ' +
-        'keeps shrinking. The fix is to remember bits that are owed and emit their opposite ' +
-        'later; without it the coder works on most inputs and corrupts some.',
-      '**An adaptive model transmits nothing at all.** Counts start at one and rise as symbols ' +
-        'arrive; encoder and decoder update identically, so the model never goes in the stream. ' +
-        'The price is a learning curve — the first few hundred symbols are coded under a bad ' +
-        'model — and the demo plots it.',
-      '**ANS is the modern answer: one integer of state, a multiply and a divide per symbol.** ' +
-        'Encoding pushes a symbol onto the state and decoding pops it, which is why an ANS ' +
-        'decoder runs the message BACKWARDS relative to the encoder. That is not a quirk to work ' +
-        'around; it is why an ANS encoder buffers its input.',
-      '**rANS needs the frequency total to be a power of two**, so the slot lookup is a mask and ' +
-        'the division a shift. Normalising the counts to 2^k is part of the codec rather than a ' +
-        'convenience, and the rounding it forces is one of the two reasons rANS measures slightly ' +
-        'worse than arithmetic coding here.',
-      '**This is why zstd, LZFSE and JPEG XL all switched.** ANS gets arithmetic-coding ratios at ' +
-        'Huffman-like speed, and speed on the DECODE side is what a format is usually judged on — ' +
-        'data is written once and read many times.'
+        'NEITHER end has decided its leading bit.',
+      'So nothing can be emitted while the interval keeps shrinking. The fix is to remember bits ' +
+        'that are owed and emit their opposite later.',
+      'Without it the coder works on most inputs and corrupts some.'
     ];
+  }
+
+  function orientationAns() {
+    return [
+      '**An adaptive model transmits nothing at all.** Counts start at one and rise as symbols ' +
+        'arrive, and encoder and decoder update identically, so the model never goes in the ' +
+        'stream.',
+      'The price is a learning curve, because the first few hundred symbols are coded under a bad ' +
+        'model. The demo plots it.',
+      '**ANS is the modern answer: one integer of state, a multiply and a divide per symbol.** ' +
+        'Encoding pushes a symbol onto the state and decoding pops it, which is why an ANS decoder ' +
+        'runs the message BACKWARDS relative to the encoder.',
+      'That is not a quirk to work around. It is why an ANS encoder buffers its input.',
+      '**rANS needs the frequency total to be a power of two**, so the slot lookup is a mask and ' +
+        'the division a shift.',
+      'Normalising the counts to 2^k is part of the codec rather than a convenience, and the ' +
+        'rounding it forces is one of the two reasons rANS measures slightly worse than arithmetic ' +
+        'coding here.',
+      '**This is why zstd, LZFSE and JPEG XL all switched.** ANS gets arithmetic-coding ratios at ' +
+        'Huffman-like speed.',
+      'Speed on the DECODE side is what a format is usually judged on, because data is written ' +
+        'once and read many times.'
+    ];
+  }
+
+  function orientation() {
+    return orientationInterval().concat(orientationAns());
   }
 
   function config() {
@@ -96,12 +111,12 @@
       diagram: diagram(),
       insight: '**ANS is the most consequential compression development of the last fifteen ' +
         'years, because it removed the reason to accept Huffman’s whole-bit penalty.** Before it, ' +
-        'the choice was a fast coder that wastes up to a bit per symbol or an accurate one that ' +
-        'costs a multiply and a divide with a serial dependency — and every format shipped the ' +
-        'fast one. rANS collapses that trade: table-driven, one state variable, and within a ' +
-        'fraction of a per cent of the entropy. If you are choosing an entropy stage today the ' +
-        'question is no longer ratio against speed, it is whether your decoder can afford to run ' +
-        'the symbol stream backwards.'
+        'the choice was a fast coder that wastes up to a bit per symbol. The alternative was an ' +
+        'accurate one costing a multiply and a divide with a serial dependency. Every format shipped the fast ' +
+        'one. rANS collapses that trade. It is table-driven, has one state variable, and lands ' +
+        'within a fraction of a per cent of the entropy. If you are choosing an entropy stage ' +
+        'today the question is no longer ratio against speed. It is whether your decoder can ' +
+        'afford to run the symbol stream backwards.'
     };
   }
 
