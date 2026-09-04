@@ -20,11 +20,14 @@
         },
         plain: 'abc becomes #a#b#c#, and every even palindrome of the original becomes an odd one.',
         formal: 'a radius in the transformed string is exactly a LENGTH in the original',
-        detail: 'A palindrome with a centre and one with a gap need two implementations, two sets ' +
-          'of indices and two off-by-one errors. Interleaving costs a factor of two in memory and ' +
-          'removes the duplicate entirely — and it pays a second dividend nobody mentions: because ' +
-          'the transformed string has separators between every pair of characters, the radius at a ' +
-          'centre equals the length of the original palindrome, so there is no division at the end.',
+        detail: [
+          'A palindrome with a centre and one with a gap need two implementations, two sets of ' +
+            'indices and two off-by-one errors.',
+          'Interleaving costs a factor of two in memory and removes the duplicate entirely.',
+          'It also pays a second dividend nobody mentions. The transformed string has separators ' +
+            'between every pair of characters, so the radius at a centre equals the length of the ' +
+            'original palindrome. There is no division at the end.'
+        ],
         example: '"abacabadabacaba" becomes 31 transformed characters, and the radius 15 at the ' +
           'centre is the length of the whole palindrome.'
       },
@@ -35,11 +38,14 @@
         readAs: 'Manacher seeds each position from its mirror image inside the palindrome already known — 2c ' +
           '− i is that mirror, c being the centre. Capping it at the distance to the known edge is what ' +
           'keeps the answer correct.',
-        detail: 'If `i` lies inside the palindrome centred at `c` and reaching to `r`, then the ' +
-          'characters around `i` mirror those around `2c − i`, whose radius is known. When that ' +
-          'radius is strictly smaller than the distance to `r` the answer is exact and free; when it ' +
-          'reaches the edge the answer is at least that far and the rest must be measured. The `min` ' +
-          'is the part people leave out, and leaving it out makes the algorithm quadratic.',
+        detail: [
+          'If `i` lies inside the palindrome centred at `c` and reaching to `r`, then the characters ' +
+            'around `i` mirror those around `2c − i`, whose radius is known.',
+          'When that radius is strictly smaller than the distance to `r`, the answer is exact and ' +
+            'free. When it reaches the edge, the answer is at least that far and the rest must be ' +
+            'measured.',
+          'The `min` is the part people leave out, and leaving it out makes the algorithm quadratic.'
+        ],
         example: 'On a 15-character string, 11 of the 31 transformed positions reused a mirror and ' +
           'only 26 characters were compared.'
       },
@@ -47,11 +53,14 @@
         term: 'The right edge never moves left, and that is the whole proof',
         plain: 'Every extension pushes the edge right, and it can be pushed at most n times.',
         formal: 'total extension work is O(n), independent of the string\'s shape',
-        detail: 'Each comparison either fails — once per position, so at most n times — or succeeds ' +
-          'and moves the right edge. The edge is monotone and bounded, so the successes total at ' +
-          'most n. That is the same argument as the Z-window, as the two-pointer sliding window and ' +
-          'as Myers\'s furthest-reaching path, and recognising it is worth more than the palindrome ' +
-          'algorithm it is being used for here.',
+        detail: [
+          'Each comparison either fails — once per position, so at most n times — or succeeds and ' +
+            'moves the right edge.',
+          'The edge is monotone and bounded, so the successes total at most n.',
+          'That is the same argument as the Z-window, as the two-pointer sliding window and as ' +
+            'Myers\'s furthest-reaching path. Recognising it is worth more than the palindrome ' +
+            'algorithm it is being used for here.'
+        ],
         example: 'On the repeated family, Manacher does exactly 4n comparisons while expanding ' +
           'around every centre does about n²/2.'
       },
@@ -59,11 +68,13 @@
         term: 'How many and how many different are separate questions',
         plain: 'A string of n identical characters has n(n+1)/2 palindromic substrings and n distinct ones.',
         formal: 'the count is the sum of the radii; the distinct count is the eertree\'s node count',
-        detail: 'Manacher gives every maximal palindrome and therefore the count with multiplicity; ' +
-          'no amount of arithmetic on the radius array recovers the distinct count. The gap between ' +
-          'them is a factor of n in the worst case, and the two questions arrive in different ' +
-          'problems — the count in "how many substrings have this property", the distinct count in ' +
-          '"what is the vocabulary".',
+        detail: [
+          'Manacher gives every maximal palindrome and therefore the count with multiplicity. No ' +
+            'amount of arithmetic on the radius array recovers the distinct count.',
+          'The gap between them is a factor of n in the worst case.',
+          'The two questions arrive in different problems: the count in "how many substrings have ' +
+            'this property", the distinct count in "what is the vocabulary".'
+        ],
         example: 'At n = 800 the repeated string has 320 400 palindromic substrings and 800 distinct ' +
           'ones.'
       },
@@ -71,22 +82,27 @@
         term: 'The eertree has one node per distinct palindromic substring, and there are at most n',
         plain: 'Adding a character creates at most one new distinct palindrome.',
         formal: 'the node count is at most n + 2, which is why the structure is linear',
-        detail: 'That bound is not obvious and it is the reason the structure exists. Each ' +
-          'character extension can create at most one palindrome that was not present before — the ' +
-          'longest palindromic suffix of the new prefix — so the tree grows by at most one node per ' +
-          'input character. Everything else about the construction is bookkeeping around that ' +
-          'single fact.',
+        detail: [
+          'That bound is not obvious, and it is the reason the structure exists.',
+          'Each character extension can create at most one palindrome that was not present before: ' +
+            'the longest palindromic suffix of the new prefix. So the tree grows by at most one node ' +
+            'per input character.',
+          'Everything else about the construction is bookkeeping around that single fact.'
+        ],
         example: '"abacabadabacaba" has 15 distinct palindromic substrings for 15 characters.'
       },
       {
         term: 'The imaginary root of length −1 is not a hack',
         plain: 'Extending a palindrome adds a character on both sides, and starting from −1 produces a single character.',
         formal: 'two roots: length 0 for even palindromes and length −1 for odd ones',
-        detail: 'Without it, the first character of every odd palindrome is a special case that has ' +
-          'to be written separately, and the suffix-link walk needs a guard at every step. With it, ' +
-          '"extend by one character on each side" is uniform: applied to the length-−1 node it ' +
-          'produces a length-1 palindrome, which is exactly what a single character is. It is the ' +
-          'same trick as a sentinel node in a linked list, and it removes the same class of code.',
+        detail: [
+          'Without it, the first character of every odd palindrome is a special case that has to be ' +
+            'written separately, and the suffix-link walk needs a guard at every step.',
+          'With it, "extend by one character on each side" is uniform. Applied to the length-−1 node ' +
+            'it produces a length-1 palindrome, which is exactly what a single character is.',
+          'It is the same trick as a sentinel node in a linked list, and it removes the same class ' +
+            'of code.'
+        ],
         example: 'Node 0 has length −1 and node 1 has length 0; every real palindrome hangs off one ' +
           'of them.'
       },
@@ -94,11 +110,15 @@
         term: 'The suffix link points to the longest proper palindromic suffix',
         plain: 'The same idea as a border, restricted to palindromes.',
         formal: 'link(u) = the longest palindrome that is a proper suffix of u\'s palindrome',
-        detail: 'Walking that chain from the current node is how the construction finds where to ' +
-          'attach a new character, and it is also how occurrence counts are accumulated: a ' +
-          'palindrome occurs wherever any palindrome that has it as a suffix occurs, so one ' +
-          'backwards pass over the nodes totals every count. The parallel with KMP\'s border chain ' +
-          'is exact, which is a useful thing to notice rather than a coincidence.',
+        detail: [
+          'Walking that chain from the current node is how the construction finds where to attach a ' +
+            'new character.',
+          'It is also how occurrence counts are accumulated. A palindrome occurs wherever any ' +
+            'palindrome that has it as a suffix occurs, so one backwards pass over the nodes totals ' +
+            'every count.',
+          'The parallel with KMP\'s border chain is exact, which is a useful thing to notice rather ' +
+            'than a coincidence.'
+        ],
         example: 'The node for "abacaba" links to "aba", which links to "a", which links to the ' +
           'empty root.'
       },
@@ -106,12 +126,15 @@
         term: 'Expanding around every centre is the oracle, and it is affordable',
         plain: 'O(n²) is cheap enough to check a linear algorithm against on the sizes that matter.',
         formal: 'the only check that owes the mirror argument nothing',
-        detail: 'A wrong `min` in Manacher produces radii that are too large, which produces ' +
-          '"palindromes" that are not, and the failure is silent because the output is still an ' +
-          'array of plausible numbers. Expanding around every centre is ten lines, is obviously ' +
-          'correct, and is fast enough at a few hundred characters to run in a test on every ' +
-          'commit. Every linear string algorithm in this milestone has an oracle of this kind for ' +
-          'the same reason.',
+        detail: [
+          'A wrong `min` in Manacher produces radii that are too large, which produces ' +
+            '"palindromes" that are not. The failure is silent, because the output is still an array ' +
+            'of plausible numbers.',
+          'Expanding around every centre is ten lines, is obviously correct, and is fast enough at a ' +
+            'few hundred characters to run in a test on every commit.',
+          'Every linear string algorithm in this milestone has an oracle of this kind for the same ' +
+            'reason.'
+        ],
         example: 'The demo checks both the count and the distinct count against exhaustive ' +
           'enumeration on every run.'
       }

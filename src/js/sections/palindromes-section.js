@@ -44,38 +44,43 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**The odd/even problem is what makes palindromes awkward.** `aba` has a centre and `abba` has ' +
+        'a gap, so a naive implementation needs two of everything.',
+      '**Interleaving a separator** turns every even-length palindrome of the original into an ' +
+        'odd-length one of the transformed string. `abc` becomes `#a#b#c#`, at a cost of a factor ' +
+        'of two in memory and one duplicate implementation removed.',
+      '**Manacher is the Z-window again.** Keep the palindrome that reaches furthest right; a ' +
+        'position inside it has a mirror whose radius is already known, so the only work is ' +
+        'extending past the right edge.',
+      'Because that edge never moves left, the total extension over the whole run is at most `n`. ' +
+        'The demo counts the mirror reuses and the extensions separately, because the ratio between ' +
+        'them is the algorithm.',
+      '**The eertree answers a different question.** Manacher gives every maximal palindrome and ' +
+        'therefore the *count* of palindromic substrings. The palindromic tree has one node per ' +
+        '*distinct* palindromic substring, and is built online in linear time.',
+      'On a string of one repeated character those two numbers are `n(n+1)/2` and `n`, and no amount ' +
+        'of squinting at the radius array recovers the second from the first.',
+      '**The eertree has two roots**, one of length 0 and one of length −1.',
+      'The imaginary node is not a trick to be tidied away. It is what makes "extend this palindrome ' +
+        'by one character on each side" work uniformly for the first character of an odd palindrome. ' +
+        'Removing it means special-casing every odd length by hand.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'The odd/even problem is what makes palindromes awkward: `aba` has a centre and `abba` has a ' +
-          'gap, so a naive implementation needs two of everything. **Interleaving a separator** — ' +
-          '`abc` becomes `#a#b#c#` — turns every even-length palindrome of the original into an ' +
-          'odd-length one of the transformed string, at a cost of a factor of two in memory and one ' +
-          'duplicate implementation removed.',
-        '**Manacher is the Z-window again.** Keep the palindrome that reaches furthest right; a ' +
-          'position inside it has a mirror whose radius is already known, so the only work is ' +
-          'extending past the right edge. Because that edge never moves left, the total extension ' +
-          'over the whole run is at most `n` — and the demo counts the mirror reuses and the ' +
-          'extensions separately, because the ratio between them is the algorithm.',
-        '**The eertree answers a different question.** Manacher gives every maximal palindrome and ' +
-          'therefore the *count* of palindromic substrings; the palindromic tree has one node per ' +
-          '*distinct* palindromic substring and is built online in linear time. On a string of one ' +
-          'repeated character those two numbers are `n(n+1)/2` and `n`, and no amount of squinting ' +
-          'at the radius array recovers the second from the first.',
-        '**The eertree has two roots**, one of length 0 and one of length −1. The imaginary node is ' +
-          'not a trick to be tidied away: it is what makes "extend this palindrome by one character ' +
-          'on each side" work uniformly for the first character of an odd palindrome, and removing ' +
-          'it means special-casing every odd length by hand.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — the radius array, the growth, and the tree',
         markup: root.PalindromesTemplate.render()
       },
       diagram: diagram(),
       insight: 'The mirror argument transfers and the palindromes mostly do not. Very few production ' +
-        'systems care about palindromic substrings; a great many care about "never re-examine what ' +
-        'an earlier structure already proved", which is the same amortisation as the Z-window, as ' +
+        'systems care about palindromic substrings. A great many care about "never re-examine what ' +
+        'an earlier structure already proved". That is the same amortisation as the Z-window, as ' +
         'the two-pointer sliding window, and as the furthest-reaching path in 15.9\'s diff. If you ' +
         'take one thing from this section, take the shape of the argument rather than the problem it ' +
         'is applied to here.'
