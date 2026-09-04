@@ -56,37 +56,50 @@
     };
   }
 
-  function orientation() {
+  function orientationModes() {
     return [
       '**⚠ Teaching code: not constant-time, not audited, never for real data.** Use AES-GCM or ' +
-        'ChaCha20-Poly1305 through an audited library; the raw modes below are here to be broken.',
-      '**A block cipher is a keyed permutation on a fixed-size block, and nothing more.** AES ' +
-        'maps 16 bytes to 16 bytes reversibly under a key, through rounds of substitution and ' +
-        'permutation. It has no notion of a message, a length or an order — everything about ' +
-        'encrypting real data is the MODE, and every failure in this section is a mode failure.',
+        'ChaCha20-Poly1305 through an audited library. The raw modes below are here to be broken.',
+      '**A block cipher is a keyed permutation on a fixed-size block, and nothing more.** AES maps ' +
+        '16 bytes to 16 bytes reversibly under a key, through rounds of substitution and ' +
+        'permutation.',
+      'It has no notion of a message, a length or an order. Everything about encrypting real data ' +
+        'is the MODE, and every failure in this section is a mode failure.',
       '**ECB leaks structure, and the picture in the demo shows it.** Encrypting each block ' +
-        'independently means identical plaintext blocks give identical ciphertext blocks. The ' +
-        'demo counts distinct blocks: the plaintext image and its ECB ciphertext have almost the ' +
+        'independently means identical plaintext blocks give identical ciphertext blocks.',
+      'The demo counts distinct blocks. The plaintext image and its ECB ciphertext have almost the ' +
         'same count, and the shape is still visible.',
-      '**CBC needs an unpredictable IV, and reusing one leaks equality of prefixes.** Chaining ' +
-        'each block into the next makes position matter, but the first block is XORed with the ' +
-        'IV, so a fixed IV means two messages with the same opening reveal that they do.',
+      '**CBC needs an unpredictable IV, and reusing one leaks equality of prefixes.** Chaining each ' +
+        'block into the next makes position matter.',
+      'But the first block is XORed with the IV, so a fixed IV means two messages with the same ' +
+        'opening reveal that they do.',
       '**CTR needs a never-repeated counter, and repeating one is worse than any of this.** The ' +
-        'keystream is a function of the key and the counter alone, so encrypting two messages at ' +
-        'the same counter value publishes the XOR of the two plaintexts. There is no partial ' +
-        'failure here.',
-      '**The padding oracle turns one bit of feedback into full decryption, and the demo runs ' +
-        'it.** An attacker who can tell "the padding was invalid" from any other outcome — an ' +
-        'error message, a status code, a response time — recovers the plaintext at about 128 ' +
-        'queries per byte, without the key and without touching AES.',
-      '**Unauthenticated ciphertext is malleable, and the demo edits one.** Flipping a bit in a ' +
-        'CTR ciphertext flips exactly that bit in the plaintext, so an attacker who knows the ' +
-        'message format rewrites its contents. Encryption without integrity is not a weaker ' +
-        'protection, it is a different one that leaves this door open.',
-      '**Which is why every one of these modes is the wrong answer in production.** ECB, CBC and ' +
-        'CTR are components of authenticated modes, not choices you make. The next section builds ' +
-        'the authenticated interface, and everything demonstrated here is a reason it exists.'
+        'keystream is a function of the key and the counter alone.',
+      'So encrypting two messages at the same counter value publishes the XOR of the two ' +
+        'plaintexts. There is no partial failure here.'
     ];
+  }
+
+  function orientationAttacks() {
+    return [
+      '**The padding oracle turns one bit of feedback into full decryption, and the demo runs it.** ' +
+        'An attacker only needs to tell "the padding was invalid" from any other outcome.',
+      'An error message, a status code or a response time will do. They then recover the plaintext ' +
+        'at about 128 queries per byte, without the key and without touching AES.',
+      '**Unauthenticated ciphertext is malleable, and the demo edits one.** Flipping a bit in a CTR ' +
+        'ciphertext flips exactly that bit in the plaintext, so an attacker who knows the message ' +
+        'format rewrites its contents.',
+      'Encryption without integrity is not a weaker protection. It is a different one that leaves ' +
+        'this door open.',
+      '**Which is why every one of these modes is the wrong answer in production.** ECB, CBC and ' +
+        'CTR are components of authenticated modes, not choices you make.',
+      'The next section builds the authenticated interface, and everything demonstrated here is a ' +
+        'reason it exists.'
+    ];
+  }
+
+  function orientation() {
+    return orientationModes().concat(orientationAttacks());
   }
 
   function config() {
@@ -102,11 +115,11 @@
         'or timing difference that distinguishes "bad padding" from "bad MAC" is a full plaintext ' +
         'disclosure.** That is a much stronger statement than it first sounds. The attacker does ' +
         'not need the key, does not need a weakness in AES, and does not need to see any ' +
-        'plaintext — a single distinguishable bit, leaked however incidentally, is worth the ' +
+        'plaintext. A single distinguishable bit, leaked however incidentally, is worth the ' +
         'whole message at roughly 128 queries per byte. It is why "we return a generic error" is ' +
-        'a cryptographic requirement rather than a courtesy, why the timing of the two rejection ' +
-        'paths has to match, and ultimately why the answer is a mode that never has two rejection ' +
-        'paths to confuse.'
+        'a cryptographic requirement rather than a courtesy, and why the timing of the two ' +
+        'rejection paths has to match. Ultimately it is why the answer is a mode that never has ' +
+        'two rejection paths to confuse.'
     };
   }
 

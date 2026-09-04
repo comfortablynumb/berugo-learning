@@ -157,11 +157,14 @@
         term: 'A block cipher is a keyed permutation and nothing more',
         plain: 'AES maps 16 bytes to 16 bytes reversibly under a key.',
         formal: 'AES is a bijection on 128-bit blocks for each key; it has no notion of a message, a length or an order',
-        detail: 'Everything about encrypting real data — how a long message is split, how ' +
-          'position is made to matter, how the last partial block is handled — is the MODE rather ' +
-          'than the cipher. That is why every failure in this section is a mode failure and none ' +
-          'is an attack on AES. It also explains the shape of the standards: FIPS 197 specifies ' +
-          'one block transformation, and a separate document specifies each way of using it.',
+        detail: [
+          'Everything about encrypting real data is the MODE rather than the cipher. That covers how ' +
+            'a long message is split, how position is made to matter, and how the last partial ' +
+            'block is handled.',
+          'That is why every failure in this section is a mode failure, and none is an attack on AES.',
+          'It also explains the shape of the standards. FIPS 197 specifies one block transformation, ' +
+            'and a separate document specifies each way of using it.'
+        ],
         example: 'The demo encrypts the same 2 304-byte image three ways with one cipher and one ' +
           'key, and the three results differ entirely.'
       },
@@ -179,14 +182,16 @@
         },
         plain: 'Identical plaintext blocks give identical ciphertext blocks.',
         formal: 'ECB is a per-block function with no position input, so equal blocks map to equal blocks',
-        detail: 'The consequence is that any repetition in the plaintext survives encryption, ' +
-          'which for structured data — an image, a database column, a fixed-format record — ' +
-          'leaks the structure itself. Counting distinct ciphertext blocks quantifies it: a mode ' +
-          'that hid the structure would produce one distinct block per position, and ECB produces ' +
-          'as many as the plaintext had. The picture is the famous demonstration and the count is ' +
-          'the measurement behind it.',
+        detail: [
+          'The consequence is that any repetition in the plaintext survives encryption. For ' +
+            'structured data — an image, a database column, a fixed-format record — that leaks the ' +
+            'structure itself.',
+          'Counting distinct ciphertext blocks quantifies it. A mode that hid the structure would ' +
+            'produce one distinct block per position, and ECB produces as many as the plaintext had.',
+          'The picture is the famous demonstration, and the count is the measurement behind it.'
+        ],
         example: 'The demo’s 144-block image has 25 distinct plaintext blocks and 26 distinct ECB ' +
-          'ciphertext blocks; CBC gives 145.'
+          'ciphertext blocks. CBC gives 145.'
       },
       {
         term: 'CBC needs an unpredictable IV and adds padding',
@@ -195,11 +200,14 @@
         readAs: 'Each ciphertext block is the encryption of the plaintext block exclusive-ORed ' +
           'with the previous ciphertext block, and the initialisation vector plays the part of ' +
           'the block before the first one.',
-        detail: 'Chaining makes position matter, which removes the ECB leak, at the cost of being ' +
-          'sequential to encrypt and needing the message padded to a whole number of blocks. The ' +
-          'IV requirement is stronger than "unique": a PREDICTABLE IV allowed the BEAST attack ' +
-          'against TLS, because an attacker who knows the next IV can choose plaintext that ' +
-          'cancels it. The padding is where the oracle lives.',
+        detail: [
+          'Chaining makes position matter, which removes the ECB leak. The cost is being sequential ' +
+            'to encrypt, and needing the message padded to a whole number of blocks.',
+          'The IV requirement is stronger than "unique". A PREDICTABLE IV allowed the BEAST attack ' +
+            'against TLS, because an attacker who knows the next IV can choose plaintext that ' +
+            'cancels it.',
+          'The padding is where the oracle lives.'
+        ],
         example: 'The demo’s CBC panel is noise, and its 144-block image becomes 145 ciphertext ' +
           'blocks because of the padding block.'
       },
@@ -208,13 +216,17 @@
         plain: 'Encrypt a counter to make a keystream, then XOR.',
         formal: 'Cᵢ = Pᵢ ⊕ E_k(nonce ‖ i); parallel in both directions and needing no padding',
         readAs: 'Each ciphertext block is the plaintext block exclusive-ORed with the encryption ' +
-          'of a counter block built from the nonce and the block index, so the plaintext is never ' +
+          'of a counter block built from the nonce and the block index. The plaintext is never ' +
           'fed into the cipher at all.',
-        detail: 'Because the plaintext never enters the cipher, encryption and decryption are the ' +
-          'same operation, both are parallel, and the message needs no padding — which removes ' +
-          'the padding oracle entirely. The price is absolute: the keystream is a function of the ' +
-          'key and the counter alone, so encrypting two messages at the same counter value under ' +
-          'one key publishes the XOR of the two plaintexts. There is no partial failure here.',
+        detail: [
+          'Because the plaintext never enters the cipher, encryption and decryption are the same ' +
+            'operation, both are parallel, and the message needs no padding. That removes the ' +
+            'padding oracle entirely.',
+          'The price is absolute. The keystream is a function of the key and the counter alone. ' +
+            'Encrypting two messages at the same counter value under one key publishes the XOR of ' +
+            'the two plaintexts.',
+          'There is no partial failure here.'
+        ],
         example: 'The demo’s CTR panel is noise with no padding block, and its modes table rates ' +
           'counter reuse as total and immediate.'
       },
@@ -222,12 +234,15 @@
         term: 'A padding oracle turns one bit into full decryption',
         plain: 'An attacker who can tell "bad padding" from anything else reads the message.',
         formal: 'forge the previous block so the target decrypts to valid padding; each byte costs at most 256 queries',
-        detail: 'The attacker learns one byte of the block\'s intermediate value per position by ' +
-          'forging padding of length one, then two, then three — which is why the previously ' +
-          'recovered bytes are needed — and XORs it with the real previous block to get the ' +
-          'plaintext byte. The cost is linear in the message length rather than exponential in ' +
-          'anything, the key is never attacked, and the only thing the server did wrong was ' +
-          'distinguish one failure from another.',
+        detail: [
+          'The attacker learns one byte of the block\'s intermediate value per position, by forging ' +
+            'padding of length one, then two, then three. That is why the previously recovered ' +
+            'bytes are needed.',
+          'They then XOR it with the real previous block to get the plaintext byte.',
+          'The cost is linear in the message length rather than exponential in anything, and the key ' +
+            'is never attacked. The only thing the server did wrong was distinguish one failure ' +
+            'from another.'
+        ],
         example: 'The demo recovers a 30-byte message in 2 749 queries, about 86 per byte across ' +
           '2 blocks.'
       },
@@ -235,11 +250,14 @@
         term: 'Unauthenticated ciphertext is malleable',
         plain: 'Flipping a bit in a CTR ciphertext flips exactly that bit in the plaintext.',
         formal: 'XOR is linear, so an edit to the ciphertext is the identical edit to the plaintext',
-        detail: 'An attacker who knows the message format rewrites its contents without the key ' +
-          'and without decrypting anything along the way. In CBC the effect is different but ' +
-          'still exploitable: editing a ciphertext block flips the corresponding bits of the NEXT ' +
-          'plaintext block while garbling its own. Encryption without integrity is not a weaker ' +
-          'protection, it is a different one that leaves this door wide open.',
+        detail: [
+          'An attacker who knows the message format rewrites its contents without the key, and ' +
+            'without decrypting anything along the way.',
+          'In CBC the effect is different but still exploitable. Editing a ciphertext block flips ' +
+            'the corresponding bits of the NEXT plaintext block while garbling its own.',
+          'Encryption without integrity is not a weaker protection. It is a different one that ' +
+            'leaves this door wide open.'
+        ],
         example: 'The demo edits 5 ciphertext bytes and the recipient decrypts ' +
           '"user=bob;role=admin" instead of "user=bob;role=guest".'
       },
@@ -247,11 +265,13 @@
         term: 'Every rejection path must be indistinguishable',
         plain: 'Two different failures with different timing or messages IS the oracle.',
         formal: 'compute every check, combine the results, and return one failure that cannot be told from another',
-        detail: 'The padding oracle needs only that "bad padding" is distinguishable from "bad ' +
-          'MAC" — through an error string, a status code, a log line or a response time. That ' +
-          'makes generic error messages a cryptographic requirement rather than a courtesy, and ' +
-          'it makes the timing of the two paths part of the specification. The deeper fix is a ' +
-          'mode with only one rejection path, which is what an AEAD is.',
+        detail: [
+          'The padding oracle needs only that "bad padding" is distinguishable from "bad MAC". An ' +
+            'error string, a status code, a log line or a response time will all do.',
+          'That makes generic error messages a cryptographic requirement rather than a courtesy, and ' +
+            'it makes the timing of the two paths part of the specification.',
+          'The deeper fix is a mode with only one rejection path, which is what an AEAD is.'
+        ],
         example: 'The section’s insight states it as the transferable rule, and the constant-time ' +
           'section executes the timing version of the same attack.'
       },
@@ -259,11 +279,14 @@
         term: 'None of these modes is a production choice',
         plain: 'ECB, CBC and CTR are components of authenticated modes.',
         formal: 'the deliverable is AES-GCM or ChaCha20-Poly1305; raw modes appear only inside them',
-        detail: 'Choosing between CBC and CTR is a question that should not arise in application ' +
-          'code, because the correct answer to both is an AEAD that uses one of them internally ' +
-          'and adds the authentication that makes it safe. The value of understanding the raw ' +
-          'modes is knowing what the AEAD is protecting you from and recognising the shape of the ' +
-          'failure when you meet legacy code that did make the choice.',
+        detail: [
+          'Choosing between CBC and CTR is a question that should not arise in application code.',
+          'The correct answer to both is an AEAD that uses one of them internally and adds the ' +
+            'authentication that makes it safe.',
+          'The value of understanding the raw modes is knowing what the AEAD is protecting you from. ' +
+            'It also means recognising the shape of the failure when you meet legacy code that did ' +
+            'make the choice.'
+        ],
         example: 'The demo’s modes table notes that none of its 5 rows provides integrity and ' +
           'every one is malleable.'
       }
