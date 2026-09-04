@@ -45,39 +45,53 @@
     };
   }
 
-  function orientation() {
+  function orientationPipeline() {
     return [
       '**Lossy compression is a modelling claim about the RECEIVER, not about the data.** JPEG ' +
-        'discards high spatial frequencies because human vision is poor at them; a perceptual ' +
-        'audio codec discards what a nearby louder tone would mask. The information is genuinely ' +
-        'gone, and whether that matters depends entirely on who is looking.',
+        'discards high spatial frequencies because human vision is poor at them, and a perceptual ' +
+        'audio codec discards what a nearby louder tone would mask.',
+      'The information is genuinely gone, and whether that matters depends entirely on who is ' +
+        'looking.',
       '**The pipeline is transform, quantise, entropy-code, and only the middle step loses ' +
-        'anything.** The DCT is reversible arithmetic; the entropy coder is lossless. ' +
-        'Quantisation — divide by a step and round — is the whole of the loss, and the quality ' +
+        'anything.** The DCT is reversible arithmetic, and the entropy coder is lossless.',
+      'Quantisation, which divides by a step and rounds, is the whole of the loss. The quality ' +
         'setting is a multiplier on the step table.',
       '**The transform earns its place by energy compaction.** Natural images are locally smooth, ' +
         'so the DCT concentrates most of a block’s energy into a handful of low-frequency ' +
-        'coefficients. Quantisation then zeroes nearly everything else, and the zigzag order puts ' +
-        'those zeros in one run for the entropy stage.',
-      '**Rate against distortion is a curve, and quoting one point on it is how codec ' +
-        'comparisons go wrong.** The demo sweeps quality from 10 to 100 and reports bytes, PSNR ' +
-        'and SSIM at each — three columns, because the ranking depends on which one you read.',
+        'coefficients.',
+      'Quantisation then zeroes nearly everything else, and the zigzag order puts those zeros in ' +
+        'one run for the entropy stage.',
+      '**Rate against distortion is a curve, and quoting one point on it is how codec comparisons ' +
+        'go wrong.** The demo sweeps quality from 10 to 100 and reports bytes, PSNR and SSIM at ' +
+        'each.',
+      'There are three columns, because the ranking depends on which one you read.'
+    ];
+  }
+
+  function orientationMeasurement() {
+    return [
       '**PSNR and SSIM disagree, and the disagreement is informative.** PSNR is a per-pixel error ' +
-        'and cannot see where the error is; SSIM compares local structure and punishes blocking. ' +
-        'A comparison on PSNR alone flatters block-transform codecs, which is exactly what this ' +
+        'and cannot see where the error is. SSIM compares local structure and punishes blocking.',
+      'A comparison on PSNR alone flatters block-transform codecs, which is exactly what this ' +
         'section implements.',
       '**Quality 100 is not lossless.** The quantisation table becomes all ones, but the DCT is ' +
         'computed in floating point and rounded back to integers, so a few least-significant bits ' +
-        'still move. The demo measures a finite PSNR at quality 100 rather than an infinite one.',
-      '**Generation loss is conditional, and the folklore gets it wrong.** Re-encoding at the ' +
-        'same quality on the same block grid reaches a fixed point after ONE round — every ' +
-        'coefficient is already a multiple of its step. It is a crop, a resize or a different ' +
-        'encoder’s alignment that keeps the damage accumulating, and the demo measures both.',
+        'still move.',
+      'The demo measures a finite PSNR at quality 100 rather than an infinite one.',
+      '**Generation loss is conditional, and the folklore gets it wrong.** Re-encoding at the same ' +
+        'quality on the same block grid reaches a fixed point after ONE round, because every ' +
+        'coefficient is already a multiple of its step.',
+      'It is a crop, a resize or a different encoder’s alignment that keeps the damage ' +
+        'accumulating, and the demo measures both.',
       '**A codec tuned for eyes can destroy exactly what a detector needed.** The high-frequency ' +
         'detail JPEG throws away is where an edge detector, a barcode reader or a fingerprint ' +
-        'matcher lives. Re-encoding images before inference is a common and expensive version of ' +
-        'this mistake.'
+        'matcher lives.',
+      'Re-encoding images before inference is a common and expensive version of this mistake.'
     ];
+  }
+
+  function orientation() {
+    return orientationPipeline().concat(orientationMeasurement());
   }
 
   function config() {
@@ -90,12 +104,12 @@
       },
       diagram: diagram(),
       insight: '**Lossy compression is a claim about the receiver, so the only question that ' +
-        'matters is who reads the data afterwards — and if the answer is "a program", the ' +
+        'matters is who reads the data afterwards. If the answer is "a program", the ' +
         'perceptual argument does not apply at all.** The measured half of that is the ' +
-        'generation-loss table: re-saving at the same settings on the same grid costs nothing ' +
+        'generation-loss table. Re-saving at the same settings on the same grid costs nothing ' +
         'after the first round, and a three-pixel shift costs something every time. So the ' +
-        'operational rule is not "never re-encode", it is "never re-encode after anything has ' +
-        'moved" — and the pipeline that crops, resizes and re-saves is the one that quietly ' +
+        'operational rule is not "never re-encode". It is "never re-encode after anything has ' +
+        'moved", and the pipeline that crops, resizes and re-saves is the one that quietly ' +
         'destroys an archive.'
     };
   }

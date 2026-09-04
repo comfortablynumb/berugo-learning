@@ -10,12 +10,15 @@
         term: 'Lossy compression is a claim about the receiver',
         plain: 'It throws away what the intended reader was not going to notice.',
         formal: 'the distortion measure encodes a model of the observer; the data itself has no opinion',
-        detail: 'JPEG discards high spatial frequencies because human vision resolves them ' +
-          'poorly; a perceptual audio codec discards what a nearby louder tone would mask. The ' +
-          'information is genuinely gone, and whether that matters depends entirely on who is ' +
-          'looking. If the answer is "a program" — an edge detector, a barcode reader, a ' +
-          'classifier — the perceptual argument does not apply at all, and a codec tuned for eyes ' +
-          'may have destroyed exactly the signal the program needed.',
+        detail: [
+          'JPEG discards high spatial frequencies because human vision resolves them poorly. A ' +
+            'perceptual audio codec discards what a nearby louder tone would mask.',
+          'The information is genuinely gone, and whether that matters depends entirely on who is ' +
+            'looking.',
+          'If the answer is a program — an edge detector, a barcode reader, a classifier — the ' +
+            'perceptual argument does not apply at all. A codec tuned for eyes may have destroyed ' +
+            'exactly the signal the program needed.'
+        ],
         example: 'The demo measures 89.0% of a block’s DCT coefficients quantised to zero at ' +
           'quality 50, and every one of them is information no later stage can recover.'
       },
@@ -35,11 +38,14 @@
         },
         plain: 'Transform, quantise, entropy-code — and the middle one is the whole loss.',
         formal: 'the DCT is reversible arithmetic and the entropy stage is lossless; quantisation is divide-and-round',
-        detail: 'Knowing which box is lossy is what makes the pipeline analysable. The colour ' +
-          'transform and the DCT are invertible up to floating-point rounding, and the entropy ' +
-          'coder is lossless by definition, so the quality setting is nothing but a multiplier on ' +
-          'the quantisation step table. Chroma subsampling is the one other lossy step in a ' +
-          'colour pipeline, and it is there for the same reason: a claim about the receiver.',
+        detail: [
+          'Knowing which box is lossy is what makes the pipeline analysable.',
+          'The colour transform and the DCT are invertible up to floating-point rounding, and the ' +
+            'entropy coder is lossless by definition. So the quality setting is nothing but a ' +
+            'multiplier on the quantisation step table.',
+          'Chroma subsampling is the one other lossy step in a colour pipeline, and it is there for ' +
+            'the same reason: a claim about the receiver.'
+        ],
         example: 'The demo shows the quantisation table beside the coefficients and the surviving ' +
           'levels, so the discarded values are visible as zeros.'
       },
@@ -47,12 +53,14 @@
         term: 'The transform earns its place by energy compaction',
         plain: 'It moves most of a block’s content into a few coefficients.',
         formal: 'for locally smooth data the DCT concentrates variance in the low-frequency corner',
-        detail: 'The transform does not compress — like the BWT, it rearranges — but it ' +
-          'rearranges into a form where quantisation can throw away nearly everything without ' +
-          'much visible cost. Natural images are locally smooth, so their high-frequency ' +
-          'coefficients are small; zeroing a small coefficient changes the block very little. ' +
-          'The zigzag ordering then puts those zeros in one long run for the entropy stage, which ' +
-          'is why the non-zero coefficient count predicts the file size.',
+        detail: [
+          'The transform does not compress. Like the BWT it rearranges, but it rearranges into a ' +
+            'form where quantisation can throw away nearly everything without much visible cost.',
+          'Natural images are locally smooth, so their high-frequency coefficients are small, and ' +
+            'zeroing a small coefficient changes the block very little.',
+          'The zigzag ordering then puts those zeros in one long run for the entropy stage, which is ' +
+            'why the non-zero coefficient count predicts the file size.'
+        ],
         example: 'The demo measures 85.9% of a block’s energy in the top-left 4 × 4 corner of ' +
           'its 8 × 8 coefficients, with 19 of 64 levels surviving quantisation.'
       },
@@ -60,11 +68,14 @@
         term: 'Rate against distortion is a curve, not a point',
         plain: 'A lossy codec has no single ratio.',
         formal: 'quality maps to (bytes, distortion) pairs; quoting one point is how comparisons go wrong',
-        detail: 'Two codecs can only be compared at equal distortion or equal rate, and the ' +
-          'ranking often changes along the curve — one wins at low quality and loses at high. ' +
-          'That is why a codec claim of the form "30% smaller" is meaningless without saying at ' +
-          'what quality, measured how, and on what images. The curve is also where the sensible ' +
-          'operating point lives, and it is usually well short of the top.',
+        detail: [
+          'Two codecs can only be compared at equal distortion or equal rate, and the ranking often ' +
+            'changes along the curve. One wins at low quality and loses at high.',
+          'That is why a codec claim of the form "30% smaller" is meaningless without saying at what ' +
+            'quality, measured how, and on what images.',
+          'The curve is also where the sensible operating point lives, and it is usually well short ' +
+            'of the top.'
+        ],
         example: 'The demo sweeps quality 10 to 100 and measures ratios from 18.20× down to ' +
           '2.25×, with PSNR rising 27.21 dB to 66.62.'
       },
@@ -74,11 +85,14 @@
         formal: 'PSNR = 10·log₁₀(255² / MSE); SSIM compares local means, variances and covariance',
         readAs: 'The peak signal-to-noise ratio is ten times the base-ten logarithm of 255 ' +
           'squared over the mean squared error, in decibels.',
-        detail: 'PSNR cannot see WHERE the error is, so it treats a small error spread evenly and ' +
-          'a visible block edge identically. SSIM punishes structural change and therefore ' +
-          'notices blocking, which is exactly the artefact a block-transform codec produces. A ' +
-          'comparison on PSNR alone flatters the codecs in this section, and the two measures ' +
-          'saturate at different points on the curve.',
+        detail: [
+          'PSNR cannot see WHERE the error is, so it treats a small error spread evenly and a ' +
+            'visible block edge identically.',
+          'SSIM punishes structural change and therefore notices blocking, which is exactly the ' +
+            'artefact a block-transform codec produces.',
+          'A comparison on PSNR alone flatters the codecs in this section, and the two measures ' +
+            'saturate at different points on the curve.'
+        ],
         example: 'The demo measures SSIM reaching 0.9936 at quality 90 while PSNR keeps climbing ' +
           'from 41.71 dB to 66.62 at quality 100.'
       },
@@ -86,34 +100,43 @@
         term: 'Quality 100 is not lossless',
         plain: 'The quantisation table becomes all ones and the arithmetic still rounds.',
         formal: 'the DCT is computed in floating point and the reconstruction is rounded back to integers',
-        detail: 'This surprises people who use quality 100 as an archival setting. Even with ' +
-          'every quantisation step equal to one, the forward transform, the rounding to integer ' +
-          'levels and the inverse transform each lose a fraction of a least-significant bit, and ' +
-          'the result is a finite PSNR rather than an infinite one. If the requirement is ' +
-          '"unchanged", the answer is a lossless format, not the top of a lossy dial.',
-        example: 'The demo measures 66.62 dB at quality 100 — very high, and not infinite.'
+        detail: [
+          'This surprises people who use quality 100 as an archival setting.',
+          'Even with every quantisation step equal to one, the forward transform, the rounding to ' +
+            'integer levels and the inverse transform each lose a fraction of a least-significant ' +
+            'bit. The result is a finite PSNR rather than an infinite one.',
+          'If the requirement is "unchanged", the answer is a lossless format, not the top of a ' +
+            'lossy dial.'
+        ],
+        example: 'The demo measures 66.62 dB at quality 100. That is very high, and not infinite.'
       },
       {
         term: 'Generation loss is conditional, and the folklore has it wrong',
         plain: 'Re-saving at the same settings on the same grid costs nothing after the first round.',
         formal: 'every coefficient is already a multiple of its quantisation step, so the second encode is a fixed point',
-        detail: 'The demo runs the loop rather than repeating the received wisdom, and the result ' +
-          'is a flat line: after one round the image stops changing entirely — zero pixels differ ' +
-          'on every subsequent round. What actually destroys a re-saved image is anything that ' +
-          'MOVES it relative to the 8 × 8 block grid: a crop, a resize, a different encoder’s ' +
-          'alignment. Then each round quantises coefficients that no longer sit on the grid.',
-        example: 'The demo measures 3 341 pixels changed on round one and 0 on every round after ' +
-          'it, aligned — and 2 979 to 3 281 per round when the grid is shifted by three pixels.'
+        detail: [
+          'The demo runs the loop rather than repeating the received wisdom, and the result is a ' +
+            'flat line. After one round the image stops changing entirely, with zero pixels ' +
+            'differing on every subsequent round.',
+          'What actually destroys a re-saved image is anything that MOVES it relative to the 8 × 8 ' +
+            'block grid: a crop, a resize, a different encoder’s alignment.',
+          'Then each round quantises coefficients that no longer sit on the grid.'
+        ],
+        example: 'Aligned, the demo measures 3 341 pixels changed on round one and 0 on every ' +
+          'round after it. Shifted by three pixels, it is 2 979 to 3 281 per round.'
       },
       {
         term: 'A shifted grid keeps losing, and that is what a pipeline does',
         plain: 'Crop, resize, re-save — and the damage accumulates every time.',
         formal: 'a grid offset means the second encode’s blocks straddle the first encode’s, so nothing lands on the quantisation lattice',
-        detail: 'This is the operational rule the measurement produces, and it is different from ' +
-          'the usual one. "Never re-encode a JPEG" is too strong — an aligned re-save is free. ' +
-          '"Never re-encode after anything has moved" is the rule that matches the data, and it ' +
-          'indicts exactly the pipelines that quietly destroy archives: thumbnail generators, ' +
-          'auto-croppers, and anything that resizes on upload and again on display.',
+        detail: [
+          'This is the operational rule the measurement produces, and it is different from the usual ' +
+            'one.',
+          '"Never re-encode a JPEG" is too strong, because an aligned re-save is free.',
+          '"Never re-encode after anything has moved" is the rule that matches the data. It indicts ' +
+            'exactly the pipelines that quietly destroy archives: thumbnail generators, ' +
+            'auto-croppers, and anything that resizes on upload and again on display.'
+        ],
         example: 'The demo measures PSNR falling from 34.16 dB to 30.67 over five shifted rounds ' +
           'while the aligned column holds at 32.09.'
       }
