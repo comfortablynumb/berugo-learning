@@ -5207,13 +5207,21 @@ Done this session, in curriculum order: `bridges-and-cuts`,
 `minimum-cut`, `push-relabel`, `min-cost-flow`, `bipartite-matching`,
 `general-matching` - all of M13.4-M13.6 and the whole of M14.
 
-**Resume at `competitive-analysis`** - it is section 121 in
-`Curriculum.teachingSections()` order, and M15-M20 are complete behind it. Run
+**Resume mid-way through `authenticated-encryption`** - it is section 146 in
+`Curriculum.teachingSections()` order, and everything to 145 prints `ok`. Run
 `node tools/readability.js` and work down the curriculum order; anything not
 printing `ok` is outstanding.
 
-At 120 of 364: mean sentence **19.3** words, over 30 words **11.5%**,
-single-block explanations **1 966**.
+**That one section is half done and the tree is green.** Six of its eight
+concept `detail` fields are already arrays; the two left are *counter nonces
+have no ceiling* and *misuse-resistant modes degrade instead of collapsing*, in
+`content/concepts-crypto-symmetric.js`. Its `orientation()` and `insight` in
+`sections/authenticated-encryption-section.js` are untouched, and the
+orientation will need the usual split into two named halves. It currently reads
+`mean 16.2  max 42  long 5%  1-block 2`.
+
+At 145 of 364: mean sentence **18.9** words, over 30 words **10.3%**,
+single-block explanations **1 760**.
 
 **An orientation split into paragraphs often crosses the 50-line function
 limit.** From `decision-problems` onward the fix has been two named halves -

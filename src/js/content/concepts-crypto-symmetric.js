@@ -297,12 +297,15 @@
         term: 'Confidentiality without integrity is the wrong product',
         plain: 'An AEAD refuses to return plaintext unless a tag checks out first.',
         formal: 'decrypt returns plaintext OR a failure and never both, so unverified bytes never reach the application',
-        detail: 'The previous section edited a ciphertext into a different sentence with no key ' +
-          'at all, which is possible only because there was a code path that decrypted ' +
-          'attacker-controlled bytes. Removing that path is the entire contribution of ' +
-          'authenticated encryption: the tag is checked first, the failure is single and ' +
-          'indistinguishable, and there is no partial result to leak. Almost every application ' +
-          'that wants encryption wants this interface.',
+        detail: [
+          'The previous section edited a ciphertext into a different sentence with no key at all. ' +
+            'That is possible only because there was a code path which decrypted ' +
+            'attacker-controlled bytes.',
+          'Removing that path is the entire contribution of authenticated encryption. The tag is ' +
+            'checked first, the failure is single and indistinguishable, and there is no partial ' +
+            'result to leak.',
+          'Almost every application that wants encryption wants this interface.'
+        ],
         example: 'The demo runs 5 tamper tests against the chosen suite and 4 are rejected, the ' +
           'accepted one being the honest ciphertext.'
       },
@@ -322,12 +325,15 @@
         },
         plain: 'Tag the ciphertext, verify before decrypting.',
         formal: 'encrypt-then-MAC is secure for any secure cipher and MAC; MAC-then-encrypt and encrypt-and-MAC are not in general',
-        detail: 'The distinguishing question is whether the tag can be checked before anything is ' +
-          'decrypted. If it can, forged ciphertext never reaches the decryption code and there is ' +
-          'no oracle to build — which is precisely why the padding oracle exists in TLS 1.2\'s ' +
-          'CBC suites and not in TLS 1.3. MAC-then-encrypt must decrypt to find the tag; ' +
-          'encrypt-and-MAC tags the plaintext, which leaks plaintext equality through the tag ' +
-          'and still needs the decrypt path.',
+        detail: [
+          'The distinguishing question is whether the tag can be checked before anything is ' +
+            'decrypted.',
+          'If it can, forged ciphertext never reaches the decryption code and there is no oracle to ' +
+            'build. That is precisely why the padding oracle exists in TLS 1.2\'s CBC suites and ' +
+            'not in TLS 1.3.',
+          'MAC-then-encrypt must decrypt to find the tag. Encrypt-and-MAC tags the plaintext, which ' +
+            'leaks plaintext equality through the tag and still needs the decrypt path.'
+        ],
         example: 'The demo’s order table gives four compositions and marks the "verify before ' +
           'decrypting" column as the one that decides the other two.'
       },
@@ -347,12 +353,14 @@
         },
         plain: 'Headers a middlebox must read and nobody may alter.',
         formal: 'the AEAD tag covers the associated data, so changing it fails verification even though it travels in clear',
-        detail: 'Routing headers, message types, version numbers and sequence numbers belong ' +
-          'here: visible to the network, unchangeable without detection. It is the channel that ' +
-          'makes an AEAD sufficient for a protocol rather than just for a payload, because ' +
-          'binding the header to the ciphertext stops an attacker replaying a valid ciphertext ' +
-          'under a different header. Forgetting to include the header in the associated data is a ' +
-          'common and quiet mistake.',
+        detail: [
+          'Routing headers, message types, version numbers and sequence numbers belong here. They ' +
+            'are visible to the network and unchangeable without detection.',
+          'It is the channel that makes an AEAD sufficient for a protocol rather than just for a ' +
+            'payload, because binding the header to the ciphertext stops an attacker replaying a ' +
+            'valid ciphertext under a different header.',
+          'Forgetting to include the header in the associated data is a common and quiet mistake.'
+        ],
         example: 'The demo changes only the associated data, leaving the ciphertext untouched, ' +
           'and the AEAD rejects it.'
       },
@@ -361,13 +369,16 @@
         plain: 'Same key, same nonce, same keystream.',
         formal: 'C₁ ⊕ C₂ = P₁ ⊕ P₂, so one known plaintext yields the other',
         readAs: 'The two ciphertexts exclusive-ORed together equal the two plaintexts ' +
-          'exclusive-ORed together, because the identical keystream cancels, so knowing one ' +
+          'exclusive-ORed together, because the identical keystream cancels. So knowing one ' +
           'message reveals the other.',
-        detail: 'The attacker needs only one known plaintext, which is easy to come by — a fixed ' +
-          'header, a login banner, or a message they sent themselves. This is the failure shared ' +
-          'by every stream cipher and counter mode, and it is why the nonce requirement is stated ' +
-          'as "never repeated under one key" rather than "usually different". There is no ' +
-          'degradation and no partial leak.',
+        detail: [
+          'The attacker needs only one known plaintext, which is easy to come by. A fixed header, a ' +
+            'login banner, or a message they sent themselves will do.',
+          'This is the failure shared by every stream cipher and counter mode. It is why the nonce ' +
+            'requirement is stated as "never repeated under one key" rather than "usually ' +
+            'different".',
+          'There is no degradation and no partial leak.'
+        ],
         example: 'The demo recovers 15 of 15 bytes of the second message from the two ciphertexts ' +
           'and the first plaintext.'
       },
@@ -375,11 +386,14 @@
         term: 'For GCM it is worse: the authentication key falls too',
         plain: 'Nonce reuse turns an eavesdropper into a forger.',
         formal: 'GHASH is a polynomial evaluation and therefore linear, so one known (ciphertext, tag) pair yields the tag mask',
-        detail: 'With the authentication key recovered, the attacker derives the tag mask from a ' +
-          'known pair and can then compute a valid tag for any ciphertext they choose, which the ' +
-          'receiver accepts. Confidentiality and authenticity fall together from one repeated ' +
-          '96-bit value. That is why GCM\'s nonce requirement is stricter than "do not repeat, ' +
-          'it leaks a bit", and why misuse-resistant modes exist.',
+        detail: [
+          'With the authentication key recovered, the attacker derives the tag mask from a known ' +
+            'pair. They can then compute a valid tag for any ciphertext they choose, and the ' +
+            'receiver accepts it.',
+          'Confidentiality and authenticity fall together from one repeated 96-bit value.',
+          'That is why GCM\'s nonce requirement is stricter than "do not repeat, it leaks a bit", ' +
+            'and why misuse-resistant modes exist.'
+        ],
         example: 'The demo derives the mask, tags an edited ciphertext, and reports that GCM ' +
           'accepted the forgery.'
       },
@@ -388,13 +402,16 @@
         plain: 'Collisions follow the birthday bound, not the nonce width.',
         formal: 'collision probability ≈ q²/2⁹⁷ for q messages, so 2³² messages sits at about 2⁻³³',
         readAs: 'The chance that two random ninety-six-bit nonces collide grows with the square ' +
-          'of the number of messages, so at about four billion messages the risk is around two to ' +
+          'of the number of messages. At about four billion messages the risk is around two to ' +
           'the minus thirty-three.',
-        detail: 'The standard ceiling of 2³² messages per key is chosen so that probability stays ' +
-          'under 2⁻³², which is a much stricter target than "unlikely" — and it means the number ' +
-          'looks reassuringly tiny right up to the limit. Because the risk grows with the square, ' +
-          'every doubling of traffic quadruples it, and past 2⁴⁸ messages a collision is more ' +
-          'likely than not. Nothing announces the crossing.',
+        detail: [
+          'The standard ceiling of 2³² messages per key is chosen so that probability stays under ' +
+            '2⁻³², which is a much stricter target than "unlikely". It also means the number looks ' +
+            'reassuringly tiny right up to the limit.',
+          'Because the risk grows with the square, every doubling of traffic quadruples it, and past ' +
+            '2⁴⁸ messages a collision is more likely than not.',
+          'Nothing announces the crossing.'
+        ],
         example: 'The demo computes 1.164 × 10⁻¹⁰ at 2³² messages and 3.935 × 10⁻¹ at 2⁴⁸.'
       },
       {
