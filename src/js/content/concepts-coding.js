@@ -22,12 +22,14 @@
         formal: 'H = −Σ p(x)·log₂ p(x); no lossless code averages fewer bits per symbol',
         readAs: 'Entropy is minus the sum, over every symbol, of its probability times the ' +
           'base-two logarithm of that probability.',
-        detail: 'The source-coding theorem makes this the only honest denominator for a ' +
-          'compression ratio. "Three times compression" is a claim with no unit until you say ' +
-          'three times against what, and the answer is always the entropy of some model — which ' +
-          'is why there is no single entropy of a file. An order-0 model sees each byte alone, ' +
-          'an order-2 model conditions on the previous two, and they give different floors for ' +
-          'the same bytes.',
+        detail: [
+          'The source-coding theorem makes this the only honest denominator for a compression ratio.',
+          '"Three times compression" is a claim with no unit until you say three times against what, ' +
+            'and the answer is always the entropy of some model. That is why there is no single ' +
+            'entropy of a file.',
+          'An order-0 model sees each byte alone, an order-2 model conditions on the previous two, ' +
+            'and they give different floors for the same bytes.'
+        ],
         example: 'The demo measures English text at 4.5623 bits per byte at order 0 and 0.6345 ' +
           'at order 2, over 3 000 bytes.'
       },
@@ -35,13 +37,15 @@
         term: 'A high-order estimate on a short input is memorisation',
         plain: 'Every context seen once, every prediction certain, and nothing learned.',
         formal: 'conditional entropy estimated from a finite sample is biased downward, severely when contexts are sparse',
-        detail: 'This is the failure that makes entropy estimates dangerous rather than merely ' +
-          'imprecise. With 256 possible bytes, an order-2 model has 65 536 contexts; over three ' +
-          'thousand samples each one is seen about once, every prediction is a memory of a single ' +
-          'observation, and the reported entropy approaches zero. The number looks like a result ' +
-          'and describes the sample. The defence is to report the context count and the ' +
-          'observations per context beside every estimate, which is what turns the failure from ' +
-          'invisible into obvious.',
+        detail: [
+          'This is the failure that makes entropy estimates dangerous rather than merely imprecise.',
+          'With 256 possible bytes, an order-2 model has 65 536 contexts. Over three thousand ' +
+            'samples each one is seen about once, every prediction is a memory of a single ' +
+            'observation, and the reported entropy approaches zero.',
+          'The number looks like a result and describes the sample. The defence is to report the ' +
+            'context count and the observations per context beside every estimate, which turns the ' +
+            'failure from invisible into obvious.'
+        ],
         example: 'The demo marks 3 of its 7 corpora as unusable at order 2, including random ' +
           'bytes at 2 944 contexts and 1.0 observation each.'
       },
@@ -51,13 +55,15 @@
         formal: 'there are 2ⁿ files of n bits and fewer than 2ⁿ strings shorter than n, so no injection can shorten them all',
         readAs: 'There are two-to-the-n files of n bits and strictly fewer strings shorter than ' +
           'n, so no one-to-one map can make every file smaller.',
-        detail: 'The counting argument is complete and needs nothing from information theory. It ' +
-          'also implies the useful corollary: any compressor that shrinks some inputs must expand ' +
-          'others, so a codec is a bet about which inputs you will actually see. That is why a ' +
-          'compression benchmark must include incompressible data and report the expansion rather ' +
-          'than quietly dropping the row.',
-        example: 'The demo measures random bytes at 7.936 bits per byte — within 0.064 of the ' +
-          'maximum 8 — and every codec in the milestone expands them.'
+        detail: [
+          'The counting argument is complete and needs nothing from information theory.',
+          'It also implies the useful corollary. Any compressor that shrinks some inputs must expand ' +
+            'others, so a codec is a bet about which inputs you will actually see.',
+          'That is why a compression benchmark must include incompressible data and report the ' +
+            'expansion, rather than quietly dropping the row.'
+        ],
+        example: 'The demo measures random bytes at 7.936 bits per byte, within 0.064 of the ' +
+          'maximum 8. Every codec in the milestone expands them.'
       },
       {
         term: 'Cross-entropy is what a wrong model actually costs',
@@ -65,40 +71,48 @@
         formal: 'H(p, q) = −Σ p(x)·log₂ q(x) = H(p) + D(p ‖ q), and it is never below H(p)',
         readAs: 'The cross-entropy of the true distribution p under the model q is the entropy ' +
           'of p plus the KL divergence from p to q, and that divergence is never negative.',
-        detail: 'A coder spends −log₂ q(x) bits on a symbol its model gave probability q(x), so ' +
-          'the average cost is the cross-entropy and the excess over the entropy is pure waste. ' +
+        detail: [
+          'A coder spends −log₂ q(x) bits on a symbol its model gave probability q(x). So the ' +
+            'average cost is the cross-entropy, and the excess over the entropy is pure waste.',
           'That is the same quantity, in the same units, that a language model reports as its ' +
-          'training loss — which is why "compression is prediction" is arithmetic rather than a ' +
-          'slogan. It also explains why a confident wrong model costs more than a hesitant one: ' +
-          'the logarithm punishes low probability on what actually happened.',
+            'training loss. It is why "compression is prediction" is arithmetic rather than a ' +
+            'slogan.',
+          'It also explains why a confident wrong model costs more than a hesitant one. The ' +
+            'logarithm punishes low probability on what actually happened.'
+        ],
         example: 'The demo’s arithmetic coder pays 13 688 bits against an information content of ' +
-          '13 687.0 — the cross-entropy of a model that is exactly right.'
+          '13 687.0. That is the cross-entropy of a model that is exactly right.'
       },
       {
         term: 'Mutual information is the redundancy between neighbours',
         plain: 'How much knowing the previous symbol tells you about this one.',
         formal: 'I(X; Y) = H(X) − H(X | Y), in bits',
         readAs: 'The mutual information between two variables is the entropy of the first ' +
-          'minus its entropy once the second is known — in other words, how much uncertainty ' +
-          'about this symbol the previous one removes.',
-        detail: 'It is the redundancy an order-1 model can remove, stated as one number, and it ' +
-          'is the difference between what a symbol code can reach and what a context model can. ' +
-          'On English text it is over two bits per byte — nearly half the order-0 figure — which ' +
-          'is the measured reason a context-modelling compressor beats a Huffman coder by so much ' +
-          'more than a better Huffman coder ever could.',
-        example: 'The demo measures 4.5623 at order 0 and 1.9578 at order 1 on English text: ' +
-          '2.60 bits per byte of mutual information.'
+          'minus its entropy once the second is known. In other words, it is how much ' +
+          'uncertainty about this symbol the previous one removes.',
+        detail: [
+          'It is the redundancy an order-1 model can remove, stated as one number.',
+          'It is also the difference between what a symbol code can reach and what a context model ' +
+            'can.',
+          'On English text it is over two bits per byte, nearly half the order-0 figure. That is the ' +
+            'measured reason a context-modelling compressor beats a Huffman coder by so much more ' +
+            'than a better Huffman coder ever could.'
+        ],
+        example: 'The demo measures 4.5623 at order 0 and 1.9578 at order 1 on English text. That ' +
+          'is 2.60 bits per byte of mutual information.'
       },
       {
         term: 'The estimator itself has to be checked against closed forms',
         plain: 'Test the measuring instrument on sources whose answer is arithmetic.',
         formal: 'H(p) for a biased coin and H of one transition row for a Markov chain are exact, not estimated',
-        detail: 'Every ratio in this milestone is measured against an entropy this code computes, ' +
-          'so an estimator that is subtly wrong would make every downstream conclusion wrong in ' +
-          'the same direction and none of them would look odd. Checking against a biased coin, ' +
-          'where H(p) is a closed form, and a Markov chain, where the order-1 entropy is the ' +
-          'entropy of one row of the transition matrix, is cheap and it is what licenses the ' +
-          'rest.',
+        detail: [
+          'Every ratio in this milestone is measured against an entropy this code computes.',
+          'So an estimator that is subtly wrong would make every downstream conclusion wrong in the ' +
+            'same direction, and none of them would look odd.',
+          'The checks are cheap and they license the rest. A biased coin has H(p) in closed form, ' +
+            'and a Markov chain has its order-1 entropy equal to the entropy of one row of the ' +
+            'transition matrix.'
+        ],
         example: 'The demo’s worst disagreement over six synthetic sources and 20 000 symbols is ' +
           '0.0110 bits, on an 8-state Markov chain.'
       },
@@ -109,26 +123,33 @@
         readAs: 'The compression ratio is eight divided by the bits spent per byte, and the ' +
           'smallest possible output is the ceiling of the entropy times the symbol count over ' +
           'eight.',
-        detail: 'Reporting bits per symbol invites the next question — against what entropy? — ' +
-          'and reporting a ratio does not. That is the entire reason this milestone’s tables ' +
-          'carry both columns with the entropy between them: a reader can see at a glance whether ' +
-          'a coder is within one per cent of its own floor, in which case a better coder is ' +
-          'pointless, or forty per cent away, in which case it is the whole opportunity.',
+        detail: [
+          'Reporting bits per symbol invites the next question, which is "against what entropy?". ' +
+            'Reporting a ratio does not.',
+          'That is the entire reason this milestone’s tables carry both columns with the entropy ' +
+            'between them.',
+          'A reader can see at a glance whether a coder is within one per cent of its own floor, in ' +
+            'which case a better coder is pointless. Or forty per cent away, in which case it is ' +
+            'the whole opportunity.'
+        ],
         example: 'The demo’s Huffman coder measures 4.6173 bits per byte against an entropy of ' +
-          '4.5623 — 1.0121× the floor, and the ratio column alone would not show that.'
+          '4.5623, which is 1.0121× the floor. The ratio column alone would not show that.'
       },
       {
         term: 'Entropy is measured per corpus, because it is a property of the data',
         plain: 'The same compressor is superb on logs and useless on JPEGs.',
         formal: 'the redundancy an order-0 coder cannot reach is H₀ − H₂, and it varies by an order of magnitude across data types',
         readAs: 'The redundancy an order-zero coder cannot reach is the order-zero entropy minus ' +
-          'the order-two entropy, and it differs by a factor of ten between one kind of data and ' +
+          'the order-two entropy. It differs by a factor of ten between one kind of data and ' +
           'another.',
-        detail: 'A benchmark on one corpus produces a winner and no information. Structured text ' +
-          'has enormous conditional redundancy because its keys repeat exactly; prose has less; ' +
-          'already-compressed bytes have none by construction, since a codec’s output is ' +
-          'high-entropy or the codec was not finished. Keeping several corpora and reporting all ' +
-          'of them is what makes a compression comparison mean anything.',
+        detail: [
+          'A benchmark on one corpus produces a winner and no information.',
+          'Structured text has enormous conditional redundancy because its keys repeat exactly, and ' +
+            'prose has less. Already-compressed bytes have none by construction, since a codec’s ' +
+            'output is high-entropy or the codec was not finished.',
+          'Keeping several corpora and reporting all of them is what makes a compression comparison ' +
+            'mean anything.'
+        ],
         example: 'The demo measures 4.219 bits per byte of order-2 redundancy on JSON logs and ' +
           '2.336 on mixed prose.'
       }

@@ -50,39 +50,54 @@
     };
   }
 
-  function orientation() {
+  function orientationFloor() {
     return [
       '**Entropy is the average number of bits a symbol carries, and the source-coding theorem ' +
-        'says no lossless code can average fewer.** That makes it the only honest denominator ' +
-        'for a compression ratio: "3× compression" is a claim with no unit until you say 3× ' +
-        'against what, and the answer is always the entropy of some model.',
-      '**There is no single entropy of a file — there is one number per model.** An order-0 ' +
-        'model sees each byte alone; an order-2 model conditions on the previous two. The demo ' +
-        'measures English text at about 4.5 bits per byte at order 0 and well under 1 at order ' +
-        '3, and that difference is the redundancy a context model can remove.',
-      '**A high-order estimate on a short input is memorisation, not modelling.** Every context ' +
-        'is seen once, every prediction is certain, and the reported entropy approaches zero ' +
-        'while nothing has been learned. The demo reports the context count and the observations ' +
-        'per context beside every estimate so that failure is visible rather than flattering.',
+        'says no lossless code can average fewer.** That makes it the only honest denominator for ' +
+        'a compression ratio.',
+      '"3× compression" is a claim with no unit until you say 3× against what, and the answer is ' +
+        'always the entropy of some model.',
+      '**There is no single entropy of a file. There is one number per model.** An order-0 model ' +
+        'sees each byte alone, and an order-2 model conditions on the previous two.',
+      'The demo measures English text at about 4.5 bits per byte at order 0 and well under 1 at ' +
+        'order 3. That difference is the redundancy a context model can remove.',
+      '**A high-order estimate on a short input is memorisation, not modelling.** Every context is ' +
+        'seen once, every prediction is certain, and the reported entropy approaches zero while ' +
+        'nothing has been learned.',
+      'The demo reports the context count and the observations per context beside every estimate, ' +
+        'so that failure is visible rather than flattering.',
       '**"Random data does not compress" is a theorem, not a limitation of the tools.** There are ' +
         '2^n files of n bits and fewer than 2^n shorter descriptions, so no bijection can shorten ' +
-        'them all. The demo runs every codec on random bytes and reports the expansion rather ' +
-        'than quietly dropping the row.',
-      '**Cross-entropy is what a coder pays when its model is wrong**, and it is never below the ' +
-        'entropy. The gap is the KL divergence, and it is why a model that is confident and wrong ' +
-        'costs more than a model that is uncertain — a fact with exactly the same arithmetic in a ' +
-        'compressor and in a language model’s loss.',
-      '**Mutual information is the redundancy between neighbours, as one number.** H(X) minus ' +
-        'H(X given the previous symbol) is what an order-1 model can remove, and on the demo’s ' +
-        'English text it is over two bits per byte — nearly half the order-0 figure.',
-      '**The estimator is checked against sources whose entropy is known in closed form.** Four ' +
-        'biased coins and two Markov chains, where the true entropy is arithmetic rather than an ' +
-        'estimate. Everything else in the milestone is measured against numbers this code ' +
-        'produces, so it has to be right first.',
-      '**Compression ratio and bits per symbol are the same statement twice.** A ratio hides the ' +
-        'denominator and a bits-per-symbol figure carries it, which is why every table in this ' +
-        'milestone reports both and puts the entropy in the next column.'
+        'them all.',
+      'The demo runs every codec on random bytes and reports the expansion, rather than quietly ' +
+        'dropping the row.'
     ];
+  }
+
+  function orientationModels() {
+    return [
+      '**Cross-entropy is what a coder pays when its model is wrong**, and it is never below the ' +
+        'entropy.',
+      'The gap is the KL divergence, and it is why a model that is confident and wrong costs more ' +
+        'than a model that is uncertain. That fact has exactly the same arithmetic in a compressor ' +
+        'and in a language model’s loss.',
+      '**Mutual information is the redundancy between neighbours, as one number.** H(X) minus H(X ' +
+        'given the previous symbol) is what an order-1 model can remove.',
+      'On the demo’s English text it is over two bits per byte, nearly half the order-0 figure.',
+      '**The estimator is checked against sources whose entropy is known in closed form.** That is ' +
+        'four biased coins and two Markov chains, where the true entropy is arithmetic rather than ' +
+        'an estimate.',
+      'Everything else in the milestone is measured against numbers this code produces, so it has ' +
+        'to be right first.',
+      '**Compression ratio and bits per symbol are the same statement twice.** A ratio hides the ' +
+        'denominator and a bits-per-symbol figure carries it.',
+      'That is why every table in this milestone reports both, and puts the entropy in the next ' +
+        'column.'
+    ];
+  }
+
+  function orientation() {
+    return orientationFloor().concat(orientationModels());
   }
 
   function config() {
@@ -96,10 +111,10 @@
       diagram: diagram(),
       insight: '**A compressor’s ratio is only meaningful against the entropy of a stated model, ' +
         'and choosing the model is the whole argument.** Report "3× compression" and you have ' +
-        'said nothing; report "4.62 bits per byte against an order-0 entropy of 4.56" and a ' +
-        'reader knows the coder is within 1.2% of its own floor and that a better model is where ' +
-        'the remaining gain is. The habit worth taking away is to ask, of any compression claim, ' +
-        'what the denominator was — and to notice that a high-order entropy estimate on a small ' +
+        'said nothing. Report "4.62 bits per byte against an order-0 entropy of 4.56" and a ' +
+        'reader knows the coder is within 1.2% of its own floor. They also know a better model ' +
+        'is where the remaining gain is. The habit worth taking away is to ask, of any compression claim, ' +
+        'what the denominator was. And to notice that a high-order entropy estimate on a small ' +
         'sample is a number about the sample rather than about the source.'
     };
   }
