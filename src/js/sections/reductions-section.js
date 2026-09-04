@@ -56,49 +56,60 @@
     };
   }
 
-  function orientation() {
+  function orientationMechanics() {
     return [
-      '**A reduction from A to B is a map that turns an instance of A into an instance of B ' +
-        'with the same answer, computable in polynomial time.** Written that way it is a proof ' +
-        'device — if A is hard and A reduces to B then B is hard — and it is also the more ' +
-        'useful thing: a way to SOLVE A by calling a solver for B. Most of what this milestone ' +
-        'is for is the second reading.',
+      '**A reduction from A to B is a map that turns an instance of A into an instance of B with ' +
+        'the same answer, computable in polynomial time.** Written that way it is a proof ' +
+        'device: if A is hard and A reduces to B then B is hard.',
+      'It is also the more useful thing, which is a way to SOLVE A by calling a solver for B. ' +
+        'Most of what this milestone is for is the second reading.',
       '**The arrow points from the problem you want to solve to the problem you can call, and ' +
-        'getting it backwards proves nothing.** Reducing your scheduling problem to SAT lets ' +
-        'you use a SAT solver. Reducing SAT to your scheduling problem proves your problem is ' +
-        'hard. Both directions compile, both run, and only one of them is the argument you ' +
-        'meant to make — which is why this is the most common error in hardness claims.',
+        'getting it backwards proves nothing.** Reducing your scheduling problem to SAT lets you ' +
+        'use a SAT solver.',
+      'Reducing SAT to your scheduling problem proves your problem is hard.',
+      'Both directions compile and both run, and only one of them is the argument you meant to ' +
+        'make. That is why this is the most common error in hardness claims.',
       '**A gadget is a small piece of the target instance that simulates one piece of the ' +
-        'source.** In 3-SAT → independent set the gadget is a triangle per clause, so at most ' +
-        'one of its vertices can be chosen, and asking for one vertex per clause forces the ' +
-        'choice to be "which literal satisfies this clause". Consistency comes from a second ' +
-        'edge family joining every x to every ¬x.',
-      '**Correctness is two implications and both have to hold.** If the source is a YES then ' +
-        'the target is a YES — that is the easy direction and the one people check. If the ' +
-        'TARGET is a YES then the source is a YES — that is the direction a broken gadget ' +
+        'source.** In 3-SAT → independent set the gadget is a triangle per clause, so at most one ' +
+        'of its vertices can be chosen.',
+      'Asking for one vertex per clause forces the choice to be "which literal satisfies this ' +
+        'clause". Consistency comes from a second edge family joining every x to every ¬x.',
+      '**Correctness is two implications and both have to hold.** If the source is a YES then the ' +
+        'target is a YES. That is the easy direction and the one people check.',
+      'If the TARGET is a YES then the source is a YES. That is the direction a broken gadget ' +
         'fails, and the only way to observe it is to map the target’s answer back and check it ' +
-        'against the source instance. The demo does exactly that and reports the result.',
-      '**The mapped-back answer is the artefact worth keeping.** A reduction that only proves ' +
-        'hardness gives you a sentence; a reduction that maps solutions back gives you a ' +
-        'solver. The difference is the backward map, it is usually four lines, and it is the ' +
-        'part that turns "this is NP-hard, sorry" into "this is NP-hard, so here is the ' +
-        'encoding and the answer".',
-      '**A Turing reduction is the weaker, more useful cousin.** A many-one reduction makes ONE ' +
-        'call and returns its answer; a Turing reduction may call the oracle many times and do ' +
-        'arbitrary polynomial work between calls. Solving an optimisation problem by binary ' +
-        'searching over its decision version is a Turing reduction, and it is what every ' +
-        '"minimise k" wrapper around a SAT solver actually is.',
-      '**Reductions compose, which is why one hardness result covers thousands of problems.** ' +
-        'If A reduces to B and B reduces to C then A reduces to C, with the two maps run in ' +
-        'sequence and the two backward maps run in reverse. Cook–Levin gives everything in NP ' +
-        'reducing to SAT, and every subsequent result is one more link in a chain that starts ' +
-        'there.',
-      '**The reduction is cheap and solving the target is not.** The demo builds a target ' +
-        'instance instantly for any source; the search that answers it is exhaustive and ' +
-        'exponential, which is why the instances here have five variables. That is not a ' +
-        'weakness of the demo — it is the reason reductions are used with a real solver on the ' +
-        'far side, and the reason section 20.7 exists.'
+        'against the source instance.',
+      'The demo does exactly that and reports the result.'
     ];
+  }
+
+  function orientationPractice() {
+    return [
+      '**The mapped-back answer is the artefact worth keeping.** A reduction that only proves ' +
+        'hardness gives you a sentence. A reduction that maps solutions back gives you a solver.',
+      'The difference is the backward map. It is usually four lines, and it is the part that turns ' +
+        '"this is NP-hard, sorry" into "this is NP-hard, so here is the encoding and the answer".',
+      '**A Turing reduction is the weaker, more useful cousin.** A many-one reduction makes ONE ' +
+        'call and returns its answer. A Turing reduction may call the oracle many times and do ' +
+        'arbitrary polynomial work between calls.',
+      'Solving an optimisation problem by binary searching over its decision version is a Turing ' +
+        'reduction, and it is what every "minimise k" wrapper around a SAT solver actually is.',
+      '**Reductions compose, which is why one hardness result covers thousands of problems.** If A ' +
+        'reduces to B and B reduces to C then A reduces to C, with the two maps run in sequence ' +
+        'and the two backward maps run in reverse.',
+      'Cook–Levin gives everything in NP reducing to SAT, and every subsequent result is one more ' +
+        'link in a chain that starts there.',
+      '**The reduction is cheap and solving the target is not.** The demo builds a target instance ' +
+        'instantly for any source.',
+      'The search that answers it is exhaustive and exponential, which is why the instances here ' +
+        'have five variables.',
+      'That is not a weakness of the demo. It is the reason reductions are used with a real solver ' +
+        'on the far side, and the reason section 20.7 exists.'
+    ];
+  }
+
+  function orientation() {
+    return orientationMechanics().concat(orientationPractice());
   }
 
   function config() {
@@ -113,11 +124,11 @@
       insight: '**The reduction you will actually write at work points at a solver, and the ' +
         'test you must write for it is the round trip.** Encode the instance, call the solver, ' +
         'decode the answer, and then check the decoded answer against the ORIGINAL requirements ' +
-        'with code that shares nothing with the encoder. Every reduction bug I have seen — and ' +
-        'every one in this milestone’s own history — survives the first three steps and dies at ' +
+        'with code that shares nothing with the encoder. Every reduction bug I have seen, and ' +
+        'every one in this milestone’s own history, survives the first three steps and dies at ' +
         'the fourth. If the round trip is not in the test suite, the encoding is unverified no ' +
-        'matter how many instances it has answered correctly, because a gadget that is wrong in ' +
-        'one direction is right in the other and produces plausible answers until it does not.'
+        'matter how many instances it has answered correctly. A gadget that is wrong in one ' +
+        'direction is right in the other, and it produces plausible answers until it does not.'
     };
   }
 

@@ -161,13 +161,17 @@
         term: 'A many-one reduction maps instances, not answers',
         plain: 'Turn an instance of your problem into an instance of a problem you can solve, with the same answer.',
         formal: 'A ≤ₚ B when ∃ polynomial-time f with x ∈ A ⟺ f(x) ∈ B',
-        readAs: 'A reduces to B in polynomial time when there is a polynomial-time function f ' +
-          'such that x is a yes instance of A exactly when f of x is a yes instance of B.',
-        detail: 'The map runs before the solver and produces a new instance; it does not get to ' +
-          'call the solver, look at the answer and adjust. That restriction is what makes the ' +
-          'relation compose cleanly and what makes it a proof device: if A reduces to B and B ' +
-          'were easy, A would be too. The same map read the other way is a way to SOLVE A by ' +
-          'calling a solver for B, which is the reading almost every practical use depends on.',
+        readAs: 'A reduces to B in polynomial time when some polynomial-time function f has one ' +
+          'property. It turns every yes instance of A into a yes instance of B, and every no ' +
+          'instance into a no instance.',
+        detail: [
+          'The map runs before the solver and produces a new instance. It does not get to call the ' +
+            'solver, look at the answer and adjust.',
+          'That restriction is what makes the relation compose cleanly, and what makes it a proof ' +
+            'device. If A reduces to B and B were easy, A would be too.',
+          'The same map read the other way is a way to SOLVE A by calling a solver for B, which is ' +
+            'the reading almost every practical use depends on.'
+        ],
         example: 'The demo turns 5 variables and 9 clauses into a graph on 27 vertices and 54 ' +
           'edges in a single pass, with no solving involved.'
       },
@@ -184,46 +188,55 @@
           ].join('\n'),
           caption: 'The same construction read in either direction says two opposite things: one gives you a tool, the other gives you a hardness proof.'
         },
-        plain: 'Reducing your problem to SAT lets you use a solver; reducing SAT to your problem proves yours is hard.',
+        plain: 'Reducing your problem to SAT lets you use a solver. Reducing SAT to your problem proves yours is hard.',
         formal: 'A ≤ₚ B proves B is at least as hard as A, and lets a B-solver answer A',
-        detail: 'This is the mistake everybody makes once, and the code still runs when it is ' +
-          'made. If your goal is a hardness argument you must reduce a KNOWN-hard problem to ' +
-          'yours; if your goal is a solver you must reduce yours to a problem with a solver. ' +
+        detail: [
+          'This is the mistake everybody makes once, and the code still runs when it is made.',
+          'If your goal is a hardness argument you must reduce a KNOWN-hard problem to yours. If ' +
+            'your goal is a solver you must reduce yours to a problem with a solver.',
           'Writing the reduction the wrong way round produces a program that computes something, ' +
-          'terminates, and proves nothing whatsoever. The direction is worth saying out loud ' +
-          'every time: "I am reducing X to Y, so Y is at least as hard as X".',
+            'terminates, and proves nothing whatsoever. The direction is worth saying out loud ' +
+            'every time: "I am reducing X to Y, so Y is at least as hard as X".'
+        ],
         example: 'The demo reduces 3-SAT to independent set, so independent set is at least as ' +
-          'hard as 3-SAT — and the same code solves 3-SAT by calling an independent-set solver.'
+          'hard as 3-SAT. The same code solves 3-SAT by calling an independent-set solver.'
       },
       {
         term: 'A gadget simulates one piece of the source inside the target',
         plain: 'A clause becomes a triangle; a variable becomes a pair of opposite vertices.',
         formal: 'the 3-SAT → independent set gadget: one vertex per literal occurrence, a triangle per clause, an edge between every x and every ¬x',
         readAs: 'Reducing 3-SAT to independent set: make one vertex for every literal '
-          + 'occurrence, join the three vertices of each clause into a triangle, and join '
+          + 'occurrence. Join the three vertices of each clause into a triangle, and join '
           + 'every vertex for x to every vertex for not-x.',
-        detail: 'The triangle enforces "at most one literal chosen per clause", and asking for a ' +
-          'set of size m — one per clause — upgrades that to exactly one, which is the choice of ' +
-          'which literal satisfies the clause. The edges between complementary literals enforce ' +
-          'consistency across clauses. Those two sentences are the entire correctness proof, and ' +
-          'they are worth learning as a pattern: a gadget encodes a local choice, and a second ' +
-          'edge family enforces the global consistency the choices must respect.',
+        detail: [
+          'The triangle enforces "at most one literal chosen per clause". Asking for a set of size ' +
+            'm, one per clause, upgrades that to exactly one, which is the choice of which literal ' +
+            'satisfies the clause.',
+          'The edges between complementary literals enforce consistency across clauses.',
+          'Those two sentences are the entire correctness proof, and they are worth learning as a ' +
+            'pattern. A gadget encodes a local choice, and a second edge family enforces the global ' +
+            'consistency the choices must respect.'
+        ],
         example: 'The demo shows 9 clause triangles over 27 vertices, and highlights the one ' +
-          'vertex the solver chose in each — reading them down the table is the assignment.'
+          'vertex the solver chose in each. Reading them down the table is the assignment.'
       },
       {
         term: 'Correctness is two implications and the second is the one that fails',
-        plain: 'Source YES implies target YES is easy; target YES implies source YES is where the bugs are.',
+        plain: 'Source YES implies target YES is easy. Target YES implies source YES is where the bugs are.',
         formal: 'x ∈ A ⟹ f(x) ∈ B is usually by construction; f(x) ∈ B ⟹ x ∈ A is the direction a broken gadget loses',
         readAs: 'x being a yes instance of A implies f of x is a yes instance of B, which '
-          + 'usually comes for free; the converse — f of x being a yes instance implies x '
-          + 'is one — is the direction a broken gadget loses.',
-        detail: 'The forward direction is easy because you built the target from a solution you ' +
-          'were holding. The backward direction says the target has no solutions the source ' +
-          'cannot explain, and a gadget that is slightly too permissive breaks it silently: the ' +
-          'target is solvable, the backward map returns something, and the something is not an ' +
-          'answer to the original question. The only way to observe that is to check the mapped ' +
-          'answer against the source instance itself.',
+          + 'usually comes for free. The converse, f of x being a yes instance implying x '
+          + 'is one, is the direction a broken gadget loses.',
+        detail: [
+          'The forward direction is easy because you built the target from a solution you were ' +
+            'holding.',
+          'The backward direction says the target has no solutions the source cannot explain, and a ' +
+            'gadget that is slightly too permissive breaks it silently. The target is solvable, the ' +
+            'backward map returns something, and the something is not an answer to the original ' +
+            'question.',
+          'The only way to observe that is to check the mapped answer against the source instance ' +
+            'itself.'
+        ],
         example: 'The demo’s fourth step verifies the mapped assignment against the ORIGINAL ' +
           'formula, and reports "valid" or a named reason.'
       },
@@ -231,13 +244,15 @@
         term: 'The backward map is what turns a proof into a solver',
         plain: 'Map the target’s answer back to the source, or you have proved hardness and solved nothing.',
         formal: 'the pair (f, g) with g mapping a B-certificate to an A-certificate is a Levin reduction',
-        detail: 'A textbook reduction usually stops at the equivalence, because a proof needs no ' +
-          'more. An engineering reduction must carry the inverse: the whole reason to encode a ' +
-          'problem into SAT is to get an answer back out. The backward map is typically four ' +
-          'lines — read the chosen literals, take the complement of the set, drop the two added ' +
-          'numbers — and it is the difference between "this is NP-hard, sorry" and "this is ' +
-          'NP-hard, so here is the encoding and here is your schedule".',
-        example: 'Independent set → assignment is one line per chosen vertex; set cover → vertex ' +
+        detail: [
+          'A textbook reduction usually stops at the equivalence, because a proof needs no more.',
+          'An engineering reduction must carry the inverse. The whole reason to encode a problem ' +
+            'into SAT is to get an answer back out.',
+          'The backward map is typically four lines: read the chosen literals, take the complement ' +
+            'of the set, drop the two added numbers. It is the difference between "this is NP-hard, ' +
+            'sorry" and "this is NP-hard, so here is the encoding and here is your schedule".'
+        ],
+        example: 'Independent set → assignment is one line per chosen vertex. Set cover → vertex ' +
           'cover is reading the set indices as vertex indices.'
       },
       {
@@ -246,13 +261,15 @@
         formal: 'A ≤ᵀ B when A is decidable by a polynomial-time machine with an oracle for B',
         readAs: 'A Turing-reduces to B when a polynomial-time machine that may consult a B-oracle ' +
           'decides A.',
-        detail: 'Many-one reductions make one call and return its answer unchanged; Turing ' +
-          'reductions may call repeatedly and do arbitrary polynomial work between calls. Every ' +
-          '"minimise k" wrapper around a SAT solver is a Turing reduction, and so is every ' +
-          'branch-and-bound loop that consults a feasibility check. The weaker relation is ' +
-          'sufficient for almost every practical purpose and insufficient for some theoretical ' +
-          'ones — notably it does not distinguish NP from co-NP, which is exactly why hardness ' +
-          'proofs use the many-one form.',
+        detail: [
+          'Many-one reductions make one call and return its answer unchanged. Turing reductions may ' +
+            'call repeatedly and do arbitrary polynomial work between calls.',
+          'Every "minimise k" wrapper around a SAT solver is a Turing reduction, and so is every ' +
+            'branch-and-bound loop that consults a feasibility check.',
+          'The weaker relation is sufficient for almost every practical purpose and insufficient for ' +
+            'some theoretical ones. Notably it does not distinguish NP from co-NP, which is exactly ' +
+            'why hardness proofs use the many-one form.'
+        ],
         example: 'Turning "is there a cover of size ≤ k?" into "what is the smallest cover?" is a ' +
           'Turing reduction with about log n calls.'
       },
@@ -262,11 +279,14 @@
         formal: 'A ≤ₚ B and B ≤ₚ C ⟹ A ≤ₚ C; the composition of two polynomials is a polynomial',
         readAs: 'If A reduces to B in polynomial time and B reduces to C in polynomial '
           + 'time, then A reduces to C, because one polynomial of another is a polynomial.',
-        detail: 'This is why Cook–Levin is enough. It puts every problem in NP at the top of a ' +
-          'chain that reaches SAT, and every subsequent hardness result is one more link rather ' +
-          'than a proof from first principles. Composition also works on the backward maps, run ' +
-          'in reverse order, so a chain of reductions is still a solver — which is what makes a ' +
-          'long encoding pipeline into a solver rather than only an argument.',
+        detail: [
+          'This is why Cook–Levin is enough.',
+          'It puts every problem in NP at the top of a chain that reaches SAT. Every subsequent ' +
+            'hardness result is one more link rather than a proof from first principles.',
+          'Composition also works on the backward maps, run in reverse order, so a chain of ' +
+            'reductions is still a solver. That is what makes a long encoding pipeline into a ' +
+            'solver rather than only an argument.'
+        ],
         example: '3-SAT → independent set → vertex cover → set cover is three links, and the ' +
           'demo round-trips each of them.'
       },
@@ -274,12 +294,15 @@
         term: 'The reduction is cheap and solving the target is not',
         plain: 'Building the target instance is one pass; answering it is exponential.',
         formal: 'f runs in polynomial time by definition; the B-solver carries all the difficulty',
-        detail: 'It is easy to be impressed by a reduction and forget that it has moved the ' +
-          'difficulty rather than removed it. The demo makes the split visible: the forward map ' +
-          'is instant on any instance a browser can hold, and the exhaustive search on the ' +
-          'target is what limits the demo to five variables. That is precisely the argument for ' +
-          'pointing reductions at a real solver rather than at a hand-written search, which is ' +
-          'what section 20.7 is about.',
+        detail: [
+          'It is easy to be impressed by a reduction and forget that it has moved the difficulty ' +
+            'rather than removed it.',
+          'The demo makes the split visible. The forward map is instant on any instance a browser ' +
+            'can hold, and the exhaustive search on the target is what limits the demo to five ' +
+            'variables.',
+          'That is precisely the argument for pointing reductions at a real solver rather than at a ' +
+            'hand-written search, which is what section 20.7 is about.'
+        ],
         example: 'The demo’s unsatisfiable source takes 4 662 steps to refute through independent ' +
           'set and 127 382 through 3-colouring, from nine clauses.'
       }
