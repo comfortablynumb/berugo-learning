@@ -10,12 +10,14 @@
         term: 'A PRNG is a deterministic function, so "random" can only mean "passes these tests"',
         plain: 'The question is never whether it is random — it is not — but what structure it leaves behind.',
         formal: 'every generator here is a state and a transition; the output is a function of the state and nothing else',
-        detail: 'Framing it this way is what makes the subject tractable. There is no property ' +
-          '"randomness" to verify, only specific structures to look for, and a generator that is ' +
-          'ruinous for one use can be perfectly adequate for another. Determinism is also a ' +
-          'feature rather than a compromise: a seeded generator turns "change one line and run it ' +
-          'again" into a controlled experiment, and a bug that appears for one seed in ten ' +
-          'thousand is unreproducible without one.',
+        detail: [
+          'Framing it this way is what makes the subject tractable.',
+          'There is no property "randomness" to verify, only specific structures to look for, and a ' +
+            'generator that is ruinous for one use can be perfectly adequate for another.',
+          'Determinism is also a feature rather than a compromise. A seeded generator turns "change ' +
+            'one line and run it again" into a controlled experiment, and a bug that appears for one ' +
+            'seed in ten thousand is unreproducible without one.'
+        ],
         example: 'Every generator in the demo passes a one-dimensional histogram, including the ' +
           'one whose triples all lie on fifteen planes.'
       },
@@ -33,12 +35,15 @@
         },
         plain: 'A histogram of single outputs passes for every generator here, RANDU included.',
         formal: 'over 200 000 samples into 64 buckets, every generator sits inside the plausible chi-squared range on its high bits',
-        detail: 'A one-dimensional uniformity test asks the easiest possible question, and any ' +
-          'generator that fails it would never have been published. What separates them is the ' +
-          'structure in *consecutive* outputs, which a histogram cannot see because it discards ' +
-          'the order. That is the general shape of this whole subject: the test that is easy to ' +
-          'run is the test that discriminates least, and every real test suite — TestU01, ' +
-          'PractRand — is a battery of many tests for exactly that reason.',
+        detail: [
+          'A one-dimensional uniformity test asks the easiest possible question, and any generator ' +
+            'that fails it would never have been published.',
+          'What separates them is the structure in *consecutive* outputs, which a histogram cannot ' +
+            'see because it discards the order.',
+          'That is the general shape of this whole subject: the test that is easy to run is the test ' +
+            'that discriminates least. Every real test suite — TestU01, PractRand — is a battery of ' +
+            'many tests for exactly that reason.'
+        ],
         example: 'The demo’s table has all nine generators passing on their high bits, with ' +
           'statistics from 0.1 to 81.0 against a plausible range of 45.7 to 82.5.'
       },
@@ -46,11 +51,14 @@
         term: 'A statistic far below the expectation is also a failure',
         plain: 'Counts that are too even are as suspicious as counts that are too ragged.',
         formal: 'RANDU scores 0.1 where 63 is expected, because a full-period generator sweeps every value exactly once',
-        detail: 'A chi-squared test has two tails and almost every write-up checks one of them. ' +
+        detail: [
+          'A chi-squared test has two tails and almost every write-up checks one of them.',
           'If the counts come out impossibly regular, the values are not being sampled — they are ' +
-          'being enumerated, which is exactly what a full-period generator does over its whole ' +
-          'cycle. Reporting that as a pass is how a histogram test certifies a counter, so the ' +
-          'demo names three verdicts rather than two: uneven, too even, and plausible.',
+            'being enumerated, which is exactly what a full-period generator does over its whole ' +
+            'cycle.',
+          'Reporting that as a pass is how a histogram test certifies a counter. So the demo names ' +
+            'three verdicts rather than two: uneven, too even, and plausible.'
+        ],
         example: 'The Numerical Recipes LCG scores exactly 0.0 on its low eight bits, because they ' +
           'cycle through all 256 values with a period of 256.'
       },
@@ -58,11 +66,14 @@
         term: 'RANDU’s failure is a linear identity you can check',
         plain: 'Its outputs satisfy x[n+2] = 6·x[n+1] − 9·x[n] exactly, which is why triples lie on planes.',
         formal: 'the residual of that identity is 0 for every consecutive triple, and large for every other generator here',
-        detail: 'Every linear congruential generator’s outputs taken k at a time lie on a lattice ' +
-          'of hyperplanes; a good multiplier makes the lattice fine enough that no plot at a ' +
-          'realistic sample size can find it, and RANDU’s makes it fifteen planes in three ' +
-          'dimensions. The identity is what makes this checkable rather than quotable: it either ' +
-          'holds for every triple or it does not, and no sample size or seed changes the answer.',
+        detail: [
+          'Every linear congruential generator’s outputs taken k at a time lie on a lattice of ' +
+            'hyperplanes.',
+          'A good multiplier makes the lattice fine enough that no plot at a realistic sample size ' +
+            'can find it, and RANDU’s makes it fifteen planes in three dimensions.',
+          'The identity is what makes this checkable rather than quotable. It either holds for every ' +
+            'triple or it does not, and no sample size or seed changes the answer.'
+        ],
         example: 'The demo evaluates that identity over 2 000 consecutive triples and reports a ' +
           'worst residual of exactly 0 for RANDU.'
       },
@@ -70,12 +81,14 @@
         term: 'For a power-of-two modulus the low bits are provably worse than the high bits',
         plain: 'Bit k of such an LCG has a period of 2^(k+1), so the lowest bit simply alternates.',
         formal: 'measured: RANDU’s bits 0 to 5 have periods 1, 2, 1, 4, 8 and 16',
-        detail: 'This is a theorem rather than an observation, and it is why `rand() % 8` on a ' +
-          'generator like that returns a counter rather than a sample. It is also invisible to a ' +
-          'frequency test: the bits come up set half the time, so the histogram is perfect and ' +
-          'the sequence is a cycle. PCG exists to fix precisely this by permuting the output ' +
-          'rather than handing the state out, which is why its low bits are as good as its high ' +
-          'ones.',
+        detail: [
+          'This is a theorem rather than an observation, and it is why `rand() % 8` on a generator ' +
+            'like that returns a counter rather than a sample.',
+          'It is also invisible to a frequency test. The bits come up set half the time, so the ' +
+            'histogram is perfect and the sequence is a cycle.',
+          'PCG exists to fix precisely this by permuting the output rather than handing the state ' +
+            'out, which is why its low bits are as good as its high ones.'
+        ],
         example: 'The demo’s heat strip shows RANDU’s bit 0 at 100% set — a worst deviation of ' +
           '50.00 points — with a measured period of 1.'
       },
@@ -83,15 +96,18 @@
         term: 'Modulo bias is arithmetic, not a sampling artefact',
         plain: 'If n does not divide the range, some outputs get one extra source value each — and nothing redistributes them.',
         formal: 'range mod n of the outputs get ⌊range/n⌋ + 1 chances and the rest get ⌊range/n⌋',
-        readAs: 'Divide the generator’s range by the bound and keep the remainder; that many of ' +
+        readAs: 'Divide the generator’s range by the bound and keep the remainder. That many of ' +
           'the possible outputs get one more chance than all the others, and the ratio between ' +
           'the two groups is the bias.',
-        detail: 'The bias needs no experiment to predict, which is what makes it worth stating ' +
-          'before measuring: it is a property of two integers. It is largest exactly when n is a ' +
-          'large fraction of the range — the case people reach for `%` on — and it becomes ' +
-          'invisible when the range is 2³² and n is small, which is why the shortcut survives in ' +
-          'so much code. Rejection removes it exactly by discarding the ragged top of the range; ' +
-          'Lemire does the same with one multiplication.',
+        detail: [
+          'The bias needs no experiment to predict, which is what makes it worth stating before ' +
+            'measuring. It is a property of two integers.',
+          'It is largest exactly when n is a large fraction of the range — the case people reach for ' +
+            '`%` on. And it becomes invisible when the range is 2³² and n is small, which is why the ' +
+            'shortcut survives in so much code.',
+          'Rejection removes it exactly by discarding the ragged top of the range. Lemire does the ' +
+            'same with one multiplication.'
+        ],
         example: 'Drawing 200 buckets from 8 bits, the demo predicts 56 favoured outputs at a ratio ' +
           'of 2.000× and measures a spread of 2.219× arriving at it.'
       },
@@ -100,13 +116,16 @@
         plain: 'Drawing the swap partner from the whole array gives nⁿ paths for n! outcomes, and n! does not divide nⁿ.',
         formal: 'at n = 3: 27 equally likely execution paths and 6 outcomes, so the distribution cannot be uniform',
         readAs: 'Every step picks from all n positions, so there are n multiplied by itself n ' +
-          'times equally likely ways the loop can run; that count is not a whole-number multiple ' +
+          'times equally likely ways the loop can run. That count is not a whole-number multiple ' +
           'of the number of orderings, so the orderings cannot come out equally often.',
-        detail: 'This is a counting argument, not a statistical one, so no generator quality ' +
-          'fixes it — the bias is in the algorithm and would persist with a perfect source of ' +
-          'randomness. Fisher-Yates draws from the unvisited suffix instead, giving exactly n! ' +
-          'paths for n! outcomes. The two differ by one character in the source, and on three ' +
-          'elements the difference is large enough to read straight off a table.',
+        detail: [
+          'This is a counting argument, not a statistical one, so no generator quality fixes it. The ' +
+            'bias is in the algorithm and would persist with a perfect source of randomness.',
+          'Fisher-Yates draws from the unvisited suffix instead, giving exactly n! paths for n! ' +
+            'outcomes.',
+          'The two differ by one character in the source, and on three elements the difference is ' +
+            'large enough to read straight off a table.'
+        ],
         example: 'Over 120 000 shuffles the demo measures Fisher-Yates at a chi-squared of 7.0 and ' +
           'the naive version at 1 509.7, against a threshold of 11.0.'
       },
@@ -114,12 +133,14 @@
         term: 'Statistical quality and unpredictability are different properties',
         plain: 'Every generator here passes statistical tests and every one of them is predictable from its output.',
         formal: 'xorshift and MT19937 are linear over GF(2), so their state is recoverable from a few hundred outputs',
-        detail: 'A generator that passes TestU01 is telling you about its distribution, not about ' +
-          'whether an observer can compute the next value — and for all of these, the observer ' +
-          'can. That is fine for simulation, for reproducible tests and for sampling, and it is ' +
-          'not fine for anything a person could gain by predicting: session tokens, password ' +
-          'salts, a shuffle in a game people bet on. `Math.random()` is in this category and its ' +
-          'specification says so explicitly.',
+        detail: [
+          'A generator that passes TestU01 is telling you about its distribution, not about whether ' +
+            'an observer can compute the next value. For all of these, the observer can.',
+          'That is fine for simulation, for reproducible tests and for sampling. It is not fine for ' +
+            'anything a person could gain by predicting: session tokens, password salts, a shuffle ' +
+            'in a game people bet on.',
+          '`Math.random()` is in this category and its specification says so explicitly.'
+        ],
         example: 'MT19937 has 19 937 bits of state and its whole future is determined by 624 ' +
           'consecutive outputs.'
       }

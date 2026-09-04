@@ -53,47 +53,53 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**A PRNG is a deterministic function iterated on a state**, so "random" can only ever mean ' +
+        '"passes the tests somebody cares about".',
+      'The useful question is never whether a generator is random — it is not — but what structure ' +
+        'it leaves behind, and whether that structure matters for the use.',
+      'Reproducibility is the other half of the deal, and it is a feature. A seeded generator is ' +
+        'what makes "change one line and run it again" a controlled experiment.',
+      '**The test everybody runs separates nothing.** Every generator here passes a one-dimensional ' +
+        'histogram, RANDU included.',
+      'What gives RANDU away is the *pairs* and *triples*. Its outputs satisfy ' +
+        'x[n+2] = 6·x[n+1] − 9·x[n] exactly, so every triple it has ever produced lies on one of ' +
+        'fifteen planes.',
+      'The demo checks that identity rather than describing it, and the residual is exactly zero.',
+      '**For a power-of-two modulus, the low bits are worse than the high ones — provably.** Bit k ' +
+        'of such an LCG has a period of 2^(k+1), so the lowest bit alternates and the low four ' +
+        'repeat every sixteen draws.',
+      '`rand() % 8` on a generator like that is not slightly biased, it is a counter. This is why ' +
+        'PCG permutes its output rather than handing the state out, and it is measurable here as a ' +
+        'bit period rather than as advice.',
+      '**Two consumer-side mistakes ruin a correct generator.** `value % n` is biased whenever n ' +
+        'does not divide the range, and the bias is largest exactly when n is a large fraction of ' +
+        'it.',
+      'And a shuffle that draws its swap partner from the whole array rather than from the ' +
+        'unvisited suffix has nⁿ equally likely execution paths for n! outcomes. Since n! does not ' +
+        'divide nⁿ, the distribution *cannot* be uniform, whatever generator feeds it.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**A PRNG is a deterministic function iterated on a state**, so "random" can only ever ' +
-          'mean "passes the tests somebody cares about". The useful question is never whether a ' +
-          'generator is random — it is not — but what structure it leaves behind and whether that ' +
-          'structure matters for the use. Reproducibility is the other half of the deal, and it ' +
-          'is a feature: a seeded generator is what makes "change one line and run it again" a ' +
-          'controlled experiment.',
-        '**The test everybody runs separates nothing.** Every generator here passes a ' +
-          'one-dimensional histogram, RANDU included. What gives RANDU away is the *pairs* and ' +
-          '*triples*: its outputs satisfy x[n+2] = 6·x[n+1] − 9·x[n] exactly, so every triple it ' +
-          'has ever produced lies on one of fifteen planes. The demo checks that identity rather ' +
-          'than describing it, and the residual is exactly zero.',
-        '**For a power-of-two modulus, the low bits are worse than the high ones — provably.** ' +
-          'Bit k of such an LCG has a period of 2^(k+1), so the lowest bit alternates and the low ' +
-          'four repeat every sixteen draws. `rand() % 8` on a generator like that is not slightly ' +
-          'biased, it is a counter. This is why PCG permutes its output rather than handing the ' +
-          'state out, and it is measurable here as a bit period rather than as advice.',
-        '**Two consumer-side mistakes ruin a correct generator.** `value % n` is biased whenever ' +
-          'n does not divide the range, and the bias is largest exactly when n is a large ' +
-          'fraction of it. And a shuffle that draws its swap partner from the whole array rather ' +
-          'than from the unvisited suffix has nⁿ equally likely execution paths for n! outcomes — ' +
-          'and n! does not divide nⁿ, so the distribution *cannot* be uniform, whatever generator ' +
-          'feeds it.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — scatter, bit heat, uniformity, bias and shuffles',
         markup: root.RandomGenerationTemplate.render()
       },
       diagram: diagram(),
-      insight: 'Default to PCG or splitmix for simulation work and to the platform CSPRNG for ' +
-        'anything a person could gain by predicting — session tokens, password salts, shuffles in ' +
-        'a game people bet on. The distinction is not quality, it is whether an observer who has ' +
-        'seen some output can compute the rest, and for every generator in this section they can: ' +
-        'xorshift and MT19937 are linear over GF(2) and their state is recoverable from a few ' +
-        'hundred outputs. `Math.random()` is in that category too and its specification says so. ' +
-        'The other habit worth forming is to seed explicitly and log the seed, because a bug that ' +
-        'only appears for one seed in ten thousand is unreproducible otherwise, and "it passed ' +
-        'the tests" then means nothing at all.'
+      insight: 'Default to PCG or splitmix for simulation work, and to the platform CSPRNG for ' +
+        'anything a person could gain by predicting. Think of session tokens, password salts, or ' +
+        'shuffles in a game people bet on. The distinction is not quality. It is whether an ' +
+        'observer who has seen some output can compute the rest, and for every generator in this ' +
+        'section they can. Xorshift and MT19937 are linear over GF(2), and their state is ' +
+        'recoverable from a few hundred outputs. `Math.random()` is in that category too and its ' +
+        'specification says so. The other habit worth forming is to seed explicitly and log the ' +
+        'seed. A bug that only appears for one seed in ten thousand is unreproducible otherwise, ' +
+        'and "it passed the tests" then means nothing at all.'
     };
   }
 
