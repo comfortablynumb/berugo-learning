@@ -20,12 +20,14 @@
         },
         plain: 'Being fast is what makes SHA-256 a good hash and a catastrophic password store.',
         formal: 'a password store is priced by the attacker’s guesses per second, so the defender buys security by spending time',
-        detail: 'Every other use of a hash wants it fast, and this one wants the opposite, which ' +
-          'inverts the instinct that makes engineers reach for SHA-256. The defender pays the ' +
-          'cost once per login and can afford a quarter of a second; the attacker pays it per ' +
-          'guess and is trying billions. That asymmetry is the entire mechanism, and it means the ' +
-          'security of the store is measured in the attacker\'s rate rather than in any property ' +
-          'of the algorithm.',
+        detail: [
+          'Every other use of a hash wants it fast, and this one wants the opposite. That inverts ' +
+            'the instinct which makes engineers reach for SHA-256.',
+          'The defender pays the cost once per login and can afford a quarter of a second. The ' +
+            'attacker pays it per guess and is trying billions.',
+          'That asymmetry is the entire mechanism. It means the security of the store is measured in ' +
+            'the attacker\'s rate rather than in any property of the algorithm.'
+        ],
         example: 'At the same 250 ms budget the demo prices unsalted SHA-256 at 4.096 × 10¹⁰ ' +
           'guesses per second and Argon2id at 64 MiB at 2.048 × 10⁴.'
       },
@@ -43,25 +45,31 @@
         },
         plain: 'Its job is to make each stored hash a separate problem.',
         formal: 'a per-user random salt stops one precomputed table covering the database and hides equal passwords',
-        detail: 'Storing the salt in plain text alongside the hash is correct and expected — it ' +
-          'is not a second key. Without one, a single precomputed table attacks every account at ' +
-          'once and two users with the same password have visibly the same stored value, which ' +
-          'leaks membership of a leak list. With one, each account is its own search. Note what ' +
-          'it does NOT do: it costs the attacker nothing per guess, so a salted fast hash is ' +
-          'still a fast hash.',
-        example: 'The demo derives one password under two salts and reports the keys identical: ' +
-          'no. Both rows still run at 4.096 × 10¹⁰ guesses per second.'
+        detail: [
+          'Storing the salt in plain text alongside the hash is correct and expected. It is not a ' +
+            'second key.',
+          'Without one, a single precomputed table attacks every account at once. Two users with the ' +
+            'same password also have visibly the same stored value, which leaks membership of a ' +
+            'leak list. With one, each account is its own search.',
+          'Note what it does NOT do. It costs the attacker nothing per guess, so a salted fast hash ' +
+            'is still a fast hash.'
+        ],
+        example: 'The demo derives one password under two salts and reports the keys as not ' +
+          'identical. Both rows still run at 4.096 × 10¹⁰ guesses per second.'
       },
       {
         term: 'A pepper is a secret, and it lives outside the database',
         plain: 'An application-held key mixed into the derivation.',
         formal: 'a pepper defends exactly one threat: database exfiltration without application compromise',
-        detail: 'Because it is not stored with the hash, an attacker holding a dumped table ' +
-          'cannot verify guesses at all — they need the application key too. That is a real ' +
-          'defence against the most common breach shape, and it is narrow: an attacker who ' +
-          'reaches the application gets both. It also complicates rotation, since changing the ' +
-          'pepper invalidates every stored hash unless the scheme is designed for it, so it is a ' +
-          'considered choice rather than a default.',
+        detail: [
+          'Because it is not stored with the hash, an attacker holding a dumped table cannot verify ' +
+            'guesses at all. They need the application key too.',
+          'That is a real defence against the most common breach shape, and it is narrow. An ' +
+            'attacker who reaches the application gets both.',
+          'It also complicates rotation, since changing the pepper invalidates every stored hash ' +
+            'unless the scheme is designed for it. So it is a considered choice rather than a ' +
+            'default.'
+        ],
         example: 'The demo lists it in the record table with its threat named, and marks it as ' +
           'not modelled by the cost calculator.'
       },
@@ -69,24 +77,31 @@
         term: 'Memory hardness is what breaks GPUs specifically',
         plain: 'A GPU has thousands of cores and little memory each.',
         formal: 'an attacker with fixed RAM runs floor(RAM / memory-per-guess) guesses at once, so the memory parameter divides their parallelism',
-        detail: 'Raising the memory cost is nearly free for a server verifying one login at a ' +
-          'time and ruinous for a rig verifying thousands at once, because the rig\'s fixed RAM ' +
-          'divides by your parameter. Below a threshold the attacker is limited by cores and the ' +
-          'parameter buys nothing; above it every doubling halves them. That threshold is why ' +
-          'bcrypt\'s 4 KiB, which was generous in 1999, does not constrain a modern rig at all ' +
-          'while scrypt and Argon2 at tens of megabytes do.',
-        example: 'The demo’s sweep runs 4 096 parallel guesses at 4 MiB and 32 at 512 MiB, a ' +
-          'factor of 128, at identical defender cost.'
+        detail: [
+          'Raising the memory cost is nearly free for a server verifying one login at a time, and ' +
+            'ruinous for a rig verifying thousands at once. The rig\'s fixed RAM divides by your ' +
+            'parameter.',
+          'Below a threshold the attacker is limited by cores and the parameter buys nothing. Above ' +
+            'it, every doubling halves them.',
+          'That threshold is why bcrypt\'s 4 KiB, which was generous in 1999, does not constrain a ' +
+            'modern rig at all, while scrypt and Argon2 at tens of megabytes do.'
+        ],
+        example: 'The demo’s sweep runs 4 096 parallel guesses at 4 MiB and 32 at 512 MiB. That ' +
+          'is a factor of 128, at identical defender cost.'
       },
       {
         term: 'The parameter is the security control, not the algorithm',
         plain: '"We use bcrypt" is not an answer to "how expensive is a guess".',
         formal: 'bcrypt at cost 4 and cost 12 differ by a factor of 256 and are both bcrypt',
-        detail: 'Naming the algorithm settles almost nothing, because the cost parameter spans ' +
-          'orders of magnitude within every one of them and a badly parameterised Argon2 is ' +
-          'weaker than a well parameterised scrypt. The correct parameter is whatever exhausts ' +
-          'your verification budget on your production hardware today, which means it is a ' +
-          'measurement rather than a constant, and it changes as hardware improves.',
+        detail: [
+          'Naming the algorithm settles almost nothing. The cost parameter spans orders of magnitude ' +
+            'within every one of them, and a badly parameterised Argon2 is weaker than a well ' +
+            'parameterised scrypt.',
+          'The correct parameter is whatever exhausts your verification budget on your production ' +
+            'hardware today.',
+          'That means it is a measurement rather than a constant, and it changes as hardware ' +
+            'improves.'
+        ],
         example: 'The demo measures PBKDF2 in this browser and reports the iteration count that ' +
           'fills 250 ms here, which differs by machine.'
       },
@@ -94,12 +109,14 @@
         term: 'Tune against a measured budget, not a blog post',
         plain: 'The right number is the one that fills your verification time on your hardware.',
         formal: 'measure milliseconds per iteration, then set iterations = budget / per-iteration',
-        detail: 'A quoted iteration count is a snapshot of somebody else\'s hardware at some ' +
-          'point in the past, and using it means your parameter drifts away from your budget in ' +
-          'both directions — too slow on weak hardware, far too cheap on strong. Measuring takes ' +
-          'a few lines: run a sample, divide, scale. The budget itself is a product decision ' +
-          'about how long a login may take, typically a couple of hundred milliseconds, and it ' +
-          'has to account for concurrent logins as well.',
+        detail: [
+          'A quoted iteration count is a snapshot of somebody else\'s hardware at some point in the ' +
+            'past. Using it means your parameter drifts away from your budget in both directions: ' +
+            'too slow on weak hardware, far too cheap on strong.',
+          'Measuring takes a few lines. Run a sample, divide, scale.',
+          'The budget itself is a product decision about how long a login may take, typically a ' +
+            'couple of hundred milliseconds, and it has to account for concurrent logins as well.'
+        ],
         example: 'The demo runs 2 000 PBKDF2 iterations, divides, and reports both the ' +
           'per-iteration microseconds and the iteration count for a 250 ms budget.'
       },
@@ -107,12 +124,14 @@
         term: 'Rehash on successful login, or the parameters freeze',
         plain: 'The only moment you hold the plaintext is a successful verification.',
         formal: 'if stored parameters are below current policy, re-derive at the current cost and replace the record',
-        detail: 'Costs must rise as hardware improves, and the stored hash cannot be upgraded ' +
-          'without the password — which the system holds for exactly one instant, during a ' +
-          'successful login. A store without that path is frozen at whatever it launched with, ' +
-          'and gets weaker every year with nobody changing a line. Building it requires the ' +
-          'record to be self-describing: algorithm, parameters and salt stored alongside the key, ' +
-          'so an old record can be recognised and replaced.',
+        detail: [
+          'Costs must rise as hardware improves, and the stored hash cannot be upgraded without the ' +
+            'password. The system holds that for exactly one instant, during a successful login.',
+          'A store without that path is frozen at whatever it launched with, and gets weaker every ' +
+            'year with nobody changing a line.',
+          'Building it requires the record to be self-describing. Algorithm, parameters and salt are ' +
+            'stored alongside the key, so an old record can be recognised and replaced.'
+        ],
         example: 'The demo verifies a record at 1 000 iterations against a policy of 30 000 and ' +
           'reports needsRehash: yes.'
       },
@@ -120,14 +139,16 @@
         term: 'Credential stuffing ignores all of this',
         plain: 'A password from a leak list falls at any cost parameter.',
         formal: 'reused credentials cost the attacker one guess per account, so the hash cost is irrelevant',
-        detail: 'The cost parameter prices a search over a space of candidates, and a stuffing ' +
-          'attack does not search — it tries the password the user already used somewhere else, ' +
-          'once. That makes rate limiting, breach-list checking and multi-factor authentication ' +
-          'the controls that matter for the most common real attack, and it is worth stating ' +
-          'plainly so that tuning Argon2 is not mistaken for a complete answer to account ' +
-          'takeover.',
-        example: 'The demo’s verdict note says it directly: a password from a leak list falls ' +
-          'immediately regardless of the setting.'
+        detail: [
+          'The cost parameter prices a search over a space of candidates, and a stuffing attack does ' +
+            'not search. It tries the password the user already used somewhere else, once.',
+          'That makes rate limiting, breach-list checking and multi-factor authentication the ' +
+            'controls that matter for the most common real attack.',
+          'It is worth stating plainly, so that tuning Argon2 is not mistaken for a complete answer ' +
+            'to account takeover.'
+        ],
+        example: 'The demo’s verdict note says it directly. A password from a leak list falls ' +
+          'immediately, regardless of the setting.'
       }
     ],
 

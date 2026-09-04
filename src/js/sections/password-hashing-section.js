@@ -47,39 +47,53 @@
     };
   }
 
-  function orientation() {
+  function orientationSlowness() {
     return [
       '**⚠ Teaching code: not constant-time, not audited, never for real data.** Use argon2, ' +
         'bcrypt or scrypt from a maintained library, and never a hash you assembled yourself.',
       '**A password hash is deliberately slow, which inverts every other instinct you have.** ' +
         'SHA-256 is a good hash and a catastrophic password store, because being fast is its ' +
-        'purpose. The demo puts an unsalted SHA-256 next to Argon2id at the same verification ' +
-        'budget and the attacker\'s guess rate differs by six orders of magnitude.',
+        'purpose.',
+      'The demo puts an unsalted SHA-256 next to Argon2id at the same verification budget, and the ' +
+        'attacker\'s guess rate differs by six orders of magnitude.',
       '**A salt is not a secret and does not need to be.** Its job is to make each stored hash a ' +
-        'separate problem, so one precomputed table cannot cover the whole database and two users ' +
-        'with the same password do not visibly share a hash. The demo derives the same password ' +
-        'under two salts and shows the keys differ.',
+        'separate problem.',
+      'One precomputed table then cannot cover the whole database, and two users with the same ' +
+        'password do not visibly share a hash. The demo derives the same password under two salts ' +
+        'and shows the keys differ.',
       '**A pepper is a secret, and it lives somewhere the database is not.** An application-held ' +
-        'key mixed into the derivation means a stolen database alone is not enough. It defends ' +
-        'against exactly one threat — database exfiltration without application compromise — and ' +
-        'it complicates key rotation, so it is a considered choice rather than a default.',
+        'key mixed into the derivation means a stolen database alone is not enough.',
+      'It defends against exactly one threat, which is database exfiltration without application ' +
+        'compromise. It also complicates key rotation, so it is a considered choice rather than a ' +
+        'default.'
+    ];
+  }
+
+  function orientationParameters() {
+    return [
       '**The parameter is the security control, not the algorithm.** Argon2id with a 4 MiB memory ' +
-        'parameter is weaker than scrypt at 32 MiB. The demo\'s slider moves the memory parameter ' +
-        'and the attacker\'s effective parallelism collapses with it, because their fixed RAM ' +
-        'divides by your memory cost.',
+        'parameter is weaker than scrypt at 32 MiB.',
+      'The demo\'s slider moves the memory parameter and the attacker\'s effective parallelism ' +
+        'collapses with it, because their fixed RAM divides by your memory cost.',
       '**Memory hardness is what breaks GPUs and ASICs specifically.** A GPU has thousands of ' +
-        'cores and comparatively little memory per core, so a function that demands tens of ' +
-        'megabytes per guess turns thousands of parallel attempts into dozens. That is why ' +
-        'PBKDF2, which needs almost no memory, is the weakest survivor of the four.',
+        'cores and comparatively little memory per core.',
+      'So a function that demands tens of megabytes per guess turns thousands of parallel attempts ' +
+        'into dozens. That is why PBKDF2, which needs almost no memory, is the weakest survivor of ' +
+        'the four.',
       '**Tune against a measured verification time, not a number from a blog post.** The demo ' +
-        'measures PBKDF2 in this browser and reports the iteration count that fits a ' +
-        '250 ms budget here. On your production hardware the answer is different, which is the ' +
-        'point: the correct parameter is whatever exhausts your budget today.',
+        'measures PBKDF2 in this browser and reports the iteration count that fits a 250 ms budget ' +
+        'here.',
+      'On your production hardware the answer is different, which is the point. The correct ' +
+        'parameter is whatever exhausts your budget today.',
       '**Which means the rehash-on-successful-login path is mandatory and usually absent.** ' +
         'Parameters must rise as hardware improves, and the only moment you hold the plaintext ' +
-        'password to re-derive with is a successful login. A system without that path is frozen ' +
-        'at whatever cost it launched with.'
+        'password to re-derive with is a successful login.',
+      'A system without that path is frozen at whatever cost it launched with.'
     ];
+  }
+
+  function orientation() {
+    return orientationSlowness().concat(orientationParameters());
   }
 
   function config() {
@@ -92,11 +106,11 @@
       },
       diagram: diagram(),
       insight: '**The parameter, not the algorithm, is the security control, and it must be ' +
-        're-tuned as hardware improves — which requires the rehash-on-successful-login path that ' +
+        're-tuned as hardware improves. That requires the rehash-on-successful-login path that ' +
         'most systems never build.** "We use bcrypt" is not an answer to "how expensive is a ' +
-        'guess", because bcrypt at cost 4 and bcrypt at cost 12 differ by a factor of 256 and ' +
-        'both are bcrypt. And a cost chosen once at launch decays: the same parameter buys less ' +
-        'every year as hardware improves, so a store that cannot raise it is a store whose ' +
+        'guess". Bcrypt at cost 4 and bcrypt at cost 12 differ by a factor of 256, and ' +
+        'both are bcrypt. And a cost chosen once at launch decays. The same parameter buys less ' +
+        'every year as hardware improves. A store that cannot raise it is a store whose ' +
         'security is a function of how long ago it was written. The engineering work is the ' +
         'self-describing record and the upgrade path, not the choice between three good ' +
         'algorithms.'
