@@ -21,12 +21,15 @@
         },
         plain: 'Runge’s function is perfectly smooth, and the polynomial through more of its equally spaced samples oscillates more wildly.',
         formal: 'for f(x) = 1/(1 + 25x²) on [−1, 1] the equally spaced interpolant’s maximum error grows without bound as the node count rises',
-        detail: 'This is not a rounding problem and it does not go away in exact arithmetic — it is ' +
-          'a genuine property of high-degree polynomials through equally spaced points. The error ' +
-          'of an interpolant is proportional to the product of the distances from the evaluation ' +
-          'point to every node, and on a uniform grid that product is enormous near the ends of ' +
-          'the interval. Adding nodes makes the degree higher and the product worse, so the ' +
-          'oscillation grows rather than shrinking.',
+        detail: [
+          'This is not a rounding problem and it does not go away in exact arithmetic. It is a ' +
+            'genuine property of high-degree polynomials through equally spaced points.',
+          'The error of an interpolant is proportional to the product of the distances from the ' +
+            'evaluation point to every node. On a uniform grid that product is enormous near the ' +
+            'ends of the interval.',
+          'Adding nodes makes the degree higher and the product worse, so the oscillation grows ' +
+            'rather than shrinking.'
+        ],
         example: 'The demo measures 4.384e-1 at 5 nodes and 2.572e+2 at 25 — five times the data ' +
           'for an answer 5.9e+2 times worse.'
       },
@@ -34,14 +37,17 @@
         term: 'Chebyshev nodes fix it by moving where you sample, not how often',
         plain: 'Cluster the nodes towards the ends of the interval and the same degree of polynomial converges.',
         formal: 'xₖ = cos(kπ/n), which are equally spaced points on a semicircle projected onto the interval',
-        readAs: 'The k-th node is the cosine of k times pi over n — take equally spaced points ' +
+        readAs: 'The k-th node is the cosine of k times pi over n. Take equally spaced points ' +
           'around a half-circle and drop them straight down onto the line.',
-        detail: 'The clustering is exactly what makes the product of distances small everywhere ' +
-          'instead of small in the middle and enormous at the edges, and the resulting interpolant ' +
-          'is within a small factor of the best possible polynomial of that degree. When you ' +
-          'control the sampling this is free accuracy — it is why spectral methods and Chebyshev ' +
-          'approximation of special functions use these points — and when the data arrives on a ' +
-          'uniform grid it is the reason to reach for something other than one polynomial.',
+        detail: [
+          'The clustering is exactly what makes the product of distances small everywhere, instead ' +
+            'of small in the middle and enormous at the edges.',
+          'The resulting interpolant is within a small factor of the best possible polynomial of ' +
+            'that degree. When you control the sampling this is free accuracy, which is why spectral ' +
+            'methods and Chebyshev approximation of special functions use these points.',
+          'When the data arrives on a uniform grid instead, it is the reason to reach for something ' +
+            'other than one polynomial.'
+        ],
         example: 'At 25 nodes the demo measures 8.166e-3 for Chebyshev against 2.572e+2 for the ' +
           'same degree on equally spaced nodes.'
       },
@@ -49,12 +55,15 @@
         term: 'A spline is many low-degree pieces rather than one high-degree curve',
         plain: 'Run a separate cubic between each pair of nodes and match value, slope and curvature where they meet.',
         formal: 'a natural cubic spline is C² at every interior knot, with the second derivative set to zero at both ends',
-        detail: 'Since oscillation is a high-degree problem and no piece ever exceeds degree three, ' +
-          'a spline converges on the equally spaced data where the polynomial diverges. The ' +
-          'continuity conditions produce a tridiagonal system, which is why construction is linear ' +
-          'in the number of nodes rather than cubic — a detail that makes splines practical for ' +
-          'thousands of points. The "natural" boundary condition is a choice; clamped splines fix ' +
-          'the end slopes instead, and which you want depends on what you know about the data.',
+        detail: [
+          'Oscillation is a high-degree problem, and no piece ever exceeds degree three. So a spline ' +
+            'converges on the equally spaced data where the polynomial diverges.',
+          'The continuity conditions produce a tridiagonal system, which is why construction is ' +
+            'linear in the number of nodes rather than cubic. That detail is what makes splines ' +
+            'practical for thousands of points.',
+          'The "natural" boundary condition is a choice. Clamped splines fix the end slopes instead, ' +
+            'and which you want depends on what you know about the data.'
+        ],
         example: 'On the same equally spaced nodes the demo measures the spline at 1.926e-3 where ' +
           'the polynomial is at 2.572e+2.'
       },
@@ -62,11 +71,14 @@
         term: 'Passing through every data point is the weakest possible quality claim',
         plain: 'A curve can agree with the data exactly and be arbitrarily wrong between the data.',
         formal: 'interpolation constrains the curve at n points and says nothing about the continuum between them',
-        detail: 'It is the same shape as the residual in 18.1: an easily checked quantity that ' +
-          'measures agreement with what you specified rather than agreement with what you wanted. ' +
-          'Both the natural and the monotone spline in the demo pass through every point to ' +
-          'machine precision, so neither is wrong by that test, and only one of them stays inside ' +
-          'the range of the data. Look at the curve between the points, always.',
+        detail: [
+          'It is the same shape as the residual in 18.1. It is an easily checked quantity that ' +
+            'measures agreement with what you specified rather than agreement with what you wanted.',
+          'Both the natural and the monotone spline in the demo pass through every point to machine ' +
+            'precision. Neither is wrong by that test, and only one of them stays inside the range ' +
+            'of the data.',
+          'Look at the curve between the points, always.'
+        ],
         example: 'Both splines in the demo interpolate to within 1.1e-16 at the nodes, and one of ' +
           'them dips 0.109 below a data set whose smallest value is zero.'
       },
@@ -74,11 +86,15 @@
         term: 'C² continuity is what forces a spline to overshoot',
         plain: 'Matching curvature at every join leaves the curve no choice but to swing past the data.',
         formal: 'requiring the second derivative to match at each knot over-determines the shape, and the excess appears as overshoot',
-        detail: 'This is a genuine trade rather than a defect: you asked for the smoothest curve ' +
-          'through the points and the smoothest curve leaves the range. The consequence is only a ' +
-          'bug when the quantity has a meaning that the overshoot violates — a probability going ' +
-          'negative, a price going below zero, a mass becoming imaginary — and in those cases the ' +
-          'fix is to give up C² deliberately rather than to look for a better solver.',
+        detail: [
+          'This is a genuine trade rather than a defect. You asked for the smoothest curve through ' +
+            'the points, and the smoothest curve leaves the range.',
+          'The consequence is only a bug when the quantity has a meaning that the overshoot ' +
+            'violates: a probability going negative, a price going below zero, a mass becoming ' +
+            'imaginary.',
+          'In those cases the fix is to give up C² deliberately, rather than to look for a better ' +
+            'solver.'
+        ],
         example: 'On the monotone data 0, 0, 0, 1, 1, 1, 1 the natural cubic dips 0.109 below zero ' +
           'and rises 0.108 above one, which is 10.9% of the data’s range.'
       },
@@ -86,12 +102,14 @@
         term: 'Monotone cubics guarantee no overshoot by limiting the slopes',
         plain: 'Clip each node’s derivative to what the neighbouring data actually supports, and the curve cannot leave the range.',
         formal: 'the Fritsch–Carlson conditions bound each node slope by three times the smaller adjacent secant slope',
-        detail: 'The construction is the useful part: it is not a different kind of curve but the ' +
-          'same piecewise cubic with the free slopes chosen conservatively instead of smoothly. ' +
+        detail: [
+          'The construction is the useful part. It is not a different kind of curve, but the same ' +
+            'piecewise cubic with the free slopes chosen conservatively instead of smoothly.',
           'You give up C² — the curvature now jumps at the knots — and you get the guarantee that ' +
-          'monotone data produces a monotone curve. This is what a colour ramp, an animation ' +
-          'easing curve and an audio envelope all need, because in each case leaving the range ' +
-          'produces a visible or audible artefact.',
+            'monotone data produces a monotone curve.',
+          'This is what a colour ramp, an animation easing curve and an audio envelope all need. In ' +
+            'each case leaving the range produces a visible or audible artefact.'
+        ],
         example: 'On the same step data the demo measures the monotone cubic’s overshoot at exactly ' +
           '0.0000 above and 0.0000 below.'
       },
@@ -100,27 +118,31 @@
         plain: 'De Casteljau’s algorithm interpolates between control points, then between those results, until one point is left.',
         formal: 'at parameter t, repeatedly replace each consecutive pair by (1 − t)P₀ + tP₁ until a single point remains',
         readAs: 'Walk along each line joining two neighbouring control points and take the '
-          + 'point a fraction t of the way; that gives a shorter list of points, and '
+          + 'point a fraction t of the way. That gives a shorter list of points, and '
           + 'repeating until one is left gives the curve at t.',
-        detail: 'The algorithm is numerically far better behaved than evaluating the Bernstein ' +
-          'polynomial directly, because every step is a convex combination — the intermediate ' +
-          'points stay inside the hull of the ones they came from, so nothing can grow. It also ' +
-          'produces the subdivision for free: the intermediate points along the two edges of the ' +
-          'triangle are the control points of the two halves, which is how a renderer flattens a ' +
-          'curve to line segments adaptively.',
+        detail: [
+          'The algorithm is numerically far better behaved than evaluating the Bernstein polynomial ' +
+            'directly. Every step is a convex combination, so the intermediate points stay inside ' +
+            'the hull of the ones they came from and nothing can grow.',
+          'It also produces the subdivision for free. The intermediate points along the two edges of ' +
+            'the triangle are the control points of the two halves.',
+          'That is how a renderer flattens a curve to line segments adaptively.'
+        ],
         example: 'Every font glyph and vector illustration is stored as Bézier control points and ' +
           'drawn by exactly this recursion.'
       },
       {
         term: 'Approximation and interpolation are different requests',
-        plain: 'Interpolation must pass through every point; approximation only has to be close, and on noisy data that is what you want.',
+        plain: 'Interpolation must pass through every point. Approximation only has to be close, and on noisy data that is what you want.',
         formal: 'interpolation solves an n-by-n system exactly; least-squares approximation minimises the residual over a smaller basis',
-        detail: 'When the data carries noise, insisting on passing through every point means ' +
-          'fitting the noise, and the curve between the points pays for it. A least-squares fit ' +
-          'with fewer parameters than data points averages the noise away instead, at the cost of ' +
-          'not matching any single observation exactly. Choosing between them is choosing whether ' +
-          'you believe the individual measurements, which is a question about the data rather than ' +
-          'about numerical methods.',
+        detail: [
+          'When the data carries noise, insisting on passing through every point means fitting the ' +
+            'noise, and the curve between the points pays for it.',
+          'A least-squares fit with fewer parameters than data points averages the noise away ' +
+            'instead, at the cost of not matching any single observation exactly.',
+          'Choosing between them is choosing whether you believe the individual measurements. That ' +
+            'is a question about the data rather than about numerical methods.'
+        ],
         example: 'The polynomial fits in 18.4 are approximations of the same kind of data these ' +
           'interpolants pass exactly through.'
       }

@@ -49,46 +49,53 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**More data points can make a polynomial fit dramatically worse.** Runge\'s function is ' +
+        'perfectly smooth and innocuous.',
+      'The polynomial through equally spaced samples of it oscillates wildly near the ends, and the ' +
+        'oscillation grows as you add nodes.',
+      'This is not a rounding problem and it does not go away in exact arithmetic. It is a property ' +
+        'of high-degree polynomials through equally spaced points, and the error grows without ' +
+        'bound.',
+      '**The fix is where the nodes are, not how many.** Chebyshev nodes cluster towards the ends of ' +
+        'the interval, and they are the projections of equally spaced points on a semicircle.',
+      'The same degree of polynomial through them converges, and does so nearly as fast as the best ' +
+        'polynomial of that degree could.',
+      'When you control the sampling, this is a free win. When the data arrives on a uniform grid, ' +
+        'it is the reason to reach for something other than one polynomial.',
+      '**Splines fit many low-degree pieces instead of one high-degree curve.** A cubic spline runs ' +
+        'a separate cubic between each pair of nodes and matches value, slope and curvature where ' +
+        'they meet.',
+      'So it is C² everywhere while no piece is ever above degree three. The oscillation problem is ' +
+        'a high-degree problem, and the spline never has a high degree.',
+      'That is why it converges on equally spaced data where the polynomial diverges.',
+      '**Passing through every data point is not the same as being usable.** A natural cubic spline ' +
+        'through monotone data overshoots. It dips below values that were never below, and rises ' +
+        'above ones that were never above, because C² continuity forces it to.',
+      'If the quantity is a probability, a price or a mass, that dip is a wrong answer between the ' +
+        'points you were given.',
+      'Monotone cubics give up C² to guarantee it never happens.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**More data points can make a polynomial fit dramatically worse.** Runge\'s function is ' +
-          'perfectly smooth and innocuous, and the polynomial through equally spaced samples of ' +
-          'it oscillates wildly near the ends, with the oscillation growing as you add nodes. ' +
-          'This is not a rounding problem and it does not go away in exact arithmetic: it is a ' +
-          'property of high-degree polynomials through equally spaced points, and the error grows ' +
-          'without bound.',
-        '**The fix is where the nodes are, not how many.** Chebyshev nodes cluster towards the ' +
-          'ends of the interval — they are the projections of equally spaced points on a ' +
-          'semicircle — and the same degree of polynomial through them converges, and does so ' +
-          'nearly as fast as the best polynomial of that degree could. When you control the ' +
-          'sampling, this is a free win; when the data arrives on a uniform grid, it is the reason ' +
-          'to reach for something other than one polynomial.',
-        '**Splines fit many low-degree pieces instead of one high-degree curve.** A cubic spline ' +
-          'runs a separate cubic between each pair of nodes and matches value, slope and curvature ' +
-          'where they meet, so it is C² everywhere while no piece is ever above degree three. The ' +
-          'oscillation problem is a high-degree problem, and the spline never has a high degree, ' +
-          'which is why it converges on equally spaced data where the polynomial diverges.',
-        '**Passing through every data point is not the same as being usable.** A natural cubic ' +
-          'spline through monotone data overshoots — it dips below values that were never below, ' +
-          'and rises above ones that were never above — because C² continuity forces it to. If ' +
-          'the quantity is a probability, a price or a mass, that dip is a wrong answer between ' +
-          'the points you were given. Monotone cubics give up C² to guarantee it never happens.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — Runge’s phenomenon, Chebyshev nodes and spline overshoot',
         markup: root.InterpolationTemplate.render()
       },
       diagram: diagram(),
       insight: 'Interpolation is one of the few places where the standard advice is genuinely ' +
-        'simple: **use a cubic spline unless you have a specific reason not to**, and if the data ' +
+        'simple. **Use a cubic spline unless you have a specific reason not to**, and if the data ' +
         'is monotone and the quantity is physical, use a monotone one. The general lesson is ' +
-        'broader and worth more than the specific rule, though: a fit that agrees with the data ' +
-        'perfectly can be arbitrarily wrong between the data, and "it passes through every point" ' +
-        'is the weakest possible quality claim. It is the same shape as the residual in 18.1 — an ' +
-        'easily computed quantity that measures agreement with what you specified rather than ' +
-        'agreement with what you wanted. Look at the curve between the points, always.'
+        'broader and worth more than the specific rule. A fit that agrees with the data perfectly ' +
+        'can be arbitrarily wrong between the data, and "it passes through every point" is the ' +
+        'weakest possible quality claim. It is the same shape as the residual in 18.1: an easily ' +
+        'computed quantity that measures agreement with what you specified rather than agreement ' +
+        'with what you wanted. Look at the curve between the points, always.'
     };
   }
 
