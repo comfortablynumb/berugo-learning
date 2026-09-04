@@ -55,42 +55,49 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**A finite difference has two errors pulling in opposite directions, and the best step is ' +
+        'where they cross.** Shrink h and the truncation error falls — those are the terms of the ' +
+        'Taylor series you dropped.',
+      'Shrink it further and the subtraction f(x+h) − f(x) starts cancelling significant digits, so ' +
+        'the rounding error rises as 1/h.',
+      'Plotted against h on log axes the total error is a V, and the bottom of it is a floor. No ' +
+        'step size gets you below it.',
+      '**Each rule has a different optimum, and both are predictable.** A forward difference ' +
+        'balances at about √ε ≈ 1.5 × 10⁻⁸ and bottoms out near 10⁻⁸ error, which is half the ' +
+        'digits gone.',
+      'A central difference has a smaller truncation term. It balances at ∛ε ≈ 6 × 10⁻⁶ and reaches ' +
+        'about 10⁻¹¹.',
+      'The demo finds these by sweeping rather than by quoting them, and the measured minima land ' +
+        'on the predicted ones.',
+      '**The complex step trick removes the subtraction and therefore the floor.** Evaluate the ' +
+        'function at x + ih and take the imaginary part over h.',
+      'The two terms never cancel, because they were never subtracted, so h can go to 10⁻¹⁶⁰ and ' +
+        'the error stays at zero.',
+      'It costs a complex-arithmetic rewrite of the function and only works for analytic ones. But ' +
+        'where it applies it is exact, and it is the bridge to why autodiff is possible.',
+      '**Reverse-mode autodiff costs about the same as one forward evaluation, however many inputs ' +
+        'there are.** It records every operation on a tape as the function runs, then walks the ' +
+        'tape backwards accumulating adjoints by the chain rule.',
+      'One backward sweep yields the whole gradient. Forward mode needs one sweep per input, so on ' +
+        '24 inputs it costs about ten times as much.',
+      'And on a billion parameters the comparison stops being a comparison.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**A finite difference has two errors pulling in opposite directions, and the best step ' +
-          'is where they cross.** Shrink h and the truncation error — the terms of the Taylor ' +
-          'series you dropped — falls; shrink it further and the subtraction f(x+h) − f(x) starts ' +
-          'cancelling significant digits, and the rounding error rises as 1/h. Plotted against h ' +
-          'on log axes the total error is a V, and the bottom of it is a floor: no step size gets ' +
-          'you below it.',
-        '**Each rule has a different optimum, and both are predictable.** A forward difference ' +
-          'balances at about √ε ≈ 1.5 × 10⁻⁸ and bottoms out near 10⁻⁸ error — half the digits ' +
-          'gone. A central difference has a smaller truncation term, balances at ∛ε ≈ 6 × 10⁻⁶ and ' +
-          'reaches about 10⁻¹¹. The demo finds these by sweeping rather than by quoting them, and ' +
-          'the measured minima land on the predicted ones.',
-        '**The complex step trick removes the subtraction and therefore the floor.** Evaluate the ' +
-          'function at x + ih and take the imaginary part over h: the two terms never cancel, ' +
-          'because they were never subtracted, so h can go to 10⁻¹⁶⁰ and the error stays at zero. ' +
-          'It costs a complex-arithmetic rewrite of the function and only works for analytic ' +
-          'ones — but where it applies it is exact, and it is the bridge to why autodiff is ' +
-          'possible.',
-        '**Reverse-mode autodiff costs about the same as one forward evaluation, however many ' +
-          'inputs there are.** It records every operation on a tape as the function runs, then ' +
-          'walks the tape backwards accumulating adjoints by the chain rule. One backward sweep ' +
-          'yields the whole gradient. Forward mode needs one sweep per input, so on 24 inputs it ' +
-          'costs about ten times as much — and on a billion parameters the comparison stops being ' +
-          'a comparison.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — the V curve, four quadrature rules and both autodiff modes',
         markup: root.DifferentiationAndAutodiffTemplate.render()
       },
       diagram: diagram(),
       insight: 'If you are computing gradients by finite differences in production code, you are ' +
-        'paying twice: once in accuracy — you get eight correct digits where autodiff gives ' +
-        'sixteen — and once in cost, because a finite-difference gradient needs one extra ' +
+        'paying twice. Once in accuracy, because you get eight correct digits where autodiff gives ' +
+        'sixteen. And once in cost, because a finite-difference gradient needs one extra ' +
         'evaluation per input while reverse mode needs one backward sweep for all of them. Both ' +
         'penalties grow with the number of parameters, which is why every deep-learning framework ' +
         'is, structurally, a reverse-mode autodiff engine with an operator library attached. ' +

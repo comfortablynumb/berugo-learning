@@ -164,14 +164,18 @@
         },
         plain: 'Shrinking the step reduces the truncation error and increases the rounding error, and the best step is where they cross.',
         formal: 'the forward difference has truncation O(h) and rounding O(ε/h), which balance at h ≈ √ε',
-        readAs: 'The part you left out of the Taylor series shrinks in proportion to the step, and ' +
-          'the part lost to rounding grows in proportion to one over the step; they are equal ' +
-          'around the square root of machine epsilon.',
-        detail: 'Plotted against h on log axes the total error is a V, and the bottom of the V is a ' +
-          'floor no step size gets under. That floor is the important part: a forward difference in ' +
-          'double precision cannot do better than about eight correct digits, which is half the ' +
-          'precision the type carries, and no amount of tuning changes it. Every method in this ' +
-          'milestone has some version of this trade; this is the one where you can see both branches.',
+        readAs: 'The part you left out of the Taylor series shrinks in proportion to the step. The ' +
+          'part lost to rounding grows in proportion to one over the step. They are equal around ' +
+          'the square root of machine epsilon.',
+        detail: [
+          'Plotted against h on log axes the total error is a V, and the bottom of the V is a floor ' +
+            'no step size gets under.',
+          'That floor is the important part. A forward difference in double precision cannot do ' +
+            'better than about eight correct digits, which is half the precision the type carries, ' +
+            'and no amount of tuning changes it.',
+          'Every method in this milestone has some version of this trade. This is the one where you ' +
+            'can see both branches.'
+        ],
         example: 'The demo sweeps h by decades and finds the forward difference bottoming out at ' +
           'h = 1e-8 with an error of 2.97e-9, against a predicted optimum of 1.49e-8.'
       },
@@ -179,14 +183,17 @@
         term: 'A central difference has a different optimum and a lower floor',
         plain: 'Sampling either side cancels the first-order error term, so the truncation shrinks as h² instead of h.',
         formal: '(f(x + h) − f(x − h)) / 2h has truncation O(h²), balancing rounding at h ≈ ∛ε',
-        readAs: 'Take the difference across the point rather than forwards from it; the leftover ' +
+        readAs: 'Take the difference across the point rather than forwards from it. The leftover ' +
           'now shrinks with the square of the step, and the best step is the cube root of machine ' +
           'epsilon.',
-        detail: 'It costs one extra evaluation and buys three orders of magnitude, which makes it ' +
-          'the default choice for checking a gradient. The predicted optimum comes from balancing ' +
-          'h² against ε/h, and the demo finds it by sweeping rather than by quoting — a decade-' +
-          'spaced sweep can only resolve the nearest decade, and it lands on the right one for ' +
-          'both rules.',
+        detail: [
+          'It costs one extra evaluation and buys three orders of magnitude, which makes it the ' +
+            'default choice for checking a gradient.',
+          'The predicted optimum comes from balancing h² against ε/h, and the demo finds it by ' +
+            'sweeping rather than by quoting.',
+          'A decade-spaced sweep can only resolve the nearest decade, and it lands on the right one ' +
+            'for both rules.'
+        ],
         example: 'The demo measures the central difference bottoming out at h = 1e-5 with an error ' +
           'of 1.11e-11, against a predicted optimum of 6.06e-6.'
       },
@@ -194,14 +201,18 @@
         term: 'The complex step removes the subtraction and therefore the floor',
         plain: 'Evaluate at x + ih and take the imaginary part; nothing cancels, so h can be arbitrarily small.',
         formal: 'f′(x) ≈ Im f(x + ih) / h, with no subtraction and therefore no cancellation',
-        readAs: 'Feed the function a complex number whose imaginary part is the step, divide the ' +
+        readAs: 'Feed the function a complex number whose imaginary part is the step. Divide the ' +
           'imaginary part of the answer by that step, and you have the derivative with no ' +
           'subtraction anywhere.',
-        detail: 'The trick is that the imaginary part of the Taylor expansion contains the ' +
-          'derivative times h with no real term to cancel against, so the rounding branch of the V ' +
-          'simply does not exist. It requires the function to be analytic and to be rewritten in ' +
-          'complex arithmetic, which is why it is not universal — but where it applies the error ' +
-          'is exactly zero, and it is the conceptual bridge to autodiff.',
+        detail: [
+          'The trick is that the imaginary part of the Taylor expansion contains the derivative ' +
+            'times h with no real term to cancel against. So the rounding branch of the V simply ' +
+            'does not exist.',
+          'It requires the function to be analytic and to be rewritten in complex arithmetic, which ' +
+            'is why it is not universal.',
+          'But where it applies the error is exactly zero, and it is the conceptual bridge to ' +
+            'autodiff.'
+        ],
         example: 'The demo measures a complex-step error of 0 at h = 1e-16, where the forward ' +
           'difference is at 3.0e-9.'
       },
@@ -209,27 +220,32 @@
         term: 'Gauss–Legendre chooses where to sample, and is exact to degree 2n − 1',
         plain: 'n points give 2n free parameters — positions and weights — and the rule spends all of them.',
         formal: 'an n-point Gauss rule integrates every polynomial of degree at most 2n − 1 exactly, and not degree 2n',
-        detail: 'A fixed grid fixes the positions and only lets you choose the weights, which is ' +
-          'why Simpson gets degree 3 from three points and Gauss gets degree 5. The boundary is ' +
-          'attained rather than merely claimed — the demo measures machine precision at degree ' +
-          '2n − 1 and a visible error at 2n. The guarantee is about polynomials, which is also its ' +
-          'limitation: on a discontinuous integrand, where no polynomial is close, Gauss has no ' +
-          'advantage at all.',
+        detail: [
+          'A fixed grid fixes the positions and only lets you choose the weights. That is why ' +
+            'Simpson gets degree 3 from three points and Gauss gets degree 5.',
+          'The boundary is attained rather than merely claimed. The demo measures machine precision ' +
+            'at degree 2n − 1 and a visible error at 2n.',
+          'The guarantee is about polynomials, which is also its limitation. On a discontinuous ' +
+            'integrand, where no polynomial is close, Gauss has no advantage at all.'
+        ],
         example: 'The demo integrates eˣ over [0, 1] to 9.33e-10 in 4 evaluations against Simpson’s ' +
           '2.326e-6 and the trapezoid rule’s 2.24e-3, both in 9. At 2 points the error is ' +
-          '5.55e-17 at degree 3 and 5.56e-3 at degree 4; at 5 points it is 8.33e-17 at degree 9 ' +
+          '5.55e-17 at degree 3 and 5.56e-3 at degree 4. At 5 points it is 8.33e-17 at degree 9 ' +
           'and 1.43e-6 at degree 10.'
       },
       {
         term: 'Adaptive quadrature spends its evaluations where the error estimate says',
         plain: 'Split the interval, compare the coarse and fine estimates, and recurse only where they disagree.',
         formal: 'the difference between a rule and the same rule on two halves estimates the error, and Richardson extrapolation improves the result',
-        detail: 'On a smooth integrand this is wasted effort — a uniform rule already resolves ' +
-          'everything and the adaptation finds nothing to do. Its case is the opposite: an ' +
-          'integrand with a spike or a kink forces a uniform grid to be fine everywhere in order ' +
-          'to resolve one small region, while adaptation refines only there. That is the general ' +
-          'shape of adaptivity, and it means benchmarking an adaptive method on smooth inputs ' +
-          'measures its overhead rather than its value.',
+        detail: [
+          'On a smooth integrand this is wasted effort. A uniform rule already resolves everything, ' +
+            'and the adaptation finds nothing to do.',
+          'Its case is the opposite. An integrand with a spike or a kink forces a uniform grid to be ' +
+            'fine everywhere in order to resolve one small region, while adaptation refines only ' +
+            'there.',
+          'That is the general shape of adaptivity. It means benchmarking an adaptive method on ' +
+            'smooth inputs measures its overhead rather than its value.'
+        ],
         example: 'On the smooth eˣ the demo’s adaptive Simpson spends 1 023 evaluations to reach ' +
           'the requested tolerance, against Gauss–Legendre’s 4.'
       },
@@ -237,12 +253,14 @@
         term: 'Autodiff differentiates the program, not the function',
         plain: 'Apply the chain rule to the operations the code actually performed, and the derivative is exact.',
         formal: 'every elementary operation has a known derivative, and the chain rule composes them with no truncation and no step size',
-        detail: 'This is why it is not a better finite difference but a different thing entirely: ' +
-          'there is no h to choose, no subtraction to cancel and no Taylor term left out, so the ' +
-          'result is the derivative to machine precision rather than an approximation of it. It ' +
-          'also means the derivative is of the code as written, including its branches — which is ' +
-          'usually what you want and is worth remembering when the code contains a discontinuity ' +
-          'the mathematics does not.',
+        detail: [
+          'This is not a better finite difference but a different thing entirely. There is no h to ' +
+            'choose, no subtraction to cancel and no Taylor term left out.',
+          'So the result is the derivative to machine precision rather than an approximation of it.',
+          'It also means the derivative is of the code as written, including its branches. That is ' +
+            'usually what you want, and it is worth remembering when the code contains a ' +
+            'discontinuity the mathematics does not.'
+        ],
         example: 'The demo’s autodiff columns read 0 or 2.8e-14 on every fixture, against a ' +
           'central-difference column between 4.2e-11 and 2.2e-8.'
       },
@@ -250,12 +268,14 @@
         term: 'Reverse mode costs one sweep whatever the number of inputs',
         plain: 'Record the operations on the way forward, walk the record backwards once, and every input’s derivative falls out.',
         formal: 'forward mode costs n sweeps for n inputs; reverse mode costs one backward pass, at a small constant times the forward pass',
-        detail: 'The asymmetry is the entire reason gradient-based training scales. A gradient with ' +
-          'a billion parameters costs a billion sweeps in forward mode and about two forward ' +
-          'passes in reverse mode, and that is the difference between possible and not. The price ' +
-          'is memory: the tape holds every intermediate value until the backward sweep needs it, ' +
-          'which is why activation checkpointing exists — recompute some values instead of storing ' +
-          'them, trading time for the memory the tape would have used.',
+        detail: [
+          'The asymmetry is the entire reason gradient-based training scales.',
+          'A gradient with a billion parameters costs a billion sweeps in forward mode and about two ' +
+            'forward passes in reverse mode. That is the difference between possible and not.',
+          'The price is memory. The tape holds every intermediate value until the backward sweep ' +
+            'needs it, which is why activation checkpointing exists. Recompute some values instead ' +
+            'of storing them, and you trade time for the memory the tape would have used.'
+        ],
         example: 'On the 24-input fixture the demo measures forward mode doing 9.60× the operations ' +
           'of reverse mode, and 24 sweeps against 1.'
       },
@@ -263,11 +283,13 @@
         term: 'Finite differences keep exactly one job: checking an analytic gradient',
         plain: 'Compare against a central difference at h = 1e-6 and expect agreement to about eight digits.',
         formal: 'the central difference at h = 10⁻⁶ has an error around 10⁻¹⁰ to 10⁻⁸, which is the tolerance a gradient check should use',
-        detail: 'Being specific about the expected agreement is what makes the check useful. Much ' +
-          'worse than eight digits means the analytic gradient is wrong; much better is suspicious ' +
-          'too, because it often means both sides came from the same code. Choosing the tolerance ' +
-          'from the V curve rather than picking a round number is the difference between a check ' +
-          'that catches sign errors and one that passes everything.',
+        detail: [
+          'Being specific about the expected agreement is what makes the check useful.',
+          'Much worse than eight digits means the analytic gradient is wrong. Much better is ' +
+            'suspicious too, because it often means both sides came from the same code.',
+          'Choosing the tolerance from the V curve rather than picking a round number is the ' +
+            'difference between a check that catches sign errors and one that passes everything.'
+        ],
         example: 'The demo’s central-difference column ranges from 4.2e-11 to 2.2e-8 across four ' +
           'fixtures, which is the band a gradient check should allow.'
       }
