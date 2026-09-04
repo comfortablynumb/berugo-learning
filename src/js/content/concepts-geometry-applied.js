@@ -155,11 +155,14 @@
         term: 'Bresenham and rounding draw the same line and disagree about which pixel',
         plain: 'Same endpoints, same pixel count, and a different choice wherever the ideal path runs between two pixels.',
         formal: 'they differ only in how a tie is broken, and one breaks it consistently',
-        detail: 'Bresenham carries an integer error term and breaks every tie the same way; ' +
-          'rounding a floating-point midpoint breaks it however the arithmetic happened to land. ' +
-          'Neither is more correct in isolation, and a renderer that uses one for outlines and the ' +
-          'other for fills draws them a pixel apart along every shared edge — which shows up as a ' +
-          'hairline seam between adjacent shapes that no amount of adjusting the geometry fixes.',
+        detail: [
+          'Bresenham carries an integer error term and breaks every tie the same way. Rounding a ' +
+            'floating-point midpoint breaks it however the arithmetic happened to land.',
+          'Neither is more correct in isolation.',
+          'But a renderer that uses one for outlines and the other for fills draws them a pixel ' +
+            'apart along every shared edge. That shows up as a hairline seam between adjacent shapes ' +
+            'that no amount of adjusting the geometry fixes.'
+        ],
         example: 'Over 3 000 lines the two agree exactly on 2 492 of them (83.1%) and always agree ' +
           'on the endpoints and the pixel count.'
       },
@@ -175,15 +178,18 @@
             '    D --> F["and the error is systematic,<br/>so it never averages out"]',
             '    E --> F'
           ].join('\n'),
-          caption: 'A coverage estimate that is wrong by a constant fraction changes the apparent weight of every line in the image, which is why the sum has to be checked against the area.'
+          caption: 'A coverage estimate that is wrong by a constant fraction changes the apparent weight of every line in the image. That is why the sum has to be checked against the area.'
         },
         plain: 'Shade each pixel by the fraction of it that falls inside the shape, and the fractions must sum to the area.',
         formal: 'the summed coverage equals the polygon\'s area, or the filter is adding or removing ink',
-        detail: 'This is the check that separates a real coverage computation from a plausible ' +
-          'blur. A filter that is biased makes thin shapes systematically too light or too heavy, ' +
-          'and the error compounds across a scene — text renders thin, hairlines disappear at some ' +
-          'zoom levels and reappear at others. Summing the coverages and comparing with the shoelace ' +
-          'area is one line and catches it immediately.',
+        detail: [
+          'This is the check that separates a real coverage computation from a plausible blur.',
+          'A filter that is biased makes thin shapes systematically too light or too heavy, and the ' +
+            'error compounds across a scene. Text renders thin, and hairlines disappear at some zoom ' +
+            'levels and reappear at others.',
+          'Summing the coverages and comparing with the shoelace area is one line, and catches it ' +
+            'immediately.'
+        ],
         example: 'Coverages sum to 377.63 against a true area of 377.50, with 67 of 411 touched ' +
           'pixels only partly covered.'
       },
@@ -191,13 +197,14 @@
         term: 'Curve flattening costs far less precision-per-segment than it looks',
         plain: 'Tightening the tolerance by 256 times multiplies the segment count by only about 14.',
         formal: 'the segment count grows roughly with the square root of the tolerance ratio',
-        detail: 'The relationship follows from a curve\'s local flatness: halving the allowed ' +
-          'deviation only requires subdividing until the chord is about √2 shorter, not twice ' +
-          'shorter. That makes a defensively tight tolerance much cheaper than the intuition ' +
-          'suggests, which is worth knowing when the alternative is visible faceting on a large ' +
-          'shape. The measured error is also always comfortably inside the bound, because ' +
-          'subdivision stops when the flatness test passes rather than when the error exactly meets ' +
-          'the tolerance.',
+        detail: [
+          'The relationship follows from a curve\'s local flatness. Halving the allowed deviation ' +
+            'only requires subdividing until the chord is about √2 shorter, not twice shorter.',
+          'That makes a defensively tight tolerance much cheaper than the intuition suggests, which ' +
+            'is worth knowing when the alternative is visible faceting on a large shape.',
+          'The measured error is also always comfortably inside the bound, because subdivision stops ' +
+            'when the flatness test passes rather than when the error exactly meets the tolerance.'
+        ],
         example: 'Tolerance 4 gives 8 segments and 1/256 of it gives 110 — 13.8× the segments for ' +
           '256× the precision.'
       },
@@ -205,24 +212,29 @@
         term: 'The separating axis theorem collapses infinitely many candidate lines to a handful',
         plain: 'Two convex shapes miss exactly when some line exists that they project onto without overlapping.',
         formal: 'only the edge normals of the two shapes can be separating, so the test is finite',
-        detail: 'That collapse is the same move as rotating calipers: a continuous search becomes a ' +
-          'scan over a combinatorial set, and the theorem is what licenses ignoring everything else. ' +
-          'It also gives the test a natural early exit — the moment an axis separates the shapes the ' +
-          'answer is "no overlap" and nothing further runs — so a clear miss is cheaper than a hit. ' +
+        detail: [
+          'That collapse is the same move as rotating calipers. A continuous search becomes a scan ' +
+            'over a combinatorial set, and the theorem is what licenses ignoring everything else.',
+          'It also gives the test a natural early exit. The moment an axis separates the shapes the ' +
+            'answer is "no overlap" and nothing further runs, so a clear miss is cheaper than a hit.',
           'The theorem is only true for convex shapes, which is why engines decompose concave ones ' +
-          'rather than generalising the test.',
+            'rather than generalising the test.'
+        ],
         example: 'An overlapping pair tests all 9 axes; a clearly separated pair exits after 2.'
       },
       {
         term: 'The minimum translation vector is the axis of smallest overlap, not the line between the centroids',
         plain: 'Push along the separating axis that was hardest to find, by exactly the overlap on it.',
         formal: 'the shortest push out of contact is the minimum overlap over the candidate axes',
-        detail: 'Taking the direction from one centroid to the other is intuitive, cheap and right ' +
-          'most of the time, which is what makes it a bad bug: it fails on the shapes where it ' +
-          'matters, the long thin ones in shallow contact, and the failure is a body that jitters or ' +
-          'sinks through a surface rather than one that visibly teleports. The sign of the push has ' +
-          'to come from the projections on the chosen axis too, not from the centroids, or the ' +
-          'vector separates them in the wrong direction.',
+        detail: [
+          'Taking the direction from one centroid to the other is intuitive, cheap and right most of ' +
+            'the time, which is what makes it a bad bug.',
+          'It fails on the shapes where it matters — the long thin ones in shallow contact. The ' +
+            'failure is a body that jitters or sinks through a surface, rather than one that visibly ' +
+            'teleports.',
+          'The sign of the push has to come from the projections on the chosen axis too, not from ' +
+            'the centroids, or the vector separates them in the wrong direction.'
+        ],
         example: 'An earlier version of this section took the push direction from the two centroids, ' +
           'and it was wrong for 38 of 800 overlapping pairs.'
       },
@@ -230,11 +242,14 @@
         term: 'A collision test is checkable: apply the push and ask again',
         plain: 'The one thing a minimum translation vector must never be is a push that does not separate.',
         formal: 'move one shape by the vector, re-run the test, and require no overlap',
-        detail: 'It costs a second run of a test that is already cheap, and it converts a subtle ' +
-          'geometric claim into a property that either holds or does not. Pair it with a sampling ' +
-          'oracle for the overlap verdict itself — scatter points and check whether any lies in both ' +
-          'shapes — and the whole routine is pinned down by two checks that share no algebra with ' +
-          'it. This is the same pattern as the hull oracle and the nearest-site grid.',
+        detail: [
+          'It costs a second run of a test that is already cheap, and it converts a subtle geometric ' +
+            'claim into a property that either holds or does not.',
+          'Pair it with a sampling oracle for the overlap verdict itself: scatter points and check ' +
+            'whether any lies in both shapes. The whole routine is then pinned down by two checks ' +
+            'that share no algebra with it.',
+          'This is the same pattern as the hull oracle and the nearest-site grid.'
+        ],
         example: 'At three separations the shapes overlap by 8.243, 5.315 and 2.386, and applying ' +
           'the push separates them in every case.'
       },
@@ -242,12 +257,14 @@
         term: 'A pixel grid is a sampling of a continuous shape, and the sample decides the answer',
         plain: 'Whether a pixel is "in" depends on where you test it, and the convention has to be stated.',
         formal: 'sampling at the pixel centre is a choice; sampling at the corner gives a shape shifted by half a pixel',
-        detail: 'Every rasteriser answers this, usually implicitly, and mismatched conventions ' +
-          'between two parts of a system produce a half-pixel offset that people spend days chasing. ' +
-          'The fill rule matters here too — the same top-left rule that decides which of two adjacent ' +
-          'triangles owns their shared edge exists so that a shared edge is drawn once rather than ' +
-          'twice or not at all, which is the rasterisation form of the boundary problem from the ' +
-          'containment section.',
+        detail: [
+          'Every rasteriser answers this, usually implicitly, and mismatched conventions between two ' +
+            'parts of a system produce a half-pixel offset that people spend days chasing.',
+          'The fill rule matters here too. The same top-left rule decides which of two adjacent ' +
+            'triangles owns their shared edge. It exists so that a shared edge is drawn once rather ' +
+            'than twice or not at all.',
+          'That is the rasterisation form of the boundary problem from the containment section.'
+        ],
         example: '378 pixels are filled for a polygon whose true area is 377.50, and 411 pixels are ' +
           'touched at all.'
       },
@@ -255,12 +272,16 @@
         term: 'Treating latitude and longitude as planar is the most common geometry bug in application code',
         plain: 'A degree of longitude is 111 km at the equator and 56 km at 60 degrees north.',
         formal: 'the distortion grows with the cosine of the latitude, so it is invisible at the equator',
-        detail: 'The bug survives testing because tests are usually written with coordinates near ' +
-          'where the developer is, or near zero, and it is a correctness bug rather than a precision ' +
-          'one: a radius search returns the wrong places, a nearest-facility lookup picks the wrong ' +
-          'facility, and a bounding box excludes real results. The fixes are ordinary — project to a ' +
-          'local planar system, use a geodesic distance, or scale longitude by the cosine of the ' +
-          'latitude — and the hard part is noticing the problem exists.',
+        detail: [
+          'The bug survives testing because tests are usually written with coordinates near where ' +
+            'the developer is, or near zero.',
+          'It is a correctness bug rather than a precision one. A radius search returns the wrong ' +
+            'places, a nearest-facility lookup picks the wrong facility, and a bounding box excludes ' +
+            'real results.',
+          'The fixes are ordinary: project to a local planar system, use a geodesic distance, or ' +
+            'scale longitude by the cosine of the latitude. The hard part is noticing the problem ' +
+            'exists.'
+        ],
         example: 'Every planar formula in this milestone is correct on a projected coordinate system ' +
           'and wrong on raw degrees, by a factor that reaches two at 60° north.'
       }

@@ -52,31 +52,36 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**Bresenham draws a line with integers only**, which is why it was invented and why it still ' +
+        'produces bit-identical output on every machine.',
+      'It and a floating-point rounding reference agree on 83.1% of random integer lines, and always ' +
+        'on the endpoints and the pixel count. Every disagreement is a line whose ideal path passes ' +
+        'exactly between two pixels.',
+      'Two defensible tie-breaks, and a renderer that mixes them draws outlines and fills one pixel ' +
+        'apart along shared edges.',
+      '**Curve flattening turns a Bézier into segments, and the tolerance is the dial.** Subdivide ' +
+        'until the control points are within the tolerance of the chord.',
+      'Halving the tolerance does *not* double the segment count — the relationship is much gentler. ' +
+        'That is worth knowing before setting it defensively low and wondering where the frame time ' +
+        'went.',
+      '**Anti-aliasing is coverage, not blur.** A pixel on the boundary is partly inside the shape, ' +
+        'and the honest value is what fraction.',
+      'Supersampling measures it directly. The sum of the coverages over all pixels is the polygon\'s ' +
+        'area, which is the check that tells you the filter is unbiased rather than merely soft.',
+      '**The separating axis theorem is the same collapse as rotating calipers.** Two convex shapes ' +
+        'miss exactly when some axis separates their projections, and only the edge normals can be ' +
+        'that axis.',
+      'That takes infinitely many candidates down to a handful. Finding none means they collide, and ' +
+        'the axis of least overlap gives the shortest push that pulls them apart.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**Bresenham draws a line with integers only**, which is why it was invented and why it ' +
-          'still produces bit-identical output on every machine. It and a floating-point rounding ' +
-          'reference agree on 83.1% of random integer lines and always on the endpoints and the ' +
-          'pixel count — and every disagreement is a line whose ideal path passes exactly between ' +
-          'two pixels. Two defensible tie-breaks, and a renderer that mixes them draws outlines and ' +
-          'fills one pixel apart along shared edges.',
-        '**Curve flattening turns a Bézier into segments, and the tolerance is the dial.** ' +
-          'Subdivide until the control points are within the tolerance of the chord. Halving the ' +
-          'tolerance does *not* double the segment count — the relationship is much gentler — which ' +
-          'is worth knowing before setting it defensively low and wondering where the frame time ' +
-          'went.',
-        '**Anti-aliasing is coverage, not blur.** A pixel on the boundary is partly inside the ' +
-          'shape, and the honest value is what fraction. Supersampling measures it directly; the ' +
-          'sum of the coverages over all pixels is the polygon\'s area, which is the check that ' +
-          'tells you the filter is unbiased rather than merely soft.',
-        '**The separating axis theorem is the same collapse as rotating calipers.** Two convex ' +
-          'shapes miss exactly when some axis separates their projections, and only the edge ' +
-          'normals can be that axis — infinitely many candidates down to a handful. Finding none ' +
-          'means they collide, and the axis of least overlap gives the shortest push that pulls ' +
-          'them apart.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — rasterisation, flattening, coverage and collision',
         markup: root.AppliedGeometryTemplate.render()
@@ -84,12 +89,11 @@
       diagram: diagram(),
       insight: 'Treating latitude and longitude as planar coordinates is the most common geometry ' +
         'bug in application code, and it is invisible where it is written. A degree of longitude is ' +
-        'about 111 km at the equator and about 55 km at 60°N, so a distance computed as if the ' +
+        'about 111 km at the equator and about 56 km at 60°N. So a distance computed as if the ' +
         'globe were a sheet of paper is correct in the tests written in the office and wrong for ' +
-        'users further north — and it gets worse the further they go. Project first, or use a ' +
-        'geodesic formula. The same lesson runs through this whole section: the discretisation is ' +
-        'not a detail you can leave until later, because it changes the answer rather than the ' +
-        'appearance.'
+        'users further north. It gets worse the further they go. Project first, or use a geodesic ' +
+        'formula. The same lesson runs through this whole section: the discretisation is not a ' +
+        'detail you can leave until later, because it changes the answer rather than the appearance.'
     };
   }
 
