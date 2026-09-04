@@ -49,33 +49,41 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**Bitap keeps the entire match state as bits.** Bit `j` of the state word is set when the ' +
+        'first `j+1` pattern characters match ending here, and one shift plus one OR advances every ' +
+        'position at once.',
+      'A 32-character pattern therefore costs the same as a one-character pattern. A 33-character ' +
+        'pattern costs twice as much, because the word ran out.',
+      'That cliff is the entire design constraint of `agrep`-style tools, and the panel below walks ' +
+        'off it.',
+      '**With errors it is Wu-Manber**: one state word per error level. Each is the intersection of ' +
+        'four terms — match, substitution, insertion, deletion — taken from itself and from the ' +
+        'level below.',
+      'The cost is `k+1` words per character, so the parallelism is over pattern positions and never ' +
+        'over error counts.',
+      'Getting that recurrence right is the hard part, and the panel checks every position against a ' +
+        'plain dynamic-programming reference.',
+      '**The band is exact and the answer outside it is a refusal.** An alignment costing at most ' +
+        '`k` cannot stray more than `k` cells from the diagonal, so only a band of width `2k+1` can ' +
+        'hold a value at most `k`.',
+      'That makes the banded distance exact *whenever the answer is within the budget*, and ' +
+        'meaningless otherwise. A banded run that returns 7 when the band was 3 is reporting an ' +
+        'artefact, and the demo reports `exact` as a separate column for exactly that reason.',
+      '**The q-gram filter has a condition nobody checks.** A pattern of length `m` and a match ' +
+        'within `k` errors must share at least `m − q + 1 − kq` q-grams with it.',
+      'When that number is positive the filter is sound and useful. When it is zero or below, every ' +
+        'window passes and the filter is a cost with no benefit.',
+      'That expression is three variables and one subtraction, and it is left out of most ' +
+        'implementations.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**Bitap keeps the entire match state as bits.** Bit `j` of the state word is set when the ' +
-          'first `j+1` pattern characters match ending here, and one shift plus one OR advances every ' +
-          'position at once. A 32-character pattern therefore costs the same as a one-character ' +
-          'pattern — and a 33-character pattern costs twice as much, because the word ran out. That ' +
-          'cliff is the entire design constraint of `agrep`-style tools, and the panel below walks ' +
-          'off it.',
-        '**With errors it is Wu-Manber**: one state word per error level, each the intersection of ' +
-          'four terms — match, substitution, insertion, deletion — taken from itself and from the ' +
-          'level below. The cost is `k+1` words per character, so the parallelism is over pattern ' +
-          'positions and never over error counts. Getting that recurrence right is the hard part, ' +
-          'and the panel checks every position against a plain dynamic-programming reference.',
-        '**The band is exact and the answer outside it is a refusal.** An alignment costing at most ' +
-          '`k` cannot stray more than `k` cells from the diagonal, so only a band of width `2k+1` ' +
-          'can hold a value at most `k`. That makes the banded distance exact *whenever the answer is ' +
-          'within the budget* and meaningless otherwise — a banded run that returns 7 when the band ' +
-          'was 3 is reporting an artefact, and the demo reports `exact` as a separate column for ' +
-          'exactly that reason.',
-        '**The q-gram filter has a condition nobody checks.** A pattern of length `m` and a match ' +
-          'within `k` errors must share at least `m − q + 1 − kq` q-grams with it. When that number ' +
-          'is positive the filter is sound and useful; when it is zero or below, every window passes ' +
-          'and the filter is a cost with no benefit. That expression is three variables and one ' +
-          'subtraction, and it is left out of most implementations.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — the bit vectors, the cliff, the band and the filter',
         markup: root.ApproximateMatchingTemplate.render()
@@ -84,8 +92,8 @@
       insight: 'In a matching pipeline the prefilter\'s selectivity decides the throughput and the ' +
         'verifier\'s speed does not. If the filter admits fifty candidates per result, making the ' +
         'verifier twice as fast halves half the cost; making the filter admit five instead removes ' +
-        'ninety per cent of it. Measure candidates-per-result before optimising anything, and be ' +
-        'suspicious of any filter whose soundness condition was never written down — a filter that ' +
+        'ninety per cent of it. Measure candidates-per-result before optimising anything. And be ' +
+        'suspicious of any filter whose soundness condition was never written down: a filter that ' +
         'admits everything is not a fast filter, it is a slow no-op.'
     };
   }

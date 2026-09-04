@@ -158,11 +158,13 @@
         readAs: 'Keep the whole search state in one machine word, one bit per pattern position. Shifting left ' +
           'advances every partial match at once, and OR-ing the character mask kills the ones that no ' +
           'longer fit. Zero means match because that makes the shift bring in the right default.',
-        detail: 'The negative logic is not perversity: shifting a 0 into the low bit starts a fresh ' +
-          'match attempt at every position for free, which is exactly what the algorithm needs. One ' +
-          'shift and one OR advance every pattern position simultaneously, so a 32-character ' +
-          'pattern costs the same as a one-character one. The parallelism is over pattern positions ' +
-          'and nothing else.',
+        detail: [
+          'The negative logic is not perversity. Shifting a 0 into the low bit starts a fresh match ' +
+            'attempt at every position for free, which is exactly what the algorithm needs.',
+          'One shift and one OR advance every pattern position simultaneously, so a 32-character ' +
+            'pattern costs the same as a one-character one.',
+          'The parallelism is over pattern positions and nothing else.'
+        ],
         example: 'On 9 870 characters with a six-character pattern, bitap uses 9 870 words at k = 0 ' +
           '— exactly one per character.'
       },
@@ -173,11 +175,14 @@
         readAs: 'While the pattern fits in one machine word the cost is one operation per character — ' +
           'genuinely constant. Past that it needs a second word, and the cost doubles in a single step. ' +
           'That cliff is what makes bit-parallel matching a short-pattern technique.',
-        detail: 'That is the entire reason `agrep` and its descendants exist and the entire reason ' +
-          'they have a documented pattern-length limit. The cost curve is a staircase whose step is ' +
-          'the machine word, which is why this family of algorithms got faster in 1985 and again ' +
-          'when 64-bit registers arrived, with nobody changing the algorithm. A demo that refuses ' +
-          'past 32 characters is showing the constraint rather than hiding it.',
+        detail: [
+          'That is the entire reason `agrep` and its descendants exist, and the entire reason they ' +
+            'have a documented pattern-length limit.',
+          'The cost curve is a staircase whose step is the machine word. That is why this family of ' +
+            'algorithms got faster in 1985 and again when 64-bit registers arrived, with nobody ' +
+            'changing the algorithm.',
+          'A demo that refuses past 32 characters is showing the constraint rather than hiding it.'
+        ],
         example: 'Pattern lengths 8, 16, 24 and 32 all cost 2.00 words per character at k = 1; 40 ' +
           'and 48 are refused outright.'
       },
@@ -185,11 +190,14 @@
         term: 'Wu-Manber is four AND terms per error level',
         plain: 'Match, substitution, insertion and deletion, intersected.',
         formal: 'R^d = ((R^d_prev << 1) | mask) & (R^{d−1}_prev << 1) & (R^{d−1} << 1) & R^{d−1}_prev',
-        detail: 'Each term corresponds to one way of consuming a character at this error level, and ' +
-          'getting any one of them wrong produces a matcher that reports positions almost ' +
-          'everywhere — which looks like a threshold problem rather than a bug. The recurrence needs ' +
-          'the previous character\'s word at this level *and* the previous level\'s word at both ' +
-          'characters, so the old row must be kept whole rather than carried one value at a time.',
+        detail: [
+          'Each term corresponds to one way of consuming a character at this error level.',
+          'Getting any one of them wrong produces a matcher that reports positions almost ' +
+            'everywhere, which looks like a threshold problem rather than a bug.',
+          'The recurrence needs the previous character\'s word at this level *and* the previous ' +
+            'level\'s word at both characters. So the old row must be kept whole rather than carried ' +
+            'one value at a time.'
+        ],
         example: 'At k = 0, 1, 2, 3 and 4 the bit-parallel matcher agrees with a plain DP reference ' +
           'on 102, 306, 510, 864 and 1 468 end positions.'
       },
@@ -200,11 +208,13 @@
         readAs: 'A cell far from the diagonal already implies more than k edits, so it need not be computed ' +
           'at all. Restricting to a band of that width is what turns quadratic edit distance into ' +
           'something linear in the text for small k.',
-        detail: 'Every step away from the diagonal costs at least one edit and every step back ' +
-          'costs another, so a cell more than k from it has value greater than k by construction. ' +
-          'That makes the band a correct restriction rather than a heuristic — which is what ' +
-          'separates it from the q-gram prefilter below and what makes "exact whenever the answer ' +
-          'is within budget" a theorem rather than an observation.',
+        detail: [
+          'Every step away from the diagonal costs at least one edit, and every step back costs ' +
+            'another. So a cell more than k from it has value greater than k by construction.',
+          'That makes the band a correct restriction rather than a heuristic.',
+          'It is what separates it from the q-gram prefilter below, and what makes "exact whenever ' +
+            'the answer is within budget" a theorem rather than an observation.'
+        ],
         example: 'Over six fixture pairs the band computes 71 cells against 314 for the full grid — ' +
           '77.4% never computed.'
       },
@@ -215,11 +225,14 @@
         readAs: 'Inside the band the answer is the true distance. If the computation runs off the band, all ' +
           'you learn is that the distance exceeds k — the correct response is to refuse rather than to ' +
           'report the band\'s number.',
-        detail: 'This is the column implementations lose. A banded routine that returns `k + 1` is ' +
-          'reporting an artefact of the band, because the true distance could be anything above it — ' +
-          'and code that sorts by that value, or thresholds on it, or averages it, is using a number ' +
-          'that does not exist. Returning the exactness flag alongside the value is the difference ' +
-          'between a distance and an upper bound on a distance.',
+        detail: [
+          'This is the column implementations lose.',
+          'A banded routine that returns `k + 1` is reporting an artefact of the band, because the ' +
+            'true distance could be anything above it. Code that sorts by that value, or thresholds ' +
+            'on it, or averages it, is using a number that does not exist.',
+          'Returning the exactness flag alongside the value is the difference between a distance and ' +
+            'an upper bound on a distance.'
+        ],
         example: 'At k = 1, five of the six fixture pairs return a refusal rather than a distance.'
       },
       {
@@ -229,23 +242,29 @@
         readAs: 'One edit can spoil at most q of the overlapping q-grams, so k edits spoil at most k·q. ' +
           'Anything within k edits must therefore still share the rest — which is the filter\'s ' +
           'threshold, and it goes negative once q gets large.',
-        detail: 'When that number is positive the filter is sound and useful; when it is zero or ' +
-          'below, every window passes and the filter is a q-gram count per position for no benefit ' +
-          'at all. The expression involves the pattern length, the error budget and q together, so a ' +
-          'filter tuned on one query silently becomes a no-op on a shorter one — and almost no ' +
-          'implementation checks it at run time.',
+        detail: [
+          'When that number is positive the filter is sound and useful. When it is zero or below, ' +
+            'every window passes and the filter is a q-gram count per position for no benefit at all.',
+          'The expression involves the pattern length, the error budget and q together, so a filter ' +
+            'tuned on one query silently becomes a no-op on a shorter one.',
+          'Almost no implementation checks it at run time.'
+        ],
         example: 'For a six-character pattern at k = 1 the threshold is 3 at q = 2, 1 at q = 3, and ' +
-          '−1 at q = 4, at which point the filter admits all 1 196 positions.'
+          '−1 at q = 4. At that last setting the filter admits all 1 196 positions.'
       },
       {
         term: 'Candidates per result decides the throughput, not the verifier',
         plain: 'The filter runs once per record and the verifier runs once per candidate.',
         formal: 'total cost ≈ records × filterCost + candidates × verifyCost, and candidates is the multiplier',
-        detail: 'If the filter admits fifty candidates per result, making the verifier twice as ' +
-          'fast halves half the cost; making the filter admit five instead removes ninety per cent ' +
-          'of it. That is one counter and ten minutes of work, and it decides where the next month ' +
-          'of optimisation goes. Almost every "our matching is too slow" investigation ends at a ' +
-          'prefilter and almost none of them start there.',
+        detail: [
+          'If the filter admits fifty candidates per result, making the verifier twice as fast ' +
+            'halves half the cost. Making the filter admit five instead removes ninety per cent of ' +
+            'it.',
+          'That is one counter and ten minutes of work, and it decides where the next month of ' +
+            'optimisation goes.',
+          'Almost every "our matching is too slow" investigation ends at a prefilter, and almost ' +
+            'none of them start there.'
+        ],
         example: 'At q = 3 the pipeline admits 6.6 candidates per result; at q = 4, where the ' +
           'threshold goes negative, it admits 44.3.'
       },
@@ -253,11 +272,14 @@
         term: 'Exact, sound and heuristic are three different guarantees',
         plain: 'Bitap is exact, the band is exact within its budget, and the q-gram filter is only sound.',
         formal: 'exact = the right answer; sound = no false negatives; heuristic = neither, without a stated bound',
-        detail: 'Mixing them in one pipeline is normal and fine; failing to know which is which is ' +
-          'not. A sound filter can be followed by an exact verifier and the whole pipeline is exact. ' +
-          'A heuristic filter cannot, and the resulting recall is an empirical number that has to be ' +
-          'measured on real data rather than reasoned about. Writing down which guarantee each stage ' +
-          'carries is what makes an end-to-end claim possible at all.',
+        detail: [
+          'Mixing them in one pipeline is normal and fine. Failing to know which is which is not.',
+          'A sound filter can be followed by an exact verifier and the whole pipeline is exact. A ' +
+            'heuristic filter cannot, and the resulting recall is an empirical number that has to be ' +
+            'measured on real data rather than reasoned about.',
+          'Writing down which guarantee each stage carries is what makes an end-to-end claim ' +
+            'possible at all.'
+        ],
         example: 'The demo reports the filter\'s soundness condition explicitly, and marks the ' +
           'settings where it does not hold.'
       }
