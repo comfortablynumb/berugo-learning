@@ -20,13 +20,16 @@
         },
         plain: 'Not "0.1 with a bit of error" — a specific other number, with a terminating decimal expansion.',
         formal: '0.1 is exactly 3602879701896397 / 2⁵⁵, which written out is 0.1000000000000000055511151231257827021181583404541015625',
-        detail: 'The format is a sign, a 53-bit integer and a power of two, and that is the ' +
-          'definition rather than an approximation of it. Because the denominator is always a ' +
-          'power of two, the decimal expansion always terminates — and its length is the number ' +
-          'of factors of two in that denominator, which is why 0.1 needs fifty-five places. ' +
+        detail: [
+          'The format is a sign, a 53-bit integer and a power of two, and that is the definition ' +
+            'rather than an approximation of it.',
+          'Because the denominator is always a power of two, the decimal expansion always ' +
+            'terminates. Its length is the number of factors of two in that denominator, which is ' +
+            'why 0.1 needs fifty-five places.',
           'Seeing all of them is what turns a vague unease about floating point into a specific, ' +
-          'checkable fact, and it is why the demo prints the whole expansion rather than a ' +
-          'readable prefix.',
+            'checkable fact. It is why the demo prints the whole expansion rather than a readable ' +
+            'prefix.'
+        ],
         example: 'The demo shows 0.1 with all fifty-five decimal places and the fraction ' +
           '3602879701896397 / 36028797018963968 beside it.'
       },
@@ -44,25 +47,30 @@
         },
         plain: 'Representable doubles are evenly spaced within a binade and twice as far apart in the next one up.',
         formal: 'the gap is 2.2204e-16 at 1.0, exactly 1 at 2⁵², and 2 at 2⁵³',
-        detail: 'This one sentence explains nearly everything people say about floating point. ' +
-          'The mantissa has a fixed number of bits, so within any range from one power of two to ' +
-          'the next there are exactly 2⁵² representable values evenly spread — and the range ' +
-          'itself doubles each time, so the spacing does too. Above 2⁵³ the gap exceeds one, half ' +
-          'the integers stop existing, and `x + 1 === x` becomes true. That is the boundary ' +
-          '`Number.MAX_SAFE_INTEGER` names.',
-        example: 'The demo’s ladder reports the gap as 1 at 2⁵², 2 at 2⁵³ and 262 144 at 2⁷⁰, ' +
-          'and the "x + 1 changes x" column flips to no at 2⁵³.'
+        detail: [
+          'This one sentence explains nearly everything people say about floating point.',
+          'The mantissa has a fixed number of bits, so within any range from one power of two to the ' +
+            'next there are exactly 2⁵² representable values evenly spread. The range itself doubles ' +
+            'each time, so the spacing does too.',
+          'Above 2⁵³ the gap exceeds one, half the integers stop existing, and `x + 1 === x` becomes ' +
+            'true. That is the boundary `Number.MAX_SAFE_INTEGER` names.'
+        ],
+        example: 'The demo’s ladder reports the gap as 1 at 2⁵², 2 at 2⁵³ and 262 144 at 2⁷⁰. The ' +
+          '"x + 1 changes x" column flips to no at 2⁵³.'
       },
       {
         term: 'The exponent is biased so the bit pattern sorts like the value',
         plain: 'Storing the exponent plus 1023 makes a positive double’s 64 bits increase monotonically with it.',
         formal: 'stored exponent 1 … 2046 means unbiased −1022 … 1023; 0 and 2047 are the two special cases',
-        detail: 'Biasing rather than storing a signed exponent is what lets `nextAfter` be an ' +
-          'integer increment of the raw pattern, lets two positive doubles be compared as ' +
-          'integers, and lets the ULP distance between two values be computed by subtracting ' +
-          'their patterns. It is also why the exponent field sits above the mantissa field: a ' +
-          'mantissa that carries into the exponent is exactly the step from the top of one binade ' +
-          'to the bottom of the next, so nothing special has to be written to handle it.',
+        detail: [
+          'Biasing rather than storing a signed exponent is what lets `nextAfter` be an integer ' +
+            'increment of the raw pattern.',
+          'It also lets two positive doubles be compared as integers, and lets the ULP distance ' +
+            'between two values be computed by subtracting their patterns.',
+          'It is why the exponent field sits above the mantissa field, too. A mantissa that carries ' +
+            'into the exponent is exactly the step from the top of one binade to the bottom of the ' +
+            'next. Nothing special has to be written to handle it.'
+        ],
         example: 'The demo shows 0.1 with a stored exponent of 1019, which is −4 after the bias, ' +
           'and its two neighbours are one integer step away in the raw pattern.'
       },
@@ -71,14 +79,18 @@
         plain: 'A stored exponent of zero is the signal that the leading bit is not there.',
         formal: 'normal: ±1.fraction × 2^(e−1023); subnormal: ±0.fraction × 2^−1022',
         readAs: 'A normal number is the fraction bits with a one glued on the front, scaled by two ' +
-          'to the stored exponent less the bias; a subnormal drops that leading one and holds the ' +
+          'to the stored exponent less the bias. A subnormal drops that leading one and holds the ' +
           'exponent fixed at the bottom of the range.',
-        detail: 'Not storing the leading one buys a free bit of precision for every normal number, ' +
-          'which is the whole reason for the convention — and it needs an escape hatch for values ' +
-          'too small to have one, which is what a stored exponent of zero is. The result is ' +
-          'gradual underflow: precision degrades bit by bit down to the smallest subnormal ' +
-          'instead of the format falling off a cliff into zero. That is what makes `a − b === 0` ' +
-          'imply `a === b`, which would otherwise be false near the bottom of the range.',
+        detail: [
+          'Not storing the leading one buys a free bit of precision for every normal number, which ' +
+            'is the whole reason for the convention.',
+          'It needs an escape hatch for values too small to have one, and that is what a stored ' +
+            'exponent of zero is.',
+          'The result is gradual underflow: precision degrades bit by bit down to the smallest ' +
+            'subnormal, instead of the format falling off a cliff into zero. That is what makes ' +
+            '`a − b === 0` imply `a === b`, which would otherwise be false near the bottom of the ' +
+            'range.'
+        ],
         example: 'The demo reports the smallest normal at 2.2250738585072014e-308 and the smallest ' +
           'subnormal at 5e-324, and stepping down from the first lands in the subnormals.'
       },
@@ -86,12 +98,15 @@
         term: 'Zero, infinity and NaN are values in the format, not error states',
         plain: 'A stored exponent of all ones is infinity when the fraction is zero and NaN when it is not.',
         formal: '2⁵³ − 2 distinct NaN patterns exist, and every comparison with a NaN except ≠ is false',
-        detail: 'NaN carries a 52-bit payload, which is what "quiet" and "signalling" distinguish ' +
-          'and what some runtimes use to smuggle type tags into doubles. The comparison rule is ' +
-          'the one that bites: `NaN !== NaN` is required by the standard, so a NaN in a sort key ' +
-          'makes the comparator violate transitivity and a NaN in a `Set` behaves differently from ' +
-          'a NaN in an `===` test. There are two zeros as well — `-0 === 0` is true and ' +
-          '`1 / -0` is −Infinity, so the sign survives division and not comparison.',
+        detail: [
+          'NaN carries a 52-bit payload, which is what "quiet" and "signalling" distinguish, and ' +
+            'what some runtimes use to smuggle type tags into doubles.',
+          'The comparison rule is the one that bites. `NaN !== NaN` is required by the standard, so ' +
+            'a NaN in a sort key makes the comparator violate transitivity. A NaN in a `Set` also ' +
+            'behaves differently from a NaN in an `===` test.',
+          'There are two zeros as well. `-0 === 0` is true and `1 / -0` is −Infinity, so the sign ' +
+            'survives division and not comparison.'
+        ],
         example: 'The demo classifies any typed value as normal, subnormal, zero, infinity or NaN ' +
           'from the stored exponent and fraction alone.'
       },
@@ -99,12 +114,14 @@
         term: 'nextAfter walks the representation, not the value',
         plain: 'For a positive double the integer ordering of the 64 bits is the ordering of the values, so the step is +1.',
         formal: 'the four cases that break a hand-written version are zero, the subnormal boundary, a binade crossing and the largest finite value',
-        detail: 'Because the exponent sits above the mantissa and is biased, incrementing the raw ' +
-          'pattern of a positive double gives exactly the next representable one — including ' +
-          'across a binade boundary, where the mantissa carries into the exponent, and including ' +
-          'across the subnormal boundary, where the implicit one appears. A version written from ' +
-          'the value instead has to special-case all four, and the usual mistake is stepping from ' +
-          'zero to the smallest normal rather than to the smallest subnormal.',
+        detail: [
+          'Because the exponent sits above the mantissa and is biased, incrementing the raw pattern ' +
+            'of a positive double gives exactly the next representable one.',
+          'That includes crossing a binade boundary, where the mantissa carries into the exponent, ' +
+            'and crossing the subnormal boundary, where the implicit one appears.',
+          'A version written from the value instead has to special-case all four. The usual mistake ' +
+            'is stepping from zero to the smallest normal rather than to the smallest subnormal.'
+        ],
         example: 'The demo’s audit checks all four boundaries plus three more and reports 7 of 7 ' +
           'holding.'
       },
@@ -112,26 +129,32 @@
         term: 'Every tolerance is a statement about a scale, and stops being true at another',
         plain: 'An absolute epsilon is strict near 1 and vacuous near 10⁹; a relative one breaks near zero.',
         formal: 'at a tolerance of 1e-9: 1e9 + 1 and 1e9 are "different" absolutely and "equal" relatively; 1e-12 and 2e-12 are the reverse',
-        detail: 'Neither comparison is wrong — each encodes a magnitude, and the encoding is ' +
-          'invisible at the call site, which is why the same helper gets copied between modules ' +
-          'operating at completely different scales. The measure that behaves identically ' +
-          'everywhere is the count of representable doubles between the two values, because that ' +
-          'is defined in terms of the format rather than in terms of a number somebody picked. ' +
-          'Almost nobody writes it, and it is four lines.',
-        example: 'The demo puts 1e9 + 1 and 1e9 at 8 388 608 doubles apart and 1e-12 and 2e-12 at ' +
-          '4 503 599 627 370 496, while an absolute tolerance calls the second pair equal.'
+        detail: [
+          'Neither comparison is wrong. Each encodes a magnitude, and the encoding is invisible at ' +
+            'the call site, which is why the same helper gets copied between modules operating at ' +
+            'completely different scales.',
+          'The measure that behaves identically everywhere is the count of representable doubles ' +
+            'between the two values. That is defined in terms of the format rather than in terms of ' +
+            'a number somebody picked.',
+          'Almost nobody writes it, and it is four lines.'
+        ],
+        example: 'The demo puts 1e9 + 1 and 1e9 at 8 388 608 doubles apart, and 1e-12 and 2e-12 at ' +
+          '4 503 599 627 370 496. An absolute tolerance calls the second pair equal.'
       },
       {
         term: 'binary32 is not a smaller binary64, it is a different format',
         plain: 'Narrowing costs precision measured in ULPs of the original, and the cost is enormous.',
         formal: '0.1 narrowed to binary32 and back is 107 374 182 representable doubles away',
-        detail: 'binary32 has 24 bits of significand against 53, so the round trip discards 29 ' +
-          'bits — which is why a `Float32Array` holding what was computed as a double is not a ' +
-          'memory optimisation but a precision decision, and why graphics code that "works in ' +
-          'floats" is making a claim about its error budget. The exponent range narrows too, so ' +
-          'values that are ordinary doubles become infinities or subnormals on the way through. ' +
-          'GPUs, neural-network inference and audio all trade precision for bandwidth here ' +
-          'deliberately.',
+        detail: [
+          'The binary32 format has 24 bits of significand against 53, so the round trip discards 29 ' +
+            'bits.',
+          'That is why a `Float32Array` holding what was computed as a double is not a memory ' +
+            'optimisation but a precision decision. It is also why graphics code that "works in ' +
+            'floats" is making a claim about its error budget.',
+          'The exponent range narrows too, so values that are ordinary doubles become infinities or ' +
+            'subnormals on the way through. GPUs, neural-network inference and audio all trade ' +
+            'precision for bandwidth here deliberately.'
+        ],
         example: 'The demo reports the narrowing cost for any typed value; for 0.1 the stored ' +
           'binary32 is 0.10000000149011612.'
       }

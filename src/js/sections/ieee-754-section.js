@@ -50,33 +50,38 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**A finite double is not an approximation of a real number — it is a rational number, ' +
+        'exactly.** Specifically it is an integer of at most 53 bits times a power of two.',
+      '`0.1` is not "0.1 with a bit of error". It is exactly 3602879701896397 / 2⁵⁵, which written ' +
+        'out in full is 0.1000000000000000055511151231257827021181583404541015625.',
+      'The demo prints every one of those digits, because seeing them is what turns a vague unease ' +
+        'into a specific fact.',
+      '**Representable doubles are not evenly spaced.** They are evenly spaced *within a binade* — ' +
+        'between one power of two and the next — and the spacing doubles at every power of two.',
+      'At 1.0 the gap is 2.22e-16; at 2⁵² it is exactly 1; at 2⁵³ it is 2. From there upwards ' +
+        '**half the integers do not exist** and `x + 1 === x` is true.',
+      'That single fact is the useful version of everything people say about floating point.',
+      '**Zero, infinity and NaN are values in the format, not error states.** A stored exponent of ' +
+        'all ones means infinity when the fraction is zero and NaN when it is not.',
+      'That leaves 2⁵³ − 2 distinct NaN bit patterns carrying payloads. And it is why ' +
+        '`NaN !== NaN`: the standard requires every comparison with a NaN except `!=` to be false.',
+      'There are two zeros as well, and `-0 === 0` while `1 / -0` is −Infinity.',
+      '**Subnormals are what happens instead of a cliff at the bottom.** Below the smallest normal ' +
+        'number the implicit leading one is dropped, so precision degrades gradually down to the ' +
+        'last bit rather than the format jumping straight to zero.',
+      'That is called gradual underflow, and it is what makes `a − b === 0` imply `a === b`, which ' +
+        'would otherwise be false.',
+      'The price is that some processors run subnormal arithmetic dramatically slower, which is why ' +
+        'numerical code sometimes turns them off.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**A finite double is not an approximation of a real number — it is a rational number, ' +
-          'exactly.** Specifically it is an integer of at most 53 bits times a power of two. ' +
-          '`0.1` is not "0.1 with a bit of error"; it is exactly 3602879701896397 / 2⁵⁵, which ' +
-          'written out in full is 0.1000000000000000055511151231257827021181583404541015625. The ' +
-          'demo prints every one of those digits, because seeing them is what turns a vague ' +
-          'unease into a specific fact.',
-        '**Representable doubles are not evenly spaced.** They are evenly spaced *within a ' +
-          'binade* — between one power of two and the next — and the spacing doubles at every ' +
-          'power of two. At 1.0 the gap is 2.22e-16; at 2⁵² it is exactly 1; at 2⁵³ it is 2, so ' +
-          'from there upwards **half the integers do not exist** and `x + 1 === x` is true. That ' +
-          'single fact is the useful version of everything people say about floating point.',
-        '**Zero, infinity and NaN are values in the format, not error states.** A stored exponent ' +
-          'of all ones means infinity when the fraction is zero and NaN when it is not — which ' +
-          'leaves 2⁵³ − 2 distinct NaN bit patterns carrying payloads, and is why `NaN !== NaN`: ' +
-          'the standard requires every comparison with a NaN except `!=` to be false. There are ' +
-          'two zeros as well, and `-0 === 0` while `1 / -0` is −Infinity.',
-        '**Subnormals are what happens instead of a cliff at the bottom.** Below the smallest ' +
-          'normal number the implicit leading one is dropped, so precision degrades gradually ' +
-          'down to the last bit rather than the format jumping straight to zero. That is called ' +
-          'gradual underflow and it is what makes `a − b === 0` imply `a === b`, which would ' +
-          'otherwise be false. The price is that some processors run subnormal arithmetic ' +
-          'dramatically slower, which is why numerical code sometimes turns them off.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — the dissector, the neighbours and the spacing ladder',
         markup: root.Ieee754Template.render()
@@ -84,13 +89,13 @@
       diagram: diagram(),
       insight: 'The everyday consequence is not that arithmetic is wrong, it is that **equality ' +
         'and tolerance both need a scale**. An absolute epsilon is a statement about magnitude, ' +
-        'so `Math.abs(a − b) < 1e-9` is a strict test near 1 and vacuous near 1e9; a relative ' +
+        'so `Math.abs(a − b) < 1e-9` is a strict test near 1 and vacuous near 1e9. A relative ' +
         'epsilon fixes that and then breaks near zero, where the denominator vanishes. The ' +
         'comparison that behaves the same everywhere is the number of representable doubles ' +
         'between the two values, and almost nobody writes it. The other consequence is a hard ' +
-        'boundary worth memorising: integers are exact up to 2⁵³, which is why JavaScript has ' +
-        '`Number.MAX_SAFE_INTEGER`, why database ids past that arrive in a browser subtly wrong, ' +
-        'and why JSON carrying a 64-bit id has to carry it as a string.'
+        'boundary worth memorising. Integers are exact up to 2⁵³, which is why JavaScript has ' +
+        '`Number.MAX_SAFE_INTEGER`. It is why database ids past that arrive in a browser subtly ' +
+        'wrong, and why JSON carrying a 64-bit id has to carry it as a string.'
     };
   }
 
