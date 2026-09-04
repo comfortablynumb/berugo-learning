@@ -167,24 +167,30 @@
         },
         plain: 'On a convex function every local minimum is the global one, so a method that stops has finished.',
         formal: 'f is convex if the segment between any two points on its graph lies on or above the graph',
-        detail: 'Off convexity the same algorithm stops somewhere and cannot tell you what it ' +
-          'found — a local minimum, a saddle, or a flat region. That is the entire difference ' +
-          'between linear programming, where "optimal" is a provable claim, and neural network ' +
-          'training, where it is a report of where the process stopped. The algorithms are similar; ' +
-          'the claims you can make about their output are not.',
+        detail: [
+          'Off convexity the same algorithm stops somewhere and cannot tell you what it found. It ' +
+            'might be a local minimum, a saddle, or a flat region.',
+          'That is the entire difference between linear programming, where "optimal" is a provable ' +
+            'claim, and neural network training, where it is a report of where the process stopped.',
+          'The algorithms are similar. The claims you can make about their output are not.'
+        ],
         example: 'Rosenbrock’s function in the demo is not convex, which is why every method’s path ' +
           'depends on where it started.'
       },
       {
         term: 'A fixed step size has a cliff on one side and a crawl on the other',
-        plain: 'Above the stability limit gradient descent explodes; below it, halving the step roughly doubles the iterations.',
+        plain: 'Above the stability limit gradient descent explodes. Below it, halving the step roughly doubles the iterations.',
         formal: 'on a quadratic, descent diverges for step > 2/L where L is the largest curvature',
-        readAs: 'The step must stay under two divided by the largest curvature of the surface, and ' +
-          'that curvature is exactly the thing you do not know when choosing the step.',
-        detail: 'The boundary is a threshold rather than a gradient, which is what makes the ' +
-          'hyperparameter unpleasant: the good values sit immediately next to the values that ' +
-          'explode, and the boundary moves with the surface. The demo measures 1 834 iterations at ' +
-          'half the limit and 1 016 at 0.9 of it — closer is faster, right up until it is not.',
+        readAs: 'The step must stay under two divided by the largest curvature of the surface. That ' +
+          'curvature is exactly the thing you do not know when choosing the step.',
+        detail: [
+          'The boundary is a threshold rather than a gradient, which is what makes the ' +
+            'hyperparameter unpleasant.',
+          'The good values sit immediately next to the values that explode, and the boundary moves ' +
+            'with the surface.',
+          'The demo measures 1 834 iterations at half the limit and 1 016 at 0.9 of it. Closer is ' +
+            'faster, right up until it is not.'
+        ],
         example: 'The demo has descent diverging at 1.1× the stability limit in 79 iterations and ' +
           'at 2.0× in 14.'
       },
@@ -193,13 +199,15 @@
         plain: 'Start generous, halve until the decrease is proportional to what the slope promised, accept.',
         formal: 'the Armijo condition asks f(x + td) ≤ f(x) + c·t·(g · d), which a sufficiently small t always satisfies for a descent direction',
         readAs: 'Accept the step only if the function fell by at least a fixed fraction of what the ' +
-          'slope in that direction predicted it would; for a downhill direction some small enough ' +
+          'slope in that direction predicted it would. For a downhill direction some small enough ' +
           'step always qualifies, so the loop terminates.',
-        detail: 'Asking for a proportional decrease rather than any decrease is the whole point — ' +
-          'any decrease would be satisfied by an arbitrarily tiny step, which converges to ' +
-          'nowhere. Because a descent direction always admits some qualifying step, backtracking ' +
-          'terminates, which is why this removes the hyperparameter rather than hiding it. It is ' +
-          'not free: it spends several extra evaluations per iteration probing.',
+        detail: [
+          'Asking for a proportional decrease rather than any decrease is the whole point. Any ' +
+            'decrease would be satisfied by an arbitrarily tiny step, which converges to nowhere.',
+          'Because a descent direction always admits some qualifying step, backtracking terminates. ' +
+            'That is why this removes the hyperparameter rather than hiding it.',
+          'It is not free. It spends several extra evaluations per iteration probing.'
+        ],
         example: 'On Rosenbrock the demo’s line search reaches 9.105e-7 against the best fixed ' +
           'step’s 3.761e-3, for 64 587 evaluations against 10 000.'
       },
@@ -208,13 +216,15 @@
         plain: 'Accumulate a velocity so the steps along the valley floor reinforce and the steps across it cancel.',
         formal: 'v := βv − α∇f, then x := x + v; the objective is not monotone and that is intended',
         readAs: 'Keep a running velocity: shrink it a little, subtract a multiple of the gradient, '
-          + 'then move by it — and accept that the objective sometimes goes up on the way.',
-        detail: 'The zig-zag of plain descent on an elongated valley is oscillation across the ' +
-          'narrow direction, and successive gradients there point in opposite directions. ' +
-          'Averaging them through a velocity cancels the oscillation while the consistent ' +
-          'component along the valley accumulates. The cost is that the objective rises on some ' +
-          'iterations, so a monotone-decrease assertion would reject a correctly working ' +
-          'optimiser.',
+          + 'then move by it. Accept that the objective sometimes goes up on the way.',
+        detail: [
+          'The zig-zag of plain descent on an elongated valley is oscillation across the narrow ' +
+            'direction, and successive gradients there point in opposite directions.',
+          'Averaging them through a velocity cancels the oscillation, while the consistent component ' +
+            'along the valley accumulates.',
+          'The cost is that the objective rises on some iterations. A monotone-decrease assertion ' +
+            'would reject a correctly working optimiser.'
+        ],
         example: 'The demo measures momentum converging in 4 129 iterations with 17 increases along ' +
           'the way.'
       },
@@ -223,13 +233,15 @@
         plain: 'Rescaling the problem rescales its steps identically, so the iteration count does not notice.',
         formal: 'the Newton step −H⁻¹g transforms correctly under any invertible change of variables, unlike −g',
         readAs: 'Multiplying the inverse of the second-derivative matrix by the gradient produces a ' +
-          'step that transforms the same way the variables do; the plain gradient does not.',
-        detail: 'The gradient is not a direction in the space of variables — it is a direction in ' +
-          'the dual space, and treating it as one is exactly what makes descent sensitive to ' +
-          'scaling. Multiplying by the inverse Hessian converts it properly, which is why Newton ' +
-          'takes the same number of steps at any conditioning while descent’s count grows with it. ' +
-          'This is also the real reason preconditioning helps first-order methods: it is an ' +
-          'approximate version of the same correction.',
+          'step that transforms the same way the variables do. The plain gradient does not.',
+        detail: [
+          'The gradient is not a direction in the space of variables. It is a direction in the dual ' +
+            'space, and treating it as one is exactly what makes descent sensitive to scaling.',
+          'Multiplying by the inverse Hessian converts it properly, which is why Newton takes the ' +
+            'same number of steps at any conditioning while descent’s count grows with it.',
+          'This is also the real reason preconditioning helps first-order methods. It is an ' +
+            'approximate version of the same correction.'
+        ],
         example: 'Across condition numbers from 1 to 1 000 the demo measures gradient descent going ' +
           'from 2 iterations to 9 244 while Newton takes 2 at every point.'
       },
@@ -238,12 +250,15 @@
         plain: 'Each step’s change in gradient tells you something about the second derivative, for free.',
         formal: 'the secant condition B(x_{k+1} − x_k) = g_{k+1} − g_k constrains an approximate Hessian, updated by a rank-two correction',
         readAs: 'The approximate curvature matrix must map the step you took to the change in ' +
-          'gradient it produced; that condition plus a minimal-change rule determines the update.',
-        detail: 'It is the same idea as the secant method in 18.2, lifted to many dimensions: use ' +
-          'the difference between consecutive gradients instead of computing a derivative. The ' +
-          'result gets most of Newton’s speed without ever forming or factoring a Hessian, which ' +
-          'is why it is the default in every general-purpose optimiser. L-BFGS goes further and ' +
-          'stores only the last few updates, making the memory linear rather than quadratic.',
+          'gradient it produced. That condition plus a minimal-change rule determines the update.',
+        detail: [
+          'It is the same idea as the secant method in 18.2, lifted to many dimensions. Use the ' +
+            'difference between consecutive gradients instead of computing a derivative.',
+          'The result gets most of Newton’s speed without ever forming or factoring a Hessian, which ' +
+            'is why it is the default in every general-purpose optimiser.',
+          'L-BFGS goes further and stores only the last few updates, making the memory linear rather ' +
+            'than quadratic.'
+        ],
         example: 'The demo has BFGS reaching 4.251e-21 in 36 iterations against Newton’s 22, on a ' +
           'surface where descent with a line search has not converged after 5 000.'
       },
@@ -251,28 +266,32 @@
         term: 'Coordinate descent is fast when the problem is aligned and slow when it is rotated',
         plain: 'Minimising one variable at a time works beautifully if the variables are independent and badly if they are not.',
         formal: 'on a separable quadratic one pass suffices; a rotation of the same surface destroys that with identical eigenvalues',
-        detail: 'This is the cleanest available demonstration of what affine invariance is not. The ' +
-          'rotated surface has the same eigenvalues, the same condition number and the same ' +
-          'difficulty by every intrinsic measure — only its alignment with the coordinate axes ' +
-          'changed, and the iteration count moves by a factor of thirty. It matters because ' +
-          'coordinate descent is what LASSO and many sparse solvers use, and their coordinates are ' +
-          'features chosen by whoever built the dataset.',
+        detail: [
+          'This is the cleanest available demonstration of what affine invariance is not.',
+          'The rotated surface has the same eigenvalues, the same condition number and the same ' +
+            'difficulty by every intrinsic measure. Only its alignment with the coordinate axes ' +
+            'changed, and the iteration count moves by a factor of thirty.',
+          'It matters because coordinate descent is what LASSO and many sparse solvers use, and ' +
+            'their coordinates are features chosen by whoever built the dataset.'
+        ],
         example: 'The demo measures 2 iterations on an axis-aligned valley and 68 on the same ' +
           'valley rotated by 45°.'
       },
       {
         term: 'Constraints turn the gradient condition into a condition on a cone',
-        plain: 'At a constrained optimum the gradient does not vanish; it is balanced by the constraints pushing back.',
+        plain: 'At a constrained optimum the gradient does not vanish. It is balanced by the constraints pushing back.',
         formal: 'the KKT conditions require ∇f + Σλᵢ∇gᵢ = 0 with λᵢ ≥ 0 and λᵢgᵢ = 0 for each inequality',
         readAs: 'At the optimum the objective’s gradient is cancelled by a non-negative combination ' +
-          'of the active constraints’ gradients, and a constraint that is not tight contributes ' +
+          'of the active constraints’ gradients. A constraint that is not tight contributes ' +
           'nothing.',
-        detail: 'The complementarity condition — either the constraint is tight or its multiplier ' +
-          'is zero — is what makes this checkable rather than merely descriptive, and the ' +
-          'multipliers have a direct meaning: each one is the rate at which the optimum would ' +
-          'improve if that constraint were relaxed, which is the shadow price. That interpretation ' +
-          'is the whole content of linear programming duality, and it is why solvers report ' +
-          'multipliers alongside the solution.',
+        detail: [
+          'The complementarity condition is what makes this checkable rather than merely ' +
+            'descriptive. Either the constraint is tight, or its multiplier is zero.',
+          'The multipliers have a direct meaning. Each one is the rate at which the optimum would ' +
+            'improve if that constraint were relaxed, which is the shadow price.',
+          'That interpretation is the whole content of linear programming duality, and it is why ' +
+            'solvers report multipliers alongside the solution.'
+        ],
         example: 'The simplex method walks the vertices of the feasible polytope, and at each one ' +
           'the sign of the multipliers says whether an improving edge exists.'
       }

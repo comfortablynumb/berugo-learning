@@ -55,37 +55,43 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**Convexity is the dividing line, and it is what "solved" means here.** On a convex function ' +
+        'every local minimum is the global one, and a descent method that stops has finished.',
+      'Off it, the same method stops somewhere and cannot tell you what it found.',
+      'That is why linear and convex programs have guarantees and neural network training has ' +
+        'heuristics. The algorithms are similar, and the claims you can make about their output ' +
+        'are not.',
+      '**A fixed step size is a hyperparameter with a cliff on one side and a crawl on the other.** ' +
+        'Above the stability limit — twice the reciprocal of the largest curvature — gradient ' +
+        'descent diverges, and not gracefully.',
+      'It explodes in a handful of iterations. Below the limit, halving the step roughly doubles ' +
+        'the iterations.',
+      'The limit depends on the surface, which is exactly the thing you do not know when you are ' +
+        'choosing the number.',
+      '**A line search removes the hyperparameter by choosing the step from the function.** Start ' +
+        'generous, halve until the decrease is proportional to what the slope promised — the ' +
+        'Armijo condition — and accept.',
+      'On Rosenbrock the fixed step that diverges and the fixed step that merely crawls are one ' +
+        'factor of ten apart. The line search needs neither: it never diverges, and in the same ' +
+        'iteration budget it gets four orders of magnitude further down.',
+      'It is not free. It spends several extra evaluations per iteration probing, but it spends ' +
+        'them on information rather than on a guess.',
+      '**Curvature is what separates the fast methods from the slow ones.** Gradient descent knows ' +
+        'only the slope, so on an elongated valley it zig-zags across the narrow direction, and ' +
+        'its iteration count grows with the condition number.',
+      'Newton uses the second derivative and takes the same number of steps at any conditioning, ' +
+        'because rescaling the problem does not change its steps.',
+      'BFGS gets most of that by accumulating an approximation to the curvature out of the ' +
+        'gradients it was already computing.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**Convexity is the dividing line, and it is what "solved" means here.** On a convex ' +
-          'function every local minimum is the global one and a descent method that stops has ' +
-          'finished; off it, the same method stops somewhere and cannot tell you what. That is ' +
-          'why linear and convex programs have guarantees and neural network training has ' +
-          'heuristics — the algorithms are similar, and the claims you can make about their ' +
-          'output are not.',
-        '**A fixed step size is a hyperparameter with a cliff on one side and a crawl on the ' +
-          'other.** Above the stability limit — twice the reciprocal of the largest curvature — ' +
-          'gradient descent diverges, and not gracefully: it explodes in a handful of iterations. ' +
-          'Below it, halving the step roughly doubles the iterations. The limit depends on the ' +
-          'surface, which is exactly the thing you do not know when you are choosing the number.',
-        '**A line search removes the hyperparameter by choosing the step from the function.** ' +
-          'Start generous, halve until the decrease is proportional to what the slope promised — ' +
-          'the Armijo condition — and accept. On Rosenbrock the fixed step that diverges and the ' +
-          'fixed step that merely crawls are one factor of ten apart, and the line search needs ' +
-          'neither of them: it never diverges, and in the same iteration budget it gets four ' +
-          'orders of magnitude further down. It is not free — it spends several extra ' +
-          'evaluations per iteration probing — but it spends them on information rather than on ' +
-          'a guess.',
-        '**Curvature is what separates the fast methods from the slow ones.** Gradient descent ' +
-          'knows only the slope, so on an elongated valley it zig-zags across the narrow ' +
-          'direction, and its iteration count grows with the condition number. Newton uses the ' +
-          'second derivative and takes the same number of steps at any conditioning, because ' +
-          'rescaling the problem does not change its steps. BFGS gets most of that by ' +
-          'accumulating an approximation to the curvature out of the gradients it was already ' +
-          'computing.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — five optimisers, a stability cliff and the cost of conditioning',
         markup: root.OptimisationTemplate.render()
@@ -93,13 +99,13 @@
       diagram: diagram(),
       insight: 'Most "the optimiser did not converge" reports are a step-size problem on an ' +
         'ill-conditioned surface, and a line search removes the hyperparameter that caused it. ' +
-        'Before touching the learning rate again, look at the conditioning: the demo shows ' +
+        'Before touching the learning rate again, look at the conditioning. The demo shows ' +
         'gradient descent going from 2 iterations to over nine thousand as κ goes from 1 to 1000, ' +
-        'while Newton takes 2 throughout. That is the practical hierarchy — **if you can afford ' +
-        'the Hessian, use it; if you cannot, use BFGS, which learns the curvature from gradients ' +
-        'you are already computing; and if the problem is too large even for that, use L-BFGS or ' +
+        'while Newton takes 2 throughout. That is the practical hierarchy. **If you can afford the ' +
+        'Hessian, use it. If you cannot, use BFGS, which learns the curvature from gradients you ' +
+        'are already computing. And if the problem is too large even for that, use L-BFGS or ' +
         'preconditioning, because both are attacking the conditioning rather than the step.** ' +
-        'Deep learning is the exception that proves it: the problems are too large for curvature ' +
+        'Deep learning is the exception that proves it. The problems are too large for curvature ' +
         'and too noisy for a line search, which is why that field alone spends real effort tuning ' +
         'learning-rate schedules by hand.'
     };
