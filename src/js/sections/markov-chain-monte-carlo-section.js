@@ -53,36 +53,43 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**The method exists because the normalising constant cancels.** A posterior is a density ' +
+        'you can evaluate up to an unknown factor. That factor is an integral over the whole ' +
+        'parameter space that nobody can do.',
+      'Metropolis–Hastings only ever uses the RATIO π(y)/π(x), in which the factor disappears. So ' +
+        'a distribution you cannot normalise is a distribution you can sample from.',
+      '**A rejection is not a wasted step. It is a repeated sample.** The chain records its ' +
+        'current position again, and that repetition is what gives high-density regions their ' +
+        'weight.',
+      'Code that skips rejected steps rather than re-recording the current one samples from the ' +
+        'wrong distribution, and nothing in the output looks unusual.',
+      '**Consecutive draws are correlated, so N draws are not N samples.** The integrated ' +
+        'autocorrelation time τ says how many steps the chain takes to forget where it was, and ' +
+        'the effective sample size is N/τ.',
+      'The demo shows a chain of 20 000 draws worth 75 independent ones.',
+      'Every standard error computed as σ/√N on that chain is too narrow by a factor of √τ, which ' +
+        'here is about sixteen.',
+      '**Both failure modes are step-size problems and they sit on opposite sides.** Too small a ' +
+        'proposal is accepted almost always and moves almost nowhere. Too large is rejected ' +
+        'almost always and the chain sits still.',
+      'The optimum for a random walk is around 0.234 acceptance in high dimensions and 0.4–0.5 in ' +
+        'one or two.',
+      'So a *low* acceptance rate is the target, and the 93% reading that looks healthiest is the ' +
+        'diagnosis of the worst chain in the table.',
+      '**Burn-in and mixing are different problems and only one of them is fixable by waiting.** ' +
+        'Burn-in is the chain forgetting its starting point, and discarding a prefix handles it.',
+      'A chain that cannot cross between modes will never mix however long you run it.',
+      'The only diagnostic that sees that is several chains started far apart: Gelman and Rubin’s ' +
+        'R̂, which compares the variance between chains against the variance within them.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**The method exists because the normalising constant cancels.** A posterior is a ' +
-          'density you can evaluate up to an unknown factor, and that factor is an integral over ' +
-          'the whole parameter space that nobody can do. Metropolis–Hastings only ever uses the ' +
-          'RATIO π(y)/π(x), in which the factor disappears — so a distribution you cannot ' +
-          'normalise is a distribution you can sample from.',
-        '**A rejection is not a wasted step; it is a repeated sample.** The chain records its ' +
-          'current position again, and that repetition is what gives high-density regions their ' +
-          'weight. Code that skips rejected steps rather than re-recording the current one ' +
-          'samples from the wrong distribution and nothing in the output looks unusual.',
-        '**Consecutive draws are correlated, so N draws are not N samples.** The integrated ' +
-          'autocorrelation time τ says how many steps the chain takes to forget where it was, ' +
-          'and the effective sample size is N/τ. The demo shows a chain of 20 000 draws worth 75 ' +
-          'independent ones. Every standard error computed as σ/√N on that chain is too narrow ' +
-          'by a factor of √τ, which here is about sixteen.',
-        '**Both failure modes are step-size problems and they sit on opposite sides.** Too small ' +
-          'a proposal is accepted almost always and moves almost nowhere; too large is rejected ' +
-          'almost always and the chain sits still. The optimum for a random walk is around 0.234 ' +
-          'acceptance in high dimensions and 0.4–0.5 in one or two — so a *low* acceptance rate ' +
-          'is the target, and the 93% reading that looks healthiest is the diagnosis of the worst ' +
-          'chain in the table.',
-        '**Burn-in and mixing are different problems and only one of them is fixable by waiting.** ' +
-          'Burn-in is the chain forgetting its starting point; discarding a prefix handles it. ' +
-          'A chain that cannot cross between modes will never mix however long you run it, and ' +
-          'the only diagnostic that sees it is several chains started far apart — Gelman and ' +
-          'Rubin’s R̂, which compares the variance between chains against the variance within them.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — a trace, an autocorrelation and four chains that disagree',
         markup: root.MarkovChainMonteCarloTemplate.render()
@@ -93,9 +100,9 @@
         'and the acceptance rate — the one number most people look at — points the wrong way. The ' +
         'practical rule is three lines long. **Run several chains from dispersed starts, report ' +
         'effective sample size rather than sample count, and never quote a posterior mean whose ' +
-        'R̂ is above 1.01.** The demo’s width-0.1 column is what happens without them: 93% ' +
-        'acceptance, a beautiful-looking trace at the wrong scale, and an answer two hundred and ' +
-        'fifty of its own standard errors from the truth.'
+        'R̂ is above 1.01.** The demo’s width-0.1 column is what happens without them. It shows ' +
+        '93% acceptance, a beautiful-looking trace at the wrong scale, and an answer two hundred ' +
+        'and fifty of its own standard errors from the truth.'
     };
   }
 

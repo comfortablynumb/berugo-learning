@@ -20,14 +20,16 @@
         },
         plain: 'You can sample from a density you can only evaluate up to an unknown factor.',
         formal: 'the acceptance ratio π(y)/π(x) is unchanged by rescaling π',
-        readAs: 'The ratio of the target density at the proposed point to its value at the ' +
-          'current point does not change if the whole density is multiplied by a constant.',
-        detail: 'A Bayesian posterior is a likelihood times a prior divided by an integral over ' +
-          'the entire parameter space, and that integral is exactly the thing nobody can ' +
-          'compute. Metropolis–Hastings never evaluates the density on its own — only ratios of ' +
-          'it — so the unknown factor divides out and the chain converges to the right ' +
-          'distribution without it ever being known. Every other property of the method is ' +
-          'engineering; this one is why it is used at all.',
+        readAs: 'Compare the target density at the proposed point with its value at the current ' +
+          'point. That ratio does not change if the whole density is multiplied by a constant.',
+        detail: [
+          'A Bayesian posterior is a likelihood times a prior divided by an integral over the entire ' +
+            'parameter space. That integral is exactly the thing nobody can compute.',
+          'Metropolis–Hastings never evaluates the density on its own, only ratios of it. So the ' +
+            'unknown factor divides out, and the chain converges to the right distribution without ' +
+            'it ever being known.',
+          'Every other property of the method is engineering. This one is why it is used at all.'
+        ],
         example: 'The demo’s mixture density is written unnormalised in the module and the chain ' +
           'still reproduces its mean to 0.0663 at the best proposal width.'
       },
@@ -36,14 +38,17 @@
         plain: 'If the flow from x to y equals the flow from y to x for every pair, the distribution stops changing.',
         formal: 'π(x)·P(x → y) = π(y)·P(y → x) for all x, y implies π is stationary',
         readAs: 'The target density at x times the chance of moving from x to y equals the ' +
-          'density at y times the chance of moving back, for every pair of points.',
-        detail: 'The Metropolis acceptance rule min(1, π(y)/π(x)) is reverse-engineered from ' +
-          'this equation rather than guessed: substituting it in makes both sides equal by ' +
-          'construction. Detailed balance is sufficient but not necessary — some samplers are ' +
-          'stationary without it — and it says nothing about how long convergence takes, which ' +
-          'is the entire practical difficulty. A chain can satisfy detailed balance perfectly ' +
-          'and still need more steps than the age of the universe to mix.',
-        example: 'A rejection re-records the current point rather than skipping the step; that ' +
+          'density at y times the chance of moving back. That holds for every pair of points.',
+        detail: [
+          'The Metropolis acceptance rule min(1, π(y)/π(x)) is reverse-engineered from this equation ' +
+            'rather than guessed. Substituting it in makes both sides equal by construction.',
+          'Detailed balance is sufficient but not necessary, and some samplers are stationary ' +
+            'without it.',
+          'It also says nothing about how long convergence takes, which is the entire practical ' +
+            'difficulty. A chain can satisfy detailed balance perfectly and still need more steps ' +
+            'than the age of the universe to mix.'
+        ],
+        example: 'A rejection re-records the current point rather than skipping the step. That ' +
           'is what makes P(x → x) large enough for the balance equation to hold.'
       },
       {
@@ -52,12 +57,15 @@
         formal: 'the stationary distribution requires P(x → x) = 1 − Σ_{y ≠ x} P(x → y)',
         readAs: 'The chance of staying at x is one minus the total chance of moving anywhere ' +
           'else, and those repeated stays are part of the sample.',
-        detail: 'Code that appends to the chain only when a move is accepted is sampling from a ' +
-          'different distribution — one that under-weights the high-density regions where ' +
-          'proposals are most often rejected. Nothing about the output looks wrong: the trace is ' +
-          'smooth, the acceptance rate is reported correctly, and the posterior mean is quietly ' +
-          'biased. This is one of the two or three most common MCMC implementation bugs and it ' +
-          'has no symptom other than the wrong answer.',
+        detail: [
+          'Code that appends to the chain only when a move is accepted is sampling from a different ' +
+            'distribution. It under-weights the high-density regions where proposals are most often ' +
+            'rejected.',
+          'Nothing about the output looks wrong. The trace is smooth, the acceptance rate is ' +
+            'reported correctly, and the posterior mean is quietly biased.',
+          'This is one of the two or three most common MCMC implementation bugs, and it has no ' +
+            'symptom other than the wrong answer.'
+        ],
         example: 'At a proposal width of 12 the demo accepts 1.2% of moves, so roughly 99 of ' +
           'every 100 recorded draws are repeats of the previous position.'
       },
@@ -67,58 +75,69 @@
         formal: 'ESS = N / τ where τ = 1 + 2Σₖ ρₖ, the integrated autocorrelation time',
         readAs: 'The effective sample size is the chain length divided by tau, where tau is one ' +
           'plus twice the sum of the autocorrelations at every lag.',
-        detail: 'Every standard error computed as σ/√N on a correlated chain is too narrow by a ' +
-          'factor of √τ, and τ can be in the hundreds. That is the mechanism behind MCMC’s ' +
-          'characteristic failure: a small, confident interval around a wrong number. Reporting ' +
-          'the effective sample size instead of the draw count makes the problem visible and ' +
-          'also makes the run comparable — twenty thousand draws worth seventy-five independent ' +
-          'ones is not a longer run than two thousand draws worth five hundred.',
+        detail: [
+          'Every standard error computed as σ/√N on a correlated chain is too narrow by a factor of ' +
+            '√τ, and τ can be in the hundreds.',
+          'That is the mechanism behind MCMC’s characteristic failure: a small, confident interval ' +
+            'around a wrong number.',
+          'Reporting the effective sample size instead of the draw count makes the problem visible, ' +
+            'and it also makes the run comparable. Twenty thousand draws worth seventy-five ' +
+            'independent ones is not a longer run than two thousand draws worth five hundred.'
+        ],
         example: 'The demo measures a correlation time of 267.2 at width 0.1, giving 74.9 ' +
           'effective samples from 20 000 draws and an honest error bar 16.3 times the naive one.'
       },
       {
         term: 'Both failure modes are step-size problems, and they sit on opposite sides',
-        plain: 'Too small a proposal is always accepted and moves nowhere; too large is always rejected and sits still.',
+        plain: 'Too small a proposal is always accepted and moves nowhere. Too large is always rejected and sits still.',
         formal: 'the optimal acceptance rate is about 0.234 in high dimensions and 0.4–0.5 in one or two',
-        detail: 'The uncomfortable consequence is that a high acceptance rate is a symptom rather ' +
-          'than a sign of health, and it is the number most dashboards show. At 93% acceptance ' +
-          'the chain is taking steps so small that the target barely differs between them, so ' +
-          'almost everything is accepted and almost nothing is explored. The optimum is a ' +
-          'genuine interior maximum, which means tuning is a search rather than a direction, and ' +
-          'adaptive samplers exist precisely to do that search automatically.',
+        detail: [
+          'The uncomfortable consequence is that a high acceptance rate is a symptom rather than a ' +
+            'sign of health, and it is the number most dashboards show.',
+          'At 93% acceptance the chain is taking steps so small that the target barely differs ' +
+            'between them. Almost everything is accepted, and almost nothing is explored.',
+          'The optimum is a genuine interior maximum, which means tuning is a search rather than a ' +
+            'direction. Adaptive samplers exist precisely to do that search automatically.'
+        ],
         example: 'The demo’s width sweep goes 92.7% → 79.1% → 43.5% → 17.1% → 6.3% → 1.2% ' +
-          'acceptance with effective sample sizes of 74.9 → 23.2 → 174.8 → 559.7 → 456.1 → ' +
-          '151.4 — the best mixing is at 17.1% acceptance.'
+          'acceptance. The effective sample sizes over that sweep are 74.9 → 23.2 → 174.8 → ' +
+          '559.7 → 456.1 → 151.4, so the best mixing is at 17.1% acceptance.'
       },
       {
         term: 'Burn-in and mixing are different problems and only one is fixed by waiting',
-        plain: 'Forgetting the starting point takes a while; crossing between separated modes may never happen.',
+        plain: 'Forgetting the starting point takes a while. Crossing between separated modes may never happen.',
         formal: 'burn-in is transient; mixing time is a property of the chain’s spectral gap',
-        detail: 'Discarding a prefix handles burn-in and does nothing for mixing. A chain whose ' +
-          'proposal cannot cross a low-density valley will not cross it in a hundred times the ' +
-          'steps, because the barrier is exponential in the valley depth rather than linear in ' +
-          'the run length. The fix is a better proposal — larger steps, a tempered chain, or a ' +
-          'mixture proposal that occasionally jumps — not a longer run, and telling the two ' +
-          'apart is what the diagnostics are for.',
-        example: 'At width 0.1 the demo’s chain spends 1.3% of its time on the second mode ' +
-          'against a true weight of 35.0%, and running it longer moves that number by ' +
-          'essentially nothing.'
+        detail: [
+          'Discarding a prefix handles burn-in and does nothing for mixing.',
+          'A chain whose proposal cannot cross a low-density valley will not cross it in a hundred ' +
+            'times the steps. The barrier is exponential in the valley depth rather than linear in ' +
+            'the run length.',
+          'The fix is a better proposal: larger steps, a tempered chain, or a mixture proposal that ' +
+            'occasionally jumps. It is not a longer run, and telling the two apart is what the ' +
+            'diagnostics are for.'
+        ],
+        example: 'At width 0.1 the demo’s chain spends 1.3% of its time on the second mode, ' +
+          'against a true weight of 35.0%. Running it longer moves that number by essentially ' +
+          'nothing.'
       },
       {
         term: 'Gelman–Rubin R̂ is the only diagnostic that can see a stuck chain',
         plain: 'Run several chains from far-apart starts and compare the variance between them against the variance within them.',
         formal: 'R̂ = √(V⁺/W), where V⁺ mixes the within-chain and between-chain variances; the threshold is 1.01',
         readAs: 'R-hat is the square root of the pooled variance estimate divided by the average ' +
-          'within-chain variance, and values above about one point zero one mean the chains ' +
-          'have not agreed yet.',
-        detail: 'A single chain reports a mean and has nothing to disagree with, which is why ' +
-          'every serious sampler runs four. If the chains started in different places and still ' +
-          'reach different answers, at least one of them is wrong, and R̂ turns that into a ' +
-          'number. Its limitation is the honest one: it cannot detect a mode that none of the ' +
-          'chains ever found, so dispersed starting points matter more than chain length and ' +
-          'both matter more than the acceptance rate.',
+          'within-chain variance. Values above about one point zero one mean the chains have not ' +
+          'agreed yet.',
+        detail: [
+          'A single chain reports a mean and has nothing to disagree with, which is why every ' +
+            'serious sampler runs four.',
+          'If the chains started in different places and still reach different answers, at least one ' +
+            'of them is wrong. R̂ turns that into a number.',
+          'Its limitation is the honest one: it cannot detect a mode that none of the chains ever ' +
+            'found. So dispersed starting points matter more than chain length, and both matter ' +
+            'more than the acceptance rate.'
+        ],
         example: 'The demo measures R̂ = 1.5081 at width 0.1, where the four chains report means ' +
-          'of −2.27, −1.61, −1.48 and +1.24, and R̂ = 1.001 at the well-mixed width.'
+          'of −2.27, −1.61, −1.48 and +1.24. At the well-mixed width R̂ is 1.001.'
       },
       {
         term: 'Gibbs sampling accepts everything and still may not mix',
@@ -126,16 +145,19 @@
         formal: 'sample xᵢ ~ π(xᵢ | x₋ᵢ); the acceptance probability is 1 by construction',
         readAs: 'Draw each coordinate from the target distribution conditioned on all the other ' +
           'coordinates, which is always accepted because the proposal already is the target.',
-        detail: 'A 100% acceptance rate is the clearest possible demonstration that acceptance ' +
-          'is not the quantity to watch. On a strongly correlated target the conditionals are ' +
-          'nearly deterministic, so each coordinate move is tiny and the chain crawls along the ' +
-          'ridge — high acceptance, terrible mixing, exactly the pathology of a too-small ' +
-          'random-walk proposal arriving by a different route. Gibbs also needs the conditionals ' +
-          'in closed form, which is why it is fast where it applies and unavailable where it ' +
-          'does not.',
+        detail: [
+          'A 100% acceptance rate is the clearest possible demonstration that acceptance is not the ' +
+            'quantity to watch.',
+          'On a strongly correlated target the conditionals are nearly deterministic, so each ' +
+            'coordinate move is tiny and the chain crawls along the ridge. High acceptance, ' +
+            'terrible mixing: exactly the pathology of a too-small random-walk proposal arriving by ' +
+            'a different route.',
+          'Gibbs also needs the conditionals in closed form, which is why it is fast where it ' +
+            'applies and unavailable where it does not.'
+        ],
         example: 'On the correlated normal at ρ = 0.9 the Gibbs sampler accepts every move and ' +
-          'still has a measurable correlation time, because each conditional draw has standard ' +
-          'deviation √(1 − ρ²) = 0.436 rather than 1.'
+          'still has a measurable correlation time. Each conditional draw has standard deviation ' +
+          '√(1 − ρ²) = 0.436 rather than 1.'
       }
     ],
 
