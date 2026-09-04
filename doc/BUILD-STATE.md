@@ -5207,13 +5207,19 @@ Done this session, in curriculum order: `bridges-and-cuts`,
 `minimum-cut`, `push-relabel`, `min-cost-flow`, `bipartite-matching`,
 `general-matching` - all of M13.4-M13.6 and the whole of M14.
 
-**Resume at `fourier-transforms`** - it is section 101 in
-`Curriculum.teachingSections()` order, and M15-M18 are complete behind it. Run
+**Resume at `competitive-analysis`** - it is section 121 in
+`Curriculum.teachingSections()` order, and M15-M20 are complete behind it. Run
 `node tools/readability.js` and work down the curriculum order; anything not
 printing `ok` is outstanding.
 
-At 100 of 364: mean sentence **19.7** words, over 30 words **12.9%**,
-single-block explanations **2 126**.
+At 120 of 364: mean sentence **19.3** words, over 30 words **11.5%**,
+single-block explanations **1 966**.
+
+**An orientation split into paragraphs often crosses the 50-line function
+limit.** From `decision-problems` onward the fix has been two named halves -
+`orientationDefinitions()` and `orientationClasses()`, `orientationRoot()` and
+`orientationIslands()`, and so on - joined by an `orientation()` that returns
+`first().concat(second())`. Run `npm run lint:size` after every section.
 
 Two prose claims were wrong against their own demos, and the pass caught them
 because repacking a paragraph means reading every figure in it:
