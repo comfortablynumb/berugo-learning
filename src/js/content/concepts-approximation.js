@@ -169,15 +169,19 @@
         plain: 'You name the error you can tolerate and the algorithm charges you for exactly that much accuracy.',
         formal: 'PTAS: polynomial in n for each fixed ε. FPTAS: polynomial in n and in 1/ε.',
         readAs: 'A polynomial-time approximation scheme is polynomial in n once epsilon is ' +
-          'fixed; a fully polynomial one is also polynomial in one over epsilon.',
-        detail: 'The difference is the whole section. A PTAS may run in n^(1/ε), so halving the ' +
-          'error squares the runtime and the dial is nearly unusable — going from ε = 0.1 to ' +
-          'ε = 0.05 can take a tractable computation to an impossible one. An FPTAS costs ' +
-          'linearly in 1/ε, so the dial behaves the way a dial should. When someone says a ' +
-          'problem "has an approximation scheme", which of the two matters more than the ratio.',
-        example: 'The demo’s PTAS enumerates 21 subsets at k = 1 for 99.25% of the optimum, ' +
-          '1 351 at k = 3 and 6 196 at k = 4, growing as nᵏ, while the FPTAS at the matching ' +
-          'accuracy uses 10 100 to 25 500 table cells and grows as n²/ε.'
+          'fixed. A fully polynomial one is also polynomial in one over epsilon.',
+        detail: [
+          'The difference is the whole section.',
+          'A PTAS may run in n^(1/ε), so halving the error squares the runtime and the dial is ' +
+            'nearly unusable. Going from ε = 0.1 to ε = 0.05 can take a tractable computation to an ' +
+            'impossible one.',
+          'An FPTAS costs linearly in 1/ε, so the dial behaves the way a dial should. When someone ' +
+            'says a problem "has an approximation scheme", which of the two matters more than the ' +
+            'ratio.'
+        ],
+        example: 'The demo’s PTAS enumerates 21 subsets at k = 1, for 99.25% of the optimum. At ' +
+          'k = 3 it is 1 351 subsets and at k = 4 it is 6 196, growing as nᵏ. The FPTAS at the ' +
+          'matching accuracy uses 10 100 to 25 500 table cells, and grows as n²/ε.'
       },
       {
         term: 'The knapsack FPTAS is one idea: scale the profits and round down',
@@ -194,63 +198,73 @@
         },
         plain: 'Divide every profit by K, floor it, solve exactly on the smaller numbers.',
         formal: 'K = ε·P_max/n; each item loses < K, so the solution loses < nK = ε·P_max ≤ ε·OPT',
-        readAs: 'Set K to epsilon times the largest profit divided by the item count; each item ' +
-          'loses less than K in the rounding, so the whole solution loses less than n times K, ' +
-          'which is epsilon times the largest profit and therefore at most epsilon times the ' +
+        readAs: 'Set K to epsilon times the largest profit divided by the item count. Each item ' +
+          'loses less than K in the rounding, so the whole solution loses less than n times K. ' +
+          'That is epsilon times the largest profit, and therefore at most epsilon times the ' +
           'optimum.',
-        detail: 'The last inequality is the one worth pausing on: the optimum is at least the ' +
-          'largest profit, because taking that single item is a feasible solution, so bounding ' +
-          'the loss by ε·P_max bounds it by ε·OPT. The error and the saving are the same number ' +
-          'read from opposite sides — the table shrinks by a factor of K and the answer degrades ' +
-          'by n times K — which is what makes the trade exact rather than heuristic.',
-        example: 'At ε = 0.5 on a 20-item instance the demo measures K = 25.15, a table of ' +
-          '10 100 cells against the exact 258 640, and a solution at 99.6452% of the optimum ' +
+        detail: [
+          'The last inequality is the one worth pausing on. The optimum is at least the largest ' +
+            'profit, because taking that single item is a feasible solution, so bounding the loss ' +
+            'by ε·P_max bounds it by ε·OPT.',
+          'The error and the saving are the same number read from opposite sides. The table shrinks ' +
+            'by a factor of K and the answer degrades by n times K.',
+          'That is what makes the trade exact rather than heuristic.'
+        ],
+        example: 'At ε = 0.5 on a 20-item instance the demo measures K = 25.15, and a table of ' +
+          '10 100 cells against the exact 258 640. The solution is at 99.6452% of the optimum, ' +
           'where only 50% was promised.'
       },
       {
         term: 'The exact DP is pseudo-polynomial, which is not a contradiction of NP-hardness',
         plain: 'Its cost is polynomial in the numbers, and the numbers are exponential in their encoding length.',
         formal: 'O(n·P) with P the total profit; P is 2^(bits) in the input size',
-        readAs: 'The cost is order n times P, where P is the total profit — and P can be as ' +
-          'large as two raised to the number of bits used to write it.',
-        detail: 'A knapsack instance with n items and 64-bit profits is written in about 64n ' +
-          'bits, and the DP takes n·2⁶⁴ steps, which is exponential in the input length. That ' +
-          'is why the DP exists alongside NP-hardness rather than in spite of it, and it is also ' +
-          'why the scaling scheme works at all: the DP is only expensive because the numbers are ' +
-          'big, and rounding makes them small. Problems that are NP-hard even with unary input — ' +
-          '"strongly NP-hard" — have no FPTAS by this route.',
+        readAs: 'The cost is order n times P, where P is the total profit. P can be as large as ' +
+          'two raised to the number of bits used to write it.',
+        detail: [
+          'A knapsack instance with n items and 64-bit profits is written in about 64n bits, and ' +
+            'the DP takes n·2⁶⁴ steps, which is exponential in the input length.',
+          'That is why the DP exists alongside NP-hardness rather than in spite of it. It is also ' +
+            'why the scaling scheme works at all. The DP is only expensive because the numbers are ' +
+            'big, and rounding makes them small.',
+          'Problems that are NP-hard even with unary input — "strongly NP-hard" — have no FPTAS by ' +
+            'this route.'
+        ],
         example: 'The demo’s exact table has 258 640 cells for 20 items because the profits sum ' +
-          'to about 13 000; doubling every profit would double the table without changing the ' +
+          'to about 13 000. Doubling every profit would double the table without changing the ' +
           'problem.'
       },
       {
         term: 'Scale the profits, never the weights',
-        plain: 'Rounding profits changes only the objective; rounding weights changes what is feasible.',
+        plain: 'Rounding profits changes only the objective. Rounding weights changes what is feasible.',
         formal: 'a floored weight admits a set whose true weight exceeds the capacity',
-        detail: 'The two look symmetric and are not. A solution to the profit-scaled problem is ' +
-          'still a valid solution to the original — the same items, the same weights, the same ' +
-          'capacity — and only its value is understated. A solution to the weight-scaled problem ' +
-          'may not fit at all, and the failure appears as a higher-than-optimal reported value ' +
-          'rather than as an error. Which quantity a relaxation is allowed to perturb is the ' +
-          'first question to ask about any scheme.',
-        example: 'The demo runs the weight-scaled variant at ε = 0.5 and it returns 6 931 — ' +
-          'higher than the true optimum of 6 764 — with a total weight of 5 631 against a ' +
-          'capacity of 5 465.'
+        detail: [
+          'The two look symmetric and are not.',
+          'A solution to the profit-scaled problem is still a valid solution to the original: the ' +
+            'same items, the same weights, the same capacity. Only its value is understated.',
+          'A solution to the weight-scaled problem may not fit at all, and the failure appears as a ' +
+            'higher-than-optimal reported value rather than as an error. Which quantity a ' +
+            'relaxation is allowed to perturb is the first question to ask about any scheme.'
+        ],
+        example: 'The demo runs the weight-scaled variant at ε = 0.5 and it returns 6 931, ' +
+          'higher than the true optimum of 6 764. Its total weight is 5 631 against a capacity ' +
+          'of 5 465.'
       },
       {
         term: 'The guarantee is a floor and the measured quality is far above it',
         plain: 'Asked for half the optimum, the scheme returns almost all of it.',
         formal: 'the bound is (1 − ε)·OPT; the measurement at ε = 0.5 is 0.996·OPT',
-        readAs: 'The promise is one minus epsilon, multiplied by the optimum; at epsilon of a ' +
-          'half the promise is half the optimum and the measured answer is 99.6% of it.',
-        detail: 'Because the analysis bounds the worst case over every instance, and because the ' +
-          'rounding loses less than K per item rather than exactly K, the realised loss is ' +
-          'typically a small fraction of the permitted one. The engineering consequence is to ' +
-          'ask for the loosest ε you can live with and measure what you get, rather than ' +
-          'reflexively tightening the dial: the cost is linear in 1/ε and the quality saturates ' +
-          'almost immediately.',
-        example: 'The demo’s sweep reads 99.6452%, 99.8522% and then exactly 100% from ε = 0.5 ' +
-          'down to ε = 0.2 — the guarantee moves from 50% to 80% while the achieved value stops ' +
+        readAs: 'The promise is one minus epsilon, multiplied by the optimum. At epsilon of a ' +
+          'half the promise is half the optimum, and the measured answer is 99.6% of it.',
+        detail: [
+          'The analysis bounds the worst case over every instance, and the rounding loses less than ' +
+            'K per item rather than exactly K. So the realised loss is typically a small fraction ' +
+            'of the permitted one.',
+          'The engineering consequence is to ask for the loosest ε you can live with and measure ' +
+            'what you get, rather than reflexively tightening the dial.',
+          'The cost is linear in 1/ε and the quality saturates almost immediately.'
+        ],
+        example: 'The demo’s sweep reads 99.6452%, 99.8522% and then exactly 100%, from ε = 0.5 ' +
+          'down to ε = 0.2. The guarantee moves from 50% to 80% while the achieved value stops ' +
           'moving at all.'
       },
       {
@@ -258,29 +272,33 @@
         plain: 'Once the divisor falls below one, dividing by it makes the table bigger.',
         formal: 'K = ε·P_max/n < 1 when ε < n/P_max, and the scaled table then exceeds the exact one',
         readAs: 'K is below one whenever epsilon is smaller than the item count divided by the ' +
-          'largest profit, and at that point the scaled table is larger than the unscaled one.',
-        detail: 'The scheme is a saving over a range rather than everywhere, and the range ' +
-          'depends on the instance: many items with small profits pushes the crossing to looser ' +
-          'ε, and few items with large profits pushes it tighter. Past the crossing you are ' +
-          'paying approximation machinery to compute an exact answer, and the right response is ' +
-          'to run the exact algorithm and say so. Every implementation discovers this and almost ' +
-          'no write-up mentions it.',
-        example: 'On the demo’s 20-item instance the crossing is at ε = 0.01, where K = 0.503 ' +
-          'and the scheme uses 514 000 cells against the exact DP’s 258 640 — twice the cost for ' +
-          'the identical answer.'
+          'largest profit. At that point the scaled table is larger than the unscaled one.',
+        detail: [
+          'The scheme is a saving over a range rather than everywhere, and the range depends on the ' +
+            'instance. Many items with small profits pushes the crossing to looser ε, and few items ' +
+            'with large profits pushes it tighter.',
+          'Past the crossing you are paying approximation machinery to compute an exact answer. The ' +
+            'right response is to run the exact algorithm and say so.',
+          'Every implementation discovers this and almost no write-up mentions it.'
+        ],
+        example: 'On the demo’s 20-item instance the crossing is at ε = 0.01, where K = 0.503. ' +
+          'The scheme uses 514 000 cells against the exact DP’s 258 640, which is twice the cost ' +
+          'for the identical answer.'
       },
       {
         term: 'Density greedy alone is unbounded; adding one line makes it a 1/2-approximation',
         plain: 'Take the best single item as well, and return whichever is larger.',
         formal: 'max(density-greedy, best single item) ≥ OPT/2',
-        detail: 'Density greedy loses on an instance with one heavy, valuable item and one light ' +
-          'item of slightly better ratio: it takes the light one, fills up, and misses almost ' +
-          'everything. The best-single-item rule loses on many light items. Neither has a bound ' +
-          'alone and their maximum has one, because the fractional optimum is at most the greedy ' +
-          'value plus the value of the first rejected item. It is the cheapest guarantee in the ' +
-          'milestone — one comparison.',
+        detail: [
+          'Density greedy loses on an instance with one heavy, valuable item and one light item of ' +
+            'slightly better ratio. It takes the light one, fills up, and misses almost everything.',
+          'The best-single-item rule loses on many light items.',
+          'Neither has a bound alone and their maximum has one, because the fractional optimum is at ' +
+            'most the greedy value plus the value of the first rejected item. It is the cheapest ' +
+            'guarantee in the milestone: one comparison.'
+        ],
         example: 'On the demo’s trap instance density greedy returns 2 against an optimum of ' +
-          '100 — 2.0% — and the combined rule returns 100 exactly, via the single-item branch.'
+          '100, which is 2.0%. The combined rule returns 100 exactly, via the single-item branch.'
       },
       {
         term: 'Some problems admit no scheme at all, and the PCP theorem is why',
@@ -289,13 +307,16 @@
         readAs: 'Approximating MAX-3SAT better than seven eighths is NP-hard, and so is ' +
           'approximating set cover better than one minus a vanishing term, times the natural ' +
           'log of n.',
-        detail: 'The PCP theorem recasts NP as the class of problems whose proofs can be verified ' +
-          'by reading a constant number of random bits, which creates a gap: satisfiable ' +
-          'instances stay satisfiable and unsatisfiable ones become badly unsatisfiable. An ' +
-          'approximation algorithm crossing that gap would decide the original problem. The ' +
-          'practical value is knowing when to stop: a problem that is APX-hard will not yield to ' +
-          'a cleverer approximation, so the effort goes into the model, the instance sizes or an ' +
-          'exact solver.',
+        detail: [
+          'The PCP theorem recasts NP as the class of problems whose proofs can be verified by ' +
+            'reading a constant number of random bits.',
+          'That creates a gap. Satisfiable instances stay satisfiable and unsatisfiable ones become ' +
+            'badly unsatisfiable, so an approximation algorithm crossing that gap would decide the ' +
+            'original problem.',
+          'The practical value is knowing when to stop. A problem that is APX-hard will not yield to ' +
+            'a cleverer approximation, so the effort goes into the model, the instance sizes or an ' +
+            'exact solver.'
+        ],
         example: 'The demo’s class table lists knapsack (FPTAS), Euclidean TSP (PTAS but no ' +
           'FPTAS), metric TSP, vertex cover and MAX-3SAT (APX), and set cover and general TSP ' +
           '(no constant factor).'

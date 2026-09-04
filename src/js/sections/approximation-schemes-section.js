@@ -53,39 +53,46 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**A scheme takes the accuracy as an input rather than fixing it.** A PTAS runs in time ' +
+        'polynomial in n for each fixed ε, which permits n^(1/ε).',
+      'So halving the error can square the runtime, and the dial is nearly unusable in practice.',
+      'An FPTAS is polynomial in n AND in 1/ε, so the cost grows linearly in the accuracy you ask ' +
+        'for. That difference is the whole content of the section.',
+      '**Knapsack’s FPTAS is one idea: scale the profits and round down.** The exact DP indexed by ' +
+        'profit costs O(n·P), which is polynomial in the numbers but not in their encoding.',
+      'So it is pseudo-polynomial rather than a contradiction of NP-hardness.',
+      'Dividing each profit by K = ε·P_max/n loses under K per item and shrinks the table by a ' +
+        'factor of K. The two are the same number seen from opposite sides.',
+      '**Scale profits, never weights.** Rounding profits changes only the objective, so any ' +
+        'solution stays feasible.',
+      'Rounding weights changes FEASIBILITY. The demo runs that variant and shows a solution that ' +
+        'exceeds the capacity, which is not a worse answer but a wrong one.',
+      'Which quantity a relaxation is allowed to perturb is always the first question about a ' +
+        'scheme.',
+      '**The guarantee is a floor and the measured quality is far above it.** At ε = 0.5 the ' +
+        'theorem promises half the optimum and the demo delivers over 99%.',
+      'That is normal, and it is why an FPTAS is worth using at loose ε rather than tight. The ' +
+        'cost is linear in 1/ε and the quality saturates almost immediately.',
+      '**The scaling stops saving before ε gets small.** K = ε·P_max/n drops below 1 once ε is ' +
+        'under n/P_max, and dividing by a number below one makes the table BIGGER.',
+      'The demo shows the crossing. At that ε the scheme costs about twice the exact DP and ' +
+        'returns the identical answer.',
+      'Nobody writes this down, and everybody who implements one finds it.',
+      '**Some problems admit no scheme at all, and the PCP theorem is why.** MAX-3SAT cannot be ' +
+        'approximated beyond 7/8 unless P = NP, and set cover cannot beat (1 − o(1))·ln n.',
+      'APX-hardness means there is a constant below which approximation is as hard as exact ' +
+        'solution.',
+      'So a PTAS for such a problem would collapse P and NP, and the search for one is not merely ' +
+        'unpromising but provably futile.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**A scheme takes the accuracy as an input rather than fixing it.** A PTAS runs in time ' +
-          'polynomial in n for each fixed ε, which permits n^(1/ε) — so halving the error can ' +
-          'square the runtime and the dial is nearly unusable in practice. An FPTAS is polynomial ' +
-          'in n AND in 1/ε, so the cost grows linearly in the accuracy you ask for. That ' +
-          'difference is the whole content of the section.',
-        '**Knapsack’s FPTAS is one idea: scale the profits and round down.** The exact DP indexed ' +
-          'by profit costs O(n·P), which is polynomial in the numbers but not in their encoding, ' +
-          'so it is pseudo-polynomial rather than a contradiction of NP-hardness. Dividing each ' +
-          'profit by K = ε·P_max/n loses under K per item and shrinks the table by a factor of K, ' +
-          'and the two are the same number seen from opposite sides.',
-        '**Scale profits, never weights.** Rounding profits changes only the objective, so any ' +
-          'solution stays feasible. Rounding weights changes FEASIBILITY: the demo runs that ' +
-          'variant and shows a solution that exceeds the capacity, which is not a worse answer ' +
-          'but a wrong one. Which quantity a relaxation is allowed to perturb is always the first ' +
-          'question about a scheme.',
-        '**The guarantee is a floor and the measured quality is far above it.** At ε = 0.5 the ' +
-          'theorem promises half the optimum and the demo delivers over 99%. That is normal, and ' +
-          'it is why an FPTAS is worth using at loose ε rather than tight: the cost is linear in ' +
-          '1/ε and the quality saturates almost immediately.',
-        '**The scaling stops saving before ε gets small.** K = ε·P_max/n drops below 1 once ε is ' +
-          'under n/P_max, and dividing by a number below one makes the table BIGGER. The demo ' +
-          'shows the crossing: at that ε the scheme costs about twice the exact DP and returns ' +
-          'the identical answer. Nobody writes this down and everybody who implements one finds it.',
-        '**Some problems admit no scheme at all, and the PCP theorem is why.** MAX-3SAT cannot be ' +
-          'approximated beyond 7/8 unless P = NP, and set cover cannot beat (1 − o(1))·ln n. ' +
-          'APX-hardness means there is a constant below which approximation is as hard as exact ' +
-          'solution — so a PTAS for such a problem would collapse P and NP, and the search for ' +
-          'one is not merely unpromising but provably futile.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — the ε dial, the table it shrinks, and the point it stops',
         markup: root.ApproximationSchemesTemplate.render()
@@ -93,13 +100,13 @@
       diagram: diagram(),
       insight: '**An FPTAS is the best outcome an NP-hard problem can have, and it is rarer than ' +
         'the textbooks make it feel.** Knapsack has one because its DP is pseudo-polynomial and ' +
-        'the objective is a sum that tolerates rounding; most NP-hard problems have neither ' +
-        'property. The engineering habit worth keeping is the one the demo forces: **ask for the ' +
-        'loosest ε you can live with and measure what you actually get, because the guarantee is ' +
-        'a worst case and the measured quality is usually two orders of magnitude better.** And ' +
-        'when the table size stops falling as ε shrinks, the scheme has run out of room — at that ' +
-        'point you are paying approximation overhead for an exact answer, and you should just run ' +
-        'the exact algorithm and say so.'
+        'the objective is a sum that tolerates rounding. Most NP-hard problems have neither ' +
+        'property. The engineering habit worth keeping is the one the demo forces. **Ask for the ' +
+        'loosest ε you can live with and measure what you actually get.** The guarantee is a ' +
+        'worst case, and the measured quality is usually two orders of magnitude better. And when ' +
+        'the table size stops falling as ε shrinks, the scheme has run out of room. At that point ' +
+        'you are paying approximation overhead for an exact answer, and you should just run the ' +
+        'exact algorithm and say so.'
     };
   }
 
