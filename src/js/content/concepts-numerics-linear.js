@@ -175,14 +175,16 @@
         },
         plain: 'Most vectors get rotated; a few come out pointing exactly where they went in, just longer or shorter.',
         formal: 'Av = λv with v non-zero; λ is the factor and v the direction',
-        readAs: 'A times v equals lambda times v: applying the matrix to that particular direction ' +
+        readAs: 'A times v equals lambda times v. Applying the matrix to that particular direction ' +
           'is the same as multiplying it by a single number.',
-        detail: 'Those directions are what make a matrix comprehensible, because in a basis of ' +
-          'them the matrix is diagonal and applying it a thousand times is raising numbers to the ' +
-          'thousandth power. That is the content of PageRank (the stationary distribution is an ' +
-          'eigenvector), of PCA (the principal directions are eigenvectors of the covariance), of ' +
-          'vibration analysis (the modes are eigenvectors) and of stability analysis (the growth ' +
-          'rates are eigenvalues).',
+        detail: [
+          'Those directions are what make a matrix comprehensible. In a basis of them the matrix is ' +
+            'diagonal, and applying it a thousand times is raising numbers to the thousandth power.',
+          'That is the content of PageRank, where the stationary distribution is an eigenvector, and ' +
+            'of PCA, where the principal directions are eigenvectors of the covariance.',
+          'It is also vibration analysis, where the modes are eigenvectors, and stability analysis, ' +
+            'where the growth rates are eigenvalues.'
+        ],
         example: 'The demo builds symmetric matrices with a chosen spectrum, so the eigenvalues ' +
           'are known in advance and every method can be scored against them.'
       },
@@ -191,13 +193,16 @@
         plain: 'Multiply and normalise repeatedly; the largest eigenvalue wins and the rest decay away.',
         formal: 'the error falls by |λ₂/λ₁| each step, so reaching a tolerance takes about log(tolerance)/log(gap) steps',
         readAs: 'Each pass shrinks the unwanted part by the ratio of the second eigenvalue to the ' +
-          'first, so the number of passes needed is the log of the tolerance divided by the log of ' +
+          'first. So the number of passes needed is the log of the tolerance divided by the log of ' +
           'that ratio.',
-        detail: 'Every eigendirection is scaled by its own eigenvalue on each pass, so relative to ' +
-          'the largest, everything else shrinks — and the rate is entirely the gap. The matrix ' +
-          'size does not appear anywhere in that count, which is why the method scales to matrices ' +
-          'too large to factor. It also means a slow PageRank is a statement about the graph’s ' +
-          'spectrum rather than about the implementation.',
+        detail: [
+          'Every eigendirection is scaled by its own eigenvalue on each pass, so relative to the ' +
+            'largest, everything else shrinks. The rate is entirely the gap.',
+          'The matrix size does not appear anywhere in that count, which is why the method scales to ' +
+            'matrices too large to factor.',
+          'It also means a slow PageRank is a statement about the graph’s spectrum rather than about ' +
+            'the implementation.'
+        ],
         example: 'The demo measures 33 iterations at a gap of 0.5 and 1 802 at a gap of 0.99, on ' +
           'the same four-by-four matrix.'
       },
@@ -206,13 +211,16 @@
         plain: 'Power iteration on an exact eigenvector returns that eigenvalue forever, whichever one it is.',
         formal: 'if x₀ = v_k then Ax₀ = λ_k x₀, so the iteration is stationary at λ_k',
         readAs: 'If the starting vector is already the k-th eigenvector, then multiplying by the '
-          + 'matrix just scales it by the k-th eigenvalue, so the iteration never moves off it.',
-        detail: 'This is the practical trap in an otherwise trivial algorithm, and the vector of ' +
-          'all ones walks straight into it: it is an eigenvector of every matrix with constant row ' +
-          'sums, which includes many of the structured matrices people test with. In exact ' +
-          'arithmetic the iteration never escapes; in floating point rounding eventually ' +
-          'introduces a component along the dominant direction and it escapes slowly, which is ' +
-          'worse than failing. A random or simply non-symmetric starting vector avoids it.',
+          + 'matrix just scales it by the k-th eigenvalue. The iteration never moves off it.',
+        detail: [
+          'This is the practical trap in an otherwise trivial algorithm, and the vector of all ones ' +
+            'walks straight into it. It is an eigenvector of every matrix with constant row sums, ' +
+            'which includes many of the structured matrices people test with.',
+          'In exact arithmetic the iteration never escapes. In floating point, rounding eventually ' +
+            'introduces a component along the dominant direction and it escapes slowly, which is ' +
+            'worse than failing.',
+          'A random or simply non-symmetric starting vector avoids it.'
+        ],
         example: 'On [[2, 1], [1, 2]] the all-ones vector is the eigenvector for λ = 3, so inverse ' +
           'iteration started there reports the smallest eigenvalue as 3 rather than 1.'
       },
@@ -220,13 +228,16 @@
         term: 'Shifting turns any eigenvalue you name into the dominant one',
         plain: 'Iterate on (A − σI)⁻¹ and whichever eigenvalue is nearest your guess becomes enormous relative to the rest.',
         formal: 'the eigenvalues of (A − σI)⁻¹ are 1/(λ − σ), which is largest for the λ nearest σ',
-        readAs: 'Subtract your guess from the matrix and invert; each eigenvalue becomes one over ' +
+        readAs: 'Subtract your guess from the matrix and invert. Each eigenvalue becomes one over ' +
           'its distance from the guess, so the closest one becomes the biggest by a wide margin.',
-        detail: 'It converts the gap — the thing that decides the speed and that you do not ' +
-          'control — into something you do control, which is the whole trick. It reaches the ' +
-          'smallest eigenvalue, which plain power iteration can never do, and it converges in a ' +
-          'dozen steps for any target. The inverse is never formed: each step solves ' +
-          '(A − σI)y = x with the factorisation computed once, which is 18.3’s reuse rule applied.',
+        detail: [
+          'It converts the gap — the thing that decides the speed and that you do not control — into ' +
+            'something you do control. That is the whole trick.',
+          'It reaches the smallest eigenvalue, which plain power iteration can never do, and it ' +
+            'converges in a dozen steps for any target.',
+          'The inverse is never formed. Each step solves (A − σI)y = x with the factorisation ' +
+            'computed once, which is 18.3’s reuse rule applied.'
+        ],
         example: 'The demo reaches all four eigenvalues of a spectrum spanning 1 to 10 in between ' +
           '10 and 24 iterations each, against 1 802 for power iteration at a tight gap.'
       },
@@ -235,29 +246,35 @@
         plain: 'Factor as QR, multiply back in the other order, repeat — and the eigenvalues never move.',
         formal: 'RQ = QᵀAQ, which is a similarity transformation, and similar matrices have identical eigenvalues',
         readAs: 'Multiplying R by Q gives Q-transpose times A times Q, which is a change of basis ' +
-          'rather than a change of matrix, so the eigenvalues are untouched.',
-        detail: 'The invariance is what makes it safe: every step is a change of basis, so the ' +
-          'thing being sought is preserved exactly while the shape of the matrix improves. The ' +
-          'subdiagonal shrinks by a factor set by ratios of neighbouring eigenvalues, which is ' +
-          'power iteration appearing again from another angle. Production implementations reduce ' +
-          'to Hessenberg form first — one O(n³) step that makes each sweep O(n²) instead of ' +
-          'O(n³) — and add shifts, which turn the convergence cubic.',
+          'rather than a change of matrix. So the eigenvalues are untouched.',
+        detail: [
+          'The invariance is what makes it safe. Every step is a change of basis, so the thing being ' +
+            'sought is preserved exactly while the shape of the matrix improves.',
+          'The subdiagonal shrinks by a factor set by ratios of neighbouring eigenvalues, which is ' +
+            'power iteration appearing again from another angle.',
+          'Production implementations reduce to Hessenberg form first, one O(n³) step that makes ' +
+            'each sweep O(n²) instead of O(n³). They also add shifts, which turn the convergence ' +
+            'cubic.'
+        ],
         example: 'The demo drives the subdiagonal norm to machine precision in 37 sweeps and ' +
           'recovers all four eigenvalues from the diagonal.'
       },
       {
         term: 'Never compute eigenvalues through the characteristic polynomial',
-        plain: 'It is the definition and it is numerically hopeless; the roots are catastrophically sensitive to the coefficients.',
+        plain: 'It is the definition, and it is numerically hopeless. The roots are catastrophically sensitive to the coefficients.',
         formal: 'det(A − λI) = 0 defines the eigenvalues, and the map from coefficients to roots can amplify a perturbation by 10⁹',
         readAs: 'The eigenvalues are the values of lambda that make the determinant of A minus '
-          + 'lambda times the identity equal to zero — and getting them that way can magnify a '
-          + 'wobble in the coefficients by a factor of a billion.',
-        detail: 'Wilkinson’s example is the one everyone cites and it deserves the reputation: the ' +
-          'polynomial with roots at 1 through 20 has coefficients that, perturbed in their ' +
-          'fifteenth significant digit — less than the rounding that storing them already caused — ' +
-          'move a root by most of a whole unit. The eigenvalues of a symmetric matrix are ' +
-          'perfectly well conditioned; it is the detour through the polynomial that destroys them, ' +
-          'which is the general lesson: a route can be far worse conditioned than its destination.',
+          + 'lambda times the identity equal to zero. Getting them that way can magnify a wobble '
+          + 'in the coefficients by a factor of a billion.',
+        detail: [
+          'Wilkinson’s example is the one everyone cites, and it deserves the reputation. The ' +
+            'polynomial with roots at 1 through 20 has coefficients that move a root by most of a ' +
+            'whole unit when perturbed in their fifteenth significant digit.',
+          'That perturbation is smaller than the rounding that storing them already caused.',
+          'The eigenvalues of a symmetric matrix are perfectly well conditioned. It is the detour ' +
+            'through the polynomial that destroys them, and that is the general lesson: a route can ' +
+            'be far worse conditioned than its destination.'
+        ],
         example: 'The demo perturbs one coefficient by a factor of 1 + 1e-10 and measures the root ' +
           'moving 3.906e-8 at degree 5 and 9.051e-1 at degree 20.'
       },
@@ -265,13 +282,15 @@
         term: 'Krylov methods get a few eigenvalues without ever forming a factorisation',
         plain: 'Build a subspace from repeated matrix-vector products and solve a tiny problem inside it.',
         formal: 'the Krylov subspace spanned by x, Ax, A²x, … captures the extreme eigenvalues first',
-        detail: 'Lanczos for symmetric matrices and Arnoldi for general ones are what you reach ' +
-          'for when the matrix is enormous and sparse and you want the ten largest eigenvalues ' +
-          'rather than all of them. The cost per step is one matrix-vector product, so the ' +
-          'sparsity is preserved throughout, and the extreme eigenvalues emerge long before the ' +
-          'subspace is complete. The practical catch is that the basis loses orthogonality in ' +
-          'floating point and has to be reorthogonalised, which is where most of the ' +
-          'implementation effort goes.',
+        detail: [
+          'Lanczos for symmetric matrices and Arnoldi for general ones are what you reach for when ' +
+            'the matrix is enormous and sparse. You want the ten largest eigenvalues rather than all ' +
+            'of them.',
+          'The cost per step is one matrix-vector product, so the sparsity is preserved throughout, ' +
+            'and the extreme eigenvalues emerge long before the subspace is complete.',
+          'The practical catch is that the basis loses orthogonality in floating point and has to be ' +
+            'reorthogonalised. That is where most of the implementation effort goes.'
+        ],
         example: 'Power iteration is the one-dimensional case of this, and its convergence at a ' +
           'gap of 0.99 shows why the larger subspace is worth building.'
       },
@@ -280,14 +299,16 @@
         plain: 'When PageRank crawls, the graph structure is the reason, not the implementation.',
         formal: 'iterations ≈ log(tolerance) / log(|λ₂/λ₁|), which diverges as the gap approaches 1',
         readAs: 'The number of passes is roughly the log of the tolerance divided by the log of '
-          + 'the ratio of the second eigenvalue to the first, and that count grows without bound '
-          + 'as the two eigenvalues get closer together.',
-        detail: 'This reframes a class of performance question. A near-tie between the top two ' +
-          'eigenvalues means the system has two nearly equally dominant modes, and no ' +
-          'implementation trick changes that — the fix is structural. In PageRank the damping ' +
-          'factor is exactly this lever: 0.85 rather than 0.99 is a deliberate choice to bound the ' +
-          'second eigenvalue, trading some fidelity to the link structure for a convergence rate ' +
-          'that is knowable in advance.',
+          + 'the ratio of the second eigenvalue to the first. That count grows without bound as '
+          + 'the two eigenvalues get closer together.',
+        detail: [
+          'This reframes a class of performance question.',
+          'A near-tie between the top two eigenvalues means the system has two nearly equally ' +
+            'dominant modes, and no implementation trick changes that. The fix is structural.',
+          'In PageRank the damping factor is exactly this lever. Choosing 0.85 rather than 0.99 ' +
+            'bounds the second eigenvalue, trading some fidelity to the link structure for a ' +
+            'convergence rate that is knowable in advance.'
+        ],
         example: 'The demo’s prediction column is log(1e-10)/log(gap), and the measurement runs a ' +
           'little under it at every row while growing at the same rate.'
       }

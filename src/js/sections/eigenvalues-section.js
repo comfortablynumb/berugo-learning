@@ -50,48 +50,54 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**Power iteration is the whole idea in three lines, and its speed is one number.** Multiply ' +
+        'a vector by the matrix repeatedly and normalise.',
+      'Every eigendirection is scaled by its own eigenvalue each time, so the largest one wins and ' +
+        'everything else decays relative to it.',
+      'That decay rate is the ratio of the second eigenvalue to the largest — the spectral gap — ' +
+        'and it is the entire convergence story. At 0.5 it takes tens of iterations, at 0.99 it ' +
+        'takes thousands, and the matrix size does not appear.',
+      '**Shifting turns a slow eigenvalue into a fast one.** Applying the iteration to (A − σI)⁻¹ ' +
+        'maps each eigenvalue λ to 1/(λ − σ), so the one nearest your guess σ becomes the dominant ' +
+        'one by a huge margin.',
+      'The gap that decides the speed is now a gap you chose. It converges in a handful of steps to ' +
+        'whichever eigenvalue you aimed at, including the smallest, which power iteration can never ' +
+        'reach.',
+      '**The QR algorithm gets the whole spectrum by making the matrix triangular without changing ' +
+        'it.** Factor A = QR, multiply back in the other order to get RQ, and repeat.',
+      'Because RQ = QᵀAQ, each step is a similarity transformation — a change of basis — so the ' +
+        'eigenvalues are untouched while the subdiagonal shrinks.',
+      'With shifts and a Hessenberg reduction first, this is what every library actually runs.',
+      '**Never compute eigenvalues through the characteristic polynomial.** It is the definition, ' +
+        'and the map from a matrix to its polynomial coefficients is catastrophically ' +
+        'ill-conditioned.',
+      'Wilkinson\'s example has roots at 1 through 20. Perturbing one coefficient in its fifteenth ' +
+        'significant digit moves a root by a substantial fraction of a whole unit.',
+      'The eigenvalues themselves are perfectly well conditioned for a symmetric matrix. It is the ' +
+        'detour through the polynomial that destroys them.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**Power iteration is the whole idea in three lines, and its speed is one number.** ' +
-          'Multiply a vector by the matrix repeatedly and normalise; every eigendirection is ' +
-          'scaled by its own eigenvalue each time, so the largest one wins and everything else ' +
-          'decays relative to it at the ratio of its eigenvalue to the largest. That ratio — the ' +
-          'spectral gap — is the entire convergence story: at 0.5 it takes tens of iterations, at ' +
-          '0.99 it takes thousands, and the matrix size does not appear.',
-        '**Shifting turns a slow eigenvalue into a fast one.** Applying the iteration to ' +
-          '(A − σI)⁻¹ maps each eigenvalue λ to 1/(λ − σ), so the one nearest your guess σ becomes ' +
-          'the dominant one by a huge margin, and the gap that decides the speed is now a gap you ' +
-          'chose. It converges in a handful of steps to whichever eigenvalue you aimed at, ' +
-          'including the smallest, which power iteration can never reach.',
-        '**The QR algorithm gets the whole spectrum by making the matrix triangular without ' +
-          'changing it.** Factor A = QR, multiply back in the other order to get RQ, and repeat. ' +
-          'Because RQ = QᵀAQ, each step is a similarity transformation — a change of basis — so ' +
-          'the eigenvalues are untouched while the subdiagonal shrinks. With shifts and a ' +
-          'Hessenberg reduction first, this is what every library actually runs.',
-        '**Never compute eigenvalues through the characteristic polynomial.** It is the ' +
-          'definition, and the map from a matrix to its polynomial coefficients is catastrophically ' +
-          'ill-conditioned: Wilkinson\'s example has roots at 1 through 20, and perturbing one ' +
-          'coefficient in its fifteenth significant digit moves a root by a substantial fraction ' +
-          'of a whole unit. The eigenvalues themselves are perfectly well conditioned for a ' +
-          'symmetric matrix; it is the detour through the polynomial that destroys them.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — gaps, shifts, the QR sweep and Wilkinson’s polynomial',
         markup: root.EigenvaluesTemplate.render()
       },
       diagram: diagram(),
-      insight: 'The transferable idea here is not any one algorithm — it is that **the ' +
-        'conditioning of a route can be far worse than the conditioning of the destination**. ' +
-        'Wilkinson\'s eigenvalues are fine; his polynomial\'s roots are not; they are the same ' +
-        'numbers reached two ways. Whenever you find yourself transforming a problem into an ' +
-        'equivalent one because the equivalent one has a nicer closed form, ask what that ' +
-        'transformation does to the conditioning, because "algebraically identical" is a statement ' +
-        'about exact arithmetic and says nothing about what survives. In practice: call `eig`, ' +
-        'never `roots(charpoly(A))`, and when you only need the largest few eigenvalues, say so — ' +
-        'the iterative methods that give you those cost a matrix-vector product per step and ' +
-        'never form a factorisation at all.'
+      insight: 'The transferable idea here is not any one algorithm. It is that **the conditioning ' +
+        'of a route can be far worse than the conditioning of the destination**. Wilkinson\'s ' +
+        'eigenvalues are fine and his polynomial\'s roots are not, and they are the same numbers ' +
+        'reached two ways. Whenever you transform a problem into an equivalent one because the ' +
+        'equivalent one has a nicer closed form, ask what that transformation does to the ' +
+        'conditioning. "Algebraically identical" is a statement about exact arithmetic and says ' +
+        'nothing about what survives. In practice: call `eig`, never `roots(charpoly(A))`. And ' +
+        'when you only need the largest few eigenvalues, say so. The iterative methods that give ' +
+        'you those cost a matrix-vector product per step and never form a factorisation at all.'
     };
   }
 
