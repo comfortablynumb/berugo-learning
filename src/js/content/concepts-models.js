@@ -301,13 +301,16 @@
         term: 'A cost model is a choice about what to count',
         plain: 'Operations, cache misses, block transfers or the critical path.',
         formal: 'a model names a unit; the analysis is a count in that unit, and the unit has to be the bottleneck',
-        detail: 'All four models in this section are correct — they are counts of real things — and ' +
-          'three of them predict nothing about any given runtime. That is the whole subject: a ' +
-          'model is not right or wrong, it is applicable or not, and it is applicable when the ' +
-          'thing it counts is the thing that is scarce. Choosing before analysing is what ' +
-          'separates a useful complexity argument from an academic one.',
+        detail: [
+          'All four models in this section are correct, because they are counts of real things. ' +
+            'Three of them predict nothing about any given runtime.',
+          'That is the whole subject. A model is not right or wrong, it is applicable or not, and it ' +
+            'is applicable when the thing it counts is the thing that is scarce.',
+          'Choosing before analysing is what separates a useful complexity argument from an academic ' +
+            'one.'
+        ],
         example: 'The demo predicts 1 048 576, 10 240, 4 096 and 256 for the same sort of 65 536 ' +
-          'records — a spread of 4 096× across four units.'
+          'records. That is a spread of 4 096× across four units.'
       },
       {
         term: 'The four predictions are in different units and cannot be compared',
@@ -325,11 +328,14 @@
         },
         plain: 'Comparisons, misses, transfers and dependent steps are four different things.',
         formal: 'the numbers are counts of distinct events; only their proxy for runtime is shared',
-        detail: 'The bar chart in the demo is only meaningful because all four are being used as ' +
-          'stand-ins for one runtime, and the section’s question is which of them that runtime ' +
-          'actually tracks. Treating the largest number as the worst algorithm, or the smallest ' +
-          'as the best, is a category error that shows up constantly in design documents that ' +
-          'compare an O(n log n) against an O(n/B · log) without saying what the units are.',
+        detail: [
+          'The bar chart in the demo is only meaningful because all four are being used as stand-ins ' +
+            'for one runtime. The section’s question is which of them that runtime actually tracks.',
+          'Treating the largest number as the worst algorithm, or the smallest as the best, is a ' +
+            'category error.',
+          'It shows up constantly in design documents that compare an O(n log n) against an ' +
+            'O(n/B · log) without saying what the units are.'
+        ],
         example: 'The demo’s four rows read 1 048 576 comparisons, 10 240 cache misses, 4 096 ' +
           'block transfers and 256 dependent steps.'
       },
@@ -337,11 +343,14 @@
         term: 'A model earns trust by being checked against its own simulator',
         plain: 'Three of the four cannot be compared to a runtime; one can be compared to a count.',
         formal: 'the DAM prediction is checked against the measured transfer count under an enforced budget',
-        detail: 'A model nobody has ever compared against anything is a preference rather than a ' +
-          'prediction. The external-memory row is checkable because a simulator can count exactly ' +
-          'what it claims to count, and the agreement is what licenses using the formula at sizes ' +
-          'too large to run. That is the general recipe: validate the model where it can be ' +
-          'validated cheaply, then extrapolate with a stated assumption.',
+        detail: [
+          'A model nobody has ever compared against anything is a preference rather than a ' +
+            'prediction.',
+          'The external-memory row is checkable because a simulator can count exactly what it claims ' +
+            'to count. That agreement licenses using the formula at sizes too large to run.',
+          'That is the general recipe. Validate the model where it can be validated cheaply, then ' +
+            'extrapolate with a stated assumption.'
+        ],
         example: 'The demo sorts 16 384 records under the DAM simulator for 1 024 transfers ' +
           'against a prediction of 1 024.'
       },
@@ -349,11 +358,14 @@
         term: 'Once the stride exceeds a cache line, every access misses',
         plain: 'The miss RATE hits 100% and stays there, however few accesses there are.',
         formal: 'accesses that are more than B apart share no line, so misses = accesses',
-        detail: 'This is the most actionable measurement in the section, because it explains why ' +
-          'a loop that touches one field of every struct in an array is paying the full line cost ' +
-          'per element — sixty-four bytes fetched to use eight. It is a layout problem and no ' +
-          'amount of optimising the loop body touches it; the fix is structure-of-arrays, or a ' +
-          'different traversal, and both are decided before the loop is written.',
+        detail: [
+          'This is the most actionable measurement in the section. It explains why a loop that ' +
+            'touches one field of every struct in an array pays the full line cost per element. ' +
+            'That is sixty-four bytes fetched to use eight.',
+          'It is a layout problem, and no amount of optimising the loop body touches it.',
+          'The fix is structure-of-arrays, or a different traversal, and both are decided before the ' +
+            'loop is written.'
+        ],
         example: 'The demo measures a 100% miss rate at strides of 8 and 64 doubles, fetching 8.0 ' +
           'bytes for every byte used in both.'
       },
@@ -361,23 +373,29 @@
         term: 'Bytes fetched per byte used is the number that names the binding resource',
         plain: 'One means perfect; eight means seven eighths of the bus is wasted.',
         formal: 'waste = bytes fetched / bytes used; at 1.0 the traffic is compulsory',
-        detail: 'A miss rate alone does not say whether the memory system is the problem, because ' +
-          'a low rate on a huge number of accesses still saturates the bus. The ratio does: it ' +
-          'compares what crossed the bus against what the computation needed, and anything far ' +
-          'above one is memory-bound with a layout cause. It is also measurable on a real machine ' +
-          'from two hardware counters, which makes it a diagnostic rather than a model.',
+        detail: [
+          'A miss rate alone does not say whether the memory system is the problem, because a low ' +
+            'rate on a huge number of accesses still saturates the bus.',
+          'The ratio does. It compares what crossed the bus against what the computation needed, and ' +
+            'anything far above one is memory-bound with a layout cause.',
+          'It is also measurable on a real machine from two hardware counters, which makes it a ' +
+            'diagnostic rather than a model.'
+        ],
         example: 'The demo measures 1.0× for a sequential scan and 7.0× to 8.0× for the strided ' +
-          'and random patterns, marking 3 of 4 as memory-bound.'
+          'and random patterns. It marks 3 of 4 as memory-bound.'
       },
       {
         term: 'The order of the questions matters more than the answers',
         plain: 'Ask where the data sits before asking about parallelism.',
         formal: 'working set vs cache · data vs memory · blockwise vs random · idle processors · off-machine',
-        detail: 'Asking about parallelism first produces a beautifully parallel algorithm that is ' +
-          'bound by block transfers and does not speed up — a real and expensive failure mode ' +
-          'rather than a hypothetical one. The data-placement questions come first because they ' +
-          'change which algorithm to use, and the parallel question comes after because it only ' +
-          'changes how an already-chosen algorithm is run.',
+        detail: [
+          'Asking about parallelism first produces a beautifully parallel algorithm that is bound by ' +
+            'block transfers and does not speed up.',
+          'That is a real and expensive failure mode rather than a hypothetical one.',
+          'The data-placement questions come first because they change which algorithm to use. The ' +
+            'parallel question comes after, because it only changes how an already-chosen algorithm ' +
+            'is run.'
+        ],
         example: 'The demo’s checklist puts the working-set question first and the network ' +
           'question last, with a way to measure each in its final column.'
       },
@@ -385,26 +403,32 @@
         term: 'Every question on the checklist is answerable by measurement, not judgement',
         plain: 'Working-set size, input size, bytes per byte, utilisation, time in syscalls.',
         formal: 'each row names an instrument: a counter, a size comparison or a profile',
-        detail: 'That is what keeps the exercise from becoming an architecture debate. Each of the ' +
-          'five measurements is available in an afternoon, and each one closes a branch of the ' +
-          'decision tree. The alternative — arguing from experience about which model applies — ' +
-          'is exactly how a team ends up optimising the wrong quantity for a quarter.',
-        example: 'The demo’s final column names the instrument per row: working-set size against ' +
-          'cache size, input size against RAM, bytes fetched over bytes used, utilisation under ' +
-          'load, and time in system calls.'
+        detail: [
+          'That is what keeps the exercise from becoming an architecture debate.',
+          'Each of the five measurements is available in an afternoon, and each one closes a branch ' +
+            'of the decision tree.',
+          'The alternative is arguing from experience about which model applies, and that is exactly ' +
+            'how a team ends up optimising the wrong quantity for a quarter.'
+        ],
+        example: 'The demo’s final column names the instrument per row. It gives working-set size ' +
+          'against cache size, input size against RAM, bytes fetched over bytes used, utilisation ' +
+          'under load, and time in system calls.'
       },
       {
         term: 'When the bottleneck is off the machine, none of the four models applies',
         plain: 'Count round trips instead.',
         formal: 'if time is dominated by network and syscall waits, operation, miss, transfer and span counts are all irrelevant',
-        detail: 'This is the branch that catches most real systems, and it is at the top of the ' +
-          'decision diagram because when it applies nothing else does. A service spending ninety ' +
-          'per cent of its latency waiting on three sequential round trips is not helped by any ' +
-          'improvement to any of the four counts; it is helped by making two of the round trips ' +
-          'concurrent. Saying so plainly is more useful than a complexity analysis of the part ' +
-          'that is not the problem.',
+        detail: [
+          'This is the branch that catches most real systems, and it is at the top of the decision ' +
+            'diagram because when it applies nothing else does.',
+          'A service spending ninety per cent of its latency waiting on three sequential round trips ' +
+            'is not helped by any improvement to any of the four counts. It is helped by making two ' +
+            'of the round trips concurrent.',
+          'Saying so plainly is more useful than a complexity analysis of the part that is not the ' +
+            'problem.'
+        ],
         example: 'The demo’s checklist row measures time in system calls and network waits against ' +
-          'time on the CPU, and says none of the four models applies when the first dominates.'
+          'time on the CPU. It says none of the four models applies when the first dominates.'
       }
     ]
   });

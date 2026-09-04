@@ -75,43 +75,56 @@
     };
   }
 
-  function orientation() {
+  function orientationModels() {
     return [
       '**Every model in this milestone counts something different, and at most one of them ' +
         'predicts your runtime.** The demo makes four predictions of the same sort and they ' +
-        'differ by four orders of magnitude. All four are correct arithmetic; three of them are ' +
-        'answers to questions nobody asked.',
+        'differ by four orders of magnitude.',
+      'All four are correct arithmetic. Three of them are answers to questions nobody asked.',
       '**The RAM model predicts well exactly when the working set fits in cache.** Then every ' +
         'access really does cost the same, comparison counts really do rank algorithms, and the ' +
-        'analysis in every textbook applies. That is a large and important region — it is most ' +
-        'of what runs inside a single request — and the mistake is not using it, it is using it ' +
-        'outside that region.',
+        'analysis in every textbook applies.',
+      'That is a large and important region, and it is most of what runs inside a single request.',
+      'The mistake is not using it. The mistake is using it outside that region.',
       '**Once the working set leaves the cache, the layout matters more than the algorithm.** A ' +
-        'miss costs a hundred or so instructions, so a loop with a bad access pattern is ' +
-        'dominated by the pattern. The demo measures four patterns against one cache and the ' +
-        'miss rates run from 12.5% to 100% on the same number of useful bytes.',
+        'miss costs a hundred or so instructions, so a loop with a bad access pattern is dominated ' +
+        'by the pattern.',
+      'The demo measures four patterns against one cache, and the miss rates run from 12.5% to ' +
+        '100% on the same number of useful bytes.',
       '**Once the data leaves memory, the algorithm changes rather than its constants.** A hash ' +
-        'join is optimal in the RAM model and terrible once the table spills, because every ' +
-        'probe is a random block. The external-memory model is what a query planner uses, and it ' +
-        'is why a planner’s decisions look wrong from a RAM-model point of view.',
-      '**The parallel model applies only when there are processors with nothing to do, and it ' +
-        'binds on span rather than on count.** Work over span is the ceiling on speed-up, it is ' +
-        'a property of the algorithm, and it is computable on paper. An algorithm with linear ' +
-        'span does not go faster on more cores no matter how the implementation looks.',
-      '**Bytes fetched over bytes used is the single most useful diagnostic here.** A random ' +
-        'probe over eight-byte values on a sixty-four-byte line fetches eight times what it ' +
-        'uses, and that ratio is arithmetic rather than a profiling result. It tells you ' +
-        'immediately whether the fix is a better loop or a different layout.',
-      '**Measure the resource that binds before optimising anything.** The order of the ' +
-        'questions matters: asking about parallelism before asking where the data sits produces ' +
-        'a beautifully parallel algorithm that is bound by transfers and does not speed up. The ' +
-        'demo’s checklist is in the order that avoids that.',
-      '**And validate the model against a measurement, because a model that is not checked is a ' +
-        'preference.** The demo runs the external-memory prediction against a real simulated ' +
-        'sort and they agree exactly; that agreement is what licenses using the formula for ' +
-        'sizes too large to run. A model nobody has ever compared against reality is a confident, ' +
-        'precise, useless prediction.'
+        'join is optimal in the RAM model and terrible once the table spills, because every probe ' +
+        'is a random block.',
+      'The external-memory model is what a query planner uses, and it is why a planner’s decisions ' +
+        'look wrong from a RAM-model point of view.'
     ];
+  }
+
+  function orientationChoosing() {
+    return [
+      '**The parallel model applies only when there are processors with nothing to do, and it ' +
+        'binds on span rather than on count.** Work over span is the ceiling on speed-up, it is a ' +
+        'property of the algorithm, and it is computable on paper.',
+      'An algorithm with linear span does not go faster on more cores, no matter how the ' +
+        'implementation looks.',
+      '**Bytes fetched over bytes used is the single most useful diagnostic here.** A random probe ' +
+        'over eight-byte values on a sixty-four-byte line fetches eight times what it uses, and ' +
+        'that ratio is arithmetic rather than a profiling result.',
+      'It tells you immediately whether the fix is a better loop or a different layout.',
+      '**Measure the resource that binds before optimising anything.** The order of the questions ' +
+        'matters.',
+      'Asking about parallelism before asking where the data sits produces a beautifully parallel ' +
+        'algorithm that is bound by transfers and does not speed up. The demo’s checklist is in ' +
+        'the order that avoids that.',
+      '**And validate the model against a measurement, because a model that is not checked is a ' +
+        'preference.** The demo runs the external-memory prediction against a real simulated sort ' +
+        'and they agree exactly.',
+      'That agreement is what licenses using the formula for sizes too large to run.',
+      'A model nobody has ever compared against reality is a confident, precise, useless prediction.'
+    ];
+  }
+
+  function orientation() {
+    return orientationModels().concat(orientationChoosing());
   }
 
   function config() {
@@ -125,10 +138,10 @@
       diagram: diagram(),
       insight: '**The highest-value analytical skill in this whole milestone is knowing which ' +
         'cost model applies before optimising, because the wrong model produces confident, ' +
-        'precise, useless predictions.** It costs two numbers — the size of the working set and ' +
-        'the size of the machine — and it changes what you do rather than how well you do it. ' +
-        'The failure it prevents is specific and common: a team profiles the inner loop, ' +
-        'optimises the comparison count, ships a 15% improvement, and the workload was bound by ' +
+        'precise, useless predictions.** It costs two numbers, the size of the working set and ' +
+        'the size of the machine, and it changes what you do rather than how well you do it. ' +
+        'The failure it prevents is specific and common. A team profiles the inner loop, ' +
+        'optimises the comparison count and ships a 15% improvement. The workload was bound by ' +
         'block transfers the whole time, where the available win was a factor of B. Ask where ' +
         'the data sits first. Everything else in this milestone is a technique for one of the ' +
         'answers.'
