@@ -10,15 +10,17 @@
         term: 'Least squares projects rather than solves',
         plain: 'With more equations than unknowns there is no exact answer, so you take the point whose leftover is perpendicular to everything reachable.',
         formal: 'minimise ‖Ax − b‖², whose solution makes the residual orthogonal to every column of A',
-        readAs: 'Choose x to make the length of the leftover as small as possible; at that point ' +
+        readAs: 'Choose x to make the length of the leftover as small as possible. At that point ' +
           'the leftover is at right angles to every column of the matrix.',
-        detail: 'The geometric statement is the whole method and it is worth holding onto, ' +
-          'because it explains why the answer is unique whenever the columns are independent — ' +
-          'a point has exactly one closest point in a subspace. Setting the derivative of the ' +
-          'squared norm to zero produces the same condition algebraically, which is where the ' +
-          'normal equations come from. Squaring rather than taking absolute values is what makes ' +
-          'the problem have a closed form at all, and it is also why one wild outlier can move ' +
-          'the whole fit.',
+        detail: [
+          'The geometric statement is the whole method, and it is worth holding onto. It explains ' +
+            'why the answer is unique whenever the columns are independent: a point has exactly one ' +
+            'closest point in a subspace.',
+          'Setting the derivative of the squared norm to zero produces the same condition ' +
+            'algebraically, which is where the normal equations come from.',
+          'Squaring rather than taking absolute values is what makes the problem have a closed form ' +
+            'at all. It is also why one wild outlier can move the whole fit.'
+        ],
         example: 'Every polynomial fit in the demo is this: the columns are 1, x, x², … sampled at ' +
           'the data points, and the fit is b projected onto their span.'
       },
@@ -37,15 +39,17 @@
         },
         plain: 'AᵀA has κ(A) multiplied by itself, so you lose half your digits before any solving happens.',
         formal: 'κ(AᵀA) = κ(A)², so a design matrix at 10⁸ becomes a system at 10¹⁶',
-        readAs: 'The condition number of A-transpose-A is the condition number of A squared, so a ' +
+        readAs: 'The condition number of A-transpose-A is the condition number of A squared. So a ' +
           'problem with eight zeros in its condition number turns into one with sixteen.',
-        detail: 'This is the textbook derivation being numerically wrong, which is unusual enough ' +
-          'to be worth stating plainly: the mathematics is correct and the arithmetic is not. The ' +
-          'demo puts κ(A), κ(AᵀA) and their ratio in adjacent columns, and the ratio sits at 1.000 ' +
-          'so the squaring can be read as exact rather than approximate. Past the degree where ' +
-          'κ(AᵀA) exceeds 1/ε the reported number stops climbing, because the Gram matrix’s ' +
-          'smallest singular value has fallen below what a double can resolve — the formulation ' +
-          'has become indistinguishable from singular.',
+        detail: [
+          'This is the textbook derivation being numerically wrong, which is unusual enough to be ' +
+            'worth stating plainly. The mathematics is correct and the arithmetic is not.',
+          'The demo puts κ(A), κ(AᵀA) and their ratio in adjacent columns. The ratio sits at 1.000, ' +
+            'so the squaring can be read as exact rather than approximate.',
+          'Past the degree where κ(AᵀA) exceeds 1/ε the reported number stops climbing. The Gram ' +
+            'matrix’s smallest singular value has fallen below what a double can resolve, and the ' +
+            'formulation has become indistinguishable from singular.'
+        ],
         example: 'At degree 10 the demo shows κ(A) = 2.15e7 against κ(AᵀA) = 4.63e14, with the ' +
           'ratio to κ(A)² at 1.002.'
       },
@@ -53,12 +57,15 @@
         term: 'Classical and modified Gram–Schmidt differ by one subtraction and by seven orders',
         plain: 'Subtract each projection from the running remainder rather than from the original vector.',
         formal: 'classical uses the original vector for every projection; modified uses the vector as it stands after the previous subtractions',
-        detail: 'On paper the two are the same algorithm — the projections are of the same vector ' +
-          'onto orthogonal directions, so the order cannot matter. In floating point it matters ' +
-          'enormously, because the classical version computes every projection against a vector ' +
-          'that still contains components it is about to remove, so the rounding errors reinforce ' +
-          'instead of cancelling. This is the clearest example in the milestone of "algebraically ' +
-          'identical" saying nothing about numerical behaviour.',
+        detail: [
+          'On paper the two are the same algorithm. The projections are of the same vector onto ' +
+            'orthogonal directions, so the order cannot matter.',
+          'In floating point it matters enormously. The classical version computes every projection ' +
+            'against a vector that still contains components it is about to remove, so the rounding ' +
+            'errors reinforce instead of cancelling.',
+          'This is the clearest example in the milestone of "algebraically identical" saying nothing ' +
+            'about numerical behaviour.'
+        ],
         example: 'On a degree-9 Vandermonde the demo measures classical Gram–Schmidt at 1.023e-1 ' +
           'from orthogonal against modified Gram–Schmidt at 2.164e-10 — a factor of 4.7e8.'
       },
@@ -66,14 +73,16 @@
         term: 'Householder builds Q from reflections, which are orthogonal by construction',
         plain: 'Instead of subtracting projections and hoping they cancel, reflect the vector onto an axis.',
         formal: 'H = I − 2vvᵀ/(vᵀv) is orthogonal exactly, whatever rounding does to v',
-        readAs: 'The reflection matrix built from any vector v is exactly orthogonal, so a product ' +
-          'of such reflections is too, no matter how inaccurate the vectors themselves are.',
-        detail: 'This is why no library ships Gram–Schmidt as its QR. Orthogonality is a property ' +
-          'of the reflection’s form rather than of the arithmetic that produced it, so the ' +
-          'computed Q is orthogonal to machine precision regardless of how ill-conditioned the ' +
-          'matrix was. The pattern generalises: when you need a computed object to have a ' +
-          'property, prefer a construction that has it structurally over one that achieves it by ' +
-          'cancellation.',
+        readAs: 'The reflection matrix built from any vector v is exactly orthogonal. A product of ' +
+          'such reflections is orthogonal too, no matter how inaccurate the vectors themselves are.',
+        detail: [
+          'This is why no library ships Gram–Schmidt as its QR.',
+          'Orthogonality is a property of the reflection’s form rather than of the arithmetic that ' +
+            'produced it. So the computed Q is orthogonal to machine precision regardless of how ' +
+            'ill-conditioned the matrix was.',
+          'The pattern generalises. When you need a computed object to have a property, prefer a ' +
+            'construction that has it structurally over one that achieves it by cancellation.'
+        ],
         example: 'Householder measures 2.337e-15 from orthogonal on the matrix where classical ' +
           'Gram–Schmidt measures 1.023e-1 — a factor of 4.4e13.'
       },
@@ -83,12 +92,15 @@
         formal: 'A = UΣVᵀ with U and V orthogonal and Σ diagonal with non-negative entries',
         readAs: 'A equals U times sigma times V-transpose, where the two outer matrices are pure ' +
           'rotations and the middle one only stretches along the axes.',
-        detail: 'The singular values on that diagonal answer three separate questions at once: ' +
-          'their ratio is the condition number, how many are meaningfully above zero is the rank, ' +
-          'and each one is the error of the approximation that drops it. That is why plotting the ' +
-          'spectrum is the first diagnostic for a misbehaving fit — the plot is the answer rather ' +
-          'than an input to further analysis. It also exists for every matrix, square or not, ' +
-          'singular or not, which the eigendecomposition does not.',
+        detail: [
+          'The singular values on that diagonal answer three separate questions at once. Their ' +
+            'ratio is the condition number. How many are meaningfully above zero is the rank. And ' +
+            'each one is the error of the approximation that drops it.',
+          'That is why plotting the spectrum is the first diagnostic for a misbehaving fit. The plot ' +
+            'is the answer rather than an input to further analysis.',
+          'It also exists for every matrix, square or not, singular or not, which the ' +
+            'eigendecomposition does not.'
+        ],
         example: 'The demo’s spectrum plot puts the singular values and the truncation errors on ' +
           'one chart, offset by exactly one position.'
       },
@@ -96,14 +108,17 @@
         term: 'Eckart–Young: the best rank-k approximation is the first k singular values',
         plain: 'Truncating the SVD is optimal, and the error is exactly what you threw away.',
         formal: 'in the spectral norm the error is σₖ₊₁; in the Frobenius norm it is the root of the sum of the squares of all the dropped values',
-        readAs: 'Measured one way, the leftover is the next singular value you discarded; measured ' +
+        readAs: 'Measured one way, the leftover is the next singular value you discarded. Measured ' +
           'the other way, it is the square root of the sum of the squares of every discarded one.',
-        detail: 'The two norms give different numbers and the difference catches people out: ' +
-          'measuring a Frobenius difference and comparing it to the spectral bound makes the ' +
-          'approximation appear to violate its own guarantee, when it is a units error. What ' +
-          'makes the theorem valuable is the word "best" — no other rank-k matrix, however ' +
-          'cleverly constructed, does better. Principal component analysis, latent semantic ' +
-          'indexing and embedding compression are all this theorem with different nouns.',
+        detail: [
+          'The two norms give different numbers, and the difference catches people out. Measuring a ' +
+            'Frobenius difference and comparing it to the spectral bound makes the approximation ' +
+            'appear to violate its own guarantee, when it is a units error.',
+          'What makes the theorem valuable is the word "best". No other rank-k matrix, however ' +
+            'cleverly constructed, does better.',
+          'Principal component analysis, latent semantic indexing and embedding compression are all ' +
+            'this theorem with different nouns.'
+        ],
         example: 'At rank 6 the demo measures a Frobenius error of 5.57e-4 against a Frobenius ' +
           'bound of 5.57e-4 and a spectral bound of 5.34e-4.'
       },
@@ -112,14 +127,17 @@
         plain: 'No computed singular value is exactly zero, so someone has to say how small counts as gone.',
         formal: 'rank = the count of singular values above σ_max × max(m, n) × machine epsilon, which is a convention',
         readAs: 'Count the singular values that are bigger than the largest one multiplied by the '
-          + 'matrix’s larger dimension and by machine epsilon; that count is what the library '
+          + 'matrix’s larger dimension and by machine epsilon. That count is what the library '
           + 'calls the rank, and the threshold is a choice rather than a fact.',
-        detail: 'Exact rank is a discontinuous function of the entries, so it cannot survive ' +
-          'rounding: perturb a singular matrix in the sixteenth digit and it becomes full rank. ' +
+        detail: [
+          'Exact rank is a discontinuous function of the entries, so it cannot survive rounding. ' +
+            'Perturb a singular matrix in the sixteenth digit and it becomes full rank.',
           'Every library therefore picks a tolerance, and the standard one scales with the largest ' +
-          'singular value and the size. Knowing it is a convention matters because it is ' +
-          'adjustable — with noisy data the right threshold is the noise level, not machine ' +
-          'epsilon, and using the default silently keeps directions that are pure noise.',
+            'singular value and the size.',
+          'Knowing it is a convention matters because it is adjustable. With noisy data the right ' +
+            'threshold is the noise level, not machine epsilon, and using the default silently ' +
+            'keeps directions that are pure noise.'
+        ],
         example: 'The truncation table’s last row has a singular value of 1.00e-6 and a measured ' +
           'error of 1.78e-15 once it is kept, which is the floor rather than a meaningful value.'
       },
@@ -127,14 +145,16 @@
         term: 'Ridge regularisation trades a little bias for a lot of variance',
         plain: 'Add a small multiple of the identity before solving, and the tiny singular values stop being inverted.',
         formal: 'minimise ‖Ax − b‖² + λ‖x‖², whose solution replaces each 1/σ with σ/(σ² + λ)',
-        readAs: 'Penalise large coefficients as well as large residuals; the effect is that a ' +
+        readAs: 'Penalise large coefficients as well as large residuals. The effect is that a ' +
           'singular value close to zero is damped instead of inverted into something enormous.',
-        detail: 'The mechanism is visible in the singular values: the unregularised solution ' +
-          'divides by σ, so a σ of 10⁻¹² produces a coefficient of 10¹² driven entirely by noise. ' +
-          'The ridge form divides by σ + λ/σ instead, which leaves the large singular values ' +
-          'almost untouched and crushes the small ones. Choosing λ is choosing where to put the ' +
-          'boundary between signal and noise, which is the same decision as the rank threshold, ' +
-          'made continuously instead of discretely.',
+        detail: [
+          'The mechanism is visible in the singular values. The unregularised solution divides by σ, ' +
+            'so a σ of 10⁻¹² produces a coefficient of 10¹² driven entirely by noise.',
+          'The ridge form divides by σ + λ/σ instead, which leaves the large singular values almost ' +
+            'untouched and crushes the small ones.',
+          'Choosing λ is choosing where to put the boundary between signal and noise. That is the ' +
+            'same decision as the rank threshold, made continuously instead of discretely.'
+        ],
         example: 'On the demo’s highest-degree fits the unregularised coefficient norm grows with ' +
           'the condition number, which is what regularisation is there to stop.'
       }

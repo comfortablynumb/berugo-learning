@@ -50,48 +50,55 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**Least squares does not solve the equations. It finds the point where the leftover is ' +
+        'perpendicular to everything you can reach.**',
+      'With more equations than unknowns there is generally no exact solution, so the minimiser is ' +
+        'the projection of b onto the column space of A.',
+      'That geometric statement is the whole method. The residual at the optimum is orthogonal to ' +
+        'every column, which is what setting the derivative to zero produces. It is also why the ' +
+        'answer is unique whenever the columns are independent.',
+      '**The normal equations are the textbook derivation and they square the condition number.** ' +
+        'AᵀA has the condition number of A multiplied by itself.',
+      'So a design matrix at 10⁸ — perfectly workable — becomes a system at 10¹⁶, which is past ' +
+        'what a double carries.',
+      'You lose half your digits at the moment you form the product, before any solving happens. ' +
+        'The demo shows the ratio landing on 1.00 to confirm it is exactly the square rather than ' +
+        'roughly it.',
+      '**QR avoids the squaring, and how you compute Q decides whether it was worth it.** Classical ' +
+        'Gram–Schmidt subtracts all the previous projections computed from the original vector.',
+      'Modified Gram–Schmidt subtracts each one from the running remainder. The two are identical ' +
+        'on paper and differ by seven orders of magnitude in how orthogonal Q comes out.',
+      'Householder reflections build Q as a product of reflections rather than subtracting ' +
+        'anything, and they are orthogonal to machine precision.',
+      '**The SVD is the one that can tell you the question was badly posed.** It factors any matrix ' +
+        'into a rotation, a scaling and another rotation.',
+      'The scalings — the singular values — are the condition number, the rank, and the error of ' +
+        'every truncation, all in one list.',
+      'Eckart–Young says the best rank-k approximation is the first k of them. Its error is exactly ' +
+        'σₖ₊₁, the first singular value you threw away.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**Least squares does not solve the equations; it finds the point where the leftover is ' +
-          'perpendicular to everything you can reach.** With more equations than unknowns there ' +
-          'is generally no exact solution, so the minimiser is the projection of b onto the column ' +
-          'space of A. That geometric statement is the whole method: the residual at the optimum ' +
-          'is orthogonal to every column, which is what setting the derivative to zero produces ' +
-          'and why the answer is unique whenever the columns are independent.',
-        '**The normal equations are the textbook derivation and they square the condition ' +
-          'number.** AᵀA has the condition number of A multiplied by itself, so a design matrix ' +
-          'at 10⁸ — perfectly workable — becomes a system at 10¹⁶, which is past what a double ' +
-          'carries. You lose half your digits at the moment you form the product, before any ' +
-          'solving happens, and the demo shows the ratio landing on 1.00 to confirm it is exactly ' +
-          'the square rather than roughly it.',
-        '**QR avoids the squaring, and how you compute Q decides whether it was worth it.** ' +
-          'Classical Gram–Schmidt subtracts all the previous projections computed from the ' +
-          'original vector; modified Gram–Schmidt subtracts each one from the running remainder. ' +
-          'The two are identical on paper and differ by seven orders of magnitude in how ' +
-          'orthogonal Q comes out. Householder reflections, which build Q as a product of ' +
-          'reflections rather than subtracting anything, are orthogonal to machine precision.',
-        '**The SVD is the one that can tell you the question was badly posed.** It factors any ' +
-          'matrix into a rotation, a scaling and another rotation, and the scalings — the singular ' +
-          'values — are the condition number, the rank, and the error of every truncation, all in ' +
-          'one list. Eckart–Young says the best rank-k approximation is the first k of them, and ' +
-          'its error is exactly σₖ₊₁: the first singular value you threw away.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — squared conditioning, three QRs and a truncated SVD',
         markup: root.LeastSquaresTemplate.render()
       },
       diagram: diagram(),
       insight: 'When a fit misbehaves, look at the singular values before you look at the code. ' +
-        'They answer the three questions that matter at once — how ill-conditioned the fit is ' +
-        '(the ratio of first to last), how many directions the data actually constrains (how many ' +
-        'are above the noise), and what you lose by dropping the rest (exactly the next one). ' +
-        'That is also the practical reason to distrust `(X\'X)^-1 X\'y` wherever you find it ' +
-        'written out: it is the mathematics transcribed literally, it squares the conditioning, ' +
-        'and every library\'s `lstsq` uses QR or the SVD instead. The mathematically clean form ' +
-        'and the numerically sound one are different expressions, and this is the clearest case ' +
-        'of it in the whole milestone.'
+        'They answer the three questions that matter at once. How ill-conditioned the fit is, ' +
+        'which is the ratio of first to last. How many directions the data actually constrains, ' +
+        'which is how many are above the noise. And what you lose by dropping the rest, which is ' +
+        'exactly the next one. That is also the practical reason to distrust `(X\'X)^-1 X\'y` ' +
+        'wherever you find it written out. It is the mathematics transcribed literally, it squares ' +
+        'the conditioning, and every library\'s `lstsq` uses QR or the SVD instead. The ' +
+        'mathematically clean form and the numerically sound one are different expressions, and ' +
+        'this is the clearest case of it in the whole milestone.'
     };
   }
 
