@@ -14,7 +14,7 @@
  * every JSON round trip is a coin flip. And the moment a *rate* is applied,
  * the product lands a fraction of an ulp on the wrong side of a half-cent
  * boundary and `Math.round` takes the whole cent the other way: at 8.75% that
- * is 996 line items in 200 000, and at 20% it is none at all. Which rates are
+ * is 1 026 line items in 200 000, and at 20% it is none at all. Which rates are
  * safe is not something a reader can reason out, and that is the argument.
  */
 (function (root) {
@@ -54,34 +54,40 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**The usual argument for not holding money in doubles is wrong, and the real one is worse.** ' +
+        'Summing a million transactions as doubles is out by well under a thousandth of a cent, and ' +
+        'rounds to the correct total every time.',
+      'Addition simply is not where the damage is. What goes instead is *equality*.',
+      'The double total does not compare equal to the exact value, even though it formats ' +
+        'identically. So every `total === expected`, every reconciliation and every cache key on a ' +
+        'money value is a coin flip.',
+      '**The cent is genuinely lost at multiplication.** Apply a rate and the product lands a ' +
+        'fraction of a unit in the last place below a half-cent boundary. `Math.round` then takes ' +
+        'the whole cent downwards.',
+      'At 8.75% that is 1 026 line items in 200 000 — a real ten dollars on this batch. At 20% it ' +
+        'is exactly none, because that rate has no ties.',
+      'Which rates are safe cannot be reasoned out from the rate, and that is the argument for not ' +
+        'having to.',
+      '**A scaled integer removes the question.** Ten cents is the integer 10, and addition, ' +
+        'subtraction and comparison are exact and total.',
+      'The only place a decision is required is where a division or a percentage forces one. That is ' +
+        'exactly where the business rule lives, and where the test should be.',
+      'That is the real payoff: not more accuracy, but **one** place in the system that rounds.',
+      '**The rounding policy is a business rule with a measurable cost.** Half-up is biased upwards ' +
+        'because every tie goes the same way. Half-even exists to remove that bias, and is what ' +
+        'IEEE 754 and most accounting standards specify.',
+      'Over one batch the six policies here spread by thousands of cents. The gap between half-up ' +
+        'and half-even is close to half the number of exact ties — a number the demo counts rather ' +
+        'than estimates.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**The usual argument for not holding money in doubles is wrong, and the real one is ' +
-          'worse.** Summing a million transactions as doubles is out by well under a thousandth ' +
-          'of a cent and rounds to the correct total every time — addition simply is not where ' +
-          'the damage is. What goes instead is *equality*: the double total does not compare ' +
-          'equal to the exact value even though it formats identically, so every `total === ' +
-          'expected`, every reconciliation and every cache key on a money value is a coin flip.',
-        '**The cent is genuinely lost at multiplication.** Apply a rate and the product lands a ' +
-          'fraction of a unit in the last place below a half-cent boundary; `Math.round` then ' +
-          'takes the whole cent downwards. At 8.75% that is 996 line items in 200 000 — a real ' +
-          'ten dollars on this batch — and at 20% it is exactly none, because that rate has no ' +
-          'ties. Which rates are safe cannot be reasoned out from the rate, and that is the ' +
-          'argument for not having to.',
-        '**A scaled integer removes the question.** Ten cents is the integer 10; addition, ' +
-          'subtraction and comparison are exact and total; the only place a decision is required ' +
-          'is where a division or a percentage forces one — which is exactly where the business ' +
-          'rule lives and where the test should be. That is the real payoff: not more accuracy, ' +
-          'but **one** place in the system that rounds.',
-        '**The rounding policy is a business rule with a measurable cost.** Half-up is biased ' +
-          'upwards because every tie goes the same way; half-even exists to remove that bias and ' +
-          'is what IEEE 754 and most accounting standards specify. Over one batch the six ' +
-          'policies here spread by thousands of cents, and the gap between half-up and half-even ' +
-          'is exactly half the number of exact ties — a number the demo counts rather than ' +
-          'estimates.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — a ledger, a rate, six policies and the cost of being exact',
         markup: root.FixedAndDecimalTemplate.render()
@@ -89,12 +95,12 @@
       diagram: diagram(),
       insight: 'Put the rounding in one function, give it a name from the domain rather than from ' +
         'arithmetic, and test it against a rational reference. The failure this prevents is not a ' +
-        'lost cent in a total — it is a system where three different call sites round slightly ' +
-        'differently and the discrepancy only appears in aggregate at the end of a quarter, by ' +
-        'which point nobody can say which of them was right. And resist exact rationals as a ' +
-        'production representation, however clean they look: the denominators grow without bound, ' +
-        'and the demo shows a 200-term sum reaching a 293-bit denominator. They are the right ' +
-        'tool for a test oracle and the wrong one for a ledger.'
+        'lost cent in a total. It is a system where three different call sites round slightly ' +
+        'differently. The discrepancy only appears in aggregate at the end of a quarter, by which ' +
+        'point nobody can say which of them was right. And resist exact rationals as a production ' +
+        'representation, however clean they look. The denominators grow without bound, and the demo ' +
+        'shows a 200-term sum reaching a 293-bit denominator. They are the right tool for a test ' +
+        'oracle and the wrong one for a ledger.'
     };
   }
 

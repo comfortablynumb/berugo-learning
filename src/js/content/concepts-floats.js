@@ -322,12 +322,14 @@
         term: 'Doubles do not lose cents by addition, and the folk claim says they do',
         plain: 'A million transactions summed as doubles are out by less than a ten-thousandth of a cent.',
         formal: 'measured: 6.855e-5 of a cent over 10⁶ additions, and the total rounds to the correct cent every time',
-        detail: 'This is worth getting right because the usual justification for not using doubles ' +
-          'is false, and a false justification is fragile — somebody eventually measures it and ' +
-          'concludes the whole concern was superstition. Addition of same-signed values with ' +
-          'about the same magnitude is the best case floating point has, and it stays under half ' +
-          'a cent at any transaction volume a business reaches. The real reasons are elsewhere, ' +
-          'and they are worse.',
+        detail: [
+          'This is worth getting right because the usual justification for not using doubles is ' +
+            'false, and a false justification is fragile.',
+          'Somebody eventually measures it and concludes the whole concern was superstition.',
+          'Addition of same-signed values with about the same magnitude is the best case floating ' +
+            'point has, and it stays under half a cent at any transaction volume a business reaches. ' +
+            'The real reasons are elsewhere, and they are worse.'
+        ],
         example: 'The demo’s divergence ladder runs to a million transactions and the ' +
           '"crosses half a cent" column stays no at every size.'
       },
@@ -345,12 +347,15 @@
         },
         plain: 'The total formats to the right cent and does not compare equal to it.',
         formal: 'across 500 independent ledgers of 500 transactions: 442 unequal totals, 0 formatting mismatches',
-        detail: 'That combination is the trap. Every display is right, every report is right, and ' +
-          '`total === expected` is a coin flip — so the failure surfaces in reconciliation, in a ' +
-          'cache key, in a `Map` lookup, in a JSON round trip, or in a test that passes locally ' +
-          'and fails in CI, and in none of those places does it look like an arithmetic problem. ' +
+        detail: [
+          'That combination is the trap. Every display is right, every report is right, and ' +
+            '`total === expected` is a coin flip.',
+          'So the failure surfaces in reconciliation, in a cache key, in a `Map` lookup, in a JSON ' +
+            'round trip, or in a test that passes locally and fails in CI. In none of those places ' +
+            'does it look like an arithmetic problem.',
           'A scaled integer removes the question rather than reducing the error, which is a ' +
-          'different and much stronger property.',
+            'different and much stronger property.'
+        ],
         example: 'The demo reports 88.4% of ledgers producing a total that formats identically to ' +
           'the exact value and is not equal to it.'
       },
@@ -358,12 +363,15 @@
         term: 'The cent is genuinely lost at multiplication',
         plain: 'Applying a rate puts the product a fraction of an ulp below a half-cent boundary, and rounding takes the whole cent the other way.',
         formal: 'at 8.75% over 200 000 lines: 2 554 exact ties, 1 026 of them rounded the wrong way, 1 026 cents lost',
-        detail: 'The product of an inexact rate and an exact amount lands just below the tie ' +
-          'rather than on it, so `Math.round` goes down where the exact rule goes up — and on the ' +
-          'ties where the double happens to land just above, it agrees. That partial agreement is ' +
-          'what makes the bug survive inspection: a spot check of a dozen line items will almost ' +
-          'certainly find none of them. Which rates are affected cannot be reasoned out from the ' +
-          'rate, which is the argument for not having to reason about it.',
+        detail: [
+          'The product of an inexact rate and an exact amount lands just below the tie rather than ' +
+            'on it. So `Math.round` goes down where the exact rule goes up, and on the ties where ' +
+            'the double happens to land just above, it agrees.',
+          'That partial agreement is what makes the bug survive inspection. A spot check of a dozen ' +
+            'line items will almost certainly find none of them.',
+          'Which rates are affected cannot be reasoned out from the rate, which is the argument for ' +
+            'not having to reason about it.'
+        ],
         example: 'At 20% the demo reports 0 disagreements over the same 200 000 lines, because ' +
           'that rate produces no exact ties at all.'
       },
@@ -371,12 +379,14 @@
         term: 'A scaled integer moves every decision to one place',
         plain: 'Ten cents is the integer 10; addition and comparison are exact and total, and only division needs a policy.',
         formal: 'addition, subtraction and comparison on scaled integers are exact at any scale; multiplication doubles the scale and must come back down',
-        detail: 'The payoff is not more accuracy, it is that the number of places in the system ' +
-          'that make a rounding decision drops to the ones that genuinely have to. That is a ' +
-          'structural property: it can be reviewed, it can be tested in one place, and a new call ' +
-          'site cannot quietly introduce a fourth rounding behaviour. The cost is that the scale ' +
-          'has to be chosen up front and every value carries it, which is why libraries wrap it ' +
-          'in a type rather than leaving it to convention.',
+        detail: [
+          'The payoff is not more accuracy. It is that the number of places in the system that make ' +
+            'a rounding decision drops to the ones that genuinely have to.',
+          'That is a structural property: it can be reviewed, it can be tested in one place, and a ' +
+            'new call site cannot quietly introduce a fourth rounding behaviour.',
+          'The cost is that the scale has to be chosen up front and every value carries it. That is why ' +
+            'libraries wrap it in a type rather than leaving it to convention.'
+        ],
         example: 'The demo’s cents column matches the exact rational total exactly at every ' +
           'transaction count, where the double column never compares equal.'
       },
@@ -384,12 +394,16 @@
         term: 'The rounding policy is a business rule with a measurable bias',
         plain: 'Half-up sends every tie the same way, so the drift accumulates; half-even splits them.',
         formal: 'over one batch: half-even drifts 177.60 cents, half-up 1 459.60, ceiling 98 848.60',
-        detail: 'Bankers’ rounding exists for exactly this reason and the demo measures rather ' +
-          'than asserts it: half-up is roughly eight times the drift of half-even on the same ' +
-          'data, because it sends all 2 554 ties in one direction while half-even sends them up ' +
-          'only when the digit below is odd. Floor and truncate are identical here and differ on ' +
-          'negatives, which means a refund is where that choice first becomes visible — a good ' +
-          'example of a policy difference that no positive-only test can find.',
+        detail: [
+          'Bankers’ rounding exists for exactly this reason, and the demo measures rather than ' +
+            'asserts it.',
+          'Half-up is roughly eight times the drift of half-even on the same data. It sends all ' +
+            '2 554 ties in one direction, while half-even sends them up only when the digit below ' +
+            'is odd.',
+          'Floor and truncate are identical here and differ on negatives, which means a refund is ' +
+            'where that choice first becomes visible. It is a good example of a policy difference ' +
+            'that no positive-only test can find.'
+        ],
         example: 'The demo’s six policies span 197 526 cents on one 200 000-line batch, and the ' +
           'two half-rules span 1 282.'
       },
@@ -397,12 +411,15 @@
         term: 'Binary and decimal are exact about different things',
         plain: 'A double halves exactly and cannot hold 0.1; a scaled decimal holds 0.1 exactly and cannot halve 0.05.',
         formal: 'neither format is more accurate; each is closed under a different set of operations',
-        detail: 'This is the framing that makes the choice a domain question rather than a quality ' +
-          'question. Binary floating point is closed under halving and doubling, which is what ' +
-          'physical simulation and signal processing need; decimal is closed under the operations ' +
-          'a price list performs, which is what invoicing needs. Asking which is "more accurate" ' +
-          'has no answer, and it is the question that produces the worst decisions — usually ' +
-          '"use more digits", which fixes nothing.',
+        detail: [
+          'This is the framing that makes the choice a domain question rather than a quality ' +
+            'question.',
+          'Binary floating point is closed under halving and doubling, which is what physical ' +
+            'simulation and signal processing need. Decimal is closed under the operations a price ' +
+            'list performs, which is what invoicing needs.',
+          'Asking which is "more accurate" has no answer, and it is the question that produces the ' +
+            'worst decisions — usually "use more digits", which fixes nothing.'
+        ],
         example: 'The demo’s comparison table has binary floating point at yes for exact halving ' +
           'and no for exact decimals, and the scaled integer the other way round.'
       },
@@ -410,12 +427,15 @@
         term: 'Exact rationals work and do not scale',
         plain: 'Every operation is a gcd, and the denominators grow without bound.',
         formal: 'summing 1/1 + 1/2 + … + 1/200 exactly reaches a denominator of 293 bits',
-        detail: 'Rationals are the right tool for a test oracle, which is exactly what this ' +
-          'milestone uses them for: they give an answer nothing else can be checked against. ' +
+        detail: [
+          'Rationals are the right tool for a test oracle, which is exactly what this milestone uses ' +
+            'them for. They give an answer nothing else can be checked against.',
           'They are the wrong tool for a ledger, because the cost per operation is unbounded and ' +
-          'grows with the history rather than with the values — two hundred additions of small ' +
-          'fractions produce a denominator no machine word can hold. Every implementation ' +
-          'normalises to keep that growth as slow as possible, and it is still unbounded.',
+            'grows with the history rather than with the values. Two hundred additions of small ' +
+            'fractions produce a denominator no machine word can hold.',
+          'Every implementation normalises to keep that growth as slow as possible, and it is still ' +
+            'unbounded.'
+        ],
         example: 'The demo charts the denominator’s bit length climbing to 293 over 200 terms ' +
           'while the value stays at 6.878031.'
       },
@@ -423,12 +443,15 @@
         term: 'The unit of account is what belongs in the integer',
         plain: 'Cents, satoshis, basis points, tenths of a cent — whatever the domain says is indivisible.',
         formal: 'the scale is chosen from the smallest unit the business can express, not from a desired precision',
-        detail: 'Getting this wrong in either direction is expensive. Too coarse and a legitimate ' +
-          'value cannot be represented at all — a fee of a tenth of a cent, an exchange rate, a ' +
-          'per-unit price on a bulk item — which forces rounding into the *data* rather than into ' +
-          'one function. Too fine and every display and every comparison has to know the scale. ' +
-          'The question to ask is what the smallest amount is that the domain will ever need to ' +
-          'state exactly, and that is a question for the business rather than for the code.',
+        detail: [
+          'Getting this wrong in either direction is expensive.',
+          'Too coarse and a legitimate value cannot be represented at all: a fee of a tenth of a ' +
+            'cent, an exchange rate, a per-unit price on a bulk item. That forces rounding into the ' +
+            '*data* rather than into one function. Too fine and every display and every comparison ' +
+            'has to know the scale.',
+          'The question to ask is what the smallest amount is that the domain will ever need to state ' +
+            'exactly. That is a question for the business rather than for the code.'
+        ],
         example: 'The demo works in cents throughout and applies rates as an exact numerator over ' +
           '10 000, which is basis points — a second scale, chosen for the same reason.'
       }
