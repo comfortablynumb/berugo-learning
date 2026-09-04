@@ -50,39 +50,53 @@
     };
   }
 
-  function orientation() {
+  function orientationOptimality() {
     return [
       '**A prefix code is one where no codeword is a prefix of another**, which is what lets a ' +
-        'decoder read a stream with no separators. The Kraft–McMillan inequality says a set of ' +
-        'lengths is achievable by a prefix code exactly when the sum of 2^(−length) is at most ' +
-        'one — and that anything a uniquely decodable code can do, a prefix code can do too.',
-      '**Huffman is optimal among symbol codes, and the qualifier is the lesson.** The greedy ' +
-        'merge provably minimises the average length over all codes that assign a whole number ' +
-        'of bits per symbol. What it cannot do is spend a fraction of a bit, and that is not a ' +
-        'bug in the algorithm — it is the definition of the family it is optimal within.',
+        'decoder read a stream with no separators.',
+      'The Kraft–McMillan inequality says a set of lengths is achievable by a prefix code exactly ' +
+        'when the sum of 2^(−length) is at most one. It also says anything a uniquely decodable ' +
+        'code can do, a prefix code can do too.',
+      '**Huffman is optimal among symbol codes, and the qualifier is the lesson.** The greedy merge ' +
+        'provably minimises the average length over all codes that assign a whole number of bits ' +
+        'per symbol.',
+      'What it cannot do is spend a fraction of a bit. That is not a bug in the algorithm, it is ' +
+        'the definition of the family it is optimal within.',
       '**The gap is at most one bit per symbol and that can be most of the file.** A symbol with ' +
-        'probability 0.99 carries 0.0145 bits and costs a whole one. The demo sweeps the skew: ' +
-        'at 99/1 Huffman spends 12.4 times the entropy, and at 999/1 it spends 87.7 times.',
+        'probability 0.99 carries 0.0145 bits and costs a whole one.',
+      'The demo sweeps the skew. At 99/1 Huffman spends 12.4 times the entropy, and at 999/1 it ' +
+        'spends 87.7 times.',
       '**On a large, flat alphabet Huffman is nearly perfect.** The same sweep at 50/50 measures ' +
-        '1.00× the entropy, and English text measures within about 1.2%. Which is why Huffman is ' +
-        'still everywhere: the case it is bad at is a two-symbol source, and most real alphabets ' +
-        'are not that.',
-      '**The tree has to reach the decoder, and that costs bytes.** Canonical Huffman removes ' +
-        'most of it: sort by (length, symbol), assign codewords consecutively, and the decoder ' +
-        'rebuilds every codeword from the LENGTHS alone. The demo costs three encodings of the ' +
-        'same code, and which wins depends on how dense the alphabet is.',
-      '**DEFLATE compresses the length table itself**, with a run-length layer and a third ' +
-        'Huffman code over 19 symbols. That sounds like over-engineering until you see the ' +
-        'numbers: a sparse table of 256 lengths is mostly zeros, and the run-length form is a ' +
-        'fraction of either alternative.',
-      '**Adaptive Huffman makes one pass instead of two.** The tree is updated after every ' +
-        'symbol, so nothing is transmitted and a stream can be coded without a second look. It ' +
-        'pays in ratio on short inputs, because the model starts uniform, and in speed, because ' +
+        '1.00× the entropy, and English text measures within about 1.2%.',
+      'That is why Huffman is still everywhere. The case it is bad at is a two-symbol source, and ' +
+        'most real alphabets are not that.'
+    ];
+  }
+
+  function orientationTables() {
+    return [
+      '**The tree has to reach the decoder, and that costs bytes.** Canonical Huffman removes most ' +
+        'of it. Sort by length then symbol, assign codewords consecutively, and the decoder ' +
+        'rebuilds every codeword from the LENGTHS alone.',
+      'The demo costs three encodings of the same code, and which wins depends on how dense the ' +
+        'alphabet is.',
+      '**DEFLATE compresses the length table itself**, with a run-length layer and a third Huffman ' +
+        'code over 19 symbols.',
+      'That sounds like over-engineering until you see the numbers. A sparse table of 256 lengths ' +
+        'is mostly zeros, and the run-length form is a fraction of either alternative.',
+      '**Adaptive Huffman makes one pass instead of two.** The tree is updated after every symbol, ' +
+        'so nothing is transmitted and a stream can be coded without a second look.',
+      'It pays in ratio on short inputs, because the model starts uniform, and in speed, because ' +
         'the tree is restructured per symbol.',
       '**Ties in the merge produce different trees with identical cost.** Two correct Huffman ' +
-        'implementations can disagree byte for byte and both be optimal, which matters the first ' +
-        'time somebody diffs two compressed files and concludes one of them is broken.'
+        'implementations can disagree byte for byte and both be optimal.',
+      'That matters the first time somebody diffs two compressed files and concludes one of them ' +
+        'is broken.'
     ];
+  }
+
+  function orientation() {
+    return orientationOptimality().concat(orientationTables());
   }
 
   function config() {
@@ -95,13 +109,13 @@
       },
       diagram: diagram(),
       insight: '**Huffman cannot spend less than one bit on a symbol, so on a source that is 99% ' +
-        'one value it wastes about nine tenths of the achievable compression — and that single ' +
+        'one value it wastes about nine tenths of the achievable compression. That single ' +
         'limitation is why arithmetic coding exists.** The practical reading is about where each ' +
-        'belongs: with a large alphabet and no extreme skew, Huffman is within a couple of per ' +
-        'cent of the entropy and decodes with one table lookup per symbol, which is why it is ' +
-        'still in DEFLATE and JPEG. The moment the distribution is sharply skewed — a bit ' +
-        'stream, a flag column, a probability from a context model — the whole-bit floor ' +
-        'dominates and the answer is a coder that can spend fractions.'
+        'belongs. With a large alphabet and no extreme skew, Huffman is within a couple of per ' +
+        'cent of the entropy and decodes with one table lookup per symbol. That is why it is ' +
+        'still in DEFLATE and JPEG. The moment the distribution is sharply skewed the whole-bit ' +
+        'floor dominates, and the answer is a coder that can spend fractions. A bit stream, a ' +
+        'flag column and a probability from a context model are all that case.'
     };
   }
 

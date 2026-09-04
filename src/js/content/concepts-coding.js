@@ -171,11 +171,14 @@
         formal: 'Kraft–McMillan: lengths ℓᵢ are achievable by a prefix code iff Σ 2^(−ℓᵢ) ≤ 1',
         readAs: 'A set of codeword lengths can be realised by a prefix code exactly when the sum ' +
           'of two to the minus each length is at most one.',
-        detail: 'The inequality is what makes the whole family tractable: it says the achievable ' +
-          'length sets are exactly the ones satisfying one arithmetic condition, and — the second ' +
-          'half of McMillan’s result — that any uniquely decodable code’s lengths satisfy it too. ' +
-          'So nothing is lost by restricting attention to prefix codes, and a sum strictly below ' +
-          'one means codeword space is being wasted and some symbol could have been shorter.',
+        detail: [
+          'The inequality is what makes the whole family tractable. It says the achievable length ' +
+            'sets are exactly the ones satisfying one arithmetic condition.',
+          'The second half of McMillan’s result is that any uniquely decodable code’s lengths ' +
+            'satisfy it too. So nothing is lost by restricting attention to prefix codes.',
+          'A sum strictly below one means codeword space is being wasted, and some symbol could have ' +
+            'been shorter.'
+        ],
         example: 'The demo reports a Kraft sum of exactly 1.0000 on its English-text code, which ' +
           'means the code is complete.'
       },
@@ -184,15 +187,18 @@
         plain: 'The best possible code that spends a whole number of bits per symbol.',
         formal: 'greedily merging the two least-frequent symbols minimises Σ p(x)·ℓ(x) over all integer-length prefix codes',
         readAs: 'Merging the two rarest symbols repeatedly gives the smallest possible average ' +
-          'codeword length — the sum over symbols of probability times length — among all codes ' +
-          'whose codewords are a whole number of bits.',
-        detail: 'The proof is short: in an optimal code the two least frequent symbols are ' +
-          'siblings at the deepest level, so merging them and solving the smaller problem is ' +
-          'exact. What the algorithm cannot do is spend a fraction of a bit, and that is not a ' +
-          'defect to be fixed — it is the definition of the family it is optimal within. Every ' +
-          'complaint about Huffman’s ratio is a complaint about integer codeword lengths.',
-        example: 'The demo measures 4.6173 bits per byte against an entropy of 4.5623 — 1.2% ' +
-          'above the floor, and provably the best any integer-length code does on that table.'
+          'codeword length, which is the sum over symbols of probability times length. That holds ' +
+          'among all codes whose codewords are a whole number of bits.',
+        detail: [
+          'The proof is short. In an optimal code the two least frequent symbols are siblings at the ' +
+            'deepest level, so merging them and solving the smaller problem is exact.',
+          'What the algorithm cannot do is spend a fraction of a bit. That is not a defect to be ' +
+            'fixed, it is the definition of the family it is optimal within.',
+          'Every complaint about Huffman’s ratio is a complaint about integer codeword lengths.'
+        ],
+        example: 'The demo measures 4.6173 bits per byte against an entropy of 4.5623, which is ' +
+          '1.2% above the floor. It is provably the best any integer-length code does on that ' +
+          'table.'
       },
       {
         term: 'The gap is at most one bit per symbol, and that can be most of the file',
@@ -200,14 +206,16 @@
         formal: 'H ≤ average length < H + 1, and the bound is tight as the distribution skews',
         readAs: 'The average codeword length is at least the entropy and less than the entropy ' +
           'plus one bit.',
-        detail: 'On a large flat alphabet the plus-one is invisible: rounding some symbols up and ' +
-          'others down nearly cancels, and the demo lands 1.2% above the entropy on English. On a ' +
-          'two-symbol source there is nothing to cancel — both codewords are one bit and the ' +
-          'entropy can be arbitrarily small — so the ratio between what is spent and what is ' +
-          'carried grows without limit. That single fact is the entire reason arithmetic coding ' +
-          'exists.',
-        example: 'The demo’s skew sweep pins Huffman at exactly 1.0000 bits at every setting, ' +
-          'measuring 12.38× the entropy at 99:1 and 87.66× at 999:1.'
+        detail: [
+          'On a large flat alphabet the plus-one is invisible. Rounding some symbols up and others ' +
+            'down nearly cancels, and the demo lands 1.2% above the entropy on English.',
+          'On a two-symbol source there is nothing to cancel. Both codewords are one bit and the ' +
+            'entropy can be arbitrarily small, so the ratio between what is spent and what is ' +
+            'carried grows without limit.',
+          'That single fact is the entire reason arithmetic coding exists.'
+        ],
+        example: 'The demo’s skew sweep pins Huffman at exactly 1.0000 bits at every setting. It ' +
+          'measures 12.38× the entropy at 99:1 and 87.66× at 999:1.'
       },
       {
         term: 'Canonical Huffman transmits lengths, not codewords',
@@ -215,11 +223,15 @@
         formal: 'code(i+1) = (code(i) + 1) << (ℓ(i+1) − ℓ(i)), starting from zero at the shortest length',
         readAs: 'Each codeword is the previous one plus one, shifted left by the increase in ' +
           'length.',
-        detail: 'The decoder can rebuild every codeword from the length per symbol alone, which ' +
-          'is what makes the table cheap, and it can decode with a length-indexed comparison ' +
-          'rather than a tree in memory — one comparison per bit read and no pointer chasing. ' +
-          'DEFLATE, JPEG and every serious format does this. The reconstruction is exact, so ' +
-          'nothing about the compression changes; only the header does.',
+        detail: [
+          'The decoder can rebuild every codeword from the length per symbol alone, which is what ' +
+            'makes the table cheap.',
+          'It can also decode with a length-indexed comparison rather than a tree in memory. That is ' +
+            'one comparison per bit read and no pointer chasing, and DEFLATE, JPEG and every ' +
+            'serious format does it.',
+          'The reconstruction is exact, so nothing about the compression changes. Only the header ' +
+            'does.'
+        ],
         example: 'The demo’s canonical code gives the space "000" at length 3 and assigns the ' +
           'four-bit codewords 0010 through 0101 consecutively.'
       },
@@ -228,12 +240,14 @@
         plain: 'The canonical form pays for every symbol of the alphabet, used or not.',
         formal: 'tree ≈ (2k − 1) + k·log₂|Σ| bits for k used symbols; canonical ≈ 4·|Σ| bits',
         readAs: 'An explicit tree costs about two k minus one bits of shape plus a symbol per ' +
-          'leaf; a canonical table costs about four bits for every symbol of the alphabet.',
-        detail: 'This contradicts the usual folklore, which says canonical Huffman is simply ' +
-          'smaller. On a sparse alphabet — thirty used bytes of 256 — the explicit tree wins ' +
-          'outright, because the canonical table is paying four bits each for 226 symbols that ' +
-          'never appear. What actually makes the sparse case cheap is DEFLATE’s extra layer: ' +
-          'run-length coding the length array, where those 226 zeros collapse.',
+          'leaf. A canonical table costs about four bits for every symbol of the alphabet.',
+        detail: [
+          'This contradicts the usual folklore, which says canonical Huffman is simply smaller.',
+          'On a sparse alphabet of thirty used bytes out of 256, the explicit tree wins outright. ' +
+            'The canonical table is paying four bits each for 226 symbols that never appear.',
+          'What actually makes the sparse case cheap is DEFLATE’s extra layer, which run-length ' +
+            'codes the length array. Those 226 zeros collapse.'
+        ],
         example: 'At 11.7% density the demo measures 299 bits for the tree, 1 024 for the plain ' +
           'canonical table and 178 run-length coded.'
       },
@@ -241,27 +255,32 @@
         term: 'Adaptive Huffman transmits nothing and pays a learning curve',
         plain: 'Update the tree after every symbol; the decoder does the same.',
         formal: 'FGK maintains the sibling property in O(1) per symbol, so the tree stays optimal for the counts seen so far',
-        detail: 'One pass instead of two matters when the input is a stream with no second ' +
-          'chance, and no table in the header matters when the message is short. The cost is that ' +
-          'the early symbols are coded under a nearly uniform model, and that the tree is ' +
-          'restructured per symbol — a per-symbol cost a static code does not have. On a long ' +
-          'stream the learning curve amortises away and the missing header is pure gain.',
-        example: 'The demo’s adaptive arithmetic model — the same idea with a better coder — ends ' +
-          'at 4.5971 bits per symbol against the static 4.5623, sending no table at all.'
+        detail: [
+          'One pass instead of two matters when the input is a stream with no second chance, and no ' +
+            'table in the header matters when the message is short.',
+          'The cost is that the early symbols are coded under a nearly uniform model, and that the ' +
+            'tree is restructured per symbol. That is a per-symbol cost a static code does not have.',
+          'On a long stream the learning curve amortises away, and the missing header is pure gain.'
+        ],
+        example: 'The demo’s adaptive arithmetic model is the same idea with a better coder. It ' +
+          'ends at 4.5971 bits per symbol against the static 4.5623, sending no table at all.'
       },
       {
         term: 'Two correct Huffman implementations can disagree byte for byte',
         plain: 'Ties in the merge produce different trees with identical cost.',
         formal: 'the optimum is a multiset of lengths, not a unique tree; any tie-break gives the same Σ p·ℓ',
         readAs: 'What is optimal is the collection of codeword lengths rather than any particular ' +
-          'tree, and every way of breaking a tie gives the same average length — the sum of ' +
+          'tree. Every way of breaking a tie gives the same average length, which is the sum of ' +
           'probability times length.',
-        detail: 'This surprises people the first time they diff two compressed files and conclude ' +
-          'one is broken. The greedy merge has to choose when two weights are equal, and the ' +
-          'choice changes which symbol gets which codeword without changing the total. It is also ' +
-          'why formats specify a canonical ordering: not for compression, but so that two ' +
-          'encoders produce identical bytes and the output is reproducible.',
-        example: 'The demo’s "i" and "o" both have count 166 and get 0011 and 0100 — a different ' +
+        detail: [
+          'This surprises people the first time they diff two compressed files and conclude one is ' +
+            'broken.',
+          'The greedy merge has to choose when two weights are equal, and the choice changes which ' +
+            'symbol gets which codeword without changing the total.',
+          'It is also why formats specify a canonical ordering. Not for compression, but so that two ' +
+            'encoders produce identical bytes and the output is reproducible.'
+        ],
+        example: 'The demo’s "i" and "o" both have count 166 and get 0011 and 0100. A different ' +
           'tie-break would swap them at identical cost.'
       },
       {
@@ -269,15 +288,17 @@
         plain: 'Some symbols are rounded up to the next whole bit and some down.',
         formal: 'waste(x) = ℓ(x) + log₂ p(x), which is negative when the codeword is shorter than the information',
         readAs: 'A symbol’s waste is its codeword length plus the base-two logarithm of its ' +
-          'probability, and it is negative where the code is shorter than the symbol’s own ' +
+          'probability. It is negative where the code is shorter than the symbol’s own ' +
           'information content.',
-        detail: 'A codeword shorter than −log₂ p is possible for individual symbols — it has to ' +
-          'be paid for by other symbols being longer, which is what the Kraft sum enforces. So a ' +
-          'code table has a column of small positive and negative numbers, and weighted by ' +
-          'frequency they nearly cancel. That cancellation is why Huffman is close to the entropy ' +
-          'on a rich alphabet and why it collapses on a poor one, where there is nothing left to ' +
-          'cancel against.',
-        example: 'The demo’s space wastes +0.53 bits and "e" wastes −0.31; the whole table lands ' +
+        detail: [
+          'A codeword shorter than −log₂ p is possible for individual symbols. It has to be paid for ' +
+            'by other symbols being longer, which is what the Kraft sum enforces.',
+          'So a code table has a column of small positive and negative numbers, and weighted by ' +
+            'frequency they nearly cancel.',
+          'That cancellation is why Huffman is close to the entropy on a rich alphabet, and why it ' +
+            'collapses on a poor one where there is nothing left to cancel against.'
+        ],
+        example: 'The demo’s space wastes +0.53 bits and "e" wastes −0.31. The whole table lands ' +
           '+0.0550 bits per symbol above the entropy.'
       }
     ],
