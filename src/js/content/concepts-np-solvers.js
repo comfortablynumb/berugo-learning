@@ -168,14 +168,17 @@
     'hardness-in-practice': [
       {
         term: 'Worst case and typical case are different questions',
-        plain: 'NP-completeness says some instances are hard; it says nothing about yours.',
+        plain: 'NP-completeness says some instances are hard. It says nothing about yours.',
         formal: 'a completeness result quantifies over all instances; a benchmark quantifies over a distribution',
-        detail: 'Industrial SAT instances with millions of variables are solved in seconds every ' +
-          'day, and randomly generated instances with fifty variables can be genuinely ' +
-          'difficult. That is not a contradiction: the complexity class is a statement about the ' +
-          'worst member of an infinite family, and your instances are drawn from a distribution ' +
-          'with structure in it. The useful question is what that structure is, because it is ' +
-          'the thing a solver exploits and it is not in the class.',
+        detail: [
+          'Industrial SAT instances with millions of variables are solved in seconds every day, and ' +
+            'randomly generated instances with fifty variables can be genuinely difficult.',
+          'That is not a contradiction. The complexity class is a statement about the worst member ' +
+            'of an infinite family, and your instances are drawn from a distribution with structure ' +
+            'in it.',
+          'The useful question is what that structure is, because it is the thing a solver exploits ' +
+            'and it is not in the class.'
+        ],
         example: 'The demo’s structure table lists five properties that separate an industrial ' +
           'instance from a random one, and none of them is about size.'
       },
@@ -190,45 +193,54 @@
           ].join('\n'),
           caption: 'Hardness is not spread evenly over instances; it is concentrated at a threshold. Benchmarks drawn away from it say almost nothing about a solver.'
         },
-        plain: 'Below it almost everything is satisfiable; above it almost nothing is.',
+        plain: 'Below it almost everything is satisfiable. Above it almost nothing is.',
         formal: 'the satisfiable fraction falls from 1 to 0 across a narrowing window around m/n ≈ 4.27',
         readAs: 'The fraction of satisfiable formulas falls from one to zero across a window ' +
-          'around a clause-to-variable ratio of about four point two seven, and the window ' +
-          'narrows as n grows.',
-        detail: 'This is a property of the DISTRIBUTION rather than of any instance, so it needs ' +
-          'many seeds per ratio and a median rather than a single run. The threshold value is ' +
-          'asymptotic: at the sizes a browser can measure the crossover sits above 4.27 and ' +
-          'drifts down as n grows, which the demo reports rather than rounding to the textbook ' +
-          'number. The window narrowing with n is what makes it a genuine phase transition ' +
-          'rather than a gradual trend.',
+          'around a clause-to-variable ratio of about four point two seven. The window narrows ' +
+          'as n grows.',
+        detail: [
+          'This is a property of the DISTRIBUTION rather than of any instance, so it needs many ' +
+            'seeds per ratio and a median rather than a single run.',
+          'The threshold value is asymptotic. At the sizes a browser can measure the crossover sits ' +
+            'above 4.27 and drifts down as n grows, which the demo reports rather than rounding to ' +
+            'the textbook number.',
+          'The window narrowing with n is what makes it a genuine phase transition rather than a ' +
+            'gradual trend.'
+        ],
         example: 'At 44 variables the demo measures the satisfiable fraction crossing one half at ' +
           'ratio 4.38, and reports that the asymptotic value is 4.27.'
       },
       {
         term: 'The cost peaks at the crossover, and both ends are cheap for opposite reasons',
-        plain: 'Under-constrained instances have many answers; over-constrained ones contradict quickly.',
+        plain: 'Under-constrained instances have many answers. Over-constrained ones contradict quickly.',
         formal: 'median DPLL nodes rise from 10 at ratio 1 to 313 at ratio 4.5 and fall to 53 at ratio 8',
-        detail: 'Far below the threshold there are so many satisfying assignments that almost any ' +
-          'descent lands on one. Far above it a contradiction appears within a few decisions and ' +
-          'propagation reaches it immediately. At the crossover there are few solutions AND no ' +
-          'early contradiction, so the search has to go deep before it learns anything at all — ' +
-          'which is exactly the regime anybody generating "random test instances" should be ' +
-          'aiming at if the test is to mean anything.',
-        example: 'The demo’s median column rises and then falls: 10 nodes at ratio 1, 134 at ' +
-          '4.00, a peak of 313 at 4.50, then 247 at 5.00, 137 at 6.00 and 53 at 8.00.'
+        detail: [
+          'Far below the threshold there are so many satisfying assignments that almost any descent ' +
+            'lands on one.',
+          'Far above it a contradiction appears within a few decisions, and propagation reaches it ' +
+            'immediately.',
+          'At the crossover there are few solutions AND no early contradiction, so the search has to ' +
+            'go deep before it learns anything at all. That is exactly the regime anybody ' +
+            'generating "random test instances" should be aiming at if the test is to mean anything.'
+        ],
+        example: 'The demo’s median column rises and then falls. It reads 10 nodes at ratio 1, ' +
+          '134 at 4.00, a peak of 313 at 4.50, then 247 at 5.00, 137 at 6.00 and 53 at 8.00.'
       },
       {
         term: 'Report the median, because the mean is dominated by the tail',
         plain: 'Near the threshold a handful of runs are far above everything else.',
         formal: 'at the peak the worst run is several times the median; the mean tracks the tail and moves between experiments',
-        detail: 'A mean over a heavy-tailed sample is an estimate of something that moves between ' +
-          'runs, so quoting it as "the solve time" makes a benchmark irreproducible without ' +
-          'anybody doing anything wrong. The demo prints the median, the upper quartile, the ' +
-          'mean and the worst side by side precisely so the gap between them is visible; where ' +
-          'the four agree the distribution is well behaved, and where they diverge is exactly ' +
-          'where a single number stops describing anything.',
-        example: 'At ratio 3 the demo measures a median of 20 and a worst of 255 — a spread of ' +
-          '12.8× — while the mean reads 29.6.'
+        detail: [
+          'A mean over a heavy-tailed sample is an estimate of something that moves between runs. ' +
+            'Quoting it as "the solve time" makes a benchmark irreproducible without anybody doing ' +
+            'anything wrong.',
+          'The demo prints the median, the upper quartile, the mean and the worst side by side, ' +
+            'precisely so the gap between them is visible.',
+          'Where the four agree the distribution is well behaved. Where they diverge is exactly ' +
+            'where a single number stops describing anything.'
+        ],
+        example: 'At ratio 3 the demo measures a median of 20 and a worst of 255, a spread of ' +
+          '12.8×, while the mean reads 29.6.'
       },
       {
         term: 'A backdoor is a small set of variables that makes the rest propagate',
@@ -236,12 +248,15 @@
         formal: 'a strong backdoor is a set B such that for every assignment to B, a polynomial subsolver decides the rest',
         readAs: 'A strong backdoor is a set of variables such that for every way of assigning ' +
           'them, a polynomial-time subsolver settles everything else.',
-        detail: 'Industrial instances usually have one of a few dozen variables even when they ' +
-          'have millions in total, and random instances at the threshold do not. That single ' +
-          'structural fact explains most of the gap between "solves in seconds" and "runs for a ' +
-          'week". It also runs backwards into the encoding: a model that keeps related variables ' +
-          'together and keeps implications binary preserves the backdoor, and one that flattens ' +
-          'the structure destroys it.',
+        detail: [
+          'Industrial instances usually have one of a few dozen variables even when they have ' +
+            'millions in total, and random instances at the threshold do not.',
+          'That single structural fact explains most of the gap between "solves in seconds" and ' +
+            '"runs for a week".',
+          'It also runs backwards into the encoding. A model that keeps related variables together ' +
+            'and keeps implications binary preserves the backdoor, and one that flattens the ' +
+            'structure destroys it.'
+        ],
         example: 'The demo’s structure table contrasts "no small set decides the rest" for random ' +
           'instances against "often a few dozen" for industrial ones.'
       },
@@ -249,14 +264,16 @@
         term: 'Combinatorial search has heavy-tailed runtimes',
         plain: 'The same solver on the same instance with a different seed can take orders of magnitude longer.',
         formal: 'the runtime distribution has a tail heavy enough that the mean is dominated by rare runs',
-        detail: 'An unlucky seed wanders into a region of the space with no short path out, and ' +
-          'it has no way to know that is what happened. This is not a defect in the solver: it ' +
-          'is a property of the search landscape, and it appears in complete and incomplete ' +
-          'solvers alike. The practical consequence is that a p99 several times the median means ' +
-          'most of your latency budget is being spent by a small number of runs, and shaving the ' +
-          'median does nothing about them.',
+        detail: [
+          'An unlucky seed wanders into a region of the space with no short path out, and it has no ' +
+            'way to know that is what happened.',
+          'This is not a defect in the solver. It is a property of the search landscape, and it ' +
+            'appears in complete and incomplete solvers alike.',
+          'A p99 several times the median means most of your latency budget is being spent by a ' +
+            'small number of runs. Shaving the median does nothing about them.'
+        ],
         example: 'The demo measures a median of 1 125 flips and a worst of 6 060 on one instance ' +
-          'over 40 seeds — a spread of 5.4×.'
+          'over 40 seeds, a spread of 5.4×.'
       },
       {
         term: 'Restarts convert an unbounded tail into a bounded expectation',
@@ -264,26 +281,30 @@
         formal: 'with success probability p per attempt, the expected total is cutoff/p, which is geometric rather than heavy-tailed',
         readAs: 'If each attempt succeeds with probability p, the expected total work is the ' +
           'cutoff divided by p, which is a geometric distribution rather than a heavy-tailed one.',
-        detail: 'A fresh attempt is a fresh draw from the distribution rather than a continuation ' +
-          'of a bad one, which is exactly the same argument as a hedged request in a ' +
-          'distributed system. The mechanism is arithmetic rather than luck, and it works ' +
-          'because the hazard rate stops rising: past a certain point, a run that has not ' +
-          'finished is no more likely to finish soon than a fresh one, so continuing it is ' +
-          'strictly worse than restarting.',
-        example: 'The demo’s best cutoff takes the mean from 1 582 flips to 1 314 and the worst ' +
+        detail: [
+          'A fresh attempt is a fresh draw from the distribution rather than a continuation of a bad ' +
+            'one. That is exactly the same argument as a hedged request in a distributed system.',
+          'The mechanism is arithmetic rather than luck, and it works because the hazard rate stops ' +
+            'rising.',
+          'Past a certain point, a run that has not finished is no more likely to finish soon than a ' +
+            'fresh one. So continuing it is strictly worse than restarting.'
+        ],
+        example: 'The demo’s best cutoff takes the mean from 1 582 flips to 1 314, and the worst ' +
           'from 6 060 to 5 252, while barely moving the median.'
       },
       {
         term: 'Too short a cutoff is far worse than no restarts at all',
         plain: 'Every attempt is abandoned just before it would have finished.',
         formal: 'if the cutoff is below the median, most attempts fail and the expected total rises rather than falls',
-        detail: 'This is the failure mode of picking a timeout that feels responsive rather than ' +
-          'one the data supports, and it is not a mild mistake — the demo’s shortest cutoff ' +
-          'makes the mean more than four times worse than doing nothing. The cutoff has to come ' +
-          'from the measured distribution: somewhere above the median and below the point where ' +
-          'the tail begins, which for a heavy-tailed distribution is a wide but not unlimited ' +
-          'window.',
-        example: 'The demo’s 100-flip cutoff takes 2 666 restarts and a mean of 6 747 flips ' +
+        detail: [
+          'This is the failure mode of picking a timeout that feels responsive rather than one the ' +
+            'data supports, and it is not a mild mistake.',
+          'The demo’s shortest cutoff makes the mean more than four times worse than doing nothing.',
+          'The cutoff has to come from the measured distribution: somewhere above the median and ' +
+            'below the point where the tail begins. For a heavy-tailed distribution that is a wide ' +
+            'but not unlimited window.'
+        ],
+        example: 'The demo’s 100-flip cutoff takes 2 666 restarts and a mean of 6 747 flips, ' +
           'against 1 582 with no restarts at all.'
       }
     ],

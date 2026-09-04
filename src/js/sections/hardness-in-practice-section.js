@@ -66,49 +66,62 @@
     };
   }
 
-  function orientation() {
+  function orientationTransition() {
     return [
-      '**Worst case and typical case are different questions and NP-completeness answers only ' +
-        'the first.** A hardness result says some instances are hard; it says nothing about ' +
-        'the ones you have. Industrial SAT instances with millions of variables are solved in ' +
-        'seconds every day, and randomly generated instances with fifty variables can be ' +
-        'genuinely difficult. Structure is the difference, and structure is not in the ' +
-        'complexity class.',
-      '**Random 3-SAT has a phase transition, and it is a property of the distribution rather ' +
-        'than of any instance.** Below a clause-to-variable ratio of about 4.27 almost every ' +
-        'formula is satisfiable; above it almost none is; and at the crossover both the ' +
-        'satisfiable fraction and the solve cost change abruptly. The demo sweeps the ratio ' +
-        'with many seeds per point, because a single instance per ratio measures noise.',
+      '**Worst case and typical case are different questions and NP-completeness answers only the ' +
+        'first.** A hardness result says some instances are hard. It says nothing about the ones ' +
+        'you have.',
+      'Industrial SAT instances with millions of variables are solved in seconds every day, and ' +
+        'randomly generated instances with fifty variables can be genuinely difficult.',
+      'Structure is the difference, and structure is not in the complexity class.',
+      '**Random 3-SAT has a phase transition, and it is a property of the distribution rather than ' +
+        'of any instance.** Below a clause-to-variable ratio of about 4.27 almost every formula is ' +
+        'satisfiable, and above it almost none is.',
+      'At the crossover both the satisfiable fraction and the solve cost change abruptly.',
+      'The demo sweeps the ratio with many seeds per point, because a single instance per ratio ' +
+        'measures noise.',
       '**The cost peaks at the crossover for a reason that is easy to state.** Far below it, ' +
-        'solutions are plentiful and any descent finds one. Far above it, contradictions ' +
-        'appear within a few decisions and propagation reaches them immediately. At the ' +
-        'crossover there are few solutions AND no early contradiction, so the search has to go ' +
-        'deep before it learns anything at all.',
-      '**Report the median, not the mean.** At the peak the cost distribution is heavy-tailed, ' +
-        'so the mean is dominated by a handful of runs far above everything else and moves ' +
-        'around between experiments. The demo prints the median, the upper quartile, the mean ' +
-        'and the worst side by side precisely so the gap between them is visible.',
-      '**Generating genuinely hard instances is its own skill.** Random at the threshold is ' +
-        'one recipe; the pigeonhole family from 20.3 is another, and it is hard for a ' +
-        'structural reason rather than a statistical one. "I tried a few instances and it was ' +
-        'fast" is not evidence about a solver, because the instances people reach for first ' +
-        'are exactly the under-constrained ones.',
+        'solutions are plentiful and any descent finds one.',
+      'Far above it, contradictions appear within a few decisions and propagation reaches them ' +
+        'immediately.',
+      'At the crossover there are few solutions AND no early contradiction, so the search has to go ' +
+        'deep before it learns anything at all.'
+    ];
+  }
+
+  function orientationTails() {
+    return [
+      '**Report the median, not the mean.** At the peak the cost distribution is heavy-tailed, so ' +
+        'the mean is dominated by a handful of runs far above everything else, and moves around ' +
+        'between experiments.',
+      'The demo prints the median, the upper quartile, the mean and the worst side by side, ' +
+        'precisely so the gap between them is visible.',
+      '**Generating genuinely hard instances is its own skill.** Random at the threshold is one ' +
+        'recipe. The pigeonhole family from 20.3 is another, and it is hard for a structural ' +
+        'reason rather than a statistical one.',
+      '"I tried a few instances and it was fast" is not evidence about a solver, because the ' +
+        'instances people reach for first are exactly the under-constrained ones.',
       '**A backdoor is a small set of variables whose assignment makes the rest propagate.** ' +
         'Industrial instances usually have one of a few dozen variables even when they have ' +
-        'millions in total; random instances at the threshold do not. That single structural ' +
-        'fact explains most of the gap between "solves in seconds" and "runs for a week", and ' +
-        'it is why encodings that preserve structure beat encodings that flatten it.',
-      '**Runtimes of combinatorial search are heavy-tailed, and the tail is not a bug.** The ' +
-        'same stochastic solver on the same instance with different seeds produces a ' +
-        'distribution whose worst run is orders of magnitude above its median. An unlucky seed ' +
-        'wanders into a region with no short path out, and it has no way to know.',
-      '**Restarts convert an unbounded tail into a bounded expectation, and the cutoff has to ' +
-        'be measured.** Abandon a run at a cutoff and start again with a fresh seed: the ' +
-        'expected total is then geometric rather than heavy-tailed. Too long a cutoff does ' +
-        'nothing; too short a cutoff is far worse than no restarts at all, because every ' +
-        'attempt is killed just before it would have finished. The demo measures all of that ' +
-        'and the bad setting is in the table on purpose.'
+        'millions in total, and random instances at the threshold do not.',
+      'That single structural fact explains most of the gap between "solves in seconds" and "runs ' +
+        'for a week", and it is why encodings that preserve structure beat encodings that flatten ' +
+        'it.',
+      '**Runtimes of combinatorial search are heavy-tailed, and the tail is not a bug.** The same ' +
+        'stochastic solver on the same instance with different seeds produces a distribution whose ' +
+        'worst run is orders of magnitude above its median.',
+      'An unlucky seed wanders into a region with no short path out, and it has no way to know.',
+      '**Restarts convert an unbounded tail into a bounded expectation, and the cutoff has to be ' +
+        'measured.** Abandon a run at a cutoff and start again with a fresh seed, and the expected ' +
+        'total is then geometric rather than heavy-tailed.',
+      'Too long a cutoff does nothing. Too short a cutoff is far worse than no restarts at all, ' +
+        'because every attempt is killed just before it would have finished.',
+      'The demo measures all of that, and the bad setting is in the table on purpose.'
     ];
+  }
+
+  function orientation() {
+    return orientationTransition().concat(orientationTails());
   }
 
   function config() {
@@ -121,13 +134,13 @@
       },
       diagram: diagram(),
       insight: '**When a cost distribution is heavy-tailed the fix is a cutoff, not a faster ' +
-        'algorithm — and this is the same argument as hedged requests.** A p99 that is fifty ' +
+        'algorithm, and this is the same argument as hedged requests.** A p99 that is fifty ' +
         'times the median means most of your latency budget is being spent by a small number of ' +
-        'unlucky runs, and shaving 20% off the median does nothing about them. Abandoning and ' +
+        'unlucky runs. Shaving 20% off the median does nothing about them. Abandoning and ' +
         'retrying does, because a fresh attempt is a fresh draw from the distribution rather ' +
-        'than a continuation of a bad one. The cutoff is the whole design and it has to come ' +
-        'from the measured distribution: the demo’s shortest cutoff makes the mean four times ' +
-        'WORSE than no restarts at all, which is the failure mode of picking a timeout that ' +
+        'than a continuation of a bad one. The cutoff is the whole design, and it has to come ' +
+        'from the measured distribution. The demo’s shortest cutoff makes the mean four times ' +
+        'WORSE than no restarts at all. That is the failure mode of picking a timeout that ' +
         'feels responsive rather than one the data supports.'
     };
   }
