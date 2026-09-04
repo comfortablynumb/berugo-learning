@@ -47,40 +47,45 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**A diff is a shortest path in an edit graph.** Moving right deletes a line of A, moving down ' +
+        'inserts a line of B, and moving along the diagonal is free whenever the two lines are ' +
+        'equal.',
+      'Framing it as a longest common subsequence is equivalent and less useful, because the LCS ' +
+        'formulation invites an `O(NM)` table and the graph formulation does not.',
+      '**Myers searches by cost rather than by position.** For each diagonal it keeps the furthest ' +
+        'point reachable at the current edit distance `D`, then slides greedily along matching ' +
+        'lines — those "snakes" are free. It stops the moment the far corner is reached.',
+      'The cost is `O((N+M)·D)`, proportional to the size of the ANSWER. That is why two nearly ' +
+        'identical files diff instantly however large they are, and two unrelated ones do not.',
+      '**Minimal and readable are different objectives.** On a file with many repeated lines — a ' +
+        'closing brace, a blank line — the shortest script interleaves hunks in a way that ' +
+        'corresponds to no change anybody made.',
+      '**Patience diff** gives up minimality. It anchors on lines that occur exactly once in each ' +
+        'file, takes the longest increasing subsequence of those anchors, and recurses between them.',
+      'The panel measures both objectives on the same pair, and they disagree.',
+      '**A three-way merge is two diffs against a base.** A position changed on one side only takes ' +
+        'that side. Changed identically on both, it is taken once. Changed differently on both, it ' +
+        'is a **conflict** and must be reported rather than resolved.',
+      'Split "lines inserted before position i" from "lines replacing position i". That is what ' +
+        'lets an insertion on one side and an edit on the other coexist without being called a ' +
+        'conflict, and the fixtures below include exactly that case.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'A diff is a shortest path in an **edit graph**: moving right deletes a line of A, moving ' +
-          'down inserts a line of B, and moving along the diagonal is free whenever the two lines ' +
-          'are equal. Framing it as a longest common subsequence is equivalent and less useful, ' +
-          'because the LCS formulation invites an `O(NM)` table and the graph formulation does not.',
-        '**Myers searches by cost rather than by position.** For each diagonal it keeps the furthest ' +
-          'point reachable at the current edit distance `D`, slides greedily along matching lines — ' +
-          'those "snakes" are free — and stops the moment the far corner is reached. The cost is ' +
-          '`O((N+M)·D)`, proportional to the size of the ANSWER, which is why two nearly identical ' +
-          'files diff instantly however large they are and two unrelated ones do not.',
-        '**Minimal and readable are different objectives.** On a file with many repeated lines — a ' +
-          'closing brace, a blank line — the shortest script interleaves hunks in a way that ' +
-          'corresponds to no change anybody made. **Patience diff** gives up minimality: it anchors ' +
-          'on lines that occur exactly once in each file, takes the longest increasing subsequence ' +
-          'of those anchors, and recurses between them. The panel measures both objectives on the ' +
-          'same pair, and they disagree.',
-        '**A three-way merge is two diffs against a base.** A position changed on one side only ' +
-          'takes that side; changed identically on both takes it once; changed differently on both ' +
-          'is a **conflict** and must be reported rather than resolved. Splitting "lines inserted ' +
-          'before position i" from "lines replacing position i" is what lets an insertion on one ' +
-          'side and an edit on the other coexist without being called a conflict, and the fixtures ' +
-          'below include exactly that case.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — the side-by-side, the two objectives, and the growth',
         markup: root.DiffAndMergeTemplate.render()
       },
       diagram: diagram(),
-      insight: 'When a diff is unreadable the fix is almost never a better algorithm — it is a ' +
+      insight: 'When a diff is unreadable the fix is almost never a better algorithm. It is a ' +
         'different objective. `git diff --patience` and `--histogram` exist because minimal edit ' +
-        'scripts and legible ones are different things, and the same is true of `--ignore-all-space` ' +
+        'scripts and legible ones are different things. The same is true of `--ignore-all-space` ' +
         'and of the indent heuristic Git turned on by default in 2016. Each of them makes the script ' +
         'longer and the review shorter, which is the correct trade and one that a complexity ' +
         'analysis cannot see.'

@@ -304,11 +304,13 @@
         formal: 'the shortest edit script is the shortest path from (0,0) to (N,M) in that graph',
         readAs: 'Lay the two files out as the axes of a grid. Moving right deletes, moving down inserts, ' +
           'moving diagonally keeps a matching line for free. The cheapest route across is the diff.',
-        detail: 'Framing it as a longest common subsequence is equivalent and less useful, because ' +
-          'the LCS formulation invites an O(NM) table and the graph formulation invites a search ' +
-          'that stops when it reaches the corner. The difference between those two mental models is ' +
-          'the difference between a diff that scales with the file and one that scales with the ' +
-          'change.',
+        detail: [
+          'Framing it as a longest common subsequence is equivalent and less useful.',
+          'The LCS formulation invites an O(NM) table. The graph formulation invites a search that ' +
+            'stops when it reaches the corner.',
+          'The difference between those two mental models is the difference between a diff that ' +
+            'scales with the file and one that scales with the change.'
+        ],
         example: 'On a 200-line file with 1% of lines changed, Myers visits 13 diagonals; the table ' +
           'would have 40 000 cells.'
       },
@@ -319,11 +321,14 @@
         readAs: 'Myers costs the file sizes times the number of differences, not times the file sizes. Two ' +
           'large files that differ in three lines are diffed almost instantly — which is why this is ' +
           'the algorithm every version control system uses.',
-        detail: 'That is the property that makes `git diff` on a one-line change to a ten-thousand ' +
-          'line file return instantly. The work is not a function of the file size but of how ' +
-          'different the two files are, so the common case — a small change to a large file — is ' +
-          'the cheap case. Two unrelated files of the same size cost the full quadratic, and that ' +
-          'is also the right behaviour.',
+        detail: [
+          'That is the property that makes `git diff` on a one-line change to a ten-thousand line ' +
+            'file return instantly.',
+          'The work is not a function of the file size but of how different the two files are. So ' +
+            'the common case — a small change to a large file — is the cheap case.',
+          'Two unrelated files of the same size cost the full quadratic, and that is also the right ' +
+            'behaviour.'
+        ],
         example: 'Diagonals visited at 1%, 10% and 60% of lines changed: 13, 841 and 29 041, on ' +
           'identical file sizes.'
       },
@@ -342,22 +347,26 @@
         },
         plain: 'Sliding along matching lines costs nothing, so take as many as possible before spending an edit.',
         formal: 'the diagonal edges have weight 0; every furthest-reaching path extends greedily along them',
-        detail: 'Because matching lines are free, the furthest-reaching point on a diagonal at cost ' +
-          'D is found by taking the best of the two D−1 neighbours and then sliding — no search, no ' +
-          'choice, no backtracking. That is what collapses a shortest-path problem into a single ' +
-          'forward sweep per cost level, and it is why the algorithm is thirty lines rather than a ' +
-          'priority queue.',
+        detail: [
+          'Because matching lines are free, the furthest-reaching point on a diagonal at cost D is ' +
+            'found by taking the best of the two D−1 neighbours and then sliding.',
+          'No search, no choice, no backtracking.',
+          'That is what collapses a shortest-path problem into a single forward sweep per cost ' +
+            'level, and it is why the algorithm is thirty lines rather than a priority queue.'
+        ],
         example: 'At 1% changed the search makes 210 snake comparisons and visits only 13 diagonals.'
       },
       {
         term: 'Minimal and readable are different objectives',
         plain: 'The shortest edit script on a file full of closing braces is one no human reads as the change that was made.',
         formal: 'edit-script length and hunk count are different measures, and optimising one can worsen the other',
-        detail: 'When a file has many identical lines — a closing brace, a blank line, a repeated ' +
-          'boilerplate row — the minimal script pairs them arbitrarily and interleaves the hunks. ' +
-          'The result is correct, shortest, and unreadable. That is not a bug in the algorithm; it ' +
-          'is the algorithm optimising the thing it was asked to optimise, and the fix is to ask for ' +
-          'something else.',
+        detail: [
+          'When a file has many identical lines — a closing brace, a blank line, a repeated ' +
+            'boilerplate row — the minimal script pairs them arbitrarily and interleaves the hunks.',
+          'The result is correct, shortest, and unreadable.',
+          'That is not a bug in the algorithm. It is the algorithm optimising the thing it was asked ' +
+            'to optimise, and the fix is to ask for something else.'
+        ],
         example: 'On a file where a function moved, Myers produces 6 operations in 3 hunks and ' +
           'patience produces 8 in 2.'
       },
@@ -365,11 +374,14 @@
         term: 'Patience diff anchors on lines unique in both files',
         plain: 'Match the lines that occur exactly once on each side, take the longest increasing subsequence of those, recurse between them.',
         formal: 'the anchors exclude repeated lines by construction, which is exactly what Myers interleaves',
-        detail: 'Giving up minimality buys hunks that correspond to the change somebody actually ' +
-          'made, because a line that appears once in each file is almost certainly *the same line* ' +
-          'and a closing brace is not. Between anchors the algorithm falls back to Myers, so ' +
-          'patience is an anchoring strategy rather than a whole algorithm — which is why it is a ' +
-          'flag on the same command rather than a different tool.',
+        detail: [
+          'Giving up minimality buys hunks that correspond to the change somebody actually made.',
+          'A line that appears once in each file is almost certainly *the same line*, and a closing ' +
+            'brace is not.',
+          'Between anchors the algorithm falls back to Myers, so patience is an anchoring strategy ' +
+            'rather than a whole algorithm. That is why it is a flag on the same command rather than ' +
+            'a different tool.'
+        ],
         example: 'The anchors on the reorder fixture are 3 lines that occur exactly once in each ' +
           'file; the repeated closing braces are not among them.'
       },
@@ -379,11 +391,13 @@
         formal: 'apply(A, script) = B is the only claim; the length and the hunk count are commentary',
         readAs: 'The one thing a diff must guarantee is that applying it to the first file produces the ' +
           'second. How short or how readable the script is are preferences, not correctness.',
-        detail: 'A diff that does not reconstruct the second file is a plausible list of line ' +
-          'numbers, and every other number computed from it is meaningless. The check is four lines ' +
-          'and it catches the whole family of backtracking errors that produce scripts which look ' +
-          'right in a side-by-side view and are not. Every panel in the demo reports it, before it ' +
-          'reports anything else.',
+        detail: [
+          'A diff that does not reconstruct the second file is a plausible list of line numbers, and ' +
+            'every other number computed from it is meaningless.',
+          'The check is four lines, and it catches the whole family of backtracking errors that ' +
+            'produce scripts which look right in a side-by-side view and are not.',
+          'Every panel in the demo reports it, before it reports anything else.'
+        ],
         example: 'Both Myers and patience round-trip on all four fixtures, which is what licenses ' +
           'comparing their hunk counts at all.'
       },
@@ -391,10 +405,12 @@
         term: 'A three-way merge distinguishes inserting before a line from replacing it',
         plain: 'One side adding a line and the other editing a nearby line is not a conflict.',
         formal: 'per base position: a prefix of inserted lines, and a replacement for the line itself',
-        detail: 'Conflating the two produces conflicts on every commit that touched two nearby ' +
-          'lines, which is the difference between a merge tool people trust and one they route ' +
-          'around. Splitting them means an insertion on one side and an edit on the other are ' +
-          'independent decisions at the same position, and both can be taken.',
+        detail: [
+          'Conflating the two produces conflicts on every commit that touched two nearby lines.',
+          'That is the difference between a merge tool people trust and one they route around.',
+          'Splitting them means an insertion on one side and an edit on the other are independent ' +
+            'decisions at the same position, and both can be taken.'
+        ],
         example: 'Of five three-way fixtures, only one conflicts — the one where both sides changed ' +
           'the same line to different content.'
       },
@@ -402,11 +418,14 @@
         term: 'A conflict is reported, never resolved',
         plain: 'When both sides changed the same thing differently, the tool must stop.',
         formal: 'the merge output contains both versions with markers, and the conflict count is the result',
-        detail: 'A merge tool that silently picks a side is a merge tool nobody can trust, because ' +
-          'the cases where it guesses wrong are exactly the cases where the two changes were ' +
-          'incompatible for a reason. Reporting the count as the primary output — rather than ' +
-          'burying it in the exit status — is what makes the tool\'s behaviour predictable, and it ' +
-          'is why every merge driver in use has the same three markers.',
+        detail: [
+          'A merge tool that silently picks a side is a merge tool nobody can trust.',
+          'The cases where it guesses wrong are exactly the cases where the two changes were ' +
+            'incompatible for a reason.',
+          'Reporting the count as the primary output — rather than burying it in the exit status — ' +
+            'is what makes the tool\'s behaviour predictable. It is why every merge driver in use ' +
+            'has the same three markers.'
+        ],
         example: 'The conflicting fixture emits both versions between markers and reports 1 ' +
           'conflict; the other four resolve automatically.'
       }
