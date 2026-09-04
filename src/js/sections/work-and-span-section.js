@@ -57,45 +57,61 @@
     };
   }
 
-  function orientation() {
+  function orientationCosts() {
     return [
       '**A parallel algorithm has two costs and only one of them is time.** WORK is the total ' +
-        'number of operations — what one processor would do. SPAN, or depth, is the longest ' +
-        'chain that must happen in order. Everything else about parallel performance follows ' +
-        'from those two numbers and the processor count.',
+        'number of operations, which is what one processor would do. SPAN, or depth, is the ' +
+        'longest chain that must happen in order.',
+      'Everything else about parallel performance follows from those two numbers and the processor ' +
+        'count.',
       '**Brent’s theorem says time on p processors is at most work/p + span, and the second term ' +
-        'does not shrink.** No amount of hardware shortens a dependency chain. An algorithm with ' +
-        'linear span will not go faster on more cores however parallel the implementation looks, ' +
-        'which is what most "we parallelised it and nothing happened" investigations turn out to ' +
-        'be about.',
+        'does not shrink.** No amount of hardware shortens a dependency chain.',
+      'An algorithm with linear span will not go faster on more cores however parallel the ' +
+        'implementation looks. That is what most "we parallelised it and nothing happened" ' +
+        'investigations turn out to be about.',
       '**The demo schedules a recorded dependency graph rather than evaluating the formula.** ' +
         'Every operation is a node with its inputs, a greedy list scheduler runs up to p ready ' +
-        'operations per step, and the reported time is the length of that schedule. It is ' +
-        'consistently shorter than Brent’s bound, which is what an upper bound is supposed to be.',
+        'operations per step, and the reported time is the length of that schedule.',
+      'It is consistently shorter than Brent’s bound, which is what an upper bound is supposed to ' +
+        'be.',
       '**Prefix scan looks inherently sequential and is not, which is why it is the canonical ' +
-        'primitive.** The loop is n work and n span. Blelloch’s up-sweep and down-sweep is 2n ' +
-        'work and 2 log n span — the same work, an exponentially shorter critical path — and ' +
-        'parallel compaction, radix sort, quicksort partitioning and sparse matrix operations ' +
-        'are all built on it.',
-      '**Work efficiency is a separate property from short span, and the demo separates them.** ' +
-        'Hillis–Steele reaches log n span too, and does n log n work — a factor of log n more ' +
-        'than necessary. On a machine with a processor per element it is the faster of the two; ' +
-        'on a machine with eight, it pays that whole factor and loses.',
-      '**The speed-up ceiling is work over span, and it is reached long before the processor ' +
-        'count runs out.** At 256 elements the work-efficient scan has 511 work and 17 span, so ' +
-        'no schedule beats a speed-up of 30 — and the demo shows the measured time flattening at ' +
-        'exactly 17 steps while the processor count keeps rising.',
-      '**Amdahl and Gustafson answer different questions and are routinely quoted at each ' +
-        'other.** Amdahl fixes the problem and asks how fast it goes: a serial fraction s caps ' +
-        'the speed-up at 1/s forever. Gustafson fixes the TIME and asks how much bigger a ' +
-        'problem fits: that grows without bound. Both are correct, and which one applies is a ' +
-        'question about your workload rather than about the arithmetic.',
-      '**Utilisation is the diagnostic that connects them.** A greedy schedule keeps every ' +
-        'processor busy while there is ready work, so falling utilisation means the graph has ' +
-        'run out of parallelism rather than that the scheduler is bad. The demo prints it per ' +
-        'processor count, and watching it collapse is watching the span become the binding ' +
-        'constraint.'
+        'primitive.** The loop is n work and n span.',
+      'Blelloch’s up-sweep and down-sweep is 2n work and 2 log n span, which is the same work with ' +
+        'an exponentially shorter critical path.',
+      'Parallel compaction, radix sort, quicksort partitioning and sparse matrix operations are all ' +
+        'built on it.'
     ];
+  }
+
+  function orientationCeilings() {
+    return [
+      '**Work efficiency is a separate property from short span, and the demo separates them.** ' +
+        'Hillis–Steele reaches log n span too, and does n log n work, which is a factor of log n ' +
+        'more than necessary.',
+      'On a machine with a processor per element it is the faster of the two. On a machine with ' +
+        'eight, it pays that whole factor and loses.',
+      '**The speed-up ceiling is work over span, and it is reached long before the processor count ' +
+        'runs out.** At 256 elements the work-efficient scan has 511 work and 17 span, so no ' +
+        'schedule beats a speed-up of 30.',
+      'The demo shows the measured time flattening at exactly 17 steps while the processor count ' +
+        'keeps rising.',
+      '**Amdahl and Gustafson answer different questions and are routinely quoted at each other.** ' +
+        'Amdahl fixes the problem and asks how fast it goes, so a serial fraction s caps the ' +
+        'speed-up at 1/s forever.',
+      'Gustafson fixes the TIME and asks how much bigger a problem fits, and that grows without ' +
+        'bound.',
+      'Both are correct, and which one applies is a question about your workload rather than about ' +
+        'the arithmetic.',
+      '**Utilisation is the diagnostic that connects them.** A greedy schedule keeps every ' +
+        'processor busy while there is ready work, so falling utilisation means the graph has run ' +
+        'out of parallelism rather than that the scheduler is bad.',
+      'The demo prints it per processor count, and watching it collapse is watching the span become ' +
+        'the binding constraint.'
+    ];
+  }
+
+  function orientation() {
+    return orientationCosts().concat(orientationCeilings());
   }
 
   function config() {
@@ -109,13 +125,13 @@
       diagram: diagram(),
       insight: '**Compute the span before buying cores.** Work over span is the maximum speed-up ' +
         'any scheduler can reach, and it is a property of the algorithm rather than of the ' +
-        'machine — so it can be worked out on paper before a line of parallel code is written. ' +
+        'machine. So it can be worked out on paper before a line of parallel code is written. ' +
         'When it is small the answer is a different algorithm, not more hardware, and the ' +
         'restructuring is usually the same move every time: turn a sequential accumulation into ' +
         'a tree. The second thing to check is that the work did not grow while the span shrank. ' +
         'A method with a shorter critical path and a factor of log n more work is faster only ' +
-        'when there are processors to absorb it, and on the machine you actually have it is ' +
-        'often slower than the loop it replaced.'
+        'when there are processors to absorb it. On the machine you actually have it is often ' +
+        'slower than the loop it replaced.'
     };
   }
 

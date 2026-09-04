@@ -163,13 +163,16 @@
         },
         plain: 'Total operations, and the longest chain of dependent ones.',
         formal: 'work T₁ = the time on one processor · span T∞ = the time on infinitely many',
-        readAs: 'T-one is the total work, the time on a single processor; T-infinity is the span, ' +
+        readAs: 'T-one is the total work, the time on a single processor. T-infinity is the span, ' +
           'the time given unlimited processors.',
-        detail: 'Work says what the computation costs and span says how fast it can possibly go. ' +
-          'They are properties of the ALGORITHM rather than of any machine, which is what makes ' +
-          'them worth computing before buying hardware: the ratio is the speed-up ceiling, and no ' +
-          'scheduler, language or runtime beats it. Everything else in parallel performance is ' +
-          'about how close a real system gets to that ratio.',
+        detail: [
+          'Work says what the computation costs and span says how fast it can possibly go.',
+          'They are properties of the ALGORITHM rather than of any machine, which is what makes them ' +
+            'worth computing before buying hardware. The ratio is the speed-up ceiling, and no ' +
+            'scheduler, language or runtime beats it.',
+          'Everything else in parallel performance is about how close a real system gets to that ' +
+            'ratio.'
+        ],
         example: 'The demo’s work-efficient scan over 256 elements has work 511 and span 17, so ' +
           'its ceiling is 30.1×.'
       },
@@ -179,25 +182,29 @@
         formal: 'parallelism = T₁/T∞; speed-up on p processors is at most min(p, T₁/T∞)',
         readAs: 'The parallelism is the work divided by the span, and the speed-up on p ' +
           'processors is at most the smaller of p and that ratio.',
-        detail: 'This is the number to compute before a discussion about core counts, because it ' +
-          'settles the discussion. The demo’s scan floors at 17 steps: at 256 processors it takes ' +
-          '17 and at a million it would still take 17, since the critical path has to be walked ' +
-          'one step at a time. Adding processors past the parallelism is not a diminishing return, ' +
-          'it is a zero one.',
-        example: 'The demo’s schedule reaches 30.06× speed-up at 256 processors and the span is ' +
-          'attained exactly — time ÷ span reads 1.00×.'
+        detail: [
+          'This is the number to compute before a discussion about core counts, because it settles ' +
+            'the discussion.',
+          'The demo’s scan floors at 17 steps. At 256 processors it takes 17, and at a million it ' +
+            'would still take 17, since the critical path has to be walked one step at a time.',
+          'Adding processors past the parallelism is not a diminishing return, it is a zero one.'
+        ],
+        example: 'The demo’s schedule reaches 30.06× speed-up at 256 processors, and the span is ' +
+          'attained exactly. Time ÷ span reads 1.00×.'
       },
       {
         term: 'Brent’s theorem says a greedy schedule is within a factor of two',
         plain: 'Never leave a processor idle when work is ready, and you are close to optimal.',
         formal: 'T_p ≤ T₁/p + T∞, and since both terms are lower bounds, T_p ≤ 2·T_opt',
-        readAs: 'The time on p processors is at most the work divided by p plus the span, and ' +
-          'because each of those is separately a lower bound, greedy is within twice optimal.',
-        detail: 'The consequence is that scheduling is not where the performance is. Any greedy ' +
-          'scheduler — including a work-stealing runtime, which is greedy with a cheap ' +
-          'approximation — lands within a factor of two of the best possible, so the way to go ' +
-          'faster is to change the work or the span. That is why parallel performance work is ' +
-          'about restructuring algorithms rather than tuning thread pools.',
+        readAs: 'The time on p processors is at most the work divided by p plus the span. Because ' +
+          'each of those is separately a lower bound, greedy is within twice optimal.',
+        detail: [
+          'The consequence is that scheduling is not where the performance is.',
+          'Any greedy scheduler lands within a factor of two of the best possible, and that includes ' +
+            'a work-stealing runtime, which is greedy with a cheap approximation.',
+          'So the way to go faster is to change the work or the span. That is why parallel ' +
+            'performance work is about restructuring algorithms rather than tuning thread pools.'
+        ],
         example: 'The demo measures 39 steps at 16 processors against Brent’s bound of 49, and 17 ' +
           'against 19 at 256.'
       },
@@ -207,12 +214,14 @@
         formal: 'Blelloch scan: 2(n − 1) additions in 2·log₂ n levels',
         readAs: 'Twice n minus one additions, arranged in two times the base-two logarithm of n ' +
           'levels.',
-        detail: 'Each output of a scan needs the one before it, which looks like a chain of length ' +
-          'n — and the tree formulation gets the same answers with a critical path of 2 log n. ' +
-          'The up-sweep computes every subtree sum in n − 1 additions; the down-sweep pushes the ' +
-          'sum of everything to the left back down in another n − 1. Every parallel compaction, ' +
-          'radix sort and sparse-matrix routine is built on it, which is why it is called the ' +
-          'canonical primitive rather than a trick.',
+        detail: [
+          'Each output of a scan needs the one before it, which looks like a chain of length n. The ' +
+            'tree formulation gets the same answers with a critical path of 2 log n.',
+          'The up-sweep computes every subtree sum in n − 1 additions. The down-sweep pushes the sum ' +
+            'of everything to the left back down in another n − 1.',
+          'Every parallel compaction, radix sort and sparse-matrix routine is built on it, which is ' +
+            'why it is called the canonical primitive rather than a trick.'
+        ],
         example: 'The demo measures 511 work and 17 span at n = 256, against 2n = 512 and ' +
           '2·log₂(256) = 16.'
       },
@@ -222,26 +231,32 @@
         formal: 'a work-efficient algorithm has T₁ within a constant of the best sequential one',
         readAs: 'The total work is within a constant factor of the best known sequential ' +
           'algorithm for the same problem.',
-        detail: 'Hillis–Steele reaches a span of log n rather than 2 log n and does seven times ' +
-          'the work of the sequential loop to get there. Neither is better in the abstract: with ' +
-          'a handful of processors the extra work dominates and the work-efficient version wins, ' +
-          'and with thousands the span dominates and the other does. Which is why the two ' +
-          'numbers have to be quoted together — an algorithm described by one of them alone ' +
-          'cannot be compared to anything.',
-        example: 'The demo measures work 511 and span 17 for Blelloch against work 1 793 and span ' +
-          '8 for Hillis–Steele, at 2.00× and 7.00× the sequential loop.'
+        detail: [
+          'Hillis–Steele reaches a span of log n rather than 2 log n, and does seven times the work ' +
+            'of the sequential loop to get there.',
+          'Neither is better in the abstract. With a handful of processors the extra work dominates ' +
+            'and the work-efficient version wins, and with thousands the span dominates and the ' +
+            'other does.',
+          'That is why the two numbers have to be quoted together. An algorithm described by one of ' +
+            'them alone cannot be compared to anything.'
+        ],
+        example: 'The demo measures work 511 and span 17 for Blelloch, against work 1 793 and span ' +
+          '8 for Hillis–Steele. That is 2.00× and 7.00× the sequential loop.'
       },
       {
         term: 'Utilisation falls as processors are added, and that is the graph running dry',
         plain: 'Near the end of the schedule there is not enough ready work to go round.',
         formal: 'utilisation = T₁ / (p · T_p); it falls whenever T_p is limited by the span',
         readAs: 'Utilisation is the work divided by the processor count times the time actually ' +
-          'taken, and it falls whenever that time is set by the span rather than by the work.',
-        detail: 'It is tempting to read falling utilisation as a scheduling failure and go looking ' +
-          'for a better runtime. It is usually the dependency graph: at the top of a reduction ' +
-          'tree there are two ready operations and 254 idle processors, and no scheduler invents ' +
-          'work that does not exist. The fix is a different algorithm with more parallelism, or ' +
-          'more independent problems run at once.',
+          'taken. It falls whenever that time is set by the span rather than by the work.',
+        detail: [
+          'It is tempting to read falling utilisation as a scheduling failure and go looking for a ' +
+            'better runtime.',
+          'It is usually the dependency graph. At the top of a reduction tree there are two ready ' +
+            'operations and 254 idle processors, and no scheduler invents work that does not exist.',
+          'The fix is a different algorithm with more parallelism, or more independent problems run ' +
+            'at once.'
+        ],
         example: 'The demo’s utilisation falls from 100.0% at one processor to 11.7% at 256, while ' +
           'the schedule length falls from 511 to 17.'
       },
@@ -249,13 +264,16 @@
         term: 'Amdahl’s law is a ceiling on a fixed problem',
         plain: 'The serial fraction sets a maximum speed-up whatever the machine.',
         formal: 'speed-up ≤ 1/s where s is the serial fraction; on p processors, 1/(s + (1 − s)/p)',
-        readAs: 'The speed-up is at most one over the serial fraction, and on p processors it is ' +
-          'one over the serial fraction plus the parallel fraction divided by p.',
-        detail: 'Five per cent serial caps the speed-up at twenty, so a thousand processors ' +
-          'deliver 19.6 and the other 980 are idle. The number is brutal and it is arithmetic: ' +
-          'the serial part is walked at the same speed whatever surrounds it. Measuring the ' +
-          'serial fraction — startup, coordination, the final merge, the lock — is therefore the ' +
-          'first thing to do, because it says whether the exercise is worth starting.',
+        readAs: 'The speed-up is at most one over the serial fraction. On p processors it is one ' +
+          'over the serial fraction plus the parallel fraction divided by p.',
+        detail: [
+          'Five per cent serial caps the speed-up at twenty, so a thousand processors deliver 19.6 ' +
+            'and the other 980 are idle.',
+          'The number is brutal and it is arithmetic. The serial part is walked at the same speed ' +
+            'whatever surrounds it.',
+          'Measuring the serial fraction — startup, coordination, the final merge, the lock — is ' +
+            'therefore the first thing to do. It says whether the exercise is worth starting.'
+        ],
         example: 'The demo reports ceilings of 1000×, 100×, 20× and 5× at serial fractions of ' +
           '0.1%, 1%, 5% and 20%.'
       },
@@ -265,13 +283,16 @@
         formal: 'scaled speed-up = s + p·(1 − s), for a problem whose parallel part grows with p',
         readAs: 'The scaled speed-up is the serial fraction plus p times the parallel fraction, ' +
           'for a problem that is made bigger as the machine gets bigger.',
-        detail: 'At 20% serial Amdahl says 5.0× on a thousand processors and Gustafson says 819×, ' +
-          'and neither is wrong — they are answers to different questions. The one that applies ' +
-          'is decided by whether the workload grows when the machine does: a nightly batch over ' +
-          'a fixed dataset is Amdahl, and a service whose traffic grows with its fleet is ' +
-          'Gustafson. Quoting one at the other is the standard mistake in capacity arguments.',
+        detail: [
+          'At 20% serial Amdahl says 5.0× on a thousand processors and Gustafson says 819×. Neither ' +
+            'is wrong, because they are answers to different questions.',
+          'The one that applies is decided by whether the workload grows when the machine does. A ' +
+            'nightly batch over a fixed dataset is Amdahl, and a service whose traffic grows with ' +
+            'its fleet is Gustafson.',
+          'Quoting one at the other is the standard mistake in capacity arguments.'
+        ],
         example: 'The demo’s last column reads 1023×, 1014×, 973× and 819× at the four serial ' +
-          'fractions, beside Amdahl’s 506.2, 91.2, 19.6 and 5.0.'
+          'fractions. Amdahl’s beside it reads 506.2, 91.2, 19.6 and 5.0.'
       }
     ],
 
