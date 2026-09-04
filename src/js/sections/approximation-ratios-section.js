@@ -52,38 +52,45 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**A ratio is what separates an approximation algorithm from a heuristic.** For a ' +
+        'minimisation problem, a ρ-approximation returns a solution of cost at most ρ times the ' +
+        'optimum on EVERY input. For maximisation, it returns at least 1/ρ of it.',
+      'Without that quantifier there is no statement, and a heuristic can be arbitrarily bad on an ' +
+        'input you have not tried.',
+      'The demo measures every ratio against an exact optimum computed by enumeration, so nothing ' +
+        'on this page is assumed.',
+      '**The 2-approximation for vertex cover looks wasteful and is the one you can defend.** Take ' +
+        'a maximal matching and keep BOTH endpoints of every matched edge.',
+      'Any cover must take at least one endpoint per matched edge, so the matching size is a lower ' +
+        'bound on the optimum and the answer is at most twice it.',
+      'That is a certificate, and it proves the ratio for the instance in hand without knowing the ' +
+        'optimum at all.',
+      '**The clever-looking alternative has no constant ratio.** Repeatedly taking the ' +
+        'highest-degree vertex is the first improvement everyone proposes, and it is Θ(log n) ' +
+        'away from optimal on a constructible family.',
+      'On random graphs it beats the matching algorithm handsomely. On the trap it does not.',
+      'Both measurements are in the demo, and neither one alone is the answer.',
+      '**Greedy set cover is ln n and that bound is attained, not approached.** Repeatedly take ' +
+        'the set with the best coverage per unit cost, and the cost is at most H(n) times the ' +
+        'optimum.',
+      'The demo builds Vazirani’s instance where greedy pays exactly H(n), which is 5.43 against ' +
+        'an optimum of 1.01 at n = 128.',
+      'It then shows the same algorithm within a few percent of optimal on random instances.',
+      '**Metric TSP is where the bound comes from a lower bound rather than the algorithm.** ' +
+        'MST ≤ OPT because deleting a tour edge leaves a spanning tree. Doubling gives a walk of ' +
+        '2·MST, and shortcutting cannot lengthen it under the triangle inequality.',
+      'Christofides replaces the doubling with a minimum-weight perfect matching on the odd-degree ' +
+        'vertices, which costs at most OPT/2, and gets 3/2.',
+      'That has been the best ratio known for metric TSP for forty-five years.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**A ratio is what separates an approximation algorithm from a heuristic.** For a ' +
-          'minimisation problem, a ρ-approximation returns a solution of cost at most ρ times ' +
-          'the optimum on EVERY input; for maximisation, at least 1/ρ of it. Without that ' +
-          'quantifier there is no statement, and a heuristic can be arbitrarily bad on an input ' +
-          'you have not tried. The demo measures every ratio against an exact optimum computed by ' +
-          'enumeration, so nothing on this page is assumed.',
-        '**The 2-approximation for vertex cover looks wasteful and is the one you can defend.** ' +
-          'Take a maximal matching and keep BOTH endpoints of every matched edge. Any cover must ' +
-          'take at least one endpoint per matched edge, so the matching size is a lower bound on ' +
-          'the optimum and the answer is at most twice it — a certificate that proves the ratio ' +
-          'for the instance in hand without knowing the optimum at all.',
-        '**The clever-looking alternative has no constant ratio.** Repeatedly taking the ' +
-          'highest-degree vertex is the first improvement everyone proposes, and it is Θ(log n) ' +
-          'away from optimal on a constructible family. On random graphs it beats the matching ' +
-          'algorithm handsomely; on the trap it does not. Both measurements are in the demo, and ' +
-          'neither one alone is the answer.',
-        '**Greedy set cover is ln n and that bound is attained, not approached.** Repeatedly take ' +
-          'the set with the best coverage per unit cost; the cost is at most H(n) times the ' +
-          'optimum. The demo builds Vazirani’s instance where greedy pays exactly H(n) — 5.43 ' +
-          'against an optimum of 1.01 at n = 128 — and shows the same algorithm within a few ' +
-          'percent of optimal on random instances.',
-        '**Metric TSP is where the bound comes from a lower bound rather than the algorithm.** ' +
-          'MST ≤ OPT because deleting a tour edge leaves a spanning tree; doubling gives a walk ' +
-          'of 2·MST; shortcutting cannot lengthen it under the triangle inequality. Christofides ' +
-          'replaces the doubling with a minimum-weight perfect matching on the odd-degree ' +
-          'vertices, which costs at most OPT/2, and gets 3/2 — the best ratio known for metric ' +
-          'TSP for forty-five years.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — ratio distributions against exact optima, and the tight instances',
         markup: root.ApproximationRatiosTemplate.render()
@@ -91,12 +98,12 @@
       diagram: diagram(),
       insight: '**The ratio is a worst case and the distribution is what you will see, and ' +
         'shipping decisions need both.** The demo makes the point twice over. Greedy set cover ' +
-        'has a ln n bound and measures 1.23 on random instances; highest-degree vertex cover has ' +
+        'has a ln n bound and measures 1.23 on random instances. Highest-degree vertex cover has ' +
         'no bound and measures 1.03. If you only know the bounds you will write an exact solver ' +
-        'you did not need; if you only know the measurements you will ship something that fails ' +
+        'you did not need. If you only know the measurements you will ship something that fails ' +
         'on the one input that matters. **The professional position is to use the algorithm with ' +
         'the guarantee, know its measured distribution, and keep the exact solver for instances ' +
-        'small enough to afford it** — which, as the enumeration counts in this demo show, is a ' +
+        'small enough to afford it.** As the enumeration counts in this demo show, that is a ' +
         'smaller set than people expect.'
     };
   }

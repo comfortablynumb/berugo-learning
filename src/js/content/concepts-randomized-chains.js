@@ -340,14 +340,17 @@
         },
         plain: 'A guarantee is a statement about every input, not about the ones you tried.',
         formal: 'ALG(x) ≤ ρ · OPT(x) for all x, minimising; ALG(x) ≥ OPT(x)/ρ maximising',
-        readAs: 'For every input, the algorithm’s cost is at most rho times the optimal cost — ' +
-          'or for a maximisation problem, at least the optimum divided by rho.',
-        detail: 'Without the universal quantifier there is no statement at all, and a heuristic ' +
-          'that is excellent on every instance anybody has run can still be arbitrarily bad on ' +
-          'one nobody has. The ratio is also what lets the algorithm be reasoned about in ' +
-          'composition: if a subroutine is a 2-approximation you can bound what the surrounding ' +
-          'system does, and if it is merely "good in practice" you cannot. Every ratio in this ' +
-          'section is measured against an exact optimum rather than assumed.',
+        readAs: 'For every input, the algorithm’s cost is at most rho times the optimal cost. ' +
+          'For a maximisation problem it is at least the optimum divided by rho.',
+        detail: [
+          'Without the universal quantifier there is no statement at all. A heuristic that is ' +
+            'excellent on every instance anybody has run can still be arbitrarily bad on one nobody ' +
+            'has.',
+          'The ratio is also what lets the algorithm be reasoned about in composition. If a ' +
+            'subroutine is a 2-approximation you can bound what the surrounding system does, and if ' +
+            'it is merely "good in practice" you cannot.',
+          'Every ratio in this section is measured against an exact optimum rather than assumed.'
+        ],
         example: 'The demo computes exact vertex covers by subset enumeration on every one of ' +
           'its 200 instances, so the ratio column is a measurement and the bound column is a ' +
           'promise.'
@@ -358,15 +361,18 @@
         formal: '|matching| ≤ OPT ≤ |cover| = 2|matching|',
         readAs: 'The matching size is at most the optimum, which is at most the cover size, which ' +
           'is exactly twice the matching size.',
-        detail: 'Taking both endpoints looks wasteful and is what makes the proof work: every ' +
-          'edge is covered because the matching was maximal, and any cover must take at least ' +
-          'one endpoint of each matched edge, so the matching size lower-bounds the optimum. ' +
-          'That lower bound is a certificate — it proves the ratio for the instance in front of ' +
-          'you without knowing the optimum — which is worth more than the worst-case constant, ' +
-          'because it lets the algorithm report how good this particular answer is.',
+        detail: [
+          'Taking both endpoints looks wasteful, and it is what makes the proof work. Every edge is ' +
+            'covered because the matching was maximal, and any cover must take at least one ' +
+            'endpoint of each matched edge, so the matching size lower-bounds the optimum.',
+          'That lower bound is a certificate. It proves the ratio for the instance in front of you ' +
+            'without knowing the optimum.',
+          'That is worth more than the worst-case constant, because it lets the algorithm report how ' +
+            'good this particular answer is.'
+        ],
         example: 'Over 200 random graphs the demo measures a mean ratio of 1.5161 with a worst ' +
-          'case of exactly 2.0000, against 1.4950 for LP rounding, and no bound violation and no ' +
-          'infeasible answer anywhere.'
+          'case of exactly 2.0000, against 1.4950 for LP rounding. There is no bound violation ' +
+          'and no infeasible answer anywhere.'
       },
       {
         term: 'The obvious improvement has no constant ratio',
@@ -374,58 +380,69 @@
         formal: 'greedy-by-degree ≈ H(k) · OPT on the family with k left vertices and ⌊k/i⌋ right vertices of degree i',
         readAs: 'On that family greedy’s cover is about the k-th harmonic number times the ' +
           'optimum, where the harmonic number grows like the natural log of k.',
-        detail: 'This is the most instructive result in the section because the measurements ' +
-          'point in opposite directions. On random graphs greedy-by-degree is the best algorithm ' +
-          'in the table by a wide margin; on the trap it is unboundedly worse than the algorithm ' +
-          'that looks careless. Both are true, and shipping decisions need both — the guarantee ' +
-          'for what you can defend, and the distribution for what you will experience.',
-        example: 'The demo measures greedy-by-degree at a mean ratio of 1.0321 on random ' +
-          'graphs, then 46 against an optimum of 20 on a 66-vertex trap (1.90 for the matching ' +
-          'cover), 201 at k = 60 (3.35), and 382 at k = 100 (3.82) where the matching algorithm ' +
-          'holds at 1.98.'
+        detail: [
+          'This is the most instructive result in the section, because the measurements point in ' +
+            'opposite directions.',
+          'On random graphs greedy-by-degree is the best algorithm in the table by a wide margin. On ' +
+            'the trap it is unboundedly worse than the algorithm that looks careless.',
+          'Both are true, and shipping decisions need both: the guarantee for what you can defend, ' +
+            'and the distribution for what you will experience.'
+        ],
+        example: 'The demo measures greedy-by-degree at a mean ratio of 1.0321 on random graphs. ' +
+          'On a 66-vertex trap it returns 46 against an optimum of 20, where the matching cover ' +
+          'is at 1.90. At k = 60 the ratio is 3.35 and at k = 100 it is 3.82, while the matching ' +
+          'algorithm holds at 1.98.'
       },
       {
         term: 'Greedy set cover is ln n, and the bound is attained rather than approached',
         plain: 'Take the set with the best coverage per unit cost, repeatedly.',
         formal: 'greedy cost ≤ H(m) · OPT where m is the largest set size and H(m) ≈ ln m + 0.577',
         readAs: 'The greedy cost is at most the m-th harmonic number times the optimum, where m ' +
-          'is the size of the biggest set and the harmonic number is about the natural log of m ' +
+          'is the size of the biggest set. That harmonic number is about the natural log of m ' +
           'plus 0.577.',
-        detail: 'Vazirani’s instance prices n singletons at 1/(n − i) each and the whole universe ' +
-          'at 1 + ε, so at every step the cheapest remaining singleton beats the universal set on ' +
-          'coverage-per-cost by a hair and greedy pays the full harmonic sum. Nothing about it ' +
-          'is natural — somebody had to build it — which is precisely the lesson: the bound is ' +
-          'a worst case over a family that has to be constructed, and greedy set cover on inputs ' +
-          'that arise by accident is usually within a few percent of optimal.',
-        example: 'The demo measures greedy paying exactly H(n) on the tight instance — 4.7439 ' +
-          'at n = 64, for a ratio of 4.6969, and 5.4331 at n = 128 — and a mean ratio of 1.2330 ' +
-          'on random instances.'
+        detail: [
+          'Vazirani’s instance prices n singletons at 1/(n − i) each and the whole universe at ' +
+            '1 + ε. At every step the cheapest remaining singleton beats the universal set on ' +
+            'coverage-per-cost by a hair, and greedy pays the full harmonic sum.',
+          'Nothing about it is natural, because somebody had to build it. That is precisely the ' +
+            'lesson: the bound is a worst case over a family that has to be constructed.',
+          'Greedy set cover on inputs that arise by accident is usually within a few percent of ' +
+            'optimal.'
+        ],
+        example: 'The demo measures greedy paying exactly H(n) on the tight instance. That is ' +
+          '4.7439 at n = 64, for a ratio of 4.6969, and 5.4331 at n = 128. On random instances ' +
+          'the mean ratio is 1.2330.'
       },
       {
         term: 'Metric TSP’s bound comes from a lower bound rather than from the algorithm',
         plain: 'Deleting an edge from an optimal tour leaves a spanning tree, so the MST is below the optimum.',
         formal: 'MST ≤ OPT; doubling gives an Eulerian walk of 2·MST; shortcutting cannot lengthen it',
-        detail: 'Almost all of the work is in establishing that the minimum spanning tree is a ' +
-          'valid lower bound; once that holds, doubling and shortcutting are mechanical. Every ' +
-          'step needs the triangle inequality, and without it no constant-factor approximation ' +
-          'exists at all unless P = NP — so "metric" is a load-bearing word rather than a ' +
-          'convenience. The general pattern is worth extracting: an approximation ratio is ' +
-          'usually a lower bound plus a construction, and finding the lower bound is the hard ' +
-          'part.',
-        example: 'Over 60 instances the demo measures the MST at 73.3% of the optimal tour, ' +
-          'tree-doubling at a mean of 1.1428 and a median of 1.1520, and Christofides at 1.0675 ' +
-          'and 1.0635 — both far inside their bounds of 2 and 1.5.'
+        detail: [
+          'Almost all of the work is in establishing that the minimum spanning tree is a valid lower ' +
+            'bound. Once that holds, doubling and shortcutting are mechanical.',
+          'Every step needs the triangle inequality, and without it no constant-factor approximation ' +
+            'exists at all unless P = NP. So "metric" is a load-bearing word rather than a ' +
+            'convenience.',
+          'The general pattern is worth extracting. An approximation ratio is usually a lower bound ' +
+            'plus a construction, and finding the lower bound is the hard part.'
+        ],
+        example: 'Over 60 instances the demo measures the MST at 73.3% of the optimal tour. ' +
+          'Tree-doubling reaches a mean of 1.1428 and a median of 1.1520, and Christofides 1.0675 ' +
+          'and 1.0635. Both are far inside their bounds of 2 and 1.5.'
       },
       {
         term: 'Christofides replaces the doubling with a matching on the odd vertices',
         plain: 'Only the odd-degree vertices need extra edges, and the cheapest way to fix them costs at most half the optimum.',
         formal: 'the odd-degree set has even size; a minimum perfect matching on it costs ≤ OPT/2, giving 3/2',
-        detail: 'The handshake lemma does real work here: the number of odd-degree vertices in ' +
-          'any graph is even, so a perfect matching on them exists. The bound on its cost comes ' +
-          'from taking the optimal tour restricted to those vertices, which splits into two ' +
-          'alternating matchings whose total is at most the tour — so the cheaper one is at most ' +
-          'half of it. That has been the best known ratio for metric TSP since 1976, which is ' +
-          'itself worth knowing when someone proposes to improve on it in an afternoon.',
+        detail: [
+          'The handshake lemma does real work here. The number of odd-degree vertices in any graph ' +
+            'is even, so a perfect matching on them exists.',
+          'The bound on its cost comes from taking the optimal tour restricted to those vertices. ' +
+            'That splits into two alternating matchings whose total is at most the tour, so the ' +
+            'cheaper one is at most half of it.',
+          'That has been the best known ratio for metric TSP since 1976, which is itself worth ' +
+            'knowing when someone proposes to improve on it in an afternoon.'
+        ],
         example: 'The demo’s matching is computed exactly by a bitmask dynamic program over the ' +
           'odd set, because an approximate matching there would break the 3/2 bound rather than ' +
           'merely weaken it.'
@@ -436,33 +453,39 @@
         formal: 'radius ≤ 2·OPT, and no polynomial (2 − δ)-approximation exists unless P = NP',
         readAs: 'The covering radius is at most twice the optimal one, and no polynomial ' +
           'algorithm can do better than that factor unless P equals NP.',
-        detail: 'Most approximation ratios are the best currently known and invite improvement; ' +
-          'this one is the best possible, so an afternoon spent looking for a 1.9-approximation ' +
-          'is provably wasted. Knowing which category a bound is in changes what you do with it, ' +
-          'and the two look identical when quoted without their hardness result. The algorithm ' +
-          'is also three lines long, which is the usual pattern for problems whose optimal ' +
-          'approximation is a simple greedy.',
+        detail: [
+          'Most approximation ratios are the best currently known and invite improvement. This one ' +
+            'is the best possible, so an afternoon spent looking for a 1.9-approximation is ' +
+            'provably wasted.',
+          'Knowing which category a bound is in changes what you do with it, and the two look ' +
+            'identical when quoted without their hardness result.',
+          'The algorithm is also three lines long, which is the usual pattern for problems whose ' +
+            'optimal approximation is a simple greedy.'
+        ],
         example: 'The demo scores greedy against exact optima found by enumerating 120, 560 ' +
-          'and 1 820 choices of centres, measuring ratios of 1.0547, 1.4313 and 1.2297 at ' +
-          'k = 2, 3 and 4.'
+          'and 1 820 choices of centres. The ratios are 1.0547, 1.4313 and 1.2297 at k = 2, 3 ' +
+          'and 4.'
       },
       {
         term: 'List scheduling is 2 − 1/m, and a sort improves it to 4/3 − 1/(3m)',
-        plain: 'Assign each job to the least-loaded machine; sorting longest-first first is strictly better.',
+        plain: 'Assign each job to the least-loaded machine. Sorting longest-first first is strictly better.',
         formal: 'makespan ≤ (2 − 1/m)·OPT for any order, and (4/3 − 1/(3m))·OPT for longest-first',
-        readAs: 'The finishing time is at most two minus one over m times the optimum in any ' +
-          'order, and at most four thirds minus one over three m if the jobs are sorted longest ' +
-          'first.',
-        detail: 'The proof is one observation: the last job to finish started when every machine ' +
-          'was busy, so the makespan is at most the average load plus the last job’s length, and ' +
-          'both terms are below the optimum. Sorting improves the bound because the long jobs are ' +
-          'placed while there is still room to balance them — the tight instance for the ' +
-          'unsorted version is m(m−1) unit jobs followed by one job of length m, and sorting ' +
-          'solves it exactly. It is the cheapest guarantee improvement in the milestone.',
+        readAs: 'The finishing time is at most two minus one over m times the optimum, in any ' +
+          'order. It is at most four thirds minus one over three m if the jobs are sorted ' +
+          'longest first.',
+        detail: [
+          'The proof is one observation. The last job to finish started when every machine was busy. ' +
+            'So the makespan is at most the average load plus the last job’s length, and both terms ' +
+            'are below the optimum.',
+          'Sorting improves the bound because the long jobs are placed while there is still room to ' +
+            'balance them.',
+          'The tight instance for the unsorted version is m(m−1) unit jobs followed by one job of ' +
+            'length m, and sorting solves it exactly. It is the cheapest guarantee improvement in ' +
+            'the milestone.'
+        ],
         example: 'The demo measures list scheduling at a mean of 1.1465 and a worst of 1.4074 ' +
-          'over 60 instances, against longest-first at 1.0294 and 1.0882, and on the tight ' +
-          'instance list scheduling reaches exactly 1.75 = 2 − 1/4 while longest-first is ' +
-          'optimal.'
+          'over 60 instances, against longest-first at 1.0294 and 1.0882. On the tight instance ' +
+          'list scheduling reaches exactly 1.75 = 2 − 1/4, while longest-first is optimal.'
       }
     ]
   });
