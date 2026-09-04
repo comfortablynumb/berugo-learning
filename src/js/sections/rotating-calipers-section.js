@@ -51,40 +51,44 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**Rotating calipers turn a continuous optimisation into a linear scan.** Imagine a pair of ' +
+        'parallel lines squeezing a convex hull, rotated slowly through 180 degrees.',
+      'Quantities like the diameter, the width and the enclosing rectangle are all read off that ' +
+        'rotation. The trick is that only finitely many angles can possibly be optimal.',
+      '**The theorem is the whole thing: the minimum-area rectangle always has a side flush with a ' +
+        'hull edge.** If it did not, it would touch the hull only at isolated vertices.',
+      'It could then be rotated a little in either direction without losing contact, and one of ' +
+        'those rotations would make it smaller.',
+      'So there are exactly `h` candidates, one per hull edge, and the search is an `O(h)` scan ' +
+        'rather than an optimisation over a continuous parameter.',
+      '**The diameter uses the same idea with an antipodal pointer.** As the caliper walks one hull ' +
+        'edge forward, the opposite vertex only ever moves forward too, never back.',
+      'So the whole scan is linear in the hull size rather than quadratic in it. The amortised ' +
+        'argument is the same one that makes a two-pointer window linear.',
+      '**The smallest enclosing circle is a different shape of argument.** It is determined by at ' +
+        'most three points, and Welzl\'s algorithm finds them by shuffling and rebuilding.',
+      'The randomisation is the algorithm rather than a detail. On an adversarial order the same ' +
+        'construction is cubic, and the shuffle is what makes the expected number of rebuilds linear.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**Rotating calipers turn a continuous optimisation into a linear scan.** Imagine a pair of ' +
-          'parallel lines squeezing a convex hull, rotated slowly through 180 degrees. Quantities ' +
-          'like the diameter, the width and the enclosing rectangle are all read off that rotation ' +
-          '— and the trick is that only finitely many angles can possibly be optimal.',
-        '**The theorem is the whole thing: the minimum-area rectangle always has a side flush with ' +
-          'a hull edge.** If it did not, it would touch the hull only at isolated vertices, and it ' +
-          'could be rotated a little in either direction without losing contact — one of which ' +
-          'would make it smaller. So there are exactly `h` candidates, one per hull edge, and the ' +
-          'search is an `O(h)` scan rather than an optimisation over a continuous parameter.',
-        '**The diameter uses the same idea with an antipodal pointer.** As the caliper walks one ' +
-          'hull edge forward, the opposite vertex only ever moves forward too, never back — so the ' +
-          'whole scan is linear in the hull size rather than quadratic in it. The amortised argument ' +
-          'is the same one that makes a two-pointer window linear.',
-        '**The smallest enclosing circle is a different shape of argument.** It is determined by at ' +
-          'most three points, and Welzl\'s algorithm finds them by shuffling and rebuilding. The ' +
-          'randomisation is the algorithm rather than a detail: on an adversarial order the same ' +
-          'construction is cubic, and the shuffle is what makes the expected number of rebuilds ' +
-          'linear.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — the candidate angles, a rotation sweep, and Welzl',
         markup: root.RotatingCalipersTemplate.render()
       },
       diagram: diagram(),
       insight: 'An axis-aligned bounding box is the default because it is free, and on data that ' +
-        'happens to lie along a diagonal it is catastrophically loose — the measurement below is a ' +
-        'thirty-fold difference on a strip of points, from the same points, with no approximation ' +
-        'anywhere. Before optimising a spatial index or a collision broad phase, check what fraction ' +
-        'of your bounding volume is actually occupied. If it is small and your data has a grain, ' +
-        'the fix is a rotation rather than a better tree.'
+        'happens to lie along a diagonal it is catastrophically loose. The measurement below is a ' +
+        '10.79× difference on a diagonal strip of points, from the same points, with no ' +
+        'approximation anywhere. Before optimising a spatial index or a collision broad phase, check ' +
+        'what fraction of your bounding volume is actually occupied. If it is small and your data ' +
+        'has a grain, the fix is a rotation rather than a better tree.'
     };
   }
 

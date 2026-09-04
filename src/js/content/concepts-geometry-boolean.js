@@ -162,12 +162,15 @@
         },
         plain: 'So there are only h candidate angles, one per hull edge, and every other angle is provably worse.',
         formal: 'a continuous optimisation collapses to an O(h) scan',
-        detail: 'The proof is a rotation argument. Suppose the minimum rectangle touched the hull ' +
-          'only at isolated vertices; then it can be rotated slightly either way without losing ' +
-          'contact, and one of those two rotations makes the area smaller — so it was not the ' +
-          'minimum. The only rectangles that cannot be improved that way are the ones already flush ' +
-          'with an edge. That single theorem is what makes the scan complete rather than a sample, ' +
-          'and it is the same collapse from infinite to finite that the separating-axis test uses.',
+        detail: [
+          'The proof is a rotation argument.',
+          'Suppose the minimum rectangle touched the hull only at isolated vertices. Then it can be ' +
+            'rotated slightly either way without losing contact, and one of those two rotations ' +
+            'makes the area smaller — so it was not the minimum.',
+          'The only rectangles that cannot be improved that way are the ones already flush with an ' +
+            'edge. That single theorem is what makes the scan complete rather than a sample, and it ' +
+            'is the same collapse from infinite to finite that the separating-axis test uses.'
+        ],
         example: '9 hull edges give 9 candidate angles, and the winner at −135.09° has an area of ' +
           '932.6 against 933.8 for the next best.'
       },
@@ -175,13 +178,15 @@
         term: 'What the rotation buys depends entirely on whether the data has a grain',
         plain: 'On diagonally arranged points the minimum rectangle is a tenth of the axis-aligned box; on a grid it is the same box.',
         formal: 'the ratio ranges from 0.093 to 1.000 across the six fixture sets',
-        detail: 'The axis-aligned bounding box is the default everywhere — in spatial indexes, ' +
-          'collision broad phases, layout and image cropping — because it is free to compute and ' +
-          'free to test. It is also arbitrarily bad when the data is not aligned with the axes, and ' +
-          'the fixture sets make that concrete: a diagonal cloud gives a 10.79× reduction in ' +
-          'enclosed area from the same points with no approximation at all, while a grid gives ' +
-          'exactly nothing. The technique pays precisely when the data has a direction the axes do ' +
-          'not share.',
+        detail: [
+          'The axis-aligned bounding box is the default everywhere — in spatial indexes, collision ' +
+            'broad phases, layout and image cropping — because it is free to compute and free to ' +
+            'test.',
+          'It is also arbitrarily bad when the data is not aligned with the axes, and the fixture ' +
+            'sets make that concrete. A diagonal cloud gives a 10.79× reduction in enclosed area ' +
+            'from the same points with no approximation at all, while a grid gives exactly nothing.',
+          'The technique pays precisely when the data has a direction the axes do not share.'
+        ],
         example: 'The diagonal set: 932.6 against an axis-aligned 10 058.0 — a ratio of 0.093 at a ' +
           'best angle of −135.1°.'
       },
@@ -189,12 +194,16 @@
         term: 'The diameter is a pair of antipodal points, and there are only h of those',
         plain: 'The furthest two points of a set are both on the hull, and the calipers walk the pairs in one rotation.',
         formal: 'the diameter must agree exactly with a brute-force scan over all pairs, not approximately',
-        detail: 'Both endpoints being on the hull is easy to see — moving either one outward along ' +
-          'its direction increases the distance — and it is what reduces an O(n²) search to a walk ' +
-          'over the hull. The calipers rotate two parallel supporting lines together, and the pairs ' +
-          'of points they touch at each step are the antipodal pairs; the diameter is the largest ' +
-          'distance among them. Because this is an exact combinatorial answer rather than an ' +
-          'optimisation, the test for it is equality rather than tolerance.',
+        detail: [
+          'Both endpoints being on the hull is easy to see: moving either one outward along its ' +
+            'direction increases the distance. That is what reduces an O(n²) search to a walk over ' +
+            'the hull.',
+          'The calipers rotate two parallel supporting lines together, and the pairs of points they ' +
+            'touch at each step are the antipodal pairs. The diameter is the largest distance among ' +
+            'them.',
+          'Because this is an exact combinatorial answer rather than an optimisation, the test for ' +
+            'it is equality rather than tolerance.'
+        ],
         example: 'The diameter is 141.487 by calipers and 141.487 by the O(n²) scan over every pair ' +
           '— exact agreement.'
       },
@@ -202,12 +211,14 @@
         term: 'The rotation sweep is the reference, and being better than it is expected',
         plain: 'A fine sweep over angles is approximate by construction; the exact scan may beat it and must never lose to it.',
         formal: 'the sweep\'s step is 0.0250°, so a gap smaller than that means it never tried the winning angle',
-        detail: 'Checking an exact method against a discretised one needs the asymmetry stated ' +
-          'explicitly, or the test is meaningless. The scan tries h angles and is provably complete; ' +
-          'the sweep tries 3 600 evenly spaced ones and will usually miss the optimum by a fraction ' +
-          'of its step. So the assertion is one-sided: the scan must never be worse than the sweep, ' +
-          'and when it is slightly better that is the sweep\'s discretisation showing, not a bug in ' +
-          'the scan.',
+        detail: [
+          'Checking an exact method against a discretised one needs the asymmetry stated ' +
+            'explicitly, or the test is meaningless.',
+          'The scan tries h angles and is provably complete. The sweep tries 3 600 evenly spaced ' +
+            'ones, and will usually miss the optimum by a fraction of its step.',
+          'So the assertion is one-sided. The scan must never be worse than the sweep, and when it ' +
+            'is slightly better that is the sweep\'s discretisation showing, not a bug in the scan.'
+        ],
         example: 'Calipers 932.559 against the 3 600-angle sweep\'s 932.779 — the scan is better by ' +
           '0.024%, which is the sweep missing the optimum.'
       },
@@ -215,12 +226,16 @@
         term: 'The smallest enclosing circle is determined by two or three points, never more',
         plain: 'Welzl\'s algorithm exploits that: pick points at random and rebuild only when one falls outside.',
         formal: 'expected linear time, from a randomised incremental construction with a constant-size basis',
-        detail: 'The basis being at most three is what makes the recursion bounded: a circle through ' +
-          'three points is determined, so once three boundary points are fixed there is nothing left ' +
-          'to search. Randomising the insertion order is what makes the expected cost linear — the ' +
-          'probability that the i-th point falls outside the circle of the first i − 1 is at most ' +
-          '3/i, so the rebuilds telescope. On adversarial order it degrades, which is why the ' +
-          'shuffle is part of the algorithm rather than a nicety.',
+        detail: [
+          'The basis being at most three is what makes the recursion bounded. A circle through three ' +
+            'points is determined, so once three boundary points are fixed there is nothing left to ' +
+            'search.',
+          'Randomising the insertion order is what makes the expected cost linear. The probability ' +
+            'that the i-th point falls outside the circle of the first i − 1 is at most 3/i, so the ' +
+            'rebuilds telescope.',
+          'On adversarial order it degrades, which is why the shuffle is part of the algorithm ' +
+            'rather than a nicety.'
+        ],
         example: 'The default set\'s circle has a radius of 70.74 with 2 points on it, found after ' +
           '2 594 rebuild steps.'
       },
@@ -228,12 +243,15 @@
         term: 'Calipers only work on a convex ring, so the hull is a precondition rather than a step',
         plain: 'Everything in this section takes h, the hull size, as its cost — not n.',
         formal: 'O(n log n) to hull, then O(h) for diameter, width and the rectangle scan',
-        detail: 'That split is why the hull section comes first, and it changes how the cost should ' +
-          'be quoted: a million points with a twelve-vertex hull cost a sort and then almost ' +
-          'nothing. It also means the hull\'s collinear policy leaks in here — a hull that keeps ' +
-          'points lying on its edges produces duplicate candidate angles, which is harmless for the ' +
-          'answer and inflates h, while a hull with a reflex vertex from a broken predicate makes ' +
-          'the caliper walk skip antipodal pairs entirely.',
+        detail: [
+          'That split is why the hull section comes first, and it changes how the cost should be ' +
+            'quoted. A million points with a twelve-vertex hull cost a sort and then almost nothing.',
+          'It also means the hull\'s collinear policy leaks in here. A hull that keeps points lying ' +
+            'on its edges produces duplicate candidate angles, which is harmless for the answer and ' +
+            'inflates h.',
+          'A hull with a reflex vertex from a broken predicate is worse: it makes the caliper walk ' +
+            'skip antipodal pairs entirely.'
+        ],
         example: 'Hull sizes across the fixture sets run from 5 on a grid to 80 on a circle, and ' +
           'each one is the number of candidate angles tried.'
       },
@@ -241,12 +259,15 @@
         term: 'Width is the other caliper measurement, and it is not the rectangle\'s short side',
         plain: 'The width is the smallest distance between two parallel supporting lines.',
         formal: 'the minimum over hull edges of the furthest vertex\'s distance from that edge',
-        detail: 'It answers a different question from the minimum-area rectangle and can be attained ' +
-          'at a different angle: the rectangle trades width against height to minimise a product, ' +
-          'while the width minimises one dimension outright. It is the measurement that matters for ' +
-          '"will this shape fit through that gap", for the thickness of a milled part and for the ' +
-          'tightest slab in a collision test — and computing it from the minimum-area rectangle is a ' +
-          'common and quiet mistake.',
+        detail: [
+          'It answers a different question from the minimum-area rectangle, and can be attained at a ' +
+            'different angle.',
+          'The rectangle trades width against height to minimise a product, while the width ' +
+            'minimises one dimension outright.',
+          'It is the measurement that matters for "will this shape fit through that gap", for the ' +
+            'thickness of a milled part and for the tightest slab in a collision test. Computing it ' +
+            'from the minimum-area rectangle is a common and quiet mistake.'
+        ],
         example: 'The winning rectangle at −135.09° is 141.47 by 6.59, and the next candidate at ' +
           '44.84° is 141.47 by 6.60 — nearly the same shape at a very different angle.'
       },
@@ -254,12 +275,15 @@
         term: 'Every result here is checkable against a slow method, so check it',
         plain: 'All pairs for the diameter, a fine angle sweep for the rectangle, every point for the circle.',
         formal: 'three references, two exact and one discretised, and the discretised one is one-sided',
-        detail: 'Calipers code is short and subtle: an off-by-one in the antipodal walk gives an ' +
-          'answer that is right on most inputs and quietly too small on some, which is exactly the ' +
-          'failure the milestone keeps meeting. The references cost O(n²), O(3 600 n) and O(n), all ' +
-          'affordable at test sizes, and between them they pin down every number the section quotes. ' +
-          'Verifying that the enclosing circle covers every point is the cheapest of the three and ' +
-          'catches the most.',
+        detail: [
+          'Calipers code is short and subtle. An off-by-one in the antipodal walk gives an answer ' +
+            'that is right on most inputs and quietly too small on some, which is exactly the ' +
+            'failure the milestone keeps meeting.',
+          'The references cost O(n²), O(3 600 n) and O(n), all affordable at test sizes, and between ' +
+            'them they pin down every number the section quotes.',
+          'Verifying that the enclosing circle covers every point is the cheapest of the three, and ' +
+            'catches the most.'
+        ],
         example: 'Diameter exact, enclosing circle covering every point exactly, and the rectangle ' +
           'within 0.024% of a 3 600-angle sweep.'
       }
