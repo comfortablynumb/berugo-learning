@@ -175,34 +175,38 @@
         },
         plain: 'Checking a claimed matrix product costs n², whatever algorithm produced it.',
         formal: 'Freivalds compares A(Bx) with Cx in 3n² operations, against n^2.807 to multiply',
-        readAs: 'Compute B times the vector x, then A times that, and compare with C times x — ' +
-          'three matrix-vector products, each costing n squared.',
-        detail: 'The gap widens with n because one side is cubic and the other quadratic, so at ' +
-          'any size large enough to care about, verification is free relative to computation. ' +
+        readAs: 'Compute B times the vector x, then A times that, and compare with C times x. ' +
+          'That is three matrix-vector products, each costing n squared.',
+        detail: [
+          'The gap widens with n because one side is cubic and the other quadratic. At any size ' +
+            'large enough to care about, verification is free relative to computation.',
           'That asymmetry is the foundation of every protocol where one machine does work for ' +
-          'another and the result cannot simply be trusted — outsourced computation, blockchain ' +
-          'validation, and the checksum on a rebuilt index are all the same shape. It is also ' +
-          'the reason a residual check belongs in numerical code: it costs one matrix-vector ' +
-          'product against the whole solve.',
+            'another and the result cannot simply be trusted. Outsourced computation, blockchain ' +
+            'validation, and the checksum on a rebuilt index are all the same shape.',
+          'It is also the reason a residual check belongs in numerical code. It costs one ' +
+            'matrix-vector product against the whole solve.'
+        ],
         example: 'At n = 60 the demo counts 432 000 operations to multiply and 43 200 to check ' +
-          'the result eight times — a factor of ten, growing linearly in n.'
+          'the result eight times. That is a factor of ten, growing linearly in n.'
       },
       {
         term: 'The whole family is the Schwartz–Zippel lemma',
         plain: 'A non-zero polynomial has few roots, so a random point almost certainly is not one.',
         formal: 'for a non-zero polynomial of total degree d over a field F, Pr[p(r) = 0] ≤ d/|F| for r drawn uniformly',
-        readAs: 'For a polynomial that is not identically zero and has total degree d, the chance ' +
-          'that a uniformly random point makes it vanish is at most d divided by the size of ' +
-          'the field.',
-        detail: 'Every test in this section is that lemma with a different polynomial. Freivalds ' +
-          'uses the bilinear form (AB − C)x; a string fingerprint reads the string as ' +
-          'coefficients and evaluates at a random base; an expression-tree equality test ' +
-          'evaluates both trees. Recognising the shape is what lets you invent the next one — ' +
-          'given any two objects that can be written as polynomials in a shared variable, ' +
-          'equality can be tested in the size of one evaluation rather than the size of the ' +
-          'objects.',
+        readAs: 'Take a polynomial that is not identically zero and has total degree d. The ' +
+          'chance that a uniformly random point makes it vanish is at most d divided by the size ' +
+          'of the field.',
+        detail: [
+          'Every test in this section is that lemma with a different polynomial.',
+          'Freivalds uses the bilinear form (AB − C)x. A string fingerprint reads the string as ' +
+            'coefficients and evaluates at a random base, and an expression-tree equality test ' +
+            'evaluates both trees.',
+          'Recognising the shape is what lets you invent the next one. Given two objects that can ' +
+            'both be written as polynomials in a shared variable, equality costs one evaluation ' +
+            'rather than a full comparison.'
+        ],
         example: 'The demo tests (x + y)(x − y) = x² − y² + xy over ℤ mod 1009 and accepts it 3 ' +
-          'times in 2 000 — a rate of 0.00150 against a bound of 2/1009 = 0.00198 — while the ' +
+          'times in 2 000. That is a rate of 0.00150 against a bound of 2/1009 = 0.00198. The ' +
           'degree-3 false claim is accepted 4 times, 0.00200 against 0.00297.'
       },
       {
@@ -219,15 +223,18 @@
         },
         plain: 'A true identity holds everywhere, so no random point can refute it.',
         formal: 'Pr[reject | the claim is true] = 0 exactly, not approximately',
-        detail: 'This is stronger than a small false-positive rate and it changes how the ' +
-          'algorithm is used. There is no threshold to tune, no trade between sensitivity and ' +
-          'specificity, and no risk that adding rounds starts producing spurious rejections — ' +
-          'so the round count is chosen purely from the failure probability you want. Any ' +
-          'implementation that produces a false alarm has a bug rather than bad luck, which ' +
-          'makes the false-alarm counter a genuine correctness test rather than a statistic.',
+        detail: [
+          'This is stronger than a small false-positive rate, and it changes how the algorithm is ' +
+            'used.',
+          'There is no threshold to tune, no trade between sensitivity and specificity, and no risk ' +
+            'that adding rounds starts producing spurious rejections. So the round count is chosen ' +
+            'purely from the failure probability you want.',
+          'Any implementation that produces a false alarm has a bug rather than bad luck. That makes ' +
+            'the false-alarm counter a genuine correctness test rather than a statistic.'
+        ],
         example: 'Across every round count and every field size the demo measures exactly zero ' +
-          'false alarms — 0 of 4 000 at each of eight round counts, and 8 000 of 8 000 true ' +
-          'identities accepted.'
+          'false alarms. That is 0 of 4 000 at each of eight round counts, and 8 000 of 8 000 ' +
+          'true identities accepted.'
       },
       {
         term: 'The field must be larger than the degree or the test proves nothing',
@@ -235,41 +242,47 @@
         formal: 'd/|F| ≥ 1 when |F| ≤ d, and the lemma then says nothing',
         readAs: 'When the field has no more elements than the polynomial has degree, d over the ' +
           'size of the field is at least one and the bound is vacuous.',
-        detail: 'This is the formal version of "I tried a few values and it worked". A degree-3 ' +
-          'identity tested over the integers modulo 5 can fail on three-fifths of the field and ' +
-          'still pass every test you run; over a 32-bit prime the same identity is caught with ' +
-          'probability 1 − 7e-10 per round. Choosing the field is therefore a real design ' +
-          'decision, and the arithmetic cost of a bigger one is usually trivial next to the ' +
-          'guarantee it buys.',
+        detail: [
+          'This is the formal version of "I tried a few values and it worked".',
+          'A degree-3 identity tested over the integers modulo 5 can fail on three-fifths of the ' +
+            'field and still pass every test you run. Over a 32-bit prime the same identity is ' +
+            'caught with probability 1 − 7e-10 per round.',
+          'Choosing the field is therefore a real design decision, and the arithmetic cost of a ' +
+            'bigger one is usually trivial next to the guarantee it buys.'
+        ],
         example: 'The demo’s ∏(xᵢ − i) = 0 claim is accepted 2.9% of the time over ℤ mod 101 ' +
-          'and 0.1% over ℤ mod 10007 — the same false claim, tested two ways.'
+          'and 0.1% over ℤ mod 10007. It is the same false claim, tested two ways.'
       },
       {
         term: 'A fingerprint needs the base drawn after the data is fixed',
         plain: 'With a fixed base an adversary constructs two inputs that collide and the bound describes nothing.',
         formal: 'the n/p bound is over the random choice of base, for fixed inputs',
-        detail: 'Fixing the base moves the quantifier: instead of "for any two inputs, most bases ' +
-          'distinguish them", you have "for this base, some inputs collide" — and finding those ' +
-          'inputs is a small polynomial-factoring problem, not a search. This is the same ' +
-          'argument as universal hashing in 3.2 arriving from the polynomial side, and the same ' +
-          'failure appears in practice whenever a content-addressing scheme uses a hard-coded ' +
-          'multiplier.',
-        example: 'The demo builds a pair whose difference polynomial has 8 chosen roots and ' +
-          'measures a collision rate of 0.0858 at p = 101 against the d/p bound of 0.0792 — ' +
-          'attained, because the pair was constructed to attain it.'
+        detail: [
+          'Fixing the base moves the quantifier. Instead of "for any two inputs, most bases ' +
+            'distinguish them", you have "for this base, some inputs collide".',
+          'Finding those inputs is a small polynomial-factoring problem, not a search.',
+          'This is the same argument as universal hashing in 3.2 arriving from the polynomial side. ' +
+            'The same failure appears in practice whenever a content-addressing scheme uses a ' +
+            'hard-coded multiplier.'
+        ],
+        example: 'The demo builds a pair whose difference polynomial has 8 chosen roots. It ' +
+          'measures a collision rate of 0.0858 at p = 101 against the d/p bound of 0.0792, which ' +
+          'is attained because the pair was constructed to attain it.'
       },
       {
         term: 'The ordinary case does not exercise the bound, and reporting it as agreement is a lie',
         plain: 'Two strings differing in one character never collide, at any field size.',
         formal: 'a one-position difference is a monomial c·bᵏ, whose only root is b = 0',
         readAs: 'The difference between the two fingerprints is a single term, c times the base ' +
-          'raised to some power, and the only base making that zero is zero itself.',
-        detail: 'Measuring a collision rate of zero beside a bound of n/p and calling them ' +
-          'consistent is technically true and completely uninformative, and it is the exact ' +
-          'shape of a demo that appears to validate a theory it never tested. The bound is a ' +
-          'worst case, so the worst case has to be constructed: expand the polynomial with the ' +
-          'roots you want and use its coefficients as the difference. Then the measurement lands ' +
-          'on the bound and the agreement means something.',
+          'raised to some power. The only base making that zero is zero itself.',
+        detail: [
+          'Measuring a collision rate of zero beside a bound of n/p and calling them consistent is ' +
+            'technically true and completely uninformative. It is the exact shape of a demo that ' +
+            'appears to validate a theory it never tested.',
+          'The bound is a worst case, so the worst case has to be constructed. Expand the polynomial ' +
+            'with the roots you want and use its coefficients as the difference.',
+          'Then the measurement lands on the bound, and the agreement means something.'
+        ],
         example: 'Across all four field sizes the demo measures 0 of 4 000 collisions for the ' +
           'one-character pair, and 343, 41, 5 and 0 of 4 000 for the constructed one.'
       },
@@ -279,28 +292,34 @@
         formal: 'a proof for one of n leaves is ⌈log₂ n⌉ hashes',
         readAs: 'Verifying one leaf takes the ceiling of log base two of the number of leaves ' +
           'many sibling hashes.',
-        detail: 'The producer commits to the whole object with one value; a consumer who wants ' +
-          'one piece re-hashes it and combines with the siblings up the path, and any change ' +
-          'anywhere below the root produces a different root. The cost is logarithmic in the ' +
-          'object rather than linear, which is what makes it usable across a network — and it is ' +
-          'the same "expensive object, cheap certificate" structure as Freivalds, which is why ' +
-          'this section previews M54 rather than deferring it.',
-        example: 'The demo builds a tree over 79 chunks with proofs of 7 hashes, verifies one ' +
-          'chunk against the root, and shows the same proof rejecting a chunk with one character ' +
-          'added.'
+        detail: [
+          'The producer commits to the whole object with one value. A consumer who wants one piece ' +
+            're-hashes it and combines with the siblings up the path, and any change anywhere below ' +
+            'the root produces a different root.',
+          'The cost is logarithmic in the object rather than linear, which is what makes it usable ' +
+            'across a network.',
+          'It is the same "expensive object, cheap certificate" structure as Freivalds, which is why ' +
+            'this section previews M54 rather than deferring it.'
+        ],
+        example: 'The demo builds a tree over 79 chunks with proofs of 7 hashes, and verifies one ' +
+          'chunk against the root. It then shows the same proof rejecting a chunk with one ' +
+          'character added.'
       },
       {
         term: 'Look for an identity the answer must satisfy before writing a second implementation',
         plain: 'A cheap check on the result is usually available and always cheaper than computing it twice.',
         formal: 'residual ‖Ax − b‖ for a linear solve; a checksum for a rebuilt index; a spot-check for a migration',
-        readAs: 'The norm of A times x minus b — how far the computed answer is from satisfying ' +
-          'the equation it was supposed to solve.',
-        detail: 'The habit generalises well past the three algorithms here. Any computation whose ' +
-          'output satisfies a checkable relation admits a verifier that costs a fraction of the ' +
-          'computation, and that verifier catches implementation bugs, hardware faults and ' +
-          'malicious results alike. It is worth noting the limit, though, which 18.1 makes ' +
-          'precise: a residual near machine precision proves the answer solves a nearby problem, ' +
-          'not that it is near the right answer.',
+        readAs: 'The norm of A times x minus b. That is how far the computed answer is from ' +
+          'satisfying the equation it was supposed to solve.',
+        detail: [
+          'The habit generalises well past the three algorithms here.',
+          'Any computation whose output satisfies a checkable relation admits a verifier that costs ' +
+            'a fraction of the computation. That verifier catches implementation bugs, hardware ' +
+            'faults and malicious results alike.',
+          'It is worth noting the limit, though, which 18.1 makes precise. A residual near machine ' +
+            'precision proves the answer solves a nearby problem, not that it is near the right ' +
+            'answer.'
+        ],
         example: 'The Merkle row of the demo prices the alternative: verifying one chunk touches ' +
           '7 hashes against re-hashing all 5 000 characters.'
       }

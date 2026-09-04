@@ -50,36 +50,42 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**Verifying an answer can be asymptotically cheaper than producing it.** Freivalds checks a ' +
+        'claimed matrix product in O(n²) by comparing A(Bx) against Cx for a random 0/1 vector x.',
+      'Producing the product costs at best n^2.807, and checking it costs n² whatever produced it.',
+      'The demo shows the two operation counts side by side, and the gap widens with n because one ' +
+        'is cubic and the other quadratic.',
+      '**The whole family is one lemma.** A non-zero polynomial of total degree d over a field has ' +
+        'at most d/|F| of the field as roots, which is Schwartz–Zippel.',
+      'So evaluating both sides of a false identity at a random point catches it with probability ' +
+        'at least 1 − d/|F|.',
+      'Freivalds is that lemma with the polynomial being the bilinear form (AB − C)x. A string ' +
+        'fingerprint is that lemma with the string read as a polynomial’s coefficients.',
+      '**The error is one-sided, and that is worth more than the constant.** A true identity holds ' +
+        'at every point, so the test never rejects a correct claim.',
+      'The false-alarm column in every table on this page is structurally zero.',
+      'Repetition therefore has no trade-off. Each round multiplies the failure probability ' +
+        'without any risk of accumulating false positives.',
+      '**The field size is the dial, and it must be chosen against the degree.** The bound is ' +
+        'd/|F|, so a degree-3 identity over ℤ mod 101 is caught only 97% of the time per round.',
+      'The same identity over a 32-bit prime is caught essentially always.',
+      'Testing over a field smaller than the degree proves nothing at all, which is the mistake ' +
+        'behind every "I tried a few values and it worked".',
+      '**A fingerprint is a random hash, and a fixed base is not a fingerprint.** Comparing two ' +
+        'strings by one field element works because the base is drawn at random after the strings ' +
+        'are fixed.',
+      'With a fixed base, an adversary constructs a collision offline and the n/p bound describes ' +
+        'nothing.',
+      'This is the same argument as universal hashing in 3.2, arriving from the polynomial side.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**Verifying an answer can be asymptotically cheaper than producing it.** Freivalds ' +
-          'checks a claimed matrix product in O(n²) by comparing A(Bx) against Cx for a random ' +
-          '0/1 vector x. Producing the product costs at best n^2.807; checking it costs n² ' +
-          'whatever produced it. The demo shows the two operation counts side by side, and the ' +
-          'gap widens with n because one is cubic and the other quadratic.',
-        '**The whole family is one lemma.** A non-zero polynomial of total degree d over a field ' +
-          'has at most d/|F| of the field as roots — Schwartz–Zippel — so evaluating both sides ' +
-          'of a false identity at a random point catches it with probability at least 1 − d/|F|. ' +
-          'Freivalds is that lemma with the polynomial being the bilinear form (AB − C)x; a ' +
-          'string fingerprint is that lemma with the string read as a polynomial’s coefficients.',
-        '**The error is one-sided, and that is worth more than the constant.** A true identity ' +
-          'holds at every point, so the test never rejects a correct claim: the false-alarm ' +
-          'column in every table on this page is structurally zero. Repetition therefore has no ' +
-          'trade-off — each round multiplies the failure probability without any risk of ' +
-          'accumulating false positives.',
-        '**The field size is the dial, and it must be chosen against the degree.** The bound is ' +
-          'd/|F|, so a degree-3 identity over ℤ mod 101 is caught only 97% of the time per round ' +
-          'while the same identity over a 32-bit prime is caught essentially always. Testing ' +
-          'over a field smaller than the degree proves nothing at all, which is the mistake ' +
-          'behind every "I tried a few values and it worked".',
-        '**A fingerprint is a random hash, and a fixed base is not a fingerprint.** Comparing two ' +
-          'strings by one field element works because the base is drawn at random after the ' +
-          'strings are fixed. With a fixed base, an adversary constructs a collision offline and ' +
-          'the n/p bound describes nothing. This is the same argument as universal hashing in ' +
-          '3.2, arriving from the polynomial side.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — a corrupted product, two identities and a Merkle path',
         markup: root.FingerprintingTemplate.render()
@@ -87,13 +93,13 @@
       diagram: diagram(),
       insight: '**"Trust but verify" is a cost argument, not a slogan, and this section is where ' +
         'it gets its numbers.** Every distributed protocol that accepts work from a machine it ' +
-        'does not control rests on verification being cheaper than recomputation — a Merkle proof ' +
+        'does not control rests on verification being cheaper than recomputation. A Merkle proof ' +
         'is a logarithmic number of hashes against re-downloading the object, and Freivalds is n² ' +
-        'against n³. The habit worth taking away is smaller and more immediate: **when you have ' +
+        'against n³. The habit worth taking away is smaller and more immediate. **When you have ' +
         'an expensive computation and a claimed result, look for an identity the result must ' +
         'satisfy before you look for a second implementation.** A residual check on a linear ' +
-        'solve, a checksum on a rebuilt index, a random spot-check of a migration — all of them ' +
-        'are this lemma, and all of them cost a fraction of the thing they check.'
+        'solve, a checksum on a rebuilt index, a random spot-check of a migration: all of them ' +
+        'are this lemma. All of them cost a fraction of the thing they check.'
     };
   }
 
