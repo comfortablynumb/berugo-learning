@@ -59,55 +59,67 @@
     };
   }
 
-  function orientation() {
+  function orientationBranching() {
     return [
-      '**"NP-hard" is a statement about a family of instances and says nothing about the one ' +
-        'in front of you.** Parameterised complexity replaces it with a sharper question: pick ' +
-        'a number k that describes the part of the problem that is genuinely small — the size ' +
-        'of the answer you would accept, the width of the structure, the number of exceptions ' +
-        '— and ask for f(k)·n^O(1). That is a promise about the SHAPE of the cost rather than ' +
-        'a hope about the instance.',
-      '**Branch and reduce on vertex cover is three lines and gives 2ᵏ.** Take any uncovered ' +
-        'edge; one of its two endpoints is in the cover, so branch on both and drop k by one. ' +
-        'The demo measures the node count as exactly 2^(k+1) − 1 at every k, giving a ' +
-        'fitted base of 2.0030 — the bound observed rather than cited.',
-      '**Branching on a high-degree vertex instead gives a base below two.** Either the vertex ' +
-        'is in the cover, or every one of its neighbours is; the second branch drops k by the ' +
-        'degree rather than by one. The proved bound is 1.4656ᵏ and the demo measures ' +
-        '1.4991 on its instances, which is a heuristic branching rule landing just above ' +
-        'a bound proved for a more careful one. Same problem, one different choice of what ' +
-        'to branch on, and at the largest budget the demo can still refute that is 4 095 ' +
-        'nodes against 53.',
-      '**Kernelisation is a different kind of win and it happens before any search.** Two ' +
-        'safe rules — commit any vertex of degree above k, delete any isolated vertex — run to ' +
-        'a fixed point in polynomial time. What survives has at most k² edges or the answer is ' +
-        'NO. The output size depends on k alone, which the demo shows by growing the ' +
-        'instance from 46 vertices and 137 edges to 646 and 1 953, and watching the kernel ' +
-        'go from 13 edges to 14.',
+      '**"NP-hard" is a statement about a family of instances and says nothing about the one in ' +
+        'front of you.** Parameterised complexity replaces it with a sharper question.',
+      'Pick a number k that describes the part of the problem that is genuinely small: the size ' +
+        'of the answer you would accept, the width of the structure, the number of exceptions.',
+      'Then ask for f(k)·n^O(1). That is a promise about the SHAPE of the cost rather than a hope ' +
+        'about the instance.',
+      '**Branch and reduce on vertex cover is three lines and gives 2ᵏ.** Take any uncovered edge. ' +
+        'One of its two endpoints is in the cover, so branch on both and drop k by one.',
+      'The demo measures the node count as exactly 2^(k+1) − 1 at every k, giving a fitted base of ' +
+        '2.0030. That is the bound observed rather than cited.',
+      '**Branching on a high-degree vertex instead gives a base below two.** Either the vertex is ' +
+        'in the cover, or every one of its neighbours is, and the second branch drops k by the ' +
+        'degree rather than by one.',
+      'The proved bound is 1.4656ᵏ and the demo measures 1.4991 on its instances, which is a ' +
+        'heuristic branching rule landing just above a bound proved for a more careful one.',
+      'Same problem, one different choice of what to branch on. At the largest budget the demo can ' +
+        'still refute that is 4 095 nodes against 53.'
+    ];
+  }
+
+  function orientationKernels() {
+    return [
+      '**Kernelisation is a different kind of win and it happens before any search.** Two safe ' +
+        'rules run to a fixed point in polynomial time: commit any vertex of degree above k, and ' +
+        'delete any isolated vertex.',
+      'What survives has at most k² edges, or the answer is NO.',
+      'The output size depends on k alone. The demo shows that by growing the instance from 46 ' +
+        'vertices and 137 edges to 646 and 1 953, and watching the kernel go from 13 edges to 14.',
       '**A reduction rule has to be SAFE, and safety is a proof rather than a plausible ' +
-        'argument.** "Commit the highest-degree vertex" is not safe — the optimum need not ' +
-        'contain it. "Commit any vertex of degree above k" is, and the proof is one line: ' +
-        'covering its edges individually would need more than k vertices. A rule that is ' +
-        'nearly safe returns a smaller cover for an instance that has none, and nothing ' +
-        'downstream notices, which is why every rule here is checked against brute force.',
+        'argument.** "Commit the highest-degree vertex" is not safe, because the optimum need not ' +
+        'contain it.',
+      '"Commit any vertex of degree above k" is safe, and the proof is one line: covering its ' +
+        'edges individually would need more than k vertices.',
+      'A rule that is nearly safe returns a smaller cover for an instance that has none, and ' +
+        'nothing downstream notices. That is why every rule here is checked against brute force.',
       '**The measured branching base and the proved one are different numbers and both are ' +
         'honest.** With the reduction rules on, the fitted base over the demo’s window reads ' +
-        'higher than without them, because the rules fire hardest at small k and flatten the ' +
-        'left end of the curve. The node counts are lower everywhere; the ratio between ' +
-        'consecutive points is not. A single "measured base" column would have to pick one of ' +
-        'those to report, so the demo reports both.',
+        'higher than without them.',
+      'The rules fire hardest at small k and flatten the left end of the curve. The node counts ' +
+        'are lower everywhere, and the ratio between consecutive points is not.',
+      'A single "measured base" column would have to pick one of those to report, so the demo ' +
+        'reports both.',
       '**Treewidth is a second parameter, and it is the structure of the graph rather than the ' +
-        'size of the answer.** A graph that is nearly a tree admits a dynamic program over a ' +
-        'tree decomposition costing 2^(w+1) per bag. The demo builds a decomposition from a ' +
-        'min-degree elimination ordering — a heuristic, so the width it reports is an upper ' +
-        'bound and the section says so rather than calling it the treewidth, which is itself ' +
-        'NP-hard to compute.',
+        'size of the answer.** A graph that is nearly a tree admits a dynamic program over a tree ' +
+        'decomposition costing 2^(w+1) per bag.',
+      'The demo builds a decomposition from a min-degree elimination ordering, which is a ' +
+        'heuristic. So the width it reports is an upper bound, and the section says so rather ' +
+        'than calling it the treewidth, which is itself NP-hard to compute.',
       '**The W-hierarchy is why not everything is fixed-parameter tractable.** Vertex cover ' +
-        'parameterised by k is FPT; clique parameterised by k is W[1]-hard, which means an ' +
-        'f(k)·n^O(1) algorithm for it would give one for everything in W[1] and is not ' +
-        'expected. The parameter is not a free choice: it has to be one the problem is ' +
-        'actually tractable in, and the hierarchy is the map of which ones are.'
+        'parameterised by k is FPT, and clique parameterised by k is W[1]-hard.',
+      'That means an f(k)·n^O(1) algorithm for clique would give one for everything in W[1], and ' +
+        'is not expected.',
+      'The parameter is not a free choice. It has to be one the problem is actually tractable in, ' +
+        'and the hierarchy is the map of which ones are.'
     ];
+  }
+
+  function orientation() {
+    return orientationBranching().concat(orientationKernels());
   }
 
   function config() {
@@ -120,14 +132,14 @@
       },
       diagram: diagram(),
       insight: '**Ask what the parameter is before asking how hard the problem is.** Every ' +
-        'production instance of an NP-hard problem has something small in it — the number of ' +
-        'machines, the number of exceptions to the rule, the depth of the dependency graph, the ' +
-        'number of constraints that actually bind — and the useful question is whether the cost ' +
-        'can be pushed into that number and out of the data size. When it can, the algorithm ' +
-        'scales with the data and not with the difficulty, which is the property you need in ' +
-        'production. And run the kernelisation even when you do not intend to search: it is ' +
-        'polynomial, it is safe, and on the demo’s instances it deletes ninety-nine per cent of ' +
-        'the graph before anything expensive begins.'
+        'production instance of an NP-hard problem has something small in it. It might be the ' +
+        'number of machines, the number of exceptions to the rule, the depth of the dependency ' +
+        'graph, or the number of constraints that actually bind. The useful question is whether the cost can be ' +
+        'pushed into that number and out of the data size. When it can, the algorithm scales with ' +
+        'the data and not with the difficulty, which is the property you need in production. And ' +
+        'run the kernelisation even when you do not intend to search. It is polynomial, it is ' +
+        'safe, and on the demo’s instances it deletes ninety-nine per cent of the graph before ' +
+        'anything expensive begins.'
     };
   }
 

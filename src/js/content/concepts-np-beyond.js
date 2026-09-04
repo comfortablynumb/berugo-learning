@@ -173,12 +173,15 @@
         formal: 'a problem is FPT in parameter k when it is solvable in f(k)·n^O(1) for some computable f',
         readAs: 'A problem is fixed-parameter tractable in k when it can be solved in time f of k ' +
           'times a polynomial in n, for some computable function f.',
-        detail: 'The promise is about the SHAPE of the cost rather than about the instance, and ' +
-          'that is what makes it usable: the algorithm scales with the data and not with the ' +
-          'difficulty. In production the parameter is almost always something you control or ' +
-          'measure — the number of machines, the number of exceptions to a rule, the size of the ' +
-          'answer anybody would accept — so the question "what is the parameter here?" is ' +
-          'usually more productive than "how hard is this problem?".',
+        detail: [
+          'The promise is about the SHAPE of the cost rather than about the instance, and that is ' +
+            'what makes it usable. The algorithm scales with the data and not with the difficulty.',
+          'In production the parameter is almost always something you control or measure. It might ' +
+            'be the number of machines, the number of exceptions to a rule, or the size of the ' +
+            'answer anybody would accept.',
+          'So the question "what is the parameter here?" is usually more productive than "how hard ' +
+            'is this problem?".'
+        ],
         example: 'The demo solves vertex cover with a budget of 12 on 20 vertices in 13 search ' +
           'nodes, against 1 048 576 subsets for brute force.'
       },
@@ -188,14 +191,16 @@
         formal: 'the recursion T(k) = 2·T(k − 1) + O(m) has T(k) = 2^(k+1) − 1 nodes',
         readAs: 'The recursion where each node makes two calls with the budget reduced by one ' +
           'has two-to-the-k-plus-one minus one nodes.',
-        detail: 'This is the baseline every other technique is measured against and it is worth ' +
-          'implementing once, because it is three lines and it is already fixed-parameter ' +
-          'tractable. The measured node count matches the closed form exactly with the reduction ' +
-          'rules off, which is what makes it a useful control: any deviation from 2^(k+1) − 1 is ' +
-          'something else in the implementation doing work, and knowing that lets the other ' +
-          'effects be attributed.',
-        example: 'The demo fits a base of 2.0030 over the NO runs and reports 4 095 nodes at the ' +
-          'largest budget it can still refute — which is 2¹² − 1.'
+        detail: [
+          'This is the baseline every other technique is measured against, and it is worth ' +
+            'implementing once. It is three lines, and it is already fixed-parameter tractable.',
+          'The measured node count matches the closed form exactly with the reduction rules off, ' +
+            'which is what makes it a useful control.',
+          'Any deviation from 2^(k+1) − 1 is something else in the implementation doing work, and ' +
+            'knowing that lets the other effects be attributed.'
+        ],
+        example: 'The demo fits a base of 2.0030 over the NO runs, and reports 4 095 nodes at the ' +
+          'largest budget it can still refute. That is 2¹² − 1.'
       },
       {
         term: 'Branching on a high-degree vertex gives a base below two',
@@ -203,26 +208,32 @@
         formal: 'T(k) = T(k − 1) + T(k − d) for a vertex of degree d, giving 1.4656ᵏ under the standard analysis',
         readAs: 'The recursion where one branch drops the budget by one and the other drops it ' +
           'by the vertex degree gives about 1.4656 to the k.',
-        detail: 'The second branch is the interesting one: if the vertex is not in the cover then ' +
-          'every edge at it must be covered by the other endpoint, so all d neighbours go in at ' +
-          'once and the budget drops by d rather than by one. The saving compounds, and the ' +
-          'measured difference against edge branching is two orders of magnitude at moderate k. ' +
-          'Same problem, same code path, one different choice of what to branch on.',
+        detail: [
+          'The second branch is the interesting one. If the vertex is not in the cover then every ' +
+            'edge at it must be covered by the other endpoint. So all d neighbours go in at once, ' +
+            'and the budget drops by d rather than by one.',
+          'The saving compounds, and the measured difference against edge branching is two orders ' +
+            'of magnitude at moderate k.',
+          'Same problem, same code path, one different choice of what to branch on.'
+        ],
         example: 'The demo measures 1.4991 for degree branching against 2.0030 for edge ' +
           'branching, and 53 nodes against 4 095 at the same budget.'
       },
       {
         term: 'A reduction rule has to be safe, and safety is a proof',
-        plain: '"Take the highest-degree vertex" is not safe; "take any vertex of degree above k" is.',
+        plain: '"Take the highest-degree vertex" is not safe. "Take any vertex of degree above k" is.',
         formal: 'deg(v) > k ⟹ v is in every cover of size ≤ k, since covering its edges singly costs more than k',
         readAs: 'A vertex whose degree exceeds k must be in every cover of size at most k, ' +
           'because covering its edges one at a time would cost more than k vertices.',
-        detail: 'The distinction matters because the unsafe rule sounds more plausible. Taking ' +
-          'the highest-degree vertex is a heuristic and the optimum need not contain it; taking ' +
-          'any vertex of degree above the remaining budget is forced, and the proof is one line. ' +
-          'A rule that is nearly safe produces a smaller cover for an instance that has none, ' +
-          'and nothing downstream notices — which is why every rule in this milestone is checked ' +
-          'against brute force on every fixture.',
+        detail: [
+          'The distinction matters because the unsafe rule sounds more plausible.',
+          'Taking the highest-degree vertex is a heuristic and the optimum need not contain it. ' +
+            'Taking any vertex of degree above the remaining budget is forced, and the proof is ' +
+            'one line.',
+          'A rule that is nearly safe produces a smaller cover for an instance that has none, and ' +
+            'nothing downstream notices. That is why every rule in this milestone is checked ' +
+            'against brute force on every fixture.'
+        ],
         example: 'The demo’s five methods all return a cover of exactly 12 on the default ' +
           'instance, and each returned cover is checked against the graph itself.'
       },
@@ -230,13 +241,16 @@
         term: 'Kernelisation shrinks the instance in polynomial time to a size that depends only on k',
         plain: 'Apply the safe rules to a fixed point; what is left is bounded by k², whatever n was.',
         formal: 'Buss: after the rules, more than k² edges means NO; otherwise ≤ k² edges and ≤ k² + k vertices',
-        readAs: 'After the reduction rules, an instance with more than k squared edges is a no; ' +
-          'otherwise the kernel has at most k squared edges and k squared plus k vertices.',
-        detail: 'The argument is short: every surviving vertex has degree at most k, so a cover ' +
-          'of k vertices reaches at most k² edges. The striking part is that this is a ' +
-          'polynomial preprocess whose OUTPUT SIZE has nothing to do with the input size, which ' +
-          'is a stronger statement than any running-time bound and is what makes kernelisation ' +
-          'worth running even when you do not intend to search afterwards.',
+        readAs: 'After the reduction rules, an instance with more than k squared edges is a no. ' +
+          'Otherwise the kernel has at most k squared edges and k squared plus k vertices.',
+        detail: [
+          'The argument is short. Every surviving vertex has degree at most k, so a cover of k ' +
+            'vertices reaches at most k² edges.',
+          'The striking part is that this is a polynomial preprocess whose OUTPUT SIZE has nothing ' +
+            'to do with the input size.',
+          'That is a stronger statement than any running-time bound, and it is what makes ' +
+            'kernelisation worth running even when you do not intend to search afterwards.'
+        ],
         example: 'The demo grows an instance from 46 vertices and 137 edges to 646 and 1 953, ' +
           'and the kernel goes from 13 edges to 14.'
       },
@@ -244,12 +258,14 @@
         term: 'A fitted branching base is a property of the tail, not of a window',
         plain: 'The reduction rules cut every node count and make the measured base look worse.',
         formal: 'fitting nodes ≈ c·bᵏ over a window where the preprocessing is still firing inflates b',
-        detail: 'The rules fire hardest at small k, because "degree above k" is a common ' +
-          'condition when k is small and a rare one when it is large. That flattens the left end ' +
-          'of the curve, so the ratio between consecutive points is larger across the measured ' +
-          'window even though every point is lower. Reporting only the fitted base would say ' +
-          'preprocessing made things worse; reporting only the node counts would hide why the ' +
-          'base moved. The honest table has both columns.',
+        detail: [
+          'The rules fire hardest at small k, because "degree above k" is a common condition when k ' +
+            'is small and a rare one when it is large.',
+          'That flattens the left end of the curve, so the ratio between consecutive points is ' +
+            'larger across the measured window even though every point is lower.',
+          'Reporting only the fitted base would say preprocessing made things worse. Reporting only ' +
+            'the node counts would hide why the base moved. The honest table has both columns.'
+        ],
         example: 'The demo measures a base of 2.0030 with the rules off and 3.0163 with them on, ' +
           'while the node count at the smallest budget falls from 127 to 1.'
       },
@@ -259,25 +275,32 @@
         formal: 'a tree decomposition of width w gives vertex cover in O(2^w · w · n); computing treewidth exactly is NP-hard',
         readAs: 'A tree decomposition of width w solves vertex cover in time proportional to two ' +
           'to the w times w times n, and finding the smallest width is itself NP-hard.',
-        detail: 'The decomposition here comes from a min-degree elimination ordering, which is a ' +
-          'heuristic — so the width it reports is an UPPER BOUND and calling it "the treewidth" ' +
-          'is the standard overclaim. Which parameter to use is a property of your instances ' +
-          'rather than of the problem: road networks and program control-flow graphs have small ' +
-          'treewidth and enormous covers, and the reverse is equally common.',
+        detail: [
+          'The decomposition here comes from a min-degree elimination ordering, which is a heuristic.',
+          'So the width it reports is an UPPER BOUND, and calling it "the treewidth" is the standard ' +
+            'overclaim.',
+          'Which parameter to use is a property of your instances rather than of the problem. Road ' +
+            'networks and program control-flow graphs have small treewidth and enormous covers, ' +
+            'and the reverse is equally common.'
+        ],
         example: 'The demo finds widths of 3, 4, 6, 7 and 10 on graphs of rising density, giving ' +
           '16 to 2 048 states per bag.'
       },
       {
         term: 'The W-hierarchy is why not every parameter works',
-        plain: 'Vertex cover by answer size is tractable; clique by answer size is not believed to be.',
+        plain: 'Vertex cover by answer size is tractable. Clique by answer size is not believed to be.',
         formal: 'clique parameterised by k is W[1]-hard, so an f(k)·n^O(1) algorithm would collapse W[1] to FPT',
         readAs: 'Clique with the clique size as the parameter is W-one-hard, so an algorithm ' +
           'polynomial in n and arbitrary in k would put all of W-one into the tractable class.',
-        detail: 'The parameter is not a free choice. Clique has a trivial n^k algorithm — try ' +
-          'every k-subset — and the whole point of fixed-parameter tractability is to get the k ' +
-          'out of the exponent on n, which for clique is believed impossible. The hierarchy is ' +
-          'the map of which parameterisations are tractable, and consulting it before committing ' +
-          'to a parameter saves the effort of looking for an algorithm nobody expects to exist.',
+        detail: [
+          'The parameter is not a free choice.',
+          'Clique has a trivial n^k algorithm, which is to try every k-subset. The whole point of ' +
+            'fixed-parameter tractability is to get the k out of the exponent on n, which for ' +
+            'clique is believed impossible.',
+          'The hierarchy is the map of which parameterisations are tractable. Consulting it before ' +
+            'committing to a parameter saves the effort of looking for an algorithm nobody expects ' +
+            'to exist.'
+        ],
         example: 'Vertex cover and clique are complementary problems on complementary graphs, ' +
           'and one is FPT in the answer size while the other is W[1]-hard in it.'
       }
