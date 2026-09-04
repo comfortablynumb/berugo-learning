@@ -419,11 +419,14 @@
         },
         plain: 'It is a permutation: same length, same bytes, same order-0 entropy.',
         formal: 'the output is a rearrangement of the input, so its symbol counts — and therefore its entropy — are identical',
-        detail: 'This is the measurement the whole section is arranged around, and it is exact ' +
-          'rather than approximate: the first two rows of the stage table agree to every decimal ' +
-          'place, because a permutation cannot change a multiset. Running it before a compressor ' +
-          'roughly halves the output anyway, which means the gain is not redundancy removal at ' +
-          'all — it is making the data fit a model that was already there.',
+        detail: [
+          'This is the measurement the whole section is arranged around, and it is exact rather than ' +
+            'approximate. The first two rows of the stage table agree to every decimal place, ' +
+            'because a permutation cannot change a multiset.',
+          'Running it before a compressor roughly halves the output anyway.',
+          'So the gain is not redundancy removal at all. It is making the data fit a model that was ' +
+            'already there.'
+        ],
         example: 'The demo measures 4.5612 bits per byte before the transform and 4.5612 after ' +
           'it, over the same 2 000 symbols.'
       },
@@ -431,11 +434,13 @@
         term: 'What it does is group by following context',
         plain: 'Sorting every rotation puts characters with similar successors together.',
         formal: 'row i of the sorted rotation matrix ends with the character preceding the i-th suffix',
-        detail: 'The last column collects, for each context, all the characters that precede it — ' +
-          'so everything before "he" in English text lands in one run, and that run is mostly ' +
-          '"t". The input was not locally repetitive and the output is. That is the whole trick, ' +
-          'and it needs no knowledge of the language: the sort discovers the contexts rather than ' +
-          'being told them.',
+        detail: [
+          'The last column collects, for each context, all the characters that precede it. So ' +
+            'everything before "he" in English text lands in one run, and that run is mostly "t".',
+          'The input was not locally repetitive and the output is.',
+          'That is the whole trick, and it needs no knowledge of the language. The sort discovers ' +
+            'the contexts rather than being told them.'
+        ],
         example: 'The demo’s first 32 transformed bytes read "ffffffffffyyyyyyyyyyeeeeeeeeeekk" ' +
           'from an input that reads "the_quick_brown_fox_jumps_over_t".'
       },
@@ -443,35 +448,42 @@
         term: 'Move-to-front turns local repetition into small numbers',
         plain: 'Replace each symbol by its position in a list that puts the last-seen symbol first.',
         formal: 'a run of one character becomes a run of zeros; a recently-seen character becomes a small index',
-        detail: 'This is where the entropy actually falls, and it is worth noticing that MTF ' +
-          'alone would do nothing useful to the original text — it needs the transform to have ' +
-          'produced the runs first. The pair is the technique: rearrange so that a local property ' +
-          'holds, then use a code that exploits local properties. Neither half works without the ' +
-          'other.',
+        detail: [
+          'This is where the entropy actually falls.',
+          'It is worth noticing that MTF alone would do nothing useful to the original text. It ' +
+            'needs the transform to have produced the runs first.',
+          'The pair is the technique. Rearrange so that a local property holds, then use a code that ' +
+            'exploits local properties. Neither half works without the other.'
+        ],
         example: 'The demo measures the entropy dropping from 4.5612 to 0.7405 bits per byte at ' +
-          'this stage — a factor of 6.16.'
+          'this stage. That is a factor of 6.16.'
       },
       {
         term: 'The transform is invertible from one extra integer',
         plain: 'Which row of the sorted matrix was the original string.',
         formal: 'LF mapping: the i-th occurrence of a character in the last column is the i-th in the first',
-        detail: 'That correspondence is why a permutation this aggressive is still safe. The ' +
-          'first column is the last column sorted, so it costs nothing to know; the LF mapping ' +
-          'walks backwards through the original one character at a time; and the row index is the ' +
-          'only extra information the decoder needs. Both directions are linear with a counting ' +
-          'pass, which is why the inverse is fast even though the forward transform sorts.',
-        example: 'The demo round-trips the whole chain — transform, MTF, RLE and back — on every ' +
-          'corpus and reports it as a verified column.'
+        detail: [
+          'That correspondence is why a permutation this aggressive is still safe.',
+          'The first column is the last column sorted, so it costs nothing to know. The LF mapping ' +
+            'walks backwards through the original one character at a time, and the row index is the ' +
+            'only extra information the decoder needs.',
+          'Both directions are linear with a counting pass, which is why the inverse is fast even ' +
+            'though the forward transform sorts.'
+        ],
+        example: 'The demo round-trips the whole chain on every corpus — transform, MTF, RLE and ' +
+          'back — and reports it as a verified column.'
       },
       {
         term: 'The entropy coder at the end is deliberately weak',
         plain: 'Order-0 Huffman is enough once the transform has done its work.',
         formal: 'the pipeline makes a simple model accurate rather than building a complicated one',
-        detail: 'That is the architectural claim worth taking away. A context-mixing compressor ' +
-          'gets a better ratio and costs orders of magnitude more time; the BWT chain gets most ' +
-          'of the way there with a sort and an order-0 code. Where the modelling happens is a ' +
-          'design choice, and putting it in a reversible preprocessing step keeps the coder ' +
-          'simple, fast and easy to verify.',
+        detail: [
+          'That is the architectural claim worth taking away.',
+          'A context-mixing compressor gets a better ratio and costs orders of magnitude more time. ' +
+            'The BWT chain gets most of the way there with a sort and an order-0 code.',
+          'Where the modelling happens is a design choice, and putting it in a reversible ' +
+            'preprocessing step keeps the coder simple, fast and easy to verify.'
+        ],
         example: 'The demo’s BWT chain measures 2.841× on mixed prose against DEFLATE’s 2.027× ' +
           'and plain Huffman’s 1.974×.'
       },
@@ -479,23 +491,29 @@
         term: 'Bits per symbol can rise while the total falls',
         plain: 'Run-length coding produces fewer symbols, each carrying more.',
         formal: 'after RLE the symbol count drops from 2 000 to 294 and the entropy rises from 0.74 to 4.09',
-        detail: 'A reader watching only the bits-per-symbol column would conclude the RLE stage ' +
-          'made things worse. It did not: the floor in BYTES fell from 186 to 151, because there ' +
-          'are far fewer symbols. This is the standard way a per-symbol metric misleads when the ' +
-          'symbol count changes, and the defence is to report the total beside it — which is why ' +
-          'the stage table has both columns.',
-        example: 'The demo measures 0.7405 bits over 2 000 symbols after MTF and 4.0861 over 294 ' +
-          'after RLE — 186 bytes against 151.'
+        detail: [
+          'A reader watching only the bits-per-symbol column would conclude the RLE stage made ' +
+            'things worse.',
+          'It did not. The floor in BYTES fell from 186 to 151, because there are far fewer symbols.',
+          'This is the standard way a per-symbol metric misleads when the symbol count changes. The ' +
+            'defence is to report the total beside it, which is why the stage table has both ' +
+            'columns.'
+        ],
+        example: 'The demo measures 0.7405 bits over 2 000 symbols after MTF, and 4.0861 over 294 ' +
+          'after RLE. That is 186 bytes against 151.'
       },
       {
         term: 'Block size is the transform’s one real parameter, and it is a memory decision',
         plain: 'A bigger block sees more context and costs more to sort.',
         formal: 'O(n log n) comparisons over rotations plus the memory to hold the block and its order',
-        detail: 'The ratio gain is steep at small sizes and flattens: bzip2 caps the block at 900 ' +
-          'KB, and the demo shows why — most of the benefit arrives by a few kilobytes on ' +
-          'ordinary text. It also means the block boundary is a compression boundary, so a ' +
-          'repeated string that straddles two blocks is not found, which is the same window ' +
-          'trade-off LZ77 makes under a different name.',
+        detail: [
+          'The ratio gain is steep at small sizes and then flattens.',
+          'bzip2 caps the block at 900 KB, and the demo shows why. Most of the benefit arrives by a ' +
+            'few kilobytes on ordinary text.',
+          'It also means the block boundary is a compression boundary, so a repeated string that ' +
+            'straddles two blocks is not found. That is the same window trade-off LZ77 makes under ' +
+            'a different name.'
+        ],
         example: 'The demo measures ratios of 1.739, 2.079, 6.024 and 10.753 at block sizes of ' +
           '64, 256, 1 024 and 4 096 bytes.'
       },
@@ -503,11 +521,13 @@
         term: 'Preprocessing to make a weak model strong is a general technique',
         plain: 'Rearrange reversibly so that a simple coder becomes accurate.',
         formal: 'the transform changes no bytes and the stage after it gets much better — that pair is the diagnostic',
-        detail: 'Delta coding before an integer codec, a colour transform before a DCT, sorting a ' +
-          'column before run-length coding, tokenising before a language model — all the same ' +
-          'move. The question to ask when a model is weak is not always "how do I make the model ' +
-          'stronger" but "is there a reversible rearrangement that makes the data fit the model I ' +
-          'already have", and the second is often far cheaper.',
+        detail: [
+          'Delta coding before an integer codec, a colour transform before a DCT, sorting a column ' +
+            'before run-length coding, tokenising before a language model. All the same move.',
+          'The question to ask when a model is weak is not always "how do I make the model stronger".',
+          'It is often "is there a reversible rearrangement that makes the data fit the model I ' +
+            'already have", and the second is far cheaper.'
+        ],
         example: 'The demo shows the transform leaving the entropy at 4.5612 and the next stage ' +
           'taking it to 0.7405.'
       }

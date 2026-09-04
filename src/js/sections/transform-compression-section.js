@@ -46,39 +46,52 @@
     };
   }
 
-  function orientation() {
+  function orientationChain() {
     return [
-      '**The Burrows–Wheeler transform does not compress anything.** It is a permutation: same ' +
-        'length, same symbol counts, and therefore — by definition — the same order-0 entropy. ' +
-        'The demo’s first two table rows are identical to four decimal places, and that is the ' +
+      '**The Burrows–Wheeler transform does not compress anything.** It is a permutation, so it ' +
+        'has the same length, the same symbol counts, and by definition the same order-0 entropy.',
+      'The demo’s first two table rows are identical to four decimal places, and that is the ' +
         'measurement the whole section is arranged around.',
-      '**What it does is rearrange.** Sorting every rotation of the block groups characters by ' +
-        'what FOLLOWS them, so the characters preceding "he" in English text land in one run, and ' +
-        'that run is mostly "t". The output is locally repetitive in a way the input was not.',
+      '**What it does is rearrange.** Sorting every rotation of the block groups characters by what ' +
+        'FOLLOWS them, so the characters preceding "he" in English text land in one run, and that ' +
+        'run is mostly "t".',
+      'The output is locally repetitive in a way the input was not.',
       '**Move-to-front converts local repetition into small numbers.** Each symbol is replaced by ' +
         'its position in a list that puts the last-seen symbol first, so a run of one character ' +
-        'becomes a run of zeros. This is where the entropy drops — from about 4.6 bits per byte ' +
-        'to under one on the demo’s text.',
-      '**Then run-length coding collapses the zeros and a weak entropy coder finishes.** The ' +
-        'coder is order-0 Huffman, which the earlier sections showed is far from the best ' +
-        'available. It does not need to be better: the pipeline has already made the simple model ' +
-        'accurate.',
-      '**The transform is invertible from one extra integer.** The LF mapping — the i-th ' +
-        'occurrence of a character in the last column is the i-th in the first — lets a decoder ' +
-        'walk the original back out knowing only which row was the untransformed string. That is ' +
-        'why a permutation this aggressive is still safe.',
+        'becomes a run of zeros.',
+      'This is where the entropy drops, from about 4.6 bits per byte to under one on the demo’s ' +
+        'text.',
+      '**Then run-length coding collapses the zeros and a weak entropy coder finishes.** The coder ' +
+        'is order-0 Huffman, which the earlier sections showed is far from the best available.',
+      'It does not need to be better. The pipeline has already made the simple model accurate.'
+    ];
+  }
+
+  function orientationParameters() {
+    return [
+      '**The transform is invertible from one extra integer.** The LF mapping says the i-th ' +
+        'occurrence of a character in the last column is the i-th in the first.',
+      'That lets a decoder walk the original back out, knowing only which row was the ' +
+        'untransformed string. It is why a permutation this aggressive is still safe.',
       '**Block size is the one real parameter, and it is a memory decision.** A bigger block finds ' +
-        'more context and costs O(n log n) sorting plus the memory to hold it. bzip2 caps it at ' +
-        '900 KB for that reason, and the demo shows the ratio gain flattening well before then.',
+        'more context and costs O(n log n) sorting plus the memory to hold it.',
+      'bzip2 caps it at 900 KB for that reason, and the demo shows the ratio gain flattening well ' +
+        'before then.',
       '**The decode cost is asymmetric in the unusual direction.** Most codecs decode faster than ' +
-        'they encode; this one inverts the transform with a counting pass and an LF walk, which ' +
-        'is fast, but the ENCODER has to sort every rotation. That is why bzip2 is slow to ' +
-        'compress and unremarkable to decompress.',
+        'they encode.',
+      'This one inverts the transform with a counting pass and an LF walk, which is fast, but the ' +
+        'ENCODER has to sort every rotation. That is why bzip2 is slow to compress and ' +
+        'unremarkable to decompress.',
       '**Preprocessing to make a weak model strong is a general technique.** Delta coding before ' +
         'an integer codec, colour transforms before an image codec, sorting a column before ' +
-        'run-length coding — all the same move, and all measurable the same way: the transform ' +
-        'changes no bytes and the stage after it gets much better.'
+        'run-length coding: all the same move.',
+      'All of them are measurable the same way. The transform changes no bytes, and the stage after ' +
+        'it gets much better.'
     ];
+  }
+
+  function orientation() {
+    return orientationChain().concat(orientationParameters());
   }
 
   function config() {
@@ -90,14 +103,14 @@
         markup: root.TransformCompressionTemplate.render()
       },
       diagram: diagram(),
-      insight: '**The BWT does not compress; it rearranges data so that a simple model becomes ' +
-        'accurate — and that is a technique, not a trick specific to text.** The general form is ' +
-        'worth carrying: when a model is weak, ask whether a REVERSIBLE rearrangement would make ' +
-        'the data fit it, rather than making the model stronger. Delta coding before an integer ' +
-        'codec, sorting a column before run-length coding, a colour transform before a DCT — all ' +
-        'the same move. The diagnostic is the one this demo makes visible: a transform that ' +
-        'leaves the entropy unchanged and makes the next stage much better is doing exactly what ' +
-        'it should.'
+      insight: '**The BWT does not compress. It rearranges data so that a simple model becomes ' +
+        'accurate, and that is a technique rather than a trick specific to text.** The general ' +
+        'form is worth carrying. When a model is weak, ask whether a REVERSIBLE rearrangement ' +
+        'would make the data fit it, rather than making the model stronger. Delta coding before ' +
+        'an integer codec, sorting a column before run-length coding, a colour transform before a ' +
+        'DCT: all the same move. The diagnostic is the one this demo makes visible. A transform ' +
+        'that leaves the entropy unchanged and makes the next stage much better is doing exactly ' +
+        'what it should.'
     };
   }
 
