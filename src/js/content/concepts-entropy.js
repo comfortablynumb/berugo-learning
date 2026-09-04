@@ -151,12 +151,15 @@
         term: 'An identifier scheme is three decisions, and uniqueness is not one of them',
         plain: 'How it is generated, what it costs the index, and what it tells the person holding it.',
         formal: 'every scheme here achieves uniqueness; they differ on locality, ordering and leakage',
-        detail: 'Arguing about collision probability is arguing about the one dimension where all ' +
-          'the candidates are fine — a 122-bit random identifier collides with probability about ' +
-          '10⁻²⁰ at a billion rows, and a sequential integer never collides at all. The decisions ' +
-          'that actually differ are the ones with costs attached, and two of the three are ' +
-          'invisible at the moment the scheme is chosen: the index cost shows up when the table ' +
-          'gets large, and the leakage shows up when somebody looks.',
+        detail: [
+          'Arguing about collision probability is arguing about the one dimension where all the ' +
+            'candidates are fine.',
+          'A 122-bit random identifier collides with probability about 10⁻²⁰ at a billion rows, and ' +
+            'a sequential integer never collides at all.',
+          'The decisions that actually differ are the ones with costs attached, and two of the three ' +
+            'are invisible at the moment the scheme is chosen. The index cost shows up when the ' +
+            'table gets large, and the leakage shows up when somebody looks.'
+        ],
         example: 'The demo reports 0 duplicates for all five schemes over 20 000 identifiers and ' +
           'working sets from 14 to 64 pages.'
       },
@@ -175,12 +178,14 @@
         },
         plain: 'A B-tree inserts where the key sorts, so a random key lands on a random page.',
         formal: 'measured: a random UUID touches 64 distinct index pages in a 64-insert window; a time-ordered one touches 15',
-        detail: 'The number that matters is the working set — how many distinct pages the recent ' +
-          'inserts touched — because that is what the buffer pool has to hold to avoid a disk ' +
-          'read per insert. For a random key it is the whole window and it grows without bound; ' +
-          'for a time-ordered key it is a handful of pages and it is flat. At a billion rows that ' +
-          'is the difference between an index that lives in memory and one that does not, and it ' +
-          'is invisible until the table outgrows the cache.',
+        detail: [
+          'The number that matters is the working set: how many distinct pages the recent inserts ' +
+            'touched. That is what the buffer pool has to hold to avoid a disk read per insert.',
+          'For a random key it is the whole window and it grows without bound. For a time-ordered ' +
+            'key it is a handful of pages, and it is flat.',
+          'At a billion rows that is the difference between an index that lives in memory and one ' +
+            'that does not, and it is invisible until the table outgrows the cache.'
+        ],
         example: 'The demo’s chart has the random-UUID line as the diagonal y = x and every ' +
           'time-ordered line flat, across windows from 8 to 512.'
       },
@@ -188,12 +193,15 @@
         term: 'Time-ordered is not monotonic, and the gap is where cursors break',
         plain: 'UUIDv7 and ULID sort across milliseconds and come out unordered within one.',
         formal: 'measured: 0 inversions across milliseconds and 6 735 of 13 333 same-millisecond pairs out of order',
-        detail: 'The timestamp is 48 bits of milliseconds and everything below it is random, so ' +
-          'two identifiers from the same millisecond order by their random tails — about half of ' +
-          'them the wrong way, which is exactly what randomness predicts. A cursor that pages by ' +
-          '`id > last` therefore drops rows, and it drops them only under concurrency, which is ' +
-          'the hardest kind of bug to reproduce. Snowflake has a sequence counter in those bits ' +
-          'instead and is strictly monotonic per machine.',
+        detail: [
+          'The timestamp is 48 bits of milliseconds and everything below it is random, so two ' +
+            'identifiers from the same millisecond order by their random tails. About half of them ' +
+            'come out the wrong way, which is exactly what randomness predicts.',
+          'A cursor that pages by `id > last` therefore drops rows, and it drops them only under ' +
+            'concurrency. That is the hardest kind of bug to reproduce.',
+          'Snowflake has a sequence counter in those bits instead, and is strictly monotonic per ' +
+            'machine.'
+        ],
         example: 'The demo reports Snowflake at 0 out-of-order pairs of 13 333 same-millisecond ' +
           'pairs, where UUIDv7 has 6 735.'
       },
@@ -201,12 +209,15 @@
         term: 'A Snowflake is three fields and two hard limits',
         plain: '41 bits of milliseconds, 10 of machine id, 12 of sequence — and the last two are ceilings.',
         formal: '4 096 identifiers per machine per millisecond, and 1 024 machines',
-        detail: 'The sequence width is a hard rate limit that nobody notices until a backfill job ' +
-          'hits it: past 4 096 in one millisecond the generator must either stall or borrow from ' +
-          'the next millisecond, and borrowing means it is now ahead of the clock and will keep ' +
-          'borrowing until real time catches up. The machine-id width is a deployment constraint ' +
-          'that has to be satisfied by something outside the generator — a coordinator, a ' +
-          'configuration file, or an ordinal from a stateful set.',
+        detail: [
+          'The sequence width is a hard rate limit that nobody notices until a backfill job hits it.',
+          'Past 4 096 in one millisecond the generator must either stall or borrow from the next ' +
+            'millisecond. Borrowing means it is now ahead of the clock, and will keep borrowing ' +
+            'until real time catches up.',
+          'The machine-id width is a deployment constraint that has to be satisfied by something ' +
+            'outside the generator — a coordinator, a configuration file, or an ordinal from a ' +
+            'stateful set.'
+        ],
         example: 'The demo issues 5 000 identifiers in one millisecond, borrows exactly 1 ' +
           'millisecond from the future, and produces 0 duplicates.'
       },
@@ -214,12 +225,16 @@
         term: 'A backwards clock forces a choice, and the third option is the one that ships',
         plain: 'Wait and stall, refuse and drop, or serve from the stale reading and hand out a duplicate.',
         formal: 'measured over a 40 ms regression: waiting issued 13 of 13 with 8 stalls; refusing issued 5 of 13',
-        detail: 'Only two of the three preserve uniqueness, and the third is the one a generator ' +
-          'falls into by accident, because serving from whatever the clock currently says is what ' +
-          'the code does if nobody thought about it. The duplicate does not surface at generation ' +
-          'time — it surfaces days later as a primary-key violation nobody can reproduce, because ' +
-          'the clock has long since moved on. Testing this requires injecting the clock, which is ' +
-          'why the generator takes one as a parameter.',
+        detail: [
+          'Only two of the three preserve uniqueness, and the third is the one a generator falls ' +
+            'into by accident.',
+          'Serving from whatever the clock currently says is what the code does if nobody thought ' +
+            'about it.',
+          'The duplicate does not surface at generation time. It surfaces days later as a ' +
+            'primary-key violation nobody can reproduce, because the clock has long since moved on. ' +
+            'Testing this requires injecting the clock, which is why the generator takes one as a ' +
+            'parameter.'
+        ],
         example: 'The demo runs both policies against a scripted regression and reports 0 ' +
           'duplicates for each, which is the property they were chosen to keep.'
       },
@@ -227,12 +242,14 @@
         term: 'The fields that make an identifier cheap to index are the fields that leak',
         plain: 'Sortability is information, and information is what an outsider reads.',
         formal: 'UUIDv7 leaks the creation time to the millisecond; Snowflake leaks time, machine and per-millisecond sequence',
-        detail: 'This is a genuine trade rather than an oversight in either direction. A ' +
-          'time-ordered identifier is cheap to index precisely because its high bits encode when ' +
-          'it was made, and anyone holding one can read that back with a shift. A sequential ' +
-          'integer is worse: the value *is* the count, so id 4 812 tells a competitor how many ' +
-          'rows exist and two ids a week apart tell them the growth rate. Only the random UUID ' +
-          'leaks nothing, and it pays for that with the worst locality of the five.',
+        detail: [
+          'This is a genuine trade rather than an oversight in either direction.',
+          'A time-ordered identifier is cheap to index precisely because its high bits encode when ' +
+            'it was made, and anyone holding one can read that back with a shift.',
+          'A sequential integer is worse: the value *is* the count. So id 4 812 tells a competitor ' +
+            'how many rows exist, and two ids a week apart tell them the growth rate. Only the ' +
+            'random UUID leaks nothing, and it pays for that with the worst locality of the five.'
+        ],
         example: 'The demo’s leakage table has Snowflake at yes in all four columns and UUIDv4 at ' +
           'no in all four.'
       },
@@ -240,12 +257,14 @@
         term: 'A key and a name are different objects, and one identifier is rarely both',
         plain: 'A key lives in an index and pays for locality; a name appears in URLs and pays for what it reveals.',
         formal: 'systems that need both use two identifiers rather than compromising on one',
-        detail: 'The two roles have opposite requirements, so a single scheme is a compromise on ' +
-          'at least one of them — and the compromise is usually made silently, by whoever picked ' +
-          'the primary-key type. Having both is cheap: a time-ordered internal key that never ' +
-          'leaves the database and an opaque external identifier that appears in URLs, with one ' +
-          'index between them. What it costs is an extra column and the discipline never to ' +
-          'expose the first.',
+        detail: [
+          'The two roles have opposite requirements, so a single scheme is a compromise on at least ' +
+            'one of them.',
+          'That compromise is usually made silently, by whoever picked the primary-key type.',
+          'Having both is cheap: a time-ordered internal key that never leaves the database, and an ' +
+            'opaque external identifier that appears in URLs, with one index between them. What it ' +
+            'costs is an extra column and the discipline never to expose the first.'
+        ],
         example: 'The demo’s locality and leakage tables put the same five schemes in almost ' +
           'exactly opposite orders.'
       },
@@ -253,12 +272,15 @@
         term: 'Bit-packing several fields into one word is the same technique underneath',
         plain: 'A Snowflake is a struct in an integer, and so are permission masks, tagged pointers and colour values.',
         formal: 'timestamp << 22 | machine << 12 | sequence, unpacked by a shift and a mask',
-        detail: 'The reason to do it is that the whole thing then fits in a machine word, an ' +
-          'integer column and an index entry — which is why a Snowflake fits in a `bigint` and a ' +
-          'UUID needs sixteen bytes. The reason to be careful is that the field widths are a ' +
-          'permanent decision: widening one narrows another, and both are already stored in every ' +
-          'row that exists. Write the layout down beside the code that packs it, because the ' +
-          'shifts alone do not say what the fields mean.',
+        detail: [
+          'The reason to do it is that the whole thing then fits in a machine word, an integer ' +
+            'column and an index entry. That is why a Snowflake fits in a `bigint` and a UUID needs ' +
+            'sixteen bytes.',
+          'The reason to be careful is that the field widths are a permanent decision. Widening one ' +
+            'narrows another, and both are already stored in every row that exists.',
+          'Write the layout down beside the code that packs it, because the shifts alone do not say ' +
+            'what the fields mean.'
+        ],
         example: 'The demo colours the four fields of a real Snowflake and shows each one read ' +
           'back by shifting and masking.'
       }

@@ -51,47 +51,53 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**An identifier scheme is three decisions**: how it is generated, what it costs the index it ' +
+        'becomes a key in, and what it tells someone who holds one.',
+      'Uniqueness is not on the list, because every scheme here achieves it. Arguing about collision ' +
+        'probability is arguing about the one dimension where they are all fine.',
+      '**Randomness in the high bits is what destroys insert locality.** A B-tree inserts where the ' +
+        'key sorts, so a random key lands on a random page and consecutive inserts touch as many ' +
+        'pages as your window is wide.',
+      'The demo measures that directly. The working set for random UUIDs is the whole window, and ' +
+        'for a time-ordered scheme it is about a dozen pages.',
+      'At a billion rows that is the difference between an index that lives in memory and one that ' +
+        'reads from disk on every insert.',
+      '**Time-ordered is not the same as monotonic, and the gap matters.** UUIDv7 and ULID put a ' +
+        '48-bit millisecond timestamp in the high bits and fill the rest with randomness.',
+      'So ids from *different* milliseconds sort correctly, and ids from the *same* millisecond come ' +
+        'out in a random order — about half of the same-millisecond pairs, which the demo counts.',
+      'A cursor that pages by `id > last` silently drops rows under them. Snowflake has a sequence ' +
+        'counter in the low bits instead, and is strictly ordered.',
+      '**Time in the identifier is time leaked out of it.** A UUIDv7 hands its holder the creation ' +
+        'time to the millisecond.',
+      'A Snowflake hands over the machine that made it and the per-millisecond sequence, from which ' +
+        'a competitor can estimate your write rate.',
+      'A sequential integer is worse still — the value *is* the count, so id 4 812 says how many ' +
+        'rows exist. Only the random UUID leaks nothing, and it leaks nothing by giving up ' +
+        'everything else.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**An identifier scheme is three decisions**: how it is generated, what it costs the ' +
-          'index it becomes a key in, and what it tells someone who holds one. Uniqueness is not ' +
-          'on the list, because every scheme here achieves it — arguing about collision ' +
-          'probability is arguing about the one dimension where they are all fine.',
-        '**Randomness in the high bits is what destroys insert locality.** A B-tree inserts where ' +
-          'the key sorts, so a random key lands on a random page and consecutive inserts touch ' +
-          'as many pages as your window is wide. The demo measures that directly: the working ' +
-          'set for random UUIDs is the whole window, and for a time-ordered scheme it is about a ' +
-          'dozen pages. At a billion rows that is the difference between an index that lives in ' +
-          'memory and one that reads from disk on every insert.',
-        '**Time-ordered is not the same as monotonic, and the gap matters.** UUIDv7 and ULID put ' +
-          'a 48-bit millisecond timestamp in the high bits and fill the rest with randomness, so ' +
-          'ids from *different* milliseconds sort correctly and ids from the *same* millisecond ' +
-          'come out in a random order — about half of the same-millisecond pairs, which the demo ' +
-          'counts. A cursor that pages by `id > last` silently drops rows under them. Snowflake ' +
-          'has a sequence counter in the low bits instead and is strictly ordered.',
-        '**Time in the identifier is time leaked out of it.** A UUIDv7 hands its holder the ' +
-          'creation time to the millisecond; a Snowflake hands over the machine that made it and ' +
-          'the per-millisecond sequence, from which a competitor can estimate your write rate. A ' +
-          'sequential integer is worse still — the value *is* the count, so id 4 812 says how ' +
-          'many rows exist. Only the random UUID leaks nothing, and it leaks nothing by giving up ' +
-          'everything else.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — locality, ordering, a clock that misbehaves, and leakage',
         markup: root.IntegerAlgorithmsTemplate.render()
       },
       diagram: diagram(),
       insight: 'The decision worth making explicitly is whether the identifier is a *key* or a ' +
-        '*name*. As a key it lives in an index and its cost is locality, so time-ordered wins; as ' +
-        'a name it appears in URLs and support tickets and its cost is what it reveals, so random ' +
-        'wins. Many systems want both and the answer is to have both — a time-ordered internal ' +
-        'key and an opaque external identifier — rather than to compromise on one that is ' +
-        'mediocre at each. And whichever you choose, the operational failure to plan for is the ' +
-        'clock: a backwards step means either stalling or handing out a duplicate, the ' +
-        'duplicate arrives days later as a primary-key violation nobody can reproduce, and the ' +
-        'only way to know which your generator does is to test it against a clock you control.'
+        '*name*. As a key it lives in an index and its cost is locality, so time-ordered wins. As a ' +
+        'name it appears in URLs and support tickets and its cost is what it reveals, so random ' +
+        'wins. Many systems want both, and the answer is to have both: a time-ordered internal key ' +
+        'and an opaque external identifier. That beats compromising on one that is mediocre at ' +
+        'each. And whichever you choose, the operational failure to plan for is the clock. A ' +
+        'backwards step means either stalling or handing out a duplicate. The duplicate arrives ' +
+        'days later as a primary-key violation nobody can reproduce. The only way to know which ' +
+        'your generator does is to test it against a clock you control.'
     };
   }
 
