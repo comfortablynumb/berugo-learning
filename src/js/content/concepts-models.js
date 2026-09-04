@@ -20,25 +20,31 @@
         },
         plain: 'One pass over the data, in an order nobody chose, in sub-linear space.',
         formal: 'space o(n), a single pass, and no control over the arrival order',
-        readAs: 'The space used has to grow more slowly than the length of the input, the data ' +
+        readAs: 'The space used has to grow more slowly than the length of the input. The data ' +
           'is seen once in whatever order it arrives, and none of it can be revisited.',
-        detail: 'Every result in the area follows from those two constraints together. One pass ' +
-          'alone is easy if the space is unbounded — keep everything and answer at the end. ' +
-          'Sub-linear space alone is easy with two passes — the second pass can use what the ' +
-          'first learned. It is the conjunction that forbids things, and the forbidding is ' +
-          'structural rather than a gap somebody will close.',
-        example: 'The demo’s exact distinct-value set is killed at item 345 of 200 000 — it is not ' +
+        detail: [
+          'Every result in the area follows from those two constraints together.',
+          'One pass alone is easy if the space is unbounded, because you can keep everything and ' +
+            'answer at the end. Sub-linear space alone is easy with two passes, because the second ' +
+            'pass can use what the first learned.',
+          'It is the conjunction that forbids things, and the forbidding is structural rather than a ' +
+            'gap somebody will close.'
+        ],
+        example: 'The demo’s exact distinct-value set is killed at item 345 of 200 000. It is not ' +
           'slow, it does not fit.'
       },
       {
         term: 'The budget is enforced by killing the structure, not by warning',
         plain: 'A structure that exceeds its byte budget stops, and reports where.',
         formal: 'each structure reports its own byte footprint; the harness kills it at the budget',
-        detail: 'This is the difference between a demonstration and an assertion. Almost every ' +
-          'streaming tutorial says "an exact set does not fit" and then quietly runs one to check ' +
-          'the sketch’s answer. Killing it means the claim is measured, and the item index where ' +
-          'it died is a real number a reader can reason about — 345 items into a stream of two ' +
-          'hundred thousand, which is 0.17% of the way through.',
+        detail: [
+          'This is the difference between a demonstration and an assertion.',
+          'Almost every streaming tutorial says "an exact set does not fit" and then quietly runs ' +
+            'one to check the sketch’s answer.',
+          'Killing it means the claim is measured, and the item index where it died is a real number ' +
+            'a reader can reason about. It is 345 items into a stream of two hundred thousand, ' +
+            'which is 0.17% of the way through.'
+        ],
         example: 'The demo kills the exact set at 8 208 bytes against a budget of 8 192, and kills ' +
           'HyperLogLog p=14 at 16 384 bytes too.'
       },
@@ -48,12 +54,15 @@
         formal: 'relative error ≈ 1.04/√m for m registers',
         readAs: 'The relative error is about one point oh four divided by the square root of the ' +
           'number of registers.',
-        detail: 'The square-root law is why the accuracy-space plot is a straight line on ' +
-          'logarithmic axes, and why there is a practical sweet spot rather than a knob worth ' +
-          'turning to the end. Going from 4 096 registers to 16 384 costs four times the memory ' +
-          'and halves the error; going further halves it again for another four times. Somewhere ' +
-          'around a few kilobytes the error is small enough that the next halving is not worth ' +
-          'the bytes, and that is where every production configuration sits.',
+        detail: [
+          'The square-root law is why the accuracy-space plot is a straight line on logarithmic ' +
+            'axes. It is also why there is a practical sweet spot rather than a knob worth turning ' +
+            'to the end.',
+          'Going from 4 096 registers to 16 384 costs four times the memory and halves the error. ' +
+            'Going further halves it again for another four times.',
+          'Somewhere around a few kilobytes the error is small enough that the next halving is not ' +
+            'worth the bytes, and that is where every production configuration sits.'
+        ],
         example: 'The demo measures 11.30%, 8.38%, 4.33% and 0.73% at 16, 256, 4 096 and 16 384 ' +
           'bytes.'
       },
@@ -61,11 +70,15 @@
         term: 'A sketch’s measured error can exceed its predicted error, for a documented reason',
         plain: 'The raw estimator reads high in a particular band of cardinalities.',
         formal: 'HyperLogLog’s raw estimate is biased upward for cardinalities between roughly 2.5m and 4m',
-        detail: 'Production implementations correct that band — with linear counting below it and ' +
-          'an empirical bias table inside it — and a teaching implementation that skips the ' +
-          'correction will measure worse than the formula says. The honest move is to report both ' +
-          'columns and name the reason, because "the measurement disagrees with the theory" is ' +
-          'either a bug, a missing correction, or a real limit, and only one of those is fine.',
+        detail: [
+          'Production implementations correct that band, with linear counting below it and an ' +
+            'empirical bias table inside it.',
+          'A teaching implementation that skips the correction will measure worse than the formula ' +
+            'says.',
+          'The honest move is to report both columns and name the reason. "The measurement disagrees ' +
+            'with the theory" is either a bug, a missing correction, or a real limit, and only one ' +
+            'of those is fine.'
+        ],
         example: 'The demo measures 8.38% at p=8 against a predicted 6.50%, and names the ' +
           'uncorrected band rather than hiding the row.'
       },
@@ -75,24 +88,29 @@
         formal: 'a returned value v satisfies rank(v) ∈ [q − ε, q + ε]; the VALUE error depends on the distribution',
         readAs: 'The rank of the returned value lies within epsilon of the requested quantile; ' +
           'nothing is promised about how far the value itself is from the true one.',
-        detail: 'On a heavy-tailed distribution a rank error of one per cent at the ninety-ninth ' +
-          'percentile can be an enormous difference in milliseconds, because the values are ' +
-          'spread out there. This is the most commonly misread guarantee in latency monitoring: ' +
-          'the dashboards quote a value and the sketch guarantees a position, and the two are only ' +
-          'close where the distribution is dense.',
-        example: 'The demo reports ranks rather than values — 0.5001, 0.8995 and 0.9897 for ' +
-          't-digest against the requested 0.50, 0.90 and 0.99.'
+        detail: [
+          'On a heavy-tailed distribution a rank error of one per cent at the ninety-ninth ' +
+            'percentile can be an enormous difference in milliseconds, because the values are ' +
+            'spread out there.',
+          'This is the most commonly misread guarantee in latency monitoring.',
+          'The dashboards quote a value and the sketch guarantees a position, and the two are only ' +
+            'close where the distribution is dense.'
+        ],
+        example: 'The demo reports ranks rather than values. They are 0.5001, 0.8995 and 0.9897 ' +
+          'for t-digest, against the requested 0.50, 0.90 and 0.99.'
       },
       {
         term: 'Which sketch to reach for depends on where the accuracy is wanted',
         plain: 'A reservoir is equally wrong everywhere; t-digest keeps resolution at the tails.',
         formal: 'reservoir sampling is uniform; t-digest allocates smaller clusters near 0 and 1',
-        detail: 'A uniform sample of a thousand items answers the median well and the p99 badly, ' +
-          'because only ten of its samples are past the ninety-ninth percentile. t-digest ' +
-          'deliberately spends its memory where the tails are, which is why it wins on the ' +
-          'measurement that matters for latency. That is a design choice matched to a question, ' +
-          'not a strictly better structure — for a median, a reservoir at the same size is fine ' +
-          'and simpler.',
+        detail: [
+          'A uniform sample of a thousand items answers the median well and the p99 badly, because ' +
+            'only ten of its samples are past the ninety-ninth percentile.',
+          'The t-digest deliberately spends its memory where the tails are, which is why it wins on ' +
+            'the measurement that matters for latency.',
+          'That is a design choice matched to a question, not a strictly better structure. For a ' +
+            'median, a reservoir at the same size is fine and simpler.'
+        ],
         example: 'The demo measures a worst rank error of 1.045% for a 1 000-item reservoir at ' +
           '8 000 bytes and 0.050% for t-digest at 928.'
       },
@@ -102,11 +120,13 @@
         formal: 'exact singleton detection and exact maximum gap both need Ω(n) space in one pass',
         readAs: 'Both of those questions need space at least of the order of the number of ' +
           'items in the stream, which is exactly what the model does not have.',
-        detail: 'Knowing which side of the line a requirement falls on is the practical value of ' +
-          'the model, because it turns an engineering argument into a settled one. "Which keys ' +
-          'appeared exactly once" is not hard, it is impossible in the constraints, so the ' +
-          'negotiation is about the requirement — retain the data, take two passes, or ask a ' +
-          'different question — and never about the implementation.',
+        detail: [
+          'Knowing which side of the line a requirement falls on is the practical value of the ' +
+            'model, because it turns an engineering argument into a settled one.',
+          '"Which keys appeared exactly once" is not hard, it is impossible in the constraints.',
+          'So the negotiation is about the requirement — retain the data, take two passes, or ask a ' +
+            'different question — and never about the implementation.'
+        ],
         example: 'The demo’s table marks 2 of 5 questions as having no one-pass answer, with the ' +
           'structural reason in the row.'
       },
@@ -114,12 +134,14 @@
         term: 'Cash-register and turnstile streams are different models',
         plain: 'Whether the stream can subtract as well as add.',
         formal: 'cash-register: updates are non-negative · turnstile: updates may be negative',
-        detail: 'Several sketches that work on the first silently do not work on the second. ' +
-          'HyperLogLog cannot remove an element at all; count-min tolerates deletions only in the ' +
-          'strict turnstile model where counts stay non-negative. Asking which model applies is a ' +
-          'good early question for any real deployment, because retractions, corrections and ' +
-          'late-arriving cancellations turn a cash-register design into a turnstile one without ' +
-          'anybody deciding to.',
+        detail: [
+          'Several sketches that work on the first silently do not work on the second.',
+          'HyperLogLog cannot remove an element at all. Count-min tolerates deletions only in the ' +
+            'strict turnstile model, where counts stay non-negative.',
+          'Asking which model applies is a good early question for any real deployment. ' +
+            'Retractions, corrections and late-arriving cancellations turn a cash-register design ' +
+            'into a turnstile one without anybody deciding to.'
+        ],
         example: 'A distinct-user count fed by an event log with retractions is a turnstile ' +
           'stream, and the demo’s HyperLogLog rows do not apply to it.'
       }

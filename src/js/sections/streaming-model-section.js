@@ -54,43 +54,58 @@
     };
   }
 
-  function orientation() {
+  function orientationConstraints() {
     return [
-      '**The streaming model is one pass and sub-linear space, and both halves do work.** One ' +
-        'pass means the data is gone once it has been seen; sub-linear space means there is no ' +
-        'room to keep it. Together they rule out any exact answer that can depend on every item ' +
-        'in the stream, which is more questions than people expect.',
+      '**The streaming model is one pass and sub-linear space, and both halves do work.** One pass ' +
+        'means the data is gone once it has been seen. Sub-linear space means there is no room to ' +
+        'keep it.',
+      'Together they rule out any exact answer that can depend on every item in the stream, which ' +
+        'is more questions than people expect.',
       '**An exact distinct count needs one entry per distinct value, so past a budget it is not ' +
-        'slow — it is impossible.** The demo runs it against a hard byte limit and kills it at ' +
-        'the item where it passes, which is usually a few hundred items into a stream of ' +
-        'hundreds of thousands. That is the model refusing rather than degrading.',
+        'slow. It is impossible.** The demo runs it against a hard byte limit and kills it at the ' +
+        'item where it passes.',
+      'That is usually a few hundred items into a stream of hundreds of thousands, and it is the ' +
+        'model refusing rather than degrading.',
       '**HyperLogLog answers the same question in bytes that do not grow with the stream.** Its ' +
-        'relative error is about 1.04/√m for m registers, so the accuracy is bought in a ' +
-        'currency you choose in advance. The demo runs four precisions and reports the measured ' +
-        'error against the predicted one for each.',
+        'relative error is about 1.04/√m for m registers, so the accuracy is bought in a currency ' +
+        'you choose in advance.',
+      'The demo runs four precisions and reports the measured error against the predicted one for ' +
+        'each.',
       '**A measured error above its own prediction is not automatically a bug.** The predicted ' +
-        'figure is a standard error, so individual runs land either side of it, and HyperLogLog ' +
-        'additionally has a known bias band between about 2.5m and 4m distinct values where the ' +
-        'raw estimator reads high. The demo shows a row inside that band, and the honest reading ' +
-        'is the band rather than the single number.',
-      '**Quantile error is a RANK error, not a value error.** Asking for the 99th percentile and ' +
-        'getting the value at rank 0.9897 is a rank error of 0.0003; the VALUE could be far from ' +
-        'the true p99 on a heavy-tailed distribution and the sketch would still be within its ' +
-        'guarantee. Every bound in this family is stated over ranks, and comparing sketches by ' +
-        'value error compares the wrong thing.',
-      '**Some questions have no approximate answer either, and that is the useful half.** ' +
-        '"Which keys appeared exactly once" cannot be answered by a sketch that over-counts, ' +
-        'because over-counting turns a one into a two and there is no way to tell. Neither can ' +
-        '"the largest gap between consecutive values" without sorting.',
-      '**Two passes change the picture completely.** An exact median is impossible in one pass ' +
-        'with sub-linear space and straightforward in two — count into buckets, then rescan the ' +
-        'bucket that contains the median. Whether the data can be read twice is therefore a ' +
-        'design question worth asking before reaching for a sketch.',
-      '**Cash-register and turnstile streams are different models.** A cash-register stream only ' +
-        'adds; a turnstile stream also subtracts. Count-min survives subtraction and count-sketch ' +
-        'is designed for it; HyperLogLog does not survive it at all, because a register records ' +
-        'a maximum and a maximum cannot be undone.'
+        'figure is a standard error, so individual runs land either side of it.',
+      'HyperLogLog additionally has a known bias band between about 2.5m and 4m distinct values, ' +
+        'where the raw estimator reads high.',
+      'The demo shows a row inside that band, and the honest reading is the band rather than the ' +
+        'single number.'
     ];
+  }
+
+  function orientationLimits() {
+    return [
+      '**Quantile error is a RANK error, not a value error.** Asking for the 99th percentile and ' +
+        'getting the value at rank 0.9897 is a rank error of 0.0003.',
+      'The VALUE could be far from the true p99 on a heavy-tailed distribution, and the sketch ' +
+        'would still be within its guarantee.',
+      'Every bound in this family is stated over ranks, and comparing sketches by value error ' +
+        'compares the wrong thing.',
+      '**Some questions have no approximate answer either, and that is the useful half.** "Which ' +
+        'keys appeared exactly once" cannot be answered by a sketch that over-counts, because ' +
+        'over-counting turns a one into a two and there is no way to tell.',
+      'Neither can "the largest gap between consecutive values", without sorting.',
+      '**Two passes change the picture completely.** An exact median is impossible in one pass with ' +
+        'sub-linear space, and straightforward in two.',
+      'Count into buckets, then rescan the bucket that contains the median. Whether the data can be ' +
+        'read twice is therefore a design question worth asking before reaching for a sketch.',
+      '**Cash-register and turnstile streams are different models.** A cash-register stream only ' +
+        'adds, and a turnstile stream also subtracts.',
+      'Count-min survives subtraction and count-sketch is designed for it.',
+      'HyperLogLog does not survive it at all, because a register records a maximum and a maximum ' +
+        'cannot be undone.'
+    ];
+  }
+
+  function orientation() {
+    return orientationConstraints().concat(orientationLimits());
   }
 
   function config() {
@@ -104,14 +119,14 @@
       diagram: diagram(),
       insight: '**Knowing which questions are provably impossible in one pass ends a whole class ' +
         'of requirement before it is written down.** "Report the exact number of unique users" ' +
-        'over an unbounded stream is not a hard engineering problem, it is a space bound, and the ' +
-        'only honest replies are "approximately, with this error", "exactly, with storage ' +
-        'proportional to the users", or "exactly, in two passes over retained data". Which of ' +
-        'those three the product actually needs is usually a five-minute conversation, and it ' +
-        'is a conversation that cannot happen at all if the impossibility is not on the table. ' +
-        'The one to watch for is a requirement that quietly needs the SET rather than the ' +
-        'COUNT — deduplication, exactly-once, "who was affected" — because those need the space ' +
-        'and no sketch will save them.'
+        'over an unbounded stream is not a hard engineering problem, it is a space bound. There ' +
+        'are three honest replies: "approximately, with this error", "exactly, with storage ' +
+        'proportional to the users", and "exactly, in two passes over retained data". Which of ' +
+        'those three the product actually needs is usually a five-minute conversation. It cannot ' +
+        'happen at all if the impossibility is not on the table. ' +
+        'The one to watch for is a requirement that quietly needs the SET rather than the COUNT. ' +
+        'Deduplication, exactly-once and "who was affected" all need the space, and no sketch ' +
+        'will save them.'
     };
   }
 
