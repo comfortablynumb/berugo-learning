@@ -309,16 +309,18 @@
     metaheuristics: [
       {
         term: 'A heuristic has no guarantee, which is a precise statement rather than an apology',
-        plain: 'An approximation algorithm comes with a proved ratio; a heuristic comes with measurements.',
+        plain: 'An approximation algorithm comes with a proved ratio. A heuristic comes with measurements.',
         formal: 'no bound on cost(heuristic) / cost(optimum) holds for all inputs',
         readAs: 'There is no bound on the ratio between what the heuristic costs and what the ' +
           'optimum costs that holds on every input.',
-        detail: 'The consequence is that a heuristic can only be evaluated empirically, which ' +
-          'makes the experimental design the whole of its credibility. That is a much heavier ' +
-          'obligation than it sounds: the instances, the budget, the seeds and the baseline all ' +
-          'have to be stated, because any of them can be chosen to produce whatever ranking the ' +
-          'author wanted. A heuristic reported without them is a claim about one experiment ' +
-          'nobody can repeat.',
+        detail: [
+          'The consequence is that a heuristic can only be evaluated empirically, which makes the ' +
+            'experimental design the whole of its credibility.',
+          'That is a much heavier obligation than it sounds. The instances, the budget, the seeds ' +
+            'and the baseline all have to be stated, because any of them can be chosen to produce ' +
+            'whatever ranking the author wanted.',
+          'A heuristic reported without them is a claim about one experiment nobody can repeat.'
+        ],
         example: 'The demo runs all eight methods on one instance from one seed under one budget, ' +
           'and reports the budget offered and the budget actually used in separate columns.'
       },
@@ -335,12 +337,15 @@
         },
         plain: 'Fix the number of objective evaluations, or you are measuring patience.',
         formal: 'best-so-far as a function of evaluations spent is the comparison; a final value alone is not',
-        detail: 'A method that runs longer will usually find something better, so a table of ' +
-          'final values ranks the authors rather than the algorithms. Fixing the budget makes ' +
-          'the comparison meaningful and plotting best-so-far against evaluations answers the ' +
-          'question a production system actually asks — how good is the answer if I stop now. ' +
+        detail: [
+          'A method that runs longer will usually find something better, so a table of final values ' +
+            'ranks the authors rather than the algorithms.',
+          'Fixing the budget makes the comparison meaningful, and plotting best-so-far against ' +
+            'evaluations answers the question a production system actually asks: how good is the ' +
+            'answer if I stop now.',
           'The harness here refuses a run whose methods were given different budgets rather than ' +
-          'warning about it, because a warning in a log is not a defence.',
+            'warning about it, because a warning in a log is not a defence.'
+        ],
         example: 'The demo offers every method 40 000 evaluations and reports that 2-opt used ' +
           '2 430 of them, 6.1%, before converging.'
       },
@@ -349,14 +354,16 @@
         plain: 'A 2-opt candidate is four table lookups, so charging a full tour costing is wrong by a factor of n.',
         formal: 'Δ = d(a, c) + d(b, d) − d(a, b) − d(c, d) for reversing the segment between two edges',
         readAs: 'The change in tour length is the length of the two edges the move ' +
-          'creates, minus the length of the two edges it removes — four table lookups ' +
+          'creates, minus the length of the two edges it removes. That is four table lookups ' +
           'rather than a walk over the whole tour.',
-        detail: 'This is the commonest way a budgeted comparison is rigged without anybody ' +
-          'intending it. If local search is charged a full O(n) costing per candidate and a ' +
-          'population method is charged one per offspring, local search appears n times more ' +
-          'expensive than it is and loses every comparison. The unit has to be the same thing ' +
-          'for every method — one candidate solution evaluated — and the implementations have to ' +
-          'be written to make that true.',
+        detail: [
+          'This is the commonest way a budgeted comparison is rigged without anybody intending it.',
+          'Suppose local search is charged a full O(n) costing per candidate while a population ' +
+            'method is charged one per offspring. Local search then appears n times more expensive ' +
+            'than it is, and loses every comparison.',
+          'The unit has to be the same thing for every method, which is one candidate solution ' +
+            'evaluated. The implementations have to be written to make that true.'
+        ],
         example: 'The demo’s or-opt uses a six-term delta rather than a recosting for exactly ' +
           'this reason, and its move count is then comparable with 2-opt’s.'
       },
@@ -367,11 +374,14 @@
         readAs: 'Annealing accepts a worsening move with probability e to the minus delta over ' +
           'temperature; tabu search forbids undoing a recent move for a fixed number of ' +
           'iterations.',
-        detail: 'Reading the zoo that way turns forty named methods into four ideas: go uphill ' +
-          'with decreasing probability, go uphill deliberately and forbid coming straight back, ' +
-          'recombine two solutions in the hope of landing in a third basin, or start again ' +
-          'somewhere else. Ant colony is the one genuine outlier, because its memory is in the ' +
-          'edges rather than in any solution, so it rebuilds rather than edits.',
+        detail: [
+          'Reading the zoo that way turns forty named methods into four ideas.',
+          'Go uphill with decreasing probability, go uphill deliberately and forbid coming straight ' +
+            'back, recombine two solutions in the hope of landing in a third basin, or start again ' +
+            'somewhere else.',
+          'Ant colony is the one genuine outlier, because its memory is in the edges rather than in ' +
+            'any solution, so it rebuilds rather than edits.'
+        ],
         example: 'The demo’s comparison table names the escape mechanism for each of the eight ' +
           'methods in its last column.'
       },
@@ -381,12 +391,16 @@
         formal: 'a geometric schedule with T_final = T₀·fall needs cooling = fall^(1/steps)',
         readAs: 'For the temperature to fall by a chosen factor over a given number of steps, ' +
           'the per-step rate is that factor raised to one over the step count.',
-        detail: 'If the temperature never falls far enough the acceptance probability stays near ' +
-          'one, every move is taken, and the search is a random walk that returns whatever it ' +
-          'started from. That was measured here before the schedule was made budget-aware: ' +
-          'annealing came back with exactly the nearest-neighbour tour it began with, at every ' +
-          'budget under a few thousand. At the other end, temperature zero makes the acceptance ' +
-          'test Δ < 0 and annealing IS hill climbing.',
+        detail: [
+          'If the temperature never falls far enough the acceptance probability stays near one, ' +
+            'every move is taken, and the search is a random walk that returns whatever it started ' +
+            'from.',
+          'That was measured here before the schedule was made budget-aware. Annealing came back ' +
+            'with exactly the nearest-neighbour tour it began with, at every budget under a few ' +
+            'thousand.',
+          'At the other end, temperature zero makes the acceptance test Δ < 0, and annealing IS hill ' +
+            'climbing.'
+        ],
         example: 'The demo’s cooling sweep runs 0.00, 2.61, 13.06 and 52.23 as starting ' +
           'temperatures, giving tours of 513.39, 486.03, 489.28 and 486.03.'
       },
@@ -394,14 +408,16 @@
         term: 'Order crossover exists because the obvious crossover produces invalid tours',
         plain: 'Cut two permutations and swap halves, and the child visits some cities twice and others never.',
         formal: 'OX: copy a slice of parent A, fill the remaining positions in parent B’s order, skipping what is present',
-        detail: 'Encoding and repair are where a genetic algorithm’s real cost lives, and they ' +
-          'are the part the biological metaphor does not mention. Any representation with a ' +
-          'constraint — a permutation, a tree, a schedule with precedence — needs an operator ' +
-          'designed to preserve it, and designing one is most of the work of applying a GA to a ' +
-          'new problem. A repair pass instead of an operator is legal and usually dominates the ' +
-          'runtime.',
-        example: 'The demo’s genetic algorithm reaches 552.96 against a best of 481.52 — the ' +
-          'weakest method in the table on this instance.'
+        detail: [
+          'Encoding and repair are where a genetic algorithm’s real cost lives, and they are the ' +
+            'part the biological metaphor does not mention.',
+          'Any representation with a constraint — a permutation, a tree, a schedule with precedence ' +
+            '— needs an operator designed to preserve it. Designing one is most of the work of ' +
+            'applying a GA to a new problem.',
+          'A repair pass instead of an operator is legal, and usually dominates the runtime.'
+        ],
+        example: 'The demo’s genetic algorithm reaches 552.96 against a best of 481.52. That is ' +
+          'the weakest method in the table on this instance.'
       },
       {
         term: 'GRASP is the control every comparison needs',
@@ -409,24 +425,29 @@
         formal: 'greedy with a random choice among the α best candidates, then local search, repeated until the budget is gone',
         readAs: 'A greedy construction that picks randomly among the alpha best candidates at ' +
           'each step, followed by local search, repeated until the budget runs out.',
-        detail: 'It has no memory, no population and no parameters worth tuning beyond α, so any ' +
-          'method that cannot beat it is not paying for its own sophistication. Including it is ' +
-          'the single cheapest way to make a metaheuristic comparison honest, and on the demo’s ' +
-          'instances it ties for first place — which is exactly the result a paper proposing a ' +
-          'new method would have no reason to report.',
+        detail: [
+          'It has no memory, no population and no parameters worth tuning beyond α. So any method ' +
+            'that cannot beat it is not paying for its own sophistication.',
+          'Including it is the single cheapest way to make a metaheuristic comparison honest.',
+          'On the demo’s instances it ties for first place, which is exactly the result a paper ' +
+            'proposing a new method would have no reason to report.'
+        ],
         example: 'The demo’s GRASP reaches 481.52, tying with 2-opt for the best tour under the ' +
           '40 000-evaluation budget.'
       },
       {
         term: 'The ranking changes with the budget, which is why a budget-free claim says nothing',
-        plain: 'Local search wins early and stops; the sampling methods keep improving.',
+        plain: 'Local search wins early and stops. The sampling methods keep improving.',
         formal: 'a method that converges has a flat best-so-far curve after convergence; one that samples does not',
-        detail: 'A converged local search cannot use the rest of the budget at all — there is no ' +
-          'improving move to evaluate — so its curve is flat from the moment it stops. Annealing ' +
-          'and tabu are still sampling at the end of every budget in the demo, and they overtake ' +
-          'at the largest one. Any single row of that table is true and none of them is ' +
-          'informative on its own, which is precisely why the budget belongs in the claim.',
-        example: 'At 2 000 evaluations the demo’s winner is 2-opt at 489.02; at 160 000 the ' +
+        detail: [
+          'A converged local search cannot use the rest of the budget at all, because there is no ' +
+            'improving move to evaluate. Its curve is flat from the moment it stops.',
+          'Annealing and tabu are still sampling at the end of every budget in the demo, and they ' +
+            'overtake at the largest one.',
+          'Any single row of that table is true and none of them is informative on its own, which is ' +
+            'precisely why the budget belongs in the claim.'
+        ],
+        example: 'At 2 000 evaluations the demo’s winner is 2-opt at 489.02. At 160 000 the ' +
           'winner is simulated annealing, with four methods tied at 481.52.'
       }
     ]

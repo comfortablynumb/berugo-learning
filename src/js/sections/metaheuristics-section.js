@@ -79,54 +79,67 @@
     };
   }
 
-  function orientation() {
+  function orientationBudget() {
     return [
-      '**A heuristic is a method with no guarantee, and that is a precise statement rather ' +
-        'than an apology.** An approximation algorithm comes with a proved ratio; a heuristic ' +
-        'comes with measurements. The consequence is that a heuristic can only be evaluated ' +
-        'empirically, which makes the experimental design the whole of its credibility — and ' +
-        'the experimental design is what this section is about.',
-      '**The only honest comparison fixes the evaluation budget.** Every method here gets the ' +
-        'same number of objective evaluations on the same instance from the same seed, and the ' +
-        'harness reports whether it really did. Comparing by "best result found" compares how ' +
-        'long each author was willing to wait, which is how most published metaheuristic ' +
-        'comparisons are done and why most of them mean nothing.',
+      '**A heuristic is a method with no guarantee, and that is a precise statement rather than ' +
+        'an apology.** An approximation algorithm comes with a proved ratio. A heuristic comes ' +
+        'with measurements.',
+      'The consequence is that a heuristic can only be evaluated empirically, which makes the ' +
+        'experimental design the whole of its credibility.',
+      'The experimental design is what this section is about.',
+      '**The only honest comparison fixes the evaluation budget.** Every method here gets the same ' +
+        'number of objective evaluations on the same instance from the same seed, and the harness ' +
+        'reports whether it really did.',
+      'Comparing by "best result found" compares how long each author was willing to wait. That is ' +
+        'how most published metaheuristic comparisons are done, and why most of them mean nothing.',
       '**Constructive heuristics build one answer and local search improves one.** Nearest ' +
-        'neighbour is a single pass and lands 22.27% above the best tour anything in the ' +
-        'demo finds. 2-opt reverses a ' +
-        'segment when doing so shortens the tour; or-opt lifts a run of one to three cities ' +
-        'and reinserts it elsewhere. Each candidate move costs one delta of four table lookups ' +
-        '— charging a full tour costing instead would make local search look n times more ' +
-        'expensive than it is, which is the commonest way a budgeted comparison is rigged ' +
-        'without anybody intending it.',
-      '**Every metaheuristic in the list is one answer to "what do I do at a local optimum".** ' +
-        'That is the only axis on which they differ. Annealing accepts a worsening move with ' +
-        'probability e^(−Δ/T) and cools; tabu takes the best available move even when it is ' +
-        'worse and forbids reversing it; a genetic algorithm recombines; ant colony keeps ' +
-        'statistics on edges rather than on solutions; GRASP restarts. Reading them that way ' +
-        'makes the zoo a list of four ideas rather than forty.',
-      '**A cooling schedule has to be derived from the budget, and this is where annealing is ' +
-        'usually got wrong.** A rate tuned for a million evaluations is a random walk when it ' +
-        'is given a thousand: the temperature never falls far enough to settle, and the method ' +
-        'returns its starting tour. That was measured here before the schedule was made ' +
-        'budget-aware — annealing came back with exactly the nearest-neighbour tour it started ' +
-        'from. At temperature zero the acceptance test becomes Δ < 0 and annealing IS hill ' +
-        'climbing, which the demo offers as a setting rather than as a footnote.',
-      '**Order crossover exists because the obvious crossover produces invalid tours.** Cutting ' +
-        'two permutations at a point and swapping halves gives a child that visits some cities ' +
-        'twice and others never. Order crossover copies a slice from one parent and fills the ' +
-        'rest in the other parent’s order, skipping what is already present. Encoding and ' +
-        'repair are where a genetic algorithm’s real cost lives, and they are the part the ' +
-        'metaphor does not mention.',
-      '**GRASP is the control the whole tournament needs.** It is "restart a randomised greedy ' +
-        'construction and run local search on it", with no memory and no population. Any ' +
-        'method that cannot beat it is not paying for its own sophistication, and on the ' +
-        'demo’s instances several do not.',
-      '**Best-so-far against evaluations is the plot, not the final number.** It answers the ' +
-        'question a production system actually asks — how good is the answer if I stop now — ' +
-        'and it is the plot that shows local search reaching its ceiling early while the ' +
-        'population methods are still climbing. A table of final tour lengths hides both facts.'
+        'neighbour is a single pass and lands 22.27% above the best tour anything in the demo ' +
+        'finds.',
+      '2-opt reverses a segment when doing so shortens the tour, and or-opt lifts a run of one to ' +
+        'three cities and reinserts it elsewhere.',
+      'Each candidate move costs one delta of four table lookups. Charging a full tour costing ' +
+        'instead would make local search look n times more expensive than it is, which is the ' +
+        'commonest way a budgeted comparison is rigged without anybody intending it.'
     ];
+  }
+
+  function orientationMethods() {
+    return [
+      '**Every metaheuristic in the list is one answer to "what do I do at a local optimum".** ' +
+        'That is the only axis on which they differ.',
+      'Annealing accepts a worsening move with probability e^(−Δ/T) and cools. Tabu takes the best ' +
+        'available move even when it is worse, and forbids reversing it.',
+      'A genetic algorithm recombines, ant colony keeps statistics on edges rather than on ' +
+        'solutions, and GRASP restarts. Reading them that way makes the zoo a list of four ideas ' +
+        'rather than forty.',
+      '**A cooling schedule has to be derived from the budget, and this is where annealing is ' +
+        'usually got wrong.** A rate tuned for a million evaluations is a random walk when it is ' +
+        'given a thousand.',
+      'The temperature never falls far enough to settle, and the method returns its starting tour. ' +
+        'That was measured here before the schedule was made budget-aware, and annealing came back ' +
+        'with exactly the nearest-neighbour tour it started from.',
+      'At temperature zero the acceptance test becomes Δ < 0 and annealing IS hill climbing, which ' +
+        'the demo offers as a setting rather than as a footnote.',
+      '**Order crossover exists because the obvious crossover produces invalid tours.** Cutting two ' +
+        'permutations at a point and swapping halves gives a child that visits some cities twice ' +
+        'and others never.',
+      'Order crossover copies a slice from one parent and fills the rest in the other parent’s ' +
+        'order, skipping what is already present.',
+      'Encoding and repair are where a genetic algorithm’s real cost lives, and they are the part ' +
+        'the metaphor does not mention.',
+      '**GRASP is the control the whole tournament needs.** It is "restart a randomised greedy ' +
+        'construction and run local search on it", with no memory and no population.',
+      'Any method that cannot beat it is not paying for its own sophistication, and on the demo’s ' +
+        'instances several do not.',
+      '**Best-so-far against evaluations is the plot, not the final number.** It answers the ' +
+        'question a production system actually asks: how good is the answer if I stop now.',
+      'It is also the plot that shows local search reaching its ceiling early while the population ' +
+        'methods are still climbing. A table of final tour lengths hides both facts.'
+    ];
+  }
+
+  function orientation() {
+    return orientationBudget().concat(orientationMethods());
   }
 
   function config() {
@@ -141,13 +154,13 @@
       insight: '**Put the trivial baseline in the comparison and give everything the same ' +
         'budget, and most of the metaheuristic literature stops being persuasive.** On these ' +
         'instances 2-opt from a nearest-neighbour start reaches the best tour in the table using ' +
-        'a few per cent of the budget and then stops, and the sophisticated methods spend the ' +
+        'a few per cent of the budget, and then stops. The sophisticated methods spend the ' +
         'whole budget arriving at the same place. That is not an argument against annealing or ' +
-        'tabu search — on rugged landscapes with many deep basins they win, and the budget sweep ' +
-        'shows the ranking changing — it is an argument for the control. Before adopting a ' +
-        'method with six tuning parameters, run "greedy plus local search, restarted" under the ' +
-        'same budget on your own instances, because that is the number the six parameters have ' +
-        'to beat and it is an afternoon’s work to produce.'
+        'tabu search. On rugged landscapes with many deep basins they win, and the budget sweep ' +
+        'shows the ranking changing. It is an argument for the control. Before adopting a method ' +
+        'with six tuning parameters, run "greedy plus local search, restarted" under the same ' +
+        'budget on your own instances. That is the number the six parameters have to beat, and it ' +
+        'is an afternoon’s work to produce.'
     };
   }
 
