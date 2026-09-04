@@ -75,33 +75,38 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**Normalisation decides more matches than the metric does.** Lower-casing, stripping ' +
+        'punctuation and collapsing whitespace is four lines that nobody argues about, and it ' +
+        'changes the answer more than the choice between Levenshtein and Jaro-Winkler.',
+      'It is also the step people skip when they are comparing metrics, which makes the comparison ' +
+        'a comparison of two normalisers.',
+      '**Tokenisation is a choice with visible consequences.** Whitespace splitting makes `v1.2.3` ' +
+        'one token; a rule-based tokeniser makes it five.',
+      'Byte-pair encoding learns a vocabulary from the corpus, so that common sequences become ' +
+        'single tokens and rare ones decompose. The panel measures characters-per-token as the ' +
+        'merges accumulate, which is the number a subword tokeniser exists to move.',
+      '**Log-template extraction is clustering with a threshold**, and the threshold is the whole ' +
+        'tuning surface. Too low and every line collapses into one template full of wildcards; too ' +
+        'high and every line is its own template.',
+      'The sweep below runs the same corpus at eight settings and the template count moves by an ' +
+        'order of magnitude. That is why a log-parsing pipeline tuned once and never re-tuned ' +
+        'degrades silently as the log format drifts.',
+      '**The prefilter\'s selectivity decides the throughput.** The verifier runs once per candidate ' +
+        'and the filter runs once per record, so the candidates-per-result ratio multiplies the ' +
+        'expensive stage.',
+      'Turn the blocking off in the panel below and watch that ratio move by an order of magnitude, ' +
+        'while precision and recall do not move at all.',
+      'Those are separate concerns, and conflating them is how a matching system ends up optimised ' +
+        'in the wrong place.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**Normalisation decides more matches than the metric does.** Lower-casing, stripping ' +
-          'punctuation and collapsing whitespace is four lines that nobody argues about, and it ' +
-          'changes the answer more than the choice between Levenshtein and Jaro-Winkler. It is also ' +
-          'the step people skip when they are comparing metrics, which makes the comparison a ' +
-          'comparison of two normalisers.',
-        '**Tokenisation is a choice with visible consequences.** Whitespace splitting makes ' +
-          '`v1.2.3` one token; a rule-based tokeniser makes it five; byte-pair encoding learns a ' +
-          'vocabulary from the corpus so that common sequences become single tokens and rare ones ' +
-          'decompose. The panel measures characters-per-token as the merges accumulate, which is ' +
-          'the number a subword tokeniser exists to move.',
-        '**Log-template extraction is clustering with a threshold**, and the threshold is the whole ' +
-          'tuning surface. Too low and every line collapses into one template full of wildcards; ' +
-          'too high and every line is its own template. The sweep below runs the same corpus at ' +
-          'eight settings and the template count moves by an order of magnitude, which is why a ' +
-          'log-parsing pipeline that was tuned once and never re-tuned degrades silently as the log ' +
-          'format drifts.',
-        '**The prefilter\'s selectivity decides the throughput.** The verifier runs once per ' +
-          'candidate and the filter runs once per record, so the candidates-per-result ratio ' +
-          'multiplies the expensive stage. Turn the blocking off in the panel below and watch that ' +
-          'ratio move by an order of magnitude while precision and recall do not move at all — ' +
-          'those are separate concerns, and conflating them is how a matching system ends up ' +
-          'optimised in the wrong place.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — templates, tokenisers, four metrics, and the pipeline',
         markup: root.TextProcessingTemplate.render()
@@ -109,7 +114,7 @@
       diagram: diagram(),
       insight: 'Measure candidates-per-result before optimising anything in a matching pipeline. ' +
         'It is one counter, it takes ten minutes to add, and it tells you whether the work is in ' +
-        'the filter or the verifier — which is the only question that decides where the next month ' +
+        'the filter or the verifier. That is the only question that decides where the next month ' +
         'goes. Almost every "our matching is too slow" investigation ends at a prefilter that was ' +
         'admitting fifty candidates per result, and almost none of them start there.'
     };

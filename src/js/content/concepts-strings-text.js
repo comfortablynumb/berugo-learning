@@ -155,11 +155,14 @@
         term: 'Tokenisation is a decision about what an atom is',
         plain: 'Splitting on whitespace and splitting on character class give different answers.',
         formal: 'every downstream index, count and similarity inherits the tokeniser\'s choice',
-        detail: 'Whitespace splitting treats `/api/orders` as one token, which is right for grouping ' +
-          'by route and wrong for finding every request under `/api`. A rule-based tokeniser splits ' +
-          'letters, digits and punctuation apart, which finds the prefix and loses the route. ' +
+        detail: [
+          'Whitespace splitting treats `/api/orders` as one token. That is right for grouping by ' +
+            'route, and wrong for finding every request under `/api`.',
+          'A rule-based tokeniser splits letters, digits and punctuation apart, which finds the ' +
+            'prefix and loses the route.',
           'Neither is correct in general, and the choice is usually made once, early, by whoever ' +
-          'wrote the first ingestion script.',
+            'wrote the first ingestion script.'
+        ],
         example: '`POST /api/login 401 33ms` is 4 tokens by whitespace and 8 by character class.'
       },
       {
@@ -177,33 +180,41 @@
         },
         plain: 'Repeatedly merge the commonest adjacent pair into a new symbol.',
         formal: 'merge count trades vocabulary size against sequence length',
-        detail: 'At zero merges it is a character tokeniser: a tiny vocabulary and very long ' +
-          'sequences. Each merge adds one symbol and shortens every occurrence of that pair, so the ' +
-          'vocabulary grows while the token count falls. Common sequences end up whole and rare ones ' +
-          'decompose into pieces, which is why a subword tokeniser never meets an out-of-vocabulary ' +
-          'word — it just spends more tokens on it.',
+        detail: [
+          'At zero merges it is a character tokeniser: a tiny vocabulary and very long sequences.',
+          'Each merge adds one symbol and shortens every occurrence of that pair, so the vocabulary ' +
+            'grows while the token count falls.',
+          'Common sequences end up whole and rare ones decompose into pieces. That is why a subword ' +
+            'tokeniser never meets an out-of-vocabulary word — it just spends more tokens on it.'
+        ],
         example: '60 merges over this corpus reach 4.90 characters per token on a vocabulary of 84.'
       },
       {
         term: 'A log template is what survives when lines in a group disagree',
         plain: 'Group similar lines, keep the positions where they all agree, wildcard the rest.',
         formal: 'a position becomes `<*>` exactly where the group\'s tokens differ',
-        detail: 'That is the whole of Drain-style extraction, and it needs no schema, no regular ' +
-          'expression and no configuration from whoever produced the logs. The wildcards land ' +
-          'precisely on the variable fields, because being variable is what made them disagree. It ' +
-          'is the difference between grepping a log format nobody documented and reading a table of ' +
-          'four rows.',
+        detail: [
+          'That is the whole of Drain-style extraction, and it needs no schema, no regular ' +
+            'expression and no configuration from whoever produced the logs.',
+          'The wildcards land precisely on the variable fields, because being variable is what made ' +
+            'them disagree.',
+          'It is the difference between grepping a log format nobody documented and reading a table ' +
+            'of four rows.'
+        ],
         example: '300 raw lines become 4 templates, of which `GET <*> <*> <*>` covers 182.'
       },
       {
         term: 'The similarity threshold is the only knob, and nothing finds it for you',
         plain: 'Too low and every line is one template; too high and every line is its own.',
         formal: 'the useful setting is corpus-specific and is not discoverable from the algorithm',
-        detail: 'A template that is all wildcards matches everything and tells an operator nothing; ' +
-          'one template per line is the raw log with extra steps. Both ends are degenerate and the ' +
-          'algorithm is happy at both, so the setting has to come from looking at the output. The ' +
-          'honest way to ship one is to sweep it, print the largest template and its wildcard count ' +
-          'at each setting, and pick from that.',
+        detail: [
+          'A template that is all wildcards matches everything and tells an operator nothing. One ' +
+            'template per line is the raw log with extra steps.',
+          'Both ends are degenerate and the algorithm is happy at both, so the setting has to come ' +
+            'from looking at the output.',
+          'The honest way to ship one is to sweep it, print the largest template and its wildcard ' +
+            'count at each setting, and pick from that.'
+        ],
         example: 'From 0.20 to 0.90 the template count goes 3, 4, 4, 4, 7, 7, 8, 8 while the largest ' +
           'template falls from 182 lines to 46.'
       },
@@ -211,11 +222,14 @@
         term: 'No single similarity metric is right for names and identifiers alike',
         plain: 'The one that fixes spelling variants breaks on serial numbers.',
         formal: 'prefix-weighted metrics score `service-a` against `service-b` above almost any cutoff',
-        detail: 'Jaro-Winkler boosts a shared prefix, which is exactly right for human names where ' +
-          'variation lands at the end, and exactly wrong for identifiers where the discriminating ' +
-          'character does. A system that uses one metric for both will confidently merge two ' +
-          'accounts. The fix is not a better metric but a typed one: choose per field, and check ' +
-          'the choice against pairs that must NOT match.',
+        detail: [
+          'Jaro-Winkler boosts a shared prefix. That is exactly right for human names, where ' +
+            'variation lands at the end, and exactly wrong for identifiers, where the discriminating ' +
+            'character does.',
+          'A system that uses one metric for both will confidently merge two accounts.',
+          'The fix is not a better metric but a typed one. Choose per field, and check the choice ' +
+            'against pairs that must NOT match.'
+        ],
         example: 'Jaro-Winkler gives 0.956 to `service-a` / `service-b` and 0.956 to `user-1234` / ' +
           '`user-1235` — neither pair is a match.'
       },
@@ -226,11 +240,14 @@
         readAs: 'Set-based similarity does not care what order the pieces came in, so "John Smith" and "Smith ' +
           'John" score high. Edit distance charges the full cost of moving them, and scores the same ' +
           'pair low. Neither is wrong; they answer different questions.',
-        detail: '"Elizabeth Windsor" and "Windsor Elizabeth" are the same name written twice, and a ' +
-          'character-level distance sees almost nothing in common. A set-of-q-grams comparison sees ' +
-          'most of it, because the shared pieces are still shared wherever they sit. The lesson is ' +
-          'not that one family wins: it is that field semantics decide which invariance you want, ' +
-          'and reorderings and typos want different ones.',
+        detail: [
+          '"Elizabeth Windsor" and "Windsor Elizabeth" are the same name written twice, and a ' +
+            'character-level distance sees almost nothing in common.',
+          'A set-of-q-grams comparison sees most of it, because the shared pieces are still shared ' +
+            'wherever they sit.',
+          'The lesson is not that one family wins. Field semantics decide which invariance you want, ' +
+            'and reorderings and typos want different ones.'
+        ],
         example: 'That pair scores 0.059 by Levenshtein ratio and 0.778 by Jaccard on 2-grams.'
       },
       {
@@ -240,11 +257,14 @@
         readAs: 'Every record pays the cheap filter, and only the survivors pay the expensive check. So the ' +
           'number that decides your throughput is how many candidates the filter lets through, not how ' +
           'fast either step is.',
-        detail: 'Comparing every record against every other is quadratic and pointless, because ' +
-          'almost every pair is obviously unrelated. Blocking on a cheap key admits the plausible ' +
-          'pairs and the verifier decides among them. Keeping the two jobs separate is what makes ' +
-          'the pipeline tunable: the filter can be changed for cost without touching correctness, ' +
-          'as long as it admits everything the verifier would accept.',
+        detail: [
+          'Comparing every record against every other is quadratic and pointless, because almost ' +
+            'every pair is obviously unrelated.',
+          'Blocking on a cheap key admits the plausible pairs, and the verifier decides among them.',
+          'Keeping the two jobs separate is what makes the pipeline tunable. The filter can be ' +
+            'changed for cost without touching correctness, as long as it admits everything the ' +
+            'verifier would accept.'
+        ],
         example: 'Blocking takes 267 records to 12 candidates — a selectivity of 0.045 — while ' +
           'precision stays at 50% and recall at 100%.'
       },
@@ -252,11 +272,14 @@
         term: 'Precision and recall are separate numbers and one of them is usually the point',
         plain: 'Returning everything gives perfect recall; returning nothing gives perfect precision.',
         formal: 'a single accuracy figure hides which of the two a change traded away',
-        detail: 'A matching pipeline that reports one number cannot say whether tightening the ' +
-          'threshold dropped a false positive or a true match, and those are opposite outcomes. ' +
+        detail: [
+          'A matching pipeline that reports one number cannot say whether tightening the threshold ' +
+            'dropped a false positive or a true match, and those are opposite outcomes.',
           'Reporting both makes the trade visible, and makes the case for reporting the filter\'s ' +
-          'selectivity beside them: a filter that changes recall is not a filter, it is a second ' +
-          'verifier with no bound on its error.',
+            'selectivity beside them.',
+          'A filter that changes recall is not a filter. It is a second verifier with no bound on ' +
+            'its error.'
+        ],
         example: 'Both pipelines here return 8 records for 4 expected — precision 50%, recall 100% — ' +
           'and differ only in the 267-against-12 candidate count.'
       }
