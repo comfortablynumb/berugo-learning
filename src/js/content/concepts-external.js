@@ -22,11 +22,14 @@
         },
         plain: 'Fixed-size machines, items of assorted sizes, and the question of how many machines.',
         formal: 'partition items into the fewest subsets whose sums are at most the capacity; NP-hard offline',
-        detail: 'VM placement, container scheduling, memory allocation, disk layout and CDN cache ' +
-          'filling are all this problem with different words. Recognising it is worth doing ' +
-          'because the results transfer intact: the online bounds, the offline heuristic, the ' +
-          'tight families and — most usefully — the fact that the difficulty is fragmentation ' +
-          'rather than capacity.',
+        detail: [
+          'VM placement, container scheduling, memory allocation, disk layout and CDN cache filling ' +
+            'are all this problem with different words.',
+          'Recognising it is worth doing because the results transfer intact. That covers the online ' +
+            'bounds, the offline heuristic and the tight families.',
+          'Most usefully of all, it carries the fact that the difficulty is fragmentation rather ' +
+            'than capacity.'
+        ],
         example: 'The demo packs 200 items into unit bins with a lower bound of 63 and gets ' +
           'between 64 and 80 depending on the policy.'
       },
@@ -36,10 +39,13 @@
         formal: 'FFD ≤ (11/9)·OPT + 6/9; the multiplicative constant is tight',
         readAs: 'First-fit-decreasing uses at most eleven ninths of the optimal bin count plus ' +
           'six ninths.',
-        detail: 'Sorting is what makes it offline: every item has to be known before the first ' +
-          'is placed. The additive term is not decoration — it is why a small instance can ' +
-          'exceed 11/9 without violating anything, and why a bound quoted without it looks ' +
-          'broken the first time somebody measures it on twelve items.',
+        detail: [
+          'Sorting is what makes it offline. Every item has to be known before the first is placed.',
+          'The additive term is not decoration. It is why a small instance can exceed 11/9 without ' +
+            'violating anything.',
+          'It is also why a bound quoted without it looks broken the first time somebody measures it ' +
+            'on twelve items.'
+        ],
         example: 'Against exact optima on 25 instances of twelve items the demo measures a worst ' +
           'ratio of 1.2000 against 11/9 = 1.2222.'
       },
@@ -47,24 +53,30 @@
         term: 'Online, first-fit is 1.7-competitive and nothing beats about 1.54',
         plain: 'Place each item as it arrives, in the earliest bin that fits.',
         formal: 'FF ≤ 1.7·OPT + O(1), and no online algorithm is better than 1.5403-competitive',
-        detail: 'The tight family is worth knowing: sevenths, thirds and halves in that order, ' +
-          'where one of each fits in a bin — they sum to 0.977 — and every bin holds exactly one ' +
-          'half, so the optimum is one bin per group and cannot be beaten. First-fit puts six ' +
-          'sevenths together, then two thirds, and the halves have nowhere to go. Sorted ' +
-          'decreasing, the identical items pack perfectly, which is the clearest statement of ' +
-          'what the arrival order costs.',
+        detail: [
+          'The tight family is worth knowing. It is sevenths, thirds and halves in that order, and ' +
+            'one of each fits in a bin because they sum to 0.977.',
+          'Every bin holds exactly one half, so the optimum is one bin per group and cannot be ' +
+            'beaten. First-fit puts six sevenths together, then two thirds, and the halves have ' +
+            'nowhere to go.',
+          'Sorted decreasing, the identical items pack perfectly. That is the clearest statement of ' +
+            'what the arrival order costs.'
+        ],
         example: 'At 6, 12, 24 and 48 groups the demo measures 1.6667 for first-fit at every ' +
-          'size and 1.0000 for the sorted version.'
+          'size, and 1.0000 for the sorted version.'
       },
       {
         term: 'Utilisation and bin count are different numbers',
         plain: 'A packing can use 96% of what it opened and still be a bin above optimal.',
         formal: 'utilisation = total size / (bins × capacity); the bin count is what is paid for',
-        detail: 'Utilisation is a ratio and the bin count is a cost, and improving one does not ' +
-          'necessarily improve the other. Worse, utilisation hides the shape of what is left: ' +
-          'ten bins each 5% free is the same utilisation as one bin 50% free, and only the ' +
-          'second can take another item. That is why the demo reports STRANDED capacity — free ' +
-          'space in bins too small for anything remaining — as a separate column.',
+        detail: [
+          'Utilisation is a ratio and the bin count is a cost, and improving one does not ' +
+            'necessarily improve the other.',
+          'Worse, utilisation hides the shape of what is left. Ten bins each 5% free is the same ' +
+            'utilisation as one bin 50% free, and only the second can take another item.',
+          'That is why the demo reports STRANDED capacity as a separate column. It is the free space ' +
+            'in bins too small for anything remaining.'
+        ],
         example: 'The demo measures next-fit at 78.4% utilisation with 80 bins and ' +
           'first-fit-decreasing at 98.0% with 64.'
       },
@@ -74,23 +86,29 @@
         formal: 'stranded capacity = Σ over bins of the free space, where that space is below the smallest remaining item',
         readAs: 'Add up, across every open bin, the free space in the bins whose free space is ' +
           'too small for the smallest item still waiting to be placed.',
-        detail: 'A cluster reporting sixty per cent utilisation while rejecting jobs is not short ' +
-          'of capacity; it is short of CONTIGUOUS capacity, and those are different quantities ' +
-          'that one number cannot distinguish. The practical consequence is that adding machines ' +
-          'raises the utilisation figure and does not raise the number of jobs that fit — the ' +
-          'fixes are all about shaping the input instead.',
-        example: 'The demo reports stranded capacity per policy: 0.22 for next-fit against 1.02 ' +
-          'for first-fit, which has the higher utilisation of the two.'
+        detail: [
+          'A cluster reporting sixty per cent utilisation while rejecting jobs is not short of ' +
+            'capacity. It is short of CONTIGUOUS capacity, and those are different quantities that ' +
+            'one number cannot distinguish.',
+          'The practical consequence is that adding machines raises the utilisation figure and does ' +
+            'not raise the number of jobs that fit.',
+          'The fixes are all about shaping the input instead.'
+        ],
+        example: 'The demo reports stranded capacity per policy. It is 0.22 for next-fit against ' +
+          '1.02 for first-fit, which has the higher utilisation of the two.'
       },
       {
         term: 'Two dimensions are qualitatively harder, not merely bigger',
         plain: 'An item fits only when both axes fit, so a bin can be full of CPU and empty of memory.',
         formal: 'fits(bin, item) = bin.cpu + item.cpu ≤ C_cpu AND bin.mem + item.mem ≤ C_mem',
-        detail: 'In one dimension a bin with 30% free takes anything below 30%. In two, a bin ' +
-          'with 30% CPU free and 5% memory free takes only jobs small on both, and a job that is ' +
-          '10% CPU and 20% memory does not fit despite being small. The demo counts the bins that ' +
-          'are full on one axis only, and on anti-correlated jobs there are many — each of them ' +
-          'capacity that will be reported as free and cannot be used.',
+        detail: [
+          'In one dimension a bin with 30% free takes anything below 30%.',
+          'In two, a bin with 30% CPU free and 5% memory free takes only jobs small on both. A job ' +
+            'that is 10% CPU and 20% memory does not fit despite being small.',
+          'The demo counts the bins that are full on one axis only, and on anti-correlated jobs ' +
+            'there are many. Each of them is capacity that will be reported as free and cannot be ' +
+            'used.'
+        ],
         example: 'On 200 anti-correlated jobs the demo counts 20 lopsided bins out of 68 under ' +
           'first-fit, at 76.7% CPU and 82.1% memory utilisation.'
       },
@@ -98,24 +116,30 @@
         term: 'The offline advantage disappears with the second axis',
         plain: '"Decreasing" has no meaning for a two-dimensional item.',
         formal: 'no total order on (cpu, mem) plays the role that size does in one dimension',
-        detail: 'Sort by CPU and the memory axis fragments; sort by the sum and both fragment a ' +
-          'little; sort by the maximum and lopsided items are misjudged. There is no ordering ' +
-          'that recovers the 11/9 guarantee, and the demo shows first-fit-decreasing losing its ' +
-          'advantage — from clearly best in one dimension to tied with worst-fit in two. That is ' +
-          'the measured reason real cluster schedulers use scoring heuristics with no proved ' +
-          'bound at all.',
+        detail: [
+          'Sort by CPU and the memory axis fragments. Sort by the sum and both fragment a little. ' +
+            'Sort by the maximum and lopsided items are misjudged.',
+          'There is no ordering that recovers the 11/9 guarantee, and the demo shows ' +
+            'first-fit-decreasing losing its advantage. It goes from clearly best in one dimension ' +
+            'to tied with worst-fit in two.',
+          'That is the measured reason real cluster schedulers use scoring heuristics with no proved ' +
+            'bound at all.'
+        ],
         example: 'The demo measures ratios of 1.1154 for FFD and 1.1795 for worst-fit in one ' +
-          'dimension, and 1.1964 against 1.2143 in two.'
+          'dimension. In two it measures 1.1964 against 1.2143.'
       },
       {
         term: 'Next-fit is O(1) per item and genuinely bad',
         plain: 'It looks only at the last opened bin.',
         formal: 'NF ≤ 2·OPT, and the bound is tight — alternating tiny and large items open a bin each',
-        detail: 'The trade is real: one comparison per item rather than a scan of every open bin, ' +
-          'and no bin list to hold. That is the right choice when the item stream is enormous and ' +
-          'the bins are cheap — a streaming writer packing records into blocks, for instance — ' +
-          'and the wrong one whenever the bins cost money. The demo measures the price at about ' +
-          'a quarter more machines.',
+        detail: [
+          'The trade is real: one comparison per item rather than a scan of every open bin, and no ' +
+            'bin list to hold.',
+          'That is the right choice when the item stream is enormous and the bins are cheap, as in a ' +
+            'streaming writer packing records into blocks. It is the wrong one whenever the bins ' +
+            'cost money.',
+          'The demo measures the price at about a quarter more machines.'
+        ],
         example: 'On the demo’s 200-item workload next-fit uses 80 bins where first-fit uses 65, ' +
           'at 78.4% utilisation against 96.5%.'
       }

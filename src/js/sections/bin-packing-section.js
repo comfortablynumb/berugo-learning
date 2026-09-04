@@ -63,43 +63,53 @@
     };
   }
 
-  function orientation() {
+  function orientationPolicies() {
     return [
       '**Bin packing is the shape of every placement problem: fixed-size machines, items of ' +
         'assorted sizes, how many machines.** VM placement, container scheduling, memory ' +
-        'allocation and disk layout are all this problem with different words, and every one of ' +
-        'them is ONLINE — items arrive and are placed before the next one is known.',
+        'allocation and disk layout are all this problem with different words.',
+      'Every one of them is ONLINE. Items arrive and are placed before the next one is known.',
       '**Offline it is NP-hard and first-fit-decreasing is within 11/9 of optimal plus a ' +
-        'constant.** Sort the items largest first and put each in the earliest bin that fits. ' +
-        'The demo checks that bound against the EXACT optimum on instances small enough to solve ' +
-        'exhaustively, rather than against the lower bound, because the two are different ' +
-        'numbers.',
+        'constant.** Sort the items largest first and put each in the earliest bin that fits.',
+      'The demo checks that bound against the EXACT optimum on instances small enough to solve ' +
+        'exhaustively, rather than against the lower bound, because the two are different numbers.',
       '**Online, first-fit and best-fit are 1.7-competitive and no online algorithm beats about ' +
-        '1.54.** The demo’s tight instance is Johnson’s family of sevenths, thirds and halves: ' +
-        'one of each fills a bin, so the optimum is one bin per group, and first-fit — seeing ' +
-        'the sevenths first — measures 1.6667 at every size while the sorted version is exactly ' +
-        'optimal.',
+        '1.54.** The demo’s tight instance is Johnson’s family of sevenths, thirds and halves.',
+      'One of each fills a bin, so the optimum is one bin per group.',
+      'First-fit sees the sevenths first and measures 1.6667 at every size, while the sorted ' +
+        'version is exactly optimal.',
       '**Next-fit is the cheap one and it is genuinely bad.** Looking only at the last opened bin ' +
-        'makes each placement O(1) and costs 27% more bins on the demo’s workload. It is the ' +
-        'right choice when the item stream is enormous and the bins are cheap, and the wrong one ' +
-        'the rest of the time.',
+        'makes each placement O(1), and costs 27% more bins on the demo’s workload.',
+      'It is the right choice when the item stream is enormous and the bins are cheap, and the ' +
+        'wrong one the rest of the time.'
+    ];
+  }
+
+  function orientationFragmentation() {
+    return [
       '**Utilisation and bin count are different numbers, and the second is not the one that ' +
         'hurts.** A packing can use 96% of the capacity it opened and still be one bin above ' +
-        'optimal; another can use 78% and be twenty above. The demo reports both, plus the ' +
-        'STRANDED capacity — free space in bins too small for anything left in the workload.',
+        'optimal. Another can use 78% and be twenty above.',
+      'The demo reports both, plus the STRANDED capacity, which is free space in bins too small ' +
+        'for anything left in the workload.',
       '**Fragmentation is the underlying phenomenon and it is what a cluster feels.** A cluster ' +
         'reporting 60% utilisation while rejecting jobs is not short of capacity, it is short of ' +
-        'CONTIGUOUS capacity, and those are different quantities that a single utilisation ' +
-        'number cannot distinguish.',
-      '**Two dimensions are qualitatively harder, not merely bigger.** An item fits only when ' +
-        'both axes fit, so a bin can be nearly full on CPU and empty on memory and be useless to ' +
-        'everything in the queue. The demo counts those bins, and on anti-correlated jobs there ' +
-        'are many of them.',
-      '**And the offline advantage disappears with the second axis.** "Decreasing" has no ' +
-        'meaning for a two-dimensional item — sort by CPU and memory fragments, sort by the sum ' +
-        'and both fragment — so first-fit-decreasing stops beating the online policies. That is ' +
-        'the measured reason real cluster schedulers use heuristics with no proved bound.'
+        'CONTIGUOUS capacity.',
+      'Those are different quantities that a single utilisation number cannot distinguish.',
+      '**Two dimensions are qualitatively harder, not merely bigger.** An item fits only when both ' +
+        'axes fit, so a bin can be nearly full on CPU and empty on memory and be useless to ' +
+        'everything in the queue.',
+      'The demo counts those bins, and on anti-correlated jobs there are many of them.',
+      '**And the offline advantage disappears with the second axis.** "Decreasing" has no meaning ' +
+        'for a two-dimensional item.',
+      'Sort by CPU and memory fragments. Sort by the sum and both fragment. So first-fit-decreasing ' +
+        'stops beating the online policies.',
+      'That is the measured reason real cluster schedulers use heuristics with no proved bound.'
     ];
+  }
+
+  function orientation() {
+    return orientationPolicies().concat(orientationFragmentation());
   }
 
   function config() {
@@ -115,10 +125,10 @@
         'rather than adding machines.** The question to ask is not "how much is free" but "how ' +
         'much is free in pieces large enough for what is queued", and on two axes at once. The ' +
         'three moves that actually help are all about shaping the input rather than improving ' +
-        'the packer: standardise instance sizes so the pieces compose, admit large jobs before ' +
-        'small ones so the awkward items are placed while there is room, and repack ' +
-        'periodically if the workload tolerates migration. Adding machines to a fragmented ' +
-        'cluster raises the utilisation number and does not raise the number of jobs that fit.'
+        'the packer. Standardise instance sizes so the pieces compose. Admit large jobs before ' +
+        'small ones so the awkward items are placed while there is room. And repack periodically ' +
+        'if the workload tolerates migration. Adding machines to a fragmented cluster raises the ' +
+        'utilisation number and does not raise the number of jobs that fit.'
     };
   }
 
