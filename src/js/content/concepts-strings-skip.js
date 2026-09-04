@@ -311,11 +311,13 @@
         },
         plain: 'Running a single-pattern matcher k times costs k passes; this costs one.',
         formal: 'O(n + total pattern length + occurrences), independent of k for the scan itself',
-        detail: 'The automaton is built once from the pattern set and then the text is read once. ' +
-          'That is the entire argument, and it means the saving grows without bound as the set ' +
-          'grows while the automaton\'s per-character cost does not move. At one pattern it is a ' +
-          'loss — the trie construction buys nothing — and the crossover is at two or three, which ' +
-          'is why almost any real keyword set is worth an automaton.',
+        detail: [
+          'The automaton is built once from the pattern set, and then the text is read once.',
+          'That is the entire argument. The saving grows without bound as the set grows, while the ' +
+            'automaton\'s per-character cost does not move.',
+          'At one pattern it is a loss, because the trie construction buys nothing. The crossover is ' +
+            'at two or three, which is why almost any real keyword set is worth an automaton.'
+        ],
         example: 'The automaton does 4 000 comparisons at every set size from 1 to 32, while one ' +
           'naive scan per pattern goes from 4 303 to 135 036.'
       },
@@ -323,11 +325,14 @@
         term: 'The trie of patterns is the goto function',
         plain: 'One state per distinct prefix of any pattern.',
         formal: 'goto(state, symbol) = the child, or undefined; the state count is the number of distinct prefixes',
-        detail: 'That is the memory model and it is worth internalising: a keyword set costs states ' +
-          'proportional to its total *distinct prefix* count rather than its total length, so a ' +
-          'thousand words sharing prefixes is far cheaper than a thousand random strings. It also ' +
-          'means the automaton for a growing keyword list grows sublinearly in the list, which is ' +
-          'why content filters and intrusion signature sets stay affordable.',
+        detail: [
+          'That is the memory model, and it is worth internalising.',
+          'A keyword set costs states proportional to its total *distinct prefix* count rather than ' +
+            'its total length. So a thousand words sharing prefixes is far cheaper than a thousand ' +
+            'random strings.',
+          'It also means the automaton for a growing keyword list grows sublinearly in the list, ' +
+            'which is why content filters and intrusion signature sets stay affordable.'
+        ],
         example: '5 patterns over an 8-letter vocabulary give 10 states and 9 goto edges.'
       },
       {
@@ -344,11 +349,13 @@
         },
         plain: 'Point each state at the state for the longest proper suffix of what it spells that is a prefix of some pattern.',
         formal: 'fail(u) = the deepest state v ≠ u whose string is a suffix of u\'s string',
-        detail: 'Exactly the same idea as the border array, with "the pattern" replaced by "any ' +
-          'pattern", and exactly the same consequence: on a mismatch the automaton falls back ' +
-          'without re-reading any text. One breadth-first pass builds all of them, because a ' +
-          'state\'s failure link is computed from its parent\'s and BFS is the order that finishes ' +
-          'parents first.',
+        detail: [
+          'Exactly the same idea as the border array, with "the pattern" replaced by "any pattern".',
+          'It has exactly the same consequence: on a mismatch the automaton falls back without ' +
+            're-reading any text.',
+          'One breadth-first pass builds all of them, because a state\'s failure link is computed ' +
+            'from its parent\'s, and BFS is the order that finishes parents first.'
+        ],
         example: 'The state for "she" fails to the state for "he", which is the longest suffix that ' +
           'is also a prefix of a pattern.'
       },
@@ -356,11 +363,14 @@
         term: 'Output links exist for one case, and it is the case that bites',
         plain: 'When a pattern is a suffix of another, reaching the longer one must also report the shorter.',
         formal: 'output(u) = the nearest state along u\'s failure chain that ends a pattern; the chain must be followed on every match',
-        detail: 'Nothing in the goto trie says that arriving at `she` also means arriving at `he`, ' +
-          'and nothing about the failure links reports it either — the links are followed on ' +
-          'mismatch, not on match. The output chain is a separate five lines, and dropping them ' +
-          'produces a matcher that finds every occurrence of every pattern except the nested ones. ' +
-          'That looks like a data problem rather than an algorithm problem, which is why it survives.',
+        detail: [
+          'Nothing in the goto trie says that arriving at `she` also means arriving at `he`.',
+          'Nothing about the failure links reports it either, because the links are followed on ' +
+            'mismatch, not on match.',
+          'The output chain is a separate five lines, and dropping them produces a matcher that ' +
+            'finds every occurrence of every pattern except the nested ones. That looks like a data ' +
+            'problem rather than an algorithm problem, which is why it survives.'
+        ],
         example: 'On the ushers fixture, 2 of the 11 matches come from the output chain alone, and ' +
           'both disappear when it is dropped.'
       },
@@ -368,12 +378,14 @@
         term: 'The failure is silent, and the fix is a question rather than a debugger',
         plain: 'When a multi-pattern matcher is "missing some matches", ask whether any pattern is a suffix of another.',
         formal: 'the dropped matches are exactly the occurrences of patterns that are proper suffixes of other patterns',
-        detail: 'That one question resolves most reports of this shape, and it explains the timing: ' +
-          'keyword lists grow organically, and nobody adds `he` to a list containing `she` on the ' +
-          'day the matcher is written and tested. The bug appears months later, on a list change, ' +
-          'in a component nobody touched — which is the worst possible combination for diagnosis and ' +
-          'the best possible argument for an assertion against a brute-force oracle in the test ' +
-          'suite.',
+        detail: [
+          'That one question resolves most reports of this shape, and it explains the timing.',
+          'Keyword lists grow organically, and nobody adds `he` to a list containing `she` on the ' +
+            'day the matcher is written and tested.',
+          'The bug appears months later, on a list change, in a component nobody touched. That is ' +
+            'the worst possible combination for diagnosis, and the best possible argument for an ' +
+            'assertion against a brute-force oracle in the test suite.'
+        ],
         example: 'The broken run reports 9 matches against a true 11, with the failure-link count ' +
           'identical in both — nothing about the run looks different.'
       },
@@ -384,11 +396,13 @@
         readAs: 'Every pattern-and-position pair where a match genuinely occurs, reported once each. A ' +
           'multiset rather than a set because the same pattern can legitimately appear at many ' +
           'positions.',
-        detail: 'Two separate requirements that are easy to conflate. Overlapping means the same ' +
-          'pattern occurring at nearby positions; nested means different patterns ending at the ' +
-          'same position. An implementation can get one right and the other wrong, so the oracle ' +
-          'compares multisets rather than sets — a duplicate report is as much a disagreement as a ' +
-          'missing one.',
+        detail: [
+          'Two separate requirements that are easy to conflate.',
+          'Overlapping means the same pattern occurring at nearby positions. Nested means different ' +
+            'patterns ending at the same position.',
+          'An implementation can get one right and the other wrong, so the oracle compares multisets ' +
+            'rather than sets. A duplicate report is as much a disagreement as a missing one.'
+        ],
         example: 'On the fixture, "she" at position 1 and "he" at position 2 both end at position ' +
           '3, and both must be reported.'
       },
@@ -398,22 +412,28 @@
         formal: '|alphabet| × states cells; the failure links are never followed at run time',
         readAs: 'Precomputing every transition costs one cell per state per character, and in exchange the ' +
           'scan never walks a failure chain. Memory for a guaranteed one-array-read per character.',
-        detail: 'The sparse form follows links on a mismatch, which is a short loop per character; ' +
-          'the dense form has no loop at all. The cost is a cell per state per alphabet symbol, and ' +
-          'a keyword set has many more states than a single pattern, so the multiplication bites ' +
-          'sooner. That is why intrusion-detection and content-filter engines work over bytes: 256 ' +
-          'is affordable at ten thousand states and a Unicode alphabet is not.',
+        detail: [
+          'The sparse form follows links on a mismatch, which is a short loop per character. The ' +
+            'dense form has no loop at all.',
+          'The cost is a cell per state per alphabet symbol, and a keyword set has many more states ' +
+            'than a single pattern, so the multiplication bites sooner.',
+          'That is why intrusion-detection and content-filter engines work over bytes. 256 is ' +
+            'affordable at ten thousand states, and a Unicode alphabet is not.'
+        ],
         example: 'The same 10-state automaton costs 40 cells on DNA and 400 on source code.'
       },
       {
         term: 'The saving is unbounded in the set size and zero at one pattern',
         plain: 'The automaton is worth building exactly when there is more than one thing to look for.',
         formal: 'saving ≈ k, since the automaton pass is independent of k and the naive alternative is linear in it',
-        detail: 'Stating the crossover honestly is what makes the recommendation useful. At one ' +
-          'pattern the automaton is a trie construction and a state machine to gain nothing; at two ' +
-          'it roughly breaks even against two naive scans; past that the saving is essentially the ' +
-          'pattern count. Any system with a *list* of things to find — a filter, a tokeniser\'s ' +
-          'reserved words, a signature set — is on the right side of that line.',
+        detail: [
+          'Stating the crossover honestly is what makes the recommendation useful.',
+          'At one pattern the automaton is a trie construction and a state machine to gain nothing. ' +
+            'At two it roughly breaks even against two naive scans, and past that the saving is ' +
+            'essentially the pattern count.',
+          'Any system with a *list* of things to find — a filter, a tokeniser\'s reserved words, a ' +
+            'signature set — is on the right side of that line.'
+        ],
         example: 'The saving is 1.08× at one pattern and 33.76× at thirty-two, on the same text.'
       }
     ]

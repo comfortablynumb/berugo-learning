@@ -45,30 +45,35 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**Searching for `k` patterns by running a single-pattern matcher `k` times costs `k` passes ' +
+        'over the text.** Aho-Corasick costs one, whatever `k` is.',
+      'Build a trie of the patterns — that is the **goto** function. Then add a **failure link** ' +
+        'from each state to the state for the longest proper suffix of what it spells that is also ' +
+        'a prefix of some pattern.',
+      'That is exactly KMP\'s border with "the pattern" replaced by "any pattern".',
+      '**One breadth-first pass builds the links**, because a state\'s failure link is computed from ' +
+        'its parent\'s, and BFS is precisely the order that finishes parents first.',
+      'Nothing about the construction is deep. What is easy to get wrong is the *reporting*.',
+      '**Output links exist for one case and it is the case that bites.** When a pattern is a suffix ' +
+        'of another — `he` inside `she`, `ana` inside `banana` — reaching the state for the longer ' +
+        'one must also report the shorter. Nothing in the goto trie says so.',
+      'The output link chains each state to the nearest state along its failure path that ends a ' +
+        'pattern, and following that chain is what makes the report complete. The checkbox below ' +
+        'turns them off so the loss is a number.',
+      '**The automaton conversion is the same trade as KMP\'s table.** Resolving every failure ' +
+        'fallback into a dense `next[state][symbol]` table makes matching one lookup per character ' +
+        'with no inner loop, at a cost of `|alphabet| × states` cells.',
+      'On DNA that is free; on Unicode it is not. That is why production implementations keep the ' +
+        'sparse form and follow links, and why intrusion-detection engines work over bytes.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'Searching for `k` patterns by running a single-pattern matcher `k` times costs `k` passes ' +
-          'over the text. Aho-Corasick costs one, whatever `k` is. Build a trie of the patterns — ' +
-          'that is the **goto** function — and add a **failure link** from each state to the state ' +
-          'for the longest proper suffix of what it spells that is also a prefix of some pattern. ' +
-          'That is exactly KMP\'s border with "the pattern" replaced by "any pattern".',
-        '**One breadth-first pass builds the links**, because a state\'s failure link is computed ' +
-          'from its parent\'s, and BFS is precisely the order that finishes parents first. Nothing ' +
-          'about the construction is deep; what is easy to get wrong is the *reporting*.',
-        '**Output links exist for one case and it is the case that bites.** When a pattern is a ' +
-          'suffix of another — `he` inside `she`, `ana` inside `banana` — reaching the state for the ' +
-          'longer one must also report the shorter, and nothing in the goto trie says so. The output ' +
-          'link chains each state to the nearest state along its failure path that ends a pattern, ' +
-          'and following that chain is what makes the report complete. The checkbox below turns them ' +
-          'off so the loss is a number.',
-        '**The automaton conversion is the same trade as KMP\'s table.** Resolving every failure ' +
-          'fallback into a dense `next[state][symbol]` table makes matching one lookup per character ' +
-          'with no inner loop, at a cost of `|alphabet| × states` cells. On DNA that is free; on ' +
-          'Unicode it is not, which is why production implementations keep the sparse form and ' +
-          'follow links — and why intrusion-detection engines work over bytes.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — the automaton, the nested matches, and the scaling',
         markup: root.AhoCorasickTemplate.render()
@@ -76,10 +81,10 @@
       diagram: diagram(),
       insight: 'When a multi-pattern matcher is reported as "missing some matches", the first thing ' +
         'to check is whether any pattern in the set is a suffix of another. That single question ' +
-        'resolves most of these reports, and it is why keyword lists that grow organically — a ' +
-        'content filter, an intrusion signature set, a tokeniser\'s reserved words — break long ' +
-        'after the matcher was written and tested. Nobody adds `he` to a list that already contains ' +
-        '`she` on the day the matcher is built.'
+        'resolves most of these reports. It is also why keyword lists that grow organically break ' +
+        'long after the matcher was written and tested — a content filter, an intrusion signature ' +
+        'set, a tokeniser\'s reserved words. Nobody adds `he` to a list that already contains `she` ' +
+        'on the day the matcher is built.'
     };
   }
 
