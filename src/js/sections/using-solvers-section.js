@@ -56,52 +56,65 @@
     };
   }
 
-  function orientation() {
+  function orientationModelling() {
     return [
-      '**For most NP-hard problems that turn up at work the correct move is to encode the ' +
-        'problem and call a solver.** Decades of engineering have gone into CDCL SAT solvers, ' +
-        'MIP solvers and CP solvers, and none of it is going into your hand-written search. ' +
-        'The work moves from writing an algorithm to writing a MODEL, and a good model beats a ' +
+      '**For most NP-hard problems that turn up at work the correct move is to encode the problem ' +
+        'and call a solver.** Decades of engineering have gone into CDCL SAT solvers, MIP solvers ' +
+        'and CP solvers, and none of it is going into your hand-written search.',
+      'The work moves from writing an algorithm to writing a MODEL, and a good model beats a ' +
         'clever hand-written search almost every time.',
-      '**"At most one of these is true" is the workhorse constraint and there are three ways ' +
-        'to write it.** Pairwise is one clause per pair — no new variables and n(n−1)/2 ' +
-        'clauses, which is fine at n = 5 and half a million clauses at n = 1 000. Commander ' +
-        'splits into groups with a fresh variable per group and recurses. Sequential is a ' +
-        'chain of carry variables meaning "one of the first i is true", at 3n clauses. The ' +
-        'demo prices all three exactly.',
-      '**The clause count is arithmetic and the solve time is not.** At two thousand ' +
-        'literals pairwise is 1 999 000 clauses and sequential is 5 996 — a factor of 333, ' +
-        'and that is the number that decides whether the model fits in memory at all. ' +
-        'Whether it also solves faster depends on the solver, and on this one it does not, ' +
-        'which the demo shows rather than glosses.',
-      '**The solver bundled here is DPLL, not CDCL, and that changes what the encoding column ' +
-        'can show.** It branches on the first unassigned variable, so the auxiliary variables ' +
-        'an encoding introduces sit after every decision variable and never change the shape ' +
-        'of the search — the node counts come out identical across all three encodings. That ' +
-        'is a fact about this solver. With clause learning the propagation strength of the ' +
-        'sequential encoding does show up, and the honest report is the one that says which ' +
-        'of the two you are looking at.',
-      '**Symmetry breaking is the largest win in this section and it costs six unit clauses.** ' +
-        'A proper assignment stays proper when the slots are permuted, so a solver that has ' +
-        'refuted "task 0 goes in slot 1" will refute "task 0 goes in slot 2" again from ' +
-        'scratch, c! times over. Fixing the slots of one mutually conflicting group rules out ' +
-        'nothing and deletes that entire factor: the demo measures 1 439 nodes falling to 1.',
-      '**The node counts on the unsatisfiable side are exactly 2·c! − 1.** Three slots cost ' +
-        '11 nodes, four cost 47, five cost 239, six cost 1 439 — the solver is enumerating ' +
-        'assignments of the conflicting group to slots one permutation at a time. Seeing the ' +
-        'factorial in the measurement is what makes symmetry breaking obvious rather than ' +
-        'clever.',
-      '**Redundant constraints can help, which is counter-intuitive.** A constraint implied by ' +
-        'the others adds no solutions and can still cut search dramatically, because ' +
-        'propagation is not logically complete: the solver only derives what unit propagation ' +
-        'reaches, and a redundant clause can put a consequence within reach that was several ' +
-        'inferences away. Stating "the total headcount equals the total demand" alongside the ' +
-        'per-shift constraints is the standard example.',
-      '**Read what the solver actually returned.** SAT with a model is a certificate you can ' +
-        'check in milliseconds — check it. UNSAT is a claim about every assignment and the ' +
-        'only evidence is a proof file. "Budget exhausted" is neither, and treating it as UNSAT ' +
-        'is the mistake that turns a slow model into a wrong answer.'
+      '**"At most one of these is true" is the workhorse constraint and there are three ways to ' +
+        'write it.** Pairwise is one clause per pair, with no new variables and n(n−1)/2 clauses.',
+      'That is fine at n = 5 and half a million clauses at n = 1 000.',
+      'Commander splits into groups with a fresh variable per group and recurses. Sequential is a ' +
+        'chain of carry variables meaning "one of the first i is true", at 3n clauses.',
+      'The demo prices all three exactly.',
+      '**The clause count is arithmetic and the solve time is not.** At two thousand literals ' +
+        'pairwise is 1 999 000 clauses and sequential is 5 996, which is a factor of 333.',
+      'That is the number that decides whether the model fits in memory at all.',
+      'Whether it also solves faster depends on the solver, and on this one it does not, which the ' +
+        'demo shows rather than glosses.'
     ];
+  }
+
+  function orientationSolving() {
+    return [
+      '**The solver bundled here is DPLL, not CDCL, and that changes what the encoding column can ' +
+        'show.** It branches on the first unassigned variable, so the auxiliary variables an ' +
+        'encoding introduces sit after every decision variable and never change the shape of the ' +
+        'search.',
+      'The node counts come out identical across all three encodings, and that is a fact about ' +
+        'this solver.',
+      'With clause learning the propagation strength of the sequential encoding does show up, and ' +
+        'the honest report is the one that says which of the two you are looking at.',
+      '**Symmetry breaking is the largest win in this section and it costs six unit clauses.** A ' +
+        'proper assignment stays proper when the slots are permuted.',
+      'So a solver that has refuted "task 0 goes in slot 1" will refute "task 0 goes in slot 2" ' +
+        'again from scratch, c! times over.',
+      'Fixing the slots of one mutually conflicting group rules out nothing and deletes that ' +
+        'entire factor. The demo measures 1 439 nodes falling to 1.',
+      '**The node counts on the unsatisfiable side are exactly 2·c! − 1.** Three slots cost 11 ' +
+        'nodes, four cost 47, five cost 239 and six cost 1 439.',
+      'The solver is enumerating assignments of the conflicting group to slots, one permutation at ' +
+        'a time. Seeing the factorial in the measurement is what makes symmetry breaking obvious ' +
+        'rather than clever.',
+      '**Redundant constraints can help, which is counter-intuitive.** A constraint implied by the ' +
+        'others adds no solutions and can still cut search dramatically, because propagation is ' +
+        'not logically complete.',
+      'The solver only derives what unit propagation reaches, and a redundant clause can put a ' +
+        'consequence within reach that was several inferences away.',
+      'Stating "the total headcount equals the total demand" alongside the per-shift constraints ' +
+        'is the standard example.',
+      '**Read what the solver actually returned.** SAT with a model is a certificate you can check ' +
+        'in milliseconds, so check it.',
+      'UNSAT is a claim about every assignment, and the only evidence is a proof file.',
+      '"Budget exhausted" is neither, and treating it as UNSAT is the mistake that turns a slow ' +
+        'model into a wrong answer.'
+    ];
+  }
+
+  function orientation() {
+    return orientationModelling().concat(orientationSolving());
   }
 
   function config() {
@@ -114,12 +127,12 @@
       },
       diagram: diagram(),
       insight: '**Spend your effort on the model and the validation, and treat the solver as a ' +
-        'library.** The two highest-leverage moves are both cheap: break the symmetry your ' +
+        'library.** The two highest-leverage moves are both cheap. Break the symmetry your ' +
         'problem obviously has, and validate the decoded answer against the original ' +
         'requirements with code the encoder did not write. The first is worth three orders of ' +
-        'magnitude here for six unit clauses; the second is the only defence against a model ' +
+        'magnitude here for six unit clauses. The second is the only defence against a model ' +
         'that quietly answers a different question. Everything else — which at-most-one form, ' +
-        'which solver, which parameters — is worth measuring on your own instances and is worth ' +
+        'which solver, which parameters — is worth measuring on your own instances, and is worth ' +
         'much less than those two.'
     };
   }

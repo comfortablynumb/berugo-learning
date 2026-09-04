@@ -20,12 +20,14 @@
         },
         plain: 'Write the problem down as constraints and hand it to somebody else’s search.',
         formal: 'model → encode → solve → decode → validate, with the solver as the only step you do not write',
-        detail: 'Decades of engineering have gone into CDCL SAT solvers, MIP solvers and CP ' +
-          'solvers, and none of it is going into a hand-written search written this quarter. The ' +
-          'work moves from writing an algorithm to writing a MODEL, and a good model beats a ' +
-          'clever hand-written search on almost every industrial instance. What that buys you ' +
-          'is also a different skill set: the questions become "which encoding" and "what does ' +
-          'the answer mean" rather than "which pruning rule".',
+        detail: [
+          'Decades of engineering have gone into CDCL SAT solvers, MIP solvers and CP solvers, and ' +
+            'none of it is going into a hand-written search written this quarter.',
+          'The work moves from writing an algorithm to writing a MODEL, and a good model beats a ' +
+            'clever hand-written search on almost every industrial instance.',
+          'What that buys you is also a different skill set. The questions become "which encoding" ' +
+            'and "what does the answer mean" rather than "which pruning rule".'
+        ],
         example: 'The demo hands the same scheduling instance to the bundled DPLL under six ' +
           'different models, and every one of them agrees with a hand-written colourer.'
       },
@@ -45,30 +47,35 @@
         },
         plain: 'One clause per pair, a tree of commander variables, or a chain of carries.',
         formal: 'pairwise: n(n − 1)/2 clauses, 0 new variables. commander: O(n) clauses, O(n) variables. sequential: 3n − 4 clauses, n − 1 variables',
-        readAs: 'Pairwise costs n times n minus one over two clauses and no new variables; the ' +
+        readAs: 'Pairwise costs n times n minus one over two clauses and no new variables. The ' +
           'commander and sequential encodings cost a linear number of clauses and a linear ' +
           'number of new variables.',
-        detail: 'One colour per vertex, one shift per nurse, one machine per job — this ' +
-          'constraint is most of what a real model is made of, and the three encodings are all ' +
-          'exactly correct. Which to use is decided by the group size and it has a crossover: ' +
-          'pairwise is smallest below about twenty literals and introduces no variables, and a ' +
-          'counter wins above it. Knowing where the crossover is means never having to argue ' +
-          'about it — use both, in the same model.',
-        example: 'At 5 literals the demo measures 10 pairwise clauses against 11 sequential; at ' +
+        detail: [
+          'One colour per vertex, one shift per nurse, one machine per job. This constraint is most ' +
+            'of what a real model is made of, and the three encodings are all exactly correct.',
+          'Which to use is decided by the group size, and it has a crossover. Pairwise is smallest ' +
+            'below about twenty literals and introduces no variables, and a counter wins above it.',
+          'Knowing where the crossover is means never having to argue about it. Use both, in the ' +
+            'same model.'
+        ],
+        example: 'At 5 literals the demo measures 10 pairwise clauses against 11 sequential. At ' +
           '2 000 it measures 1 999 000 against 5 996.'
       },
       {
         term: 'Clause count is arithmetic and solve time is not',
-        plain: 'The size of the formula is exactly computable; whether it solves faster is an experiment.',
+        plain: 'The size of the formula is exactly computable. Whether it solves faster is an experiment.',
         formal: 'the pairwise-to-sequential clause ratio is (n − 1)/6 asymptotically — 333× at n = 2 000',
         readAs: 'The ratio between the pairwise and sequential clause counts grows like n minus ' +
           'one over six, reaching three hundred and thirty-three at two thousand literals.',
-        detail: 'The clause count is what decides whether a model fits in memory at all, and it ' +
-          'costs nothing to compute before writing any code. Solve time is a different question ' +
-          'with a different answer per solver: propagation strength, clause-learning quality and ' +
-          'branching heuristics all interact with the encoding. The honest report gives the ' +
-          'arithmetic as arithmetic and the timings as measurements, rather than presenting one ' +
-          'as evidence for the other.',
+        detail: [
+          'The clause count is what decides whether a model fits in memory at all, and it costs ' +
+            'nothing to compute before writing any code.',
+          'Solve time is a different question with a different answer per solver. Propagation ' +
+            'strength, clause-learning quality and branching heuristics all interact with the ' +
+            'encoding.',
+          'The honest report gives the arithmetic as arithmetic and the timings as measurements, ' +
+            'rather than presenting one as evidence for the other.'
+        ],
         example: 'The demo’s scaling table is pure arithmetic with no solving in it, and its ' +
           'model table reports node counts separately.'
       },
@@ -76,14 +83,16 @@
         term: 'The solver here is DPLL, and that bounds what the encoding column can show',
         plain: 'It branches on the first unassigned variable, so auxiliary variables never change its search order.',
         formal: 'with a fixed variable order and no clause learning, encodings that differ only in auxiliary variables give identical node counts',
-        detail: 'This is a limitation of the bundled solver rather than a fact about encodings, ' +
-          'and reporting the node column without saying so would be an overclaim. The auxiliary ' +
-          'variables an encoding introduces are numbered after every decision variable, so the ' +
-          'search explores the same tree whichever encoding is used. With clause learning the ' +
-          'propagation strength of the sequential encoding does show up in the time, and the ' +
-          'propagation column is where that difference is visible even here.',
-        example: 'The demo’s three plain rows all report 1 439 nodes and report 18 010, 21 923 ' +
-          'and 21 150 propagations — the clause counts differ and the search does not.'
+        detail: [
+          'This is a limitation of the bundled solver rather than a fact about encodings, and ' +
+            'reporting the node column without saying so would be an overclaim.',
+          'The auxiliary variables an encoding introduces are numbered after every decision ' +
+            'variable, so the search explores the same tree whichever encoding is used.',
+          'With clause learning the propagation strength of the sequential encoding does show up in ' +
+            'the time. The propagation column is where that difference is visible even here.'
+        ],
+        example: 'The demo’s three plain rows all report 1 439 nodes, and report 18 010, 21 923 ' +
+          'and 21 150 propagations. The clause counts differ and the search does not.'
       },
       {
         term: 'Symmetry breaking is the largest cheap win available',
@@ -91,13 +100,16 @@
         formal: 'a proper assignment stays proper under any permutation of the c slots, so the search space carries a factor of c!',
         readAs: 'A proper assignment stays proper when the slots are permuted, so the search ' +
           'space contains c factorial copies of every answer.',
-        detail: 'A solver that has refuted "task 0 goes in slot 1" will refute "task 0 goes in ' +
-          'slot 2" again from scratch, and again for every permutation. Tasks that mutually ' +
-          'conflict need distinct slots anyway, so assigning them 1, 2, 3, … rules out no ' +
-          'solution at all and removes the whole factor. It costs a handful of unit clauses and ' +
-          'is the first thing to try on any model with interchangeable objects in it.',
-        example: 'The demo measures 1 439 nodes falling to 1 for six unit clauses — a factor of ' +
-          '1 439 on an unsatisfiable instance.'
+        detail: [
+          'A solver that has refuted "task 0 goes in slot 1" will refute "task 0 goes in slot 2" ' +
+            'again from scratch, and again for every permutation.',
+          'Tasks that mutually conflict need distinct slots anyway, so assigning them 1, 2, 3, … ' +
+            'rules out no solution at all and removes the whole factor.',
+          'It costs a handful of unit clauses, and is the first thing to try on any model with ' +
+            'interchangeable objects in it.'
+        ],
+        example: 'The demo measures 1 439 nodes falling to 1 for six unit clauses. That is a ' +
+          'factor of 1 439 on an unsatisfiable instance.'
       },
       {
         term: 'The node counts on the unsatisfiable side are exactly 2·c! − 1',
@@ -105,14 +117,17 @@
         formal: 'for a clique of size c asked for c − 1 slots, DPLL with a fixed variable order visits 2·c! − 1 nodes and c! conflicts',
         readAs: 'Take a group of c things that all conflict with each other, and ask the solver to ' +
           'fit them into one fewer slot than there are things. Reading the variables in a fixed ' +
-          'order it explores two times c factorial, minus one, search nodes, and hits c factorial ' +
-          'dead ends — where "c factorial" is c × (c − 1) × … × 1, the number of ways to put the ' +
-          'group in order.',
-        detail: 'Seeing a factorial in a measurement is what makes symmetry breaking obvious ' +
-          'rather than clever: the number is not merely large, it is exactly the count of ' +
-          'permutations of the conflicting group. Three slots cost 11 nodes, four cost 47, five ' +
-          'cost 239 and six cost 1 439, and each is two times the factorial minus one. Once the ' +
-          'shape of the number is recognised, the fix suggests itself.',
+          'order, it explores two times c factorial, minus one, search nodes. It also hits c ' +
+          'factorial dead ends. Here "c factorial" is c × (c − 1) × … × 1, the number of ways to ' +
+          'put the group in order.',
+        detail: [
+          'Seeing a factorial in a measurement is what makes symmetry breaking obvious rather than ' +
+            'clever. The number is not merely large, it is exactly the count of permutations of the ' +
+            'conflicting group.',
+          'Three slots cost 11 nodes, four cost 47, five cost 239 and six cost 1 439, and each is ' +
+            'two times the factorial minus one.',
+          'Once the shape of the number is recognised, the fix suggests itself.'
+        ],
         example: 'The demo’s slot sweep prints the measured node count and 2·slots! − 1 side by ' +
           'side, and they match on every unsatisfiable row.'
       },
@@ -120,26 +135,30 @@
         term: 'A redundant constraint can help, which is counter-intuitive',
         plain: 'A clause implied by the others adds no solutions and can still cut the search.',
         formal: 'unit propagation is not logically complete, so an implied clause can put a consequence within reach that was several inferences away',
-        detail: 'Solvers only derive what their propagation reaches, not everything that follows. ' +
-          'A redundant clause changes nothing about the set of models and can change a great ' +
-          'deal about how quickly the solver notices a contradiction — the classic example is ' +
-          'stating "the total headcount equals the total demand" alongside the per-shift ' +
-          'constraints, which is implied and propagates immediately. Adding redundancy is a ' +
-          'legitimate modelling technique rather than a sign of a confused model.',
+        detail: [
+          'Solvers only derive what their propagation reaches, not everything that follows.',
+          'A redundant clause changes nothing about the set of models, and can change a great deal ' +
+            'about how quickly the solver notices a contradiction.',
+          'The classic example is stating "the total headcount equals the total demand" alongside ' +
+            'the per-shift constraints, which is implied and propagates immediately. Adding ' +
+            'redundancy is a legitimate modelling technique rather than a sign of a confused model.'
+        ],
         example: 'The same idea explains why the demo’s symmetry-breaking unit clauses help: ' +
           'they are implied by nothing, but they are consistent with some solution and ' +
           'propagate at once.'
       },
       {
         term: 'Read what the solver actually returned',
-        plain: 'SAT with a model is a certificate; UNSAT is a claim; a budget overrun is neither.',
+        plain: 'SAT with a model is a certificate. UNSAT is a claim, and a budget overrun is neither.',
         formal: 'the three outcomes are SAT with an assignment, UNSAT with (optionally) a resolution proof, and UNKNOWN',
-        detail: 'A SAT answer comes with an assignment you can check in milliseconds, so check ' +
-          'it — that is a free end-to-end test of the encoder, the solver and the decoder on ' +
-          'every production run. An UNSAT answer is a claim about every assignment and the only ' +
-          'evidence is a proof file. "Budget exhausted" is neither, and every API that collapses ' +
-          'it into the UNSAT branch turns a slow model into a wrong answer, silently and at the ' +
-          'worst possible moment.',
+        detail: [
+          'A SAT answer comes with an assignment you can check in milliseconds, so check it. That is ' +
+            'a free end-to-end test of the encoder, the solver and the decoder on every production ' +
+            'run.',
+          'An UNSAT answer is a claim about every assignment, and the only evidence is a proof file.',
+          '"Budget exhausted" is neither. Every API that collapses it into the UNSAT branch turns a ' +
+            'slow model into a wrong answer, silently and at the worst possible moment.'
+        ],
         example: 'The demo’s scheduling model reports a budget overrun on one row of the ' +
           'feasibility frontier in section 20.9, next to a row that is genuinely proved ' +
           'infeasible.'
