@@ -23,15 +23,19 @@
         },
         plain: 'Given three points, is the third to the left of the line through the first two, to its right, or on it?',
         formal: 'orient2d(a, b, c) returns the SIGN of (b − a) × (c − a), and only the sign is ever used',
-        readAs: 'Take the vector from a to b and the vector from a to c, form their cross product, and ' +
-          'throw the magnitude away — what the caller wants is whether it came out positive, negative ' +
-          'or zero.',
-        detail: 'Convex hulls, point-in-polygon, segment intersection, ear clipping and Delaunay ' +
-          'flips are all this single test repeated. It is a two-by-two determinant, and its ' +
-          'magnitude is twice the area of the triangle — but no algorithm above it reads the ' +
-          'magnitude, only whether it is positive, negative or zero. That matters enormously: a ' +
-          'result that is off by a percent is harmless, and a result whose sign is wrong is not an ' +
-          'inaccuracy at all, it is a false statement about how three points are arranged.',
+        readAs: 'Take the vector from a to b and the vector from a to c, and form their cross ' +
+          'product. Throw the magnitude away: what the caller wants is whether it came out ' +
+          'positive, negative or zero.',
+        detail: [
+          'Convex hulls, point-in-polygon, segment intersection, ear clipping and Delaunay flips are ' +
+            'all this single test repeated.',
+          'It is a two-by-two determinant, and its magnitude is twice the area of the triangle. But ' +
+            'no algorithm above it reads the magnitude — only whether it is positive, negative or ' +
+            'zero.',
+          'That matters enormously. A result that is off by a percent is harmless. A result whose ' +
+            'sign is wrong is not an inaccuracy at all: it is a false statement about how three ' +
+            'points are arranged.'
+        ],
         example: 'The default triple has c one unit in the last place off the line, and the exact ' +
           'answer is a left turn (+1); the floating-point determinant reads 4.441e-16.'
       },
@@ -39,12 +43,15 @@
         term: 'A wrong sign is a contradiction, not an error bar',
         plain: 'Rotating the three arguments must not change the answer, and swapping two must flip it.',
         formal: 'the three rotations agree with each other and disagree with all three swaps — six calls, one fact',
-        detail: 'This is the property everything downstream leans on without ever stating it. A hull ' +
-          'walk that is told a is left of bc and simultaneously that c is left of ba has been handed ' +
-          'two incompatible arrangements of the same three points, and there is no recovery: the ' +
-          'stack pops a vertex it should have kept, pushes it back, and loops. The permutation table ' +
-          'is worth running before any geometry code is trusted, because it needs no ground truth — ' +
-          'you do not have to know the right answer to know that these six cannot all be right.',
+        detail: [
+          'This is the property everything downstream leans on without ever stating it.',
+          'A hull walk that is told a is left of bc and simultaneously that c is left of ba has been ' +
+            'handed two incompatible arrangements of the same three points. There is no recovery: ' +
+            'the stack pops a vertex it should have kept, pushes it back, and loops.',
+          'The permutation table is worth running before any geometry code is trusted, because it ' +
+            'needs no ground truth. You do not have to know the right answer to know that these six ' +
+            'cannot all be right.'
+        ],
         example: 'On the default triple the naive determinant answers left, collinear, left for the ' +
           'three rotations — it contradicts itself on the very first fixture.'
       },
@@ -62,13 +69,15 @@
         },
         plain: 'Treating a small value as zero makes the contradictions vanish and makes every answer "collinear".',
         formal: 'over 4 000 near-collinear triples: 0 contradictions, 4 000 wrong answers',
-        detail: 'Almost everyone reaches for a tolerance first, and the sweep is the argument against ' +
-          'it. The epsilon test scores zero in the column people check — it never contradicts itself, ' +
-          'because it answers "collinear" for everything near the line — and 4 000 in the column that ' +
-          'decides whether the program is correct, because those triples are not collinear. It is not ' +
-          'a compromise between the naive test and the exact one; it is a third, different failure, ' +
-          'and the quieter of the two: nothing crashes, the hull simply comes out missing vertices ' +
-          'that were genuinely on it.',
+        detail: [
+          'Almost everyone reaches for a tolerance first, and the sweep is the argument against it.',
+          'The epsilon test scores zero in the column people check, because it answers "collinear" ' +
+            'for everything near the line. It scores 4 000 in the column that decides whether the ' +
+            'program is correct, because those triples are not collinear.',
+          'It is not a compromise between the naive test and the exact one. It is a third, different ' +
+            'failure, and the quieter of the two: nothing crashes, and the hull simply comes out ' +
+            'missing vertices that were genuinely on it.'
+        ],
         example: 'At an epsilon of 1e-12 the tolerance test calls a real turn collinear 4 000 times ' +
           'out of 4 000, while the naive test does it 0 times.'
       },
@@ -76,12 +85,15 @@
         term: 'The naive test fails loudly, which is the better of the two failures',
         plain: 'It contradicts itself on about a quarter of near-collinear triples and is outright wrong on about a sixth.',
         formal: '1 121 self-contradictions and 642 wrong answers in 4 000 triples',
-        detail: 'The plain determinant is not merely imprecise near the line — it is inconsistent, ' +
-          'because the subtractions inside it round differently depending on which argument came ' +
-          'first. That is why the crash it produces is easier to live with than the tolerance test\'s ' +
-          'silence: a hull that loops forever gets debugged, and a hull that quietly drops three ' +
-          'vertices ships. Note also which column is empty for it: the naive test never calls a real ' +
-          'turn collinear, so its errors are all sign flips rather than degeneracy claims.',
+        detail: [
+          'The plain determinant is not merely imprecise near the line. It is inconsistent, because ' +
+            'the subtractions inside it round differently depending on which argument came first.',
+          'That is why the crash it produces is easier to live with than the tolerance test\'s ' +
+            'silence. A hull that loops forever gets debugged; a hull that quietly drops three ' +
+            'vertices ships.',
+          'Note also which column is empty for it. The naive test never calls a real turn collinear, ' +
+            'so its errors are all sign flips rather than degeneracy claims.'
+        ],
         example: 'The same sweep gives the adaptive predicate 0 contradictions and 0 wrong answers.'
       },
       {
@@ -91,12 +103,15 @@
         readAs: 'Compare the size of the answer against an error bar built from the size of the two ' +
           'products that made it. When the answer is bigger than its own error bar its sign cannot be ' +
           'a rounding artefact, and nothing further needs to run.',
-        detail: 'An epsilon chosen by hand is a guess about the magnitude of the inputs, which is why ' +
-          'it is wrong on data of a different scale. The bound here is computed from the operands ' +
-          'themselves, so it scales with them automatically, and it is a genuine bound rather than a ' +
-          'heuristic: floating-point rounding provably cannot have moved the value further than that. ' +
+        detail: [
+          'An epsilon chosen by hand is a guess about the magnitude of the inputs, which is why it ' +
+            'is wrong on data of a different scale.',
+          'The bound here is computed from the operands themselves, so it scales with them ' +
+            'automatically. It is a genuine bound rather than a heuristic: floating-point rounding ' +
+            'provably cannot have moved the value further than that.',
           'The result is a filter that is never wrong when it answers, and knows when it must not ' +
-          'answer.',
+            'answer.'
+        ],
         example: 'On ordinary points the filter answers all 4 000 calls itself and escalates 0 times.'
       },
       {
@@ -104,26 +119,33 @@
         plain: 'Every finite double is an integer times a power of two, so scaling the coordinates up makes the determinant integer arithmetic.',
         formal: 'scale by 2ᵏ into exact integers, evaluate the determinant in BigInt, read the sign',
         readAs: 'Multiplying every coordinate by a large enough power of two turns all of them into ' +
-          'whole numbers with no loss whatever, and whole-number arithmetic in BigInt cannot round, so ' +
+          'whole numbers, with no loss whatever. Whole-number arithmetic in BigInt cannot round, so ' +
           'the sign it produces is the true one.',
-        detail: 'People assume the exact path means arbitrary-precision decimals and a large ' +
-          'dependency. It does not. A double is a sign, a 53-bit integer and an exponent — that is ' +
-          'the definition of the format, not an approximation of it — so a common scaling turns the ' +
-          'whole triple into integers exactly, and BigInt then evaluates a determinant of three ' +
-          'products with no rounding at all. Shewchuk\'s adaptive predicates get the same guarantee ' +
-          'faster by summing exact partial terms only until the sign is settled, but the idea is this ' +
-          'one.',
+        detail: [
+          'People assume the exact path means arbitrary-precision decimals and a large dependency. ' +
+            'It does not.',
+          'A double is a sign, a 53-bit integer and an exponent — that is the definition of the ' +
+            'format, not an approximation of it. So a common scaling turns the whole triple into ' +
+            'integers exactly, and BigInt then evaluates a determinant of three products with no ' +
+            'rounding at all.',
+          'Shewchuk\'s adaptive predicates get the same guarantee faster, by summing exact partial ' +
+            'terms only until the sign is settled. The idea is this one.'
+        ],
         example: 'The exact path decides every one of the 2 507 triples the filter refused to answer.'
       },
       {
         term: 'Robustness is free on the data you actually have',
         plain: 'The exact path runs only when the points are close to collinear, and ordinary data never is.',
         formal: '0.00% escalation on ordinary points against 62.67% on triples built to be hard',
-        detail: 'This is what makes the choice easy, and it is the number to quote when someone ' +
-          'objects to the cost. The adaptive predicate is not a trade of speed against correctness on ' +
-          'your inputs; it is a trade of speed against correctness on the inputs that would otherwise ' +
-          'give a wrong answer. On the ordinary set the slow path did not run once in 4 000 calls, so ' +
-          'the measured cost of robustness there is the error-bound comparison and nothing else.',
+        detail: [
+          'This is what makes the choice easy, and it is the number to quote when someone objects to ' +
+            'the cost.',
+          'The adaptive predicate is not a trade of speed against correctness on your inputs. It is ' +
+            'a trade of speed against correctness on the inputs that would otherwise give a wrong ' +
+            'answer.',
+          'On the ordinary set the slow path did not run once in 4 000 calls, so the measured cost ' +
+            'of robustness there is the error-bound comparison and nothing else.'
+        ],
         example: '4 000 predicate calls on ordinary points escalated 0 times; the same count on ' +
           'adversarial triples escalated 2 507 times.'
       },
@@ -131,27 +153,33 @@
         term: 'Integer coordinates make the whole problem evaporate',
         plain: 'If the inputs can be integers within the range a double represents exactly, the naive determinant is already exact.',
         formal: 'coordinates below 2²⁶ keep the determinant\'s products and difference exact in a double',
-        detail: 'This is the practical escape and it is chosen far too rarely. Map tiles, screen ' +
-          'pixels, CAD grids and fixed-point world coordinates are all integers, and a determinant ' +
-          'over small integers has no rounding to be robust against — the fast path is then the exact ' +
-          'path. The cost is a decision at the boundary of the system rather than inside it: snap on ' +
-          'input, and document the grid. Every library that snaps coordinates before a boolean ' +
-          'operation is making this trade, and calling it preprocessing rather than what it is, a ' +
-          'correctness decision.',
+        detail: [
+          'This is the practical escape, and it is chosen far too rarely.',
+          'Map tiles, screen pixels, CAD grids and fixed-point world coordinates are all integers, ' +
+            'and a determinant over small integers has no rounding to be robust against. The fast ' +
+            'path is then the exact path.',
+          'The cost is a decision at the boundary of the system rather than inside it: snap on ' +
+            'input, and document the grid. Every library that snaps coordinates before a boolean ' +
+            'operation is making this trade, and calling it preprocessing rather than what it is — a ' +
+            'correctness decision.'
+        ],
         example: 'The section\'s adversarial triple is built from full-mantissa values like ' +
-          '0.15608477592468262 for exactly this reason: a tidy line through 0.5 with slope 1 never ' +
+          '0.15608477592468262 for exactly this reason. A tidy line through 0.5 with slope 1 never ' +
           'rounds, and the naive test behaves perfectly on it.'
       },
       {
         term: 'In-circle is the same story with one more dimension',
         plain: 'Does d lie inside the circle through a, b and c? It is a 4×4 determinant with the same failure mode.',
         formal: 'the sign of a determinant in the lifted coordinates x, y, x² + y², and only the sign',
-        detail: 'Delaunay triangulation and every flip-based mesh repair rest on this predicate ' +
-          'exactly as hulls rest on orientation. Lifting each point onto the paraboloid turns "inside ' +
-          'the circumcircle" into "below the plane through the other three", which is another ' +
-          'orientation test one dimension up. It has the same three implementations with the same ' +
-          'three behaviours, and it is more fragile than orient2d rather than less, because squaring ' +
-          'the coordinates squares the dynamic range the determinant has to resolve.',
+        detail: [
+          'Delaunay triangulation and every flip-based mesh repair rest on this predicate exactly as ' +
+            'hulls rest on orientation.',
+          'Lifting each point onto the paraboloid turns "inside the circumcircle" into "below the ' +
+            'plane through the other three", which is another orientation test one dimension up.',
+          'It has the same three implementations with the same three behaviours, and it is more ' +
+            'fragile than orient2d rather than less. Squaring the coordinates squares the dynamic ' +
+            'range the determinant has to resolve.'
+        ],
         example: 'The triangulation section runs 7 531 predicate calls and needs the exact path 0 ' +
           'times — the same shape of answer as here.'
       }

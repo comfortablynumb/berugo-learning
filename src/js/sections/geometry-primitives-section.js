@@ -51,46 +51,52 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**Almost everything in this milestone is one question asked over and over.** Given three ' +
+        'points `a`, `b` and `c`, does `c` lie to the left of the line from `a` to `b`, to its ' +
+        'right, or exactly on it?',
+      'Convex hulls, point-in-polygon, segment intersection, triangulation and Delaunay flips are ' +
+        'all that single test repeated. It is computed as a small determinant, and only its ' +
+        '**sign** is ever wanted.',
+      '**A wrong sign is not an inaccuracy, it is a contradiction.** Geometry is the one algorithmic ' +
+        'area where floating point does not merely lose precision — it returns answers that cannot ' +
+        'all be true at once.',
+      'Swapping two arguments must flip the sign. So if the test says "left" for `(a, b, c)` and ' +
+        '"left" again for `(a, c, b)`, it has contradicted itself. The code above it is being told ' +
+        'the points are arranged two incompatible ways.',
+      'That is what makes a hull loop forever or a polygon come out with a hole in it.',
+      '**`|value| < epsilon` is not the fix**, and the sweep below is the reason. A tolerance makes ' +
+        'the test wonderfully self-consistent, because it answers "collinear" for everything near ' +
+        'the line — including the triples that genuinely are not collinear.',
+      'It has traded a loud failure for a quiet one: nothing crashes, and a hull built on it drops ' +
+        'real vertices.',
+      '**The fix is to measure the error rather than guess at it.** Compute the determinant in ' +
+        'floating point, compute a bound on how far rounding could possibly have moved it, and trust ' +
+        'the sign only when the value exceeds that bound.',
+      'When it does not, redo the arithmetic exactly. Every finite double is precisely an integer ' +
+        'times a power of two, so "exactly" is available rather than aspirational.',
+      'And on data that is not adversarial the slow path never runs at all.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'Almost everything in this milestone is one question asked over and over: given three ' +
-          'points `a`, `b` and `c`, does `c` lie to the left of the line from `a` to `b`, to its ' +
-          'right, or exactly on it? Convex hulls, point-in-polygon, segment intersection, ' +
-          'triangulation and Delaunay flips are all that single test repeated. It is computed as a ' +
-          'small determinant, and only its **sign** is ever wanted.',
-        '**A wrong sign is not an inaccuracy, it is a contradiction.** Geometry is the one ' +
-          'algorithmic area where floating point does not merely lose precision — it returns ' +
-          'answers that cannot all be true at once. Swapping two arguments must flip the sign, so ' +
-          'if the test says "left" for `(a, b, c)` and "left" again for `(a, c, b)`, the code above ' +
-          'it is being told the points are simultaneously arranged two incompatible ways. That is ' +
-          'what makes a hull loop forever or a polygon come out with a hole in it.',
-        '**`|value| < epsilon` is not the fix**, and the sweep below is the reason. A tolerance ' +
-          'makes the test wonderfully self-consistent, because it answers "collinear" for ' +
-          'everything near the line — including the triples that genuinely are not collinear. It ' +
-          'has traded a loud failure for a quiet one: nothing crashes, and a hull built on it drops ' +
-          'real vertices.',
-        '**The fix is to measure the error rather than guess at it.** Compute the determinant in ' +
-          'floating point, compute a bound on how far rounding could possibly have moved it, and ' +
-          'trust the sign only when the value exceeds that bound. When it does not, redo the ' +
-          'arithmetic exactly. Every finite double is precisely an integer times a power of two, so ' +
-          '"exactly" is available rather than aspirational — and on data that is not adversarial ' +
-          'the slow path never runs at all.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — six orderings, a sweep, and what the filter costs',
         markup: root.GeometryPrimitivesTemplate.render()
       },
       diagram: diagram(),
       insight: 'Every "the convex hull crashed" and "the polygon has a hole in it" traces back to ' +
-        'an orientation test that answered differently for the same three points in a different ' +
-        'order. The instinct is to reach for a tolerance, and it makes the symptom disappear while ' +
-        'making the code wrong in a quieter way. If your coordinates can be integers, make them ' +
-        'integers and the whole problem evaporates; if they cannot, use an adaptive predicate and ' +
-        'measure how often it escalates. On ordinary data the answer is never, which means ' +
-        'robustness here is free and the only thing it costs you is the afternoon spent reading ' +
-        'this section.'
+        'the same thing. An orientation test answered differently for the same three points in a ' +
+        'different order. The instinct is to reach for a tolerance, and it makes the symptom ' +
+        'disappear while making the code wrong in a quieter way. If your coordinates can be ' +
+        'integers, make them integers and the whole problem evaporates. If they cannot, use an ' +
+        'adaptive predicate and measure how often it escalates. On ordinary data the answer is ' +
+        'never, which means robustness here is free — and the only thing it costs you is the ' +
+        'afternoon spent reading this section.'
     };
   }
 
