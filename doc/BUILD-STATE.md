@@ -5207,9 +5207,23 @@ Done this session, in curriculum order: `bridges-and-cuts`,
 `minimum-cut`, `push-relabel`, `min-cost-flow`, `bipartite-matching`,
 `general-matching` - all of M13.4-M13.6 and the whole of M14.
 
-**Resume at `two-sat`** - it is section 58 in `Curriculum.teachingSections()`
-order. Run `node tools/readability.js` and work down the curriculum order;
-anything not printing `ok` is outstanding.
+**Resume at `integer-representation`** - it is section 83 in
+`Curriculum.teachingSections()` order, and M15-M17 are complete behind it. Run
+`node tools/readability.js` and work down the curriculum order; anything not
+printing `ok` is outstanding.
+
+At 82 of 364: mean sentence **20.1** words, over 30 words **14.2%**,
+single-block explanations **2 270**.
+
+Two prose claims were wrong against their own demos, and the pass caught them
+because repacking a paragraph means reading every figure in it:
+
+- **`rotating-calipers` claimed "a thirty-fold difference"** for the
+  axis-aligned box against the minimum-area rectangle. The section measures
+  10 058.0 against 932.6 - 10.79x - and its fixture table's smallest ratio is
+  0.093, so 30x is not reachable on any set it ships.
+- **`applied-geometry` quoted 55 km per degree of longitude at 60 N** in the
+  insight and 56 km in the concept. Both round 55.5; they agree now.
 
 Two things learned repacking these thirteen:
 
