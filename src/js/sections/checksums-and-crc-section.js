@@ -52,39 +52,52 @@
     };
   }
 
-  function orientation() {
+  function orientationDetectors() {
     return [
       '**A checksum is a claim about which corruptions it catches, and the claims differ ' +
-        'enormously.** The demo runs the search rather than quoting the claim: every single-bit ' +
-        'flip, thousands of double-bit flips, every byte swap it has budget for, and bursts up to ' +
-        'a stated length.',
+        'enormously.** The demo runs the search rather than quoting the claim.',
+      'It tries every single-bit flip, thousands of double-bit flips, every byte swap it has budget ' +
+        'for, and bursts up to a stated length.',
       '**A commutative sum cannot see reordering.** A byte sum and a parity bit catch every ' +
         'single-bit flip and zero per cent of byte swaps, because addition does not care about ' +
-        'order. That is not a theoretical concern — misordered reassembly and scatter-gather bugs ' +
-        'produce exactly this error.',
-      '**Fletcher and Adler fix ordering by keeping a running sum of the running sum.** The ' +
-        'second accumulator gives each byte a weight that depends on its position, so a swap ' +
-        'changes the result. Adler-32 is Fletcher with a prime modulus, and it is what zlib uses.',
+        'order.',
+      'That is not a theoretical concern. Misordered reassembly and scatter-gather bugs produce ' +
+        'exactly this error.',
+      '**Fletcher and Adler fix ordering by keeping a running sum of the running sum.** The second ' +
+        'accumulator gives each byte a weight that depends on its position, so a swap changes the ' +
+        'result.',
+      'Adler-32 is Fletcher with a prime modulus, and it is what zlib uses.',
       '**CRC is different in kind: it is polynomial division over GF(2).** Coefficients are bits, ' +
-        'addition is XOR, and the checksum is a remainder. That algebra is what turns "usually ' +
-        'catches errors" into proved guarantees about specific error classes.',
+        'addition is XOR, and the checksum is a remainder.',
+      'That algebra is what turns "usually catches errors" into proved guarantees about specific ' +
+        'error classes.'
+    ];
+  }
+
+  function orientationLimits() {
+    return [
       '**Bursts are why CRC survives in hardware.** Real media do not produce independent ' +
-        'single-bit flips — they produce scratches, interference and whole bad sectors — and a ' +
-        'burst shorter than the generator’s degree is caught with CERTAINTY rather than with high ' +
+        'single-bit flips. They produce scratches, interference and whole bad sectors.',
+      'A burst shorter than the generator’s degree is caught with CERTAINTY rather than with high ' +
         'probability.',
       '**The demo is careful about what "verified" means.** Checking every burst of 32 bits ' +
         'exhaustively would need 2^30 patterns per position, so the search is exhaustive to a ' +
-        'stated length and samples beyond it. Each row says which, because a guarantee reported ' +
-        'from a sampled search is a different claim.',
-      '**The implementation is table-driven, and checked against the bit-at-a-time version.** One ' +
-        'lookup and one XOR per byte, from a 256-entry table; slicing-by-8 extends it to a word ' +
-        'at a time. Both agree with the published test vectors, which is the only reason to ' +
-        'believe either.',
+        'stated length and samples beyond it.',
+      'Each row says which, because a guarantee reported from a sampled search is a different claim.',
+      '**The implementation is table-driven, and checked against the bit-at-a-time version.** It is ' +
+        'one lookup and one XOR per byte from a 256-entry table, and slicing-by-8 extends it to a ' +
+        'word at a time.',
+      'Both agree with the published test vectors, which is the only reason to believe either.',
       '**None of them detects an adversary, and confusing the two is the failure this section ' +
-        'exists to prevent.** A CRC is public and invertible: four appended bytes make it come ' +
-        'out to any value you like, and the demo does exactly that. A checksum answers "did the ' +
-        'wire corrupt this"; only a keyed cryptographic hash answers "did somebody change this".'
+        'exists to prevent.** A CRC is public and invertible, so four appended bytes make it come ' +
+        'out to any value you like. The demo does exactly that.',
+      'A checksum answers "did the wire corrupt this". Only a keyed cryptographic hash answers "did ' +
+        'somebody change this".'
     ];
+  }
+
+  function orientation() {
+    return orientationDetectors().concat(orientationLimits());
   }
 
   function config() {
@@ -96,14 +109,14 @@
         markup: root.ChecksumsTemplate.render()
       },
       diagram: diagram(),
-      insight: '**CRC detects the error classes hardware actually produces — bursts — which is ' +
-        'why it survives in storage and networking where a plain sum would not; and it detects ' +
-        'nothing about an adversary, which is why it is never an integrity check.** Both halves ' +
-        'matter operationally. The first says a checksum should be chosen against the failure ' +
-        'mode of the medium rather than by width: a 16-bit CRC beats a 32-bit sum on a channel ' +
-        'that produces bursts. The second is the one that shows up in incident reports — a system ' +
-        'that validates uploads with a CRC has verified that the transfer worked, and has ' +
-        'verified nothing at all about who wrote the bytes.'
+      insight: '**CRC detects the error classes hardware actually produces, which are bursts. ' +
+        'That is why it survives in storage and networking where a plain sum would not. And it ' +
+        'detects nothing about an adversary, which is why it is never an integrity check.** Both ' +
+        'halves matter operationally. The first says a checksum should be chosen against the ' +
+        'failure mode of the medium rather than by width. A 16-bit CRC beats a 32-bit sum ' +
+        'on a channel that produces bursts. The second is the one that shows up in incident ' +
+        'reports. A system that validates uploads with a CRC has verified that the transfer ' +
+        'worked, and has verified nothing at all about who wrote the bytes.'
     };
   }
 

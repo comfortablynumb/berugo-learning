@@ -19,11 +19,14 @@
         },
         plain: 'Not "is this right" but "which kinds of wrong would I notice".',
         formal: 'a detector catches an error exactly when the corrupted message hashes differently',
-        detail: 'That framing is what makes the choice tractable. Every function here catches ' +
-          '100% of single-bit flips, so a test that checks only those cannot tell them apart. The ' +
-          'differences appear on the error classes the medium actually produces — bursts on a ' +
-          'disc or a radio link, reordering in reassembly, whole-word corruption in memory — and ' +
-          'the demo searches each class rather than quoting a claim about it.',
+        detail: [
+          'That framing is what makes the choice tractable.',
+          'Every function here catches 100% of single-bit flips, so a test that checks only those ' +
+            'cannot tell them apart.',
+          'The differences appear on the error classes the medium actually produces: bursts on a ' +
+            'disc or a radio link, reordering in reassembly, whole-word corruption in memory. The ' +
+            'demo searches each class rather than quoting a claim about it.'
+        ],
         example: 'The demo measures 100.0% on single-bit flips for all six detectors and 0.0% to ' +
           '100.0% on byte swaps.'
       },
@@ -33,11 +36,14 @@
         formal: 'Σ is invariant under permutation, so any pure sum has a blind spot exactly there',
         readAs: 'A sum does not change when its terms are reordered, so a checksum built only ' +
           'from addition cannot detect that two bytes swapped places.',
-        detail: 'This is not a theoretical concern. Misordered reassembly, a scatter-gather list ' +
-          'built wrongly and an out-of-order write all produce exactly this corruption, and a ' +
-          'byte sum or a parity bit reports success every time. Fletcher and Adler fix it by ' +
-          'keeping a running sum of the running sum, so each byte gets a weight that depends on ' +
-          'its position — which is the minimum change that makes order matter.',
+        detail: [
+          'This is not a theoretical concern. Misordered reassembly, a scatter-gather list built ' +
+            'wrongly and an out-of-order write all produce exactly this corruption.',
+          'A byte sum or a parity bit reports success every time.',
+          'Fletcher and Adler fix it by keeping a running sum of the running sum, so each byte gets ' +
+            'a weight that depends on its position. That is the minimum change that makes order ' +
+            'matter.'
+        ],
         example: 'The demo measures 0.0% of byte swaps caught by a plain sum, 50.3% by the ' +
           'Internet checksum and 99.2% by Fletcher-16.'
       },
@@ -47,11 +53,13 @@
         formal: 'CRC(m) = m·x^32 mod G(x), where G is the generator polynomial of degree 32',
         readAs: 'The checksum is the remainder when the message, shifted left by the generator’s ' +
           'degree, is divided by the generator polynomial.',
-        detail: 'The algebra is what turns "usually catches errors" into proved guarantees. An ' +
-          'error is undetected exactly when its own polynomial is divisible by the generator, so ' +
-          'every question about detection becomes a question about divisibility — and a burst ' +
-          'shorter than the generator’s degree simply cannot be a multiple of it. That is a proof ' +
-          'rather than a probability, which is why CRC is specified for storage and links.',
+        detail: [
+          'The algebra is what turns "usually catches errors" into proved guarantees.',
+          'An error is undetected exactly when its own polynomial is divisible by the generator, so ' +
+            'every question about detection becomes a question about divisibility.',
+          'A burst shorter than the generator’s degree simply cannot be a multiple of it. That is a ' +
+            'proof rather than a probability, which is why CRC is specified for storage and links.'
+        ],
         example: 'The demo’s CRC-32 misses nothing at any burst length up to 34 bits in a search ' +
           'over every position.'
       },
@@ -59,13 +67,15 @@
         term: 'Bursts are what hardware actually produces',
         plain: 'Not independent bit flips — scratches, interference, a bad sector.',
         formal: 'a burst of length k is an error confined to a window of k bits whose ends both moved',
-        detail: 'That mismatch between the error model people imagine and the one media produce ' +
-          'is why the width of a checksum is a poor guide to its usefulness. A 16-bit CRC beats a ' +
-          '32-bit sum on a channel that produces bursts, because the sum has a blind spot the ' +
-          'burst walks straight into. Choosing a detector means asking what the medium does, not ' +
-          'how many bits are available.',
-        example: 'The demo measures the byte sum failing first at 9-bit bursts, the 16-bit ' +
-          'checksums at 17, and CRC-32 not at all within range.'
+        detail: [
+          'That mismatch between the error model people imagine and the one media produce is why ' +
+            'the width of a checksum is a poor guide to its usefulness.',
+          'A 16-bit CRC beats a 32-bit sum on a channel that produces bursts, because the sum has a ' +
+            'blind spot the burst walks straight into.',
+          'Choosing a detector means asking what the medium does, not how many bits are available.'
+        ],
+        example: 'The demo measures the byte sum failing first at 9-bit bursts and the 16-bit ' +
+          'checksums at 17. CRC-32 does not fail at all within range.'
       },
       {
         term: 'A guarantee from a sampled search is a different claim',
@@ -73,11 +83,14 @@
         formal: 'a burst of length k has 2^(k−2) interior patterns; exhaustive verification stops being finishable around k = 12',
         readAs: 'The number of distinct bursts of length k grows as two to the power k minus two, ' +
           'so an exhaustive search runs out of time well before k reaches thirty-two.',
-        detail: 'Verifying "every burst of 32 bits is detected" exhaustively would need a billion ' +
-          'patterns per position, so any demo that claims it has either proved a theorem or ' +
-          'sampled. Reporting both columns — the exhaustively verified prefix and the longest ' +
-          'length where nothing was missed — is the difference between a measurement and a ' +
-          'quotation dressed as one.',
+        detail: [
+          'Verifying "every burst of 32 bits is detected" exhaustively would need a billion patterns ' +
+            'per position. Any demo that claims it has either proved a theorem or sampled.',
+          'Reporting both columns is the difference between a measurement and a quotation dressed as ' +
+            'one.',
+          'Those columns are the exhaustively verified prefix, and the longest length where nothing ' +
+            'was missed.'
+        ],
         example: 'The demo reports CRC-32 as exhaustively verified to 9 bits and missing nothing ' +
           'up to 34.'
       },
@@ -85,11 +98,13 @@
         term: 'The table-driven implementation is checked against the definition',
         plain: 'Two implementations, and the published vectors.',
         formal: 'a 256-entry table gives one lookup and one XOR per byte; slicing-by-8 does a word at a time',
-        detail: 'A checksum implementation that is subtly wrong still produces a stable, ' +
-          'plausible-looking value for every input, so nothing about its output reveals the bug. ' +
-          'The only defence is agreement with somebody else’s answer: the bit-at-a-time version ' +
-          'derived straight from the definition, and the published check values that appear in ' +
-          'every CRC catalogue for exactly this purpose.',
+        detail: [
+          'A checksum implementation that is subtly wrong still produces a stable, plausible-looking ' +
+            'value for every input, so nothing about its output reveals the bug.',
+          'The only defence is agreement with somebody else’s answer.',
+          'That means the bit-at-a-time version derived straight from the definition, and the ' +
+            'published check values that appear in every CRC catalogue for exactly this purpose.'
+        ],
         example: 'The demo checks 5 of 5 published vectors, including CRC-32 of "123456789" = ' +
           '0xcbf43926, against both implementations.'
       },
@@ -99,11 +114,13 @@
         formal: 'CRC is affine in its input: crc(prefix ‖ s) = crc(prefix ‖ 0) ⊕ L(s) for a linear L',
         readAs: 'The checksum of a prefix followed by a suffix is the checksum of the prefix ' +
           'followed by zeros, exclusive-ored with a linear function of the suffix.',
-        detail: 'That makes forgery a 32-by-32 linear system rather than a search — 33 CRC ' +
-          'evaluations and a Gaussian elimination. It is not a weakness in CRC; it is outside ' +
-          'what CRC promises. The failure is in systems that treat "the checksum matches" as an ' +
-          'integrity claim, which verifies that the transfer worked and verifies nothing at all ' +
-          'about who wrote the bytes.',
+        detail: [
+          'That makes forgery a 32-by-32 linear system rather than a search. It is 33 CRC ' +
+            'evaluations and a Gaussian elimination.',
+          'It is not a weakness in CRC. It is outside what CRC promises.',
+          'The failure is in systems that treat "the checksum matches" as an integrity claim. That ' +
+            'verifies the transfer worked, and verifies nothing at all about who wrote the bytes.'
+        ],
         example: 'The demo forges a chosen CRC-32 with 4 appended bytes, solved rather than ' +
           'searched.'
       },
@@ -111,11 +128,14 @@
         term: 'A checksum and a cryptographic hash answer different questions',
         plain: '"Did the wire corrupt this" against "did somebody change this".',
         formal: 'a checksum has no key and no collision resistance; a MAC has both',
-        detail: 'Confusing them is the failure this section exists to prevent, and it shows up in ' +
-          'incident reports rather than in textbooks: an upload validated by CRC, a config file ' +
-          '"verified" by MD5 against a hash served from the same compromised host, a cache key ' +
-          'that an attacker can steer. The right question is whether the adversary can choose the ' +
-          'input, and if they can, no unkeyed function helps.',
+        detail: [
+          'Confusing them is the failure this section exists to prevent, and it shows up in incident ' +
+            'reports rather than in textbooks.',
+          'An upload validated by CRC. A config file "verified" by MD5 against a hash served from ' +
+            'the same compromised host. A cache key that an attacker can steer.',
+          'The right question is whether the adversary can choose the input. If they can, no unkeyed ' +
+            'function helps.'
+        ],
         example: 'The demo’s forgery is the demonstration: a valid CRC on a message the attacker ' +
           'chose.'
       }
