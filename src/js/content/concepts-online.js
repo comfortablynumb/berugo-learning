@@ -305,11 +305,13 @@
         formal: 'Graham (1966): the makespan is at most (2 − 1/m) times the optimal makespan',
         readAs: 'The finish time is at most two minus one over m times the best possible finish ' +
           'time, for m machines.',
-        detail: 'The proof is two lines and worth carrying: the machine that finishes last was ' +
-          'the least loaded when its final job arrived, so every other machine held at least ' +
-          'that much, so the total is at least m times it — and adding the last job back gives ' +
-          'the bound. Nothing about the arrival order or the job sizes is used, which is why the ' +
-          'result holds for every input rather than typical ones.',
+        detail: [
+          'The proof is two lines and worth carrying. The machine that finishes last was the least ' +
+            'loaded when its final job arrived, so every other machine held at least that much.',
+          'The total is therefore at least m times it, and adding the last job back gives the bound.',
+          'Nothing about the arrival order or the job sizes is used, which is why the result holds ' +
+            'for every input rather than typical ones.'
+        ],
         example: 'Over 40 instances scored against exact optima the demo measures a worst ratio ' +
           'of 1.5000 against a bound of 1.7500.'
       },
@@ -317,13 +319,16 @@
         term: 'The bound is tight and its instance is a recognisable arrival pattern',
         plain: 'Many tiny jobs, then one enormous one.',
         formal: 'm(m − 1) jobs of size 1 followed by one job of size m: the online makespan is 2m − 1 against an optimum of m',
-        detail: 'The small jobs fill every machine evenly to m − 1 and the big one has nowhere ' +
-          'good to go, so the online rule pays 2m − 1 while an optimal assignment puts the big ' +
-          'job alone and spreads the rest. This is not a theoretical curiosity: a burst of small ' +
-          'requests followed by one expensive one is an ordinary arrival pattern, and it is ' +
-          'exactly the shape that makes a live load balancer produce one very slow machine.',
+        detail: [
+          'The small jobs fill every machine evenly to m − 1, and the big one has nowhere good to go.',
+          'So the online rule pays 2m − 1, while an optimal assignment puts the big job alone and ' +
+            'spreads the rest.',
+          'This is not a theoretical curiosity. A burst of small requests followed by one expensive ' +
+            'one is an ordinary arrival pattern. It is exactly the shape that makes a live load ' +
+            'balancer produce one very slow machine.'
+        ],
         example: 'At four machines the demo measures 1.7500 on that family, which is 2 − 1/4 ' +
-          'exactly, and LPT solves the same instance perfectly.'
+          'exactly. LPT solves the same instance perfectly.'
       },
       {
         term: 'LPT is the same rule with the future revealed',
@@ -331,11 +336,14 @@
         formal: 'LPT is (4/3 − 1/(3m))-competitive against the offline optimum',
         readAs: 'Longest-processing-time first costs at most four thirds minus one over three m ' +
           'times the optimum.',
-        detail: 'The gap between 2 − 1/m and 4/3 − 1/(3m) is exactly what being online costs on ' +
-          'this problem, and it is a useful number to have because it bounds what any amount of ' +
-          'prediction could buy. Placing the large jobs first is also the practical lesson: ' +
-          'where a scheduler can see even part of the queue, admitting the awkward items while ' +
-          'there is still room is most of the benefit.',
+        detail: [
+          'The gap between 2 − 1/m and 4/3 − 1/(3m) is exactly what being online costs on this ' +
+            'problem.',
+          'It is a useful number to have, because it bounds what any amount of prediction could buy.',
+          'Placing the large jobs first is also the practical lesson. Where a scheduler can see even ' +
+            'part of the queue, admitting the awkward items while there is still room is most of ' +
+            'the benefit.'
+        ],
         example: 'The demo measures LPT at a worst ratio of 1.0455 against exact optima where ' +
           'the online rule measures 1.5000.'
       },
@@ -345,11 +353,13 @@
         formal: 'the maximum load is (1 + o(1))·log n / log log n with high probability',
         readAs: 'The busiest bin holds about the logarithm of n divided by the logarithm of the ' +
           'logarithm of n.',
-        detail: 'This is the baseline any load balancer without feedback is measured against, and ' +
-          'it is worse than intuition suggests: the mean load is 1 and the maximum keeps growing ' +
-          'with n. The demo measures it climbing from 4.33 to 6.83 as the bin count goes from 100 ' +
-          'to 25 600, which is a 256-fold change in size for a maximum that has not stopped ' +
-          'rising.',
+        detail: [
+          'This is the baseline any load balancer without feedback is measured against, and it is ' +
+            'worse than intuition suggests.',
+          'The mean load is 1 and the maximum keeps growing with n.',
+          'The demo measures it climbing from 4.33 to 6.83 as the bin count goes from 100 to 25 600. ' +
+            'That is a 256-fold change in size for a maximum that has not stopped rising.'
+        ],
         example: 'At 25 600 bins the demo measures a maximum of 6.83 against a mean of exactly 1.'
       },
       {
@@ -357,23 +367,28 @@
         plain: 'Sample two bins, put the ball in the less loaded one.',
         formal: 'the maximum load becomes log log n / log 2 + O(1); d choices gives log log n / log d',
         readAs: 'The busiest bin holds about the logarithm of the logarithm of n divided by the ' +
-          'logarithm of two, and with d samples the base becomes d.',
-        detail: 'A bin only grows past height h when BOTH samples were already at h, so the ' +
-          'probability of reaching each successive level SQUARES rather than multiplying — and ' +
-          'squaring at every level is what turns a logarithm into a log-logarithm. That is the ' +
-          'whole argument, it fits in a sentence, and the change to the code is one extra sample ' +
-          'and a comparison.',
-        example: 'At 25 600 bins the demo measures 3.08 for two choices against 6.83 for one — a ' +
-          'ratio of 2.22 that grows with n.'
+          'logarithm of two. With d samples the base becomes d.',
+        detail: [
+          'A bin only grows past height h when BOTH samples were already at h, so the probability of ' +
+            'reaching each successive level SQUARES rather than multiplying.',
+          'Squaring at every level is what turns a logarithm into a log-logarithm.',
+          'That is the whole argument, it fits in a sentence, and the change to the code is one ' +
+            'extra sample and a comparison.'
+        ],
+        example: 'At 25 600 bins the demo measures 3.08 for two choices against 6.83 for one. ' +
+          'That is a ratio of 2.22, and it grows with n.'
       },
       {
         term: 'Three choices is not another exponential improvement',
         plain: 'Cubing instead of squaring buys a constant, not an exponent.',
         formal: 'd choices gives log log n / log d, so going from d = 2 to d = 3 divides by log 3 / log 2 ≈ 1.58',
-        detail: 'The benefit per extra sample falls off sharply after the second, which is why ' +
-          'the technique is named after two rather than ten. It also means the engineering ' +
-          'question is settled: sample two, and spend any further effort on making the load ' +
-          'signal current rather than on sampling more backends.',
+        detail: [
+          'The benefit per extra sample falls off sharply after the second, which is why the ' +
+            'technique is named after two rather than ten.',
+          'It also means the engineering question is settled.',
+          'Sample two, and spend any further effort on making the load signal current rather than on ' +
+            'sampling more backends.'
+        ],
         example: 'At 25 600 bins the demo measures 6.83, 3.08 and 3.00 for one, two and three ' +
           'choices.'
       },
@@ -381,11 +396,13 @@
         term: 'Consistent hashing answers a different question and is measured on two axes',
         plain: 'It is not balancing load; it is keeping the assignment stable when machines change.',
         formal: 'removing one of m machines moves about 1/m of the keys, against nearly all of them under hashing modulo m',
-        detail: 'Reporting only the load imbalance makes consistent hashing look strictly worse ' +
-          'than random assignment, which is the standard misreading. The property it exists for ' +
-          'is that a machine leaving disturbs only the keys that machine owned — random ' +
-          'assignment and modulo hashing cannot promise that at all — and the imbalance is the ' +
-          'price of that promise rather than a defect in the construction.',
+        detail: [
+          'Reporting only the load imbalance makes consistent hashing look strictly worse than ' +
+            'random assignment, which is the standard misreading.',
+          'The property it exists for is that a machine leaving disturbs only the keys that machine ' +
+            'owned. Random assignment and modulo hashing cannot promise that at all.',
+          'The imbalance is the price of that promise rather than a defect in the construction.'
+        ],
         example: 'The demo measures 6.16% of keys moving when one of sixteen machines leaves, ' +
           'against an ideal of 6.25%.'
       },
@@ -395,11 +412,14 @@
         formal: 'with v points per machine the imbalance falls roughly as 1/√v',
         readAs: 'The imbalance falls roughly as one over the square root of the number of points ' +
           'per machine.',
-        detail: 'One point per machine leaves the busiest holding several times the mean, because ' +
-          'the arc it owns is a single random interval and random intervals are very uneven. ' +
-          'Adding points averages several intervals per machine, and the averaging follows the ' +
-          'usual square-root law. The cost is the ring size, which has to be searched on every ' +
-          'lookup and held in memory on every client.',
+        detail: [
+          'One point per machine leaves the busiest holding several times the mean, because the arc ' +
+            'it owns is a single random interval and random intervals are very uneven.',
+          'Adding points averages several intervals per machine, and the averaging follows the usual ' +
+            'square-root law.',
+          'The cost is the ring size, which has to be searched on every lookup and held in memory on ' +
+            'every client.'
+        ],
         example: 'The demo measures imbalances of 4.470, 1.850, 1.351, 1.226 and 1.085 at 1, 4, ' +
           '16, 64 and 256 points per machine.'
       }

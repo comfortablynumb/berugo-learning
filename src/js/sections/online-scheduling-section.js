@@ -53,44 +53,60 @@
     };
   }
 
-  function orientation() {
+  function orientationGraham() {
     return [
       '**List scheduling is the whole online algorithm: put the arriving job on the least-loaded ' +
         'machine.** Graham proved in 1966 that it is (2 − 1/m)-competitive, and no online rule ' +
-        'beats it by much. The demo scores it against the EXACT optimum found by exhaustive ' +
-        'assignment rather than against a lower bound, because a ratio against a bound is an ' +
-        'over-estimate and reporting it as the ratio is how an algorithm ends up looking worse ' +
-        'than it is.',
-      '**The bound is tight and its instance is worth recognising.** m(m − 1) jobs of size one ' +
-        'followed by one job of size m: the small jobs fill every machine evenly, and the big one ' +
-        'has nowhere good to go. The demo measures exactly 2 − 1/m on it at every m. That shape ' +
-        '— a burst of small requests and then one large one — is a real arrival pattern, not a ' +
-        'theoretical curiosity.',
+        'beats it by much.',
+      'The demo scores it against the EXACT optimum found by exhaustive assignment rather than ' +
+        'against a lower bound.',
+      'A ratio against a bound is an over-estimate, and reporting it as the ratio is how an ' +
+        'algorithm ends up looking worse than it is.',
+      '**The bound is tight and its instance is worth recognising.** Take m(m − 1) jobs of size ' +
+        'one followed by one job of size m.',
+      'The small jobs fill every machine evenly, and the big one has nowhere good to go. The demo ' +
+        'measures exactly 2 − 1/m on it at every m.',
+      'That shape, a burst of small requests and then one large one, is a real arrival pattern ' +
+        'rather than a theoretical curiosity.',
       '**Sorting the jobs first gives 4/3 − 1/(3m), and sorting needs the future.** LPT is the ' +
-        'same greedy rule with the jobs longest-first, and the gap between its bound and ' +
-        'Graham’s is exactly what online costs. On the tight instance LPT is optimal, because ' +
-        'placing the big job first removes the problem entirely.',
-      '**Random assignment has a maximum load about log n / log log n above the mean.** Throwing ' +
-        'n balls into n bins uniformly leaves the busiest bin with several, not one, and the ' +
-        'gap grows with n. That is the baseline any load balancer without feedback is measured ' +
-        'against, and it is worse than most people expect.',
+        'same greedy rule with the jobs longest-first, and the gap between its bound and Graham’s ' +
+        'is exactly what online costs.',
+      'On the tight instance LPT is optimal, because placing the big job first removes the problem ' +
+        'entirely.'
+    ];
+  }
+
+  function orientationBalancing() {
+    return [
+      '**Random assignment has a maximum load about log n / log log n above the mean.** Throwing n ' +
+        'balls into n bins uniformly leaves the busiest bin with several, not one, and the gap ' +
+        'grows with n.',
+      'That is the baseline any load balancer without feedback is measured against, and it is ' +
+        'worse than most people expect.',
       '**Sampling two bins and taking the lighter collapses it to about log log n.** A bin only ' +
         'grows past height h when BOTH samples were already at h, so the probability squares at ' +
-        'every level — which is what turns a logarithm into a log-logarithm. The demo measures ' +
+        'every level.',
+      'Squaring at every level is what turns a logarithm into a log-logarithm. The demo measures ' +
         'the maximum at rising n against both predictions.',
-      '**Three choices is not another exponential improvement.** Cubing instead of squaring buys ' +
-        'a constant factor, so the benefit per extra sample falls off sharply after the second. ' +
-        'That is why the technique is called the power of TWO choices and why nobody samples ten.',
+      '**Three choices is not another exponential improvement.** Cubing instead of squaring buys a ' +
+        'constant factor, so the benefit per extra sample falls off sharply after the second.',
+      'That is why the technique is called the power of TWO choices, and why nobody samples ten.',
       '**Consistent hashing answers a different question and is measured on two axes.** It is not ' +
-        'trying to balance load; it is trying to make the assignment stable when the machine set ' +
-        'changes. The demo reports its imbalance — where it loses to random assignment — next to ' +
-        'the fraction of keys that move when a machine is removed, where random assignment has ' +
-        'no answer at all.',
+        'trying to balance load. It is trying to make the assignment stable when the machine set ' +
+        'changes.',
+      'The demo reports its imbalance, where it loses to random assignment, next to the fraction ' +
+        'of keys that move when a machine is removed. Random assignment has no answer to the ' +
+        'second at all.',
       '**Virtual nodes are the dial, and they trade memory for balance.** One ring point per ' +
-        'machine leaves the busiest machine several times over the mean; sixty-four points each ' +
-        'brings it inside a quarter. The key-movement fraction stays at about 1/m throughout, ' +
-        'because that is a property of the construction rather than of the number of points.'
+        'machine leaves the busiest machine several times over the mean, and sixty-four points ' +
+        'each brings it inside a quarter.',
+      'The key-movement fraction stays at about 1/m throughout, because that is a property of the ' +
+        'construction rather than of the number of points.'
     ];
+  }
+
+  function orientation() {
+    return orientationGraham().concat(orientationBalancing());
   }
 
   function config() {
@@ -103,13 +119,13 @@
       },
       diagram: diagram(),
       insight: '**Sample two backends and send the request to the less loaded one.** It is a ' +
-        'one-line change to any random load balancer, it needs no coordination, no shared state ' +
-        'and no history, and it collapses the tail of the load distribution from logarithmic to ' +
+        'one-line change to any random load balancer, and it needs no coordination, no shared ' +
+        'state and no history. It collapses the tail of the load distribution from logarithmic to ' +
         'log-logarithmic. Nothing else in this milestone has that ratio of benefit to effort. ' +
-        'The two conditions to check are that the load signal is roughly current — a stale one ' +
-        'makes every balancer converge on the same "idle" backend and is worse than random — and ' +
-        'that sampling really is two independent draws rather than two rounds of the same ' +
-        'hash, which quietly turns it back into one choice.'
+        'There are two conditions to check. The load signal has to be roughly current, because a ' +
+        'stale one makes every balancer converge on the same "idle" backend and is worse than ' +
+        'random. And the sampling has to be two independent draws rather than two rounds of the ' +
+        'same hash, which quietly turns it back into one choice.'
     };
   }
 
