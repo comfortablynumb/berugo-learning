@@ -49,48 +49,57 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**A solver\'s order says how the error shrinks when you halve the step, and it is ' +
+        'measurable.** An order-p method has error proportional to hᵖ, so halving h divides the ' +
+        'error by 2ᵖ.',
+      'The demo halves the step six times and reads the order back off the ratios rather than ' +
+        'quoting it. Euler comes out at 1, midpoint at 2, RK4 at 4.',
+      'That is the entire content of "fourth order". It is worth checking on your own solver, ' +
+        'because getting it wrong is the classic symptom of an implementation bug.',
+      '**Order is not the same as long-term fidelity.** RK4 has far less error per step than ' +
+        'Verlet, and over a long simulation it still loses energy monotonically while Verlet does ' +
+        'not.',
+      'The reason is structural. Verlet is symplectic, meaning it exactly preserves a slightly ' +
+        'perturbed energy, so its energy error oscillates within a bound forever.',
+      'RK4 preserves nothing in particular, so its small per-step energy errors all point the same ' +
+        'way and accumulate.',
+      '**Stiffness is when the step size is limited by a mode you no longer care about.** A system ' +
+        'with a very fast component and a very slow one forces an explicit method to take small ' +
+        'steps.',
+      'They have to stay small enough to remain stable for the fast component, long after that ' +
+        'component has decayed to nothing.',
+      'The limit is a stability constraint, not an accuracy one. Crossing it does not degrade the ' +
+        'answer gracefully: the solution explodes.',
+      '**Implicit methods buy stability by solving for the next state instead of computing it.** ' +
+        'Backward Euler evaluates the slope at the destination, which makes each step a ' +
+        'root-finding problem.',
+      'That is more work per step, and unconditionally stable. So the step size is chosen by how ' +
+        'accurate you need to be rather than by what will not explode.',
+      'On a stiff problem that trade is not close: fifty times the step for a few times the cost ' +
+        'per step.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**A solver\'s order says how the error shrinks when you halve the step, and it is ' +
-          'measurable.** An order-p method has error proportional to hᵖ, so halving h divides the ' +
-          'error by 2ᵖ — the demo halves the step six times and reads the order back off the ' +
-          'ratios rather than quoting it. Euler comes out at 1, midpoint at 2, RK4 at 4. That is ' +
-          'the entire content of "fourth order", and it is worth checking on your own solver, ' +
-          'because getting it wrong is the classic symptom of an implementation bug.',
-        '**Order is not the same as long-term fidelity.** RK4 has far less error per step than ' +
-          'Verlet, and over a long simulation it still loses energy monotonically while Verlet ' +
-          'does not. The reason is structural: Verlet is symplectic, meaning it exactly preserves ' +
-          'a slightly perturbed energy, so its energy error oscillates within a bound forever. ' +
-          'RK4 preserves nothing in particular, so its small per-step energy errors all point the ' +
-          'same way and accumulate.',
-        '**Stiffness is when the step size is limited by a mode you no longer care about.** A ' +
-          'system with a very fast component and a very slow one forces an explicit method to take ' +
-          'steps small enough to remain stable for the fast one — long after that component has ' +
-          'decayed to nothing. The limit is a stability constraint, not an accuracy one, and ' +
-          'crossing it does not degrade the answer gracefully: the solution explodes.',
-        '**Implicit methods buy stability by solving for the next state instead of computing ' +
-          'it.** Backward Euler evaluates the slope at the destination, which makes each step a ' +
-          'root-finding problem — more work per step, and unconditionally stable, so the step size ' +
-          'is chosen by how accurate you need to be rather than by what will not explode. On a ' +
-          'stiff problem that trade is not close: fifty times the step for a few times the cost ' +
-          'per step.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — convergence order, an orbit over 200 000 steps, and stiffness',
         markup: root.DifferentialEquationsTemplate.render()
       },
       diagram: diagram(),
       insight: 'Game physics uses Verlet not because it is more accurate but because its error ' +
-        'does not accumulate as energy — and a "more accurate" RK4 integrator makes an orbit ' +
-        'decay. That is the specific lesson; the general one is that **the property you need ' +
-        'preserved is often not the one the error bound talks about**. Error per step is what ' +
-        'papers report; whether the errors cancel or accumulate is what decides whether your ' +
-        'simulation is still recognisable after a million steps. Ask what invariant your system ' +
-        'has — energy, momentum, a probability summing to one, a total balance — and choose the ' +
-        'method that preserves it, because a solver that conserves the invariant approximately ' +
-        'forever beats one that tracks the trajectory beautifully and then drifts.'
+        'does not accumulate as energy. A "more accurate" RK4 integrator makes an orbit decay. ' +
+        'That is the specific lesson. The general one is that **the property you need preserved is ' +
+        'often not the one the error bound talks about**. Error per step is what papers report. ' +
+        'Whether the errors cancel or accumulate is what decides whether your simulation is still ' +
+        'recognisable after a million steps. Ask what invariant your system has — energy, ' +
+        'momentum, a probability summing to one, a total balance — and choose the method that ' +
+        'preserves it. A solver that conserves the invariant approximately forever beats one that ' +
+        'tracks the trajectory beautifully and then drifts.'
     };
   }
 

@@ -311,13 +311,15 @@
         },
         plain: 'Halve the step and an order-p method divides its error by 2ᵖ.',
         formal: 'error ∝ hᵖ, so log₂ of the ratio between consecutive halvings estimates p',
-        readAs: 'The error is proportional to the step raised to the power p, so taking the log ' +
+        readAs: 'The error is proportional to the step raised to the power p. So taking the log ' +
           'base two of how much the error shrank when you halved the step gives you p back.',
-        detail: 'This is the first check to run on any solver you write, including one you think ' +
-          'you trust: a wrong coefficient in the Runge–Kutta weights produces a trajectory that ' +
-          'looks entirely plausible and an order that is visibly not four. The demo halves the step ' +
-          'six times on a unit spring, whose exact solution is a cosine, and reads the order off ' +
-          'the ratios rather than quoting it.',
+        detail: [
+          'This is the first check to run on any solver you write, including one you think you trust.',
+          'A wrong coefficient in the Runge–Kutta weights produces a trajectory that looks entirely ' +
+            'plausible and an order that is visibly not four.',
+          'The demo halves the step six times on a unit spring, whose exact solution is a cosine, ' +
+            'and reads the order off the ratios rather than quoting it.'
+        ],
         example: 'The demo measures 0.998 for Euler, 1.996 for midpoint, 3.995 for RK4 and 2.000 ' +
           'for velocity Verlet.'
       },
@@ -326,12 +328,14 @@
         plain: 'One slope at the start, two at the midpoint from different estimates, one at the far end.',
         formal: 'y := y + h(k₁ + 2k₂ + 2k₃ + k₄)/6, which is Simpson’s rule applied to the slope',
         readAs: 'The new value is the old one plus the step times a weighted average of the four ' +
-          'slopes, with the two midpoint slopes counted twice as heavily as the endpoints.',
-        detail: 'The unequal weighting is what buys the fourth order: it is Simpson’s rule ' +
-          'appearing again, integrating the slope over the step rather than sampling it once. Four ' +
-          'evaluations for fourth-order error is a good trade on a smooth problem, which is why ' +
-          'RK4 is the default general-purpose integrator — and the section exists to show where ' +
-          'that default is the wrong choice.',
+          'slopes. The two midpoint slopes are counted twice as heavily as the endpoints.',
+        detail: [
+          'The unequal weighting is what buys the fourth order. It is Simpson’s rule appearing ' +
+            'again, integrating the slope over the step rather than sampling it once.',
+          'Four evaluations for fourth-order error is a good trade on a smooth problem, which is why ' +
+            'RK4 is the default general-purpose integrator.',
+          'And the section exists to show where that default is the wrong choice.'
+        ],
         example: 'The demo’s diagram traces the four stages, and the order table confirms 3.995 ' +
           'from the measured errors.'
       },
@@ -339,11 +343,14 @@
         term: 'Order is not the same as long-term fidelity',
         plain: 'RK4 has far less error per step than Verlet and loses energy steadily where Verlet does not.',
         formal: 'a symplectic method exactly conserves a nearby modified energy, so its energy error is bounded rather than accumulating',
-        detail: 'The reason is structural rather than a matter of accuracy. Verlet preserves the ' +
-          'geometry of the underlying system — phase-space volume — so its energy error oscillates ' +
-          'within a band forever. RK4 preserves nothing in particular, so its small per-step ' +
-          'energy errors all point the same way and accumulate without limit. Over a long ' +
-          'simulation the bounded error wins, however much larger it is per step.',
+        detail: [
+          'The reason is structural rather than a matter of accuracy.',
+          'Verlet preserves the geometry of the underlying system — phase-space volume — so its ' +
+            'energy error oscillates within a band forever.',
+          'RK4 preserves nothing in particular, so its small per-step energy errors all point the ' +
+            'same way and accumulate without limit. Over a long simulation the bounded error wins, ' +
+            'however much larger it is per step.'
+        ],
         example: 'Over 200 000 steps at h = 0.1 the demo measures RK4’s orbital radius decaying ' +
           'monotonically to 0.994302 while Verlet oscillates between 1.000000 and 1.004988.'
       },
@@ -351,12 +358,15 @@
         term: 'The effect is real at the step sizes simulations actually use, and not at smaller ones',
         plain: 'At h = 0.01 both methods hold the orbit to a part in 10⁹ and there is nothing to choose between them.',
         formal: 'the energy drift is O(h^p) per step, so a small enough step makes both methods indistinguishable over any finite run',
-        detail: 'Being honest about where a claimed effect appears is the difference between ' +
-          'teaching and folklore. "RK4 makes an orbit decay" is true at h = 0.1 over 200 000 steps ' +
-          'and simply does not reproduce at h = 0.01 — so the demo defaults to the step where the ' +
-          'difference is real rather than to one that flatters either method. Real-time simulation ' +
-          'runs at large steps because the step is the frame time, which is exactly why the ' +
-          'distinction matters there.',
+        detail: [
+          'Being honest about where a claimed effect appears is the difference between teaching and ' +
+            'folklore.',
+          '"RK4 makes an orbit decay" is true at h = 0.1 over 200 000 steps, and it simply does not ' +
+            'reproduce at h = 0.01. So the demo defaults to the step where the difference is real ' +
+            'rather than to one that flatters either method.',
+          'Real-time simulation runs at large steps because the step is the frame time, which is ' +
+            'exactly why the distinction matters there.'
+        ],
         example: 'The demo’s step control offers 0.01, where RK4’s energy drift is 5.56e-9 and ' +
           'Verlet’s is 2.50e-9, and 0.1, where they are 5.73e-3 and 2.46e-5.'
       },
@@ -365,12 +375,15 @@
         plain: 'A fast component forces tiny steps long after it has decayed to nothing.',
         formal: 'explicit Euler is stable only for h < 2/|λ| of the fastest mode, regardless of accuracy',
         readAs: 'The step has to stay below two divided by the size of the fastest decay rate or ' +
-          'the method blows up, whatever accuracy you were willing to accept.',
-        detail: 'The constraint is stability rather than accuracy, which is why it cannot be ' +
-          'negotiated away by lowering your standards. It is also a threshold rather than a ' +
-          'gradient: crossing it does not degrade the answer, it makes the solution explode. Real ' +
-          'stiff systems are everywhere — chemical kinetics with fast and slow reactions, circuits ' +
-          'with mixed time constants, and any physical model spanning several time scales.',
+          'the method blows up. That holds whatever accuracy you were willing to accept.',
+        detail: [
+          'The constraint is stability rather than accuracy, which is why it cannot be negotiated ' +
+            'away by lowering your standards.',
+          'It is also a threshold rather than a gradient. Crossing it does not degrade the answer, ' +
+            'it makes the solution explode.',
+          'Real stiff systems are everywhere: chemical kinetics with fast and slow reactions, ' +
+            'circuits with mixed time constants, and any physical model spanning several time scales.'
+        ],
         example: 'With decay rates 1 000 and 1, the demo measures a stability limit of h = 2.000e-3 ' +
           'and explicit Euler exploding at 1.25× it.'
       },
@@ -378,11 +391,14 @@
         term: 'Implicit methods buy stability by solving for the next state',
         plain: 'Evaluate the slope at the destination instead of the origin, which makes each step a root-finding problem.',
         formal: 'backward Euler is y_{n+1} = y_n + h f(t_{n+1}, y_{n+1}), which is unconditionally stable',
-        detail: 'Each step now costs a nonlinear solve — Newton’s method from 18.2, with the ' +
-          'previous step as the starting point — so it is several times more expensive. On a stiff ' +
-          'problem the trade is not close: the step size is chosen by how accurate you need to be ' +
-          'rather than by what will not explode, which can be fifty times larger. This is also why ' +
-          'stiff solvers need the Jacobian, and why autodiff from 18.7 turns up inside them.',
+        detail: [
+          'Each step now costs a nonlinear solve — Newton’s method from 18.2, with the previous step ' +
+            'as the starting point — so it is several times more expensive.',
+          'On a stiff problem the trade is not close. The step size is chosen by how accurate you ' +
+            'need to be rather than by what will not explode, which can be fifty times larger.',
+          'This is also why stiff solvers need the Jacobian, and why autodiff from 18.7 turns up ' +
+            'inside them.'
+        ],
         example: 'The demo reaches t = 1 in 10 implicit steps at 50× the explicit stability limit ' +
           'with an error of 1.77e-2, against the 500 steps explicit Euler needs.'
       },
@@ -390,12 +406,15 @@
         term: 'Adaptive step size comes from running two methods at once',
         plain: 'An embedded pair produces two estimates of different orders, and their difference is the error estimate.',
         formal: 'RK45 shares stage evaluations between a fourth- and fifth-order formula, so the error estimate is nearly free',
-        detail: 'The elegance is in the sharing: the two formulas use the same slope evaluations ' +
-          'with different weights, so the extra estimate costs almost nothing. The difference ' +
-          'between them estimates the local error, which drives the step-size controller — shrink ' +
-          'when the estimate exceeds the tolerance, grow when it is comfortably under. That is ' +
-          'what `solve_ivp` and every production ODE solver do, and it is why they report step ' +
-          'counts rather than taking the step you asked for.',
+        detail: [
+          'The elegance is in the sharing. The two formulas use the same slope evaluations with ' +
+            'different weights, so the extra estimate costs almost nothing.',
+          'The difference between them estimates the local error, which drives the step-size ' +
+            'controller. Shrink when the estimate exceeds the tolerance, grow when it is comfortably ' +
+            'under.',
+          'That is what `solve_ivp` and every production ODE solver do. It is why they report step ' +
+            'counts rather than taking the step you asked for.'
+        ],
         example: 'The same structure appears in adaptive quadrature in 18.7: two estimates, their ' +
           'difference as the error, and refinement only where it is large.'
       },
@@ -403,12 +422,15 @@
         term: 'Choose the method by the invariant you need preserved',
         plain: 'Ask what your system conserves, then pick the integrator that conserves it.',
         formal: 'error bounds describe accuracy per step; conservation describes whether errors cancel or accumulate',
-        detail: 'Error per step is what papers report; whether the errors cancel or accumulate is ' +
-          'what decides whether a simulation is still recognisable after a million steps. Energy, ' +
-          'momentum, a probability summing to one, a total account balance — a method that ' +
-          'preserves the invariant approximately forever beats one that tracks the trajectory ' +
-          'beautifully and drifts. It generalises past ODEs: the same question decides whether to ' +
-          'store a running total or recompute it from the ledger.',
+        detail: [
+          'Error per step is what papers report. Whether the errors cancel or accumulate is what ' +
+            'decides whether a simulation is still recognisable after a million steps.',
+          'Energy, momentum, a probability summing to one, a total account balance — a method that ' +
+            'preserves the invariant approximately forever beats one that tracks the trajectory ' +
+            'beautifully and drifts.',
+          'It generalises past ODEs. The same question decides whether to store a running total or ' +
+            'recompute it from the ledger.'
+        ],
         example: 'Verlet is second order and RK4 is fourth, and over 200 000 steps Verlet’s energy ' +
           'drift is 2.46e-5 against RK4’s 5.73e-3.'
       }
