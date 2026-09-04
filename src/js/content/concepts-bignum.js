@@ -15,18 +15,21 @@
             '    B --> C{"does that stay exactly<br/>representable?"}',
             '    C -->|no| D["silent loss of low bits,<br/>and a wrong product"]',
             '    C -->|yes| E["the base is legal"]',
-            '    E --> F["which is why 2²⁶ and not 2³²<br/>when the accumulator is a double"]'
+            '    E --> F["which is why 2¹⁶ and not 2³²<br/>when the accumulator is a double"]'
           ].join('\n'),
           caption: 'The limb size is not a tuning parameter. It is whatever keeps the widest intermediate exact, and picking a rounder number breaks multiplication quietly.'
         },
         plain: 'A limb product plus the running column total has to stay exactly representable.',
         formal: 'at a base of 2¹⁶ a limb product is at most 2³², leaving 21 bits of headroom below 2⁵³',
-        detail: 'Schoolbook multiplication forms products of two limbs and adds a column of them ' +
-          'into an accumulator, and a double holds integers exactly only up to 2⁵³. Choosing 2³² ' +
-          'as the base would make every product overflow that immediately, so the arithmetic ' +
-          'would be silently approximate in the one module that must not be — and it would look ' +
-          'fine on small operands. The headroom is what bounds how deep a column can get: 21 bits ' +
-          'is thousands of limbs, far more than any demo here uses.',
+        detail: [
+          'Schoolbook multiplication forms products of two limbs and adds a column of them into an ' +
+            'accumulator, and a double holds integers exactly only up to 2⁵³.',
+          'Choosing 2³² as the base would make every product overflow that immediately, so the ' +
+            'arithmetic would be silently approximate in the one module that must not be. And it ' +
+            'would look fine on small operands.',
+          'The headroom is what bounds how deep a column can get. Twenty-one bits is thousands of ' +
+            'limbs, far more than any demo here uses.'
+        ],
         example: 'The demo multiplies 123 456 789 by 987 654 321 as two-limb numbers in base ' +
           '65 536 and gets 121 932 631 112 635 269, matching BigInt exactly.'
       },
@@ -36,12 +39,14 @@
         formal: 'the exponent drops from 2 to log₂3 ≈ 1.585, at the cost of extra additions at every level',
         readAs: 'Doubling the operand size multiplies schoolbook’s work by four and Karatsuba’s by ' +
           'about three, so the gap widens with size — and the additions the recursion needs grow too.',
-        detail: 'Splitting each operand into a high and a low half, the middle term of the product ' +
-          'can be recovered from the other two plus one extra product of the sums, so three ' +
-          'multiplications do the work of four. That is a genuine asymptotic improvement and it ' +
-          'is not free: each level allocates four temporary arrays and performs several ' +
-          'full-width additions and subtractions. The recursion floor exists because below it ' +
-          'that overhead exceeds the saving outright.',
+        detail: [
+          'Splitting each operand into a high and a low half, the middle term of the product can be ' +
+            'recovered from the other two plus one extra product of the sums. So three ' +
+            'multiplications do the work of four.',
+          'That is a genuine asymptotic improvement, and it is not free. Each level allocates four ' +
+            'temporary arrays and performs several full-width additions and subtractions.',
+          'The recursion floor exists because below it that overhead exceeds the saving outright.'
+        ],
         example: 'At 4 096 bits the demo measures 65 536 limb multiplications for schoolbook ' +
           'against 13 834 for Karatsuba — 4.74× fewer.'
       },
@@ -49,13 +54,15 @@
         term: 'The crossover is three different sizes, and only one of them is what you pay',
         plain: 'Count only multiplications and Karatsuba wins at 128 bits; count everything and it wins at 2 048; time it and it has not won yet.',
         formal: 'measured: multiplications cross at 128 bits, total limb work at 2 048 bits, wall clock at no size in the sweep',
-        detail: 'This is where the folk claim comes from. "Karatsuba wins above eight limbs" is ' +
-          'true of exactly one column, and it is the column that flatters the algorithm. Adding ' +
-          'the limb-level additions moves the crossing by a factor of sixteen, and timing it moves ' +
-          'the crossing out of the measured range entirely, because the recursion’s allocations ' +
-          'do not appear in any operation count. An implementation is not faster because its ' +
-          'asymptotics are better; the only way to know is to count all of the work and then time ' +
-          'it anyway.',
+        detail: [
+          'This is where the folk claim comes from. "Karatsuba wins above eight limbs" is true of ' +
+            'exactly one column, and it is the column that flatters the algorithm.',
+          'Adding the limb-level additions moves the crossing by a factor of sixteen. Timing it ' +
+            'moves the crossing out of the measured range entirely, because the recursion’s ' +
+            'allocations do not appear in any operation count.',
+          'An implementation is not faster because its asymptotics are better. The only way to know ' +
+            'is to count all of the work and then time it anyway.'
+        ],
         example: 'At 512 bits the demo reports 1.97× fewer multiplications, 0.66× on total limb ' +
           'work, and 0.26× on wall clock — three numbers, two of them below one.'
       },
@@ -63,12 +70,14 @@
         term: 'Division is the operation that is genuinely hard',
         plain: 'Every quotient digit is an estimate from the top two limbs, and the estimate can be wrong.',
         formal: 'Knuth’s algorithm D normalises so the leading divisor limb is at least half the base, which bounds the error at two',
-        detail: 'Without the normalising shift the quotient estimate can be off by an arbitrary ' +
-          'amount, and the correction loop becomes unbounded. With it, the estimate is at most ' +
-          'two too large, so at most two corrections are needed — and a third case remains where ' +
-          'the subtraction still goes negative, which is the add-back. Every part of the algorithm ' +
-          'exists to make a specific error bound hold, which is why it reads as arbitrary until ' +
-          'you know which bound each step is protecting.',
+        detail: [
+          'Without the normalising shift the quotient estimate can be off by an arbitrary amount, ' +
+            'and the correction loop becomes unbounded.',
+          'With it, the estimate is at most two too large, so at most two corrections are needed. A ' +
+            'third case remains where the subtraction still goes negative, which is the add-back.',
+          'Every part of the algorithm exists to make a specific error bound hold, which is why it ' +
+            'reads as arbitrary until you know which bound each step is protecting.'
+        ],
         example: 'The demo runs 4 000 randomised divisions against BigInt and reports 0 wrong ' +
           'quotients and 0 wrong remainders.'
       },
@@ -76,12 +85,15 @@
         term: 'The add-back is too rare for random testing to reach',
         plain: 'It fires once in half a million quotient digits, so leaving it out passes every randomised test.',
         formal: 'measured 1 add-back in 500 034 quotient digits — a rate of 2.00e-6, below Knuth’s 2/base estimate of 3.05e-5',
-        detail: 'This is the general lesson rather than a fact about long division: a branch that ' +
-          'random inputs reach once in half a million opportunities is, for testing purposes, ' +
-          'unreachable — and an implementation that omits it ships, passes everything, and fails ' +
-          'on an input a user supplies a year later. The only defence is a fixture built ' +
-          'deliberately to reach it, which is why the two operand pairs that trigger it every time ' +
-          'are named constants in the module rather than something a search hopes to stumble on.',
+        detail: [
+          'This is the general lesson rather than a fact about long division.',
+          'A branch that random inputs reach once in half a million opportunities is, for testing ' +
+            'purposes, unreachable. An implementation that omits it ships, passes everything, and ' +
+            'fails on an input a user supplies a year later.',
+          'The only defence is a fixture built deliberately to reach it. That is why the two operand ' +
+            'pairs that trigger it every time are named constants in the module, rather than ' +
+            'something a search hopes to stumble on.'
+        ],
         example: 'The demo’s two fixtures each fire the correction on every run, and produce the ' +
           'correct quotient and remainder.'
       },
@@ -89,12 +101,15 @@
         term: 'Square-and-multiply leaks the exponent’s population count',
         plain: 'One squaring per bit and one multiplication per SET bit, so the operation count names how many bits are one.',
         formal: 'for 65 537: 17 bits, 2 set, 17 squarings, 2 multiplications — the counts match exactly',
-        detail: 'The squaring count is the exponent’s bit length, which is usually public; the ' +
-          'multiplication count is its population count, which for a private exponent is not. An ' +
-          'attacker who can time the operation, or watch its power draw, reads that count ' +
-          'directly. This is why 65 537 is the standard public exponent — two set bits, everybody ' +
-          'knows, nothing leaks — and why a private exponent must never go through this algorithm ' +
-          'as written. M23 is about the fix.',
+        detail: [
+          'The squaring count is the exponent’s bit length, which is usually public. The ' +
+            'multiplication count is its population count, which for a private exponent is not.',
+          'An attacker who can time the operation, or watch its power draw, reads that count ' +
+            'directly.',
+          'This is why 65 537 is the standard public exponent: two set bits, everybody knows, nothing ' +
+            'leaks. It is also why a private exponent must never go through this algorithm as ' +
+            'written. M23 is about the fix.'
+        ],
         example: 'The demo compares 65 537 with 131 071 — both 17 bits, so both cost 17 ' +
           'squarings — and they cost 2 multiplications against 17.'
       },
@@ -102,12 +117,14 @@
         term: 'Montgomery form replaces a division with a shift',
         plain: 'Work with x·R mod n instead of x, and the modular reduction becomes arithmetic on the low bits.',
         formal: 'entering and leaving the form costs two multiplications, so it pays only when many operations happen inside it',
-        detail: 'A modular multiplication is a multiplication plus a reduction, and the reduction ' +
-          'is a division — the expensive operation. Montgomery’s trick picks a radix R that is a ' +
-          'power of two, so dividing by R is a shift, and arranges the arithmetic so the ' +
-          'reduction only ever divides by R. The conversion at each end is the overhead, which is ' +
-          'exactly why modular exponentiation is the canonical use: hundreds of operations happen ' +
-          'between one entry and one exit.',
+        detail: [
+          'A modular multiplication is a multiplication plus a reduction, and the reduction is a ' +
+            'division — the expensive operation.',
+          'Montgomery’s trick picks a radix R that is a power of two, so dividing by R is a shift. It ' +
+            'then arranges the arithmetic so the reduction only ever divides by R.',
+          'The conversion at each end is the overhead. That is exactly why modular exponentiation is ' +
+            'the canonical use: hundreds of operations happen between one entry and one exit.'
+        ],
         example: 'The demo checks Montgomery form against the plain algorithm on every run and ' +
           'reports the same value with 34 reductions for a 17-bit exponent.'
       },
@@ -115,13 +132,16 @@
         term: 'The platform’s big integers are fast and are not constant time',
         plain: 'BigInt beats both implementations here by three to five times, and its work depends on the values.',
         formal: 'at 4 096 bits: 0.0565 ms for BigInt against 0.1762 and 0.4750 ms',
-        detail: 'The engine’s implementation is compiled code with a real carry instruction and a ' +
-          'proper multiplication algorithm, so writing your own is a learning exercise rather ' +
-          'than an optimisation. What is worth knowing is what it does not promise: the work ' +
-          'depends on the operand values, so an equality check on a secret leaks through timing, ' +
-          'and there is no way to ask for a constant-time comparison. That is the moment a ' +
-          'general-purpose big-integer type stops being the right tool, and it arrives as soon as ' +
-          'one of the integers is a key.',
+        detail: [
+          'The engine’s implementation is compiled code with a real carry instruction and a proper ' +
+            'multiplication algorithm, so writing your own is a learning exercise rather than an ' +
+            'optimisation.',
+          'What is worth knowing is what it does not promise. The work depends on the operand ' +
+            'values, so an equality check on a secret leaks through timing, and there is no way to ' +
+            'ask for a constant-time comparison.',
+          'That is the moment a general-purpose big-integer type stops being the right tool, and it ' +
+            'arrives as soon as one of the integers is a key.'
+        ],
         example: 'The demo’s BigInt column beats schoolbook at every size in the sweep, from 64 ' +
           'bits to 4 096.'
       }

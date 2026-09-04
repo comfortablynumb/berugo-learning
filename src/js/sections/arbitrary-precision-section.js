@@ -54,48 +54,53 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**A big integer is an array of digits in a very large base**, and the base is chosen by ' +
+        'arithmetic rather than by taste.',
+      'Schoolbook multiplication forms a product of two limbs and adds a column of them into an ' +
+        'accumulator, and a double holds integers exactly only to 2⁵³. So a base of 2¹⁶ gives ' +
+        'products of at most 2³² and twenty-one bits of headroom for the column.',
+      'Get that wrong and the arithmetic is silently approximate in the one module that must not be.',
+      '**Karatsuba is the classic asymptotic win and the classic misquotation.** Splitting each ' +
+        'operand in half lets three multiplications of half-size operands do the work of four, so ' +
+        'the exponent drops from 2 to log₂3 ≈ 1.585.',
+      'That is paid for with several extra additions and a temporary allocation at every level.',
+      'The demo reports limb multiplications, total limb work and wall-clock time separately, and ' +
+        '**they cross at three different sizes**. Only one of the three is what a caller pays.',
+      '**Division is the operation that is genuinely hard.** Knuth’s algorithm D estimates each ' +
+        'quotient digit from the top two limbs, and two things make that estimate safe.',
+      'One is a normalising shift that puts the divisor’s leading limb at least halfway up the ' +
+        'base. The other is a correction for the rare case where the estimate is still one too ' +
+        'large.',
+      'That correction fires roughly once in half a million quotient digits, so leaving it out ' +
+        'passes every randomised test. Which is exactly why it is the classic long-division bug.',
+      '**Modular exponentiation is where the timing channel lives.** Square-and-multiply does one ' +
+        'squaring per bit of the exponent and one multiplication per *set* bit, so the operation ' +
+        'count leaks the exponent’s population count directly.',
+      'That is harmless for a public exponent of 65 537, because everyone knows it. It is fatal for a ' +
+        'private one, which is the whole subject of constant-time programming in M23.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'A big integer is **an array of digits in a very large base**, and the base is chosen by ' +
-          'arithmetic rather than by taste. Schoolbook multiplication forms a product of two ' +
-          'limbs and adds a column of them into an accumulator, and a double holds integers ' +
-          'exactly only to 2⁵³ — so a base of 2¹⁶ gives products of at most 2³² and twenty-one ' +
-          'bits of headroom for the column. Get that wrong and the arithmetic is silently ' +
-          'approximate in the one module that must not be.',
-        '**Karatsuba is the classic asymptotic win and the classic misquotation.** Splitting each ' +
-          'operand in half lets three multiplications of half-size operands do the work of four, ' +
-          'so the exponent drops from 2 to log₂3 ≈ 1.585 — paid for with several extra additions ' +
-          'and a temporary allocation at every level. The demo reports limb multiplications, ' +
-          'total limb work and wall-clock time separately, and **they cross at three different ' +
-          'sizes**. Only one of the three is what a caller pays.',
-        '**Division is the operation that is genuinely hard.** Knuth’s algorithm D estimates each ' +
-          'quotient digit from the top two limbs, and two things make that estimate safe: a ' +
-          'normalising shift that puts the divisor’s leading limb at least halfway up the base, ' +
-          'and a correction for the rare case where the estimate is still one too large. That ' +
-          'correction fires roughly once in half a million quotient digits, so leaving it out ' +
-          'passes every randomised test — which is exactly why it is the classic long-division bug.',
-        '**Modular exponentiation is where the timing channel lives.** Square-and-multiply does ' +
-          'one squaring per bit of the exponent and one multiplication per *set* bit, so the ' +
-          'operation count leaks the exponent’s population count directly. That is harmless for a ' +
-          'public exponent of 65 537 — everyone knows it — and fatal for a private one, which is ' +
-          'the whole subject of constant-time programming in M23.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — the crossover, the limbs, the division audit and modPow',
         markup: root.ArbitraryPrecisionTemplate.render()
       },
       diagram: diagram(),
       insight: 'In production you will use the platform’s big integers rather than these, and the ' +
-        'reason to have read this is to know what they are not. `BigInt` is not constant time — ' +
-        'its work depends on the operand values, so an equality check on a secret leaks through ' +
-        'timing. It is not cheap either: the wall-clock column shows the engine’s multiplication ' +
-        'beating both implementations here by three to five times, because it is compiled code ' +
-        'with a proper carry instruction, and even so a bignum operation is orders of magnitude ' +
-        'more expensive than the machine word it looks like in the source. The judgement worth ' +
-        'having is when a computation needs to leave 64 bits at all: hashes and ids usually do ' +
-        'not, cryptography and exact rational arithmetic always do.'
+        'reason to have read this is to know what they are not. `BigInt` is not constant time: its ' +
+        'work depends on the operand values, so an equality check on a secret leaks through timing. ' +
+        'It is not cheap either. The wall-clock column shows the engine’s multiplication beating ' +
+        'both implementations here by three to five times, because it is compiled code with a ' +
+        'proper carry instruction. Even so, a bignum operation is orders of magnitude more ' +
+        'expensive than the machine word it looks like in the source. The judgement worth having is ' +
+        'when a computation needs to leave 64 bits at all: hashes and ids usually do not, ' +
+        'cryptography and exact rational arithmetic always do.'
     };
   }
 
