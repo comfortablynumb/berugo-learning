@@ -48,43 +48,55 @@
     };
   }
 
-  function orientation() {
+  function orientationMatching() {
     return [
       '**LZ77 replaces a repeat with a pointer backwards, and that is the entire idea.** A token ' +
-        'is a distance and a length; the dictionary is everything already decoded, so nothing is ' +
-        'transmitted twice and the decoder needs no table.',
+        'is a distance and a length.',
+      'The dictionary is everything already decoded, so nothing is transmitted twice and the ' +
+        'decoder needs no table.',
       '**Match finding is where all the CPU goes and where compression levels come from.** A hash ' +
-        'of the next three bytes indexes a chain of earlier positions with the same three bytes; ' +
-        'the encoder walks that chain looking for the longest match and stops after a cut-off. ' +
-        'That cut-off IS the compression level.',
-      '**The demo measures the ladder rather than describing it.** Depth 1 to depth 64 on the ' +
-        'same corpus with the same code: the ratio improves by about a fifth and the chain links ' +
-        'walked per byte rise elevenfold, with the curve flattening long before the work does. ' +
-        'That shape is why level 9 is rarely worth it and level 1 usually is.',
+        'of the next three bytes indexes a chain of earlier positions with the same three bytes.',
+      'The encoder walks that chain looking for the longest match and stops after a cut-off. That ' +
+        'cut-off IS the compression level.',
+      '**The demo measures the ladder rather than describing it.** It runs depth 1 to depth 64 on ' +
+        'the same corpus with the same code.',
+      'The ratio improves by about a fifth and the chain links walked per byte rise elevenfold, ' +
+        'with the curve flattening long before the work does.',
+      'That shape is why level 9 is rarely worth it and level 1 usually is.',
       '**LZSS adds one flag bit and that is what stops expansion.** Plain LZ77 emits a triple at ' +
-        'every position; LZSS emits a literal when no match pays for itself. Incompressible input ' +
-        'then costs nine bits per byte instead of thirty, which is the difference between a 12% ' +
-        'expansion and a 300% one.',
+        'every position, and LZSS emits a literal when no match pays for itself.',
+      'Incompressible input then costs nine bits per byte instead of thirty, which is the ' +
+        'difference between a 12% expansion and a 300% one.'
+    ];
+  }
+
+  function orientationTokens() {
+    return [
       '**Lazy matching is a one-symbol lookahead.** After finding a match at position i, check ' +
-        'whether a longer one starts at i + 1; if so, emit a literal and take the better match. ' +
-        'It is worth a few per cent for a constant factor of work, and every production encoder ' +
-        'does it.',
+        'whether a longer one starts at i + 1. If so, emit a literal and take the better match.',
+      'It is worth a few per cent for a constant factor of work, and every production encoder does ' +
+        'it.',
       '**The window is two things at once: how far a match can reach, and how many bits every ' +
         'distance costs.** Doubling it adds a bit to every match token, so it pays only if the ' +
-        'extra reach finds enough. The demo sweeps it and prints which size won; on data whose ' +
-        'repeats are all local the small window wins outright, and the window is also the ' +
-        'DECODER’s memory, which is why formats fix it in the header rather than leaving it to ' +
-        'the encoder.',
+        'extra reach finds enough.',
+      'The demo sweeps it and prints which size won. On data whose repeats are all local the small ' +
+        'window wins outright.',
+      'The window is also the DECODER’s memory, which is why formats fix it in the header rather ' +
+        'than leaving it to the encoder.',
       '**LZ78 and LZW build an explicit dictionary instead**, adding one entry per token and ' +
-        'transmitting no distance at all — every code is the same width. The demo measures LZW ' +
-        'BEATING a bare LZSS on prose, and the reason is instructive: LZSS spends 21 bits on ' +
-        'every match while LZW spends 12 on everything. What reverses it is the entropy stage in ' +
-        'the next section, which codes the common distances and lengths in far fewer bits than ' +
-        'their fixed fields.',
+        'transmitting no distance at all. Every code is the same width.',
+      'The demo measures LZW BEATING a bare LZSS on prose, and the reason is instructive. LZSS ' +
+        'spends 21 bits on every match while LZW spends 12 on everything.',
+      'What reverses it is the entropy stage in the next section, which codes the common distances ' +
+        'and lengths in far fewer bits than their fixed fields.',
       '**The dictionary approach and the entropy approach are orthogonal**, which is why DEFLATE ' +
-        'does both: LZ77 removes the repeats and Huffman codes what is left. Neither one ' +
-        'subsumes the other, and the next section measures what each stage contributes.'
+        'does both. LZ77 removes the repeats and Huffman codes what is left.',
+      'Neither one subsumes the other, and the next section measures what each stage contributes.'
     ];
+  }
+
+  function orientation() {
+    return orientationMatching().concat(orientationTokens());
   }
 
   function config() {
@@ -96,12 +108,12 @@
         markup: root.DictionaryCompressionTemplate.render()
       },
       diagram: diagram(),
-      insight: '**"Level 9" is nearly always "search harder", not "a different algorithm" — so ' +
+      insight: '**"Level 9" is nearly always "search harder", not "a different algorithm". So ' +
         'the compression level is a CPU budget, and the right one is a property of your ratio of ' +
-        'writes to reads.** Data written once and read many times deserves a slow encode; a log ' +
+        'writes to reads.** Data written once and read many times deserves a slow encode. A log ' +
         'stream that is compressed on the hot path and read by nobody deserves level 1. The other ' +
-        'lever is the one people forget: the window is the decoder’s memory as well as the ' +
-        'encoder’s search space, and on data whose repeats are local a smaller window is both ' +
+        'lever is the one people forget. The window is the decoder’s memory as well as the ' +
+        'encoder’s search space. On data whose repeats are local a smaller window is both ' +
         'faster and smaller, because every distance field shrinks.'
     };
   }

@@ -20,12 +20,15 @@
         },
         plain: 'A distance saying how far back, a length saying how much.',
         formal: 'a token is (distance, length) into the already-decoded output, or a literal byte',
-        detail: 'Everything before the cursor is the dictionary, and none of it is transmitted — ' +
-          'the decoder already has it. That is what separates LZ77 from LZ78: there is no ' +
-          'dictionary to build or send, only a window to keep. An overlapping copy is legal and ' +
-          'useful, so a distance of one and a length of two hundred is a run of two hundred ' +
-          'identical bytes, and run-length encoding falls out of the same mechanism without a ' +
-          'special case.',
+        detail: [
+          'Everything before the cursor is the dictionary, and none of it is transmitted, because ' +
+            'the decoder already has it.',
+          'That is what separates LZ77 from LZ78. There is no dictionary to build or send, only a ' +
+            'window to keep.',
+          'An overlapping copy is legal and useful, so a distance of one and a length of two hundred ' +
+            'is a run of two hundred identical bytes. Run-length encoding falls out of the same ' +
+            'mechanism without a special case.'
+        ],
         example: 'The demo codes 6 000 bytes of prose into 1 051 matches and 333 literals, with ' +
           '94.5% of the input covered by matches.'
       },
@@ -33,23 +36,29 @@
         term: 'Match finding is where all the CPU goes',
         plain: 'A hash of the next three bytes indexes a chain of earlier positions.',
         formal: 'chain[i] = the previous position with the same 3-byte hash; the search walks at most `depth` links',
-        detail: 'The cut-off is the entire mechanism behind compression levels. Walking one link ' +
-          'finds a match quickly and rarely the longest; walking sixty-four finds the longest and ' +
-          'costs sixty-four comparisons per position. Nothing else about the algorithm changes ' +
-          'between level 1 and level 9 in gzip, zstd or brotli — which is worth knowing because ' +
-          'it says exactly what a level dial trades and where the returns stop.',
-        example: 'The demo measures 0.22 chain links per byte at depth 1 and 2.28 at depth 64 — ' +
-          '10.5 times the work.'
+        detail: [
+          'The cut-off is the entire mechanism behind compression levels.',
+          'Walking one link finds a match quickly and rarely the longest. Walking sixty-four finds ' +
+            'the longest and costs sixty-four comparisons per position.',
+          'Nothing else about the algorithm changes between level 1 and level 9 in gzip, zstd or ' +
+            'brotli. That is worth knowing, because it says exactly what a level dial trades and ' +
+            'where the returns stop.'
+        ],
+        example: 'The demo measures 0.22 chain links per byte at depth 1 and 2.28 at depth 64. ' +
+          'That is 10.5 times the work.'
       },
       {
         term: 'The ladder flattens long before the work does',
         plain: 'Most of the ratio is bought in the first few steps of the search.',
         formal: 'ratio rises 1.506 → 1.849 while links per byte rise 0.22 → 2.28',
-        detail: 'That shape is the argument for choosing a low level by default. The ratio curve ' +
-          'is steep at the left and nearly flat at the right, so the last doublings of search ' +
-          'effort buy a per cent or two. The decision is not about compression at all — it is ' +
-          'about the ratio of writes to reads. Data written once and read for years deserves the ' +
-          'expensive end; a log stream compressed on the hot path does not.',
+        detail: [
+          'That shape is the argument for choosing a low level by default. The ratio curve is steep ' +
+            'at the left and nearly flat at the right, so the last doublings of search effort buy a ' +
+            'per cent or two.',
+          'The decision is not about compression at all. It is about the ratio of writes to reads.',
+          'Data written once and read for years deserves the expensive end. A log stream compressed ' +
+            'on the hot path does not.'
+        ],
         example: 'The demo measures a 22.8% ratio gain for 10.5× the search work across the ' +
           'whole depth ladder.'
       },
@@ -57,13 +66,15 @@
         term: 'LZSS adds one flag bit, and that is what stops expansion',
         plain: 'Emit a literal when a match would not pay for itself.',
         formal: 'plain LZ77 emits a triple at every position; LZSS emits a flag plus either a byte or a pair',
-        detail: 'Without the flag every position costs a full (distance, length, next) triple, so ' +
-          'incompressible input expands enormously. With it a literal costs one bit more than the ' +
-          'byte itself. That is the difference between a twelve per cent expansion and a three ' +
-          'hundred per cent one, and it is why every real format is LZSS even when the ' +
-          'documentation says LZ77.',
-        example: 'The demo measures 0.889× on random bytes — a 12.5% expansion, which is the ' +
-          'nine-bits-per-literal cost exactly.'
+        detail: [
+          'Without the flag every position costs a full (distance, length, next) triple, so ' +
+            'incompressible input expands enormously.',
+          'With it a literal costs one bit more than the byte itself.',
+          'That is the difference between a twelve per cent expansion and a three hundred per cent ' +
+            'one. It is why every real format is LZSS even when the documentation says LZ77.'
+        ],
+        example: 'The demo measures 0.889× on random bytes, which is a 12.5% expansion. That is ' +
+          'the nine-bits-per-literal cost exactly.'
       },
       {
         term: 'The window is reach and cost at the same time',
@@ -71,35 +82,43 @@
         formal: 'a distance costs ⌈log₂(window)⌉ bits, paid on every match',
         readAs: 'A distance field is the ceiling of the base-two logarithm of the window size, in ' +
           'bits, and every match pays it.',
-        detail: 'A bigger window finds more matches AND makes each one more expensive, so the ' +
-          'right size depends on how far apart the repeats in the data actually are. It is also ' +
-          'the DECODER’s memory footprint, which is why formats fix it in the header rather than ' +
-          'letting the encoder choose freely — a decoder has to be able to allocate it before ' +
-          'reading a byte of payload.',
+        detail: [
+          'A bigger window finds more matches AND makes each one more expensive, so the right size ' +
+            'depends on how far apart the repeats in the data actually are.',
+          'It is also the DECODER’s memory footprint, which is why formats fix it in the header ' +
+            'rather than letting the encoder choose freely.',
+          'A decoder has to be able to allocate it before reading a byte of payload.'
+        ],
         example: 'The demo sweeps 64, 256, 1 024 and 4 096 bytes with distance fields of 6, 8, 10 ' +
-          'and 12 bits, measuring ratios of 1.163, 1.426, 1.728 and 1.838.'
+          'and 12 bits. The ratios are 1.163, 1.426, 1.728 and 1.838.'
       },
       {
         term: 'Lazy matching is a one-symbol lookahead',
         plain: 'Check whether a longer match starts one byte later.',
         formal: 'if the match at i + 1 is longer, emit a literal at i and take the better match',
-        detail: 'It costs roughly twice the search work — two positions probed instead of one — ' +
-          'and returns a few per cent. Every production encoder does it, and the reason it works ' +
-          'is that greedy match selection is not optimal: taking a five-byte match now can ' +
-          'prevent a nine-byte match starting one byte on. Full optimal parsing solves that with ' +
-          'a shortest-path search over the token graph, and costs far more than the lookahead ' +
-          'does.',
+        detail: [
+          'It costs roughly twice the search work, because two positions are probed instead of one, ' +
+            'and it returns a few per cent.',
+          'Every production encoder does it. The reason it works is that greedy match selection is ' +
+            'not optimal: taking a five-byte match now can prevent a nine-byte match starting one ' +
+            'byte on.',
+          'Full optimal parsing solves that with a shortest-path search over the token graph, and ' +
+            'costs far more than the lookahead does.'
+        ],
         example: 'The demo measures 4.61% better compression from lazy matching on mixed prose.'
       },
       {
         term: 'LZW builds a dictionary instead of pointing at a window',
         plain: 'Every token is a fixed-width code into a table both sides construct identically.',
         formal: 'the dictionary starts as the alphabet and gains one entry per token; no distances are ever sent',
-        detail: 'That made LZW cheap in 1984, when the dictionary fitted in memory and a window ' +
-          'did not. The decoder rebuilds the same table from the same tokens — including the ' +
-          'famous case where a code arrives one step before its entry exists, handled by the ' +
-          '"previous plus previous[0]" rule rather than by an error. It is what GIF and Unix ' +
-          'compress used, and it is why GIF compresses so poorly by modern standards.',
+        detail: [
+          'That made LZW cheap in 1984, when the dictionary fitted in memory and a window did not.',
+          'The decoder rebuilds the same table from the same tokens. That includes the famous case ' +
+            'where a code arrives one step before its entry exists, handled by the "previous plus ' +
+            'previous[0]" rule rather than by an error.',
+          'It is what GIF and Unix compress used, and it is why GIF compresses so poorly by modern ' +
+            'standards.'
+        ],
         example: 'The demo builds 1 873 dictionary entries at 12 bits per code and measures ' +
           '2.134× on mixed prose.'
       },
@@ -107,13 +126,16 @@
         term: 'A bare LZSS can lose to LZW, and the entropy stage is what reverses it',
         plain: 'Fixed-width fields are expensive when most matches are short.',
         formal: 'LZSS spends 1 + 12 + 8 = 21 bits per match here; LZW spends 12 bits on everything',
-        detail: 'This is the measurement worth sitting with rather than explaining away. On prose ' +
-          'with many short repeats, paying a full 12-bit distance and 8-bit length for a ' +
-          'four-byte match is worse than a flat 12-bit dictionary code. What fixes it is coding ' +
-          'the tokens themselves — the common distances and lengths get short codewords — which ' +
-          'is exactly what DEFLATE adds on top of LZ77 and what the next section measures.',
-        example: 'The demo measures LZW at 1.11× BETTER than lazy LZSS on mixed prose, and ' +
-          'DEFLATE beats both.'
+        detail: [
+          'This is the measurement worth sitting with rather than explaining away.',
+          'On prose with many short repeats, paying a full 12-bit distance and 8-bit length for a ' +
+            'four-byte match is worse than a flat 12-bit dictionary code.',
+          'What fixes it is coding the tokens themselves, so the common distances and lengths get ' +
+            'short codewords. That is exactly what DEFLATE adds on top of LZ77, and what the next ' +
+            'section measures.'
+        ],
+        example: 'The demo measures LZW at 1.11× BETTER than lazy LZSS on mixed prose. DEFLATE ' +
+          'beats both.'
       }
     ],
 
