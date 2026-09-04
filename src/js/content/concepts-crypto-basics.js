@@ -22,12 +22,15 @@
         },
         plain: 'Confidentiality, integrity, authenticity and non-repudiation are separate things.',
         formal: 'encryption gives confidentiality only; integrity needs a tag, authenticity needs a keyed tag, non-repudiation needs a signature',
-        detail: 'Conflating these is the most common cryptographic mistake in system design, and ' +
-          'it is a vocabulary failure rather than a mathematical one. "We encrypt it" answers ' +
-          'whether an eavesdropper can read the message and says nothing about whether it arrived ' +
-          'as sent, who sent it, or whether that can be proved to anyone else. Each of the four ' +
-          'has a different primitive, and picking the wrong one leaves a door open that nobody ' +
-          'notices because the traffic looks encrypted.',
+        detail: [
+          'Conflating these is the most common cryptographic mistake in system design, and it is a ' +
+            'vocabulary failure rather than a mathematical one.',
+          '"We encrypt it" answers whether an eavesdropper can read the message. It says nothing ' +
+            'about whether it arrived as sent, who sent it, or whether that can be proved to anyone ' +
+            'else.',
+          'Each of the four has a different primitive, and picking the wrong one leaves a door open ' +
+            'that nobody notices, because the traffic looks encrypted.'
+        ],
         example: 'The demo tabulates all four with the question each answers and what it does ' +
           'not give you, across 4 rows.'
       },
@@ -35,12 +38,14 @@
         term: 'Kerckhoffs’s principle: only the key is secret',
         plain: 'The system must stay secure with everything but the key made public.',
         formal: 'security must rest on the key alone, never on the algorithm or the protocol remaining hidden',
-        detail: 'This is an engineering position, not a moral one. Secrets that are not keys ' +
-          'leak — through disassembly, staff turnover, subpoena or a leaked repository — and ' +
-          'unlike a key they cannot be rotated when they do. A design whose security depends on ' +
-          'its algorithm staying hidden also cannot be reviewed, which removes the only process ' +
-          'that reliably finds cryptographic flaws. Every primitive worth using is fully ' +
-          'published and has been attacked in public for years.',
+        detail: [
+          'This is an engineering position, not a moral one.',
+          'Secrets that are not keys leak, through disassembly, staff turnover, subpoena or a leaked ' +
+            'repository. Unlike a key they cannot be rotated when they do.',
+          'A design whose security depends on its algorithm staying hidden also cannot be reviewed, ' +
+            'which removes the only process that reliably finds cryptographic flaws. Every ' +
+            'primitive worth using is fully published and has been attacked in public for years.'
+        ],
         example: 'Every primitive in the milestone is a published standard, and all 6 of them ' +
           'are checked against published vectors at render time.'
       },
@@ -48,12 +53,15 @@
         term: 'The adversary model decides the answer',
         plain: 'Naming who you are defending against makes the rest of the choice mechanical.',
         formal: 'passive eavesdropper, active modifier, chosen-plaintext and chosen-ciphertext adversaries need progressively stronger constructions',
-        detail: 'A passive attacker who only reads needs confidentiality. An active one who can ' +
-          'modify traffic needs authentication as well, because an unauthenticated ciphertext ' +
-          'can be edited into a different valid message. An attacker who can submit chosen ' +
-          'ciphertexts and observe how the system responds needs a mode with no distinguishable ' +
-          'failure at all, which is what rules out every unauthenticated mode. Stating the ' +
-          'adversary first turns a debate about algorithms into a lookup.',
+        detail: [
+          'A passive attacker who only reads needs confidentiality. An active one who can modify ' +
+            'traffic needs authentication as well, because an unauthenticated ciphertext can be ' +
+            'edited into a different valid message.',
+          'An attacker who can submit chosen ciphertexts and observe how the system responds needs a ' +
+            'mode with no distinguishable failure at all. That is what rules out every ' +
+            'unauthenticated mode.',
+          'Stating the adversary first turns a debate about algorithms into a lookup.'
+        ],
         example: 'The demo’s map names the adversary in its second column for all 7 requirement ' +
           'rows.'
       },
@@ -62,14 +70,17 @@
         plain: 'It means the best known attack costs about 2 to the 128 operations.',
         formal: '128-bit security ≈ 2¹²⁸ operations: a 3 072-bit RSA modulus, a 256-bit elliptic curve, a 128-bit symmetric key',
         readAs: 'A hundred-and-twenty-eight-bit security level means the cheapest known attack ' +
-          'costs about two to the hundred-and-twenty-eighth operations, which is reached by a ' +
+          'costs about two to the hundred-and-twenty-eighth operations. That is reached by a ' +
           'three-thousand-and-seventy-two-bit RSA key or a two-hundred-and-fifty-six-bit curve.',
-        detail: 'The number is a claim about the attacker\'s cost, so it depends on the best ' +
-          'known algorithm rather than on how many bits the key happens to occupy. Factoring has ' +
-          'subexponential algorithms and the elliptic-curve discrete log does not, which is why ' +
-          'RSA needs twelve times the bits of a curve at the same level and the gap widens as the ' +
-          'level rises. Comparing "2 048-bit RSA" with "256-bit ECC" as if the numbers were ' +
-          'commensurable is one of the most common errors in this area.',
+        detail: [
+          'The number is a claim about the attacker\'s cost, so it depends on the best known ' +
+            'algorithm rather than on how many bits the key happens to occupy.',
+          'Factoring has subexponential algorithms and the elliptic-curve discrete log does not. ' +
+            'That is why RSA needs twelve times the bits of a curve at the same level, and why the ' +
+            'gap widens as the level rises.',
+          'Comparing "2 048-bit RSA" with "256-bit ECC" as if the numbers were commensurable is one ' +
+            'of the most common errors in this area.'
+        ],
         example: 'The public-key section tabulates the equivalences: 128-bit security is 3 072 ' +
           'bits of RSA and 256 bits of curve.'
       },
@@ -77,25 +88,30 @@
         term: 'Test vectors are the only detector of a wrong implementation',
         plain: 'A broken cipher produces stable, well-distributed, completely wrong output.',
         formal: 'agreement with published values from NIST or an RFC is the check; no property of the output alone reveals the bug',
-        detail: 'This is what makes cryptographic code different from ordinary code. A hash with ' +
-          'a wrong constant still returns 32 bytes that pass every randomness test, a cipher with ' +
-          'a swapped byte order still round-trips with itself, and an off-by-one in padding still ' +
-          'produces plausible ciphertext. Nothing about the output looks wrong, and unit tests ' +
-          'written against your own implementation agree with it by construction. Only somebody ' +
-          'else\'s published answer catches it.',
-        example: 'The demo checks 6 of 6 vectors — FIPS 180-4, FIPS 197, RFC 4231, RFC 6070 and ' +
-          'RFC 8439 — when the page renders.'
+        detail: [
+          'This is what makes cryptographic code different from ordinary code.',
+          'A hash with a wrong constant still returns 32 bytes that pass every randomness test. A ' +
+            'cipher with a swapped byte order still round-trips with itself, and an off-by-one in ' +
+            'padding still produces plausible ciphertext.',
+          'Nothing about the output looks wrong, and unit tests written against your own ' +
+            'implementation agree with it by construction. Only somebody else\'s published answer ' +
+            'catches it.'
+        ],
+        example: 'The demo checks 6 of 6 vectors when the page renders. They come from FIPS 180-4, ' +
+          'FIPS 197, RFC 4231, RFC 6070 and RFC 8439.'
       },
       {
         term: 'Production failures are composition and parameters',
         plain: 'AES has never been the weak point in your system.',
         formal: 'the recurring failures are repeated nonces, fast password hashes, unauthenticated modes and variable-time comparisons',
-        detail: 'Every mainstream primitive is strong, and the breaches are elsewhere: a nonce ' +
-          'reused under one key, a password stored with a fast hash, a mode with no ' +
-          'authentication, a token compared with an operator that exits early. Each is an ' +
-          'ordinary engineering mistake rather than an exotic cryptographic one, which is exactly ' +
-          'why they keep happening — they are invisible to code review unless the reviewer knows ' +
-          'the specific failure mode by name.',
+        detail: [
+          'Every mainstream primitive is strong, and the breaches are elsewhere.',
+          'A nonce reused under one key. A password stored with a fast hash. A mode with no ' +
+            'authentication. A token compared with an operator that exits early.',
+          'Each is an ordinary engineering mistake rather than an exotic cryptographic one, which is ' +
+            'exactly why they keep happening. They are invisible to code review unless the reviewer ' +
+            'knows the specific failure mode by name.'
+        ],
         example: 'The demo’s fifth column names the classic failure for each of the 7 ' +
           'requirements, and every one is demonstrated later in the milestone.'
       },
@@ -103,12 +119,16 @@
         term: 'Every path ends at an audited library',
         plain: 'The right answer to "which cipher should I implement" is none of them.',
         formal: 'the deliverable is a call to crypto.subtle, libsodium or an equivalent, not an implementation',
-        detail: 'The implementations in this milestone exist so the attacks can be executed ' +
-          'rather than described, and they are explicitly unfit for real data — not ' +
-          'constant-time, not side-channel hardened, not audited. Understanding a construction ' +
-          'and shipping one are different activities: the second requires years of adversarial ' +
-          'attention that only a widely deployed library accumulates. Reading the code is how you ' +
-          'learn what can go wrong; calling the library is how you avoid it.',
+        detail: [
+          'The implementations in this milestone exist so the attacks can be executed rather than ' +
+            'described. They are explicitly unfit for real data: not constant-time, not ' +
+            'side-channel hardened, not audited.',
+          'Understanding a construction and shipping one are different activities. The second ' +
+            'requires years of adversarial attention that only a widely deployed library ' +
+            'accumulates.',
+          'Reading the code is how you learn what can go wrong. Calling the library is how you avoid ' +
+            'it.'
+        ],
         example: 'All 7 rows of the demo’s chooser terminate at a named API rather than at an ' +
           'algorithm.'
       },
@@ -116,12 +136,15 @@
         term: 'A tag proves who only if the key identifies them',
         plain: 'A MAC key is shared, so either holder could have produced the tag.',
         formal: 'a MAC gives authenticity between key holders and never non-repudiation, because the verifier can forge it',
-        detail: 'This is the distinction that decides between HMAC and a signature, and it is ' +
-          'about who holds what rather than about strength. If two parties share a MAC key, a ' +
-          'valid tag proves the message came from one of them and cannot settle which — the ' +
-          'verifier could have produced it themselves. A signature is produced with a private key ' +
-          'and checked with a public one, so a third party who trusts the public key can be ' +
-          'convinced. Audit logs, code signing and certificates all need the second.',
+        detail: [
+          'This is the distinction that decides between HMAC and a signature, and it is about who ' +
+            'holds what rather than about strength.',
+          'If two parties share a MAC key, a valid tag proves the message came from one of them and ' +
+            'cannot settle which. The verifier could have produced it themselves.',
+          'A signature is produced with a private key and checked with a public one, so a third ' +
+            'party who trusts the public key can be convinced. Audit logs, code signing and ' +
+            'certificates all need the second.'
+        ],
         example: 'The demo’s goals table separates authenticity from non-repudiation and names ' +
           'the different primitive each one needs.'
       }

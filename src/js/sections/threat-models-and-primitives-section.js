@@ -50,40 +50,54 @@
     };
   }
 
-  function orientation() {
+  function orientationGoals() {
     return [
       '**⚠ Everything implemented in this milestone is teaching code.** It is not constant-time, ' +
-        'not side-channel hardened and not audited, and it must never protect real data. ' +
-        'Production code uses `crypto.subtle`, libsodium or an equivalent audited library. The ' +
+        'not side-channel hardened and not audited, and it must never protect real data.',
+      'Production code uses `crypto.subtle`, libsodium or an equivalent audited library. The ' +
         'implementations exist so the attacks can be executed rather than described.',
       '**Confidentiality, integrity, authenticity and non-repudiation are four goals, not one.** ' +
-        'Encryption gives the first. It gives the second only if the mode authenticates, and the ' +
-        'third only with a key whose holder is known. Non-repudiation needs a signature, because ' +
-        'a MAC is producible by the verifier and therefore proves nothing to anyone else.',
+        'Encryption gives the first.',
+      'It gives the second only if the mode authenticates, and the third only with a key whose ' +
+        'holder is known.',
+      'Non-repudiation needs a signature, because a MAC is producible by the verifier and therefore ' +
+        'proves nothing to anyone else.',
       '**Kerckhoffs\'s principle: the system must be secure with everything but the key public.** ' +
-        'That is not a moral position, it is an engineering one — secrets that are not keys leak, ' +
-        'and a design whose security depends on the algorithm staying hidden has no way to be ' +
-        'reviewed, rotated or replaced.',
-      '**The adversary model changes the answer.** A passive eavesdropper needs confidentiality; ' +
-        'an active attacker who can modify traffic needs authentication too; an attacker who can ' +
-        'submit chosen ciphertexts and observe the response needs a mode with no oracle at all. ' +
-        'Naming the adversary first is what makes the rest of the choice mechanical.',
-      '**"128-bit security" means the best known attack costs about 2^128 operations** — it is ' +
-        'not the key length, and for RSA it is nothing like the key length. The demo tabulates ' +
-        'the equivalences: 128-bit security is a 3 072-bit RSA key and a 256-bit elliptic curve.',
-      '**Every primitive here is checked against published test vectors at render time.** NIST\'s ' +
-        'AES vectors, RFC 4231 for HMAC, RFC 6070 for PBKDF2, RFC 8439 for ChaCha20-Poly1305. A ' +
-        'wrong implementation produces stable, plausible output forever; only agreement with ' +
+        'That is not a moral position, it is an engineering one.',
+      'Secrets that are not keys leak, and a design whose security depends on the algorithm staying ' +
+        'hidden has no way to be reviewed, rotated or replaced.',
+      '**The adversary model changes the answer.** A passive eavesdropper needs confidentiality, ' +
+        'and an active attacker who can modify traffic needs authentication too.',
+      'An attacker who can submit chosen ciphertexts and observe the response needs a mode with no ' +
+        'oracle at all. Naming the adversary first is what makes the rest of the choice mechanical.'
+    ];
+  }
+
+  function orientationPractice() {
+    return [
+      '**"128-bit security" means the best known attack costs about 2^128 operations.** It is not ' +
+        'the key length, and for RSA it is nothing like the key length.',
+      'The demo tabulates the equivalences. 128-bit security is a 3 072-bit RSA key and a 256-bit ' +
+        'elliptic curve.',
+      '**Every primitive here is checked against published test vectors at render time.** That is ' +
+        'NIST\'s AES vectors, RFC 4231 for HMAC, RFC 6070 for PBKDF2 and RFC 8439 for ' +
+        'ChaCha20-Poly1305.',
+      'A wrong implementation produces stable, plausible output forever. Only agreement with ' +
         'somebody else\'s answer detects it.',
       '**Most production failures are composition and parameter failures, not broken primitives.** ' +
-        'AES has never been the weak point in your system. A repeated nonce, a fast password hash, ' +
-        'an unauthenticated mode, a `===` on a token — those are the failures, and every one of ' +
-        'them is demonstrated in this milestone with the attack actually running.',
-      '**Every path in the chooser ends at an audited API**, which is the practical form of "do ' +
-        'not implement your own". The implementations in these sections exist to make the failure ' +
-        'modes visible, and the thing you should ship is one line calling a library somebody has ' +
-        'attacked professionally.'
+        'AES has never been the weak point in your system.',
+      'A repeated nonce, a fast password hash, an unauthenticated mode, a `===` on a token: those ' +
+        'are the failures.',
+      'Every one of them is demonstrated in this milestone, with the attack actually running.',
+      '**Every path in the chooser ends at an audited API**, which is the practical form of "do not ' +
+        'implement your own".',
+      'The implementations in these sections exist to make the failure modes visible. The thing you ' +
+        'should ship is one line calling a library somebody has attacked professionally.'
     ];
+  }
+
+  function orientation() {
+    return orientationGoals().concat(orientationPractice());
   }
 
   function config() {
@@ -96,11 +110,11 @@
       },
       diagram: diagram(),
       insight: '**Most cryptographic failures in production are composition and parameter ' +
-        'failures, not broken primitives — AES has never been the weak point in your system.** ' +
-        'That reframes what "getting crypto right" means: the work is not choosing a strong ' +
-        'algorithm, because every mainstream one is strong, it is naming the adversary, choosing ' +
-        'the parameters against that adversary, and composing the pieces in an order that ' +
-        'survives an attacker who can modify traffic and observe your error messages. The rest of ' +
+        'failures, not broken primitives. AES has never been the weak point in your system.** ' +
+        'That reframes what "getting crypto right" means. The work is not choosing a strong ' +
+        'algorithm, because every mainstream one is strong. It is naming the adversary and ' +
+        'choosing the parameters against that adversary. It is also composing the pieces in an ' +
+        'order that survives an attacker who can modify traffic and read your errors. The rest of ' +
         'this milestone runs those failures as executable attacks, which is the only way to see ' +
         'that they are ordinary engineering mistakes rather than exotic ones.'
     };
