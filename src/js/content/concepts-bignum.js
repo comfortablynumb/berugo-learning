@@ -152,11 +152,14 @@
         term: 'A Fermat test is not a primality test, and on a Carmichael number it is not probabilistic either',
         plain: 'Every base coprime to 561 passes, so the false-positive rate for that input is one.',
         formal: 'measured: 319 of 319 coprime bases pass for 561, 767 of 767 for 1105, 1 295 of 1 295 for 1729',
-        detail: 'The framing "a probabilistic test with error 2⁻ᵏ" is about random bases on ' +
-          'arbitrary inputs, and it collapses completely on the inputs it is most likely to be ' +
-          'handed by an adversary. Carmichael numbers satisfy Fermat’s congruence for every base ' +
-          'coprime to them — that is Korselt’s criterion — so running more bases changes nothing ' +
-          'at all. They are also enumerable, so the adversary does not have to be lucky.',
+        detail: [
+          'The framing "a probabilistic test with error 2⁻ᵏ" is about random bases on arbitrary ' +
+            'inputs. It collapses completely on the inputs it is most likely to be handed by an ' +
+            'adversary.',
+          'Carmichael numbers satisfy Fermat’s congruence for every base coprime to them — that is ' +
+            'Korselt’s criterion — so running more bases changes nothing at all.',
+          'They are also enumerable, so the adversary does not have to be lucky.'
+        ],
         example: 'The demo’s table puts all eight Carmichael numbers at exactly 100.0%.'
       },
       {
@@ -173,15 +176,17 @@
         },
         plain: 'In a prime modulus the only square roots of 1 are ±1, so anything else is a proof of compositeness.',
         formal: 'write n − 1 = d × 2ˢ; a prime has a^d ≡ 1 or some a^(d·2ⁱ) ≡ −1',
-        readAs: 'Pull all the factors of two out of n minus one; then for a prime, raising the ' +
+        readAs: 'Pull all the factors of two out of n minus one. Then for a prime, raising the ' +
           'base to what is left either already gives one, or gives minus one somewhere along the ' +
           'chain of squarings that follows.',
-        detail: 'That extra condition is the entire difference from the Fermat test. A composite ' +
-          'that arrives at 1 without passing through −1 has just produced a square root of one ' +
-          'that is neither 1 nor n − 1, and a prime modulus has no such thing — so the witness is ' +
-          'a certificate rather than a hint. It is also why the residue sequence is worth ' +
-          'displaying: the Fermat test looks only at the last value, and every bit of the ' +
-          'information is in the values before it.',
+        detail: [
+          'That extra condition is the entire difference from the Fermat test.',
+          'A composite that arrives at 1 without passing through −1 has just produced a square root ' +
+            'of one that is neither 1 nor n − 1. A prime modulus has no such thing, so the witness ' +
+            'is a certificate rather than a hint.',
+          'It is also why the residue sequence is worth displaying. The Fermat test looks only at ' +
+            'the last value, and every bit of the information is in the values before it.'
+        ],
         example: 'For 561 the demo shows 263 → 166 → 67 → 1 for base 2: it reaches 1, which is ' +
           'what Fermat checks, without ever reaching 560.'
       },
@@ -189,12 +194,15 @@
         term: 'Below 2⁶⁴ Miller-Rabin is deterministic, and quoting an error rate is a misunderstanding',
         plain: 'Small fixed witness sets have been verified exhaustively against every composite under a bound.',
         formal: 'twelve fixed bases decide primality for every input below 2⁶⁴; two bases suffice below 1 373 653',
-        detail: 'These sets are facts about the integers rather than heuristics, established by ' +
-          'exhaustive search, and they turn a probabilistic algorithm into a decision procedure ' +
-          'over a bounded range. A 64-bit primality check therefore needs no randomness, no ' +
-          'repetition and no confidence interval — and code that runs "forty random rounds" on a ' +
-          '64-bit input is doing more work for a weaker guarantee. Above 2⁶⁴ the probabilistic ' +
-          'framing returns and is the right one.',
+        detail: [
+          'These sets are facts about the integers rather than heuristics, established by exhaustive ' +
+            'search, and they turn a probabilistic algorithm into a decision procedure over a ' +
+            'bounded range.',
+          'A 64-bit primality check therefore needs no randomness, no repetition and no confidence ' +
+            'interval. Code that runs "forty random rounds" on a 64-bit input is doing more work ' +
+            'for a weaker guarantee.',
+          'Above 2⁶⁴ the probabilistic framing returns and is the right one.'
+        ],
         example: 'The demo’s witness set for 561 is one base, and base 2 rejects all eight ' +
           'Carmichael numbers in the table.'
       },
@@ -202,13 +210,16 @@
         term: 'Trial division costs the square root of n; Pollard’s rho costs the square root of the smallest factor',
         plain: 'One is governed by the number and the other by its easiest factor, which is why they diverge so wildly.',
         formal: 'on a 15-digit semiprime: 5 000 000 operations without finishing, against 2 532 — a factor of 1 975',
-        detail: 'The rho sequence x → x² + c mod n is a pseudorandom walk, so by the birthday ' +
-          'bound it repeats a residue modulo a factor p after about √p steps — long before it ' +
-          'repeats modulo n — and Floyd’s cycle detection turns that repeat into a gcd that ' +
-          'reveals p — about 3 390 steps for a factor of 11 489 279. The consequence is the ' +
-          'whole shape of practical factoring: a large number ' +
-          'with one small factor collapses instantly, and a product of two equal-sized primes does ' +
-          'not. That is precisely why an RSA modulus is built the second way.',
+        detail: [
+          'The rho sequence x → x² + c mod n is a pseudorandom walk. By the birthday bound it ' +
+            'repeats a residue modulo a factor p after about √p steps, long before it repeats ' +
+            'modulo n.',
+          'Floyd’s cycle detection turns that repeat into a gcd that reveals p — about 3 390 steps ' +
+            'for a factor of 11 489 279.',
+          'The consequence is the whole shape of practical factoring. A large number with one small ' +
+            'factor collapses instantly, and a product of two equal-sized primes does not. That is ' +
+            'precisely why an RSA modulus is built the second way.'
+        ],
         example: 'The demo factors 158 346 127 852 483 into 11 489 279 × 13 782 077, with trial ' +
           'division exhausting a five-million-operation budget and rho finishing in 2 532.'
       },
@@ -216,12 +227,14 @@
         term: 'The linear sieve marks each composite once and leaves its smallest factor behind',
         plain: 'Only ever mark a composite from its smallest prime factor, and the table it builds turns factorising into lookups.',
         formal: 'to 10⁶: 2 122 048 marks for the classic sieve against 921 501 — one per composite — for 4× the memory',
-        detail: 'The classic sieve crosses out each composite once per distinct prime factor, so ' +
-          'the total work is n times the sum of the reciprocals of the primes — about n log log n. ' +
+        detail: [
+          'The classic sieve crosses out each composite once per distinct prime factor. So the total ' +
+            'work is n times the sum of the reciprocals of the primes — about n log log n.',
           'The linear sieve restricts marking so each composite is reached exactly once, and the ' +
-          'prime that reached it is recorded, which means factorising any number under the limit ' +
-          'becomes a walk down an array with no arithmetic at all. It pays for that with an ' +
-          'integer per entry instead of a bit.',
+            'prime that reached it is recorded. Factorising any number under the limit then becomes ' +
+            'a walk down an array with no arithmetic at all.',
+          'It pays for that with an integer per entry instead of a bit.'
+        ],
         example: 'The demo finds the same 78 498 primes both ways, at 976.6 KB against 3.8 MB.'
       },
       {
@@ -229,14 +242,17 @@
         plain: 'Solving a·x + n·y = gcd gives x as a’s inverse whenever the gcd comes out as one.',
         formal: 'a⁻¹ mod n exists exactly when gcd(a, n) = 1, and the extended algorithm returns it',
         readAs: 'A number has a reciprocal in modular arithmetic only when it shares no factor ' +
-          'with the modulus, and the extended Euclidean algorithm computes that reciprocal as a ' +
+          'with the modulus. The extended Euclidean algorithm computes that reciprocal as a ' +
           'by-product of finding the shared factor.',
-        detail: 'Division in modular arithmetic is multiplication by an inverse, and the inverse ' +
-          'is where the arithmetic stops being total: two thirds of the residues modulo 12 have ' +
-          'no inverse at all. That is why prime moduli are so convenient — every non-zero residue ' +
-          'is then invertible — and why a composite modulus turns "divide" into "check first". ' +
+        detail: [
+          'Division in modular arithmetic is multiplication by an inverse, and the inverse is where ' +
+            'the arithmetic stops being total. Two thirds of the residues modulo 12 have no inverse ' +
+            'at all.',
+          'That is why prime moduli are so convenient — every non-zero residue is then invertible — ' +
+            'and why a composite modulus turns "divide" into "check first".',
           'Stein’s binary gcd computes the same answer with shifts and subtractions instead of ' +
-          'divisions, which matters on hardware without a divider.',
+            'divisions, which matters on hardware without a divider.'
+        ],
         example: 'The demo measures Euclid at 14.06 divisions per pair and Stein at 77.06 shifts ' +
           'and subtractions, with 0 disagreements over 4 000 pairs.'
       },
@@ -244,12 +260,14 @@
         term: 'The Chinese remainder theorem is only correct while the moduli are wide enough',
         plain: 'Residues modulo coprime numbers pin down one value — modulo their product, and no further.',
         formal: 'the reconstruction is exact only while the product of the moduli exceeds the value',
-        detail: 'This is the condition people forget, and when it fails nothing raises an error: ' +
-          'the answer comes back wrapped and looks exactly like a valid answer. It matters because ' +
-          'CRT is the standard way to run a computation that would overflow — do it modulo several ' +
-          'small primes and reassemble — and the reassembly is only the true value if the product ' +
-          'of the primes is larger than any intermediate the computation produces, not just the ' +
-          'final one.',
+        detail: [
+          'This is the condition people forget, and when it fails nothing raises an error. The ' +
+            'answer comes back wrapped and looks exactly like a valid answer.',
+          'It matters because CRT is the standard way to run a computation that would overflow: do ' +
+            'it modulo several small primes and reassemble.',
+          'The reassembly is only the true value if the product of the primes is larger than any ' +
+            'intermediate the computation produces, not just the final one.'
+        ],
         example: 'The demo rebuilds 1 234 567 from six residues whose moduli multiply to 7 436 429, ' +
           'and reports the range covered at each step so the condition is visible.'
       },
@@ -257,12 +275,15 @@
         term: 'Modular exponentiation is what makes the asymmetry usable',
         plain: 'Raising to a huge power modulo n costs the exponent’s bit length, while undoing it costs a factorisation.',
         formal: 'modPow is O(log e) modular multiplications; recovering e from the result is the discrete logarithm problem',
-        detail: 'Every public-key scheme in ordinary use rests on a pair like this: an operation ' +
-          'that is cheap in one direction and believed expensive in the other. Fast exponentiation ' +
-          'is the cheap direction and it is elementary — square and multiply, one step per bit. ' +
-          'The expensive direction is not proved expensive, which is the honest statement: RSA and ' +
-          'Diffie-Hellman rest on the absence of a fast algorithm rather than on a proof that none ' +
-          'exists, and a quantum computer of sufficient size would supply one.',
+        detail: [
+          'Every public-key scheme in ordinary use rests on a pair like this: an operation that is ' +
+            'cheap in one direction and believed expensive in the other.',
+          'Fast exponentiation is the cheap direction and it is elementary — square and multiply, ' +
+            'one step per bit.',
+          'The expensive direction is not proved expensive, which is the honest statement. RSA and ' +
+            'Diffie-Hellman rest on the absence of a fast algorithm rather than on a proof that none ' +
+            'exists, and a quantum computer of sufficient size would supply one.'
+        ],
         example: 'The demo computes 3 raised to 123 456 789 modulo 1 000 000 007 in 27 squarings ' +
           'and 16 multiplications.'
       }

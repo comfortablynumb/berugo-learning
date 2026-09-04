@@ -55,47 +55,52 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**Modular arithmetic is the arithmetic of a finite wheel.** Addition, subtraction and ' +
+        'multiplication all commute with taking the remainder, so a long computation can be ' +
+        'reduced at every step and never leave the modulus.',
+      'Division is the exception. `a/b mod n` means multiplying by b’s inverse, that inverse exists ' +
+        'only when b and n are coprime, and the extended Euclidean algorithm is what produces it.',
+      '**A Fermat test is not a primality test, and on a Carmichael number it is not probabilistic ' +
+        'either.** Fermat’s little theorem says a^(n−1) ≡ 1 for every prime n and every base ' +
+        'coprime to it.',
+      'And 561, 1105 and 1729 satisfy it for *every* coprime base as well. For those inputs the ' +
+        'false-positive rate is 1, not 2⁻ᵏ, and running more bases does not help at all.',
+      '**Miller–Rabin closes the hole by looking at square roots of one.** In a prime modulus the ' +
+        'only square roots of 1 are 1 and −1. So a squaring chain that arrives at 1 without passing ' +
+        'through −1 is a certificate of compositeness.',
+      'And for bounded ranges the test is *deterministic*: small fixed witness sets have been ' +
+        'verified exhaustively, and twelve fixed bases settle every input below 2⁶⁴.',
+      '**Factoring is the asymmetry everything else rests on.** Trial division costs the square ' +
+        'root of n. Pollard’s rho costs the square root of the *smallest factor*, by a birthday ' +
+        'argument on a pseudorandom walk.',
+      'So a large number with one small factor falls instantly and a product of two equal-sized ' +
+        'primes does not. That is precisely why an RSA modulus is built that way.',
+      'It is also why the sieve of Eratosthenes is still how you get the small primes that make ' +
+        'trial division worth trying first.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**Modular arithmetic is the arithmetic of a finite wheel**, and addition, subtraction ' +
-          'and multiplication all commute with taking the remainder — so a long computation can ' +
-          'be reduced at every step and never leave the modulus. Division is the exception: `a/b ' +
-          'mod n` means multiplying by b’s inverse, that inverse exists only when b and n are ' +
-          'coprime, and the extended Euclidean algorithm is what produces it.',
-        '**A Fermat test is not a primality test, and on a Carmichael number it is not ' +
-          'probabilistic either.** Fermat’s little theorem says a^(n−1) ≡ 1 for every prime n and ' +
-          'every base coprime to it — and 561, 1105 and 1729 satisfy it for *every* coprime base ' +
-          'as well. For those inputs the false-positive rate is 1, not 2⁻ᵏ, and running more ' +
-          'bases does not help at all.',
-        '**Miller–Rabin closes the hole by looking at square roots of one.** In a prime modulus ' +
-          'the only square roots of 1 are 1 and −1, so a squaring chain that arrives at 1 without ' +
-          'passing through −1 is a certificate of compositeness. And for bounded ranges the test ' +
-          'is *deterministic*: small fixed witness sets have been verified exhaustively, and ' +
-          'twelve fixed bases settle every input below 2⁶⁴.',
-        '**Factoring is the asymmetry everything else rests on.** Trial division costs the square ' +
-          'root of n; Pollard’s rho costs the square root of the *smallest factor*, by a birthday ' +
-          'argument on a pseudorandom walk. So a large number with one small factor falls ' +
-          'instantly and a product of two equal-sized primes does not — which is precisely why an ' +
-          'RSA modulus is built that way, and why the sieve of Eratosthenes is still how you get ' +
-          'the small primes that make trial division worth trying first.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — witnesses, Carmichael numbers, factoring and sieves',
         markup: root.ModularArithmeticTemplate.render()
       },
       diagram: diagram(),
       insight: 'The practical rules are short. **For anything under 2⁶⁴, use deterministic ' +
-        'Miller–Rabin with the published witness set and stop calling it probabilistic** — there ' +
-        'is no error rate to quote. **Never use a Fermat test alone**, because the inputs it is ' +
-        'wrong on are a named, enumerable set that an adversary can simply look up. And in ' +
-        'competitive settings, know that the two cheap facts do most of the work: a linear sieve ' +
-        'gives you smallest-prime-factor for every number under the limit, which turns ' +
-        'factorisation into array lookups, and the Chinese remainder theorem lets a computation ' +
-        'that would overflow be run modulo several small primes and reassembled — provided the ' +
-        'product of the moduli exceeds the answer, which is the condition people forget and the ' +
-        'one that makes the result silently wrong when it fails.'
+        'Miller–Rabin with the published witness set and stop calling it probabilistic.** There is ' +
+        'no error rate to quote. **Never use a Fermat test alone**, because the inputs it is wrong ' +
+        'on are a named, enumerable set that an adversary can simply look up. And in competitive ' +
+        'settings, two cheap facts do most of the work. A linear sieve gives you ' +
+        'smallest-prime-factor for every number under the limit, which turns factorisation into ' +
+        'array lookups. The Chinese remainder theorem lets a computation that would overflow be run ' +
+        'modulo several small primes and reassembled — provided the product of the moduli exceeds ' +
+        'the answer. That is the condition people forget, and the one that makes the result ' +
+        'silently wrong when it fails.'
     };
   }
 
