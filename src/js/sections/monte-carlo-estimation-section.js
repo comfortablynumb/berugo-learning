@@ -58,52 +58,58 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**The error falls like 1/√N and nothing changes that.** Quadrupling the samples halves the ' +
+        'error, and ten times the accuracy costs a hundred times the work.',
+      'That rate is a property of averaging independent draws, so it is the same for an integral, ' +
+        'an area, a probability or a simulated queue.',
+      'The only lever is the numerator. The standard error is σ/√N, and every technique in this ' +
+        'section reduces σ.',
+      '**The rate does not depend on the dimension, which is the whole reason Monte Carlo is ' +
+        'used.** A product quadrature rule with m nodes per axis needs mᵈ points, and its error ' +
+        'per axis improves like m⁻². At a fixed budget m collapses as d grows.',
+      'The demo measures both at the same point budget and finds the crossover between five and ' +
+        'six dimensions. Below it quadrature wins by six orders of magnitude, and above it ' +
+        'sampling wins and keeps winning.',
+      '**Antithetic and control variates work by correlation and fail without it.** Pairing u with ' +
+        '1 − u helps when f is monotone, because the pair’s errors point opposite ways.',
+      'On an oscillating integrand the pairs are positively correlated and the trick backfires.',
+      'A control variate reduces the variance by a factor of 1 − ρ², so a control correlated at ' +
+        '0.3 buys 9% and is not worth the code. Both report their correlation in the demo for ' +
+        'exactly that reason.',
+      '**Stratification is the one that changes the rate rather than the constant**, and it breaks ' +
+        'the usual error bar. One point per stratum removes the between-strata variance exactly, ' +
+        'so what is left shrinks with the stratum width.',
+      'But the draws are no longer identically distributed, and the sample-variance formula no ' +
+        'longer estimates the estimator’s variance.',
+      'The demo shows a stratified run whose reported variance is unchanged and whose measured ' +
+        'error is a thousand times smaller.',
+      '**Importance sampling turns an impossible estimate into a possible one.** It is also the ' +
+        'only technique here that can be catastrophically worse than doing nothing.',
+      'Sample from a distribution that lives where the event is, weight by the density ratio, and ' +
+        'the estimator stays unbiased.',
+      'Choose the shift badly and a handful of draws carry all the weight. The diagnostic is the ' +
+        'effective sample size of the weights, and it is not optional.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**The error falls like 1/√N and nothing changes that.** Quadrupling the samples halves ' +
-          'the error; ten times the accuracy costs a hundred times the work. That rate is a ' +
-          'property of averaging independent draws, so it is the same for an integral, an area, ' +
-          'a probability or a simulated queue. The only lever is the numerator: the standard ' +
-          'error is σ/√N, and every technique in this section reduces σ.',
-        '**The rate does not depend on the dimension, which is the whole reason Monte Carlo is ' +
-          'used.** A product quadrature rule with m nodes per axis needs mᵈ points and its error ' +
-          'per axis improves like m⁻²; at a fixed budget m collapses as d grows. The demo ' +
-          'measures both at the same point budget and finds the crossover between five and six ' +
-          'dimensions — below it quadrature wins by six orders of magnitude, above it sampling ' +
-          'wins and keeps winning.',
-        '**Antithetic and control variates work by correlation and fail without it.** Pairing u ' +
-          'with 1 − u helps when f is monotone, because the pair’s errors point opposite ways; ' +
-          'on an oscillating integrand the pairs are positively correlated and the trick backfires. ' +
-          'A control variate reduces the variance by a factor of 1 − ρ², so a control correlated ' +
-          'at 0.3 buys 9% and is not worth the code. Both report their correlation in the demo ' +
-          'for exactly that reason.',
-        '**Stratification is the one that changes the rate rather than the constant**, and it ' +
-          'breaks the usual error bar. One point per stratum removes the between-strata variance ' +
-          'exactly, so what is left shrinks with the stratum width — but the draws are no longer ' +
-          'identically distributed and the sample-variance formula no longer estimates the ' +
-          'estimator’s variance. The demo shows a stratified run whose reported variance is ' +
-          'unchanged and whose measured error is a thousand times smaller.',
-        '**Importance sampling is the only technique that turns an impossible estimate into a ' +
-          'possible one, and the only one that can be catastrophically worse than doing nothing.** ' +
-          'Sample from a distribution that lives where the event is, weight by the density ratio, ' +
-          'and the estimator stays unbiased. Choose the shift badly and a handful of draws carry ' +
-          'all the weight; the diagnostic is the effective sample size of the weights, and it is ' +
-          'not optional.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — five estimators, the dimension crossover and a tail probability',
         markup: root.MonteCarloEstimationTemplate.render()
       },
       diagram: diagram(),
       insight: '**Monte Carlo loses badly in one dimension and wins in thirty, and people reach ' +
-        'for it in one.** The demo’s dimension table is the whole argument: at d = 1 the midpoint ' +
-        'rule is nine orders of magnitude more accurate than sampling at the same cost, and by ' +
-        'd = 8 it is ten times worse and falling. If your integral is one-dimensional and smooth, ' +
-        'use quadrature from 18.7 and stop. The second habit worth breaking is quoting a Monte ' +
-        'Carlo result without an interval. Every estimate in the table carries one, the rare-event ' +
-        'row shows a plain estimator reporting **zero with a standard error of zero**, and that is ' +
+        'for it in one.** The demo’s dimension table is the whole argument. At d = 1 the midpoint ' +
+        'rule is nine orders of magnitude more accurate than sampling at the same cost. By d = 8 ' +
+        'it is ten times worse and falling. If your integral is one-dimensional and smooth, use ' +
+        'quadrature from 18.7 and stop. The second habit worth breaking is quoting a Monte Carlo ' +
+        'result without an interval. Every estimate in the table carries one. The rare-event row ' +
+        'shows a plain estimator reporting **zero with a standard error of zero**, and that is ' +
         'what an estimate with no interval looks like from the inside. **A sampled number without ' +
         'an error bar is not a measurement.**'
     };
