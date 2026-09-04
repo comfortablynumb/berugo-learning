@@ -20,13 +20,16 @@
         },
         plain: 'Move an imaginary line across the plane and keep only what it currently touches.',
         formal: 'an event queue ordered by sweep position, and a status structure ordered along the line',
-        detail: 'The two structures answer different questions and confusing them is the usual first ' +
-          'mistake. The queue says what happens next and is ordered by x; the status says what the ' +
-          'line is crossing right now and is ordered by y at the current x. Everything the sweep ' +
-          'knows lives in those two objects, and everything to the left of the line has been dealt ' +
-          'with for good. That is the whole paradigm, and it is why closest pair, rectangle union, ' +
-          'the skyline problem and segment intersection are the same algorithm wearing different ' +
-          'clothes.',
+        detail: [
+          'The two structures answer different questions, and confusing them is the usual first ' +
+            'mistake.',
+          'The queue says what happens next and is ordered by x. The status says what the line is ' +
+            'crossing right now, and is ordered by y at the current x.',
+          'Everything the sweep knows lives in those two objects, and everything to the left of the ' +
+            'line has been dealt with for good. That is the whole paradigm, and it is why closest ' +
+            'pair, rectangle union, the skyline problem and segment intersection are the same ' +
+            'algorithm wearing different clothes.'
+        ],
         example: 'On the default scene the line at x = 39.9 crosses 8 of 12 segments, and only those ' +
           '8 can possibly cross each other at that moment.'
       },
@@ -44,12 +47,15 @@
         },
         plain: 'So test neighbours in the status order rather than every pair.',
         formal: 'adjacency in the status structure is a necessary condition for an intersection',
-        detail: 'This is the observation the whole of Bentley-Ottmann rests on. Before two segments ' +
-          'cross, their order along the sweep line must swap, and to swap they must first be ' +
-          'adjacent — so it is enough to test a pair when an insertion, a removal or a swap makes ' +
-          'them neighbours. The saving is not a constant factor: brute force tests every pair ' +
-          'whether or not any of them cross, while the sweep does work proportional to the number of ' +
-          'crossings it actually reports.',
+        detail: [
+          'This is the observation the whole of Bentley-Ottmann rests on.',
+          'Before two segments cross, their order along the sweep line must swap. To swap they must ' +
+            'first be adjacent, so it is enough to test a pair when an insertion, a removal or a ' +
+            'swap makes them neighbours.',
+          'The saving is not a constant factor. Brute force tests every pair whether or not any of ' +
+            'them cross, while the sweep does work proportional to the number of crossings it ' +
+            'actually reports.'
+        ],
         example: 'The default scene processes 24 events and finds 12 intersections, against 66 pairs ' +
           'tested by brute force.'
       },
@@ -58,13 +64,16 @@
         plain: 'The event queue is not built once at the start; it grows as the sweep runs.',
         formal: 'O((n + k) log n): k is the number of crossings, and it is an output term',
         readAs: 'The cost is the number of segments plus the number of crossings found, each ' +
-          'multiplied by the log of the segment count — so an input with no crossings costs nothing ' +
+          'multiplied by the log of the segment count. So an input with no crossings costs nothing ' +
           'for the crossings it does not have.',
-        detail: 'When a crossing is found it is pushed as a future event, because at that point the ' +
-          'two segments swap places in the status order and expose two new neighbouring pairs. This ' +
-          'is what makes the algorithm output-sensitive and also what makes it delicate: the same ' +
-          'crossing can be discovered from either side, so the queue must reject duplicates, and a ' +
-          'crossing discovered behind the sweep line must be ignored rather than queued in the past.',
+        detail: [
+          'When a crossing is found it is pushed as a future event. At that point the two segments ' +
+            'swap places in the status order and expose two new neighbouring pairs.',
+          'This is what makes the algorithm output-sensitive, and also what makes it delicate.',
+          'The same crossing can be discovered from either side, so the queue must reject ' +
+            'duplicates. And a crossing discovered behind the sweep line must be ignored rather than ' +
+            'queued in the past.'
+        ],
         example: 'A 6-segment grid where every horizontal meets every vertical produces 9 crossings ' +
           'from 6 segments — k grows quadratically while n does not.'
       },
@@ -72,12 +81,15 @@
         term: 'The paradigm is a paragraph and the implementation is the degeneracies',
         plain: 'Shared endpoints, vertical segments, three segments through one point, and overlapping collinear pairs.',
         formal: 'each one breaks a different assumption the clean description quietly makes',
-        detail: 'The clean version assumes every segment has one y at the sweep position, that every ' +
-          'event involves exactly two segments and that intersections are isolated points. A ' +
-          'vertical segment breaks the first, a shared endpoint or a triple crossing breaks the ' +
-          'second, and a collinear overlap breaks the third — its intersection is an interval, so a ' +
-          'single point has to be chosen and documented. None of these announce themselves at ' +
-          'runtime: the algorithm returns a plausible answer with a crossing missing.',
+        detail: [
+          'The clean version assumes every segment has one y at the sweep position, that every event ' +
+            'involves exactly two segments, and that intersections are isolated points.',
+          'A vertical segment breaks the first. A shared endpoint or a triple crossing breaks the ' +
+            'second. A collinear overlap breaks the third: its intersection is an interval, so a ' +
+            'single point has to be chosen and documented.',
+          'None of these announce themselves at runtime. The algorithm returns a plausible answer ' +
+            'with a crossing missing.'
+        ],
         example: 'Four fixtures built to be degenerate, and the sweep agrees with brute force on all ' +
           'four: 1, 5, 1 and 2 crossings respectively.'
       },
@@ -85,24 +97,30 @@
         term: 'The oracle has to be a separate implementation, not the same code with a flag',
         plain: 'Brute force over all pairs is quadratic, obviously correct, and affordable at the sizes that matter for testing.',
         formal: 'agreement between two implementations that share no code is evidence; self-agreement is not',
-        detail: 'A comparison test is only worth the confidence you put in it if the two sides can ' +
-          'fail independently. Brute force tests every pair with the segment-intersection predicate ' +
-          'and never touches an event queue or a status order, so a bug in the sweep\'s ordering, ' +
-          'its duplicate rejection or its degeneracy handling cannot hide in both. That is exactly ' +
-          'why the degenerate fixtures are worth running: they are where a sweep and a pairwise ' +
-          'check are most likely to disagree.',
+        detail: [
+          'A comparison test is only worth the confidence you put in it if the two sides can fail ' +
+            'independently.',
+          'Brute force tests every pair with the segment-intersection predicate and never touches an ' +
+            'event queue or a status order. So a bug in the sweep\'s ordering, its duplicate ' +
+            'rejection or its degeneracy handling cannot hide in both.',
+          'That is exactly why the degenerate fixtures are worth running. They are where a sweep and ' +
+            'a pairwise check are most likely to disagree.'
+        ],
         example: 'Across 7 fixtures, 0 disagreements between the sweep and the pairwise check.'
       },
       {
         term: 'Coordinate compression turns a continuous axis into a small number of slabs',
         plain: 'Only the coordinates that actually appear can matter, so relabel them 0, 1, 2 and work on those.',
         formal: 'n rectangles produce at most 2n distinct y values and therefore at most 2n − 1 slabs',
-        detail: 'Inside a slab nothing changes, so the covered height is constant there and the ' +
-          'sweep only has to track which slabs are covered as x events arrive. This is what makes ' +
-          'rectangle-union area a sweep problem rather than an integration problem, and the same ' +
-          'move appears everywhere in this milestone and in offline range queries: the geometry is ' +
-          'continuous, the interesting positions are finite, and an index over the finite set is the ' +
-          'whole algorithm.',
+        detail: [
+          'Inside a slab nothing changes, so the covered height is constant there. The sweep only ' +
+            'has to track which slabs are covered as x events arrive.',
+          'This is what makes rectangle-union area a sweep problem rather than an integration ' +
+            'problem.',
+          'The same move appears everywhere in this milestone and in offline range queries. The ' +
+            'geometry is continuous, the interesting positions are finite, and an index over the ' +
+            'finite set is the whole algorithm.'
+        ],
         example: '6 rectangles compress to 9 slabs, and the sweep walks the x-events once over them.'
       },
       {
@@ -111,12 +129,15 @@
         formal: '2ⁿ − 1 terms: 63 at 6 rectangles, and over a billion at 30',
         readAs: 'The number of terms doubles with every rectangle added, so six rectangles need ' +
           'sixty-three of them and thirty rectangles need more than a billion.',
-        detail: 'That combination is exactly what an oracle should be: obviously right, easy to get ' +
-          'right, and unaffordable in production. Keeping one in the test suite is the cheapest way ' +
-          'to be sure the fast algorithm is correct rather than plausible, and the exponential cost ' +
-          'is not a problem there because the fixtures are small on purpose. The same shape recurs ' +
-          'across this milestone — a rasteriser for boolean operations, a pairwise scan for ' +
-          'intersections, a nearest-site grid for Voronoi.',
+        detail: [
+          'That combination is exactly what an oracle should be: obviously right, easy to get right, ' +
+            'and unaffordable in production.',
+          'Keeping one in the test suite is the cheapest way to be sure the fast algorithm is ' +
+            'correct rather than plausible. The exponential cost is not a problem there, because ' +
+            'the fixtures are small on purpose.',
+          'The same shape recurs across this milestone — a rasteriser for boolean operations, a ' +
+            'pairwise scan for intersections, a nearest-site grid for Voronoi.'
+        ],
         example: 'On the 6-rectangle fixture, inclusion-exclusion sums 63 terms and the sweep agrees ' +
           'to the last digit: 876.00 both ways.'
       },
@@ -124,12 +145,14 @@
         term: 'Sparse input pays for a structure it never uses',
         plain: 'When there are almost no crossings, the sweep still maintains the queue and the status order.',
         formal: 'the log factor is per event, and it is paid whether or not k is large',
-        detail: 'This is the honest counterweight to the output-sensitive bound. On a scene with no ' +
-          'crossings at all the sweep still sorts the endpoints, inserts and removes every segment ' +
-          'in an ordered structure, and tests each neighbouring pair, while a brute-force scan on a ' +
-          'few dozen segments is a tight double loop over contiguous memory. The crossover is much ' +
-          'higher than the asymptotics suggest, and for small n the quadratic version is genuinely ' +
-          'faster as well as simpler to get right.',
+        detail: [
+          'This is the honest counterweight to the output-sensitive bound.',
+          'On a scene with no crossings at all the sweep still sorts the endpoints, inserts and ' +
+            'removes every segment in an ordered structure, and tests each neighbouring pair. A ' +
+            'brute-force scan on a few dozen segments is a tight double loop over contiguous memory.',
+          'The crossover is much higher than the asymptotics suggest, and for small n the quadratic ' +
+            'version is genuinely faster as well as simpler to get right.'
+        ],
         example: 'The sparse fixture has 12 segments and 0 crossings, so every event maintains a ' +
           'structure that never reports anything.'
       }

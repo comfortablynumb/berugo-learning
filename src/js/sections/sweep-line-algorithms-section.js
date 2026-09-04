@@ -52,41 +52,47 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**A sweep replaces "check every pair" with "check every pair the moving line ever holds side ' +
+        'by side".**',
+      'A vertical line travels left to right. An **event queue** holds the points where something ' +
+        'changes, and a **status structure** holds the segments the line currently crosses, in the ' +
+        'order it crosses them.',
+      'Two segments can only cross if they first become neighbours in that order, so neighbours are ' +
+        'the only pairs worth testing.',
+      '**The paradigm is a paragraph and the implementation is the degeneracies.** Two segments ' +
+        'sharing an endpoint, a vertical segment with no single y at the sweep position, three ' +
+        'segments through one point, an intersection landing exactly on an endpoint.',
+      'Each is a case, each is easy to get subtly wrong, and none of them announces itself. The ' +
+        'sweep below counts how many it met.',
+      '**A collinear overlap is not a point.** Two segments lying along the same line and ' +
+        'overlapping share a whole interval, so "the intersection" has to be *defined* rather than ' +
+        'computed.',
+      'Any consistent choice will do — this one reports the overlap\'s first point in sweep order. ' +
+        'But it has to be the same choice everywhere, or two implementations that agree perfectly ' +
+        'will appear to disagree.',
+      '**The same sweep answers a different question.** Rectangle-union area sweeps x and keeps the ' +
+        'covered y-length; the skyline problem sweeps and keeps the tallest live building.',
+      'Compressing the coordinates first turns an unbounded axis into at most `2n` slabs, and the ' +
+        'segment tree people reach for buys a log factor rather than correctness.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'A sweep replaces "check every pair" with "check every pair the moving line ever holds ' +
-          'side by side". A vertical line travels left to right; an **event queue** holds the ' +
-          'points where something changes, and a **status structure** holds the segments the line ' +
-          'currently crosses, in the order it crosses them. Two segments can only cross if they ' +
-          'first become neighbours in that order, so neighbours are the only pairs worth testing.',
-        '**The paradigm is a paragraph and the implementation is the degeneracies.** Two segments ' +
-          'sharing an endpoint, a vertical segment with no single y at the sweep position, three ' +
-          'segments through one point, an intersection landing exactly on an endpoint — each is a ' +
-          'case, each is easy to get subtly wrong, and none of them announces itself. The sweep ' +
-          'below counts how many it met.',
-        '**A collinear overlap is not a point.** Two segments lying along the same line and ' +
-          'overlapping share a whole interval, so "the intersection" has to be *defined* rather ' +
-          'than computed. Any consistent choice will do — this one reports the overlap\'s first ' +
-          'point in sweep order — but it has to be the same choice everywhere, or two ' +
-          'implementations that agree perfectly will appear to disagree.',
-        '**The same sweep answers a different question.** Rectangle-union area sweeps x and keeps ' +
-          'the covered y-length; the skyline problem sweeps and keeps the tallest live building. ' +
-          'Compressing the coordinates first turns an unbounded axis into at most `2n` slabs, and ' +
-          'the segment tree people reach for buys a log factor rather than correctness.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — the sweep, its status, seven fixtures and a rectangle union',
         markup: root.SweepLineAlgorithmsTemplate.render()
       },
       diagram: diagram(),
       insight: 'Write the brute force first and keep it. It is ten lines, it is obviously correct, ' +
-        'and it is the only thing that will ever tell you your sweep is wrong — because a sweep ' +
-        'that mishandles a shared endpoint does not crash, it returns a slightly shorter list. ' +
-        'Then run both on inputs built to be degenerate rather than on random ones: random ' +
-        'segments almost never share an endpoint, and the fixtures that do are the fixtures that ' +
-        'find the bug.'
+        'and it is the only thing that will ever tell you your sweep is wrong. A sweep that ' +
+        'mishandles a shared endpoint does not crash — it returns a slightly shorter list. Then run ' +
+        'both on inputs built to be degenerate rather than on random ones. Random segments almost ' +
+        'never share an endpoint, and the fixtures that do are the fixtures that find the bug.'
     };
   }
 
