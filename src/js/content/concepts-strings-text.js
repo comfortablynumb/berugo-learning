@@ -10,11 +10,14 @@
         term: 'Thompson construction: every parse node becomes a fragment',
         plain: 'A fragment has one entry state and a list of dangling exits, and fragments compose.',
         formal: 'the state count is linear in the pattern length, by construction',
-        detail: 'Concatenation patches one fragment\'s dangling exits to the next fragment\'s entry; ' +
-          'alternation makes a split state pointing at both entries and unions the exits; a star ' +
-          'makes a split whose second branch is the fragment and patches the fragment back to the ' +
-          'split. Each rule adds a bounded number of states, so the whole machine is linear in the ' +
-          'pattern — which is the fact the running-time bound rests on.',
+        detail: [
+          'Concatenation patches one fragment\'s dangling exits to the next fragment\'s entry.',
+          'Alternation makes a split state pointing at both entries and unions the exits. A star ' +
+            'makes a split whose second branch is the fragment, and patches the fragment back to ' +
+            'the split.',
+          'Each rule adds a bounded number of states, so the whole machine is linear in the pattern. ' +
+            'That is the fact the running-time bound rests on.'
+        ],
         example: '`(a+)+b` compiles to 5 states: one char state per literal, split states for the ' +
           'two quantifiers, and one accept.'
       },
@@ -34,11 +37,14 @@
         },
         plain: 'It consumes no character and has two successors.',
         formal: 'an epsilon transition with two targets, and no rule for choosing between them',
-        detail: 'Every difference between the two engines reduces to what they do at a split. A ' +
-          'backtracking engine picks one successor, remembers the other on a stack, and returns to ' +
-          'it if the first path fails. A state-set simulation keeps both, because a set can hold ' +
-          'two things and a program counter cannot. That is the entire algorithmic difference, and ' +
-          'it is worth a factor of seven thousand on the right input.',
+        detail: [
+          'Every difference between the two engines reduces to what they do at a split.',
+          'A backtracking engine picks one successor, remembers the other on a stack, and returns to ' +
+            'it if the first path fails. A state-set simulation keeps both, because a set can hold ' +
+            'two things and a program counter cannot.',
+          'That is the entire algorithmic difference, and it is worth a factor of seven thousand on ' +
+            'the right input.'
+        ],
         example: 'The compiled `(a+)+b` has two split states, and both are reachable after the ' +
           'first `a`.'
       },
@@ -49,11 +55,14 @@
         readAs: 'Track the whole set of states the machine could be in at once, and each character costs one ' +
           'pass over that set. Linear in the text, linear in the pattern, and no path is ever explored ' +
           'twice — which is why this cannot blow up.',
-        detail: 'The bound is almost too simple to state, and it is the whole guarantee: whatever ' +
-          'the input does, the set cannot grow past the machine. So the per-character cost is ' +
-          'fixed before the input is seen, which is what lets a service accept a user-supplied ' +
-          'pattern at all. A backtracking engine has no such bound because its stack depth is a ' +
-          'function of the input, not of the pattern.',
+        detail: [
+          'The bound is almost too simple to state, and it is the whole guarantee: whatever the ' +
+            'input does, the set cannot grow past the machine.',
+          'So the per-character cost is fixed before the input is seen, which is what lets a service ' +
+            'accept a user-supplied pattern at all.',
+          'A backtracking engine has no such bound, because its stack depth is a function of the ' +
+            'input rather than of the pattern.'
+        ],
         example: 'On `(a+)+b` the state-set peak is 4 at every input length from 6 to 22 — it does ' +
           'not move.'
       },
@@ -64,11 +73,13 @@
         readAs: 'A pattern like (a+)+ can split the same run of characters in exponentially many ways, and a ' +
           'backtracking engine tries all of them. That nesting is the specific shape to look for when ' +
           'auditing a regex.',
-        detail: 'In `(a+)+b` the inner `a+` and the outer `+` can divide a run of `a`s in every ' +
-          'possible way, and each division is a distinct path the engine must exhaust before ' +
-          'failing. That is 2^(n−1) paths. The trigger is not a long pattern or a long input — it ' +
-          'is two quantifiers that can consume the same characters, which is a property of a ' +
-          'handful of characters in the pattern.',
+        detail: [
+          'In `(a+)+b` the inner `a+` and the outer `+` can divide a run of `a`s in every possible ' +
+            'way. Each division is a distinct path the engine must exhaust before failing.',
+          'That is 2^(n−1) paths.',
+          'The trigger is not a long pattern or a long input. It is two quantifiers that can consume ' +
+            'the same characters, which is a property of a handful of characters in the pattern.'
+        ],
         example: '`a*b` takes 44 steps at n = 20; `(a*)*b` differs by three characters and exhausts ' +
           'a two-million-step budget.'
       },
@@ -79,11 +90,13 @@
         readAs: 'A catastrophic pattern is fast on input that matches, because the first success stops the ' +
           'search. It is the near-miss — the input that almost matches — that runs every path, which is ' +
           'why the bug survives testing.',
-        detail: 'This is why regular-expression denial of service is a real attack and not a ' +
-          'curiosity: an attacker does not need to guess a matching input, they need an input that ' +
-          'ALMOST matches. Removing the final `b` from a string of `a`s costs nothing to construct ' +
-          'and forces the engine through every division of the run. Benchmarks built from matching ' +
-          'inputs measure the cheap case and report that everything is fine.',
+        detail: [
+          'This is why regular-expression denial of service is a real attack and not a curiosity.',
+          'An attacker does not need to guess a matching input. They need an input that ALMOST ' +
+            'matches, and removing the final `b` from a string of `a`s costs nothing to construct.',
+          'That forces the engine through every division of the run. Benchmarks built from matching ' +
+            'inputs measure the cheap case and report that everything is fine.'
+        ],
         example: 'Eighteen `a`s with no `b` costs 1 048 576 backtracking steps and 142 simulation ' +
           'steps.'
       },
@@ -94,11 +107,13 @@
         readAs: 'The cost roughly doubles per added character on these patterns, so four more characters is ' +
           'sixteen times the work. An input the attacker controls the length of is therefore a ' +
           'denial-of-service dial.',
-        detail: 'A constant-factor difference is an engineering choice; a growing ratio is a ' +
-          'liability, because the input size is the attacker\'s parameter. Measuring the ratio at ' +
-          'one length tells you nothing about the next length, so the honest report is the growth ' +
-          'column rather than a single number — and the growth column is what turns "slow on this ' +
-          'input" into "unbounded".',
+        detail: [
+          'A constant-factor difference is an engineering choice. A growing ratio is a liability, ' +
+            'because the input size is the attacker\'s parameter.',
+          'Measuring the ratio at one length tells you nothing about the next length, so the honest ' +
+            'report is the growth column rather than a single number.',
+          'The growth column is what turns "slow on this input" into "unbounded".'
+        ],
         example: '5.6x, 16.5x, 52.5x, 174.3x, 595.8x, 2080.5x, 7384.3x at input lengths 6 to 18.'
       },
       {
@@ -108,11 +123,14 @@
         readAs: 'Once a pattern can refer back to what an earlier group captured, it is asking for something ' +
           'a finite automaton cannot do. That is why engines offering backreferences cannot offer the ' +
           'linear-time guarantee — not an implementation choice.',
-        detail: 'Matching `(a+)\\1` requires remembering what the group captured, and the set has ' +
-          'thrown that away. This is not an implementation gap to be closed later: a language with ' +
-          'backreferences is not regular, so the linear bound and backreferences cannot coexist. ' +
+        detail: [
+          'Matching `(a+)\\1` requires remembering what the group captured, and the set has thrown ' +
+            'that away.',
+          'This is not an implementation gap to be closed later. A language with backreferences is ' +
+            'not regular, so the linear bound and backreferences cannot coexist.',
           'Engines that guarantee linear time therefore refuse those patterns outright, which is a ' +
-          'documented trade rather than a missing feature.',
+            'documented trade rather than a missing feature.'
+        ],
         example: 'The fixture table here contains no capture or backreference patterns, and that ' +
           'omission is the price, not an oversight.'
       },
@@ -120,11 +138,13 @@
         term: 'Same answer first, then faster',
         plain: 'A faster engine that accepts a different language is not a faster engine.',
         formal: 'agreement on a fixture set is the precondition for every performance claim',
-        detail: 'Two engines for the same syntax can differ on empty matches, on greedy versus lazy ' +
-          'quantifiers and on anchoring, and each difference silently changes what a filter admits. ' +
-          'So the fixture table comes before the timing table: every pattern-and-input pair is run ' +
-          'through both engines and the verdicts compared, and only once they agree everywhere does ' +
-          'the step count mean anything.',
+        detail: [
+          'Two engines for the same syntax can differ on empty matches, on greedy versus lazy ' +
+            'quantifiers and on anchoring, and each difference silently changes what a filter admits.',
+          'So the fixture table comes before the timing table. Every pattern-and-input pair is run ' +
+            'through both engines and the verdicts compared.',
+          'Only once they agree everywhere does the step count mean anything.'
+        ],
         example: '0 of 12 fixtures disagree, which is what makes the 7384.3x column a statement ' +
           'about speed rather than about semantics.'
       }

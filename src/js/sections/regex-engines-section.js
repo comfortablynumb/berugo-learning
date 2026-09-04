@@ -65,30 +65,36 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**Almost every language ships a backtracking regex engine.** It tries one alternative and, on ' +
+        'failure, returns and tries the next.',
+      'That is what makes capture groups and backreferences possible. It is also what makes ' +
+        '`(a+)+b` against a string of `a`s take exponential time.',
+      'The number of ways to split the `a`s between the inner and outer plus is exponential, and the ' +
+        'engine tries all of them before concluding there is no `b`.',
+      '**That is a denial-of-service primitive**, and it usually arrives as a configuration change ' +
+        'rather than as code. Think of a validation pattern in a form, a log filter in a dashboard, ' +
+        'or a route matcher taking a user-supplied prefix.',
+      'ReDoS is a recognised vulnerability class with CVE numbers attached, and the input that ' +
+        'triggers it is often forty characters long.',
+      '**Thompson\'s simulation carries a SET of states** and advances all of them one character at ' +
+        'a time. There is nothing to backtrack to, because every alternative is already in the set.',
+      'So the cost is `O(states × length)` — linear in the input for a fixed pattern, with the state ' +
+        'count bounded by the pattern length. The panel below plots both engines on the same pattern ' +
+        'and input, and one curve is a straight line.',
+      '**The trade is real and this section does not hide it.** A set of positions does not remember ' +
+        'which path it took, so the state-set engine supports no capture groups and no ' +
+        'backreferences.',
+      'RE2 makes exactly that trade, and adds a lazily-built DFA cache on top. That is why it powers ' +
+        'services that accept patterns from users, and why it refuses features that PCRE offers.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'Almost every language ships a **backtracking** regex engine: it tries one alternative and, ' +
-          'on failure, returns and tries the next. That is what makes capture groups and ' +
-          'backreferences possible, and it is what makes `(a+)+b` against a string of `a`s take ' +
-          'exponential time — the number of ways to split the `a`s between the inner and outer plus ' +
-          'is exponential, and the engine tries all of them before concluding there is no `b`.',
-        '**That is a denial-of-service primitive**, and it usually arrives as a configuration change ' +
-          'rather than as code: a validation pattern in a form, a log filter in a dashboard, a route ' +
-          'matcher taking a user-supplied prefix. ReDoS is a recognised vulnerability class with CVE ' +
-          'numbers attached, and the input that triggers it is often forty characters long.',
-        '**Thompson\'s simulation carries a SET of states** and advances all of them one character at ' +
-          'a time. There is nothing to backtrack to because every alternative is already in the set, ' +
-          'so the cost is `O(states × length)` — linear in the input for a fixed pattern, with the ' +
-          'state count bounded by the pattern length. The panel below plots both engines on the same ' +
-          'pattern and input, and one curve is a straight line.',
-        '**The trade is real and this section does not hide it.** A set of positions does not ' +
-          'remember which path it took, so the state-set engine supports no capture groups and no ' +
-          'backreferences. RE2 makes exactly that trade — and adds a lazily-built DFA cache on top ' +
-          '— which is why it powers services that accept patterns from users and why it refuses ' +
-          'features that PCRE offers.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — the two engines, the two curves, and which patterns are dangerous',
         markup: root.RegexEnginesTemplate.render()
