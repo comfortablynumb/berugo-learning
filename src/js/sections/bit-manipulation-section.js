@@ -52,32 +52,37 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**These are not micro-optimisations in isolation. They are the primitives that other ' +
+        'structures are built out of.**',
+      'A bitset iterates with `x & -x`, an allocator finds a free block with count-trailing-zeros, ' +
+        'and a garbage collector counts live objects in a mark bitmap with popcount. A chess engine ' +
+        'generates moves with shifts and masks, and the succinct structures in M09 are rank and ' +
+        'select over exactly this machinery.',
+      '**Two identities carry most of the file.** `x & (x − 1)` clears the lowest set bit, so a ' +
+        'loop built on it runs once per *set bit* rather than once per bit.',
+      '`x & −x` isolates that lowest set bit, leaving a power of two you can turn into an index.',
+      'Everything from Kernighan’s popcount to the De Bruijn bit-scan to a bitset’s iterator is one ' +
+        'of those two with something wrapped around it.',
+      '**"Faster" here is a count, not a claim, and the counts disagree with each other.** The demo ' +
+        'reports mean operations over random words and worst-case operations separately, because ' +
+        'for the data-dependent tricks they point in opposite directions.',
+      'The De Bruijn count-trailing-zeros costs *more* than the naive loop on average and nine ' +
+        'times less in the worst case. SWAR popcount wins eightfold on every input alike.',
+      '**Correctness here is exhaustive or it is nothing.** Every trick is checked against the ' +
+        'obvious loop over all 65 536 low words plus a random sweep of full 32-bit ones.',
+      'Bit tricks fail at zero, at exact powers of two and at the sign bit — the three values a ' +
+        'hand-written test is least likely to contain.',
+      'The rounding-up-to-a-power-of-two trick returns 0 for an input of 0 and needs a guard. That ' +
+        'is exactly the kind of thing the exhaustive check finds and a spot check does not.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'These are not micro-optimisations in isolation. They are the **primitives that other ' +
-          'structures are built out of**: a bitset iterates with `x & -x`, an allocator finds a ' +
-          'free block with count-trailing-zeros, a garbage collector counts live objects in a ' +
-          'mark bitmap with popcount, a chess engine generates moves with shifts and masks, and ' +
-          'the succinct structures in M09 are rank and select over exactly this machinery.',
-        '**Two identities carry most of the file.** `x & (x − 1)` clears the lowest set bit — so ' +
-          'a loop built on it runs once per *set bit* rather than once per bit — and `x & −x` ' +
-          'isolates that lowest set bit, leaving a power of two you can turn into an index. ' +
-          'Everything from Kernighan’s popcount to the De Bruijn bit-scan to a bitset’s iterator ' +
-          'is one of those two with something wrapped around it.',
-        '**"Faster" here is a count, not a claim, and the counts disagree with each other.** ' +
-          'The demo reports mean operations over random words and worst-case operations ' +
-          'separately, because for the data-dependent tricks they point in opposite directions. ' +
-          'The De Bruijn count-trailing-zeros costs *more* than the naive loop on average and ' +
-          'nine times less in the worst case; SWAR popcount wins eightfold on every input alike.',
-        '**Correctness here is exhaustive or it is nothing.** Every trick is checked against the ' +
-          'obvious loop over all 65 536 low words plus a random sweep of full 32-bit ones, ' +
-          'because bit tricks fail at zero, at exact powers of two and at the sign bit — the ' +
-          'three values a hand-written test is least likely to contain. The rounding-up-to-a-' +
-          'power-of-two trick returns 0 for an input of 0 and needs a guard, which is exactly ' +
-          'the kind of thing the exhaustive check finds and a spot check does not.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — a trick, its loop, and every input between them',
         markup: root.BitManipulationTemplate.render()
@@ -87,10 +92,10 @@
         'profile pointed at an arithmetic loop — it almost never will. The judgement worth having ' +
         'is which kind of win a given trick is. A constant-time branchless routine is worth ' +
         'reaching for when the input is adversarial or the branch is unpredictable, because the ' +
-        'mispredict costs more than every operation you saved; a data-dependent loop is fine, and ' +
-        'often better, when the data is friendly. And in cryptography the whole calculus inverts: ' +
-        'there the branchless form is not an optimisation at all, it is the requirement, because ' +
-        'a branch on secret data is a timing channel (M23).'
+        'mispredict costs more than every operation you saved. A data-dependent loop is fine, and ' +
+        'often better, when the data is friendly. And in cryptography the whole calculus inverts. ' +
+        'There the branchless form is not an optimisation at all, it is the requirement, because a ' +
+        'branch on secret data is a timing channel (M23).'
     };
   }
 

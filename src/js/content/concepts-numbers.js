@@ -175,12 +175,14 @@
         },
         plain: '`x & (x − 1)` clears the lowest set bit and `x & −x` isolates it.',
         formal: 'x & (x − 1) has popcount(x) − 1 bits set; x & −x is a power of two, or 0 when x is 0',
-        detail: 'Subtracting one flips the lowest set bit to zero and turns every zero below it ' +
-          'into a one, so ANDing with the original keeps everything above and clears exactly that ' +
-          'bit. Negating in two’s complement is inverting and adding one, which leaves the ' +
-          'lowest set bit alone and clears everything above it — so the AND isolates it. Nearly ' +
-          'every routine in this section is one of those two with a loop or a lookup wrapped ' +
-          'round it, including a bitset’s iterator and an allocator’s free-block search.',
+        detail: [
+          'Subtracting one flips the lowest set bit to zero and turns every zero below it into a ' +
+            'one. ANDing with the original keeps everything above and clears exactly that bit.',
+          'Negating in two’s complement is inverting and adding one, which leaves the lowest set bit ' +
+            'alone and clears everything above it. So the AND isolates it.',
+          'Nearly every routine in this section is one of those two with a loop or a lookup wrapped ' +
+            'round it, including a bitset’s iterator and an allocator’s free-block search.'
+        ],
         example: 'The demo checks both over 20 001 inputs including zero and records 0 failures for ' +
           'each.'
       },
@@ -188,25 +190,31 @@
         term: 'SWAR treats a word as a vector of counters',
         plain: 'Add neighbouring bits in place, halving how many counters there are and doubling how wide, four times over.',
         formal: '32 one-bit counters → 16 two-bit → 8 four-bit → 4 eight-bit, then one multiply sums the four',
-        detail: 'The masks are what keep the additions from spilling between counters: at the ' +
-          'two-bit stage each counter can hold up to 2 and at the four-bit stage up to 4, so no ' +
-          'carry ever crosses a boundary. The final trick is the one that looks like magic and is ' +
-          'not: multiplying by 0x01010101 places a copy of the value at every byte offset and adds ' +
-          'them, so the top byte of the product is the sum of the four byte-counters, and one ' +
-          'shift extracts it. Twelve operations, no branches, no data dependence at all.',
+        detail: [
+          'The masks are what keep the additions from spilling between counters. At the two-bit ' +
+            'stage each counter can hold up to 2, and at the four-bit stage up to 4, so no carry ' +
+            'ever crosses a boundary.',
+          'The final trick looks like magic and is not. Multiplying by 0x01010101 places a copy of ' +
+            'the value at every byte offset and adds them. So the top byte of the product is the sum ' +
+            'of the four byte-counters, and one shift extracts it.',
+          'Twelve operations, no branches, no data dependence at all.'
+        ],
         example: 'The demo traces 0xDEADBEEF through 0x9959699A, 0x33233334 and 0x06050607 to the ' +
           'answer 24.'
       },
       {
         term: 'The clever bit scan loses on random data and wins in the tail',
-        plain: 'De Bruijn count-trailing-zeros is five operations always; the naive loop is four on average and ninety-four at worst.',
+        plain: 'De Bruijn count-trailing-zeros is five operations always; the naive loop is four on average and forty-six at worst.',
         formal: 'measured over 85 536 inputs: 5.00 against 4.00 operations on the mean, 5 against 46 at the worst',
-        detail: 'A random word usually has a set bit near the bottom, so the loop exits almost ' +
-          'immediately and the trick that replaces it does more work. What the trick buys is a ' +
-          'flat cost: no data dependence, no branch to mispredict, and a worst case nine times ' +
-          'better. Which of those matters is a question about the input and the surrounding code ' +
-          'rather than about the routine, and the only way to answer it is to count both — which ' +
-          'is why the demo reports the mean and the worst case in separate columns.',
+        detail: [
+          'A random word usually has a set bit near the bottom, so the loop exits almost immediately ' +
+            'and the trick that replaces it does more work.',
+          'What the trick buys is a flat cost: no data dependence, no branch to mispredict, and a ' +
+            'worst case nine times better.',
+          'Which of those matters is a question about the input and the surrounding code rather than ' +
+            'about the routine. The only way to answer it is to count both, which is why the demo ' +
+            'reports the mean and the worst case in separate columns.'
+        ],
         example: 'The sweep gives count-trailing-zeros a mean saving of 0.80× and a worst-case ' +
           'saving of 9.20×, the only row where the two disagree in direction.'
       },
@@ -214,25 +222,31 @@
         term: 'De Bruijn sequences turn an isolated bit into an index',
         plain: 'Multiplying a carefully chosen constant by a power of two rotates it so its top five bits name the exponent.',
         formal: 'the top 5 bits of 0x077CB531 × 2ᵏ are distinct for every k in 0 … 31, so a 32-entry table inverts them',
-        detail: 'A De Bruijn sequence of order 5 contains every 5-bit pattern exactly once as a ' +
-          'cyclic window. Multiplying by 2ᵏ is a left shift, so the window that lands in the top ' +
-          'five bits is different for every k — which makes a 32-entry lookup table an exact ' +
-          'inverse. The whole routine is one AND, one negate, one multiply, one shift and one ' +
-          'load, and it is completely opaque until you know what property the constant has. That ' +
-          'opacity is the real cost of the trick, not the operations.',
-        example: 'The demo’s table is built at load time by multiplying the constant by each ' +
-          'of the 32 powers of two, and disagrees with the naive loop 0 times in 85 536 inputs.'
+        detail: [
+          'A De Bruijn sequence of order 5 contains every 5-bit pattern exactly once as a cyclic ' +
+            'window.',
+          'Multiplying by 2ᵏ is a left shift, so the window that lands in the top five bits is ' +
+            'different for every k. That makes a 32-entry lookup table an exact inverse.',
+          'The whole routine is one AND, one negate, one multiply, one shift and one load, and it is ' +
+            'completely opaque until you know what property the constant has. That opacity is the ' +
+            'real cost of the trick, not the operations.'
+        ],
+        example: 'The demo’s table is built at load time by multiplying the constant by each of ' +
+          'the 32 powers of two. It disagrees with the naive loop 0 times in 85 536 inputs.'
       },
       {
         term: 'These tricks fail at zero, at powers of two and at the sign bit',
         plain: 'Exactly the three values a hand-written test is least likely to contain.',
         formal: 'rounding up to a power of two returns 0 for an input of 0 unless it is guarded',
-        detail: 'The smear-and-increment routine subtracts one before smearing, so an input of ' +
-          'zero becomes all ones, the increment carries off the top of the word, and the answer is ' +
-          'zero — Hacker’s Delight’s documented behaviour, and not what a caller sizing a ' +
-          'buffer wants. That is why the checks in this section are exhaustive over all 65 536 ' +
-          'low words rather than sampled: the failures cluster at boundaries, and a sample of ' +
-          'plausible-looking inputs is precisely a sample that avoids them.',
+        detail: [
+          'The smear-and-increment routine subtracts one before smearing. So an input of zero ' +
+            'becomes all ones, the increment carries off the top of the word, and the answer is zero.',
+          'That is Hacker’s Delight’s documented behaviour, and not what a caller sizing a buffer ' +
+            'wants.',
+          'It is why the checks in this section are exhaustive over all 65 536 low words rather than ' +
+            'sampled. The failures cluster at boundaries, and a sample of plausible-looking inputs ' +
+            'is precisely a sample that avoids them.'
+        ],
         example: 'Every trick in the demo is checked over 85 536 inputs — all 65 536 low words plus ' +
           '20 000 random 32-bit ones — and reports 0 disagreements.'
       },
@@ -240,12 +254,15 @@
         term: 'A branchless routine is bought for the mispredict, not the operation count',
         plain: 'Removing a branch can be worth it even when it adds arithmetic, if the branch was unpredictable.',
         formal: 'x >> 31 is all ones for a negative int32 and all zeros otherwise, so (x + m) ^ m is |x| with no branch',
-        detail: 'The arithmetic shift turns a sign test into a mask, and adding then XORing that ' +
-          'mask is exactly two’s-complement negation when the mask is all ones and a no-op ' +
-          'when it is zero. On a modern processor a mispredicted branch costs more cycles than ' +
-          'every operation the branchless form added, so on data the predictor cannot learn the ' +
-          'trade is worth taking — and on data it can learn, the branch is nearly free and the ' +
-          'branchless version is slower. The input decides, not the routine.',
+        detail: [
+          'The arithmetic shift turns a sign test into a mask. Adding then XORing that mask is ' +
+            'exactly two’s-complement negation when the mask is all ones, and a no-op when it is ' +
+            'zero.',
+          'On a modern processor a mispredicted branch costs more cycles than every operation the ' +
+            'branchless form added. So on data the predictor cannot learn, the trade is worth taking.',
+          'On data it can learn, the branch is nearly free and the branchless version is slower. The ' +
+            'input decides, not the routine.'
+        ],
         example: 'The demo’s identity table checks the branchless absolute value against ' +
           '`Math.abs` over 20 001 inputs and names its one exclusion: INT_MIN, where no int32 ' +
           'answer exists.'
@@ -254,12 +271,14 @@
         term: 'Gray codes change one bit between consecutive values',
         plain: 'Encoding as `x ^ (x >> 1)` guarantees neighbours differ in exactly one position.',
         formal: 'popcount(gray(x) ^ gray(x + 1)) = 1 for every x',
-        detail: 'A rotary encoder read mid-transition in ordinary binary can return an arbitrary ' +
-          'value, because several bits change at once and they do not change simultaneously — ' +
-          'going from 0111 to 1000 has a moment where every bit is in flight. With a Gray code ' +
-          'only one bit is ever changing, so a mid-transition reading is one of the two ' +
-          'neighbours and nothing else. The same property is why Gray codes appear in Karnaugh ' +
-          'maps and in some genetic-algorithm encodings.',
+        detail: [
+          'A rotary encoder read mid-transition in ordinary binary can return an arbitrary value, ' +
+            'because several bits change at once and they do not change simultaneously.',
+          'Going from 0111 to 1000 has a moment where every bit is in flight.',
+          'With a Gray code only one bit is ever changing, so a mid-transition reading is one of the ' +
+            'two neighbours and nothing else. The same property is why Gray codes appear in Karnaugh ' +
+            'maps and in some genetic-algorithm encodings.'
+        ],
         example: 'The demo checks the single-bit property over 20 001 consecutive pairs and ' +
           'reports 0 failures.'
       },
@@ -267,13 +286,15 @@
         term: 'These are primitives under other structures, not standalone optimisations',
         plain: 'A profiler will almost never point at an arithmetic loop; these matter because something else is built from them.',
         formal: 'bitset iteration, allocator free-block search, GC mark counting and move generation are all these routines',
-        detail: 'Reaching for a bit trick because a loop looks slow is nearly always misdirected ' +
-          'effort. Where they earn their place is one level down: a bitset’s iterator is ' +
-          '`x & −x` plus `x & (x − 1)`, a buddy allocator finds the right free list with ' +
-          'count-leading-zeros, a garbage collector counts live objects in a mark bitmap with ' +
-          'popcount, and a chess engine generates every knight move at once with shifts and masks. ' +
-          'In cryptography the calculus inverts entirely: there branchless is a requirement, ' +
-          'because a branch on secret data is a timing channel.',
+        detail: [
+          'Reaching for a bit trick because a loop looks slow is nearly always misdirected effort.',
+          'Where they earn their place is one level down. A bitset’s iterator is `x & −x` plus ' +
+            '`x & (x − 1)`. A buddy allocator finds the right free list with count-leading-zeros, ' +
+            'and a garbage collector counts live objects in a mark bitmap with popcount. A chess ' +
+            'engine generates every knight move at once with shifts and masks.',
+          'In cryptography the calculus inverts entirely. There branchless is a requirement, because ' +
+            'a branch on secret data is a timing channel.'
+        ],
         example: 'The succinct structures in M09 are rank and select built from exactly this ' +
           'machinery, and 17.3 measures a bitset iterating 19.6× faster because of it.'
       }
