@@ -46,39 +46,51 @@
     };
   }
 
-  function orientation() {
+  function orientationKinds() {
     return [
-      '**⚠ Teaching code: not constant-time, not audited, never for real data.** Use the ' +
-        'platform CSPRNG — `crypto.getRandomValues` in a browser, `crypto.randomBytes` or ' +
-        '`getrandom(2)` on a server — and do not seed it yourself.',
+      '**⚠ Teaching code: not constant-time, not audited, never for real data.** Use the platform ' +
+        'CSPRNG, which is `crypto.getRandomValues` in a browser and `crypto.randomBytes` or ' +
+        '`getrandom(2)` on a server. Do not seed it yourself.',
       '**A statistical PRNG and a CSPRNG are different KINDS of thing, not different qualities.** ' +
-        'A statistical generator promises its output passes distribution tests. A CSPRNG promises ' +
-        'that seeing any amount of output tells you nothing about the rest. The first says ' +
-        'nothing at all about the second.',
+        'A statistical generator promises its output passes distribution tests.',
+      'A CSPRNG promises that seeing any amount of output tells you nothing about the rest. The ' +
+        'first says nothing at all about the second.',
       '**A linear congruential generator\'s state is its output.** Observe one value and you have ' +
-        'the state; apply the public recurrence and you have every value that follows. The demo ' +
-        'does exactly that and predicts them EXACTLY — not statistically, not approximately.',
+        'the state. Apply the public recurrence and you have every value that follows.',
+      'The demo does exactly that and predicts them EXACTLY, not statistically and not ' +
+        'approximately.',
       '**And the output still looks random.** The demo measures the entropy of the same sequence ' +
-        'it just predicted perfectly, and it is close to the maximum. Every statistical test in ' +
-        'every test suite measures that quantity, which is why passing them is not evidence of ' +
-        'anything a key generator needs.',
-      '**`Math.random()` is a statistical PRNG in every engine.** It is not seeded from an ' +
-        'entropy pool, its state is recoverable from its output, and it has been used to generate ' +
-        'session tokens, password-reset links and API keys in shipped software repeatedly.',
-      '**The /dev/random blocking myth is settled and the answer is the non-blocking one.** On a ' +
-        'modern Linux kernel, once the pool is initialised the two devices are the same generator; ' +
-        '`getrandom(2)` blocks only until initialisation and then never again. Draining an ' +
-        '"entropy count" is not a thing that happens.',
-      '**The real failures are at boot, in VMs and after a fork.** A device generating a key ' +
-        'before its pool has entropy produces a predictable key; a cloned VM image resumes with a ' +
-        'cloned pool; a forked child that inherits generator state produces the same stream as its ' +
-        'parent. The Heninger study found tens of thousands of duplicate RSA keys on the public ' +
-        'internet from exactly this.',
-      '**Randomness failures are silent and total.** Nothing looks wrong — the keys are valid, the ' +
-        'protocol works, the tests pass — and the security is zero. There is no monitoring that ' +
-        'detects it after the fact, which is why the only defence is using the platform generator ' +
-        'and never rolling your own.'
+        'it just predicted perfectly, and it is close to the maximum.',
+      'Every statistical test in every test suite measures that quantity, which is why passing them ' +
+        'is not evidence of anything a key generator needs.'
     ];
+  }
+
+  function orientationFailures() {
+    return [
+      '**`Math.random()` is a statistical PRNG in every engine.** It is not seeded from an entropy ' +
+        'pool, and its state is recoverable from its output.',
+      'It has been used to generate session tokens, password-reset links and API keys in shipped ' +
+        'software repeatedly.',
+      '**The /dev/random blocking myth is settled and the answer is the non-blocking one.** On a ' +
+        'modern Linux kernel, once the pool is initialised the two devices are the same generator.',
+      '`getrandom(2)` blocks only until initialisation and then never again. Draining an "entropy ' +
+        'count" is not a thing that happens.',
+      '**The real failures are at boot, in VMs and after a fork.** A device generating a key before ' +
+        'its pool has entropy produces a predictable key.',
+      'A cloned VM image resumes with a cloned pool, and a forked child that inherits generator ' +
+        'state produces the same stream as its parent.',
+      'The Heninger study found tens of thousands of duplicate RSA keys on the public internet from ' +
+        'exactly this.',
+      '**Randomness failures are silent and total.** Nothing looks wrong. The keys are valid, the ' +
+        'protocol works, the tests pass, and the security is zero.',
+      'There is no monitoring that detects it after the fact, which is why the only defence is ' +
+        'using the platform generator and never rolling your own.'
+    ];
+  }
+
+  function orientation() {
+    return orientationKinds().concat(orientationFailures());
   }
 
   function config() {
@@ -91,12 +103,12 @@
       },
       diagram: diagram(),
       insight: '**The 2012 studies found tens of thousands of duplicate RSA keys on the public ' +
-        'internet because embedded devices generated them before their entropy pool had ' +
-        'anything in it — randomness failures are silent and total.** That is the shape of the ' +
+        'internet, because embedded devices generated them before their entropy pool had ' +
+        'anything in it. Randomness failures are silent and total.** That is the shape of the ' +
         'whole problem: there is no symptom. The keys validate, the handshakes succeed, the ' +
         'traffic is encrypted, and an attacker who knows the device model can regenerate the ' +
         'private key. Nothing in a test suite, a monitoring dashboard or a code review catches ' +
-        'it, so the defence has to be structural: use the platform CSPRNG, never seed it ' +
+        'it, so the defence has to be structural. Use the platform CSPRNG, never seed it ' +
         'yourself, and treat "generate a key at first boot" as a design smell that needs an ' +
         'entropy source or a deferred key generation.'
     };

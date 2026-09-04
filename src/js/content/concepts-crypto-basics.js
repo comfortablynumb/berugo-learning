@@ -166,12 +166,15 @@
         },
         plain: 'One promises good distribution; the other promises unpredictability.',
         formal: 'a statistical generator guarantees distribution tests pass; a CSPRNG guarantees output reveals nothing about future output',
-        detail: 'These are not two grades of the same property. A statistical generator is ' +
-          'designed to produce values that pass distribution tests, and it succeeds — which ' +
-          'says nothing whatever about whether an observer can predict the next one. A CSPRNG is ' +
-          'designed so that seeing any amount of output leaves the rest as unpredictable as ' +
-          'before, and that is the property a key, a nonce or a session token needs. Passing a ' +
-          'randomness test suite is evidence for the first and none at all for the second.',
+        detail: [
+          'These are not two grades of the same property.',
+          'A statistical generator is designed to produce values that pass distribution tests, and ' +
+            'it succeeds. That says nothing whatever about whether an observer can predict the next ' +
+            'one.',
+          'A CSPRNG is designed so that seeing any amount of output leaves the rest as unpredictable ' +
+            'as before. That is the property a key, a nonce or a session token needs. Passing a ' +
+            'randomness test suite is evidence for the first and none at all for the second.'
+        ],
         example: 'The demo predicts 8 of 8 future outputs of a statistical generator exactly, and ' +
           '0 of 8 against a keyed one.'
       },
@@ -182,12 +185,14 @@
         readAs: 'Each value is the previous value times a, plus c, reduced modulo m. Because a, ' +
           'c and m are published, anyone who sees one output can compute every output that ' +
           'follows it.',
-        detail: 'There is no statistics in the attack and no probability. The generator is a ' +
-          'published recurrence, its state is the value it last emitted, and applying the ' +
-          'recurrence forward is the entire break. This is why the observation count in the demo ' +
-          'is one rather than "enough samples": the secret is not spread across many outputs, it ' +
-          'IS an output. Mersenne Twister needs 624 observations instead of one, which is a ' +
-          'difference of degree and not of kind.',
+        detail: [
+          'There is no statistics in the attack and no probability.',
+          'The generator is a published recurrence, its state is the value it last emitted, and ' +
+            'applying the recurrence forward is the entire break.',
+          'This is why the observation count in the demo is one rather than "enough samples". The ' +
+            'secret is not spread across many outputs, it IS an output. Mersenne Twister needs 624 ' +
+            'observations instead of one, which is a difference of degree and not of kind.'
+        ],
         example: 'The demo needs 1 output to recover the whole state and then predicts the next 8 ' +
           'values exactly.'
       },
@@ -195,12 +200,16 @@
         term: 'Looking random is what a broken generator does',
         plain: 'The demo measures the entropy of the sequence it just predicted perfectly.',
         formal: 'the high byte of a 31-bit LCG measures 7.9553 bits of entropy out of 8, over 4 000 samples',
-        detail: 'That number is close to the maximum and it is exactly what every statistical ' +
-          'test measures. The same values were predicted with certainty a moment earlier, so the ' +
-          'entropy of an observed stream is not evidence of unpredictability and cannot be. It ' +
-          'gets worse in the other direction too: the LOW byte of the same generator carries only ' +
-          '1.2946 bits and takes 17 distinct values in four thousand samples, so which bits you ' +
-          'look at changes the verdict entirely while the predictability does not change at all.',
+        detail: [
+          'That number is close to the maximum, and it is exactly what every statistical test ' +
+            'measures.',
+          'The same values were predicted with certainty a moment earlier. So the entropy of an ' +
+            'observed stream is not evidence of unpredictability and cannot be.',
+          'It gets worse in the other direction too. The LOW byte of the same generator carries only ' +
+            '1.2946 bits and takes 17 distinct values in four thousand samples.',
+          'So which bits you look at changes the verdict entirely, while the predictability does not ' +
+            'change at all.'
+        ],
         example: 'The demo reports 7.9553 bits for the high byte with all 256 values seen, and ' +
           '1.2946 bits for the low byte with 17.'
       },
@@ -208,12 +217,15 @@
         term: 'The /dev/random blocking folklore points the wrong way',
         plain: 'Entropy is not consumed by use; a seeded generator produces unlimited output.',
         formal: 'once the pool is initialised, getrandom(2) never blocks again and the two devices are the same generator',
-        detail: 'The belief that reading randomness "drains" an entropy count leads people away ' +
-          'from the non-blocking interface and towards something worse — a userspace generator, a ' +
-          'clock seed, or a hand-rolled mixer. On a modern Linux kernel the pool is a seed and ' +
-          'the generator is a keyed function of it, so once initialised it can emit as many bytes ' +
-          'as anyone asks for. The genuine problem is the moment BEFORE initialisation, which is ' +
-          'precisely what getrandom(2) blocks for and then never blocks again.',
+        detail: [
+          'The belief that reading randomness "drains" an entropy count leads people away from the ' +
+            'non-blocking interface and towards something worse: a userspace generator, a clock ' +
+            'seed, or a hand-rolled mixer.',
+          'On a modern Linux kernel the pool is a seed and the generator is a keyed function of it. ' +
+            'Once initialised it can emit as many bytes as anyone asks for.',
+          'The genuine problem is the moment BEFORE initialisation, which is precisely what ' +
+            'getrandom(2) blocks for and then never blocks again.'
+        ],
         example: 'The demo’s entropy table lists this as the one non-failure among five ' +
           'situations.'
       },
@@ -221,12 +233,14 @@
         term: 'Boot, clones and forks are where entropy is actually missing',
         plain: 'A key generated before the pool has anything in it is a predictable key.',
         formal: 'first boot, VM cloning and fork() with userspace generator state all reproduce the same "random" values',
-        detail: 'An embedded device generating its host key on first boot has an almost empty ' +
-          'pool, so devices of the same model produce related or identical keys. A cloned VM ' +
-          'image resumes with a cloned pool and a cloned generator state. A forked child that ' +
-          'inherits userspace generator state continues the parent\'s stream, so two processes ' +
-          'emit the same nonces — which for AES-GCM is a complete break. All three are silent: ' +
-          'the keys are valid, the protocols work, and the security is zero.',
+        detail: [
+          'An embedded device generating its host key on first boot has an almost empty pool, so ' +
+            'devices of the same model produce related or identical keys.',
+          'A cloned VM image resumes with a cloned pool and a cloned generator state. A forked child ' +
+            'that inherits userspace generator state continues the parent\'s stream, so two ' +
+            'processes emit the same nonces, which for AES-GCM is a complete break.',
+          'All three are silent. The keys are valid, the protocols work, and the security is zero.'
+        ],
         example: 'The demo’s table names four such situations, including the study that found ' +
           'tens of thousands of duplicate RSA keys on the public internet.'
       },
@@ -234,24 +248,30 @@
         term: 'The remedy is which function you call',
         plain: 'Use the platform CSPRNG and never seed it yourself.',
         formal: 'crypto.getRandomValues in a browser, crypto.randomBytes or getrandom(2) on a server; never Math.random',
-        detail: 'There is no configuration to tune, no analysis to perform and no algorithm to ' +
-          'choose — the whole decision is the name of the function. `Math.random` is a ' +
-          'statistical PRNG in every engine, is not seeded from an entropy pool, and has been ' +
-          'used to generate session tokens, password-reset links and API keys in shipped software ' +
-          'repeatedly. Seeding a generator yourself is worse than useless, because a seed an ' +
-          'attacker can guess is a key an attacker can guess.',
+        detail: [
+          'There is no configuration to tune, no analysis to perform and no algorithm to choose. The ' +
+            'whole decision is the name of the function.',
+          '`Math.random` is a statistical PRNG in every engine and is not seeded from an entropy ' +
+            'pool. It has been used to generate session tokens, password-reset links and API keys ' +
+            'in shipped software repeatedly.',
+          'Seeding a generator yourself is worse than useless, because a seed an attacker can guess ' +
+            'is a key an attacker can guess.'
+        ],
         example: 'The demo’s comparison table ends on this row, and calls it the entire remedy.'
       },
       {
         term: 'Forward secrecy in a generator means reseeding',
         plain: 'A statistical recurrence runs backwards; a reseeded CSPRNG does not.',
         formal: 'a compromised generator state should not expose output produced before the last reseed',
-        detail: 'A linear recurrence is invertible, so an attacker who recovers the state can ' +
-          'produce not only future values but past ones — every key the generator ever emitted. ' +
-          'A CSPRNG built as a keyed function of a counter has no such inverse, and reseeding ' +
-          'from the pool periodically bounds how much a state compromise is worth in the other ' +
-          'direction too. That is the same forward-secrecy idea that appears in the ratchet ' +
-          'section, applied to a generator instead of a session.',
+        detail: [
+          'A linear recurrence is invertible, so an attacker who recovers the state can produce not ' +
+            'only future values but past ones. That is every key the generator ever emitted.',
+          'A CSPRNG built as a keyed function of a counter has no such inverse. Reseeding from the ' +
+            'pool periodically bounds how much a state compromise is worth in the other direction ' +
+            'too.',
+          'That is the same forward-secrecy idea that appears in the ratchet section, applied to a ' +
+            'generator instead of a session.'
+        ],
         example: 'The demo’s comparison table gives this its own row, separate from predicting ' +
           'the next output.'
       },
@@ -259,14 +279,16 @@
         term: 'Randomness failures are silent and total',
         plain: 'Nothing looks wrong, and there is no monitoring that catches it later.',
         formal: 'a weak key is a valid key: it passes validation, completes handshakes and encrypts traffic normally',
-        detail: 'This is what makes the failure class dangerous out of proportion to how often ' +
-          'it happens. A key from an empty entropy pool is structurally correct, so nothing in a ' +
-          'test suite, a dashboard or a code review notices, and the system works perfectly for ' +
-          'everyone including the attacker who regenerated the private key from the device model. ' +
-          'Because there is no symptom, the defence has to be structural: use the platform ' +
-          'generator, and treat "generate a key at first boot" as a design smell.',
-        example: 'The section’s insight is this: the 2012 studies found the duplicate keys by ' +
-          'scanning the internet, not because anything reported an error.'
+        detail: [
+          'This is what makes the failure class dangerous out of proportion to how often it happens.',
+          'A key from an empty entropy pool is structurally correct, so nothing in a test suite, a ' +
+            'dashboard or a code review notices. The system works perfectly for everyone, including ' +
+            'the attacker who regenerated the private key from the device model.',
+          'Because there is no symptom, the defence has to be structural. Use the platform ' +
+            'generator, and treat "generate a key at first boot" as a design smell.'
+        ],
+        example: 'The 2012 studies found the duplicate keys by scanning the internet, not because ' +
+          'anything reported an error.'
       }
     ],
 
