@@ -43,40 +43,51 @@
     };
   }
 
-  function orientation() {
+  function orientationResistances() {
     return [
-      '**⚠ Teaching code: not constant-time, not audited, never for real data.** Use `crypto.subtle` ' +
-        'or libsodium. These implementations exist so the attack can be executed rather than ' +
-        'described.',
-      '**A hash promises three separate things and they cost different amounts.** Preimage: given ' +
-        'a digest, find any input producing it. Second preimage: given an input, find a different ' +
-        'one with the same digest. Collision: find any two inputs that agree. The first two cost ' +
-        'about 2^n; the third costs about 2^(n/2), and that gap is the birthday bound.',
+      '**⚠ Teaching code: not constant-time, not audited, never for real data.** Use ' +
+        '`crypto.subtle` or libsodium. These implementations exist so the attack can be executed ' +
+        'rather than described.',
+      '**A hash promises three separate things and they cost different amounts.** Preimage is: ' +
+        'given a digest, find any input producing it. Second preimage is: given an input, find a ' +
+        'different one with the same digest.',
+      'Collision is: find any two inputs that agree. The first two cost about 2^n and the third ' +
+        'costs about 2^(n/2), and that gap is the birthday bound.',
       '**The birthday bound halves your digest.** SHA-256 gives 256-bit preimage resistance and ' +
         '128-bit collision resistance, and the demo computes the number of samples at which a ' +
-        'collision becomes even money. It is why a collision-resistant use needs twice the output ' +
-        'length a preimage-resistant use does.',
+        'collision becomes even money.',
+      'It is why a collision-resistant use needs twice the output length a preimage-resistant use ' +
+        'does.',
       '**Merkle–Damgård publishes its internal state as the digest.** SHA-1 and SHA-2 compress ' +
-        'block by block into a running state and then print it. An attacker holding the digest ' +
-        'holds a machine they can resume — not run backwards, but forwards, over blocks of their ' +
-        'own choosing.',
-      '**Which makes `hash(secret ‖ message)` forgeable, and the demo forges it.** Knowing the ' +
-        'tag and the LENGTH of the secret — not the secret — the attacker computes the padding ' +
-        'the original message would have received, resumes from the published digest, hashes ' +
-        'their own suffix and emits a tag the verifier accepts.',
+        'block by block into a running state and then print it.',
+      'An attacker holding the digest holds a machine they can resume. Not run backwards, but ' +
+        'forwards, over blocks of their own choosing.'
+    ];
+  }
+
+  function orientationForgery() {
+    return [
+      '**Which makes `hash(secret ‖ message)` forgeable, and the demo forges it.** The attacker ' +
+        'needs the tag and the LENGTH of the secret, not the secret itself.',
+      'They compute the padding the original message would have received, resume from the ' +
+        'published digest, hash their own suffix, and emit a tag the verifier accepts.',
       '**HMAC exists precisely for this, and it defeats the same attack in the demo.** Hashing ' +
-        'twice with two derived keys means the published value is the OUTER hash\'s output, and ' +
-        'resuming from it extends a message the verifier never hashes. `hash(message ‖ secret)` ' +
-        'also resists extension but loses to collisions on the message.',
+        'twice with two derived keys means the published value is the OUTER hash\'s output, so ' +
+        'resuming from it extends a message the verifier never hashes.',
+      '`hash(message ‖ secret)` also resists extension, but loses to collisions on the message.',
       '**A sponge does not have the property at all.** SHA-3 and BLAKE3 keep a state wider than ' +
-        'their output and publish a truncated slice, so there is nothing to resume from — and ' +
-        'both offer keyed modes directly, so the HMAC wrapper is unnecessary rather than merely ' +
+        'their output and publish a truncated slice, so there is nothing to resume from.',
+      'Both offer keyed modes directly, so the HMAC wrapper is unnecessary rather than merely ' +
         'redundant.',
       '**This is still being reinvented incorrectly.** API-signing schemes that concatenate a ' +
         'shared secret with a canonicalised request and hash the result are the same construction ' +
-        'as the one the demo breaks, and they ship regularly. The fix is one function call, and ' +
-        'the failure is a complete authentication bypass.'
+        'as the one the demo breaks, and they ship regularly.',
+      'The fix is one function call, and the failure is a complete authentication bypass.'
     ];
+  }
+
+  function orientation() {
+    return orientationResistances().concat(orientationForgery());
   }
 
   function config() {
@@ -90,11 +101,11 @@
       diagram: diagram(),
       insight: '**The length-extension property is why HMAC exists, and it is still being ' +
         'reinvented incorrectly in API-signing schemes today.** The reason it keeps happening is ' +
-        'that `hash(secret ‖ request)` looks obviously correct: the secret is in there, the hash ' +
+        'that `hash(secret ‖ request)` looks obviously correct. The secret is in there, the hash ' +
         'is strong, and no amount of staring at the digest reveals the key. The flaw is not in ' +
-        'the hash at all, it is in what Merkle–Damgård chooses to publish, and it is invisible ' +
+        'the hash at all. It is in what Merkle–Damgård chooses to publish, and it is invisible ' +
         'unless you already know to look for it. That is the general lesson of the milestone in ' +
-        'one construction: the primitive is fine, the composition is the vulnerability, and the ' +
+        'one construction. The primitive is fine, the composition is the vulnerability, and the ' +
         'only defence is using the composition somebody has already attacked.'
     };
   }

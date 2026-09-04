@@ -298,16 +298,20 @@
         plain: 'Preimage, second preimage and collision are separate promises.',
         formal: 'preimage and second preimage cost about 2ⁿ; a collision costs about 2^(n/2)',
         readAs: 'Finding an input for a given digest, or a second input matching a given one, ' +
-          'costs about two to the n operations for an n-bit digest, while finding any two inputs ' +
-          'that agree costs only about two to the n-over-two.',
-        detail: 'Asking "is this hash broken?" is the wrong question, because the three ' +
-          'properties fall separately. MD5 and SHA-1 both lost collision resistance while their ' +
-          'preimage resistance was never broken, which is why an MD5 checksum against accidental ' +
-          'corruption is still fine and an MD5 signature is not. Knowing which property a use ' +
-          'depends on is what decides whether a deprecation applies to you.',
+          'costs about two to the n operations for an n-bit digest. Finding any two inputs that ' +
+          'agree costs only about two to the n-over-two.',
+        detail: [
+          'Asking "is this hash broken?" is the wrong question, because the three properties fall ' +
+            'separately.',
+          'MD5 and SHA-1 both lost collision resistance while their preimage resistance was never ' +
+            'broken. That is why an MD5 checksum against accidental corruption is still fine and an ' +
+            'MD5 signature is not.',
+          'Knowing which property a use depends on is what decides whether a deprecation applies to ' +
+            'you.'
+        ],
         example: 'The demo tabulates all three at five digest sizes, computing the collision ' +
-          'sample count from the birthday formula rather than quoting it: 5.0569 × 10⁹ samples ' +
-          'at 64 bits and 1.4234 × 10²⁴ at 160.'
+          'sample count from the birthday formula rather than quoting it. It reads 5.0569 × 10⁹ ' +
+          'samples at 64 bits and 1.4234 × 10²⁴ at 160.'
       },
       {
         term: 'The birthday bound halves your digest',
@@ -324,15 +328,17 @@
         plain: 'Collision resistance is half the output length, not all of it.',
         formal: 'a collision becomes even money at about √(2·ln 2·2ⁿ) samples, so SHA-256 gives 128-bit collision resistance',
         readAs: 'Even odds of a collision arrive after roughly the square root of the size of ' +
-          'the output space, so a two-hundred-and-fifty-six-bit digest resists collisions at ' +
-          'about two to the hundred-and-twenty-eighth rather than two to the ' +
+          'the output space. So a two-hundred-and-fifty-six-bit digest resists collisions at ' +
+          'about two to the hundred-and-twenty-eighth, rather than two to the ' +
           'two-hundred-and-fifty-sixth.',
-        detail: 'The consequence is a design rule: a use that needs collision resistance needs ' +
-          'twice the digest length a preimage-resistant use does. It also explains why the ' +
-          '128-bit digests everyone grew up with turned out to be inadequate — a 128-bit hash ' +
-          'resists collisions at about 1.7 × 10¹⁹ samples, which an adversary with a budget has ' +
-          'reached in practice, and the real SHA-1 collision cost about 2⁶³ rather than the 2⁸⁰ ' +
-          'the bound suggests.',
+        detail: [
+          'The consequence is a design rule. A use that needs collision resistance needs twice the ' +
+            'digest length a preimage-resistant use does.',
+          'It also explains why the 128-bit digests everyone grew up with turned out to be ' +
+            'inadequate. A 128-bit hash resists collisions at about 1.7 × 10¹⁹ samples, which an ' +
+            'adversary with a budget has reached in practice.',
+          'The real SHA-1 collision cost about 2⁶³ rather than the 2⁸⁰ the bound suggests.'
+        ],
         example: 'The demo computes 4.0065 × 10³⁸ samples for SHA-256 and 2.1719 × 10¹⁹ for a ' +
           '128-bit digest.'
       },
@@ -340,12 +346,15 @@
         term: 'Merkle–Damgård publishes its internal state',
         plain: 'The digest of SHA-1 or SHA-2 IS the machine’s state after the last block.',
         formal: 'the compression function folds each block into a running state, and the final state is printed as the digest',
-        detail: 'That structural choice is the whole vulnerability. Anyone holding the digest ' +
-          'holds a machine they can resume — not run backwards to recover the input, but run ' +
-          'FORWARD over blocks of their own choosing, producing a legitimate digest for a longer ' +
-          'message. It is not a weakness in the compression function and no amount of ' +
-          'strengthening SHA-256 removes it; it is what "the digest is the state" means. A sponge ' +
-          'keeps a wider state and publishes a truncated slice, so it has nothing to resume.',
+        detail: [
+          'That structural choice is the whole vulnerability.',
+          'Anyone holding the digest holds a machine they can resume. Not run backwards to recover ' +
+            'the input, but run FORWARD over blocks of their own choosing, producing a legitimate ' +
+            'digest for a longer message.',
+          'It is not a weakness in the compression function, and no amount of strengthening SHA-256 ' +
+            'removes it. It is what "the digest is the state" means, and a sponge keeps a wider ' +
+            'state and publishes a truncated slice, so it has nothing to resume.'
+        ],
         example: 'The demo resumes SHA-256 from a published tag and produces a valid tag for a ' +
           'message the key holder never authorised.'
       },
@@ -353,15 +362,18 @@
         term: 'Length extension forges hash(secret ‖ message)',
         plain: 'The tag and the secret’s LENGTH are enough; the secret itself is not needed.',
         formal: 'given H(s ‖ m) and |s|, an attacker computes H(s ‖ m ‖ glue ‖ suffix) for any suffix',
-        readAs: 'Given the hash of a secret followed by a message, and the length of that secret, ' +
-          'an attacker can compute the hash of the same secret and message followed by padding ' +
-          'and anything they choose.',
-        detail: 'The glue is the padding the original message would have received, which the ' +
-          'attacker reconstructs because padding depends only on the total length. They guess the ' +
-          'secret length — there are only a few dozen plausible values, and each can simply be ' +
-          'tried — load the published tag back in as the hash state, hash their own suffix, and ' +
-          'emit a tag the verifier accepts. The cost is one hash computation and the result is a ' +
-          'complete authentication bypass.',
+        readAs: 'Take the hash of a secret followed by a message, and the length of that secret. ' +
+          'An attacker can then compute the hash of the same secret and message, followed by ' +
+          'padding and anything they choose.',
+        detail: [
+          'The glue is the padding the original message would have received, which the attacker ' +
+            'reconstructs because padding depends only on the total length.',
+          'They guess the secret length, and there are only a few dozen plausible values, each of ' +
+            'which can simply be tried.',
+          'Then they load the published tag back in as the hash state, hash their own suffix, and ' +
+            'emit a tag the verifier accepts. The cost is one hash computation, and the result is a ' +
+            'complete authentication bypass.'
+        ],
         example: 'With a 16-byte secret and a 19-byte message the demo computes 29 glue bytes and ' +
           'the forged tag is accepted.'
       },
@@ -372,12 +384,15 @@
         readAs: 'Take the key exclusive-ORed with one constant, follow it with the hash of the ' +
           'key exclusive-ORed with a different constant and then the message, and hash the whole ' +
           'thing again. What is published is the outer hash, which an attacker cannot extend.',
-        detail: 'Resuming the published digest would extend the outer hash, whose input is a ' +
-          'digest the attacker cannot control and which the verifier never re-hashes, so the ' +
-          'attack produces nothing. HMAC is also proved secure from properties of the compression ' +
-          'function rather than assumed, which is why it survived MD5 and SHA-1 losing collision ' +
-          'resistance. The same attack the demo runs against the naive construction is run ' +
-          'against HMAC and fails.',
+        detail: [
+          'Resuming the published digest would extend the outer hash, whose input is a digest the ' +
+            'attacker cannot control and which the verifier never re-hashes. So the attack produces ' +
+            'nothing.',
+          'HMAC is also proved secure from properties of the compression function rather than ' +
+            'assumed, which is why it survived MD5 and SHA-1 losing collision resistance.',
+          'The same attack the demo runs against the naive construction is run against HMAC, and it ' +
+            'fails.'
+        ],
         example: 'The demo reports the naive tag forged as "yes" and the HMAC tag forged as "no", ' +
           'both computed at render time.'
       },
@@ -385,15 +400,18 @@
         term: 'The patches people invent instead are worse',
         plain: 'Moving the secret to the end stops extension and opens a collision attack.',
         formal: 'hash(message ‖ secret) resists extension but a collision on the message forges the tag, offline',
-        readAs: 'Hashing the message followed by the secret cannot be extended, but any two ' +
+        readAs: 'Hashing the message followed by the secret cannot be extended. But any two ' +
           'messages that collide under the hash produce the same tag under any secret, and that ' +
           'collision is found without touching the system.',
-        detail: 'This is the natural fix when somebody learns about length extension, and it ' +
-          'trades one failure for another: two messages that collide under the hash produce the ' +
-          'same tag under any secret, and the attacker finds that collision offline with no ' +
-          'access to the system at all. Wrapping the message in the secret at both ends stops ' +
-          'both attacks and has no security proof, so nobody can say what else it permits. ' +
-          'Inventing a MAC is a research problem; HMAC already solved it.',
+        detail: [
+          'This is the natural fix when somebody learns about length extension, and it trades one ' +
+            'failure for another.',
+          'Two messages that collide under the hash produce the same tag under any secret, and the ' +
+            'attacker finds that collision offline with no access to the system at all.',
+          'Wrapping the message in the secret at both ends stops both attacks and has no security ' +
+            'proof, so nobody can say what else it permits. Inventing a MAC is a research problem, ' +
+            'and HMAC already solved it.'
+        ],
         example: 'The demo’s construction table rates six constructions and only three carry a ' +
           'proof.'
       },
@@ -401,12 +419,15 @@
         term: 'A sponge does not have the property at all',
         plain: 'SHA-3 and BLAKE3 keep more state than they publish.',
         formal: 'a sponge absorbs into a state wider than its output and squeezes a truncated slice, so the digest is not resumable',
-        detail: 'Because the published digest is only part of the state, there is no way to ' +
-          'reconstruct the machine and continue it, and the length-extension property is absent ' +
-          'rather than defended against. That is why SHA-3 and BLAKE3 offer keyed modes directly ' +
-          'and need no HMAC wrapper: the wrapper exists to work around a structural property they ' +
-          'do not have. It also makes them the simpler choice for a new design, since there is ' +
-          'one fewer way to compose them wrongly.',
+        detail: [
+          'Because the published digest is only part of the state, there is no way to reconstruct ' +
+            'the machine and continue it. The length-extension property is absent rather than ' +
+            'defended against.',
+          'That is why SHA-3 and BLAKE3 offer keyed modes directly and need no HMAC wrapper. The ' +
+            'wrapper exists to work around a structural property they do not have.',
+          'It also makes them the simpler choice for a new design, since there is one fewer way to ' +
+            'compose them wrongly.'
+        ],
         example: 'The demo’s table marks KMAC and BLAKE3 keyed mode as correct and notes the ' +
           'wrapper is unnecessary rather than merely redundant.'
       },
@@ -415,14 +436,16 @@
         plain: 'Concatenating a shared secret with a canonicalised request and hashing it is the same bug.',
         formal: 'signature = H(secret ‖ canonical_request) is the construction the demo forges',
         readAs: 'The signature is the hash of the shared secret followed by the canonicalised ' +
-          'request, which is exactly the concatenation the length-extension attack in the demo ' +
-          'forges without ever learning the secret.',
-        detail: 'It keeps happening because the construction looks obviously correct: the secret ' +
-          'is in there, the hash is strong, and no amount of staring at the digest reveals the ' +
-          'key. The flaw is not in the hash at all, it is in what Merkle–Damgård chooses to ' +
-          'publish, and it is invisible unless you already know to look for it. That is the ' +
-          'general lesson of the milestone in one construction — the primitive is fine, the ' +
-          'composition is the vulnerability, and the fix is one function call.',
+          'request. That is exactly the concatenation the length-extension attack in the demo ' +
+          'forges, without ever learning the secret.',
+        detail: [
+          'It keeps happening because the construction looks obviously correct. The secret is in ' +
+            'there, the hash is strong, and no amount of staring at the digest reveals the key.',
+          'The flaw is not in the hash at all. It is in what Merkle–Damgård chooses to publish, and ' +
+            'it is invisible unless you already know to look for it.',
+          'That is the general lesson of the milestone in one construction. The primitive is fine, ' +
+            'the composition is the vulnerability, and the fix is one function call.'
+        ],
         example: 'The demo’s attack table shows all six steps, and none of them requires the ' +
           'secret or a weakness in SHA-256.'
       }
