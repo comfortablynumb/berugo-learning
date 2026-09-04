@@ -46,32 +46,37 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**A fixed-width integer is a bit pattern plus an agreement about how to read it.** The same ' +
+        'eight bits `1111 1111` are 255 to code that agreed unsigned and −1 to code that agreed ' +
+        'signed, and nothing in the bits themselves settles it.',
+      'Two’s complement is the agreement everybody uses, and it is chosen for one reason: **the ' +
+        'same adder works for both readings**. The hardware does not need to know which one you ' +
+        'meant.',
+      '**Carry and overflow are different flags, and the difference is the whole section.** Carry ' +
+        'says the result left the unsigned range; overflow says it left the signed one.',
+      'They disagree constantly. At eight bits `0xFF + 0x01` carries and does not overflow, while ' +
+        '`0x7F + 0x01` overflows and does not carry.',
+      'The processor raises both on every addition, and the *types in your source code* decide ' +
+        'which one was the error.',
+      '**There is one more negative value than positive**, because zero takes a slot on the ' +
+        'positive side.',
+      'That asymmetry is not a curiosity. `−INT_MIN` is not representable, so negating the smallest ' +
+        'value gives back the smallest value and `abs()` of it is negative. And `INT_MIN / −1` ' +
+        'traps on x86 with the same signal as division by zero. The demo shows all three as values.',
+      '**What happens on overflow is a policy, and there are four.** Wrapping keeps the low bits ' +
+        'and is what JavaScript’s bitwise operators, Go and release-mode Rust do. Saturating clamps ' +
+        'to the range and is what audio and fixed-point pipelines want. Checked refuses to answer.',
+      'C picks the fourth: signed overflow is *undefined behaviour*, which means the compiler may ' +
+        'assume it cannot happen and delete the check you wrote after the addition.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'A fixed-width integer is a **bit pattern plus an agreement about how to read it**. The ' +
-          'same eight bits `1111 1111` are 255 to code that agreed unsigned and −1 to code that ' +
-          'agreed signed, and nothing in the bits themselves settles it. Two’s complement is ' +
-          'the agreement everybody uses, and it is chosen for one reason: **the same adder works ' +
-          'for both readings**, so the hardware does not need to know which one you meant.',
-        '**Carry and overflow are different flags, and the difference is the whole section.** ' +
-          'Carry says the result left the unsigned range; overflow says it left the signed one. ' +
-          'They disagree constantly — at eight bits `0xFF + 0x01` carries and does not overflow, ' +
-          '`0x7F + 0x01` overflows and does not carry. The processor raises both on every ' +
-          'addition and the *types in your source code* decide which one was the error.',
-        '**There is one more negative value than positive**, because zero takes a slot on the ' +
-          'positive side. That asymmetry is not a curiosity: `−INT_MIN` is not representable, so ' +
-          'negating the smallest value gives back the smallest value, `abs()` of it is negative, ' +
-          'and `INT_MIN / −1` traps on x86 with the same signal as division by zero. The demo ' +
-          'shows all three as values.',
-        '**What happens on overflow is a policy, and there are three.** Wrapping keeps the low ' +
-          'bits and is what JavaScript’s bitwise operators, Go and release-mode Rust do; ' +
-          'saturating clamps to the range and is what audio and fixed-point pipelines want; ' +
-          'checked refuses to answer. C picks a fourth: signed overflow is *undefined behaviour*, ' +
-          'which means the compiler may assume it cannot happen and delete the check you wrote ' +
-          'after the addition.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — one pattern, two readings, three policies',
         markup: root.IntegerRepresentationTemplate.render()
@@ -79,13 +84,13 @@
       diagram: diagram(),
       insight: 'The bug this section prevents is not "my number wrapped". It is "my overflow ' +
         'check never ran". `if (a + b < a) return error;` is the classic unsigned check and it ' +
-        'is correct; the same shape on signed integers in C is undefined behaviour, the ' +
-        'compiler is entitled to conclude the condition is false, and the check disappears from ' +
-        'the binary at −O2. Check *before* the operation using the range, or use the checked ' +
-        'primitive your language gives you. In JavaScript the trap is different and quieter: ' +
-        'everything is a double until a bitwise operator turns it into int32, so `x | 0` is a ' +
-        'truncating cast and `1 << 31` is negative, while plain arithmetic silently stops being ' +
-        'exact above 2⁵³ with no operator involved at all.'
+        'is correct. The same shape on signed integers in C is undefined behaviour, the compiler ' +
+        'is entitled to conclude the condition is false, and the check disappears from the binary ' +
+        'at −O2. Check *before* the operation using the range, or use the checked primitive your ' +
+        'language gives you. In JavaScript the trap is different and quieter. Everything is a ' +
+        'double until a bitwise operator turns it into int32, so `x | 0` is a truncating cast and ' +
+        '`1 << 31` is negative. And plain arithmetic silently stops being exact above 2⁵³, with ' +
+        'no operator involved at all.'
     };
   }
 

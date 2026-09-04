@@ -21,12 +21,15 @@
         },
         plain: 'The same eight bits are 255 unsigned and −1 signed, and nothing in the bits settles which.',
         formal: 'pattern 1111 1111 reads as 255 under the unsigned agreement and as −1 under two’s complement',
-        detail: 'This is the fact every later confusion grows out of. A width does not store a ' +
-          'number, it stores a pattern, and the type in the source code is the only thing that ' +
-          'says how to read it — the hardware has no idea. That is why a C cast between `int` and ' +
-          '`unsigned` compiles to no instructions at all, why a protocol that omits the signedness ' +
-          'of a field is under-specified, and why reading the same buffer through two typed-array ' +
-          'views gives two different answers without either being wrong.',
+        detail: [
+          'This is the fact every later confusion grows out of.',
+          'A width does not store a number, it stores a pattern. The type in the source code is the ' +
+            'only thing that says how to read it, and the hardware has no idea.',
+          'That is why a C cast between `int` and `unsigned` compiles to no instructions at all, and ' +
+            'why a protocol that omits the signedness of a field is under-specified. It is also why ' +
+            'reading the same buffer through two typed-array views gives two different answers, ' +
+            'without either being wrong.'
+        ],
         example: 'At eight bits the demo shows 0xFF as 255 and as −1 simultaneously; only the ' +
           'checkbox changes, and no bit moves.'
       },
@@ -45,14 +48,17 @@
         },
         plain: 'Adding is the same walk clockwise around the wheel whether you call the values signed or unsigned.',
         formal: 'the signed value of a pattern p at width n is p when p < 2^(n−1), and p − 2^n otherwise',
-        readAs: 'Read the bits as an ordinary positive number; if that number reaches the halfway ' +
-          'point of the width, subtract the whole range from it to get the negative value it stands for.',
-        detail: 'Sign-and-magnitude and ones’ complement both existed and both lost, because ' +
-          'both need the adder to know which representation it is looking at, and both have two ' +
-          'zeros. Two’s complement makes the bit patterns a circle: adding one always steps ' +
-          'clockwise, and the signed reading is just a decision about where to cut the circle. The ' +
-          'consequence is that a processor needs one adder, one subtractor and one comparison ' +
-          'circuit rather than two of each, and that is the entire reason the format won.',
+        readAs: 'Read the bits as an ordinary positive number. If that number reaches the halfway ' +
+          'point of the width, subtract the whole range from it to get the negative value it ' +
+          'stands for.',
+        detail: [
+          'Sign-and-magnitude and ones’ complement both existed and both lost. Both need the adder ' +
+            'to know which representation it is looking at, and both have two zeros.',
+          'Two’s complement makes the bit patterns a circle. Adding one always steps clockwise, and ' +
+            'the signed reading is just a decision about where to cut the circle.',
+          'The consequence is that a processor needs one adder, one subtractor and one comparison ' +
+            'circuit rather than two of each. That is the entire reason the format won.'
+        ],
         example: 'The wheel in the demo marks 0, 127 and −128 on one circle at eight bits; the ' +
           'dashed line is the cut, and it is the only discontinuity.'
       },
@@ -60,12 +66,15 @@
         term: 'Carry and overflow are different flags and they disagree constantly',
         plain: 'Carry says the result left the unsigned range; overflow says it left the signed one.',
         formal: '0xFF + 0x01 at eight bits raises carry and not overflow; 0x7F + 0x01 raises overflow and not carry',
-        detail: 'One adder computes both flags on every addition, and the processor raises both — ' +
-          'which one was the error is decided by the types in the source, and the hardware cannot ' +
-          'know. This is why an unsigned overflow check and a signed one are different pieces of ' +
-          'code even though the addition is the same instruction, and why an assembly programmer ' +
-          'chooses between `jc` and `jo` rather than being told which to use. Confusing them ' +
-          'produces a check that passes for exactly the inputs it was written to catch.',
+        detail: [
+          'One adder computes both flags on every addition, and the processor raises both. Which one ' +
+            'was the error is decided by the types in the source, and the hardware cannot know.',
+          'This is why an unsigned overflow check and a signed one are different pieces of code even ' +
+            'though the addition is the same instruction.',
+          'It is also why an assembly programmer chooses between `jc` and `jo` rather than being ' +
+            'told which to use. Confusing them produces a check that passes for exactly the inputs ' +
+            'it was written to catch.'
+        ],
         example: 'At 100 + 100 in the demo the flags read "overflow only": 200 is inside 0 … 255 ' +
           'and outside −128 … 127.'
       },
@@ -73,12 +82,15 @@
         term: 'There is one more negative value than positive, and negation is not total',
         plain: 'Zero occupies a slot on the positive side, so the most negative value has no positive counterpart.',
         formal: 'at width n the range is −2^(n−1) … 2^(n−1) − 1, so −(−2^(n−1)) is not representable',
-        detail: 'This is not a curiosity, it is three real bugs. Negating the smallest value ' +
-          'returns the smallest value, so `abs()` of it is negative; `INT_MIN / −1` traps on x86 ' +
-          'with the same signal as division by zero, because the true quotient is one past the ' +
-          'top of the range; and any code that computes `-x` on a signed value it did not bound ' +
-          'has a case it has not considered. The asymmetry is a direct consequence of the wheel ' +
-          'having an even number of positions and zero taking one of them.',
+        detail: [
+          'This is not a curiosity, it is three real bugs.',
+          'Negating the smallest value returns the smallest value, so `abs()` of it is negative. And ' +
+            '`INT_MIN / −1` traps on x86 with the same signal as division by zero, because the true ' +
+            'quotient is one past the top of the range.',
+          'Any code that computes `-x` on a signed value it did not bound has a case it has not ' +
+            'considered. The asymmetry is a direct consequence of the wheel having an even number of ' +
+            'positions and zero taking one of them.'
+        ],
         example: 'At eight bits the demo reports 128 negatives against 127 positives, and negating ' +
           '−128 gives −128.'
       },
@@ -86,12 +98,15 @@
         term: 'Overflow is a policy, and there are four of them',
         plain: 'Wrap, saturate, refuse, or declare it undefined — and only one of those lets the caller respond.',
         formal: 'wrapping keeps the low bits; saturating clamps to the range; checked returns nothing; C makes signed overflow undefined',
-        detail: 'JavaScript’s bitwise operators, Go and release-mode Rust wrap. Audio and ' +
-          'fixed-point pipelines saturate, because a clipped sample is a quieter failure than a ' +
-          'sample that jumps to the opposite extreme. Checked arithmetic refuses to answer, which ' +
-          'is the only policy the caller can actually handle. C’s choice is the dangerous one: ' +
-          '*undefined behaviour* means the compiler may assume overflow cannot happen, so a check ' +
-          'written after the addition can be deleted at −O2 and the binary has no check in it.',
+        detail: [
+          'JavaScript’s bitwise operators, Go and release-mode Rust wrap.',
+          'Audio and fixed-point pipelines saturate, because a clipped sample is a quieter failure ' +
+            'than a sample that jumps to the opposite extreme. Checked arithmetic refuses to answer, ' +
+            'which is the only policy the caller can actually handle.',
+          'C’s choice is the dangerous one. *Undefined behaviour* means the compiler may assume ' +
+            'overflow cannot happen, so a check written after the addition can be deleted at −O2 and ' +
+            'the binary has no check in it.'
+        ],
         example: 'The demo shows 100 + 100 at int8 as −56 wrapping, 127 saturating, and no answer ' +
           'at all under the checked policy.'
       },
@@ -99,12 +114,15 @@
         term: 'Widening needs the sign bit replicated, not zeros',
         plain: 'Sign extension copies the top bit outwards; zero extension does not, and picking wrong turns −1 into 255.',
         formal: 'sign-extending an 8-bit −1 to 16 bits gives 0xFFFF; zero-extending it gives 0x00FF',
-        detail: 'Which extension is correct depends on the *source* type, not the destination, ' +
-          'which is why the classic `char` bug survives so long: a platform where `char` is signed ' +
-          'sign-extends a byte above 127 into a negative `int`, and one where it is unsigned does ' +
-          'not, so the same code parses a UTF-8 continuation byte correctly on one machine and ' +
-          'indexes an array at −56 on another. Every processor has separate load instructions for ' +
-          'the two cases precisely because the hardware cannot infer it either.',
+        detail: [
+          'Which extension is correct depends on the *source* type, not the destination, which is ' +
+            'why the classic `char` bug survives so long.',
+          'A platform where `char` is signed sign-extends a byte above 127 into a negative `int`, ' +
+            'and one where it is unsigned does not. So the same code parses a UTF-8 continuation ' +
+            'byte correctly on one machine and indexes an array at −56 on another.',
+          'Every processor has separate load instructions for the two cases, precisely because the ' +
+            'hardware cannot infer it either.'
+        ],
         example: 'The demo’s width control re-reads the same pattern at 8, 16, 32 and 64 bits, ' +
           'and the signed reading of 0xFF stays −1 at every one of them.'
       },
@@ -112,12 +130,15 @@
         term: 'Endianness is a property of the mapping to addresses, not of the number',
         plain: 'The number is the same; the order its bytes go into memory is a separate agreement.',
         formal: '0x12345678 stores as 78 56 34 12 little-endian and 12 34 56 78 big-endian; each read the other way is 0x78563412',
-        detail: 'Nothing about the value changes — what changes is which byte lands at the lower ' +
-          'address, and the disagreement only becomes visible when something reads the bytes back ' +
-          'with the opposite agreement. That is why the bug survives every unit test: a one-byte ' +
-          'value, a palindrome and a zero all round-trip correctly whichever end you start from, ' +
-          'so it takes a real multi-byte value crossing a real boundary to expose it. Network ' +
-          'protocols fix the order in the specification for exactly this reason.',
+        detail: [
+          'Nothing about the value changes. What changes is which byte lands at the lower address, ' +
+            'and the disagreement only becomes visible when something reads the bytes back with the ' +
+            'opposite agreement.',
+          'That is why the bug survives every unit test. A one-byte value, a palindrome and a zero ' +
+            'all round-trip correctly whichever end you start from, so it takes a real multi-byte ' +
+            'value crossing a real boundary to expose it.',
+          'Network protocols fix the order in the specification for exactly this reason.'
+        ],
         example: 'At 32 bits the demo shows both byte orders and the value each produces when read ' +
           'the other way, and both come out as 2 018 915 346.'
       },
@@ -125,12 +146,15 @@
         term: 'JavaScript has one number type and two integer widths hidden inside it',
         plain: 'Every bitwise operator converts to int32 first, and plain arithmetic stops being exact above 2⁵³.',
         formal: '1 << 31 is −2147483648, 1 << 32 is 1, 4294967296 | 0 is 0, and (2**53) + 1 === 2**53',
-        detail: 'The bitwise operators are specified on int32, so `|`, `&`, `^`, `<<` and `>>` ' +
-          'apply ToInt32 to their operands — a wrap, not a clamp and not an error. `>>>` is the ' +
-          'single operator that yields uint32. The shift count is taken modulo 32, which is why a ' +
-          'shift of 32 is a shift of zero rather than a zero result. And entirely separately, with ' +
-          'no operator involved, the underlying double stops representing consecutive integers ' +
-          'above 2⁵³, which is what `Number.MAX_SAFE_INTEGER` names.',
+        detail: [
+          'The bitwise operators are specified on int32, so `|`, `&`, `^`, `<<` and `>>` apply ' +
+            'ToInt32 to their operands. That is a wrap, not a clamp and not an error.',
+          '`>>>` is the single operator that yields uint32. The shift count is taken modulo 32, ' +
+            'which is why a shift of 32 is a shift of zero rather than a zero result.',
+          'And entirely separately, with no operator involved, the underlying double stops ' +
+            'representing consecutive integers above 2⁵³. That is what ' +
+            '`Number.MAX_SAFE_INTEGER` names.'
+        ],
         example: 'The coercion table in the demo shows all eight of these, including `~~3.7` giving ' +
           '3 and `-1 >>> 0` giving 4 294 967 295.'
       }
