@@ -146,11 +146,13 @@
         term: 'Correction repairs damage without asking for a retransmission',
         plain: 'Because sometimes there is nobody to ask.',
         formal: 'an (n, k) code carries k symbols of data in n, and any k of them suffice',
-        detail: 'A scratched disc, a cosmic ray in a DRAM cell, a QR code with a coffee ring on ' +
-          'it, a storage node that is simply gone — none of those can be re-requested. Detection ' +
-          'tells you the data is wrong and correction gives it back, and the price is the ' +
-          'redundancy paid on every read whether or not anything went wrong. That is a very ' +
-          'different economic shape from a retry.',
+        detail: [
+          'A scratched disc, a cosmic ray in a DRAM cell, a QR code with a coffee ring on it, a ' +
+            'storage node that is simply gone. None of those can be re-requested.',
+          'Detection tells you the data is wrong and correction gives it back. The price is the ' +
+            'redundancy paid on every read, whether or not anything went wrong.',
+          'That is a very different economic shape from a retry.'
+        ],
         example: 'The demo’s RS(16, 10) carries 10 data symbols in 16 and recovers from any 6 ' +
           'erasures.'
       },
@@ -168,23 +170,29 @@
         },
         plain: 'The failing parity checks spell the bad bit’s index in binary.',
         formal: 'parity bits at positions 2^i cover every position whose index has bit i set',
-        detail: 'That construction is why the code is called elegant rather than merely correct: ' +
-          'nothing is searched, and the syndrome is not a flag but an address. Zero means clean; ' +
-          'anything else is the one-based index of the bit to flip. It generalises directly — a ' +
-          'code with more parity bits addresses a larger block — and it is the reason ECC memory ' +
-          'can correct in hardware in a single cycle.',
-        example: 'The demo corrects 112 of 112 single-bit errors over all 16 data words, with the ' +
-          'syndrome equal to the flipped position every time.'
+        detail: [
+          'That construction is why the code is called elegant rather than merely correct. Nothing ' +
+            'is searched, and the syndrome is not a flag but an address.',
+          'Zero means clean. Anything else is the one-based index of the bit to flip.',
+          'It generalises directly, because a code with more parity bits addresses a larger block. ' +
+            'It is also the reason ECC memory can correct in hardware in a single cycle.'
+        ],
+        example: 'The demo corrects 112 of 112 single-bit errors over all 16 data words. The ' +
+          'syndrome equals the flipped position every time.'
       },
       {
         term: 'One more parity bit turns correction into SECDED',
         plain: 'Single error correct, double error DETECT.',
         formal: 'a syndrome that is non-zero while the overall parity is even is a state one error cannot produce',
-        detail: 'Without it, a double error produces a non-zero syndrome that points at some ' +
-          'innocent third bit, and a naive decoder flips it — turning two errors into three and ' +
-          'reporting success. The extra bit distinguishes the two cases, so a double error is ' +
-          'reported rather than miscorrected. That is what ECC memory does, and it is why an ' +
-          'uncorrectable-error counter exists in every server’s logs.',
+        detail: [
+          'Without it, a double error produces a non-zero syndrome that points at some innocent ' +
+            'third bit. A naive decoder flips it, turning two errors into three and reporting ' +
+            'success.',
+          'The extra bit distinguishes the two cases, so a double error is reported rather than ' +
+            'miscorrected.',
+          'That is what ECC memory does, and it is why an uncorrectable-error counter exists in ' +
+            'every server’s logs.'
+        ],
         example: 'The demo detects 448 of 448 double-bit errors as double errors, over every data ' +
           'word and every pair of positions.'
       },
@@ -194,11 +202,13 @@
         formal: 'GF(2^8) with the polynomial 0x11d; the code’s roots are consecutive powers of a generator',
         readAs: 'The arithmetic is in the field of 256 elements built from a degree-eight ' +
           'polynomial, and the code is defined by the powers of a generator that are its roots.',
-        detail: 'Working over a field rather than the integers is what makes everything exact: ' +
-          'there is no rounding, no overflow and no precision to lose, so a decoder either ' +
-          'succeeds exactly or reports failure. It also means a whole BYTE is one symbol, so a ' +
-          'burst of eight bad bits inside one byte costs one symbol of the correction budget ' +
-          'rather than eight.',
+        detail: [
+          'Working over a field rather than the integers is what makes everything exact.',
+          'There is no rounding, no overflow and no precision to lose, so a decoder either succeeds ' +
+            'exactly or reports failure.',
+          'It also means a whole BYTE is one symbol. A burst of eight bad bits inside one byte costs ' +
+            'one symbol of the correction budget rather than eight.'
+        ],
         example: 'The demo encodes over GF(256) and verifies the round-trip on every corruption ' +
           'up to the limit.'
       },
@@ -208,11 +218,14 @@
         formal: 'up to n − k erasures are repairable; only ⌊(n − k)/2⌋ unknown errors are correctable',
         readAs: 'The code repairs as many known-bad positions as it has parity symbols, and only ' +
           'half that many errors whose positions are unknown.',
-        detail: 'Finding WHERE the damage is costs as much redundancy as fixing it, which is the ' +
-          'whole reason distributed storage cares so much about failure detection. A node that is ' +
-          'known to be down is worth twice as much as one silently returning bad bytes, so ' +
-          'anything that makes a failure announce itself — a checksum per fragment, a health ' +
-          'check that fails fast — doubles the value of redundancy already paid for.',
+        detail: [
+          'Finding WHERE the damage is costs as much redundancy as fixing it. That is the whole ' +
+            'reason distributed storage cares so much about failure detection.',
+          'A node that is known to be down is worth twice as much as one silently returning bad ' +
+            'bytes.',
+          'So anything that makes a failure announce itself — a checksum per fragment, a health ' +
+            'check that fails fast — doubles the value of redundancy already paid for.'
+        ],
         example: 'The demo repairs 6 erasures and corrects 3 errors with the same 6 parity ' +
           'symbols.'
       },
@@ -222,34 +235,43 @@
         formal: 'beyond ⌊(n − k)/2⌋ errors the received word can be closer to a DIFFERENT valid codeword',
         readAs: 'Past the floor of n minus k over two errors, the damaged word may sit nearer to ' +
           'some other legal codeword than to the one that was sent.',
-        detail: 'That failure is worse than no correction at all: the machinery built to protect ' +
-          'the data manufactures silent corruption, confidently, and reports success. Which is ' +
-          'why a decoder has to check its own limit rather than searching until something ' +
-          'validates. The demo’s table has a row past the limit and it reports beyond-limit, ' +
-          'because the alternative is a number that looks like data.',
+        detail: [
+          'That failure is worse than no correction at all. The machinery built to protect the data ' +
+            'manufactures silent corruption, confidently, and reports success.',
+          'That is why a decoder has to check its own limit, rather than searching until something ' +
+            'validates.',
+          'The demo’s table has a row past the limit and it reports beyond-limit, because the ' +
+            'alternative is a number that looks like data.'
+        ],
         example: 'The demo corrects 1, 2 and 3 errors and reports beyond-limit at 4 and 5.'
       },
       {
         term: 'Erasure coding gives replication’s durability at half the storage',
         plain: 'More losses tolerated, less space, and that is why every object store uses it.',
         formal: 'r-way replication costs r× and survives r − 1 losses; an (n, k) code costs n/k× and survives n − k',
-        detail: 'The arithmetic is stark: three-way replication is 3× storage for two tolerated ' +
-          'losses, and RS(12, 8) is 1.5× for four. That factor of two on a storage bill is why ' +
-          'the switch happened across the industry, and it is why the default assumption should ' +
-          'be an erasure code unless the read pattern forbids it.',
-        example: 'The demo tabulates RS(14, 10) at 1.40× storage tolerating 4 losses against ' +
+        detail: [
+          'The arithmetic is stark. Three-way replication is 3× storage for two tolerated losses, ' +
+            'and RS(12, 8) is 1.5× for four.',
+          'That factor of two on a storage bill is why the switch happened across the industry.',
+          'It is also why the default assumption should be an erasure code, unless the read pattern ' +
+            'forbids it.'
+        ],
+        example: 'The demo tabulates RS(14, 10) at 1.40× storage tolerating 4 losses, against ' +
           '3× replication at 3.00× tolerating 2.'
       },
       {
         term: 'The cost nobody mentions is on the read path',
         plain: 'Rebuilding one lost fragment reads k fragments from k machines.',
         formal: 'reconstruction read amplification = k for an (n, k) code, against 1 for replication',
-        detail: 'On a quiet day that is invisible, because reads are served from the intact ' +
-          'fragments. During a correlated failure it is the traffic that turns one dead node into ' +
-          'a busy cluster: every object on that node needs k reads to rebuild, all at once, ' +
-          'across the network. That is the operational reason wide codes are chosen carefully and ' +
-          'why local-reconstruction codes exist — they add parity specifically to make the common ' +
-          'single-failure case cheap.',
+        detail: [
+          'On a quiet day that is invisible, because reads are served from the intact fragments.',
+          'During a correlated failure it is the traffic that turns one dead node into a busy ' +
+            'cluster. Every object on that node needs k reads to rebuild, all at once, across the ' +
+            'network.',
+          'That is the operational reason wide codes are chosen carefully, and why ' +
+            'local-reconstruction codes exist. They add parity specifically to make the common ' +
+            'single-failure case cheap.'
+        ],
         example: 'The demo reports 10 reconstruction reads for RS(14, 10) and 1 for replication, ' +
           'in a column beside the storage saving.'
       }

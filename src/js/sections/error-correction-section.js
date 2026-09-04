@@ -48,39 +48,52 @@
     };
   }
 
-  function orientation() {
+  function orientationCodes() {
     return [
-      '**Correction repairs damage without asking for a retransmission**, which is the only ' +
-        'option when there is nobody to ask: a scratched disc, a cosmic ray in a DRAM cell, a QR ' +
-        'code with a coffee ring on it, a storage node that is simply gone.',
+      '**Correction repairs damage without asking for a retransmission**, which is the only option ' +
+        'when there is nobody to ask.',
+      'Consider a scratched disc, a cosmic ray in a DRAM cell, a QR code with a coffee ring on it, ' +
+        'or a storage node that is simply gone.',
       '**Hamming’s construction reads the error’s position out of the syndrome.** Put parity bits ' +
-        'at the powers of two, each covering the positions whose index has that bit set, and the ' +
-        'failing parities spell the bad position’s index in binary. The demo checks that on every ' +
-        'data word and every position.',
+        'at the powers of two, each covering the positions whose index has that bit set.',
+      'The failing parities then spell the bad position’s index in binary. The demo checks that on ' +
+        'every data word and every position.',
       '**One more parity bit turns single-error-correct into SECDED.** A double error leaves the ' +
         'syndrome non-zero and the overall parity even, which is a state a single error cannot ' +
-        'produce — so it is reported rather than "corrected" into a third error. That is what ECC ' +
-        'memory does, and the demo verifies all 448 double-bit cases.',
-      '**Reed–Solomon works over symbols and over a finite field.** n symbols carry k of data, ' +
-        'any k of them reconstruct everything, and the arithmetic is GF(256) — bytes, with XOR ' +
-        'for addition and a table for multiplication, so there is no floating point to lose ' +
-        'precision to.',
-      '**Erasures are worth twice as much parity as errors.** A missing disc announces itself, so ' +
-        'there is nothing to locate and n − k of them can be repaired; an unknown error costs ' +
-        'redundancy to FIND as well as to fix, so only (n − k)/2 are correctable. The demo shows ' +
-        'both limits on the same codeword.',
-      '**Past the limit the decoder must say so.** A decoder without a limit check can ' +
-        '"correct" to a valid but wrong codeword, which is silent data corruption produced by the ' +
-        'error-correction machinery itself. The demo’s table has a row past the limit and it ' +
-        'reports beyond-limit rather than a plausible answer.',
-      '**Erasure coding gives 3× replication’s durability at about 1.5× storage**, which is why ' +
-        'every large object store uses it. The demo tabulates the trade at four parameter ' +
-        'choices with the storage factor beside the loss tolerance.',
-      '**The cost nobody mentions is on the read path.** Replication reads one copy; an erasure ' +
-        'code reconstructs a lost fragment by reading k fragments from k machines, so one failure ' +
-        'turns one read into k reads across the network. That reconstruction amplification is the ' +
-        'operational price, and it is in the last column.'
+        'produce.',
+      'So it is reported rather than "corrected" into a third error. That is what ECC memory does, ' +
+        'and the demo verifies all 448 double-bit cases.',
+      '**Reed–Solomon works over symbols and over a finite field.** n symbols carry k of data, and ' +
+        'any k of them reconstruct everything.',
+      'The arithmetic is GF(256): bytes, with XOR for addition and a table for multiplication, so ' +
+        'there is no floating point to lose precision to.'
     ];
+  }
+
+  function orientationLimits() {
+    return [
+      '**Erasures are worth twice as much parity as errors.** A missing disc announces itself, so ' +
+        'there is nothing to locate and n − k of them can be repaired.',
+      'An unknown error costs redundancy to FIND as well as to fix, so only (n − k)/2 are ' +
+        'correctable. The demo shows both limits on the same codeword.',
+      '**Past the limit the decoder must say so.** A decoder without a limit check can "correct" to ' +
+        'a valid but wrong codeword.',
+      'That is silent data corruption produced by the error-correction machinery itself. The demo’s ' +
+        'table has a row past the limit, and it reports beyond-limit rather than a plausible ' +
+        'answer.',
+      '**Erasure coding gives 3× replication’s durability at about 1.5× storage**, which is why ' +
+        'every large object store uses it.',
+      'The demo tabulates the trade at four parameter choices, with the storage factor beside the ' +
+        'loss tolerance.',
+      '**The cost nobody mentions is on the read path.** Replication reads one copy. An erasure ' +
+        'code reconstructs a lost fragment by reading k fragments from k machines.',
+      'So one failure turns one read into k reads across the network. That reconstruction ' +
+        'amplification is the operational price, and it is in the last column.'
+    ];
+  }
+
+  function orientation() {
+    return orientationCodes().concat(orientationLimits());
   }
 
   function config() {
@@ -93,14 +106,14 @@
       },
       diagram: diagram(),
       insight: '**Erasure coding gives the same durability as 3× replication at around 1.5× ' +
-        'storage — and its reconstruction read amplification is the operational cost nobody ' +
+        'storage. Its reconstruction read amplification is the operational cost nobody ' +
         'mentions.** A cluster that switches from replication to an (n, k) code halves its ' +
-        'storage bill and multiplies its cross-network traffic during recovery by k, which is ' +
-        'fine on a quiet Tuesday and is exactly what turns a single node failure into a cascading ' +
-        'one. The other half of the reading is the erasure/error distinction: detection is worth ' +
-        'twice as much parity as correction, so anything that makes a failure announce itself — ' +
-        'a checksum per fragment, a health check that fails fast — is doubling the value of the ' +
-        'redundancy you already paid for.'
+        'storage bill and multiplies its cross-network traffic during recovery by k. That is ' +
+        'fine on a quiet Tuesday, and it is exactly what turns a single node failure into a ' +
+        'cascading one. The other half of the reading is the erasure/error distinction. Detection ' +
+        'is worth twice as much parity as correction. So anything that makes a failure announce ' +
+        'itself doubles the value of the redundancy you already paid for. A checksum per fragment ' +
+        'does that, and so does a health check that fails fast.'
     };
   }
 
