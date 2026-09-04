@@ -296,11 +296,14 @@
         },
         plain: 'Recurse until the subproblem is small, and some level of the recursion fits.',
         formal: 'an algorithm is cache-oblivious when it achieves the cache-aware bound without B or M as parameters',
-        detail: 'The mechanism is that a recursion produces subproblems at every scale at once, ' +
-          'so whatever the cache size is, some level has subproblems that just fit. Every level ' +
-          'below that is entirely resident and free, and the levels above are amortised over the ' +
-          'work beneath them. Nothing in the code mentions the cache; the blocking is a ' +
-          'consequence of the recursion rather than a parameter of it.',
+        detail: [
+          'The mechanism is that a recursion produces subproblems at every scale at once. Whatever ' +
+            'the cache size is, some level has subproblems that just fit.',
+          'Every level below that is entirely resident and free, and the levels above are amortised ' +
+            'over the work beneath them.',
+          'Nothing in the code mentions the cache. The blocking is a consequence of the recursion ' +
+            'rather than a parameter of it.'
+        ],
         example: 'The demo’s recursive multiply stays within 1.333× of the best tile at every ' +
           'cache size while the best tile itself changes four times.'
       },
@@ -308,36 +311,42 @@
         term: 'A comparison is only honest if the tuned reference is retuned',
         plain: 'A tile chosen for one cache and used on four is a rigged comparison.',
         formal: 'the reference is min over tile sizes of the miss count, computed separately at each cache size',
-        detail: 'This is the measurement decision that makes the section worth having. If the ' +
-          'tuned version is tuned once and then run everywhere, the cache-oblivious version wins ' +
-          'trivially and the result means nothing. Retuning at every point makes the reference ' +
-          'the best a cache-aware implementation could possibly do given somebody measured that ' +
-          'machine — which is the honest opponent.',
+        detail: [
+          'This is the measurement decision that makes the section worth having.',
+          'If the tuned version is tuned once and then run everywhere, the cache-oblivious version ' +
+            'wins trivially and the result means nothing.',
+          'Retuning at every point makes the reference the best a cache-aware implementation could ' +
+            'possibly do, given somebody measured that machine. That is the honest opponent.'
+        ],
         example: 'The demo’s best tile is 8, 16, 32 and 4 at caches of 2, 4, 16 and 64 kilobytes.'
       },
       {
         term: 'The row-major transpose misses on every element of one side',
         plain: 'Reading along rows while writing along columns.',
         formal: 'the destination access stride is n·elementBytes, which exceeds a line for any n above B',
-        detail: 'One side of the transpose walks contiguously and the other jumps a row per ' +
-          'element, so every write is a new line and the cache never helps. Splitting the larger ' +
-          'dimension and recursing makes both sides local, because a small enough submatrix has ' +
-          'both its source and its destination resident at the same time.',
+        detail: [
+          'One side of the transpose walks contiguously and the other jumps a row per element.',
+          'So every write is a new line, and the cache never helps.',
+          'Splitting the larger dimension and recursing makes both sides local, because a small ' +
+            'enough submatrix has both its source and its destination resident at the same time.'
+        ],
         example: 'At 256 × 256 with a 16-kilobyte cache the demo measures 73 728 misses for the ' +
-          'row-major loop against 16 384 for both the tiled and the recursive versions.'
+          'row-major loop, against 16 384 for both the tiled and the recursive versions.'
       },
       {
         term: 'Recursive matrix multiplication reaches the blocked bound with no parameter',
         plain: 'Halve every dimension and make eight recursive calls.',
         formal: 'the blocked bound is O(n³/(B·√M)); the recursion attains it because some level has submatrices of side √M',
-        readAs: 'The blocked miss count is n cubed divided by B times the square root of M, and ' +
-          'the recursion reaches it because one of its levels has submatrices whose side is the ' +
+        readAs: 'The blocked miss count is n cubed divided by B times the square root of M. The ' +
+          'recursion reaches it because one of its levels has submatrices whose side is the ' +
           'square root of M.',
-        detail: 'The three matrices involved in a submatrix product of side s occupy 3s² ' +
-          'elements, so they fit when s is about √(M/3) — and the recursion passes through that ' +
-          'size on its way down whatever M is. Above that level the work is amortised; below it ' +
-          'everything is resident. The demo measures the penalty against a retuned tile at ' +
-          'between 1.18 and 1.33.',
+        detail: [
+          'The three matrices involved in a submatrix product of side s occupy 3s² elements, so they ' +
+            'fit when s is about √(M/3). The recursion passes through that size on its way down ' +
+            'whatever M is.',
+          'Above that level the work is amortised. Below it everything is resident.',
+          'The demo measures the penalty against a retuned tile at between 1.18 and 1.33.'
+        ],
         example: 'At a 4-kilobyte cache the demo measures 6 144 misses for the best tile, 8 192 ' +
           'for the recursion and 295 424 for the unblocked loop.'
       },
@@ -347,12 +356,15 @@
         formal: 'a search costs O(log_B n) transfers rather than O(log₂ n − log₂ B)',
         readAs: 'A search costs on the order of the base-B logarithm of n block transfers, ' +
           'rather than the base-two logarithm of n minus the base-two logarithm of B.',
-        detail: 'The top subtree of height h/2 is contiguous, and so is each of its bottom ' +
-          'subtrees, recursively — so a root-to-leaf path passes through a contiguous region of ' +
-          'about √n nodes at each stage, and at some stage that region is a block. The recursion ' +
-          'has to walk HEAP indices rather than offsets: a subtree of a complete binary tree does ' +
-          'not occupy a contiguous index range, and laying the bottom trees out by adding a base ' +
-          'offset produces a permutation that measures identically to level order.',
+        detail: [
+          'The top subtree of height h/2 is contiguous, and so is each of its bottom subtrees, ' +
+            'recursively.',
+          'So a root-to-leaf path passes through a contiguous region of about √n nodes at each ' +
+            'stage, and at some stage that region is a block.',
+          'The recursion has to walk HEAP indices rather than offsets. A subtree of a complete ' +
+            'binary tree does not occupy a contiguous index range. Laying the bottom trees out by ' +
+            'adding a base offset produces a permutation that measures identically to level order.'
+        ],
         example: 'At height 18 the demo measures 6.65 misses per search for the vEB layout ' +
           'against 12.00 for a sorted array, on identical comparison counts.'
       },
@@ -360,11 +372,13 @@
         term: 'The comparison count does not change; only where the nodes sit does',
         plain: 'The same search, the same decisions, three different layouts.',
         formal: 'comparisons per search = the tree height, in every layout',
-        detail: 'This is the cleanest available statement of what a cache can and cannot see. ' +
-          'The algorithm is identical — descend from the root taking the same branches — and the ' +
-          'miss count differs by a factor of two, so everything in that column is layout. A ' +
-          'profiler counting instructions would report the three as identical, which is why a ' +
-          'miss counter is a different instrument rather than a more precise one.',
+        detail: [
+          'This is the cleanest available statement of what a cache can and cannot see.',
+          'The algorithm is identical, descending from the root and taking the same branches, and ' +
+            'the miss count differs by a factor of two. So everything in that column is layout.',
+          'A profiler counting instructions would report the three as identical, which is why a miss ' +
+            'counter is a different instrument rather than a more precise one.'
+        ],
         example: 'The demo reports 18.0 comparisons per search at height 18 for all three ' +
           'layouts, with misses of 11.95, 12.00 and 6.65.'
       },
@@ -373,27 +387,31 @@
         plain: 'The bounds need the cache to hold at least B blocks.',
         formal: 'M = Ω(B²); a cache that is wide and shallow breaks the bounds rather than degrading them',
         readAs: 'The number of records that fit in memory must be at least of the order of the ' +
-          'block size squared — so a cache has to hold at least as many blocks as there are ' +
+          'block size squared. So a cache has to hold at least as many blocks as there are ' +
           'records in one of them.',
-        detail: 'Real caches satisfy it comfortably — a 32-kilobyte L1 with 64-byte lines has ' +
-          'M/B² about 8 — so it is usually invisible. It is worth stating anyway, because it is ' +
-          'the assumption under which "some level of the recursion fits" becomes "some level ' +
-          'fits with room for the working set", and a machine that violated it would make the ' +
-          'analysis wrong rather than pessimistic.',
+        detail: [
+          'Real caches satisfy it comfortably, so it is usually invisible. A 32-kilobyte L1 with ' +
+            '64-byte lines has M/B² about 8.',
+          'It is worth stating anyway, because it is the assumption under which "some level of the ' +
+            'recursion fits" becomes "some level fits with room for the working set".',
+          'A machine that violated it would make the analysis wrong rather than pessimistic.'
+        ],
         example: 'The demo runs at caches from 2 to 64 kilobytes with 64-byte lines, so M/B² ' +
-          'ranges from 0.5 to 16 — and the smallest cache is where the oblivious penalty is ' +
-          'lowest, at 1.176.'
+          'ranges from 0.5 to 16. The smallest cache is where the oblivious penalty is lowest, ' +
+          'at 1.176.'
       },
       {
         term: 'Cache-oblivious is not free, and the base case is where the cost lives',
         plain: 'Recursing to single elements pays call overhead no miss counter shows.',
         formal: 'the constant factor against a tuned tile is measured at 1.18 to 1.33 here, before any call overhead',
-        detail: 'The measured penalty is only the miss count; a real implementation also pays for ' +
-          'the recursion itself, and recursing down to one element is dominated by it. The ' +
-          'engineering answer is a base case sized to fit in registers with a straight loop ' +
-          'inside it, letting the recursion handle everything above. That one decision is the ' +
-          'difference between the idea and a usable implementation, and it is the only tuning ' +
-          'parameter a cache-oblivious algorithm has.',
+        detail: [
+          'The measured penalty is only the miss count. A real implementation also pays for the ' +
+            'recursion itself, and recursing down to one element is dominated by it.',
+          'The engineering answer is a base case sized to fit in registers with a straight loop ' +
+            'inside it, letting the recursion handle everything above.',
+          'That one decision is the difference between the idea and a usable implementation, and it ' +
+            'is the only tuning parameter a cache-oblivious algorithm has.'
+        ],
         example: 'The demo exposes the base case as a control, from 2 × 2 up to 16 × 16, and the ' +
           'miss count changes with it.'
       }

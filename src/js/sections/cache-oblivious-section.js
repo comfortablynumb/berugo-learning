@@ -54,44 +54,55 @@
     };
   }
 
-  function orientation() {
+  function orientationMatrices() {
     return [
-      '**A cache-aware algorithm is handed B and M and blocks its work to fit; a cache-oblivious ' +
-        'one is handed neither and gets asymptotically the same miss count.** The mechanism is ' +
-        'recursion: halve the problem until it is small, and at some level of that recursion the ' +
-        'subproblem fits in whatever cache is actually present.',
+      '**A cache-aware algorithm is handed B and M and blocks its work to fit. A cache-oblivious ' +
+        'one is handed neither and gets asymptotically the same miss count.**',
+      'The mechanism is recursion. Halve the problem until it is small, and at some level of that ' +
+        'recursion the subproblem fits in whatever cache is actually present.',
       '**The comparison only means something if the tuned version is retuned.** A recursive ' +
         'algorithm against a tile that was chosen for one cache and then used on four is not a ' +
-        'comparison, it is a rigged one. The demo picks the best tile at every cache size ' +
-        'separately, and the tile it picks changes — which is the whole reason the oblivious ' +
-        'version is worth having.',
+        'comparison, it is a rigged one.',
+      'The demo picks the best tile at every cache size separately, and the tile it picks changes. ' +
+        'That is the whole reason the oblivious version is worth having.',
       '**Transpose is the simplest case and the row-major loop is the failure.** Reading one ' +
         'matrix along rows while writing the other along columns means one side misses on every ' +
-        'element. Splitting the larger dimension and recursing makes both sides local, with no ' +
-        'parameter and no knowledge of the cache.',
-      '**Matrix multiplication is where the numbers are dramatic.** The textbook triple loop ' +
-        'misses on nearly every access once the matrices exceed the cache; blocking brings it to ' +
-        'O(n³/(B·√M)); recursive subdivision reaches the same bound. The demo measures the ' +
-        'unblocked loop at tens of times the tuned version at a small cache and at parity when ' +
-        'everything fits.',
-      '**The van Emde Boas layout reaches the B-tree bound without knowing B.** Lay a binary ' +
-        'tree out by splitting its HEIGHT in half — the top subtree contiguous, then each bottom ' +
-        'subtree contiguous, recursively — and a root-to-leaf search touches O(log_B n) blocks ' +
-        'instead of O(log₂ n − log₂ B).',
-      '**The comparison count does not change; only where the nodes sit does.** The demo reports ' +
-        'comparisons per search alongside misses per search, and the first column is identical ' +
-        'in all three layouts. Everything in the miss column is layout, which is the cleanest ' +
-        'possible statement of what a cache can and cannot see.',
-      '**The tall-cache assumption is load-bearing and is worth stating.** The bounds need ' +
-        'M = Ω(B²) — a cache that can hold at least B blocks. Real caches satisfy it ' +
-        'comfortably, and a machine with a very wide line and a very small cache would break ' +
-        'these results rather than degrade them gently.',
-      '**Cache-oblivious is not always the right choice, and the demo shows the cost.** The ' +
-        'recursive versions carry a constant-factor penalty against a well-tuned tile — a third ' +
-        'or so here — plus real call overhead the miss counter does not see. What they buy is ' +
-        'behaviour on machines nobody measured, across cache levels simultaneously, with no ' +
-        'tuning to go stale.'
+        'element.',
+      'Splitting the larger dimension and recursing makes both sides local, with no parameter and ' +
+        'no knowledge of the cache.',
+      '**Matrix multiplication is where the numbers are dramatic.** The textbook triple loop misses ' +
+        'on nearly every access once the matrices exceed the cache.',
+      'Blocking brings it to O(n³/(B·√M)), and recursive subdivision reaches the same bound.',
+      'The demo measures the unblocked loop at tens of times the tuned version at a small cache, ' +
+        'and at parity when everything fits.'
     ];
+  }
+
+  function orientationLayouts() {
+    return [
+      '**The van Emde Boas layout reaches the B-tree bound without knowing B.** Lay a binary tree ' +
+        'out by splitting its HEIGHT in half: the top subtree contiguous, then each bottom subtree ' +
+        'contiguous, recursively.',
+      'A root-to-leaf search then touches O(log_B n) blocks instead of O(log₂ n − log₂ B).',
+      '**The comparison count does not change. Only where the nodes sit does.** The demo reports ' +
+        'comparisons per search alongside misses per search, and the first column is identical in ' +
+        'all three layouts.',
+      'Everything in the miss column is layout, which is the cleanest possible statement of what a ' +
+        'cache can and cannot see.',
+      '**The tall-cache assumption is load-bearing and is worth stating.** The bounds need ' +
+        'M = Ω(B²), which is a cache that can hold at least B blocks.',
+      'Real caches satisfy it comfortably, and a machine with a very wide line and a very small ' +
+        'cache would break these results rather than degrade them gently.',
+      '**Cache-oblivious is not always the right choice, and the demo shows the cost.** The ' +
+        'recursive versions carry a constant-factor penalty against a well-tuned tile, about a ' +
+        'third here, plus real call overhead the miss counter does not see.',
+      'What they buy is behaviour on machines nobody measured, across cache levels simultaneously, ' +
+        'with no tuning to go stale.'
+    ];
+  }
+
+  function orientation() {
+    return orientationMatrices().concat(orientationLayouts());
   }
 
   function config() {
@@ -105,13 +116,12 @@
       diagram: diagram(),
       insight: '**Recursive subdivision is the cheapest way to get decent locality on hardware ' +
         'you cannot measure.** A library shipped to unknown machines has no tile size to pick, ' +
-        'and a tile tuned for L2 is wrong for L1 and wrong again for the page cache — while a ' +
-        'recursive algorithm is simultaneously correct for all three, because it produces ' +
-        'subproblems at every scale at once. The engineering caveat is the base case: recursing ' +
-        'to single elements pays call overhead that no miss counter shows, so cut over to a ' +
-        'straight loop at a size that fits in registers and let the recursion handle everything ' +
-        'above it. That one decision is the difference between the idea and a usable ' +
-        'implementation.'
+        'and a tile tuned for L2 is wrong for L1 and wrong again for the page cache. A recursive ' +
+        'algorithm is simultaneously correct for all three, because it produces subproblems at ' +
+        'every scale at once. The engineering caveat is the base case. Recursing to single ' +
+        'elements pays call overhead that no miss counter shows. So cut over to a straight loop ' +
+        'at a size that fits in registers, and let the recursion handle everything above it. That ' +
+        'one decision is the difference between the idea and a usable implementation.'
     };
   }
 
