@@ -53,31 +53,36 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**Homogeneous coordinates make translation a matrix.** A 3-D point gets a fourth coordinate ' +
+        '`w`, and a 4×4 matrix can then express rotation, scaling, shear, translation and ' +
+        'perspective in one uniform thing that composes by multiplication.',
+      'A point carries `w = 1` and a direction carries `w = 0`, which is exactly why a direction ' +
+        'ignores translation without anyone writing a special case.',
+      '**Composition does not commute, and the bug it causes looks like a maths error.** Rotating ' +
+        'then translating is not translating then rotating, and the demo below sends one point to ' +
+        'two different places using the identical operations.',
+      'Neither matrix is wrong. They answer different questions, and the only defence is writing the ' +
+        'convention down.',
+      '**Gimbal lock is a lost degree of freedom, not a longer path.** At a pitch of 90 degrees the ' +
+        'yaw axis and the roll axis have become the same axis, so nudging one produces the same ' +
+        'rotation as nudging the other.',
+      'One dimension of control has vanished. The measurement below shows it draining away ' +
+        'gradually — about 46% gone by 45 degrees — which is why a camera starts feeling wrong long ' +
+        'before it locks.',
+      '**Möller-Trumbore returns barycentric coordinates, not just a yes or no.** Those two numbers ' +
+        'interpolate anything stored at the vertices — colour, normal, a texture coordinate — ' +
+        'without a second computation, which is why it is the ray-triangle test everyone uses.',
+      'Whether a back-facing triangle counts is a rendering decision that reaches into the ' +
+        'intersection routine, and leaving it implicit is how a mesh comes out with holes.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**Homogeneous coordinates make translation a matrix.** A 3-D point gets a fourth ' +
-          'coordinate `w`, and a 4×4 matrix can then express rotation, scaling, shear, translation ' +
-          'and perspective in one uniform thing that composes by multiplication. A point carries ' +
-          '`w = 1` and a direction carries `w = 0`, which is exactly why a direction ignores ' +
-          'translation without anyone writing a special case.',
-        '**Composition does not commute, and the bug it causes looks like a maths error.** Rotating ' +
-          'then translating is not translating then rotating — the demo below sends one point to ' +
-          'two different places using the identical operations. Neither matrix is wrong; they ' +
-          'answer different questions, and the only defence is writing the convention down.',
-        '**Gimbal lock is a lost degree of freedom, not a longer path.** At a pitch of 90 degrees ' +
-          'the yaw axis and the roll axis have become the same axis, so nudging one produces the ' +
-          'same rotation as nudging the other and one dimension of control has vanished. The ' +
-          'measurement below shows it draining away gradually — about 46% gone by 45 degrees — ' +
-          'which is why a camera starts feeling wrong long before it locks.',
-        '**Möller-Trumbore returns barycentric coordinates, not just a yes or no.** Those two ' +
-          'numbers interpolate anything stored at the vertices — colour, normal, a texture ' +
-          'coordinate — without a second computation, which is why it is the ray-triangle test ' +
-          'everyone uses. Whether a back-facing triangle counts is a rendering decision that ' +
-          'reaches into the intersection routine, and leaving it implicit is how a mesh comes out ' +
-          'with holes.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — composition order, gimbal lock measured, and ray-triangle',
         markup: root.TransformsAnd3dTemplate.render()
@@ -86,11 +91,10 @@
       insight: 'Write the convention in a comment at the top of the file: row-major or ' +
         'column-major, points as rows or columns, pre-multiply or post-multiply, radians or ' +
         'degrees, and the Euler order. It takes five lines and it is the cheapest bug fix in ' +
-        'graphics, because the failure mode of getting it wrong is not an exception — it is a ' +
-        'scene that renders, looks almost right, and drifts. And when a rotation misbehaves near ' +
-        'straight up or straight down, stop debugging the maths: that is the pole, the ' +
-        'representation has lost a degree of freedom there, and the fix is quaternions rather than ' +
-        'a special case.'
+        'graphics. The failure mode of getting it wrong is not an exception — it is a scene that ' +
+        'renders, looks almost right, and drifts. And when a rotation misbehaves near straight up ' +
+        'or straight down, stop debugging the maths. That is the pole: the representation has lost ' +
+        'a degree of freedom there, and the fix is quaternions rather than a special case.'
     };
   }
 

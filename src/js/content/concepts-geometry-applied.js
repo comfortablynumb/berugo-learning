@@ -22,12 +22,15 @@
         },
         plain: 'Add a fourth coordinate fixed at one, and moving a point becomes multiplication like everything else.',
         formal: 'a 4×4 matrix composes rotation, scale, shear, translation and projection uniformly',
-        detail: 'A rotation or a scale is linear and fits in a 3×3 matrix; a translation is not, ' +
-          'because it moves the origin. Carrying an extra coordinate makes the translation part of ' +
-          'the same object, which is what lets a whole pipeline collapse into one matrix multiplied ' +
-          'once per vertex rather than a sequence of special-cased steps. The fourth coordinate also ' +
-          'carries perspective: dividing by it at the end is what makes distant things smaller, and ' +
-          'that division is the only non-linear step in the pipeline.',
+        detail: [
+          'A rotation or a scale is linear and fits in a 3×3 matrix. A translation is not, because ' +
+            'it moves the origin.',
+          'Carrying an extra coordinate makes the translation part of the same object. That is what ' +
+            'lets a whole pipeline collapse into one matrix multiplied once per vertex, rather than ' +
+            'a sequence of special-cased steps.',
+          'The fourth coordinate also carries perspective. Dividing by it at the end is what makes ' +
+            'distant things smaller, and that division is the only non-linear step in the pipeline.'
+        ],
         example: 'The two compositions in this section differ in their translation column — 28.28 ' +
           'against 40.00 — and in nothing else.'
       },
@@ -35,12 +38,15 @@
         term: 'Composition order is not commutative, and both orders are correct',
         plain: 'Rotate then translate is a different transform from translate then rotate, and neither is a bug.',
         formal: 'matrix multiplication does not commute: A·B and B·A are different transforms',
-        detail: 'This is the most common source of "the rotation is wrong" in graphics, and it is ' +
-          'never a maths error — it is two pieces of code disagreeing about the order, or about ' +
-          'whether vectors are rows or columns, which reverses the reading of a product. The tell is ' +
-          'where the origin lands: a pure rotation fixes the origin, so if the scene is rotating ' +
-          'about the wrong point the translation was applied first. No amount of adjusting the angle ' +
-          'fixes that.',
+        detail: [
+          'This is the most common source of "the rotation is wrong" in graphics, and it is never a ' +
+            'maths error.',
+          'It is two pieces of code disagreeing about the order, or about whether vectors are rows ' +
+            'or columns, which reverses the reading of a product.',
+          'The tell is where the origin lands. A pure rotation fixes the origin, so if the scene is ' +
+            'rotating about the wrong point the translation was applied first. No amount of ' +
+            'adjusting the angle fixes that.'
+        ],
         example: 'The same two operations applied in opposite orders send (1, 0, 0) to (29.0, 29.0) ' +
           'and to (40.7, 0.7) — 30.61 apart.'
       },
@@ -48,11 +54,14 @@
         term: 'Four conventions travel with every matrix, and none of them are in the type',
         plain: 'Row or column vectors, pre- or post-multiply, radians or degrees, and which order the Euler axes apply.',
         formal: 'two libraries disagreeing on any one of them compose correctly and produce garbage',
-        detail: 'A 4×4 array of numbers carries no answer to any of these questions, so the ' +
-          'compiler cannot help and the runtime will not complain. The cheapest fix in graphics is a ' +
-          'comment at the top of the file stating all four, and the second cheapest is a unit test ' +
-          'that transforms one known point and checks where it lands. Both cost minutes; the bug ' +
-          'they prevent costs days, because everything looks nearly right.',
+        detail: [
+          'A 4×4 array of numbers carries no answer to any of these questions, so the compiler ' +
+            'cannot help and the runtime will not complain.',
+          'The cheapest fix in graphics is a comment at the top of the file stating all four. The ' +
+            'second cheapest is a unit test that transforms one known point and checks where it ' +
+            'lands.',
+          'Both cost minutes. The bug they prevent costs days, because everything looks nearly right.'
+        ],
         example: 'The two matrices here differ in exactly one thing — the order — and produce ' +
           'outlines that look equally plausible.'
       },
@@ -61,14 +70,17 @@
         plain: 'Rotational freedom bleeds away all the way to the pole; half of it is gone by 45 degrees.',
         formal: 'at pitch 90° two of the three Euler axes coincide and one degree of freedom no longer exists',
         readAs: 'When the middle rotation reaches a right angle, the first and third axes end up ' +
-          'pointing the same way, so turning one of them is indistinguishable from turning the ' +
-          'other and the pair can no longer produce every orientation.',
-        detail: 'The measurement makes this concrete: nudge yaw by a hundredth of a radian, then ' +
-          'separately nudge roll by the same amount the other way, and see how far apart the two ' +
-          'results sit. Away from the pole they are different rotations about different axes and the ' +
-          'gap is large; at ninety degrees they are the same rotation and the gap is zero. It is why ' +
-          'a camera controller starts feeling sluggish and imprecise long before anything visibly ' +
-          'locks, and why "it only breaks at exactly 90" is the wrong mental model.',
+          'pointing the same way. Turning one of them is then indistinguishable from turning the ' +
+          'other, and the pair can no longer produce every orientation.',
+        detail: [
+          'The measurement makes this concrete. Nudge yaw by a hundredth of a radian, then ' +
+            'separately nudge roll by the same amount the other way, and see how far apart the two ' +
+            'results sit.',
+          'Away from the pole they are different rotations about different axes and the gap is ' +
+            'large. At ninety degrees they are the same rotation and the gap is zero.',
+          'It is why a camera controller starts feeling sluggish and imprecise long before anything ' +
+            'visibly locks, and why "it only breaks at exactly 90" is the wrong mental model.'
+        ],
         example: 'Freedom lost runs 0.00%, 13.91%, 29.29%, 45.88%, 63.40%, 81.54% at pitches of 0, ' +
           '15, 30, 45, 60 and 75 degrees.'
       },
@@ -76,12 +88,15 @@
         term: 'The baseline for that measurement is the gap at pitch zero, not twice the nudge',
         plain: 'Two nudges about perpendicular axes differ by the nudge times the square root of two.',
         formal: 'the reference gap is 0.8103°, and every later gap is read against it',
-        detail: 'This is the kind of detail that decides whether a measurement means anything. ' +
-          'Reaching for "twice the nudge" as the baseline is the obvious move and it is wrong by a ' +
-          'factor of √2, which would make every percentage in the table too small and the curve the ' +
-          'wrong shape. Measuring the baseline instead of deriving it removes the question, and it ' +
-          'is the same discipline as measuring the escalation rate rather than assuming it in the ' +
-          'primitives section.',
+        detail: [
+          'This is the kind of detail that decides whether a measurement means anything.',
+          'Reaching for "twice the nudge" as the baseline is the obvious move, and it is wrong by a ' +
+            'factor of √2. That would make every percentage in the table too small and the curve the ' +
+            'wrong shape.',
+          'Measuring the baseline instead of deriving it removes the question. It is the same ' +
+            'discipline as measuring the escalation rate rather than assuming it in the primitives ' +
+            'section.'
+        ],
         example: 'A nudge of 0.01 radians about two perpendicular axes leaves the results 0.8103° ' +
           'apart at pitch zero, and 0.0000° apart at ninety.'
       },
@@ -89,13 +104,15 @@
         term: 'Quaternions avoid the problem by never having three separate axes',
         plain: 'One rotation about one axis, stored as four numbers, with no order to get wrong.',
         formal: 'slerp interpolates along the shortest arc at constant angular speed',
-        detail: 'Euler angles are three sequential rotations, and the sequence is what creates both ' +
-          'the ordering convention and the lock. A quaternion represents the whole orientation at ' +
-          'once, so interpolating between two of them follows the shortest path on the sphere of ' +
-          'orientations at a constant rate — which is what makes animated camera moves and skeletal ' +
-          'blending look right. The costs are real: they are hard to read in a debugger, the double ' +
-          'cover means q and −q are the same orientation, and slerp needs a sign check or it takes ' +
-          'the long way round.',
+        detail: [
+          'Euler angles are three sequential rotations, and the sequence is what creates both the ' +
+            'ordering convention and the lock.',
+          'A quaternion represents the whole orientation at once, so interpolating between two of ' +
+            'them follows the shortest path on the sphere of orientations at a constant rate. That ' +
+            'is what makes animated camera moves and skeletal blending look right.',
+          'The costs are real. They are hard to read in a debugger. The double cover means q and −q ' +
+            'are the same orientation, and slerp needs a sign check or it takes the long way round.'
+        ],
         example: 'The gimbal measurement is done with Euler angles precisely because a quaternion ' +
           'would show no drain at all.'
       },
@@ -104,13 +121,16 @@
         plain: 'It solves for the barycentric coordinates directly, so the containment test comes free.',
         formal: 'the same computation yields the distance along the ray and the coordinates u and v within the triangle',
         readAs: 'Rather than finding where the ray meets the triangle\'s plane and then asking ' +
-          'whether that point is inside the triangle, the method solves one small system whose ' +
-          'answers are the distance and the two numbers that say where in the triangle the hit is.',
-        detail: 'Those coordinates are not a by-product to be discarded — they are what a renderer ' +
-          'interpolates the normal, the texture coordinate and the colour with, so getting them from ' +
-          'the intersection instead of recomputing them is most of the reason the method is ' +
-          'standard. The degenerate case is a ray parallel to the triangle, which shows up as a ' +
-          'determinant at zero and must be rejected rather than divided by.',
+          'whether that point is inside, the method solves one small system. Its answers are the ' +
+          'distance, and the two numbers that say where in the triangle the hit is.',
+        detail: [
+          'Those coordinates are not a by-product to be discarded.',
+          'They are what a renderer interpolates the normal, the texture coordinate and the colour ' +
+            'with. Getting them from the intersection instead of recomputing them is most of the ' +
+            'reason the method is standard.',
+          'The degenerate case is a ray parallel to the triangle, which shows up as a determinant at ' +
+            'zero and must be rejected rather than divided by.'
+        ],
         example: '20 000 random rays produced 715 hits, 0 parallel cases and 0 barycentric ' +
           'round-trip errors.'
       },
@@ -118,12 +138,14 @@
         term: 'A reference that shares algebra with the routine is not a reference',
         plain: 'Check the ray-triangle test against a plane intersection plus three edge cross products.',
         formal: 'agreement between two implementations with no shared derivation is evidence; self-agreement is not',
-        detail: 'The plane-and-edges method has a completely different structure: it finds the ' +
-          'plane, intersects the ray with it, and then tests the point against three cross products. ' +
+        detail: [
+          'The plane-and-edges method has a completely different structure. It finds the plane, ' +
+            'intersects the ray with it, and then tests the point against three cross products.',
           'If both agree on twenty thousand rays including the hits, the misses and the ' +
-          'near-tangential cases, that means something. The barycentric round-trip is the second ' +
-          'half of the check and it is nearly free: rebuild the hit point from u and v and confirm ' +
-          'it lands where the routine said it did.',
+            'near-tangential cases, that means something.',
+          'The barycentric round-trip is the second half of the check, and it is nearly free. ' +
+            'Rebuild the hit point from u and v, and confirm it lands where the routine said it did.'
+        ],
         example: '0 disagreements across 20 000 rays, 715 hits and 19 285 misses.'
       }
     ],
