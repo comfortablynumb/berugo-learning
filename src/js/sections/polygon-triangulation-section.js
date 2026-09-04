@@ -56,30 +56,35 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**Ear clipping takes a simple polygon and cuts off one triangle at a time.** An *ear* is a ' +
+        'vertex whose triangle with its two neighbours lies inside the polygon and contains no ' +
+        'other vertex.',
+      'Cut it off and repeat. Every simple polygon has at least two ears, so the process always ' +
+        'terminates, and it always produces exactly `n − 2` triangles.',
+      'The `O(n²)` is the cost of re-scanning for an ear after each cut.',
+      '**Delaunay triangulation is not "a" triangulation, it is a specific one**, defined by the ' +
+        '*empty-circle property*: no triangle\'s circumcircle contains any other vertex.',
+      'Among every possible triangulation of a point set, that one maximises the smallest angle. It ' +
+        'is unique unless four points are exactly co-circular.',
+      '**Skinny triangles are the reason anyone cares.** Interpolating a value across a long thin ' +
+        'triangle stretches it along the thin direction, which is what makes an interpolated ' +
+        'terrain surface look creased.',
+      'Delaunay is the arrangement with as few skinny triangles as the points allow, which is why ' +
+        'it is the default mesh for interpolation, terrain and finite elements.',
+      '**The in-circle predicate is where robustness arrives.** Bowyer-Watson deletes every triangle ' +
+        'whose circumcircle contains the new point, and re-triangulates the hole.',
+      'If the predicate is not robust, that hole is not a simple polygon and the mesh comes out with ' +
+        'overlapping triangles. Four co-circular points, which a grid has everywhere, put the ' +
+        'predicate exactly on the boundary it must decide.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**Ear clipping** takes a simple polygon and cuts off one triangle at a time. An *ear* is a ' +
-          'vertex whose triangle with its two neighbours lies inside the polygon and contains no ' +
-          'other vertex; cut it off and repeat. Every simple polygon has at least two ears, so the ' +
-          'process always terminates, and it always produces exactly `n − 2` triangles. The `O(n²)` ' +
-          'is the cost of re-scanning for an ear after each cut.',
-        '**Delaunay triangulation is not "a" triangulation, it is a specific one**, defined by the ' +
-          '*empty-circle property*: no triangle\'s circumcircle contains any other vertex. Among ' +
-          'every possible triangulation of a point set, that one maximises the smallest angle — and ' +
-          'it is unique unless four points are exactly co-circular.',
-        '**Skinny triangles are the reason anyone cares.** Interpolating a value across a long thin ' +
-          'triangle stretches it along the thin direction, which is what makes an interpolated ' +
-          'terrain surface look creased. Delaunay is the arrangement with as few skinny triangles ' +
-          'as the points allow, which is why it is the default mesh for interpolation, terrain and ' +
-          'finite elements.',
-        '**The in-circle predicate is where robustness arrives.** Bowyer-Watson deletes every ' +
-          'triangle whose circumcircle contains the new point and re-triangulates the hole — and if ' +
-          'the predicate is not robust, that hole is not a simple polygon and the mesh comes out ' +
-          'with overlapping triangles. Four co-circular points, which a grid has everywhere, put ' +
-          'the predicate exactly on the boundary it must decide.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — Delaunay, the same mesh flipped away from it, and ear clipping',
         markup: root.PolygonTriangulationTemplate.render()
@@ -87,7 +92,7 @@
       diagram: diagram(),
       insight: 'When a triangulated surface looks creased or an interpolation goes wrong at one ' +
         'spot, look at the angles rather than the code. Any valid triangulation joins the same ' +
-        'points with the same number of triangles, so "it triangulated" tells you nothing — the ' +
+        'points with the same number of triangles, so "it triangulated" tells you nothing. The ' +
         'measurement that matters is the smallest angle, and a mesh whose worst triangle is a ' +
         'degree wide will interpolate badly no matter how carefully the interpolation is written. ' +
         'That is also why the empty-circle property is worth checking directly rather than trusting ' +
