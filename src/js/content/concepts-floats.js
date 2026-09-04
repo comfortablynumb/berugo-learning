@@ -177,12 +177,15 @@
         },
         plain: 'Four orderings of one array are four different computations, and they are allowed to disagree.',
         formal: 'the same 200 001 values summed four ways land 0, 41 434 and 50 078 representable doubles from the exact total',
-        detail: 'This is the honest answer to "the batch job and the streaming job produce ' +
-          'different totals", and it is not a bug in either of them. Reordering changes which ' +
-          'roundings happen and in which direction, so a parallel reduction, a serial loop and a ' +
-          'sorted sum genuinely compute different things. It also means a total is not a stable ' +
-          'identifier: hashing one, comparing two for equality, or asserting a golden value in a ' +
-          'test are all sensitive to a scheduling decision made somewhere else.',
+        detail: [
+          'This is the honest answer to "the batch job and the streaming job produce different ' +
+            'totals", and it is not a bug in either of them.',
+          'Reordering changes which roundings happen and in which direction, so a parallel ' +
+            'reduction, a serial loop and a sorted sum genuinely compute different things.',
+          'It also means a total is not a stable identifier. Hashing one, comparing two for ' +
+            'equality, or asserting a golden value in a test are all sensitive to a scheduling ' +
+            'decision made somewhere else.'
+        ],
         example: 'The demo’s four orderings produce 3 distinct naive sums and one Kahan sum, ' +
           'which is the real argument for compensation.'
       },
@@ -190,13 +193,15 @@
         term: 'Same-signed error accumulates linearly, not as a random walk',
         plain: 'When every value has the same sign the roundings all go the same way and add up.',
         formal: 'naive summation of 200 001 values reaches an absolute error of 1.002e+5 against 7.126e-1 for Kahan',
-        detail: 'The usual intuition — that rounding errors are random and mostly cancel — is ' +
-          'right for mixed-sign data and wrong for the common case of adding up positive ' +
-          'quantities. Once the accumulator is much larger than the addend, each addition ' +
-          'discards the addend’s low bits in the same direction, so the error grows with n rather ' +
-          'than with its square root. That is why a total over a million rows is far worse than ' +
-          'the per-row error suggests, and why the fix is structural rather than a matter of ' +
-          'being careful.',
+        detail: [
+          'The usual intuition is that rounding errors are random and mostly cancel. That is right ' +
+            'for mixed-sign data, and wrong for the common case of adding up positive quantities.',
+          'Once the accumulator is much larger than the addend, each addition discards the addend’s ' +
+            'low bits in the same direction. So the error grows with n rather than with its square ' +
+            'root.',
+          'That is why a total over a million rows is far worse than the per-row error suggests, and ' +
+            'why the fix is structural rather than a matter of being careful.'
+        ],
         example: 'On the demo’s default data the naive relative error is 1.002e-11 and pairwise, ' +
           'costing no extra arithmetic at all, is 4.329e-15.'
       },
@@ -215,12 +220,15 @@
         },
         plain: 'An addend smaller than half the local gap rounds away completely.',
         formal: 'the gap at 10¹⁶ is 2, so 10¹⁶ + 1 is 10¹⁶ and 10¹⁶ + 1.5 is not',
-        detail: 'Every individual addition here is correctly rounded and no error is reported, ' +
-          'which is what makes this failure so quiet: a loop adding a million small values into a ' +
-          'large accumulator can lose every one of them while behaving exactly as specified. The ' +
-          'threshold is half the gap because the default rounding mode is round-half-to-even, so ' +
-          'an addend of exactly half the gap leaves the sum on the even neighbour — which is why ' +
-          'the ladder shows 10¹⁶ + 1 unchanged and 10¹⁶ + 1.5 changed.',
+        detail: [
+          'Every individual addition here is correctly rounded and no error is reported, which is ' +
+            'what makes this failure so quiet.',
+          'A loop adding a million small values into a large accumulator can lose every one of them ' +
+            'while behaving exactly as specified.',
+          'The threshold is half the gap because the default rounding mode is round-half-to-even, so ' +
+            'an addend of exactly half the gap leaves the sum on the even neighbour. That is why the ' +
+            'ladder shows 10¹⁶ + 1 unchanged and 10¹⁶ + 1.5 changed.'
+        ],
         example: 'The demo’s absorption table shows the sum unchanged at addends of 0.5 and 1, and ' +
           'changed from 1.5 upwards.'
       },
@@ -228,12 +236,16 @@
         term: 'Kahan carries the discarded bits forward',
         plain: '`t − sum` recovers the part of the addend that survived, so `(t − sum) − y` is the part that did not.',
         formal: 'four operations per element instead of one, for an error bound that no longer grows with n',
-        detail: 'The compensation variable holds exactly what the last addition threw away, and ' +
-          'subtracting it from the next addend means each step begins by repaying the previous ' +
-          'one’s rounding. The bound it buys is independent of the number of terms, which is the ' +
-          'property that matters: it is not that Kahan is more accurate on a thousand values, it ' +
-          'is that it is still that accurate on a billion. Neumaier’s variant fixes the case ' +
-          'Kahan gets wrong, where the incoming value is larger than the running sum.',
+        detail: [
+          'The compensation variable holds exactly what the last addition threw away, and ' +
+            'subtracting it from the next addend means each step begins by repaying the previous ' +
+            'one’s rounding.',
+          'The bound it buys is independent of the number of terms, which is the property that ' +
+            'matters. It is not that Kahan is more accurate on a thousand values; it is that it is ' +
+            'still that accurate on a billion.',
+          'Neumaier’s variant fixes the case Kahan gets wrong, where the incoming value is larger ' +
+            'than the running sum.'
+        ],
         example: 'The demo measures Kahan at 800 004 operations against naive’s 200 001, reaching ' +
           'the same double the exact BigInt sum rounds to.'
       },
@@ -241,12 +253,14 @@
         term: 'Pairwise summation is nearly free and nearly as good',
         plain: 'No extra arithmetic at all — just a balanced tree instead of a chain.',
         formal: '4.329e-15 relative against naive’s 1.002e-11 and Kahan’s 7.126e-17, at 202 048 operations against 200 001',
-        detail: 'Because the accumulator never gets far ahead of the addend inside a balanced ' +
-          'tree, the error grows with log n rather than n, and the only cost is the recursion ' +
-          'itself — which is why it is what NumPy’s `sum` does and why it is the right default ' +
-          'when compensation would be over-engineering. It is also the reason a naive parallel ' +
-          'reduction is often *more* accurate than the serial loop it replaced, which surprises ' +
-          'people who expected parallelism to cost precision.',
+        detail: [
+          'Because the accumulator never gets far ahead of the addend inside a balanced tree, the ' +
+            'error grows with log n rather than n. The only cost is the recursion itself.',
+          'That is why it is what NumPy’s `sum` does, and why it is the right default when ' +
+            'compensation would be over-engineering.',
+          'It is also the reason a naive parallel reduction is often *more* accurate than the serial ' +
+            'loop it replaced, which surprises people who expected parallelism to cost precision.'
+        ],
         example: 'The demo shows pairwise at 202 048 operations — 1% more than naive — for four ' +
           'orders of magnitude less error.'
       },
@@ -254,13 +268,16 @@
         term: 'Cancellation exposes error rather than creating it',
         plain: 'Subtracting two nearly equal numbers throws away the leading digits they agreed on, leaving the noise.',
         formal: 'the textbook quadratic root for x² + 10⁸x + 1 loses about 15 significant digits and leaves a residual of 2.549e-1',
-        detail: 'No amount of compensation helps, because the error was already in the operands ' +
-          'before the subtraction; what the subtraction does is remove the agreeing digits and ' +
-          'promote the disagreeing ones. The only fix is to rewrite the expression so the ' +
-          'subtraction does not happen — for the quadratic that means multiplying by the ' +
-          'conjugate, and for variance it means never forming a sum of squares. Recognising the ' +
-          'shape is the skill: any expression of the form "large minus large, answer small" is ' +
-          'this.',
+        detail: [
+          'No amount of compensation helps, because the error was already in the operands before ' +
+            'the subtraction. What the subtraction does is remove the agreeing digits and promote ' +
+            'the disagreeing ones.',
+          'The only fix is to rewrite the expression so the subtraction does not happen. For the ' +
+            'quadratic that means multiplying by the conjugate, and for variance it means never ' +
+            'forming a sum of squares.',
+          'Recognising the shape is the skill. Any expression of the form "large minus large, answer ' +
+            'small" is this.'
+        ],
         example: 'The demo’s two formulations of the same root sit 1 541 029 470 702 650 ' +
           'representable doubles apart, with residuals of 2.549e-1 and 1.110e-16.'
       },
@@ -268,14 +285,17 @@
         term: 'The one-pass variance formula is cancellation by construction',
         plain: 'Σx² − (Σx)²/n subtracts two enormous nearly equal numbers whenever the data sits far from zero.',
         formal: 'on values clustered around 10⁹ it is wrong by a relative 2.619e+5, and it can return a negative variance',
-        readAs: 'Add up the squares of the values, subtract the square of their total divided by ' +
-          'the count, and on data far from the origin those two quantities are almost the same ' +
-          'size, so nearly every significant digit of the answer disappears.',
-        detail: 'A negative variance is not an inaccuracy, it is an impossibility, and it is the ' +
-          'clearest signal that this formula is not a numerical method but an algebraic identity ' +
-          'that happens to be computable. It is still taught, still in spreadsheet software, and ' +
-          'still the first thing people write. The measurement is the argument: five orders of ' +
-          'magnitude wrong on data no more adversarial than a sensor reading with an offset.',
+        readAs: 'Add up the squares of the values, then subtract the square of their total divided ' +
+          'by the count. On data far from the origin those two quantities are almost the same size, ' +
+          'so nearly every significant digit of the answer disappears.',
+        detail: [
+          'A negative variance is not an inaccuracy, it is an impossibility.',
+          'It is the clearest signal that this formula is not a numerical method but an algebraic ' +
+            'identity that happens to be computable. It is still taught, still in spreadsheet ' +
+            'software, and still the first thing people write.',
+          'The measurement is the argument: five orders of magnitude wrong on data no more ' +
+            'adversarial than a sensor reading with an offset.'
+        ],
         example: 'The demo reports 2.18103808e+4 for the sum-of-squares formula against a true ' +
           '8.32836041e-2.'
       },
@@ -283,12 +303,15 @@
         term: 'Welford is the accurate one-pass method, and two passes is more accurate still',
         plain: 'Welford updates the mean by a small deviation and never subtracts anything large.',
         formal: 'measured relative error 1.167e-7 for Welford against 7.010e-11 for two passes',
-        detail: 'Welford is the method streaming systems rediscover every few years, and the ' +
-          'reason is not that it is the most accurate — the two-pass method is, by four orders of ' +
-          'magnitude here — but that it is the most accurate one that reads the data once and ' +
-          'keeps constant state. That distinction is the whole engineering content: a batch job ' +
-          'can afford two passes, a metrics pipeline cannot, and quoting Welford as "the accurate ' +
-          'one" without the two-pass column makes it look better than it is.',
+        detail: [
+          'Welford is the method streaming systems rediscover every few years, and the reason is not ' +
+            'that it is the most accurate.',
+          'The two-pass method is, by four orders of magnitude here. Welford is the most accurate ' +
+            'one that reads the data once and keeps constant state.',
+          'That distinction is the whole engineering content. A batch job can afford two passes and ' +
+            'a metrics pipeline cannot, and quoting Welford as "the accurate one" without the ' +
+            'two-pass column makes it look better than it is.'
+        ],
         example: 'The demo puts both beside the sum-of-squares formula, which is wrong by a factor ' +
           'of about 260 000 on the same data.'
       }

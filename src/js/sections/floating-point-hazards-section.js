@@ -53,49 +53,55 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**Floating-point addition is commutative and not associative.** `(a + b) + c` and ' +
+        '`a + (b + c)` are different computations of one quantity, and they are allowed to ' +
+        'disagree.',
+      'So summing an array left to right, in sorted order, and by a parallel reduction gives three ' +
+        'answers, and none of them is the bug.',
+      'This is the honest explanation for "the batch job and the streaming job produce different ' +
+        'totals". The demo shows the same array in four orders landing on four different doubles.',
+      '**Error accumulates because the accumulator outgrows the addend.** Once the running total is ' +
+        'large, each new small value loses its low bits to rounding.',
+      'When the values share a sign those losses all go the same way rather than cancelling, so the ' +
+        'error grows with n rather than with its square root.',
+      'Past the point where the addend is smaller than half the local gap between doubles, it is ' +
+        'absorbed completely and contributes nothing at all.',
+      '**Compensated summation fixes it for three or four extra operations per element.** Kahan ' +
+        'keeps the discarded low part in a second variable and feeds it back on the next step.',
+      'Neumaier fixes the case Kahan gets wrong, where the incoming value is larger than the running ' +
+        'sum and it is the *sum* whose bits are lost.',
+      'Pairwise summation is the cheap middle: no extra arithmetic at all, just a different ' +
+        'association, and the error grows with log n instead of n.',
+      '**Catastrophic cancellation is the other failure and it needs a different fix.** Subtracting ' +
+        'two nearly equal numbers does not introduce error — it *exposes* error that was already in ' +
+        'the operands, by throwing away the leading digits they agreed on.',
+      'No amount of compensation helps; the formula has to be rewritten so the subtraction never ' +
+        'happens.',
+      'The quadratic formula and the one-pass variance are the two canonical examples, and both are ' +
+        'in the demo with their stable replacements.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**Floating-point addition is commutative and not associative.** `(a + b) + c` and ' +
-          '`a + (b + c)` are different computations of one quantity and they are allowed to ' +
-          'disagree, so summing an array left to right, in sorted order, and by a parallel ' +
-          'reduction gives three answers and none of them is the bug. This is the honest ' +
-          'explanation for "the batch job and the streaming job produce different totals", and ' +
-          'the demo shows the same array in four orders landing on four different doubles.',
-        '**Error accumulates because the accumulator outgrows the addend.** Once the running ' +
-          'total is large, each new small value loses its low bits to rounding — and when the ' +
-          'values share a sign those losses all go the same way rather than cancelling, so the ' +
-          'error grows with n rather than with its square root. Past the point where the addend ' +
-          'is smaller than half the local gap between doubles, it is absorbed completely and ' +
-          'contributes nothing at all.',
-        '**Compensated summation fixes it for three or four extra operations per element.** ' +
-          'Kahan keeps the discarded low part in a second variable and feeds it back on the next ' +
-          'step; Neumaier fixes the case Kahan gets wrong, where the incoming value is larger ' +
-          'than the running sum and it is the *sum* whose bits are lost. Pairwise summation is ' +
-          'the cheap middle: no extra arithmetic at all, just a different association, and the ' +
-          'error grows with log n instead of n.',
-        '**Catastrophic cancellation is the other failure and it needs a different fix.** ' +
-          'Subtracting two nearly equal numbers does not introduce error — it *exposes* error ' +
-          'that was already in the operands, by throwing away the leading digits they agreed on. ' +
-          'No amount of compensation helps; the formula has to be rewritten so the subtraction ' +
-          'never happens. The quadratic formula and the one-pass variance are the two canonical ' +
-          'examples, and both are in the demo with their stable replacements.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — summation, ordering, variance and cancellation',
         markup: root.FloatingPointHazardsTemplate.render()
       },
       diagram: diagram(),
       insight: 'Two rules cover most of what a working engineer needs. **Sum with pairwise or ' +
-        'Kahan whenever the count is large and the result is reported to a user** — the cost is ' +
-        'a few operations per element against an error that otherwise grows linearly, and no ' +
-        'profile will ever tell you it mattered because the wrong answer is fast. **Compute ' +
-        'variance with Welford, never with the sum of squares** — the textbook one-pass formula ' +
-        'subtracts two large nearly equal numbers by construction, and on values clustered far ' +
-        'from zero it is wrong by five orders of magnitude and can return a negative variance, ' +
-        'which is not merely inaccurate but impossible. And when two systems disagree on a total, ' +
-        'check the summation order before looking for a bug: it is usually not one.'
+        'Kahan whenever the count is large and the result is reported to a user.** The cost is a ' +
+        'few operations per element against an error that otherwise grows linearly, and no profile ' +
+        'will ever tell you it mattered, because the wrong answer is fast. **Compute variance with ' +
+        'Welford, never with the sum of squares.** The textbook one-pass formula subtracts two ' +
+        'large nearly equal numbers by construction. On values clustered far from zero it is wrong ' +
+        'by five orders of magnitude and can return a negative variance, which is not merely ' +
+        'inaccurate but impossible. And when two systems disagree on a total, check the summation ' +
+        'order before looking for a bug: it is usually not one.'
     };
   }
 
