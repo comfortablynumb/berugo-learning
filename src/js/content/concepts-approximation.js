@@ -21,13 +21,16 @@
         plain: 'Write the integer program honestly, delete the sentence that says the variables are integers, and solve what is left.',
         formal: 'min c·x subject to Ax ≥ b, x ∈ {0,1}ⁿ becomes the same with 0 ≤ x ≤ 1',
         readAs: 'Minimise c dotted with x subject to A times x being at least b, with x ' +
-          'restricted to zeros and ones — then allow x anywhere between zero and one instead.',
-        detail: 'The appeal is that the hard part of the problem is confined to one line, and ' +
-          'deleting that line leaves something with a polynomial-time algorithm and forty years ' +
-          'of solver engineering behind it. The relaxation’s optimum is a lower bound on the ' +
-          'integer optimum because every integer solution is still a fractional one, so you get ' +
-          'a usable bound before doing any rounding at all — which is often the more valuable ' +
-          'half in production, since it tells you how much room a heuristic has left.',
+          'restricted to zeros and ones. Then allow x anywhere between zero and one instead.',
+        detail: [
+          'The appeal is that the hard part of the problem is confined to one line. Deleting that ' +
+            'line leaves something with a polynomial-time algorithm and forty years of solver ' +
+            'engineering behind it.',
+          'The relaxation’s optimum is a lower bound on the integer optimum, because every integer ' +
+            'solution is still a fractional one.',
+          'So you get a usable bound before doing any rounding at all. That is often the more ' +
+            'valuable half in production, since it tells you how much room a heuristic has left.'
+        ],
         example: 'On the demo’s 12-vertex instance the LP pays 6.00 with every vertex at exactly ' +
           '0.5, against an exact integer optimum of 7 found by examining subsets.'
       },
@@ -36,30 +39,35 @@
         plain: 'Every basic solution has each coordinate at zero, one half or one.',
         formal: 'Nemhauser–Trotter: every basic feasible solution of the vertex-cover LP has x ∈ {0, ½, 1}ⁿ',
         readAs: 'Every corner solution of that linear program has each coordinate equal to zero, ' +
-          'a half, or one — no other fractional values appear.',
-        detail: 'Rounding at ½ is then feasible by inspection rather than by argument: every ' +
-          'edge’s constraint says x_u + x_v ≥ 1, so at least one endpoint is at least ½ and gets ' +
-          'taken. Each rounded coordinate at most doubles, so the cost is at most twice the LP ' +
-          'value and therefore at most twice the optimum. The theorem does more than justify the ' +
-          'rounding — the vertices at 1 and at 0 are provably in and out of some optimal cover, ' +
-          'so the LP is also a preprocessing step that shrinks the instance.',
-        example: 'The demo checks half-integrality on every instance and reports 150 of 150 — the ' +
-          'theorem observed rather than quoted.'
+          'a half, or one. No other fractional values appear.',
+        detail: [
+          'Rounding at ½ is then feasible by inspection rather than by argument. Every edge’s ' +
+            'constraint says x_u + x_v ≥ 1, so at least one endpoint is at least ½ and gets taken.',
+          'Each rounded coordinate at most doubles, so the cost is at most twice the LP value and ' +
+            'therefore at most twice the optimum.',
+          'The theorem does more than justify the rounding. The vertices at 1 and at 0 are provably ' +
+            'in and out of some optimal cover, so the LP is also a preprocessing step that shrinks ' +
+            'the instance.'
+        ],
+        example: 'The demo checks half-integrality on every instance and reports 150 of 150. That ' +
+          'is the theorem observed rather than quoted.'
       },
       {
         term: 'The integrality gap is a ceiling on the whole method, not on one algorithm',
         plain: 'If the two optima are a factor apart, no rounding of that relaxation can close it.',
         formal: 'gap = supₓ OPT_IP(x) / OPT_LP(x); for vertex cover on Kₙ it is 2 − 2/n',
         readAs: 'The gap is the largest ratio, over all instances, between the integer optimum ' +
-          'and the linear-program optimum; on the complete graph it is two minus two over n.',
-        detail: 'This is the diagnostic that tells you whether to work on the algorithm or on the ' +
-          'model. A large gap means the relaxation has thrown away too much and no amount of ' +
-          'rounding cleverness will help — you need a stronger formulation, more constraints, or ' +
-          'a semidefinite relaxation. A small gap means the relaxation is nearly exact and the ' +
-          'rounding is where the loss is. Measuring the gap on your own instances is cheap and ' +
-          'is almost never done.',
+          'and the linear-program optimum. On the complete graph it is two minus two over n.',
+        detail: [
+          'This is the diagnostic that tells you whether to work on the algorithm or on the model.',
+          'A large gap means the relaxation has thrown away too much, and no amount of rounding ' +
+            'cleverness will help. You need a stronger formulation, more constraints, or a ' +
+            'semidefinite relaxation.',
+          'A small gap means the relaxation is nearly exact and the rounding is where the loss is. ' +
+            'Measuring the gap on your own instances is cheap, and it is almost never done.'
+        ],
         example: 'On the complete graphs the demo measures gaps of 1.3333, 1.6000, 1.7143, ' +
-          '1.7778, 1.8182 and 1.8667 — matching 2 − 2/n at every size, and approaching but never ' +
+          '1.7778, 1.8182 and 1.8667. Those match 2 − 2/n at every size, approaching but never ' +
           'reaching 2.'
       },
       {
@@ -67,76 +75,89 @@
         plain: 'Take each element with probability equal to its fractional value.',
         formal: 'E[cost] = Σ c_S · x_S = the LP value exactly; Pr[element e uncovered] ≤ 1/e per round',
         readAs: 'The expected cost is the sum over sets of the cost times the fractional value, ' +
-          'which is exactly the linear-program optimum, and each element escapes coverage in one ' +
+          'which is exactly the linear-program optimum. Each element escapes coverage in one ' +
           'round with probability at most one over the base of natural logarithms.',
-        detail: 'The expected cost is exactly the LP value, which is remarkable on its own: the ' +
-          'rounding is free in expectation and only feasibility has to be paid for. Because each ' +
-          'element survives a round with probability at most 1/e, O(log n) independent rounds ' +
-          'cover everything with high probability at O(log n) times the LP cost — which recovers ' +
-          'the ln n bound for set cover from a completely different direction than greedy.',
-        example: 'The demo runs the same idea on MAX-SAT: setting each variable true with ' +
-          'probability y_i measures a mean of 97.62% of the optimum against a floor of ' +
-          '1 − 1/e = 63.2%, where a plain coin flip measures 79.00% mean and 79.31% median.'
+        detail: [
+          'The expected cost is exactly the LP value, which is remarkable on its own. The rounding ' +
+            'is free in expectation, and only feasibility has to be paid for.',
+          'Because each element survives a round with probability at most 1/e, O(log n) independent ' +
+            'rounds cover everything with high probability at O(log n) times the LP cost.',
+          'That recovers the ln n bound for set cover from a completely different direction than ' +
+            'greedy.'
+        ],
+        example: 'The demo runs the same idea on MAX-SAT. Setting each variable true with ' +
+          'probability y_i measures a mean of 97.62% of the optimum, against a floor of ' +
+          '1 − 1/e = 63.2%. A plain coin flip measures 79.00% mean and 79.31% median.'
       },
       {
         term: 'The 3/4 MAX-SAT algorithm is two weak ones with opposite biases',
-        plain: 'A coin flip is good on long clauses and bad on short ones; LP rounding is the reverse.',
+        plain: 'A coin flip is good on long clauses and bad on short ones. LP rounding is the reverse.',
         formal: 'coin: 1 − 2⁻ᵏ rises with k. LP rounding: ≥ 1 − (1 − 1/k)ᵏ falls to 1 − 1/e. Their average exceeds 3/4 per clause.',
         readAs: 'A coin flip satisfies a clause of length k with probability one minus two to ' +
-          'the minus k, which rises with k; LP rounding gives at least one minus one minus one ' +
+          'the minus k, which rises with k. LP rounding gives at least one minus one minus one ' +
           'over k, all raised to the k, which falls towards one minus one over e.',
-        detail: 'Neither algorithm alone reaches 3/4 — the coin bottoms out at 1/2 on unit ' +
-          'clauses and the LP bottoms out at 1 − 1/e ≈ 0.632 on long ones — but the two bottoms ' +
-          'are at opposite ends of the clause-length range, so their average is above 3/4 clause ' +
-          'by clause. Taking the better of the two on each instance is therefore at least the ' +
-          'average and inherits the bound. It is the clearest example of combining algorithms ' +
-          'whose weaknesses do not overlap.',
+        detail: [
+          'Neither algorithm alone reaches 3/4. The coin bottoms out at 1/2 on unit clauses, and the ' +
+            'LP bottoms out at 1 − 1/e ≈ 0.632 on long ones.',
+          'But the two bottoms are at opposite ends of the clause-length range, so their average is ' +
+            'above 3/4 clause by clause.',
+          'Taking the better of the two on each instance is therefore at least the average, and ' +
+            'inherits the bound. It is the clearest example of combining algorithms whose ' +
+            'weaknesses do not overlap.'
+        ],
         example: 'On formulas with clauses of width 1 to 4, the demo measures a coin flip at a ' +
-          'worst case of 60.00% of the optimum and the better-of-two at 82.76% — inside its 75% ' +
-          'guarantee — while the derandomised walk of 19.9 measures 98.66% mean and 93.10% worst.'
+          'worst case of 60.00% of the optimum. The better-of-two reaches 82.76%, inside its 75% ' +
+          'guarantee. The derandomised walk of 19.9 measures 98.66% mean and 93.10% worst.'
       },
       {
         term: 'The primal-dual method keeps the duality and throws away the LP',
         plain: 'Raise the dual variable of an unsatisfied constraint until something goes tight, take it, repeat.',
         formal: 'weak duality: any feasible dual value is a lower bound on the primal optimum',
-        detail: 'No tableau, no solver, no floating point — and the same factor of 2, with the ' +
-          'dual solution it constructs serving as the certificate. This is the shape most ' +
-          'production approximation code actually takes, because a combinatorial algorithm is ' +
-          'easier to deploy than a linear-programming dependency. Read the history backwards and ' +
-          'it explains itself: the combinatorial algorithm was usually found first, and the LP ' +
-          'is the explanation of why it works.',
+        detail: [
+          'No tableau, no solver, no floating point — and the same factor of 2, with the dual ' +
+            'solution it constructs serving as the certificate.',
+          'This is the shape most production approximation code actually takes, because a ' +
+            'combinatorial algorithm is easier to deploy than a linear-programming dependency.',
+          'Read the history backwards and it explains itself. The combinatorial algorithm was ' +
+            'usually found first, and the LP is the explanation of why it works.'
+        ],
         example: 'The demo runs the primal-dual cover next to LP rounding and the maximal ' +
-          'matching, and all three measure a worst case of exactly 2.0000 with means within ' +
-          'a hundredth of each other.'
+          'matching. All three measure a worst case of exactly 2.0000, with means within a ' +
+          'hundredth of each other.'
       },
       {
         term: 'A stronger relaxation can beat the integrality gap, and semidefinite is the usual one',
         plain: 'Relax to unit vectors instead of numbers and you get constraints a linear program cannot express.',
         formal: 'Goemans–Williamson MAX-CUT: relax each ±1 variable to a unit vector, solve the SDP, cut by a random hyperplane, giving 0.878',
         readAs: 'Replace each plus-or-minus-one variable by a unit vector, solve the resulting ' +
-          'semidefinite program, then split the vectors by a random plane through the origin — ' +
-          'which cuts at least 0.878 of the optimum.',
-        detail: 'The linear relaxation of MAX-CUT has an integrality gap of 2 and is useless; the ' +
-          'vector relaxation has a gap of about 1.139 and gives the best ratio known. The extra ' +
-          'strength comes from the constraint that the vectors are unit length, which forces ' +
-          'consistency between triples that no linear constraint on numbers can express. The ' +
-          'analysis is one integral — the chance a random hyperplane separates two vectors is ' +
-          'their angle over π — and the 0.878 is that ratio’s minimum.',
+          'semidefinite program, then split the vectors by a random plane through the origin. ' +
+          'That cuts at least 0.878 of the optimum.',
+        detail: [
+          'The linear relaxation of MAX-CUT has an integrality gap of 2 and is useless. The vector ' +
+            'relaxation has a gap of about 1.139 and gives the best ratio known.',
+          'The extra strength comes from the constraint that the vectors are unit length, which ' +
+            'forces consistency between triples that no linear constraint on numbers can express.',
+          'The analysis is one integral. The chance a random hyperplane separates two vectors is ' +
+            'their angle over π, and the 0.878 is that ratio’s minimum.'
+        ],
         example: 'Under the unique games conjecture 0.878 is optimal for MAX-CUT, and 2 is ' +
-          'optimal for vertex cover, so both of the milestone’s headline ratios are conjecturally ' +
-          'the end of the road.'
+          'optimal for vertex cover. So both of the milestone’s headline ratios are ' +
+          'conjecturally the end of the road.'
       },
       {
         term: 'The same model gives you the exact solver and the approximation',
         plain: 'Branch and bound prunes with exactly this relaxation, so one modelling effort buys both.',
         formal: 'the LP bound at each node is the relaxation; a node whose bound exceeds the incumbent is pruned',
-        detail: 'This is the practical reason to write the integer program first rather than ' +
-          'reaching for a heuristic. The same formulation feeds a solver that will answer ' +
-          'exactly on small instances, a rounding that gives a guarantee on large ones, and a ' +
-          'lower bound that tells you how far from optimal a heuristic’s answer is. The three ' +
-          'answers arrive from one artefact, and picking between them becomes a question of ' +
-          'instance size rather than of engineering effort.',
-        example: 'M11’s branch-and-bound section prunes on exactly this bound; the demo here ' +
+        detail: [
+          'This is the practical reason to write the integer program first rather than reaching for ' +
+            'a heuristic.',
+          'The same formulation feeds a solver that will answer exactly on small instances. It also ' +
+            'feeds a rounding that gives a guarantee on large ones, and a lower bound that tells ' +
+            'you how far from optimal a heuristic’s answer is.',
+          'The three answers arrive from one artefact, and picking between them becomes a question ' +
+            'of instance size rather than of engineering effort.'
+        ],
+        example: 'M11’s branch-and-bound section prunes on exactly this bound. The demo here ' +
           'reports the same LP value as a lower bound in the ratio table, where it averages ' +
           '0.875 of the integer optimum.'
       }

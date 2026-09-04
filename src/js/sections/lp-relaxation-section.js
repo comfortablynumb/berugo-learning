@@ -55,34 +55,37 @@
   const ORIENTATION = [
         '**Relaxation turns a modelling problem into a solved one.** Write the integer program ' +
           'honestly — one variable per decision, one constraint per requirement — then delete the ' +
-          'sentence that says the variables are integers. What remains is a linear program, which ' +
-          'is polynomial-time solvable, and its optimum is a lower bound on the integer one ' +
-          'because every integer solution is still a fractional solution.',
+          'sentence that says the variables are integers.',
+        'What remains is a linear program, which is polynomial-time solvable.',
+        'Its optimum is a lower bound on the integer one, because every integer solution is still ' +
+          'a fractional solution.',
         '**Vertex cover’s relaxation is half-integral, which is why threshold rounding works.** ' +
-          'Every basic solution has x in {0, ½, 1} — the demo checks it on every instance and ' +
-          'finds no exception. Rounding up at ½ is then feasible by inspection: every edge has ' +
-          'x_u + x_v ≥ 1, so at least one endpoint is at least ½ and gets taken. Each rounded ' +
-          'coordinate at most doubles, so the cost is at most twice the LP value.',
+          'Every basic solution has x in {0, ½, 1}, and the demo checks it on every instance and ' +
+          'finds no exception.',
+        'Rounding up at ½ is then feasible by inspection. Every edge has x_u + x_v ≥ 1, so at ' +
+          'least one endpoint is at least ½ and gets taken.',
+        'Each rounded coordinate at most doubles, so the cost is at most twice the LP value.',
         '**The integrality gap is a ceiling on the entire method, not a property of one ' +
-          'algorithm.** On the complete graph the LP pays n/2 — every vertex at exactly ½ — and ' +
-          'the integer optimum is n − 1, so the gap is 2 − 2/n. No rounding of this relaxation ' +
-          'can produce a ratio better than that, because the two numbers it compares are already ' +
-          'that far apart. Beating it needs a *stronger* relaxation, which is where semidefinite ' +
-          'programming comes in.',
+          'algorithm.** On the complete graph the LP pays n/2, with every vertex at exactly ½, and ' +
+          'the integer optimum is n − 1.',
+        'So the gap is 2 − 2/n. No rounding of this relaxation can produce a ratio better than ' +
+          'that, because the two numbers it compares are already that far apart.',
+        'Beating it needs a *stronger* relaxation, which is where semidefinite programming comes in.',
         '**Randomised rounding is the version for problems that are not half-integral.** Take set ' +
-          'S with probability x_S; the expected cost per round is exactly the LP value, and the ' +
-          'chance an element is uncovered after t rounds is at most e^−t. For MAX-SAT, setting ' +
-          'variable i true with probability y_i satisfies a clause of length k with probability at ' +
-          'least 1 − (1 − 1/k)^k ≥ 1 − 1/e.',
+          'S with probability x_S. The expected cost per round is exactly the LP value, and the ' +
+          'chance an element is uncovered after t rounds is at most e^−t.',
+        'For MAX-SAT, setting variable i true with probability y_i satisfies a clause of length k ' +
+          'with probability at least 1 − (1 − 1/k)^k ≥ 1 − 1/e.',
         '**The 3/4 algorithm is two weak algorithms with opposite biases.** A plain coin flip is ' +
-          'good on LONG clauses (1 − 2^−k rises with k) and bad on short ones; LP rounding is ' +
-          'good on SHORT clauses and falls to 1 − 1/e as k grows. Taking the better of the two on ' +
-          'each instance gives 3/4, and the proof is that their average already exceeds 3/4 ' +
-          'clause by clause.',
+          'good on LONG clauses, because 1 − 2^−k rises with k, and bad on short ones.',
+        'LP rounding is good on SHORT clauses and falls to 1 − 1/e as k grows.',
+        'Taking the better of the two on each instance gives 3/4, and the proof is that their ' +
+          'average already exceeds 3/4 clause by clause.',
         '**The primal-dual method throws away the LP and keeps the duality.** Raise the dual ' +
           'variable of an uncovered edge until a vertex’s constraint is tight, take that vertex, ' +
-          'repeat. No tableau, no solver, the same factor of 2, and the dual it builds is a ' +
-          'certificate. This is the shape most production approximation code actually takes.'
+          'repeat.',
+        'No tableau, no solver, the same factor of 2, and the dual it builds is a certificate.',
+        'This is the shape most production approximation code actually takes.'
   ];
 
   function config() {
@@ -95,15 +98,15 @@
       },
       diagram: diagram(),
       insight: '**When a problem is NP-hard, the first move is to write the integer program, not ' +
-        'to invent a heuristic.** The relaxation gives three things at once: a lower bound you can ' +
-        'report immediately, a rounding that is usually a published two-line argument, and a ' +
-        'measurable gap that tells you whether the model is the limitation or the algorithm is. ' +
-        'The demo’s complete-graph table is the diagnostic in miniature — a gap approaching 2 ' +
-        'means no amount of rounding cleverness will help and the *formulation* needs to change. ' +
-        '**The practical form of this is also the most useful: a branch-and-bound solver’s LP ' +
-        'bound is exactly this relaxation, so the same modelling effort gives you both the ' +
-        'approximation and the exact solver, and you can start with whichever the instance size ' +
-        'allows.**'
+        'to invent a heuristic.** The relaxation gives three things at once. It gives a lower ' +
+        'bound you can report immediately, and a rounding that is usually a published two-line ' +
+        'argument. It also gives a measurable gap that tells you whether the model is the ' +
+        'limitation or the algorithm is. The demo’s complete-graph table is the diagnostic in ' +
+        'miniature. A gap approaching 2 means no amount of rounding cleverness will help, and the ' +
+        '*formulation* needs to change. **The practical form of this is also the most useful. A ' +
+        'branch-and-bound solver’s LP bound is exactly this relaxation, so the same modelling ' +
+        'effort gives you both the approximation and the exact solver. You can start with ' +
+        'whichever the instance size allows.**'
     };
   }
 
