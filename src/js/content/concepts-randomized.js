@@ -202,43 +202,49 @@
         },
         plain: 'Pick an edge, fuse its endpoints into one supernode, throw away the loops that makes.',
         formal: 'edges between u and v become self-loops and are deleted; every other edge survives with its multiplicity',
-        detail: 'The multiplicity is the part that does the work. When both endpoints were joined ' +
-          'to the same outside vertex, the merge produces two parallel edges rather than one, so ' +
-          'a densely connected region accumulates weight and becomes progressively less likely ' +
-          'to be split by a later contraction. An implementation that deduplicates edges — which ' +
-          'looks like a tidy-up — destroys exactly that effect and the success probability ' +
-          'collapses to something no analysis covers.',
+        detail: [
+          'The multiplicity is the part that does the work.',
+          'When both endpoints were joined to the same outside vertex, the merge produces two ' +
+            'parallel edges rather than one. So a densely connected region accumulates weight and ' +
+            'becomes progressively less likely to be split by a later contraction.',
+          'An implementation that deduplicates edges looks like a tidy-up. It destroys exactly that ' +
+            'effect, and the success probability collapses to something no analysis covers.'
+        ],
         example: 'The demo’s trace shows 32 edges falling to 2 over 10 contractions on a ' +
-          '12-vertex graph, faster than the supernode count falls, because every merge also ' +
-          'destroys the self-loops it creates.'
+          '12-vertex graph. That is faster than the supernode count falls, because every merge ' +
+          'also destroys the self-loops it creates.'
       },
       {
         term: 'The success probability is exactly 2/(n(n−1))',
         plain: 'Each contraction has at most a 2/n chance of destroying the cut, and the product telescopes.',
         formal: 'Pr[a specific min cut survives] ≥ ∏ᵢ (1 − 2/(n − i)) = 2/(n(n−1))',
         readAs: 'The probability that one particular minimum cut survives is at least the ' +
-          'product over each step of one minus two over the remaining vertex count, which ' +
+          'product over each step of one minus two over the remaining vertex count. That ' +
           'multiplies out to two over n times n minus one.',
-        detail: 'The step everybody skips is why the per-contraction bound holds. If the minimum ' +
-          'cut has size k then every vertex has degree at least k — a vertex of smaller degree ' +
-          'would be a smaller cut on its own — so the graph has at least nk/2 edges and the ' +
-          'chance of picking one of the k cut edges is at most 2/n. That is the entire argument, ' +
-          'and it is why the edge must be drawn uniformly from the edges rather than from the ' +
-          'vertices: the bound is a statement about the edge count.',
-        example: 'At n = 12 the bound is 1.52%. On a cycle the demo measures 1.65% for a ' +
-          'nominated cut, and on two cliques joined by two edges it measures 34.55%, because ' +
-          'that graph is far from the worst case.'
+        detail: [
+          'The step everybody skips is why the per-contraction bound holds.',
+          'If the minimum cut has size k then every vertex has degree at least k, because a vertex ' +
+            'of smaller degree would be a smaller cut on its own. So the graph has at least nk/2 ' +
+            'edges, and the chance of picking one of the k cut edges is at most 2/n.',
+          'That is the entire argument. It is why the edge must be drawn uniformly from the edges ' +
+            'rather than from the vertices: the bound is a statement about the edge count.'
+        ],
+        example: 'At n = 12 the bound is 1.52%, and on a cycle the demo measures 1.65% for a ' +
+          'nominated cut. On two cliques joined by two edges it measures 34.55%, because that ' +
+          'graph is far from the worst case.'
       },
       {
         term: 'The bound is about ONE cut, not about finding any minimum cut',
         plain: 'A graph with many minimum cuts is easy to find one of, and still hard to find a particular one.',
         formal: 'Pr[returns cut C] ≥ 2/(n(n−1)) for each min cut C; the events are disjoint',
-        detail: 'Reporting the wrong event is how the bound gets a reputation for pessimism. On ' +
-          'a cycle every pair of edges is a minimum cut, so "found a minimum cut" happens on ' +
-          'essentially every run while "found this one" sits within a percent of the bound. ' +
-          'Which event you measure has to match which event you need — an algorithm that must ' +
-          'enumerate all minimum cuts is doing the second, and one that only needs the minimum ' +
-          'cut VALUE is doing the first.',
+        detail: [
+          'Reporting the wrong event is how the bound gets a reputation for pessimism.',
+          'On a cycle every pair of edges is a minimum cut. So "found a minimum cut" happens on ' +
+            'essentially every run, while "found this one" sits within a percent of the bound.',
+          'Which event you measure has to match which event you need. An algorithm that must ' +
+            'enumerate all minimum cuts is doing the second, and one that only needs the minimum ' +
+            'cut VALUE is doing the first.'
+        ],
         example: 'On C₁₂ the demo measures 100.00% for "some minimum cut" and 1.65% for a ' +
           'nominated one, with all 66 distinct minimum cuts turning up across 2 000 runs.'
       },
@@ -246,12 +252,15 @@
         term: 'The same argument counts the minimum cuts',
         plain: 'Because each minimum cut is returned with probability at least 2/(n(n−1)) and the events are disjoint, there cannot be many of them.',
         formal: 'a graph has at most n(n−1)/2 minimum cuts, attained exactly by the cycle',
-        detail: 'This is a fact about graphs proved by running an algorithm on them, which is ' +
-          'unusual enough to be worth remembering on its own. The probabilities of disjoint ' +
-          'events sum to at most one, each minimum cut has probability at least 2/(n(n−1)), so ' +
-          'there are at most n(n−1)/2 of them. It is also the more reusable half of the result: ' +
-          'any algorithm that enumerates minimum cuts now has a bound on its own output size, ' +
-          'and the cycle shows the bound cannot be improved.',
+        detail: [
+          'This is a fact about graphs proved by running an algorithm on them, which is unusual ' +
+            'enough to be worth remembering on its own.',
+          'The probabilities of disjoint events sum to at most one, and each minimum cut has ' +
+            'probability at least 2/(n(n−1)). So there are at most n(n−1)/2 of them.',
+          'It is also the more reusable half of the result. Any algorithm that enumerates minimum ' +
+            'cuts now has a bound on its own output size, and the cycle shows the bound cannot be ' +
+            'improved.'
+        ],
         example: 'C₁₂ has exactly 12 · 11 / 2 = 66 minimum cuts, and the demo’s enumeration ' +
           'oracle counts precisely 66 optimal partitions.'
       },
@@ -260,15 +269,17 @@
         plain: 'The cost model is expected total work, not the probability that one run is right.',
         formal: 'n(n−1)/2 · ln(1/δ) runs at O(n²) each gives failure below δ in O(n⁴ log n)',
         readAs: 'Take n times n minus one over two, multiplied by the natural log of one over ' +
-          'delta, runs — each costing order n squared — for a total of order n to the fourth ' +
-          'times log n.',
-        detail: 'The instinct that 1/n² is "too small to be useful" compares the wrong two ' +
-          'numbers. What matters is the failure probability multiplied by the cost of a run, and ' +
-          'contraction runs are quadratic and allocation-free. The same reasoning appears ' +
-          'wherever a cheap probabilistic filter fronts an expensive exact check, and getting it ' +
-          'wrong in the other direction is how people end up running an exponential exact ' +
-          'algorithm because the polynomial one "only" succeeds sometimes.',
-        example: 'The demo puts the two multiplications side by side: 302 runs of 10 ' +
+          'delta. That is how many runs you need, each costing order n squared, for a total of ' +
+          'order n to the fourth times log n.',
+        detail: [
+          'The instinct that 1/n² is "too small to be useful" compares the wrong two numbers.',
+          'What matters is the failure probability multiplied by the cost of a run, and contraction ' +
+            'runs are quadratic and allocation-free.',
+          'The same reasoning appears wherever a cheap probabilistic filter fronts an expensive ' +
+            'exact check. Getting it wrong in the other direction is how people end up running an ' +
+            'exponential exact algorithm because the polynomial one "only" succeeds sometimes.'
+        ],
+        example: 'The demo puts the two multiplications side by side. That is 302 runs of 10 ' +
           'contractions at the proven bound, and 11 runs at the measured rate, for the same 99% ' +
           'confidence.'
       },
@@ -276,16 +287,19 @@
         term: 'Karger–Stein spends the repetition where the cut actually dies',
         plain: 'The early contractions are almost always safe, so only the last few deserve to be repeated.',
         formal: 'contract to n/√2, recurse twice: T(n) = 2T(n/√2) + O(n²) = O(n² log n)',
-        readAs: 'Contract down to n divided by the square root of two and recurse twice; the ' +
+        readAs: 'Contract down to n divided by the square root of two and recurse twice. The ' +
           'recurrence T of n equals two T of n over root two plus order n squared, which solves ' +
           'to order n squared log n.',
-        detail: 'The survival probability of contracting from n down to t is roughly t²/n², so ' +
-          'stopping at n/√2 leaves it at about a half — and two independent recursive calls at ' +
-          'that size then cost the same as one full run while the failure probabilities ' +
-          'multiply instead of compounding. The result is a success probability of Ω(1/log n) ' +
-          'per call instead of Ω(1/n²), so the total work for high confidence drops from ' +
-          'O(n⁴ log n) to O(n² log³n). The idea generalises: when a randomised process fails ' +
-          'unevenly along its length, repeat the dangerous part rather than the whole.',
+        detail: [
+          'The survival probability of contracting from n down to t is roughly t²/n², so stopping at ' +
+            'n/√2 leaves it at about a half.',
+          'Two independent recursive calls at that size then cost the same as one full run, while ' +
+            'the failure probabilities multiply instead of compounding.',
+          'The result is a success probability of Ω(1/log n) per call instead of Ω(1/n²), so the ' +
+            'total work for high confidence drops from O(n⁴ log n) to O(n² log³n).',
+          'The idea generalises. When a randomised process fails unevenly along its length, repeat ' +
+            'the dangerous part rather than the whole.'
+        ],
         example: 'The demo runs one Karger–Stein call at 64 contractions across 63 recursive ' +
           'calls and finds the minimum cut, against 3 020 contractions for plain repetition at ' +
           'the proven bound.'
@@ -294,12 +308,14 @@
         term: 'Uniform over edges is not uniform over vertices',
         plain: 'Choosing a supernode and then one of its edges over-samples the sparse side of the cut.',
         formal: 'the degree bound is a statement about |E| ≥ nk/2, so the draw must be from E',
-        detail: 'Both rules can be described in one sentence as "contract a random edge", and ' +
-          'they induce different distributions: picking a supernode first makes a degree-2 ' +
-          'vertex as likely as a degree-20 one, so the thin end of a cut gets contracted far ' +
-          'more often than the analysis permits. There is no error message and no invariant ' +
-          'violation — the algorithm still returns a cut, just a worse one more often — which is ' +
-          'why the demo ships both and measures them.',
+        detail: [
+          'Both rules can be described in one sentence as "contract a random edge", and they induce ' +
+            'different distributions.',
+          'Picking a supernode first makes a degree-2 vertex as likely as a degree-20 one, so the ' +
+            'thin end of a cut gets contracted far more often than the analysis permits.',
+          'There is no error message and no invariant violation. The algorithm still returns a cut, ' +
+            'just a worse one more often, which is why the demo ships both and measures them.'
+        ],
         example: 'On the two-clique graph the demo measures 34.55% for the correct rule and ' +
           '23.40% for the plausible mistake, over the same 2 000 seeds.'
       },
@@ -308,14 +324,16 @@
         plain: 'Keeping each edge with probability p preserves cut values up to a factor, so you can work on a sparser graph.',
         formal: 'Karger’s sampling theorem: cuts in a p-sample are within (1 ± ε) of p times their true value for p = Ω(log n / (ε²k))',
         readAs: 'Every cut in a random sample that keeps each edge with probability p has size ' +
-          'within one plus or minus epsilon of p times its true size, provided p is at least of ' +
-          'order log n over epsilon squared times the minimum cut.',
-        detail: 'This is the reason contraction matters beyond min cut. Once every cut in a ' +
-          'sparse random sample is provably close to its true value, an expensive algorithm can ' +
-          'be run on the sample and its answer corrected — which is how near-linear-time minimum ' +
-          'cut and fast approximate max-flow algorithms are built. The pattern is the same one ' +
-          'as sketching in M07: shrink the input in a way that provably preserves the quantity ' +
-          'you care about, then pay full price on something small.',
+          'within one plus or minus epsilon of p times its true size. That holds provided p is at ' +
+          'least of order log n over epsilon squared times the minimum cut.',
+        detail: [
+          'This is the reason contraction matters beyond min cut.',
+          'Once every cut in a sparse random sample is provably close to its true value, an ' +
+            'expensive algorithm can be run on the sample and its answer corrected. That is how ' +
+            'near-linear-time minimum cut and fast approximate max-flow algorithms are built.',
+          'The pattern is the same one as sketching in M07. Shrink the input in a way that provably ' +
+            'preserves the quantity you care about, then pay full price on something small.'
+        ],
         example: 'Karger’s near-linear-time minimum cut algorithm and the Benczúr–Karger cut ' +
           'sparsifier both rest on this theorem rather than on contraction directly.'
       }

@@ -55,38 +55,45 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**Contraction is the whole algorithm and it has no cleverness in it.** Pick a uniformly ' +
+        'random surviving edge, merge its endpoints into one supernode, discard the self-loops ' +
+        'that creates, repeat until two supernodes remain.',
+      'Whatever edges still cross between them are a cut.',
+      'There is no search, no residual graph and no augmenting path. It finds the global minimum ' +
+        'cut with probability at least 2/(n(n−1)).',
+      '**The analysis is one inequality repeated.** If the minimum cut has size k, every vertex has ' +
+        'degree at least k, so the graph has at least nk/2 edges.',
+      'The chance of contracting one of the k cut edges is therefore at most 2/n. Surviving all ' +
+        'n−2 contractions gives a telescoping product that collapses to exactly 2/(n(n−1)).',
+      'The step everybody skips is *why* the degree bound holds: a vertex of degree below k would ' +
+        'be a smaller cut on its own.',
+      '**A success probability of 1/n² is not the same as a failure.** Repeat the run ' +
+        'n(n−1)/2 · ln(1/δ) times and the failure probability is below δ.',
+      'Each run is O(n²), so the total is O(n⁴ log n) for a global minimum cut without a single ' +
+        'max-flow computation.',
+      'The cost model is expected total work, and a cheap run with a small success probability can ' +
+        'beat an expensive run with certainty.',
+      '**The bound is about ONE cut, and reporting the wrong event makes it look pessimistic.** On ' +
+        'the two-clique graph, which has a single minimum cut, the demo measures a success rate ' +
+        'more than twenty times the bound.',
+      'On a cycle, which has exactly n(n−1)/2 minimum cuts, "found a minimum cut" is essentially ' +
+        'certain. "Found this particular one" sits within a percent of 2/(n(n−1)).',
+      'Same algorithm, same bound, two different questions.',
+      '**Karger–Stein spends the repetition where it matters.** The early contractions are almost ' +
+        'always safe and the last few are where cuts die.',
+      'So contracting down to n/√2 and recursing twice keeps each stage’s survival probability ' +
+        'near 1/2.',
+      'The recurrence T(n) = 2T(n/√2) + O(n²) gives O(n² log n) per run, and the success ' +
+        'probability rises from Ω(1/n²) to Ω(1/log n).'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**Contraction is the whole algorithm and it has no cleverness in it.** Pick a uniformly ' +
-          'random surviving edge, merge its endpoints into one supernode, discard the self-loops ' +
-          'that creates, repeat until two supernodes remain. Whatever edges still cross between ' +
-          'them are a cut. There is no search, no residual graph, no augmenting path — and it ' +
-          'finds the global minimum cut with probability at least 2/(n(n−1)).',
-        '**The analysis is one inequality repeated.** If the minimum cut has size k, every vertex ' +
-          'has degree at least k, so the graph has at least nk/2 edges and the chance of ' +
-          'contracting one of the k cut edges is at most 2/n. Surviving all n−2 contractions ' +
-          'gives a telescoping product that collapses to exactly 2/(n(n−1)). The step everybody ' +
-          'skips is *why* the degree bound holds: a vertex of degree below k would be a smaller ' +
-          'cut on its own.',
-        '**A success probability of 1/n² is not the same as a failure.** Repeat the run ' +
-          'n(n−1)/2 · ln(1/δ) times and the failure probability is below δ; each run is O(n²), ' +
-          'so the total is O(n⁴ log n) for a global minimum cut without a single max-flow ' +
-          'computation. The cost model is expected total work, and a cheap run with a small ' +
-          'success probability can beat an expensive run with certainty.',
-        '**The bound is about ONE cut, and reporting the wrong event makes it look pessimistic.** ' +
-          'On the two-clique graph, which has a single minimum cut, the demo measures a success ' +
-          'rate more than twenty times the bound. On a cycle, which has exactly n(n−1)/2 minimum ' +
-          'cuts, "found a minimum cut" is essentially certain while "found this particular one" ' +
-          'sits within a percent of 2/(n(n−1)). Same algorithm, same bound, two different ' +
-          'questions.',
-        '**Karger–Stein spends the repetition where it matters.** The early contractions are ' +
-          'almost always safe and the last few are where cuts die, so contracting down to n/√2 ' +
-          'and recursing twice keeps each stage’s survival probability near 1/2. The recurrence ' +
-          'T(n) = 2T(n/√2) + O(n²) gives O(n² log n) per run and the success probability rises ' +
-          'from Ω(1/n²) to Ω(1/log n).'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — contraction, repetition and the two ways to read the bound',
         markup: root.RandomContractionTemplate.render()
@@ -94,13 +101,12 @@
       diagram: diagram(),
       insight: '**The reflex "1/n² is too small to be useful" is the mistake this section ' +
         'exists to remove.** What matters is the product of the failure probability and the cost ' +
-        'of a run, and a run here is quadratic. The demo shows the corollary too, which is worth ' +
-        'more than the algorithm in practice: because the events "this run returns cut C" are ' +
-        'disjoint and each has probability at least 2/(n(n−1)), a graph can have at most ' +
-        'n(n−1)/2 minimum cuts — a fact about graphs, proved by running an algorithm on them. ' +
-        'The cycle attains it exactly, and the demo counts all of them. **When an algorithm’s ' +
-        'analysis produces a counting bound as a side effect, the bound is usually the more ' +
-        'reusable half.**'
+        'of a run, and a run here is quadratic. The demo shows the corollary too, and it is worth ' +
+        'more than the algorithm in practice. The events "this run returns cut C" are disjoint and ' +
+        'each has probability at least 2/(n(n−1)), so a graph can have at most n(n−1)/2 minimum ' +
+        'cuts. That is a fact about graphs, proved by running an algorithm on them. The cycle ' +
+        'attains it exactly, and the demo counts all of them. **When an algorithm’s analysis ' +
+        'produces a counting bound as a side effect, the bound is usually the more reusable half.**'
     };
   }
 
