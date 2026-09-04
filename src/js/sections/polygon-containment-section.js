@@ -51,39 +51,45 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**The shoelace formula gives a polygon\'s area from its vertices alone.** Sum ' +
+        '`x_i·y_(i+1) − x_(i+1)·y_i` around the ring and halve it.',
+      'The result is *signed*: positive when the ring runs counter-clockwise, negative when it runs ' +
+        'clockwise. That sign is the cheapest way to ask which way round a polygon is wound, which ' +
+        'matters to every routine downstream.',
+      '**Containment has three answers, not two.** A point is inside, outside, or exactly on the ' +
+        'boundary.',
+      'Collapsing the third into one of the others is a decision. Making it without noticing is how ' +
+        'two adjacent polygons end up both claiming a point on their shared edge, or neither ' +
+        'claiming it.',
+      '**Ray casting and the winding number disagree, and neither is wrong.** Ray casting shoots a ' +
+        'ray and asks whether the crossing count is odd. The winding number counts the same ' +
+        'crossings with a sign, and asks whether the ring goes round the point at all.',
+      'On a simple polygon they always agree. On a self-intersecting one they do not, and which ' +
+        'answer is "right" depends on a fill rule that lives in your renderer rather than in your ' +
+        'data.',
+      '**Simplification trades vertices for fidelity, and the two standard methods give up ' +
+        'different things.** Douglas-Peucker keeps whatever is furthest from the current chord, so ' +
+        'it preserves spikes and can move the line anywhere inside the tolerance.',
+      'Visvalingam removes the vertex whose triangle with its neighbours is smallest, so it gives up ' +
+        'spikes before it gives up overall shape.',
+      'Cartographers prefer the second. It is the wrong choice when the spikes are the data.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'The **shoelace formula** gives a polygon\'s area from its vertices alone: sum ' +
-          '`x_i·y_(i+1) − x_(i+1)·y_i` around the ring and halve it. The result is *signed* — ' +
-          'positive when the ring runs counter-clockwise, negative when it runs clockwise — and ' +
-          'that sign is the cheapest way to ask which way round a polygon is wound, which matters ' +
-          'to every routine downstream.',
-        '**Containment has three answers, not two.** A point is inside, outside, or exactly on the ' +
-          'boundary. Collapsing the third into one of the others is a decision, and making it ' +
-          'without noticing is how two adjacent polygons end up both claiming a point on their ' +
-          'shared edge, or neither claiming it.',
-        '**Ray casting and the winding number disagree, and neither is wrong.** Ray casting shoots ' +
-          'a ray and asks whether the crossing count is odd. The winding number counts the same ' +
-          'crossings with a sign and asks whether the ring goes round the point at all. On a simple ' +
-          'polygon they always agree. On a self-intersecting one they do not, and which answer is ' +
-          '"right" depends on a fill rule that lives in your renderer rather than in your data.',
-        '**Simplification trades vertices for fidelity, and the two standard methods give up ' +
-          'different things.** Douglas-Peucker keeps whatever is furthest from the current chord, ' +
-          'so it preserves spikes and can move the line anywhere inside the tolerance. Visvalingam ' +
-          'removes the vertex whose triangle with its neighbours is smallest, so it gives up spikes ' +
-          'before it gives up overall shape. Cartographers prefer the second; it is the wrong choice ' +
-          'when the spikes are the data.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — two fill rules, eight polygons, and two simplifiers',
         markup: root.PolygonContainmentTemplate.render()
       },
       diagram: diagram(),
       insight: 'When a containment test disagrees with a user\'s eyes, the bug is almost never in ' +
-        'the arithmetic — it is that the polygon is not simple and nobody decided which fill rule ' +
-        'applies. Before reaching for a tolerance, check `isSimple`: a self-intersecting ring makes ' +
+        'the arithmetic. It is that the polygon is not simple and nobody decided which fill rule ' +
+        'applies. Before reaching for a tolerance, check `isSimple`. A self-intersecting ring makes ' +
         '"inside" ambiguous rather than difficult, and no amount of numerical care will settle a ' +
         'question that has two defensible answers. Decide the rule, write it down next to the data, ' +
         'and the disagreement stops being mysterious.'

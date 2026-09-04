@@ -193,12 +193,15 @@
         readAs: 'Walk the vertices in order, and for each consecutive pair add the first vertex\'s x ' +
           'times the second\'s y and subtract the second\'s x times the first\'s y. The total is twice ' +
           'the signed area.',
-        detail: 'It needs no triangulation and no convexity, and it works on any simple polygon ' +
-          'because the positive and negative trapezoids under each edge cancel outside the ring. The ' +
-          'sign is not a nuisance to be stripped with an absolute value — it is the polygon\'s ' +
-          'orientation, which is what tells a renderer which side is inside and a boolean operation ' +
-          'which way to traverse. Taking the absolute value at the point of computation is how that ' +
-          'information gets lost, and it is not recoverable later.',
+        detail: [
+          'It needs no triangulation and no convexity, and it works on any simple polygon, because ' +
+            'the positive and negative trapezoids under each edge cancel outside the ring.',
+          'The sign is not a nuisance to be stripped with an absolute value. It is the polygon\'s ' +
+            'orientation, which is what tells a renderer which side is inside and a boolean ' +
+            'operation which way to traverse.',
+          'Taking the absolute value at the point of computation is how that information gets lost, ' +
+            'and it is not recoverable later.'
+        ],
         example: 'The pentagram\'s ring encloses 3 600.00 of signed area wound counter-clockwise; the ' +
           'bowtie\'s two lobes cancel exactly and it reports 0.0.'
       },
@@ -221,12 +224,15 @@
           'keeps only whether the number of crossings is odd. The second adds one for an edge crossing ' +
           'upward and subtracts one for an edge crossing downward, and asks whether the total is ' +
           'anything other than zero.',
-        detail: 'On a simple polygon the two rules are the same function computed two ways, which is ' +
-          'why the difference goes unnoticed for years. They come apart exactly where the ring wraps ' +
-          'a region more than once: two crossings is an even count, so even-odd says outside, while ' +
-          'two crossings in the same direction is a winding number of two, so non-zero says inside. ' +
+        detail: [
+          'On a simple polygon the two rules are the same function computed two ways, which is why ' +
+            'the difference goes unnoticed for years.',
+          'They come apart exactly where the ring wraps a region more than once. Two crossings is an ' +
+            'even count, so even-odd says outside; two crossings in the same direction is a winding ' +
+            'number of two, so non-zero says inside.',
           'Neither is a bug. The polygon does not carry the answer, the fill rule does, and the fill ' +
-          'rule is a choice the format made.',
+            'rule is a choice the format made.'
+        ],
         example: 'At the pentagram\'s centre the ray crosses 2 edges and the winding number is 2 — ' +
           'even-odd says out, non-zero says in.'
       },
@@ -234,12 +240,15 @@
         term: 'Self-intersection is necessary for a disagreement and not sufficient',
         plain: 'The bowtie crosses itself and the two rules still agree everywhere on it.',
         formal: 'a disagreement needs a region the ring encircles TWICE, not merely a crossing',
-        detail: 'This is the distinction the shapes table exists to draw, and it is worth more than ' +
-          'the headline. Every simple polygon in the set produces zero disagreeing probes however ' +
-          'fine the grid, as it must. Of the two non-simple polygons only the pentagram disagrees: ' +
-          'its five points are arranged so that the centre pentagon is enclosed twice in the same ' +
-          'direction. The bowtie crosses itself once, but each lobe is encircled exactly once, so an ' +
-          'odd crossing count and a non-zero winding still say the same thing about every point.',
+        detail: [
+          'This is the distinction the shapes table exists to draw, and it is worth more than the ' +
+            'headline.',
+          'Every simple polygon in the set produces zero disagreeing probes however fine the grid, ' +
+            'as it must. Of the two non-simple polygons only the pentagram disagrees: its five ' +
+            'points are arranged so that the centre pentagon is enclosed twice in the same direction.',
+          'The bowtie crosses itself once, but each lobe is encircled exactly once. So an odd ' +
+            'crossing count and a non-zero winding still say the same thing about every point.'
+        ],
         example: 'Of the 8 fixture polygons, 2 are not simple and only 1 produces a disagreement — 44 ' +
           'of 441 probes on the pentagram, and 0 on the bowtie.'
       },
@@ -247,13 +256,16 @@
         term: 'GIS and SVG made opposite choices, and both are still making them',
         plain: 'The non-zero rule is the graphics default and the even-odd rule is the one most geometry libraries assume.',
         formal: 'SVG fill-rule takes nonzero as its default; simple-feature geometry forbids the case entirely',
-        detail: 'A path that looks right in a browser and comes back with a hole in it from a spatial ' +
-          'database has not hit a bug in either — it has crossed a boundary between two fill rules. ' +
-          'The standards handle it differently again: SVG names the rule as a property and defaults ' +
-          'to non-zero, while the OGC simple-feature model declares self-intersecting rings invalid ' +
-          'and leaves the behaviour undefined, which in practice means every implementation answers ' +
-          'something and no two agree. Validate rings at the boundary of the system, because past ' +
-          'that point the question has no single right answer.',
+        detail: [
+          'A path that looks right in a browser and comes back with a hole in it from a spatial ' +
+            'database has not hit a bug in either. It has crossed a boundary between two fill rules.',
+          'The standards handle it differently again. SVG names the rule as a property and defaults ' +
+            'to non-zero, while the OGC simple-feature model declares self-intersecting rings ' +
+            'invalid and leaves the behaviour undefined.',
+          'In practice that means every implementation answers something and no two agree. Validate ' +
+            'rings at the boundary of the system, because past that point the question has no single ' +
+            'right answer.'
+        ],
         example: 'The same silhouette drawn as an 8-vertex simple star produces 0 disagreeing ' +
           'probes; drawn as a 5-vertex crossing ring it produces 44.'
       },
@@ -261,13 +273,15 @@
         term: 'The boundary is a third answer, and it needs a policy',
         plain: 'A point exactly on an edge is neither inside nor outside, and every implementation decides quietly.',
         formal: 'ray casting is written so that a vertex counts once rather than twice or zero times',
-        detail: 'The classic ray-casting loop uses a half-open comparison on the y interval — one ' +
-          'endpoint inclusive, the other exclusive — and that asymmetry is the entire handling of ' +
-          'vertices. Without it, a ray passing exactly through a vertex counts the crossing twice ' +
-          'when the two edges leave in opposite directions and the parity flips wrongly. Whether a ' +
-          'boundary point is reported inside is a separate decision again, and it matters most where ' +
-          'polygons tile: if two neighbours both claim their shared edge, a point on it belongs to ' +
-          'both, and if neither claims it, it belongs to nothing.',
+        detail: [
+          'The classic ray-casting loop uses a half-open comparison on the y interval — one endpoint ' +
+            'inclusive, the other exclusive — and that asymmetry is the entire handling of vertices.',
+          'Without it, a ray passing exactly through a vertex counts the crossing twice when the two ' +
+            'edges leave in opposite directions, and the parity flips wrongly.',
+          'Whether a boundary point is reported inside is a separate decision again, and it matters ' +
+            'most where polygons tile. If two neighbours both claim their shared edge, a point on it ' +
+            'belongs to both; if neither claims it, it belongs to nothing.'
+        ],
         example: 'The probe grid marks on-boundary points as a third colour rather than folding them ' +
           'into either answer.'
       },
@@ -275,13 +289,16 @@
         term: 'Turn direction does not make a polygon convex; the turning number does',
         plain: 'Every turn in a pentagram goes the same way, and a pentagram is not convex.',
         formal: 'convex means all turns agree AND the total turning is exactly one full revolution',
-        detail: 'The usual convexity test — walk the ring and check every orientation has the same ' +
-          'sign — is necessary and not sufficient, and the pentagram is the counterexample that shows ' +
-          'why. Its five turns all agree, because the boundary is genuinely turning consistently ' +
-          'left; it just turns through 720 degrees rather than 360. A test that only checks the signs ' +
-          'accepts it, and downstream code that trusts convexity — Sutherland-Hodgman clipping, the ' +
-          'rotating-calipers scan, an O(log n) containment test — then produces a confident wrong ' +
-          'answer.',
+        detail: [
+          'The usual convexity test walks the ring and checks every orientation has the same sign. ' +
+            'That is necessary and not sufficient, and the pentagram is the counterexample that ' +
+            'shows why.',
+          'Its five turns all agree, because the boundary is genuinely turning consistently left. It ' +
+            'just turns through 720 degrees rather than 360.',
+          'A test that only checks the signs accepts it. Downstream code that trusts convexity — ' +
+            'Sutherland-Hodgman clipping, the rotating-calipers scan, an O(log n) containment test — ' +
+            'then produces a confident wrong answer.'
+        ],
         example: 'The shapes table marks the pentagram not convex and not simple, while every simple ' +
           'polygon in the set that is not convex is at least simple.'
       },
@@ -289,13 +306,16 @@
         term: 'Simplification is lossy in a way you get to choose',
         plain: 'Douglas-Peucker bounds how far the outline moves; Visvalingam removes the least significant area first.',
         formal: 'one bounds displacement, the other bounds the area of what is discarded',
-        detail: 'They optimise different things and the difference shows on different data. ' +
+        detail: [
+          'They optimise different things, and the difference shows on different data.',
           'Douglas-Peucker keeps the point furthest from the current chord and recurses, so its ' +
-          'guarantee is geometric: no retained outline is further than the tolerance from the ' +
-          'original. Visvalingam repeatedly drops the vertex whose triangle with its neighbours has ' +
-          'the smallest area, which degrades a coastline far more gracefully because it removes ' +
-          'wiggle rather than truncating spikes. Neither preserves simplicity: both can make a ' +
-          'polygon cross itself, and that has to be checked rather than assumed.',
+            'guarantee is geometric: no retained outline is further than the tolerance from the ' +
+            'original.',
+          'Visvalingam repeatedly drops the vertex whose triangle with its neighbours has the ' +
+            'smallest area, which degrades a coastline far more gracefully because it removes ' +
+            'wiggle rather than truncating spikes. Neither preserves simplicity: both can make a ' +
+            'polygon cross itself, and that has to be checked rather than assumed.'
+        ],
         example: 'At a tolerance of zero the pentagram keeps all 5 vertices, 100.0% of its area, and ' +
           'no point moves at all — the baseline every other setting is read against.'
       },
@@ -305,12 +325,16 @@
         formal: 'edge i runs from vertex i to vertex (i + 1) mod n',
         readAs: 'Each edge starts at one vertex and ends at the next one round, and the last edge ' +
           'wraps back to the beginning — that is what the mod does.',
-        detail: 'Repeating the first vertex at the end is the other convention, and mixing the two is ' +
-          'a whole class of bug: the shoelace sum picks up a zero-area edge and still works, the ' +
-          'vertex count is off by one everywhere, and a simplification routine can drop the duplicate ' +
-          'and silently open the ring. GeoJSON requires the repeat, most in-memory representations ' +
-          'forbid it, and the conversion between them is where the errors live. Pick one, state it at ' +
-          'the top of the file, and normalise at the boundary.',
+        detail: [
+          'Repeating the first vertex at the end is the other convention, and mixing the two is a ' +
+            'whole class of bug.',
+          'The shoelace sum picks up a zero-area edge and still works. The vertex count is off by ' +
+            'one everywhere, and a simplification routine can drop the duplicate and silently open ' +
+            'the ring.',
+          'GeoJSON requires the repeat, most in-memory representations forbid it, and the conversion ' +
+            'between them is where the errors live. Pick one, state it at the top of the file, and ' +
+            'normalise at the boundary.'
+        ],
         example: 'The fixture polygons carry 4 to 12 vertices with no repeated closing point, so the ' +
           'triangle count in the triangulation section is exactly vertices minus two.'
       }
