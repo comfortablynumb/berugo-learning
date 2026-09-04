@@ -51,32 +51,37 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**Sutherland-Hodgman clips one polygon against another** by cutting the subject successively ' +
+        'with each edge of the clip polygon, treated as an infinite line.',
+      'It is short, it is fast, and it is what most people write first. It is also correct only when ' +
+        'the clip polygon is **convex**, because a convex region is exactly the intersection of the ' +
+        'half-planes its edges define.',
+      '**A concave clip breaks that identity, and the algorithm does not say so.** The measured ' +
+        'failure comes in two flavours.',
+      'Against a deep or shallow notch it returns the *empty polygon* — obviously wrong, and at ' +
+        'least loud.',
+      'Against an L-shape or a chevron it returns a perfectly plausible four- or five-vertex polygon ' +
+        'that is two-thirds too small. It renders, it passes a "did we get a polygon" check, and it ' +
+        'is simply wrong.',
+      '**The fix is a decomposition, not a tolerance.** Split the concave clip into convex pieces — ' +
+        'ear clipping always gives you triangles — clip against each, and take the union.',
+      'The result is a *list* of rings rather than one ring, because a concave clip can genuinely ' +
+        'cut the subject into disconnected parts. The single-ring version cannot even represent that.',
+      '**The Minkowski sum turns "does this fit" into "is this point inside".** Growing every ' +
+        'obstacle by the shape of the robot reduces motion planning to a point in a region.',
+      'For two convex polygons the sum is a merge of their edge vectors in angular order. That is ' +
+        'linear, and every edge of the result is an edge of one of the inputs.',
+      'Offsetting a polygon outward is its sum with a disc, and the disc is always approximated by a ' +
+        'polygon whose corner count nobody sets.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        '**Sutherland-Hodgman** clips one polygon against another by cutting the subject ' +
-          'successively with each edge of the clip polygon, treated as an infinite line. It is ' +
-          'short, it is fast, and it is what most people write first — and it is correct only when ' +
-          'the clip polygon is **convex**, because a convex region is exactly the intersection of ' +
-          'the half-planes its edges define.',
-        '**A concave clip breaks that identity, and the algorithm does not say so.** The measured ' +
-          'failure comes in two flavours. Against a deep or shallow notch it returns the *empty ' +
-          'polygon* — obviously wrong, and at least loud. Against an L-shape or a chevron it ' +
-          'returns a perfectly plausible four- or five-vertex polygon that is two-thirds too small, ' +
-          'which renders, passes a "did we get a polygon" check, and is simply wrong.',
-        '**The fix is a decomposition, not a tolerance.** Split the concave clip into convex pieces ' +
-          '— ear clipping always gives you triangles — clip against each, and take the union. The ' +
-          'result is a *list* of rings rather than one ring, because a concave clip can genuinely ' +
-          'cut the subject into disconnected parts, which the single-ring version cannot even ' +
-          'represent.',
-        '**The Minkowski sum turns "does this fit" into "is this point inside".** Growing every ' +
-          'obstacle by the shape of the robot reduces motion planning to a point in a region. For ' +
-          'two convex polygons the sum is a merge of their edge vectors in angular order — linear, ' +
-          'and every edge of the result is an edge of one of the inputs. Offsetting a polygon ' +
-          'outward is its sum with a disc, and the disc is always approximated by a polygon whose ' +
-          'corner count nobody sets.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — the concave failure, four booleans, and offsetting',
         markup: root.PolygonClippingTemplate.render()
@@ -86,8 +91,8 @@
         'which is why robust libraries snap every coordinate to a grid before they start. That is a ' +
         'correctness decision disguised as preprocessing: it makes "exactly on the boundary" a ' +
         'state you can test for rather than a state you fall into by accident. And whatever clipper ' +
-        'you use, check its area against a sampled reference on a concave case before trusting it — ' +
-        'a clipper that is 66% wrong returns a polygon that looks entirely reasonable.'
+        'you use, check its area against a sampled reference on a concave case before trusting it. ' +
+        'A clipper that is 66% wrong returns a polygon that looks entirely reasonable.'
     };
   }
 

@@ -10,12 +10,15 @@
         term: 'Sutherland-Hodgman clips against half-planes, and a concave clip is not one',
         plain: 'It cuts the subject with each clip edge extended to an infinite line, one after another.',
         formal: 'correct exactly when the clip region equals the intersection of its edges\' half-planes',
-        detail: 'For a convex clip that identity holds by definition, which is why the algorithm is ' +
-          'so short and why it is still the right choice for a viewport or a frustum. A concave clip ' +
-          'is a different set: the half-plane of a notch\'s edge cuts away parts of the subject that ' +
-          'are genuinely inside the clip region, and the intersection of all the half-planes collapses ' +
-          'to something strictly smaller than the region — sometimes to nothing at all. Nothing in ' +
-          'the algorithm detects this; it returns a polygon and the polygon is wrong.',
+        detail: [
+          'For a convex clip that identity holds by definition. That is why the algorithm is so ' +
+            'short, and why it is still the right choice for a viewport or a frustum.',
+          'A concave clip is a different set. The half-plane of a notch\'s edge cuts away parts of ' +
+            'the subject that are genuinely inside the clip region. The intersection of all the ' +
+            'half-planes then collapses to something strictly smaller than the region — sometimes to ' +
+            'nothing at all.',
+          'Nothing in the algorithm detects this. It returns a polygon, and the polygon is wrong.'
+        ],
         example: 'Against the notch clip it returns no polygon at all — 0 vertices and an area of ' +
           '0.0 where the answer is 2 800.0.'
       },
@@ -33,12 +36,15 @@
         },
         plain: 'Either the result collapses to nothing, or it comes back plausible and two-thirds too small.',
         formal: 'of 5 concave clips, 2 return an empty polygon and 3 return a wrong area',
-        detail: 'An empty result is at least obvious: something downstream renders nothing and ' +
-          'someone investigates. A polygon with the right shape, the right winding and the wrong ' +
-          'area passes every eyeball test and every schema validation, and the error only surfaces ' +
-          'when a number computed from it — a coverage percentage, a billed area, a collision volume ' +
-          '— is quietly too small. That is why the check for this algorithm has to be an area ' +
-          'comparison against an independent reference rather than a look at the picture.',
+        detail: [
+          'An empty result is at least obvious: something downstream renders nothing and someone ' +
+            'investigates.',
+          'A polygon with the right shape, the right winding and the wrong area passes every eyeball ' +
+            'test and every schema validation. The error only surfaces when a number computed from ' +
+            'it is quietly too small — a coverage percentage, a billed area, a collision volume.',
+          'That is why the check for this algorithm has to be an area comparison against an ' +
+            'independent reference rather than a look at the picture.'
+        ],
         example: 'The L-shaped and chevron clips both return a 4- or 5-vertex polygon with 66.7% and ' +
           '66.8% of the area missing.'
       },
@@ -46,13 +52,15 @@
         term: 'Decomposing the clip into convex pieces is the cheap correct fix',
         plain: 'Split the concave clip into convex parts, clip against each, and take the union of the results.',
         formal: 'correctness follows from the half-plane identity holding on every piece',
-        detail: 'It reuses the algorithm you already have rather than replacing it with Greiner-' +
-          'Hormann or Vatti, and its cost is one Sutherland-Hodgman pass per piece plus a union at ' +
-          'the end. For a clip that changes rarely — a country boundary, a level geometry, a print ' +
-          'bleed — the decomposition is computed once and amortised over every clip against it. The ' +
-          'catch is that the pieces\' results must be unioned rather than concatenated: they share ' +
-          'edges, and a renderer using the non-zero rule will not care while an area sum very much ' +
-          'will.',
+        detail: [
+          'It reuses the algorithm you already have rather than replacing it with Greiner-Hormann ' +
+            'or Vatti, and its cost is one Sutherland-Hodgman pass per piece plus a union at the end.',
+          'For a clip that changes rarely — a country boundary, a level geometry, a print bleed — ' +
+            'the decomposition is computed once and amortised over every clip against it.',
+          'The catch is that the pieces\' results must be unioned rather than concatenated. They ' +
+            'share edges, and a renderer using the non-zero rule will not care while an area sum ' +
+            'very much will.'
+        ],
         example: '6 convex pieces clipped separately give 2 800.0, matching the sampled reference ' +
           'exactly.'
       },
@@ -60,12 +68,15 @@
         term: 'A rasterised oracle answers every boolean operation with no case analysis',
         plain: 'Sample the plane on a grid, test each cell against both polygons, and count.',
         formal: 'its error is one cell along the boundary, so the resolution is the floor of what a difference can mean',
-        detail: 'This is the reason it is a good reference and a bad algorithm: no traversal, no ' +
-          'entry-exit classification, no degeneracy handling, and it computes union, intersection, ' +
-          'difference and exclusive-or with the same three lines. Its accuracy is bounded by the ' +
-          'cell size rather than by the algorithm, so a disagreement smaller than a cell means ' +
-          'nothing at all, and a disagreement of 60% means the clipper is broken. Quoting the ' +
-          'resolution alongside the number is what keeps that distinction honest.',
+        detail: [
+          'This is the reason it is a good reference and a bad algorithm. There is no traversal, no ' +
+            'entry-exit classification and no degeneracy handling, and it computes union, ' +
+            'intersection, difference and exclusive-or with the same three lines.',
+          'Its accuracy is bounded by the cell size rather than by the algorithm. So a disagreement ' +
+            'smaller than a cell means nothing at all, and a disagreement of 60% means the clipper ' +
+            'is broken.',
+          'Quoting the resolution alongside the number is what keeps that distinction honest.'
+        ],
         example: '160 000 sample cells, each 0.0625 in area, put the convex rows at 0.3% error or ' +
           'below — which is the sampler\'s error, not the clipper\'s.'
       },
@@ -74,13 +85,16 @@
         plain: 'A free consistency check on any clipper, needing no reference implementation at all.',
         formal: 'area(A ∪ B) + area(A ∩ B) = area(A) + area(B)',
         readAs: 'The area covered by either shape, plus the area covered by both, always equals the ' +
-          'two shapes\' areas added together — because the overlap is counted twice on the right and ' +
-          'once in each term on the left.',
-        detail: 'It is inclusion-exclusion on two sets, and it holds whatever the shapes are: ' +
-          'concave, self-touching, disjoint. That makes it the cheapest possible regression test for ' +
-          'a boolean library, because it needs no ground truth — you compute two of your own outputs ' +
-          'and check an identity. Pair it with the exclusive-or, which must equal the union minus the ' +
-          'intersection, and a surprising number of traversal bugs fail one of the two immediately.',
+          'two shapes\' areas added together. The overlap is counted twice on the right and once in ' +
+          'each term on the left.',
+        detail: [
+          'It is inclusion-exclusion on two sets, and it holds whatever the shapes are: concave, ' +
+            'self-touching, disjoint.',
+          'That makes it the cheapest possible regression test for a boolean library, because it ' +
+            'needs no ground truth. You compute two of your own outputs and check an identity.',
+          'Pair it with the exclusive-or, which must equal the union minus the intersection, and a ' +
+            'surprising number of traversal bugs fail one of the two immediately.'
+        ],
         example: 'Union 9 600.0 and intersection 2 800.0 sum to 12 400.0, and the exclusive-or of ' +
           '6 800.0 is exactly their difference.'
       },
@@ -88,12 +102,15 @@
         term: 'Shared edges and coincident vertices are the whole difficulty in boolean geometry',
         plain: 'Two polygons that touch along an edge have no clean entry or exit point there.',
         formal: 'the entry/exit classification is undefined where the boundaries coincide rather than cross',
-        detail: 'Greiner-Hormann, Weiler-Atherton and Vatti all walk the two boundaries alternately, ' +
-          'switching at intersection vertices classified as entering or leaving the other polygon. A ' +
-          'shared edge is neither, and a vertex lying exactly on the other boundary is both, so ' +
-          'every robust implementation either perturbs the input or snaps the coordinates to a grid ' +
-          'first. That snap is presented as preprocessing and is really a correctness decision: it ' +
-          'changes the input to one the algorithm can handle.',
+        detail: [
+          'Greiner-Hormann, Weiler-Atherton and Vatti all walk the two boundaries alternately, ' +
+            'switching at intersection vertices classified as entering or leaving the other polygon.',
+          'A shared edge is neither, and a vertex lying exactly on the other boundary is both. So ' +
+            'every robust implementation either perturbs the input or snaps the coordinates to a ' +
+            'grid first.',
+          'That snap is presented as preprocessing and is really a correctness decision: it changes ' +
+            'the input to one the algorithm can handle.'
+        ],
         example: 'The band clip is convex and touches the subject along two edges; it lands at 0.3% ' +
           'against the sampler, entirely within the sampler\'s own resolution.'
       },
@@ -101,12 +118,15 @@
         term: 'Offsetting a polygon is its Minkowski sum with a disc, and the disc is always a polygon',
         plain: 'Buffering by a radius means sweeping a disc around the boundary, and the disc is approximated by corners.',
         formal: 'the shortfall falls with the square of the corner count',
-        detail: 'Every buffering library exposes the corner count — quad segments, arc tolerance, ' +
-          'circle steps — and almost nobody sets it, so the default silently decides how much area ' +
-          'the buffered geometry loses. The approximating polygon is inscribed, so the result is ' +
-          'always too small rather than too large, and the error compounds when buffers are chained. ' +
+        detail: [
+          'Every buffering library exposes the corner count — quad segments, arc tolerance, circle ' +
+            'steps — and almost nobody sets it.',
+          'So the default silently decides how much area the buffered geometry loses. The ' +
+            'approximating polygon is inscribed, so the result is always too small rather than too ' +
+            'large, and the error compounds when buffers are chained.',
           'For a geofence or a safety margin that bias is in the wrong direction, and the fix is one ' +
-          'parameter rather than a different algorithm.',
+            'parameter rather than a different algorithm.'
+        ],
         example: 'At 3 corners the offset area is 2 717.4 against a true 3 081.1 — 11.80% short; at ' +
           '16 corners it is 0.17% and at 64 corners 0.01%.'
       },
@@ -114,12 +134,14 @@
         term: 'Minkowski sums turn motion planning into a containment test',
         plain: 'Grow the obstacles by the shape of the robot, and the robot becomes a point.',
         formal: 'the configuration-space obstacle is the obstacle summed with the reflected robot',
-        detail: 'This is the reason the operation matters beyond buffering. Once every obstacle has ' +
-          'been grown by the moving shape, a collision-free path for the shape is exactly a path for ' +
-          'a single point through the free space, and the whole problem becomes a graph search over ' +
-          'a region rather than a continuous geometric one. The same construction is what a CNC tool ' +
-          'path, a printed-circuit clearance rule and a collision margin in a game engine all ' +
-          'compute, usually without naming it.',
+        detail: [
+          'This is the reason the operation matters beyond buffering.',
+          'Once every obstacle has been grown by the moving shape, a collision-free path for the ' +
+            'shape is exactly a path for a single point through the free space. The whole problem ' +
+            'becomes a graph search over a region rather than a continuous geometric one.',
+          'The same construction is what a CNC tool path, a printed-circuit clearance rule and a ' +
+            'collision margin in a game engine all compute, usually without naming it.'
+        ],
         example: 'The same code that offsets a polygon by a 16-corner disc computes the ' +
           'configuration-space obstacle for a 16-sided robot.'
       }
