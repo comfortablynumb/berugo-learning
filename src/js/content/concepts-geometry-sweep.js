@@ -304,12 +304,14 @@
         term: 'A cell is the intersection of half-planes, one per other site',
         plain: 'Everything closer to this site than to that one is a half-plane; intersect them all.',
         formal: 'the perpendicular bisector of two sites is the boundary between their cells',
-        detail: 'This is the definition, and it is also a perfectly usable algorithm at small scale: ' +
-          'clip a bounding box by one half-plane per other site and what remains is the cell. It is ' +
-          'O(n) clips per cell and therefore O(n²) overall, which is far too slow for a million ' +
-          'sites and completely fine for a few hundred — and it is worth having in the test suite ' +
-          'whatever you use in production, because it shares no code with the dual construction and ' +
-          'so cannot fail the same way.',
+        detail: [
+          'This is the definition, and it is also a perfectly usable algorithm at small scale. Clip ' +
+            'a bounding box by one half-plane per other site, and what remains is the cell.',
+          'It is O(n) clips per cell and therefore O(n²) overall, which is far too slow for a ' +
+            'million sites and completely fine for a few hundred.',
+          'It is worth having in the test suite whatever you use in production, because it shares no ' +
+            'code with the dual construction and so cannot fail the same way.'
+        ],
         example: 'Half-plane intersection and the Delaunay dual give the same 24 cells and the same ' +
           'total area of 10 660.52, agreeing to 3.33e-15 of relative area.'
       },
@@ -327,12 +329,16 @@
         },
         plain: 'Every Delaunay triangle contributes its circumcentre as a Voronoi vertex, and every Delaunay edge a cell boundary.',
         formal: 'the two are duals: triangles become vertices, edges become edges, vertices become cells',
-        detail: 'This is why almost every library builds the triangulation and dualises rather than ' +
-          'implementing Fortune\'s sweep. The dual is a walk over a structure you already have: for ' +
-          'each site, collect the triangles around it, take their circumcentres in angular order, ' +
-          'and that ring is the cell. The empty-circle property is what makes it work — a ' +
-          'circumcentre is equidistant from its triangle\'s three sites and closer to them than to ' +
-          'any other, which is exactly the condition for being a Voronoi vertex.',
+        detail: [
+          'This is why almost every library builds the triangulation and dualises, rather than ' +
+            'implementing Fortune\'s sweep.',
+          'The dual is a walk over a structure you already have. For each site, collect the ' +
+            'triangles around it and take their circumcentres in angular order; that ring is the ' +
+            'cell.',
+          'The empty-circle property is what makes it work. A circumcentre is equidistant from its ' +
+            'triangle\'s three sites and closer to them than to any other, which is exactly the ' +
+            'condition for being a Voronoi vertex.'
+        ],
         example: 'Every one of the 24 cell corners in the default scene sits at a Delaunay triangle\'s ' +
           'circumcentre.'
       },
@@ -340,12 +346,16 @@
         term: 'Cells on the hull are unbounded, and those rays are the whole difficulty',
         plain: 'A site on the convex hull has no triangle on its outer side, so its cell runs to infinity.',
         formal: 'the unbounded cells are exactly the cells of the hull vertices',
-        detail: 'For an interior site the circumcentres form a closed ring and the cell reads ' +
-          'straight off the triangulation. For a hull site the ring is open at both ends and the two ' +
-          'missing edges are rays perpendicular to the hull edges, which have to be generated rather ' +
-          'than read off and then clipped to whatever box the caller wants. Getting the ray ' +
-          'direction or the clip order wrong produces a diagram that looks entirely plausible, which ' +
-          'is why the brute-force check matters more here than anywhere else in the milestone.',
+        detail: [
+          'For an interior site the circumcentres form a closed ring, and the cell reads straight ' +
+            'off the triangulation.',
+          'For a hull site the ring is open at both ends. The two missing edges are rays ' +
+            'perpendicular to the hull edges, which have to be generated rather than read off, and ' +
+            'then clipped to whatever box the caller wants.',
+          'Getting the ray direction or the clip order wrong produces a diagram that looks entirely ' +
+            'plausible. That is why the brute-force check matters more here than anywhere else in ' +
+            'the milestone.'
+        ],
         example: '19 of 24 cells reach the clip box, which is to say 19 of the sites are on the hull ' +
           'and their cells are genuinely unbounded.'
       },
@@ -353,12 +363,15 @@
         term: 'A wrong diagram still looks right, so check it against a nearest-site grid',
         plain: 'Rasterise the box, find each pixel\'s nearest site by brute force, and compare with the cell it landed in.',
         formal: 'the definition made executable: a point is in a cell if and only if that cell\'s site is its nearest',
-        detail: 'Voronoi output is the hardest thing in this milestone to eyeball, because almost ' +
-          'any partition of the plane into convex cells around scattered points looks like a Voronoi ' +
-          'diagram. The grid check is the definition applied directly and it costs one distance per ' +
-          'site per sample, which is nothing at test sizes. Two things must both hold: every site ' +
-          'lies inside its own cell, and every sampled point is assigned to its nearest site. Either ' +
-          'alone passes for a diagram that is subtly wrong.',
+        detail: [
+          'Voronoi output is the hardest thing in this milestone to eyeball, because almost any ' +
+            'partition of the plane into convex cells around scattered points looks like a Voronoi ' +
+            'diagram.',
+          'The grid check is the definition applied directly, and it costs one distance per site per ' +
+            'sample, which is nothing at test sizes.',
+          'Two things must both hold: every site lies inside its own cell, and every sampled point ' +
+            'is assigned to its nearest site. Either alone passes for a diagram that is subtly wrong.'
+        ],
         example: '0 of 900 grid points land in the wrong cell, and 0 of 24 sites fall outside their ' +
           'own cell.'
       },
@@ -366,12 +379,15 @@
         term: 'Fortune\'s sweep is worth understanding and rarely worth implementing',
         plain: 'It builds the diagram in O(n log n) with a beach line of parabolic arcs and two kinds of event.',
         formal: 'site events add an arc; circle events remove one and emit a Voronoi vertex',
-        detail: 'The insight is genuinely beautiful: the boundary between the region already decided ' +
-          'and the region still to come is a chain of parabolas, because a point is equidistant from ' +
-          'a site behind the sweep and the sweep line itself exactly on a parabola. The reason to ' +
-          'know it is that it is the standard example of a sweep whose status structure is not a ' +
-          'simple ordering, and the reason not to write it is that dualising a Delaunay ' +
-          'triangulation gets the same diagram in a dozen lines on top of a routine you already need.',
+        detail: [
+          'The insight is genuinely beautiful. The boundary between the region already decided and ' +
+            'the region still to come is a chain of parabolas. A point is equidistant from a site ' +
+            'behind the sweep and the sweep line itself exactly on a parabola.',
+          'The reason to know it is that it is the standard example of a sweep whose status ' +
+            'structure is not a simple ordering.',
+          'The reason not to write it is that dualising a Delaunay triangulation gets the same ' +
+            'diagram in a dozen lines, on top of a routine you already need.'
+        ],
         example: 'The two constructions in this section agree on total area to 6.71e-12 in the worst ' +
           'cell, which is floating-point noise rather than a difference.'
       },
@@ -379,24 +395,30 @@
         term: 'Lloyd relaxation moves each site to its cell\'s centroid, and repeats',
         plain: 'A few rounds turn a lumpy random diagram into an evenly spaced one.',
         formal: 'a centroidal diagram is a fixed point: every site sits at the centroid of its own cell',
-        detail: 'Each round rebuilds the diagram from the moved sites, which means the cost is a ' +
-          'full construction per round — and it is why relaxation is usually run for a fixed small ' +
-          'number of rounds rather than to convergence. It is the standard way to get blue-noise ' +
-          'point distributions for stippling, sampling and procedural map generation, and it is also ' +
-          'exactly k-means with the cells as clusters, which is worth noticing because the ' +
-          'convergence behaviour and the failure modes transfer.',
+        detail: [
+          'Each round rebuilds the diagram from the moved sites, so the cost is a full construction ' +
+            'per round. That is why relaxation is usually run for a fixed small number of rounds ' +
+            'rather than to convergence.',
+          'It is the standard way to get blue-noise point distributions for stippling, sampling and ' +
+            'procedural map generation.',
+          'It is also exactly k-means with the cells as clusters, which is worth noticing because ' +
+            'the convergence behaviour and the failure modes transfer.'
+        ],
         example: 'The largest cell is 65.6× the smallest at round 1 and 3.2× at round 12.'
       },
       {
         term: 'Relaxation approaches its fixed point rather than landing on it',
         plain: 'Movement falls fast for a round or two and then decays slowly, and never reaches zero.',
         formal: 'the stopping rule is a threshold you choose, not a state the algorithm reports',
-        detail: 'The first round does most of the work because a random point set has a handful of ' +
-          'very lopsided cells that correct immediately; after that both the total movement and the ' +
-          'area spread fall monotonically but slowly. Since neither reaches zero, "run until ' +
-          'converged" is not an implementable instruction — the number of rounds is a parameter, and ' +
-          'the honest way to set it is to plot the movement and pick a point on the curve rather ' +
-          'than to wait for a flag that never arrives.',
+        detail: [
+          'The first round does most of the work, because a random point set has a handful of very ' +
+            'lopsided cells that correct immediately.',
+          'After that both the total movement and the area spread fall monotonically but slowly, and ' +
+            'neither reaches zero.',
+          'So "run until converged" is not an implementable instruction. The number of rounds is a ' +
+            'parameter. The honest way to set it is to plot the movement and pick a point on the ' +
+            'curve, rather than to wait for a flag that never arrives.'
+        ],
         example: 'Total site movement falls 137.675 → 14.859 over 12 rounds while area spread falls ' +
           '0.8447 → 0.2956, both monotonically and neither to zero.'
       },
@@ -404,12 +426,15 @@
         term: 'The diagram answers nearest-neighbour queries in the shape of the space, not the data',
         plain: 'Once built, "which site is nearest" is a point-location query rather than a search over sites.',
         formal: 'the cell containing the query point names the nearest site, whatever the site count',
-        detail: 'That is the practical reason to build one: nearest-facility lookups, coverage maps, ' +
-          'service areas and cell-tower assignment are all this query, and a spatial index over the ' +
-          'cells answers them without touching the sites at all. It also composes: the Delaunay dual ' +
-          'is the natural neighbour graph, the cell areas are a coverage measure, and the ' +
-          'circumcentres are the points furthest from every site — which is where you put the next ' +
-          'facility.',
+        detail: [
+          'That is the practical reason to build one. Nearest-facility lookups, coverage maps, ' +
+            'service areas and cell-tower assignment are all this query, and a spatial index over ' +
+            'the cells answers them without touching the sites at all.',
+          'It also composes. The Delaunay dual is the natural neighbour graph, and the cell areas ' +
+            'are a coverage measure.',
+          'The circumcentres are the points furthest from every site, which is where you put the ' +
+            'next facility.'
+        ],
         example: 'The default scene\'s 24 cells partition the box exactly: total area 10 660.52 with ' +
           'a worst cell gap of 6.71e-12.'
       }

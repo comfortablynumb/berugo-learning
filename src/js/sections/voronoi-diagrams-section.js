@@ -53,30 +53,34 @@
     };
   }
 
+  function orientation() {
+    return [
+      '**The Voronoi cell of a site is every point closer to that site than to any other.** That ' +
+        'definition is directly constructible.',
+      'A point is closer to site `i` than to site `j` exactly when it lies on `i`\'s side of the ' +
+        'perpendicular bisector between them. So a cell is the intersection of `n − 1` half-planes.',
+      'Slow, and correct by construction with no case analysis to get wrong.',
+      '**The diagram is the exact dual of the Delaunay triangulation.** One cell per site, one cell ' +
+        'vertex per triangle — its circumcentre — and one cell edge per Delaunay edge.',
+      'So if you already have the triangulation, the diagram is a walk over it. That is why building ' +
+        'Voronoi from Delaunay is what most libraries do, and why Fortune\'s sweep is worth ' +
+        'understanding rather than necessarily implementing.',
+      '**A site on the convex hull has an unbounded cell.** Its triangles do not fan all the way ' +
+        'round it, so the dual gives an open chain rather than a closed loop.',
+      'The two ends have to be extended as rays perpendicular to the hull edges before anything can ' +
+        'be clipped. That is the one case the half-plane construction gets for free and the dual ' +
+        'does not.',
+      '**Lloyd relaxation** moves every site to the centroid of its own cell and rebuilds.',
+      'Repeat and the cells become progressively more equal in size and rounder — a *centroidal* ' +
+        'diagram. That is the standard way to turn a random point set into an even one for ' +
+        'stippling, meshing and procedural maps.'
+    ];
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
-      orientation: [
-        'The **Voronoi cell** of a site is every point closer to that site than to any other. That ' +
-          'definition is directly constructible: a point is closer to site `i` than to site `j` ' +
-          'exactly when it lies on `i`\'s side of the perpendicular bisector between them, so a ' +
-          'cell is the intersection of `n − 1` half-planes. Slow, and correct by construction with ' +
-          'no case analysis to get wrong.',
-        '**The diagram is the exact dual of the Delaunay triangulation.** One cell per site, one ' +
-          'cell vertex per triangle — its circumcentre — and one cell edge per Delaunay edge. So if ' +
-          'you already have the triangulation, the diagram is a walk over it, which is why building ' +
-          'Voronoi from Delaunay is what most libraries do and why Fortune\'s sweep is worth ' +
-          'understanding rather than necessarily implementing.',
-        '**A site on the convex hull has an unbounded cell.** Its triangles do not fan all the way ' +
-          'round it, so the dual gives an open chain rather than a closed loop, and the two ends ' +
-          'have to be extended as rays perpendicular to the hull edges before anything can be ' +
-          'clipped. That is the one case the half-plane construction gets for free and the dual ' +
-          'does not.',
-        '**Lloyd relaxation** moves every site to the centroid of its own cell and rebuilds. Repeat ' +
-          'and the cells become progressively more equal in size and rounder — a *centroidal* ' +
-          'diagram — which is the standard way to turn a random point set into an even one for ' +
-          'stippling, meshing and procedural maps.'
-      ],
+      orientation: orientation(),
       demo: {
         title: 'Interactive demo — two constructions, a nearest-site oracle, and Lloyd relaxation',
         markup: root.VoronoiDiagramsTemplate.render()
@@ -84,10 +88,10 @@
       diagram: diagram(),
       insight: 'A Voronoi diagram that is wrong still looks right, which is what makes this one of ' +
         'the easiest structures to ship broken. The cells are still convex, they still tile the ' +
-        'plane, and every one still contains its own site — none of those properties notices that a ' +
+        'plane, and every one still contains its own site. None of those properties notices that a ' +
         'boundary is in the wrong place. The only check worth trusting is the definition itself: ' +
         'sample points, find each one\'s nearest site by brute force, and ask whether it fell in ' +
-        'that site\'s cell. It is embarrassingly slow and it is the only thing that will tell you.'
+        'that site\'s cell. It is embarrassingly slow, and it is the only thing that will tell you.'
     };
   }
 
