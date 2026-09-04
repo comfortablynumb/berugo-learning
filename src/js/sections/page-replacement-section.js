@@ -64,50 +64,64 @@
     };
   }
 
-  function orientation() {
+  function orientationCeiling() {
     return [
       '**Belady’s rule is optimal and needs the future, so it exists as a ceiling rather than as ' +
-        'an algorithm.** Evict the resident item whose next use is furthest away. Every hit rate ' +
-        'in the demo is reported next to it, because a hit rate on its own is a property of the ' +
-        'trace as much as of the policy — the same LRU cache reads 46% on one trace and 0% on ' +
-        'another, and only the ceiling says which of those is a failure.',
+        'an algorithm.** Evict the resident item whose next use is furthest away.',
+      'Every hit rate in the demo is reported next to it, because a hit rate on its own is a ' +
+        'property of the trace as much as of the policy.',
+      'The same LRU cache reads 46% on one trace and 0% on another, and only the ceiling says ' +
+        'which of those is a failure.',
       '**LRU is k-competitive against Belady, and no deterministic policy does better.** With a ' +
-        'cache of k entries, LRU can miss at most k times where the optimum misses once. That ' +
-        'bound is not conservative: a loop just larger than the cache attains it, and the demo ' +
+        'cache of k entries, LRU can miss at most k times where the optimum misses once.',
+      'That bound is not conservative. A loop just larger than the cache attains it, and the demo ' +
         'shows LRU, FIFO and CLOCK all at exactly ZERO hits on it while Belady gets most of them.',
       '**LRU is not scan resistant, and that single failure is the reason every later policy ' +
-        'exists.** One pass over data larger than the cache touches each item once, and each ' +
-        'touch evicts something from the working set — so the scan destroys the cache while ' +
-        'gaining nothing from it. The demo measures how much of each policy’s Zipf hit rate ' +
-        'survives when a sweep is added.',
-      '**LFU survives the scan and fails differently.** Counting rather than timing makes ' +
-        'one-hit wonders unevictable in the wrong direction: an item hot last week keeps its ' +
-        'count forever and cannot be displaced by something hot today. The fix is decay — halve ' +
-        'the counts periodically — and without it LFU is a cache that remembers everything and ' +
-        'forgets nothing.',
-      '**CLOCK is LRU’s approximation and exists because of what hardware can do.** One reference ' +
-        'bit per page and a hand that sweeps, clearing bits and taking the first slot already ' +
-        'clear. Setting a bit is something a memory-management unit does for free; splicing a ' +
-        'linked list on every access is not, which is why operating systems use CLOCK and ' +
-        'application caches use LRU.',
-      '**ARC adapts with no dial by keeping ghosts.** Two lists for the cache — items seen once, ' +
-        'items seen twice — and two lists of keys recently evicted from each. A hit in a ghost ' +
-        'list is evidence about which half is being starved, so ARC moves a target boundary ' +
-        'towards it. On the Zipf trace the demo counts thousands of those adjustments; on the ' +
-        'mixed trace it counts NONE, and a target of zero is the adaptation rather than the ' +
-        'absence of one — the scanned keys never come back, so recency is worth nothing and ' +
-        'ARC has been told so.',
-      '**2Q reaches most of the same benefit with much less machinery.** A small FIFO for ' +
-        'newcomers, a ghost queue of what fell out of it, and a main LRU that admits only on a ' +
-        'second sighting. A scan fills the small queue, its keys expire unseen, and the main ' +
-        'cache is never touched.',
-      '**W-TinyLFU admits by frequency, and it is the strongest policy in the table.** A ' +
-        'candidate evicted from a small window must beat the main cache’s next victim on an ' +
-        'approximate frequency count before it is admitted, with a tie going to the incumbent. ' +
-        'A scan’s one-hit wonders lose every contest they enter — and on the loop trace, where ' +
-        'every recency policy scores zero, that tie-break alone takes it to 81% against Belady’s ' +
-        '82%.'
+        'exists.** One pass over data larger than the cache touches each item once, and each touch ' +
+        'evicts something from the working set.',
+      'So the scan destroys the cache while gaining nothing from it.',
+      'The demo measures how much of each policy’s Zipf hit rate survives when a sweep is added.',
+      '**LFU survives the scan and fails differently.** Counting rather than timing makes one-hit ' +
+        'wonders unevictable in the wrong direction.',
+      'An item hot last week keeps its count forever and cannot be displaced by something hot ' +
+        'today.',
+      'The fix is decay, which means halving the counts periodically. Without it LFU is a cache ' +
+        'that remembers everything and forgets nothing.'
     ];
+  }
+
+  function orientationPolicies() {
+    return [
+      '**CLOCK is LRU’s approximation and exists because of what hardware can do.** One reference ' +
+        'bit per page, and a hand that sweeps, clearing bits and taking the first slot already ' +
+        'clear.',
+      'Setting a bit is something a memory-management unit does for free, and splicing a linked ' +
+        'list on every access is not. That is why operating systems use CLOCK and application ' +
+        'caches use LRU.',
+      '**ARC adapts with no dial by keeping ghosts.** It keeps two lists for the cache, one of ' +
+        'items seen once and one of items seen twice, plus two lists of keys recently evicted from ' +
+        'each.',
+      'A hit in a ghost list is evidence about which half is being starved, so ARC moves a target ' +
+        'boundary towards it.',
+      'On the Zipf trace the demo counts thousands of those adjustments. On the mixed trace it ' +
+        'counts NONE.',
+      'A target of zero is the adaptation rather than the absence of one. The scanned keys never ' +
+        'come back, so recency is worth nothing, and ARC has been told so.',
+      '**2Q reaches most of the same benefit with much less machinery.** It is a small FIFO for ' +
+        'newcomers, a ghost queue of what fell out of it, and a main LRU that admits only on a ' +
+        'second sighting.',
+      'A scan fills the small queue, its keys expire unseen, and the main cache is never touched.',
+      '**W-TinyLFU admits by frequency, and it is the strongest policy in the table.** A candidate ' +
+        'evicted from a small window must beat the main cache’s next victim on an approximate ' +
+        'frequency count before it is admitted, with a tie going to the incumbent.',
+      'A scan’s one-hit wonders lose every contest they enter.',
+      'On the loop trace, where every recency policy scores zero, that tie-break alone takes it to ' +
+        '81% against Belady’s 82%.'
+    ];
+  }
+
+  function orientation() {
+    return orientationCeiling().concat(orientationPolicies());
   }
 
   function config() {
@@ -119,14 +133,14 @@
         markup: root.PageReplacementTemplate.render()
       },
       diagram: diagram(),
-      insight: '**Before tuning a cache, measure its hit rate against Belady on your own trace ' +
-        '— and then look at what a scan does to it.** The ceiling tells you whether there is ' +
-        'anything left to win: a policy at 99% of the optimum cannot be improved by a better ' +
+      insight: '**Before tuning a cache, measure its hit rate against Belady on your own trace, ' +
+        'and then look at what a scan does to it.** The ceiling tells you whether there is ' +
+        'anything left to win. A policy at 99% of the optimum cannot be improved by a better ' +
         'policy, only by a bigger cache, and the working-set curve says how much bigger is worth ' +
         'buying. The scan column tells you the other half. Almost every production cache ' +
         'incident that reads as "the cache stopped working at 3 a.m." is a batch job sweeping a ' +
-        'table through an LRU, and the fix is not more memory — it is admission control, which ' +
-        'costs a frequency sketch and a comparison.'
+        'table through an LRU. The fix is not more memory. It is admission control, which costs ' +
+        'a frequency sketch and a comparison.'
     };
   }
 

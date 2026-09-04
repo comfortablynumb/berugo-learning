@@ -170,23 +170,30 @@
         },
         plain: 'Evict the resident item whose next use is furthest away.',
         formal: 'OPT is optimal offline; no online policy matches it, and it is the denominator every hit rate should carry',
-        detail: 'It is not an algorithm, it is a ceiling — and having the ceiling is what turns a ' +
-          'hit rate into a statement. The same LRU cache reads 46% on one trace and 0% on ' +
-          'another, and only the optimum on each trace says which of those is a failure of the ' +
-          'policy and which is a property of the workload. Computing it costs a pass over the ' +
-          'trace to build each key’s future positions and a binary search per eviction.',
-        example: 'On the demo’s mixed trace Belady reaches 72.6% and LRU reaches 58.7%, which is ' +
+        detail: [
+          'It is not an algorithm, it is a ceiling. Having the ceiling is what turns a hit rate into ' +
+            'a statement.',
+          'The same LRU cache reads 46% on one trace and 0% on another. Only the optimum on each ' +
+            'trace says which of those is a failure of the policy and which is a property of the ' +
+            'workload.',
+          'Computing it costs a pass over the trace to build each key’s future positions, and a ' +
+            'binary search per eviction.'
+        ],
+        example: 'On the demo’s mixed trace Belady reaches 72.6% and LRU reaches 58.7%. That is ' +
           '80.9% of what was available.'
       },
       {
         term: 'LRU is k-competitive, and a loop attains it',
         plain: 'A cycle one entry longer than the cache gives LRU zero hits.',
         formal: 'LRU is k-competitive for a cache of k pages, and no deterministic policy is better; the bound is attained by a cyclic reference of k + 1 pages',
-        detail: 'Every item in the loop is evicted exactly one step before it is needed again, so ' +
-          'the hit rate is not merely low, it is zero — while an optimal offline policy keeps ' +
-          'k − 1 of the pages resident and hits on nearly all of them. Recognising that shape in ' +
-          'a real workload is worth doing: a batch job iterating a table slightly larger than the ' +
-          'buffer pool produces exactly it.',
+        detail: [
+          'Every item in the loop is evicted exactly one step before it is needed again, so the hit ' +
+            'rate is not merely low, it is zero.',
+          'An optimal offline policy keeps k − 1 of the pages resident and hits on nearly all of ' +
+            'them.',
+          'Recognising that shape in a real workload is worth doing. A batch job iterating a table ' +
+            'slightly larger than the buffer pool produces exactly it.'
+        ],
         example: 'On the demo’s loop trace LRU, FIFO and CLOCK all measure 0.0% while Belady ' +
           'measures 82.7%.'
       },
@@ -194,23 +201,28 @@
         term: 'The scan is the failure every later policy answers',
         plain: 'One pass over cold data evicts the whole working set and gains nothing.',
         formal: 'a scan of s > k items evicts every resident page in k steps while producing zero future hits',
-        detail: 'Recency cannot express "this item is new and will never come back", because a ' +
-          'new item is maximally recent. That is not a tuning problem — it is the definition of ' +
-          'the policy — so the answer has to come from somewhere else: a second sighting, a ' +
-          'frequency count, or a ghost list. Every policy invented after LRU is one of those ' +
-          'three answers.',
-        example: 'The demo’s resistance table: LRU keeps 45% of its Zipf hit rate when a sweep ' +
+        detail: [
+          'Recency cannot express "this item is new and will never come back", because a new item is ' +
+            'maximally recent.',
+          'That is not a tuning problem, it is the definition of the policy. So the answer has to ' +
+            'come from somewhere else: a second sighting, a frequency count, or a ghost list.',
+          'Every policy invented after LRU is one of those three answers.'
+        ],
+        example: 'In the demo’s resistance table, LRU keeps 45% of its Zipf hit rate when a sweep ' +
           'is added, and ARC keeps 66%.'
       },
       {
         term: 'CLOCK is LRU for hardware that cannot afford a list',
         plain: 'One reference bit per page and a hand that sweeps, clearing bits as it goes.',
         formal: 'on a miss the hand advances past set bits, clearing them, and takes the first slot whose bit is clear',
-        detail: 'Setting a bit is something a memory-management unit does in hardware on every ' +
-          'access; splicing a linked list is a memory write the operating system would have to ' +
-          'make on every page touch, which is unaffordable. That constraint — not a difference in ' +
-          'quality — is why operating systems use CLOCK and application caches use LRU, and the ' +
-          'demo shows the two within a fraction of a per cent of each other on every trace.',
+        detail: [
+          'Setting a bit is something a memory-management unit does in hardware on every access.',
+          'Splicing a linked list is a memory write the operating system would have to make on every ' +
+            'page touch, which is unaffordable.',
+          'That constraint, rather than a difference in quality, is why operating systems use CLOCK ' +
+            'and application caches use LRU. The demo shows the two within a fraction of a per cent ' +
+            'of each other on every trace.'
+        ],
         example: 'On the demo’s mixed trace CLOCK measures 58.7% and LRU measures 58.7%.'
       },
       {
@@ -218,47 +230,59 @@
         plain: 'Two cache lists and two lists of keys recently evicted from each.',
         formal: 'a hit in B1 raises p by max(1, |B2|/|B1|); a hit in B2 lowers it by max(1, |B1|/|B2|)',
         readAs: 'A hit in the first ghost list raises the target by at least one, scaled by the ' +
-          'ratio of the two ghost list sizes, and a hit in the second lowers it the same way.',
-        detail: 'The ghost lists hold keys with no data, so they cost almost nothing and carry ' +
-          'exactly the information a cache lacks: which of its recent evictions was a mistake. ' +
-          'A hit in the recency ghost list says recency was starved; a hit in the frequency one ' +
-          'says the opposite. Nothing is configured, and the same code behaves like LRU on a ' +
-          'recency workload and like LFU on a frequency one.',
+          'ratio of the two ghost list sizes. A hit in the second lowers it the same way.',
+        detail: [
+          'The ghost lists hold keys with no data, so they cost almost nothing and carry exactly the ' +
+            'information a cache lacks: which of its recent evictions was a mistake.',
+          'A hit in the recency ghost list says recency was starved. A hit in the frequency one says ' +
+            'the opposite.',
+          'Nothing is configured, and the same code behaves like LRU on a recency workload and like ' +
+            'LFU on a frequency one.'
+        ],
         example: 'On the demo’s Zipf trace ARC adjusts its target thousands of times and settles ' +
-          'near 6; on the mixed trace it adjusts zero times and stays at 0.'
+          'near 6. On the mixed trace it adjusts zero times and stays at 0.'
       },
       {
         term: 'A target of zero is an adaptation, not a stuck dial',
         plain: 'If evicted keys never come back, recency is correctly worth nothing.',
         formal: 'p moves only on a ghost hit; a trace whose cold keys are never re-requested produces none',
-        detail: 'This is the reading that is easy to get wrong, and getting it wrong turns a ' +
-          'correct measurement into a bug report. On a trace where the cold keys are swept once ' +
-          'and never seen again, a key evicted from the recency list never turns up in the ghost ' +
-          'list, ARC is never told that recency was starved, and it correctly values recency at ' +
-          'zero — which is why it reaches 99.9% of the optimum on exactly that trace.',
-        example: 'The demo’s mixed trace: 0 adaptations, p at 0.0, and 72.5% against Belady’s 72.6%.'
+        detail: [
+          'This is the reading that is easy to get wrong, and getting it wrong turns a correct ' +
+            'measurement into a bug report.',
+          'On a trace where the cold keys are swept once and never seen again, a key evicted from ' +
+            'the recency list never turns up in the ghost list. ARC is never told that recency was ' +
+            'starved, and it correctly values recency at zero.',
+          'That is why it reaches 99.9% of the optimum on exactly that trace.'
+        ],
+        example: 'On the demo’s mixed trace there are 0 adaptations, p sits at 0.0, and the hit ' +
+          'rate is 72.5% against Belady’s 72.6%.'
       },
       {
         term: 'W-TinyLFU admits by frequency, with a tie going to the incumbent',
         plain: 'A candidate must beat the victim it would replace on an approximate count.',
         formal: 'admit the window’s eviction only when sketch(candidate) > sketch(victim); the sketch halves every counter each sample period',
-        detail: 'The halving is what separates it from plain LFU: without decay a favourite from ' +
-          'last week is unevictable, and the sketch has no key list to walk so the decay has to ' +
-          'be a shift over the counter array. The tie-break is the other half and it is what ' +
-          'makes the policy scan-resistant — a one-hit wonder never beats an incumbent it has ' +
-          'never outnumbered, so it is refused admission rather than admitted and then evicted.',
-        example: 'On the demo’s loop trace, where every recency policy scores 0.0%, W-TinyLFU ' +
-          'measures 81.9% against Belady’s 82.7%.'
+        detail: [
+          'The halving is what separates it from plain LFU. Without decay a favourite from last week ' +
+            'is unevictable, and the sketch has no key list to walk, so the decay has to be a shift ' +
+            'over the counter array.',
+          'The tie-break is the other half, and it is what makes the policy scan-resistant.',
+          'A one-hit wonder never beats an incumbent it has never outnumbered, so it is refused ' +
+            'admission rather than admitted and then evicted.'
+        ],
+        example: 'On the demo’s loop trace every recency policy scores 0.0%. W-TinyLFU measures ' +
+          '81.9% against Belady’s 82.7%.'
       },
       {
         term: 'The working-set curve is what a capacity decision is made from',
         plain: 'Hit rate against cache size, with the knee visible.',
         formal: 'a single hit rate at a single size is one point on a curve whose shape is the answer',
-        detail: 'Two purchases are available and the curve separates them. The vertical gap ' +
-          'between a policy and the optimum is what a better policy could win; the slope of the ' +
-          'optimum is what more memory could win. A policy already at 99% of the ceiling cannot ' +
-          'be improved by a better policy at all, and a ceiling that is still climbing steeply ' +
-          'says memory is the cheaper purchase.',
+        detail: [
+          'Two purchases are available, and the curve separates them.',
+          'The vertical gap between a policy and the optimum is what a better policy could win. The ' +
+            'slope of the optimum is what more memory could win.',
+          'A policy already at 99% of the ceiling cannot be improved by a better policy at all. A ' +
+            'ceiling that is still climbing steeply says memory is the cheaper purchase.'
+        ],
         example: 'On the demo’s mixed trace the optimum goes from 36.6% at 10 entries to 72.6% ' +
           'at 400, and LRU goes from 18.7% to 72.6%.'
       }
