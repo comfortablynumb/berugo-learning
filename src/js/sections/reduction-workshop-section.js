@@ -87,51 +87,66 @@
     };
   }
 
-  function orientation() {
+  function orientationModelling() {
     return [
-      '**Modelling is the act of choosing which known problem your problem is, and it is ' +
-        'where the risk lives.** Shift scheduling is colouring; dependency resolution is SAT; ' +
-        'resource allocation is flow or matching; routing is a TSP variant; layout is quadratic ' +
-        'assignment. Recognising the shape gives you decades of solver engineering for free — ' +
-        'and it also commits you to every assumption the shape carries.',
-      '**Write the requirement down twice.** Once as a model, and once as a checker that reads ' +
-        'a finished answer and tests the requirement in its own language. The two must share ' +
-        'no code, because a checker written from the model checks the model and would agree ' +
-        'with a wrong one exactly as happily. The demo runs the solver’s schedule through that ' +
-        'checker and reports each requirement separately.',
-      '**The failure mode is not a slow solver. It is a model that quietly does not represent ' +
-        'the requirement.** The solver returns quickly and correctly with the answer to a ' +
-        'different question, and nothing downstream can tell — the schedule looks like a ' +
-        'schedule. Validating the mapped-back answer against the original constraints is the ' +
-        'only defence, and it is cheap.',
+      '**Modelling is the act of choosing which known problem your problem is, and it is where ' +
+        'the risk lives.** Shift scheduling is colouring, dependency resolution is SAT, and ' +
+        'resource allocation is flow or matching.',
+      'Routing is a TSP variant, and layout is quadratic assignment.',
+      'Recognising the shape gives you decades of solver engineering for free, and it also commits ' +
+        'you to every assumption the shape carries.',
+      '**Write the requirement down twice.** Once as a model, and once as a checker that reads a ' +
+        'finished answer and tests the requirement in its own language.',
+      'The two must share no code, because a checker written from the model checks the model, and ' +
+        'would agree with a wrong one exactly as happily.',
+      'The demo runs the solver’s schedule through that checker and reports each requirement ' +
+        'separately.',
+      '**The failure mode is not a slow solver. It is a model that quietly does not represent the ' +
+        'requirement.** The solver returns quickly and correctly with the answer to a different ' +
+        'question.',
+      'Nothing downstream can tell, because the schedule looks like a schedule.',
+      'Validating the mapped-back answer against the original constraints is the only defence, and ' +
+        'it is cheap.',
       '**Every arrow from a requirement to a constraint carries an assumption, and some are ' +
         'wrong.** "At least one rest day in every window of four" is encoded here as "at most ' +
-        'three of the twelve shift variables in that window", which is correct only because a ' +
-        'nurse works at most one shift a day. That equivalence is true today and would stop ' +
-        'being true the moment split shifts appeared — so the checker counts worked DAYS ' +
-        'directly rather than trusting it.',
-      '**A hard constraint is a clause and a preference is an objective, and SAT has no ' +
-        'objective.** "Weekend shifts should be shared evenly" cannot be a clause. Encoding it ' +
-        'as one — "nobody works more than two weekends" — turns a preference into a constraint ' +
-        'and can make a feasible instance infeasible, with no indication of which requirement ' +
-        'caused it. The honest model lists it as unmodelled and reports what the roster ' +
-        'achieved anyway.',
-      '**"UNSAT" and "budget exhausted" are completely different claims.** The first says no ' +
-        'schedule satisfies every constraint; the second says this solver did not find one in ' +
-        'the time it was given. The demo’s frontier table has rows of both kinds, side by side, ' +
-        'and the difference between them is the difference between "relax a requirement" and ' +
-        '"wait longer or improve the model".',
-      '**An infeasibility diagnosis has to be built, because the solver does not provide one.** ' +
-        'When the answer is UNSAT the solver says nothing about which requirement caused it. ' +
-        'The practical technique is to solve with each constraint group relaxed in turn, or to ' +
-        'ask for an unsatisfiable core; the counting argument — capacity against demand — is ' +
-        'usually cheaper and catches the common case before the solver is called at all.',
-      '**The catalogue is worth memorising because recognition is most of the work.** Once you ' +
-        'see that your problem is matching rather than colouring, the algorithm is polynomial ' +
-        'and the conversation is over. Half of "this is NP-hard" claims in practice are ' +
-        'misidentifications of a problem that has a fast exact algorithm, and the other half ' +
-        'are correct and mean "encode it and call a solver".'
+        'three of the twelve shift variables in that window".',
+      'That is correct only because a nurse works at most one shift a day.',
+      'The equivalence is true today and would stop being true the moment split shifts appeared. So ' +
+        'the checker counts worked DAYS directly rather than trusting it.'
     ];
+  }
+
+  function orientationDiagnosis() {
+    return [
+      '**A hard constraint is a clause and a preference is an objective, and SAT has no ' +
+        'objective.** "Weekend shifts should be shared evenly" cannot be a clause.',
+      'Encoding it as "nobody works more than two weekends" turns a preference into a constraint, ' +
+        'and can make a feasible instance infeasible with no indication of which requirement ' +
+        'caused it.',
+      'The honest model lists it as unmodelled and reports what the roster achieved anyway.',
+      '**"UNSAT" and "budget exhausted" are completely different claims.** The first says no ' +
+        'schedule satisfies every constraint. The second says this solver did not find one in the ' +
+        'time it was given.',
+      'The demo’s frontier table has rows of both kinds, side by side.',
+      'The difference between them is the difference between "relax a requirement" and "wait ' +
+        'longer or improve the model".',
+      '**An infeasibility diagnosis has to be built, because the solver does not provide one.** ' +
+        'When the answer is UNSAT the solver says nothing about which requirement caused it.',
+      'The practical technique is to solve with each constraint group relaxed in turn, or to ask ' +
+        'for an unsatisfiable core.',
+      'The counting argument, capacity against demand, is usually cheaper and catches the common ' +
+        'case before the solver is called at all.',
+      '**The catalogue is worth memorising because recognition is most of the work.** Once you see ' +
+        'that your problem is matching rather than colouring, the algorithm is polynomial and the ' +
+        'conversation is over.',
+      'Half of "this is NP-hard" claims in practice are misidentifications of a problem that has a ' +
+        'fast exact algorithm.',
+      'The other half are correct, and mean "encode it and call a solver".'
+    ];
+  }
+
+  function orientation() {
+    return orientationModelling().concat(orientationDiagnosis());
   }
 
   function config() {
@@ -144,11 +159,11 @@
       },
       diagram: diagram(),
       insight: '**Ship the validator, not just the solver.** The artefact that makes an ' +
-        'optimisation system trustworthy is not the model and not the solver — it is the piece ' +
-        'of code that takes the produced answer and the original written requirements and says ' +
+        'optimisation system trustworthy is not the model and not the solver. It is the piece ' +
+        'of code that takes the produced answer and the original written requirements, and says ' +
         'which requirements the answer satisfies. It is usually a morning’s work, it runs in ' +
-        'milliseconds, it catches every encoding drift the model will ever acquire, and it turns ' +
-        '"the optimiser produced a schedule" into "the optimiser produced a schedule that ' +
+        'milliseconds, and it catches every encoding drift the model will ever acquire. It also ' +
+        'turns "the optimiser produced a schedule" into "the optimiser produced a schedule that ' +
         'satisfies requirements one through five and scores this on the three we could not ' +
         'encode". Only the second sentence is worth putting in front of the people who have to ' +
         'work the shifts.'

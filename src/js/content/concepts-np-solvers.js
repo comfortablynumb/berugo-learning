@@ -312,14 +312,16 @@
     'reduction-workshop': [
       {
         term: 'Modelling is choosing which known problem your problem is',
-        plain: 'Shift scheduling is colouring; allocation is matching; routing is a TSP variant.',
+        plain: 'Shift scheduling is colouring, allocation is matching, and routing is a TSP variant.',
         formal: 'the formulation commits you to every assumption the target problem carries',
-        detail: 'Recognising the shape gives you decades of solver engineering for free, and it ' +
-          'is most of the work. It also commits you to assumptions the requirements never ' +
-          'stated: that costs are additive, that travel times are fixed, that a slot is ' +
-          'interchangeable with any other. Those are usually fine, and when one is not the ' +
-          'symptom is a model that solves quickly and produces answers the domain experts reject ' +
-          'for reasons they find hard to articulate.',
+        detail: [
+          'Recognising the shape gives you decades of solver engineering for free, and it is most of ' +
+            'the work.',
+          'It also commits you to assumptions the requirements never stated: that costs are ' +
+            'additive, that travel times are fixed, that a slot is interchangeable with any other.',
+          'Those are usually fine. When one is not, the symptom is a model that solves quickly and ' +
+            'produces answers the domain experts reject for reasons they find hard to articulate.'
+        ],
         example: 'The demo’s catalogue lists six real problems with their formulations, the ' +
           'assumption each makes, and where each usually diverges.'
       },
@@ -337,24 +339,29 @@
         },
         plain: 'An encoder that produces clauses, and a checker that reads a finished answer.',
         formal: 'encode : requirements → CNF and validate : (requirements, answer) → per-requirement verdicts, with no shared code',
-        detail: 'A checker written from the model checks the model, and would agree with a wrong ' +
-          'one exactly as happily. Writing the second version from the REQUIREMENTS — counting ' +
-          'nurses on a shift, counting worked days in a window — is what makes the agreement ' +
-          'evidence. It is usually a morning’s work, it runs in milliseconds, and it is the only ' +
-          'defence against a model that has drifted since somebody last read it.',
-        example: 'The demo checks five requirements against the produced grid and reports 5 of 5, ' +
-          'with a failure count per requirement rather than a single pass or fail.'
+        detail: [
+          'A checker written from the model checks the model, and would agree with a wrong one ' +
+            'exactly as happily.',
+          'Writing the second version from the REQUIREMENTS is what makes the agreement evidence. ' +
+            'That means counting nurses on a shift, and counting worked days in a window.',
+          'It is usually a morning’s work, it runs in milliseconds, and it is the only defence ' +
+            'against a model that has drifted since somebody last read it.'
+        ],
+        example: 'The demo checks five requirements against the produced grid and reports 5 of 5. ' +
+          'It gives a failure count per requirement rather than a single pass or fail.'
       },
       {
         term: 'The failure mode is a model that answers a different question',
         plain: 'The solver is fast and correct, and the schedule is not the one anybody asked for.',
         formal: 'a wrong encoding is satisfiable, its answer decodes cleanly, and nothing downstream can detect it',
-        detail: 'This is what makes it dangerous. A slow solver announces itself; a drifted model ' +
-          'produces a schedule that looks like a schedule, passes every type check and every ' +
-          'smoke test, and violates a requirement nobody re-read. The defect was found in this ' +
-          'milestone’s own code: a scenario configured without a night shift produced an index ' +
-          'of −1 and constrained a variable one slot below the intended row, and only the ' +
-          'independent validator noticed.',
+        detail: [
+          'This is what makes it dangerous. A slow solver announces itself.',
+          'A drifted model produces a schedule that looks like a schedule, passes every type check ' +
+            'and every smoke test, and violates a requirement nobody re-read.',
+          'The defect was found in this milestone’s own code. A scenario configured without a night ' +
+            'shift produced an index of −1 and constrained a variable one slot below the intended ' +
+            'row, and only the independent validator noticed.'
+        ],
         example: 'The demo’s hard-constraint table reports each requirement’s verdict separately, ' +
           'so a drifted one names itself instead of failing the whole run.'
       },
@@ -363,13 +370,16 @@
         plain: 'And some of them are only true because of another requirement.',
         formal: '"a rest day in every window of w" is encoded as "at most w − 1 of the w·s shift variables", which needs "at most one shift per day"',
         readAs: 'At least one rest day in every window of w days is encoded as at most w minus ' +
-          'one of the w times s shift variables in that window, which is only equivalent because ' +
+          'one of the w times s shift variables in that window. That is only equivalent because ' +
           'a nurse works at most one shift a day.',
-        detail: 'Counting shifts and counting worked days are the same number only while the ' +
-          'one-shift-per-day rule holds. That is true today and would stop being true the moment ' +
-          'split shifts appeared, and the encoding would then quietly allow a nurse to work ' +
-          'every day. The checker counts worked DAYS directly rather than trusting the ' +
-          'equivalence, which is what makes it a check rather than a restatement.',
+        detail: [
+          'Counting shifts and counting worked days are the same number only while the ' +
+            'one-shift-per-day rule holds.',
+          'That is true today and would stop being true the moment split shifts appeared. The ' +
+            'encoding would then quietly allow a nurse to work every day.',
+          'The checker counts worked DAYS directly rather than trusting the equivalence, which is ' +
+            'what makes it a check rather than a restatement.'
+        ],
         example: 'The demo’s rest-window constraint costs 2 664 clauses and 1 188 auxiliary ' +
           'variables, and is checked by counting rest days in the grid.'
       },
@@ -377,50 +387,63 @@
         term: 'A hard constraint is a clause and a preference is an objective',
         plain: 'SAT has no objective, so a preference cannot be a clause.',
         formal: 'encoding "shared evenly" as a hard bound turns a preference into a constraint and can make a feasible instance infeasible',
-        detail: 'Turning a preference into a hard bound is the tempting move and it is usually ' +
-          'wrong: the instance becomes unsatisfiable and the solver gives no indication of which ' +
-          'requirement caused it. The honest model lists the preference as unmodelled and ' +
-          'reports what the produced answer achieved on it anyway, so the gap between "satisfies ' +
-          'the model" and "is acceptable" is a number rather than an omission. Closing it means ' +
-          'MaxSAT, an ILP objective, or a search over a fairness bound.',
-        example: 'The demo’s roster gives five nurses five shifts each and three nurses two, ' +
-          'which satisfies every hard constraint and is not what anybody means by fair.'
+        detail: [
+          'Turning a preference into a hard bound is the tempting move, and it is usually wrong. The ' +
+            'instance becomes unsatisfiable, and the solver gives no indication of which ' +
+            'requirement caused it.',
+          'The honest model lists the preference as unmodelled and reports what the produced answer ' +
+            'achieved on it anyway. So the gap between "satisfies the model" and "is acceptable" is ' +
+            'a number rather than an omission.',
+          'Closing it means MaxSAT, an ILP objective, or a search over a fairness bound.'
+        ],
+        example: 'The demo’s roster gives five nurses five shifts each and three nurses two. That ' +
+          'satisfies every hard constraint and is not what anybody means by fair.'
       },
       {
         term: 'UNSAT and budget exhausted are completely different claims',
-        plain: 'One says no schedule exists; the other says this solver did not find one.',
+        plain: 'One says no schedule exists. The other says this solver did not find one.',
         formal: 'UNSAT is a statement about every assignment; UNKNOWN is a statement about one run',
-        detail: 'They arrive at the caller as the same thing — no answer — and treating the ' +
-          'second as the first is the mistake that makes a team relax a requirement that did not ' +
-          'need relaxing. The demo’s frontier table has rows of both kinds side by side on ' +
-          'instances a human can classify by counting, which is the clearest way to see that the ' +
-          'difference is real and that the solver will not tell you which one you have.',
-        example: 'At 4 nurses the demo proves infeasibility in 14 663 nodes; at 5 nurses, which ' +
+        detail: [
+          'They arrive at the caller as the same thing, which is no answer.',
+          'Treating the second as the first is the mistake that makes a team relax a requirement ' +
+            'that did not need relaxing.',
+          'The demo’s frontier table has rows of both kinds side by side, on instances a human can ' +
+            'classify by counting. That is the clearest way to see that the difference is real and ' +
+            'that the solver will not tell you which one you have.'
+        ],
+        example: 'At 4 nurses the demo proves infeasibility in 14 663 nodes. At 5 nurses, which ' +
           'is also infeasible by counting, it exhausts a 40 000-node budget and says nothing.'
       },
       {
         term: 'An infeasibility diagnosis has to be built',
         plain: 'The solver says no and does not say why.',
         formal: 'solve with each constraint group relaxed in turn, or request an unsatisfiable core; the counting argument is cheaper than both',
-        detail: 'A solver’s UNSAT answer names no requirement, so the diagnosis is a piece of ' +
-          'engineering you write. Three techniques, in increasing cost: check the counting ' +
-          'arguments before calling the solver at all, ask for an unsatisfiable core if the ' +
-          'solver produces one, and re-solve with each constraint group dropped to see which ' +
-          'restores feasibility. The first is free and catches the common case with a reason ' +
-          'attached, which is why it belongs in the code rather than in the runbook.',
+        detail: [
+          'A solver’s UNSAT answer names no requirement, so the diagnosis is a piece of engineering ' +
+            'you write.',
+          'There are three techniques, in increasing cost. Check the counting arguments before ' +
+            'calling the solver at all, or ask for an unsatisfiable core if the solver produces ' +
+            'one. Failing both, re-solve with each constraint group dropped to see which restores ' +
+            'feasibility.',
+          'The first is free and catches the common case with a reason attached, which is why it ' +
+            'belongs in the code rather than in the runbook.'
+        ],
         example: 'The demo’s frontier prints capacity against required shifts on every row, and ' +
           'the two infeasible rows are the ones where capacity is below demand.'
       },
       {
         term: 'Recognition is most of the work, and half of "NP-hard" is a misidentification',
-        plain: 'Assignment is polynomial; treating it as scheduling loses a fast exact algorithm.',
+        plain: 'Assignment is polynomial. Treating it as scheduling loses a fast exact algorithm.',
         formal: 'bipartite matching and min-cost flow are polynomial; adding one "these two together" constraint pushes them to ILP',
-        detail: 'Once you see that a problem is matching rather than colouring, the algorithm is ' +
-          'polynomial and the conversation is over. The commonest error in the catalogue is ' +
-          'exactly that: a resource-allocation problem that is a flow gets modelled as a general ' +
-          'scheduling problem because it feels like one. It is also worth knowing which single ' +
-          'constraint breaks the structure — a coupling requirement destroys the flow ' +
-          'formulation — so the trade-off can be discussed rather than discovered.',
+        detail: [
+          'Once you see that a problem is matching rather than colouring, the algorithm is ' +
+            'polynomial and the conversation is over.',
+          'The commonest error in the catalogue is exactly that. A resource-allocation problem that ' +
+            'is a flow gets modelled as a general scheduling problem because it feels like one.',
+          'It is also worth knowing which single constraint breaks the structure. A coupling ' +
+            'requirement destroys the flow formulation, so the trade-off can be discussed rather ' +
+            'than discovered.'
+        ],
         example: 'The demo’s catalogue marks resource allocation as "polynomial, not NP-hard" and ' +
           'names the constraint that would change that.'
       }
