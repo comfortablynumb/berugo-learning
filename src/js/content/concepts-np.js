@@ -311,16 +311,19 @@
     'sat-zoo': [
       {
         term: 'Cook–Levin encodes a computation as a formula',
-        plain: 'Variables say what is on the tape at each step; clauses say each step follows the rules.',
+        plain: 'Variables say what is on the tape at each step. Clauses say each step follows the rules.',
         formal: 'for any L ∈ NP with verifier V, build φ(x) satisfiable ⟺ ∃c with V(x, c) accepting in p(|x|) steps',
         readAs: 'For any language in NP with verifier V, construct a formula that is satisfiable ' +
           'exactly when some certificate makes V accept within the polynomial step bound.',
-        detail: 'The construction is mechanical: one variable per (tape cell, symbol, time step) ' +
-          'and one per (state, time step), plus clauses saying the tape starts with the input, ' +
-          'each configuration follows the transition table, and the last one accepts. Its size ' +
-          'is polynomial because the machine runs for polynomially many steps on polynomially ' +
-          'much tape. That single theorem is why SAT rather than some other problem sits at the ' +
-          'root of every hardness argument in this milestone.',
+        detail: [
+          'The construction is mechanical. There is one variable per tape cell, symbol and time ' +
+            'step, and one per state and time step.',
+          'The clauses say the tape starts with the input, each configuration follows the transition ' +
+            'table, and the last one accepts. Its size is polynomial because the machine runs for ' +
+            'polynomially many steps on polynomially much tape.',
+          'That single theorem is why SAT rather than some other problem sits at the root of every ' +
+            'hardness argument in this milestone.'
+        ],
         example: 'The demo’s reduction chain begins at "any NP problem → SAT" with Cook–Levin as ' +
           'the gadget, and every arrow after it is one construction.'
       },
@@ -343,12 +346,15 @@
         formal: '(l₁ ∨ … ∨ lₖ) becomes (l₁ ∨ l₂ ∨ y₁) ∧ (¬y₁ ∨ l₃ ∨ y₂) ∧ … , adding k − 3 variables',
         readAs: 'A clause of k literals becomes a chain of three-literal clauses linked by k ' +
           'minus three fresh variables.',
-        detail: 'The fresh variables act as a carry: y₁ is forced true only when the first two ' +
-          'literals fail, which passes the obligation down the chain. Satisfiability is ' +
-          'preserved exactly and the formula grows linearly, so 3-SAT is NP-complete too. 3-SAT ' +
-          'is then the convenient root for gadget constructions because a clause of exactly ' +
-          'three literals has a fixed small shape — a triangle, a three-way choice, three digits ' +
-          '— that a gadget can be designed around once and reused.',
+        detail: [
+          'The fresh variables act as a carry. The variable y₁ is forced true only when the first ' +
+            'two literals fail, which passes the obligation down the chain.',
+          'Satisfiability is preserved exactly and the formula grows linearly, so 3-SAT is ' +
+            'NP-complete too.',
+          'That makes 3-SAT the convenient root for gadget constructions, because a clause of ' +
+            'exactly three literals has a fixed small shape: a triangle, a three-way choice, three ' +
+            'digits. A gadget can be designed around that once and reused.'
+        ],
         example: 'The module’s toThreeCnf converts width-5 clauses and the tests check the result ' +
           'is equisatisfiable with the source on every fixture.'
       },
@@ -358,12 +364,15 @@
         formal: 'S is independent in G ⟺ S is a clique in the complement of G ⟺ V ∖ S is a vertex cover of G',
         readAs: 'A set is independent in a graph exactly when it is a clique in the complement, ' +
           'and exactly when everything outside it is a vertex cover.',
-        detail: 'Recognising that three named problems are one problem in three costumes is ' +
-          'worth more than memorising the chain, because it means a solver for any of them ' +
-          'answers all three with a two-line transformation. The rest of the chain splits into ' +
-          'branches: set cover generalises vertex cover, subset sum and partition are the ' +
-          'arithmetic branch, 3-colouring and Hamiltonian cycle are the graph branch. A new ' +
-          'hardness proof is one link from whichever of these your problem most resembles.',
+        detail: [
+          'Recognising that three named problems are one problem in three costumes is worth more ' +
+            'than memorising the chain. It means a solver for any of them answers all three with a ' +
+            'two-line transformation.',
+          'The rest of the chain splits into branches. Set cover generalises vertex cover, subset ' +
+            'sum and partition are the arithmetic branch, and 3-colouring and Hamiltonian cycle are ' +
+            'the graph branch.',
+          'A new hardness proof is one link from whichever of these your problem most resembles.'
+        ],
         example: 'The demo’s chain table lists nine links, and the first five are implemented and ' +
           'round-tripped in section 20.2.'
       },
@@ -371,14 +380,17 @@
         term: 'Horn-SAT is decided by unit propagation, in linear time',
         plain: 'At most one positive literal per clause, and propagation alone gives the answer.',
         formal: 'a Horn clause has at most one positive literal; (¬A ∨ B) is exactly "A requires B"',
-        readAs: 'A Horn clause has at most one positive literal; not-A or B says exactly '
+        readAs: 'A Horn clause has at most one positive literal. Not-A or B says exactly '
           + 'that A requires B.',
-        detail: 'Start with everything false and repeatedly find a clause that is not yet ' +
-          'satisfied: if it has a positive literal, that literal is forced true, and if it has ' +
-          'none the formula is unsatisfiable. The fixed point is the MINIMAL model — the ' +
-          'smallest set of variables that has to be true — which for a dependency graph is ' +
-          'exactly the smallest set of packages that satisfies the requirements. The algorithm ' +
-          'and the answer people actually want are the same object.',
+        detail: [
+          'Start with everything false and repeatedly find a clause that is not yet satisfied. If it ' +
+            'has a positive literal, that literal is forced true, and if it has none the formula is ' +
+            'unsatisfiable.',
+          'The fixed point is the MINIMAL model, meaning the smallest set of variables that has to ' +
+            'be true. For a dependency graph that is exactly the smallest set of packages that ' +
+            'satisfies the requirements.',
+          'The algorithm and the answer people actually want are the same object.'
+        ],
         example: 'The demo decides an 85-clause Horn instance in 170 clause visits, and DPLL ' +
           'never branches on it at all — 1 search node.'
       },
@@ -386,31 +398,36 @@
         term: 'One alternative dependency changes the complexity class',
         plain: '"A requires B or C" has two positive literals, so it is not Horn.',
         formal: '(¬A ∨ B ∨ C) is not Horn; adding conflicts (¬B ∨ ¬C) to a non-Horn formula gives general SAT',
-        readAs: 'Not-A or B or C has two positive literals, so it is not Horn; adding '
+        readAs: 'Not-A or B or C has two positive literals, so it is not Horn. Adding '
           + 'not-B or not-C on top of that gives general satisfiability.',
-        detail: 'This is the honest explanation for why some package resolvers are instantaneous ' +
-          'and others occasionally hang: they are not the same algorithm on different inputs, ' +
-          'they are different problems. Pure requirements are Horn and propagate; a virtual ' +
-          'package with two providers is a disjunction with two positive literals and is not; ' +
-          'combine that with conflicts and you have general satisfiability. Knowing which clause ' +
-          'broke the fragment turns "the resolver is slow sometimes" into an engineering ' +
-          'trade-off somebody can decide about.',
+        detail: [
+          'This is the honest explanation for why some package resolvers are instantaneous and ' +
+            'others occasionally hang. They are not the same algorithm on different inputs, they ' +
+            'are different problems.',
+          'Pure requirements are Horn and propagate. A virtual package with two providers is a ' +
+            'disjunction with two positive literals and is not, and combining that with conflicts ' +
+            'gives general satisfiability.',
+          'Knowing which clause broke the fragment turns "the resolver is slow sometimes" into an ' +
+            'engineering trade-off somebody can decide about.'
+        ],
         example: 'The demo shows the Horn rows at 1 search node and the non-Horn rows branching, ' +
           'at the same variable count.'
       },
       {
         term: '2-SAT and XOR-SAT are polynomial for completely different reasons',
-        plain: 'One is strongly connected components; the other is Gaussian elimination.',
+        plain: 'One is strongly connected components. The other is Gaussian elimination.',
         formal: '2-SAT: unsatisfiable ⟺ some x and ¬x share a strongly connected component of the implication graph. XOR-SAT: solve over GF(2)',
         readAs: 'A two-literal formula is unsatisfiable exactly when some variable and its ' +
-          'negation lie in the same strongly connected component of the implication graph; a ' +
+          'negation lie in the same strongly connected component of the implication graph. A ' +
           'parity formula is solved by Gaussian elimination over the two-element field.',
-        detail: 'These are not variations on one technique. A 2-clause is two implications, so ' +
-          'the whole formula is a graph and reachability decides it in linear time. A parity ' +
-          'constraint is a linear equation, so the whole formula is a linear system and ' +
-          'elimination decides it in cubic time. Schaefer’s dichotomy says these — with Horn, ' +
-          'dual-Horn and two trivial families — are the only polynomial cases, and everything ' +
-          'else is NP-complete with nothing in between.',
+        detail: [
+          'These are not variations on one technique.',
+          'A 2-clause is two implications, so the whole formula is a graph and reachability decides ' +
+            'it in linear time. A parity constraint is a linear equation, so the whole formula is a ' +
+            'linear system and elimination decides it in cubic time.',
+          'Schaefer’s dichotomy says these, with Horn, dual-Horn and two trivial families, are the ' +
+            'only polynomial cases. Everything else is NP-complete with nothing in between.'
+        ],
         example: 'The demo lists all three islands with their algorithms, and each is a genuine ' +
           'polynomial method rather than a heuristic that usually works.'
       },
@@ -418,28 +435,34 @@
         term: 'The pigeonhole formula is the counter-example to "solvers are fast now"',
         plain: 'A fact a human sees instantly costs a resolution solver exponentially many steps.',
         formal: 'PHP(n): n + 1 pigeons, n holes, one clause per pigeon and one per colliding pair; Haken proved every resolution refutation is exponential',
-        detail: 'The formula has O(n³) clauses and says something obviously false, and no ' +
-          'resolution-based solver — which is every CDCL solver, since clause learning is ' +
-          'resolution — can refute it in polynomial time. That is a theorem about the PROOF ' +
-          'SYSTEM rather than about any implementation, so it will not be fixed by a better ' +
-          'heuristic. When somebody says modern solvers handle millions of variables, an ' +
-          'eight-hole pigeonhole instance with 297 clauses is the reply.',
+        detail: [
+          'The formula has O(n³) clauses and says something obviously false, and no ' +
+            'resolution-based solver can refute it in polynomial time. That is every CDCL solver, ' +
+            'since clause learning is resolution.',
+          'It is a theorem about the PROOF SYSTEM rather than about any implementation, so it will ' +
+            'not be fixed by a better heuristic.',
+          'When somebody says modern solvers handle millions of variables, an eight-hole pigeonhole ' +
+            'instance with 297 clauses is the reply.'
+        ],
         example: 'The demo measures 11, 47, 239, 1 439, 10 079 and 80 639 nodes for three to ' +
-          'eight holes — exactly 2·h! − 1 at every size, with h! conflicts.'
+          'eight holes. That is exactly 2·h! − 1 at every size, with h! conflicts.'
       },
       {
         term: 'Schaefer’s dichotomy says there is no middle',
         plain: 'A Boolean constraint problem is either in P or NP-complete, with nothing in between.',
         formal: 'every Boolean CSP is polynomial if all relations are Horn, dual-Horn, bijunctive, affine, 0-valid or 1-valid; otherwise NP-complete',
-        detail: 'Dichotomy theorems are rare and this one is unusually useful, because it turns ' +
-          '"probably somewhere in between" into an unavailable answer. For a Boolean constraint ' +
-          'problem the only question is which of six families your relations fall into, and ' +
-          'that is a syntactic check over the clause list costing one pass. It is worth running ' +
-          'before assuming the worst, because the check is free relative to solving and the six ' +
-          'families cover a large fraction of the constraint logic that turns up in ' +
-          'configuration, permissions and dependency systems.',
-        example: 'The demo’s island table names five fragments; three of them have running ' +
-          'algorithms in this milestone and the section states the other two rather than ' +
+        detail: [
+          'Dichotomy theorems are rare, and this one is unusually useful, because it turns "probably ' +
+            'somewhere in between" into an unavailable answer.',
+          'For a Boolean constraint problem the only question is which of six families your ' +
+            'relations fall into, and that is a syntactic check over the clause list costing one ' +
+            'pass.',
+          'It is worth running before assuming the worst. The check is free relative to solving, and ' +
+            'the six families cover a large fraction of the constraint logic that turns up in ' +
+            'configuration, permissions and dependency systems.'
+        ],
+        example: 'The demo’s island table names five fragments. Three of them have running ' +
+          'algorithms in this milestone, and the section states the other two rather than ' +
           'implying they are the same kind of claim.'
       }
     ]

@@ -74,51 +74,67 @@
     };
   }
 
-  function orientation() {
+  function orientationRoot() {
     return [
       '**Cook and Levin proved that every problem in NP reduces to SAT, and the idea is one ' +
         'sentence: encode the run of the verifier as a formula.** Variables say what is on the ' +
-        'tape at each step; clauses say each step follows the transition table and the last ' +
-        'step accepts. The formula is satisfiable exactly when some certificate makes the ' +
-        'verifier accept. That is the whole construction, and it is why SAT rather than some ' +
-        'other problem sits at the root.',
-      '**3-CNF is not a weaker problem than CNF.** Any clause can be chained into 3-clauses ' +
-        'linked by fresh variables, preserving satisfiability and growing the formula ' +
-        'linearly. So 3-SAT is NP-complete too, and it is the convenient root for gadget ' +
-        'constructions because a clause of exactly three literals becomes a triangle, a ' +
-        'three-way choice, or three digits — a fixed small shape.',
+        'tape at each step. Clauses say each step follows the transition table and the last step ' +
+        'accepts.',
+      'The formula is satisfiable exactly when some certificate makes the verifier accept.',
+      'That is the whole construction, and it is why SAT rather than some other problem sits at ' +
+        'the root.',
+      '**3-CNF is not a weaker problem than CNF.** Any clause can be chained into 3-clauses linked ' +
+        'by fresh variables, preserving satisfiability and growing the formula linearly.',
+      'So 3-SAT is NP-complete too, and it is the convenient root for gadget constructions.',
+      'A clause of exactly three literals becomes a triangle, a three-way choice, or three digits, ' +
+        'which is a fixed small shape.',
       '**Karp’s chain is twenty-one problems and each link is one gadget.** Independent set, ' +
-        'clique and vertex cover are the same problem read three ways; set cover generalises ' +
-        'the third; subset sum and partition are the arithmetic branch; 3-colouring and ' +
-        'Hamiltonian cycle are the graph branch. A new hardness proof is one link from any of ' +
-        'them, which is why the chain is worth carrying in your head.',
-      '**The polynomial islands matter far more day to day than the hardness result.** ' +
-        '2-SAT is linear by strongly connected components; Horn-SAT is linear by unit ' +
-        'propagation; XOR-SAT is cubic by Gaussian elimination. A great deal of real ' +
-        'configuration logic lands inside one of them without anybody noticing, and that is ' +
-        'why package resolvers over pure requirements are fast.',
+        'clique and vertex cover are the same problem read three ways, and set cover generalises ' +
+        'the third.',
+      'Subset sum and partition are the arithmetic branch, and 3-colouring and Hamiltonian cycle ' +
+        'are the graph branch.',
+      'A new hardness proof is one link from any of them, which is why the chain is worth carrying ' +
+        'in your head.'
+    ];
+  }
+
+  function orientationIslands() {
+    return [
+      '**The polynomial islands matter far more day to day than the hardness result.** 2-SAT is ' +
+        'linear by strongly connected components, Horn-SAT is linear by unit propagation, and ' +
+        'XOR-SAT is cubic by Gaussian elimination.',
+      'A great deal of real configuration logic lands inside one of them without anybody noticing, ' +
+        'and that is why package resolvers over pure requirements are fast.',
       '**"A requires B and C" is the Horn clause (¬A ∨ B) ∧ (¬A ∨ C).** At most one positive ' +
-        'literal per clause is exactly the shape of a requirement, so a dependency graph is ' +
-        'Horn by construction and unit propagation decides it in one pass over the formula, ' +
-        'producing the MINIMAL model — the smallest set of packages that satisfies the ' +
+        'literal per clause is exactly the shape of a requirement.',
+      'So a dependency graph is Horn by construction, and unit propagation decides it in one pass ' +
+        'over the formula.',
+      'It produces the MINIMAL model, the smallest set of packages that satisfies the ' +
         'requirements, which is also the answer you wanted.',
-      '**One "either X or Y" changes the complexity class.** A virtual package with two ' +
-        'providers is the clause (¬A ∨ X ∨ Y), which has two positive literals and is not ' +
-        'Horn. Add conflicts, which are Horn on their own, and the combination is general SAT. ' +
-        'That is the honest explanation for why some resolvers are instantaneous and others ' +
-        'occasionally hang: the two are not the same algorithm on different inputs, they are ' +
+      '**One "either X or Y" changes the complexity class.** A virtual package with two providers ' +
+        'is the clause (¬A ∨ X ∨ Y), which has two positive literals and is not Horn.',
+      'Add conflicts, which are Horn on their own, and the combination is general SAT.',
+      'That is the honest explanation for why some resolvers are instantaneous and others ' +
+        'occasionally hang. The two are not the same algorithm on different inputs, they are ' +
         'different problems.',
       '**The pigeonhole formula is the standing counter-example to "modern solvers are fast".** ' +
-        'PHP(n) says n + 1 pigeons fit in n holes; it is unsatisfiable, a human sees why ' +
-        'immediately, and every resolution-based solver — which is every CDCL solver — needs ' +
-        'exponentially many steps to say so, because Haken proved resolution has no ' +
-        'polynomial proof of it. The demo measures the node count and it is exactly 2·h! − 1.',
+        'PHP(n) says n + 1 pigeons fit in n holes. It is unsatisfiable, and a human sees why ' +
+        'immediately.',
+      'Every resolution-based solver, which is every CDCL solver, needs exponentially many steps ' +
+        'to say so, because Haken proved resolution has no polynomial proof of it.',
+      'The demo measures the node count and it is exactly 2·h! − 1.',
       '**Schaefer’s dichotomy says there is no middle.** Every Boolean constraint satisfaction ' +
-        'language is either in P — one of six families, the islands above — or NP-complete. ' +
-        'Nothing sits between. That is unusual and useful: for a Boolean constraint problem, ' +
-        '"probably somewhere in between" is not an available answer, so it is worth checking ' +
-        'which of the six your constraints fall into before assuming the worst.'
+        'language is either in P, meaning one of six families, or NP-complete. Nothing sits ' +
+        'between.',
+      'That is unusual and useful, because for a Boolean constraint problem "probably somewhere in ' +
+        'between" is not an available answer.',
+      'So it is worth checking which of the six your constraints fall into before assuming the ' +
+        'worst.'
     ];
+  }
+
+  function orientation() {
+    return orientationRoot().concat(orientationIslands());
   }
 
   function config() {
@@ -131,11 +147,11 @@
       },
       diagram: diagram(),
       insight: '**Before assuming your constraint problem is hard, check whether it is Horn.** ' +
-        'The test is one line — does every clause have at most one positive literal? — and when ' +
-        'it passes, the answer comes from propagation in time linear in the formula, with the ' +
+        'The test is one line: does every clause have at most one positive literal? When it ' +
+        'passes, the answer comes from propagation in time linear in the formula, with the ' +
         'minimal model as a bonus. When it fails, the clause that broke it is usually a single ' +
-        'disjunction someone added for a good reason, and knowing WHICH clause is what makes the ' +
-        'conversation about it possible: "this one alternative dependency is why resolution can ' +
+        'disjunction someone added for a good reason. Knowing WHICH clause is what makes the ' +
+        'conversation about it possible. "This one alternative dependency is why resolution can ' +
         'now take exponential time" is an engineering trade-off, and "the resolver is slow ' +
         'sometimes" is not.'
     };
