@@ -144,11 +144,13 @@
         term: 'DEFLATE is LZ77 then Huffman, and it is everywhere',
         plain: 'Match removal, then a code over what is left.',
         formal: 'RFC 1951: a 32 KB window, a literal/length alphabet of 288 symbols and a distance alphabet of 30',
-        detail: 'gzip, zlib, PNG, zip and HTTP Content-Encoding are all this one format. Its ' +
-          'design is deliberately modest and it has survived thirty years because the two stages ' +
-          'are orthogonal: LZ77 removes repetition that an entropy coder cannot see, and Huffman ' +
-          'removes the skew in the token stream that LZ77 leaves behind. Neither subsumes the ' +
-          'other, which is why doing both beats doing either twice.',
+        detail: [
+          'gzip, zlib, PNG, zip and HTTP Content-Encoding are all this one format.',
+          'Its design is deliberately modest, and it has survived thirty years because the two ' +
+            'stages are orthogonal. LZ77 removes repetition that an entropy coder cannot see, and ' +
+            'Huffman removes the skew in the token stream that LZ77 leaves behind.',
+          'Neither subsumes the other, which is why doing both beats doing either twice.'
+        ],
         example: 'The demo measures DEFLATE at 24.79× on JSON logs against LZSS alone at 21.58×.'
       },
       {
@@ -165,11 +167,14 @@
         },
         plain: 'A block that does not compress is emitted raw.',
         formal: 'type 00: five bytes of header, then the bytes; so the format expands by at most that per block',
-        detail: 'This is the design decision that makes DEFLATE safe to apply blindly. An entropy ' +
-          'coder alone expands random input by about twelve per cent — it still has to code every ' +
-          'symbol, and the model is uniform — while a format with a stored option pays five ' +
-          'bytes and stops. Any pipeline that compresses untrusted data needs this property, and ' +
-          'it is worth checking that whatever codec you have chosen actually has it.',
+        detail: [
+          'This is the design decision that makes DEFLATE safe to apply blindly.',
+          'An entropy coder alone expands random input by about twelve per cent, because it still ' +
+            'has to code every symbol and the model is uniform. A format with a stored option pays ' +
+            'five bytes and stops.',
+          'Any pipeline that compresses untrusted data needs this property, and it is worth checking ' +
+            'that whatever codec you have chosen actually has it.'
+        ],
         example: 'The demo measures DEFLATE at 0.998× on random bytes where the pure entropy ' +
           'coders measure 0.893× and 0.889×.'
       },
@@ -177,11 +182,14 @@
         term: 'Fixed and dynamic Huffman are a header-cost decision',
         plain: 'Use the code in the specification, or fit one to this block and send it.',
         formal: 'type 01 transmits no table; type 10 transmits code lengths, run-length coded and Huffman coded again',
-        detail: 'The dynamic path has three layers and the third is where readers give up: the ' +
-          'code lengths are coded with a nineteen-symbol alphabet whose own lengths are sent as ' +
-          '3-bit fields in a fixed permuted order, chosen so the common ones come first and the ' +
-          'tail can be truncated. That looks like over-engineering until you measure a sparse ' +
-          'length table without it, where the plain form costs more than the payload it describes.',
+        detail: [
+          'The dynamic path has three layers, and the third is where readers give up.',
+          'The code lengths are coded with a nineteen-symbol alphabet whose own lengths are sent as ' +
+            '3-bit fields. They go in a fixed permuted order, chosen so the common ones come first ' +
+            'and the tail can be truncated.',
+          'That looks like over-engineering until you measure a sparse length table without it, ' +
+            'where the plain form costs more than the payload it describes.'
+        ],
         example: 'The demo’s encoder chooses fixed blocks on five corpora and stored on the two ' +
           'incompressible ones.'
       },
@@ -189,11 +197,14 @@
         term: 'zstd and brotli changed the entropy stage and the dictionary',
         plain: 'FSE instead of Huffman, and a dictionary that is not built from your data.',
         formal: 'zstd uses tANS for literals and match fields; brotli ships a 120 KB static dictionary of web text',
-        detail: 'zstd’s ratio advantage over gzip is mostly the entropy stage — a table-driven ' +
-          'ANS gets arithmetic-coding accuracy at Huffman speed — and its advantage on SMALL ' +
-          'payloads is the dictionary, because a 200-byte JSON document has no history to match ' +
-          'against until you give it one. Brotli’s static dictionary is the same idea taken ' +
-          'further: the dictionary is the internet, and it is why brotli beats gzip on short HTML.',
+        detail: [
+          'zstd’s ratio advantage over gzip is mostly the entropy stage, because a table-driven ANS ' +
+            'gets arithmetic-coding accuracy at Huffman speed.',
+          'Its advantage on SMALL payloads is the dictionary. A 200-byte JSON document has no ' +
+            'history to match against until you give it one.',
+          'Brotli’s static dictionary is the same idea taken further. The dictionary is the ' +
+            'internet, and it is why brotli beats gzip on short HTML.'
+        ],
         example: 'The demo’s rANS coder measures within 0.2% of arithmetic coding, which is the ' +
           'gain zstd’s FSE stage captures.'
       },
@@ -201,12 +212,14 @@
         term: 'The ranking changes with the corpus, and that is the finding',
         plain: 'No codec wins every kind of data.',
         formal: 'the same six codecs over seven corpora produce two different winners',
-        detail: 'A benchmark on one corpus produces a winner and no information. Structured text ' +
-          'rewards a dictionary stage because its keys repeat exactly; prose rewards the ' +
-          'transform chain because its redundancy is contextual rather than literal; ' +
-          'incompressible bytes defeat everything and the only question is which degrades most ' +
-          'gracefully. Publishing the corpus alongside the ratio is the minimum for a claim to be ' +
-          'checkable.',
+        detail: [
+          'A benchmark on one corpus produces a winner and no information.',
+          'Structured text rewards a dictionary stage because its keys repeat exactly, and prose ' +
+            'rewards the transform chain because its redundancy is contextual rather than literal.',
+          'Incompressible bytes defeat everything, and the only question is which degrades most ' +
+            'gracefully. Publishing the corpus alongside the ratio is the minimum for a claim to be ' +
+            'checkable.'
+        ],
         example: 'The demo measures DEFLATE winning English text at 15.63× and the BWT chain ' +
           'winning mixed prose at 2.84×.'
       },
@@ -214,11 +227,14 @@
         term: 'Decode speed usually matters more than ratio',
         plain: 'Data is written once and read many times.',
         formal: 'the encoder’s work rises with the level; the decoder’s barely moves',
-        detail: 'The asymmetry is the whole reason a compression level exists as a dial. Across a ' +
-          'sweep from depth 1 to depth 64 the encoder does ten times the work and the decoder ' +
-          'reads a token stream of almost identical length — so a higher level costs the writer ' +
-          'and is free for every subsequent reader. That also means the right level depends on ' +
-          'the read-to-write ratio rather than on how much you like compression.',
+        detail: [
+          'The asymmetry is the whole reason a compression level exists as a dial.',
+          'Across a sweep from depth 1 to depth 64 the encoder does ten times the work, and the ' +
+            'decoder reads a token stream of almost identical length. So a higher level costs the ' +
+            'writer and is free for every subsequent reader.',
+          'That also means the right level depends on the read-to-write ratio, rather than on how ' +
+            'much you like compression.'
+        ],
         example: 'The demo measures 1 694 tokens to decode at depth 1 and 1 435 at depth 64, ' +
           'while encoder work rises 11-fold.'
       },
@@ -226,23 +242,31 @@
         term: 'Every measurement is round-trip checked, including the degenerate ones',
         plain: 'A size from a codec that cannot decompress is not a measurement.',
         formal: 'empty input, one byte, a thousand identical bytes, and already-compressed data',
-        detail: 'The degenerate cases are where implementations break, and they break silently: ' +
-          'an encoder that mishandles an empty input usually produces empty output that decodes ' +
-          'to nothing, which looks fine. A single byte costs more to describe than to store in ' +
-          'every scheme, which is the honest floor on any format’s overhead. Running all four ' +
-          'through every codec is cheap and it is what makes the ratio table believable.',
+        detail: [
+          'The degenerate cases are where implementations break, and they break silently. An encoder ' +
+            'that mishandles an empty input usually produces empty output that decodes to nothing, ' +
+            'which looks fine.',
+          'A single byte costs more to describe than to store in every scheme, which is the honest ' +
+            'floor on any format’s overhead.',
+          'Running all four through every codec is cheap, and it is what makes the ratio table ' +
+            'believable.'
+        ],
         example: 'The demo verifies 66 of 66 round-trips across seven corpora and four edge cases.'
       },
       {
         term: 'A ratio below one is a result, not an omission',
         plain: 'Report the expansion rather than dropping the row.',
         formal: 'on incompressible input the honest answer is a ratio under 1, and the interesting question is how far under',
-        detail: 'Hiding the row hides the theorem — every compressor that shrinks some inputs must ' +
-          'expand others — and it hides the practical difference between codecs. The demo’s worst ' +
-          'row is a pure LZ coder at 0.889 on random bytes, and DEFLATE at 0.998 on the same ' +
-          'input; that difference is entirely the stored block, and it is the property that ' +
-          'matters when the data is untrusted.',
-        example: 'The demo reports its worst ratio explicitly: 0.889× for LZSS on random bytes.'
+        detail: [
+          'Hiding the row hides the theorem, which is that every compressor shrinking some inputs ' +
+            'must expand others. It also hides the practical difference between codecs.',
+          'The demo’s worst row is a pure LZ coder at 0.889 on random bytes, with DEFLATE at 0.998 ' +
+            'on the same input.',
+          'That difference is entirely the stored block, and it is the property that matters when ' +
+            'the data is untrusted.'
+        ],
+        example: 'The demo reports its worst ratio explicitly. It is 0.889× for LZSS on random ' +
+          'bytes.'
       }
     ],
 

@@ -50,37 +50,52 @@
     };
   }
 
-  function orientation() {
+  function orientationDeflate() {
     return [
       '**DEFLATE is LZ77 plus Huffman, and it is the most widely deployed compression format in ' +
-        'existence** — gzip, zlib, PNG, zip and HTTP Content-Encoding are all this. Its design is ' +
-        'deliberately modest: a 32 KB window, two Huffman alphabets, and a block structure that ' +
-        'lets every block choose its own encoding.',
+        'existence.** gzip, zlib, PNG, zip and HTTP Content-Encoding are all this.',
+      'Its design is deliberately modest: a 32 KB window, two Huffman alphabets, and a block ' +
+        'structure that lets every block choose its own encoding.',
       '**The stored block is the guarantee.** A block that does not compress is emitted raw with ' +
         'five bytes of overhead, so DEFLATE never expands its input by more than a fraction of a ' +
-        'per cent. The demo runs it on random bytes and measures exactly that: a ratio just below ' +
-        'one rather than the twelve per cent expansion a pure entropy coder produces.',
+        'per cent.',
+      'The demo runs it on random bytes and measures exactly that. It is a ratio just below one, ' +
+        'rather than the twelve per cent expansion a pure entropy coder produces.',
       '**Fixed and dynamic Huffman are a header-cost decision.** The fixed code is in the ' +
-        'specification and costs nothing to transmit; a dynamic code fits this block and costs a ' +
-        'table. Short blocks take the fixed code, long ones take the dynamic, and the encoder ' +
-        'decides per block by measuring both.',
-      '**zstd replaced Huffman with FSE — a table-driven ANS — and added dictionaries.** The ' +
-        'entropy stage is where its ratio comes from; the dictionary is where its performance on ' +
-        'small payloads comes from, because a 200-byte JSON document has no history to match ' +
-        'against until you give it one.',
-      '**Brotli ships a 120 KB static dictionary of web text.** That is a legitimate and slightly ' +
-        'startling design: the dictionary is not built from your data, it is built from the ' +
-        'internet, and it is what makes brotli beat gzip on small HTML responses.',
-      '**The ranking changes with the corpus, and that is the finding.** The demo runs six codecs ' +
-        'over seven corpora and no codec wins them all — DEFLATE takes the structured text, the BWT ' +
-        'chain takes the prose, and everything loses on incompressible input.',
-      '**Decode speed usually matters more than ratio**, because data is written once and read ' +
-        'many times. A Pareto plot of ratio against work is the honest way to choose, and the ' +
-        'column to look at first is the one that says what the DECODER has to do.',
-      '**Every measurement here is round-trip checked.** Empty input, a single byte, a thousand ' +
-        'identical bytes, already-compressed data. A codec that reports a superb ratio and cannot ' +
-        'decompress its own output has reported nothing.'
+        'specification and costs nothing to transmit. A dynamic code fits this block and costs a ' +
+        'table.',
+      'Short blocks take the fixed code and long ones take the dynamic, and the encoder decides ' +
+        'per block by measuring both.'
     ];
+  }
+
+  function orientationModern() {
+    return [
+      '**zstd replaced Huffman with FSE, a table-driven ANS, and added dictionaries.** The entropy ' +
+        'stage is where its ratio comes from.',
+      'The dictionary is where its performance on small payloads comes from, because a 200-byte ' +
+        'JSON document has no history to match against until you give it one.',
+      '**Brotli ships a 120 KB static dictionary of web text.** That is a legitimate and slightly ' +
+        'startling design.',
+      'The dictionary is not built from your data, it is built from the internet, and it is what ' +
+        'makes brotli beat gzip on small HTML responses.',
+      '**The ranking changes with the corpus, and that is the finding.** The demo runs six codecs ' +
+        'over seven corpora and no codec wins them all.',
+      'DEFLATE takes the structured text, the BWT chain takes the prose, and everything loses on ' +
+        'incompressible input.',
+      '**Decode speed usually matters more than ratio**, because data is written once and read ' +
+        'many times.',
+      'A Pareto plot of ratio against work is the honest way to choose, and the column to look at ' +
+        'first is the one that says what the DECODER has to do.',
+      '**Every measurement here is round-trip checked.** That means empty input, a single byte, a ' +
+        'thousand identical bytes and already-compressed data.',
+      'A codec that reports a superb ratio and cannot decompress its own output has reported ' +
+        'nothing.'
+    ];
+  }
+
+  function orientation() {
+    return orientationDeflate().concat(orientationModern());
   }
 
   function config() {
@@ -93,12 +108,12 @@
       },
       diagram: diagram(),
       insight: '**Choose a codec by measuring it on YOUR data, and choose it on decode speed ' +
-        'unless you know the data is read rarely.** The demo makes the first half concrete: no ' +
+        'unless you know the data is read rarely.** The demo makes the first half concrete. No ' +
         'codec wins every corpus, and the gap between best and worst on one corpus is smaller ' +
         'than the gap between corpora for one codec. The second half is an operational fact ' +
-        'rather than a compression one — a stored object is written once and read for years, so ' +
-        'a codec that is 3% better and twice as slow to decode is usually the wrong choice, and ' +
-        'the only way to know is to measure both directions rather than quoting a ratio.'
+        'rather than a compression one. A stored object is written once and read for years, so ' +
+        'a codec that is 3% better and twice as slow to decode is usually the wrong choice. The ' +
+        'only way to know is to measure both directions rather than quoting a ratio.'
     };
   }
 
