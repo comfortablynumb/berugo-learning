@@ -12,13 +12,15 @@
         formal: 'the optimisation form is recovered by binary search over k, at a cost of O(log range) decision calls',
         readAs: 'The optimisation answer follows from a number of decision calls proportional ' +
           'to the logarithm of the range of possible answers.',
-        detail: 'Complexity theory is built on languages — sets of strings — so a decision ' +
-          'problem *is* a language and the whole apparatus applies to it directly. The reason ' +
-          'this is not a loss is that the two forms are equivalent up to a logarithmic factor: ' +
-          'ask "is there a cover of size at most 10?", then 5, then 7, and a dozen calls locate ' +
-          'the optimum exactly. Every hardness result in this milestone is stated about the ' +
-          'decision form for that reason, and every one of them transfers to the version you ' +
-          'actually want.',
+        detail: [
+          'Complexity theory is built on languages, meaning sets of strings. So a decision problem ' +
+            '*is* a language, and the whole apparatus applies to it directly.',
+          'The reason this is not a loss is that the two forms are equivalent up to a logarithmic ' +
+            'factor. Ask "is there a cover of size at most 10?", then 5, then 7, and a dozen calls ' +
+            'locate the optimum exactly.',
+          'Every hardness result in this milestone is stated about the decision form for that ' +
+            'reason, and every one of them transfers to the version you actually want.'
+        ],
         example: 'The demo asks for a Hamiltonian CYCLE rather than the shortest tour, and for a ' +
           'clique of size 5 rather than the largest clique.'
       },
@@ -37,15 +39,17 @@
         plain: 'A problem is in NP when every yes instance has a short certificate a fast checker accepts.',
         formal: 'L ∈ NP ⟺ ∃ polynomial-time V and polynomial p with x ∈ L ⟺ ∃c, |c| ≤ p(|x|), V(x, c) accepts',
         readAs: 'A language is in NP exactly when there is a polynomial-time verifier and a ' +
-          'polynomial bound such that a string is in the language exactly when some certificate ' +
-          'no longer than that bound makes the verifier accept.',
-        detail: 'This is the definition worth carrying around, because it is the one that ' +
-          'explains what these problems have in common in practice: easy to check, hard to ' +
-          'find. The N does not stand for "not polynomial" — it stands for nondeterministic, ' +
-          'and the certificate is exactly what a nondeterministic machine would guess. Reading ' +
-          'NP as a statement about verification rather than about search is what makes ' +
-          'proof-of-work, verifiable computation and auditable heuristics obvious rather than ' +
-          'surprising.',
+          'polynomial bound on the certificate length. A string is in the language exactly when ' +
+          'some certificate within that bound makes the verifier accept.',
+        detail: [
+          'This is the definition worth carrying around, because it is the one that explains what ' +
+            'these problems have in common in practice: easy to check, hard to find.',
+          'The N does not stand for "not polynomial". It stands for nondeterministic, and the ' +
+            'certificate is exactly what a nondeterministic machine would guess.',
+          'Reading NP as a statement about verification rather than about search is what makes ' +
+            'proof-of-work, verifiable computation and auditable heuristics obvious rather than ' +
+            'surprising.'
+        ],
         example: 'The demo verifies a 12-vertex Hamiltonian certificate in 24 steps and searches ' +
           'for one on an instance that has none in 4 794.'
       },
@@ -53,12 +57,15 @@
         term: 'The gap between checking and searching is invisible on YES instances',
         plain: 'A search often stumbles onto a planted answer faster than the verifier checks it.',
         formal: 'search cost on a planted YES instance is a property of the generator, not of the problem',
-        detail: 'A backtracking search on a graph built around a planted Hamiltonian cycle ' +
-          'wanders into that cycle early, because the generator put a great many edges along it. ' +
-          'The demo shows a column where the search on a YES instance costs less than the ' +
-          'verifier does, which is a genuinely misleading measurement and is exactly why the NO ' +
-          'side is the one that matters. Proving there is no answer requires exhausting the ' +
-          'space, and no amount of luck shortens that.',
+        detail: [
+          'A backtracking search on a graph built around a planted Hamiltonian cycle wanders into ' +
+            'that cycle early, because the generator put a great many edges along it.',
+          'The demo shows a column where the search on a YES instance costs less than the verifier ' +
+            'does. That is a genuinely misleading measurement, and it is exactly why the NO side is ' +
+            'the one that matters.',
+          'Proving there is no answer requires exhausting the space, and no amount of luck shortens ' +
+            'that.'
+        ],
         example: 'On the demo’s 3-colouring row the search finds the planted colouring in 13 ' +
           'steps against 20 to verify one, and needs 2 213 to refute the obstructed instance.'
       },
@@ -66,12 +73,15 @@
         term: 'A verifier must reject malformed certificates as firmly as wrong ones',
         plain: 'A short array, a repeated index or a colour outside the palette is a rejection, not a crash.',
         formal: 'V must be total: it returns accept or reject on every input, including ill-formed ones',
-        detail: 'The moment anything untrusted supplies the certificate — which is the whole ' +
-          'point of proof-of-work and of verifiable computation — the verifier is a security ' +
-          'boundary. A verifier that throws on a malformed input is a denial-of-service vector; ' +
-          'one that accidentally accepts is worse. Every verifier in this milestone returns a ' +
-          'named reason for every rejection, and the demo feeds each of them a corrupted ' +
-          'certificate and a structurally malformed one to show that it does.',
+        detail: [
+          'The moment anything untrusted supplies the certificate, the verifier is a security ' +
+            'boundary. That is the whole point of proof-of-work and of verifiable computation.',
+          'A verifier that throws on a malformed input is a denial-of-service vector, and one that ' +
+            'accidentally accepts is worse.',
+          'Every verifier in this milestone returns a named reason for every rejection. The demo ' +
+            'feeds each of them a corrupted certificate and a structurally malformed one to show ' +
+            'that it does.'
+        ],
         example: 'The demo rejects a repeated vertex, an out-of-range subset-sum index and a ' +
           'three-vertex clique offered as a five-vertex one, each with a stated reason.'
       },
@@ -79,30 +89,35 @@
         term: 'co-NP is the mirror, and it is not known to be the same class',
         plain: 'Nobody knows a short certificate for "this formula is unsatisfiable".',
         formal: 'co-NP = { L : complement of L ∈ NP }; NP = co-NP is open, and would follow from P = NP',
-        readAs: 'co-NP is the set of languages whose complement is in NP; whether NP and '
+        readAs: 'co-NP is the set of languages whose complement is in NP. Whether NP and '
           + 'co-NP are the same class is open, and they would be equal if P equalled NP.',
-        detail: 'Every NP problem has short evidence for YES and, as far as anybody knows, none ' +
-          'for NO. That asymmetry has a very concrete consequence: a SAT solver answering SAT ' +
-          'hands you an assignment anybody can check in milliseconds, and a solver answering ' +
-          'UNSAT hands you either a resolution proof measured in gigabytes or nothing at all. ' +
+        detail: [
+          'Every NP problem has short evidence for YES and, as far as anybody knows, none for NO.',
+          'That asymmetry has a very concrete consequence. A SAT solver answering SAT hands you an ' +
+            'assignment anybody can check in milliseconds. A solver answering UNSAT hands you ' +
+            'either a resolution proof measured in gigabytes or nothing at all.',
           'Every "the solver says it is infeasible" conversation in section 20.9 traces back to ' +
-          'this, and so does every design that logs a certificate rather than a claim.',
+            'this, and so does every design that logs a certificate rather than a claim.'
+        ],
         example: 'The demo’s problem table has no row for "this formula is unsatisfiable", and ' +
           'that missing row is co-NP.'
       },
       {
         term: 'NP-hard and NP-complete are different claims',
-        plain: 'NP-hard means everything in NP reduces to it; NP-complete means that and being in NP.',
+        plain: 'NP-hard means everything in NP reduces to it. NP-complete means that and being in NP.',
         formal: 'L is NP-hard when ∀ A ∈ NP, A ≤ₚ L; NP-complete when additionally L ∈ NP',
         readAs: 'A language is NP-hard when every language in NP reduces to it in polynomial ' +
           'time, and NP-complete when it is also itself in NP.',
-        detail: 'The distinction is not pedantry. The halting problem is NP-hard and is not in ' +
-          'NP — it is not decidable at all — so "NP-hard" on its own carries no promise that an ' +
-          'answer can even be recognised, let alone found. When a paper or a colleague says ' +
-          '"NP-hard", the useful question is whether membership in NP was also established, ' +
-          'because that is what tells you whether a certificate exists and therefore whether a ' +
-          'checker can be built.',
-        example: 'The optimisation form of TSP is NP-hard; the decision form "is there a tour ' +
+        detail: [
+          'The distinction is not pedantry.',
+          'The halting problem is NP-hard and is not in NP, because it is not decidable at all. So ' +
+            '"NP-hard" on its own carries no promise that an answer can even be recognised, let ' +
+            'alone found.',
+          'When a paper or a colleague says "NP-hard", the useful question is whether membership in ' +
+            'NP was also established. That is what tells you whether a certificate exists, and ' +
+            'therefore whether a checker can be built.'
+        ],
+        example: 'The optimisation form of TSP is NP-hard. The decision form "is there a tour ' +
           'under length L?" is NP-complete, and only the second has a certificate.'
       },
       {
@@ -110,14 +125,16 @@
         plain: 'Proof-of-work, verifiable computation and puzzle-based rate limiting all live in that gap.',
         formal: 'a proof-of-work puzzle asks for a nonce with H(block ‖ nonce) < target: one hash to verify, 2ᵈ expected to find',
         readAs: 'Find a nonce such that the hash of the block concatenated with it is below the ' +
-          'target; verifying costs one hash and finding one costs two to the difficulty in ' +
+          'target. Verifying costs one hash, and finding one costs two to the difficulty in ' +
           'expectation.',
-        detail: 'Every protocol in this family is the same shape: an asymmetric cost where the ' +
-          'party doing the work pays a great deal more than the party checking it. That ' +
-          'asymmetry is not a bug in the problem, it is the mechanism — it is what makes the ' +
-          'work costly to fake and cheap to audit. Reading NP as "the class of problems with ' +
-          'that asymmetry" makes the design space obvious: any NP-complete problem with a ' +
-          'tunable difficulty dial is a candidate puzzle.',
+        detail: [
+          'Every protocol in this family is the same shape: an asymmetric cost where the party doing ' +
+            'the work pays a great deal more than the party checking it.',
+          'That asymmetry is not a bug in the problem, it is the mechanism. It is what makes the ' +
+            'work costly to fake and cheap to audit.',
+          'Reading NP as "the class of problems with that asymmetry" makes the design space obvious. ' +
+            'Any NP-complete problem with a tunable difficulty dial is a candidate puzzle.'
+        ],
         example: 'The demo measures the same asymmetry directly: 24 steps to verify against ' +
           '4 794 to refute, and the ratio grows without bound with instance size.'
       },
@@ -125,13 +142,15 @@
         term: 'P versus NP is about certificates, not about cleverness',
         plain: 'It asks whether everything checkable quickly is also solvable quickly.',
         formal: 'P = NP would mean every polynomial-time verifier can be turned into a polynomial-time solver',
-        detail: 'The practical value of the question is not the prize. It is that fifty years of ' +
-          'concentrated attack have produced no algorithm and no proof, which is the strongest ' +
-          'available evidence that a specific NP-complete problem in front of you is not about ' +
-          'to fall to a better algorithm. That is what justifies spending the effort on ' +
-          'approximation, parameterisation, encoding and heuristics instead — the moves the rest ' +
-          'of this milestone is about — rather than on one more attempt at an exact ' +
-          'polynomial method.',
+        detail: [
+          'The practical value of the question is not the prize.',
+          'It is that fifty years of concentrated attack have produced no algorithm and no proof. ' +
+            'That is the strongest available evidence that a specific NP-complete problem in front ' +
+            'of you is not about to fall to a better algorithm.',
+          'That is what justifies spending the effort on approximation, parameterisation, encoding ' +
+            'and heuristics instead. Those are the moves the rest of this milestone is about, and ' +
+            'they beat one more attempt at an exact polynomial method.'
+        ],
         example: 'The demo’s cost sweep grows by a factor of about 1.96 per extra vertex over ' +
           'eight sizes, with no sign of the polynomial anybody would need.'
       }

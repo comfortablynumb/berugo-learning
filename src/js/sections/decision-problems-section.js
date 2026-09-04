@@ -59,51 +59,66 @@
     };
   }
 
-  function orientation() {
+  function orientationDefinitions() {
     return [
       '**A decision problem asks a yes-or-no question, and that is a restriction with no cost.** ' +
         '"What is the smallest vertex cover?" becomes "is there a vertex cover of size at most ' +
-        'k?", and the optimisation answer follows from a logarithmic number of calls to the ' +
-        'decision one. The restriction is worth making because complexity theory is built on ' +
-        'languages — sets of strings — and a decision problem *is* a language, so the whole ' +
-        'apparatus becomes available for the price of a binary search over k.',
-      '**NP is defined by checking, not by searching, and that is the definition that ' +
-        'explains what these problems have in common.** A problem is in NP when every YES ' +
-        'instance has a certificate — an assignment, a tour, a subset — that a polynomial-time ' +
-        'verifier accepts, and every NO instance has none that it accepts. The demo runs both ' +
-        'sides: the verifier costs a few dozen steps on every problem in the table, and the ' +
-        'search costs thousands on the same instances.',
+        'k?". The optimisation answer follows from a logarithmic number of calls to the decision ' +
+        'one.',
+      'The restriction is worth making because complexity theory is built on languages, meaning ' +
+        'sets of strings.',
+      'A decision problem *is* a language, so the whole apparatus becomes available for the price ' +
+        'of a binary search over k.',
+      '**NP is defined by checking, not by searching, and that is the definition that explains ' +
+        'what these problems have in common.** A problem is in NP when every YES instance has a ' +
+        'certificate — an assignment, a tour, a subset — that a polynomial-time verifier accepts.',
+      'Every NO instance has none that it accepts.',
+      'The demo runs both sides. The verifier costs a few dozen steps on every problem in the ' +
+        'table, and the search costs thousands on the same instances.',
       '**The gap is not visible on YES instances.** A backtracking search on a graph with a ' +
-        'planted Hamiltonian cycle often finds it almost immediately, because it wanders into ' +
-        'the planted answer; the demo shows that column and it is sometimes *smaller* than the ' +
-        'verifier’s. The honest comparison is on the NO side, where the search has to exhaust ' +
-        'its space to say "there is none" and the verifier’s cost has not moved at all.',
-      '**A verifier must reject malformed certificates as firmly as wrong ones.** A ' +
+        'planted Hamiltonian cycle often finds it almost immediately, because it wanders into the ' +
+        'planted answer.',
+      'The demo shows that column, and it is sometimes *smaller* than the verifier’s.',
+      'The honest comparison is on the NO side, where the search has to exhaust its space to say ' +
+        '"there is none" and the verifier’s cost has not moved at all.',
+      '**A verifier must reject malformed certificates as firmly as wrong ones.** Consider a ' +
         'Hamiltonian certificate that repeats a vertex, a subset-sum certificate with an ' +
-        'out-of-range index, a colouring one entry short — each has to be a rejection rather ' +
-        'than a crash or an accidental accept, or "the verifier accepted" stops meaning ' +
-        'anything. The demo feeds each verifier a corrupted certificate and a malformed one ' +
-        'and reports what came back.',
-      '**co-NP is the mirror and it is not known to be the same class.** There is no known ' +
-        'short certificate for "this formula is unsatisfiable" — the only general witness is a ' +
-        'resolution proof, which can be exponentially long. That asymmetry is why a SAT solver ' +
-        'answering SAT hands you an assignment you can check in a second, and a solver ' +
-        'answering UNSAT hands you either a proof file measured in gigabytes or nothing at all.',
-      '**NP-hard and NP-complete are different claims and the difference matters.** NP-hard ' +
-        'means everything in NP reduces to it; NP-complete means that *and* membership in NP. ' +
-        'The halting problem is NP-hard and is not in NP, so "NP-hard" alone carries no ' +
-        'promise that an answer can even be recognised, let alone found.',
-      '**The practical reading of NP is "easy to check, hard to find", and whole industries ' +
-        'live in that gap.** Proof-of-work is a puzzle whose solution is one hash to verify ' +
-        'and 2⁷⁰ hashes to find. Verifiable computation, puzzle-based rate limiting and every ' +
-        'commitment scheme are the same shape. The gap the demo measures is the product.',
-      '**P versus NP is a question about certificates, not about cleverness.** It asks ' +
-        'whether every problem whose answers can be checked quickly can also be *solved* ' +
-        'quickly. Almost nobody expects the answer to be yes, and the reason to care is not ' +
-        'the prize: it is that the question has resisted fifty years of attack, which is the ' +
-        'strongest practical evidence available that a particular problem in front of you is ' +
-        'not about to fall to a better algorithm.'
+        'out-of-range index, or a colouring one entry short.',
+      'Each has to be a rejection rather than a crash or an accidental accept, or "the verifier ' +
+        'accepted" stops meaning anything.',
+      'The demo feeds each verifier a corrupted certificate and a malformed one, and reports what ' +
+        'came back.'
     ];
+  }
+
+  function orientationClasses() {
+    return [
+      '**co-NP is the mirror and it is not known to be the same class.** There is no known short ' +
+        'certificate for "this formula is unsatisfiable", and the only general witness is a ' +
+        'resolution proof, which can be exponentially long.',
+      'That asymmetry is why a SAT solver answering SAT hands you an assignment you can check in a ' +
+        'second. A solver answering UNSAT hands you either a proof file measured in gigabytes or ' +
+        'nothing at all.',
+      '**NP-hard and NP-complete are different claims and the difference matters.** NP-hard means ' +
+        'everything in NP reduces to it. NP-complete means that *and* membership in NP.',
+      'The halting problem is NP-hard and is not in NP, so "NP-hard" alone carries no promise that ' +
+        'an answer can even be recognised, let alone found.',
+      '**The practical reading of NP is "easy to check, hard to find", and whole industries live ' +
+        'in that gap.** Proof-of-work is a puzzle whose solution is one hash to verify and 2⁷⁰ ' +
+        'hashes to find.',
+      'Verifiable computation, puzzle-based rate limiting and every commitment scheme are the same ' +
+        'shape. The gap the demo measures is the product.',
+      '**P versus NP is a question about certificates, not about cleverness.** It asks whether ' +
+        'every problem whose answers can be checked quickly can also be *solved* quickly.',
+      'Almost nobody expects the answer to be yes, and the reason to care is not the prize.',
+      'It is that the question has resisted fifty years of attack. That is the strongest practical ' +
+        'evidence available that a particular problem in front of you is not about to fall to a ' +
+        'better algorithm.'
+    ];
+  }
+
+  function orientation() {
+    return orientationDefinitions().concat(orientationClasses());
   }
 
   function config() {
@@ -117,13 +132,13 @@
       diagram: diagram(),
       insight: '**When somebody says a problem is NP-complete, the useful follow-up is "what is ' +
         'the certificate?"** The answer tells you what to build. If a certificate exists and is ' +
-        'short, you can always ship a *checker* even when you cannot ship a solver — and a ' +
-        'checker turns an unverifiable heuristic into an auditable one. That is the single ' +
-        'highest-value move available in this whole area and it costs an afternoon: let the ' +
-        'heuristic propose, let the verifier decide, and log every rejection. It converts "the ' +
-        'optimiser produced a schedule" into "the optimiser produced a schedule that satisfies ' +
-        'every stated constraint", which is a different sentence and the only one worth putting ' +
-        'in front of an operations team.'
+        'short, you can always ship a *checker* even when you cannot ship a solver. A checker ' +
+        'turns an unverifiable heuristic into an auditable one. That is the single highest-value ' +
+        'move available in this whole area, and it costs an afternoon. Let the heuristic propose, ' +
+        'let the verifier decide, and log every rejection. It converts "the optimiser produced a ' +
+        'schedule" into "the optimiser produced a schedule that satisfies every stated ' +
+        'constraint". That is a different sentence, and the only one worth putting in front of an ' +
+        'operations team.'
     };
   }
 
