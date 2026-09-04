@@ -147,13 +147,16 @@
         term: 'A columnar writer knows what a general compressor cannot see',
         plain: 'That the column is sorted timestamps, or five distinct labels, or a slow metric.',
         formal: 'the encoding is selected from the column’s type and statistics, before any entropy coding',
-        detail: 'A general-purpose compressor sees bytes and looks for repeats. A columnar format ' +
-          'knows the values are integers that ascend, or strings from a small set, or doubles ' +
-          'that barely move — and each of those facts selects a REPRESENTATION rather than coding ' +
-          'a bad one better. That is why a Parquet file with the right encodings beats gzip over ' +
-          'the same data by a wide margin while being faster to read.',
+        detail: [
+          'A general-purpose compressor sees bytes and looks for repeats.',
+          'A columnar format knows the values are integers that ascend, or strings from a small set, ' +
+            'or doubles that barely move. Each of those facts selects a REPRESENTATION rather than ' +
+            'coding a bad one better.',
+          'That is why a Parquet file with the right encodings beats gzip over the same data by a ' +
+            'wide margin, while being faster to read.'
+        ],
         example: 'The demo measures a sorted timestamp column at 1 080 bytes with delta plus ' +
-          'Simple-8b against 16 000 raw — 14.8×.'
+          'Simple-8b, against 16 000 raw. That is 14.8×.'
       },
       {
         term: 'Sorting the column is usually worth more than the encoding choice',
@@ -170,13 +173,16 @@
         },
         plain: 'The same encoder, the same values, a different order.',
         formal: 'delta coding a sorted column gives small gaps; delta coding a shuffled one gives large signed ones',
-        detail: 'This is the finding the whole section is arranged around, and it is measured as ' +
-          'a ratio between two runs of identical code. It is also why columnar formats care so ' +
-          'much about clustering keys, why a table sorted by the column you query is smaller as ' +
-          'well as faster, and why "which codec" is the second question. The first is whether ' +
-          'anything can be reordered without breaking a requirement.',
-        example: 'The demo measures 1 080 bytes sorted against 3 880 shuffled with delta plus ' +
-          'Simple-8b — a factor of 3.59.'
+        detail: [
+          'This is the finding the whole section is arranged around, and it is measured as a ratio ' +
+            'between two runs of identical code.',
+          'It is also why columnar formats care so much about clustering keys, and why a table ' +
+            'sorted by the column you query is smaller as well as faster.',
+          '"Which codec" is the second question. The first is whether anything can be reordered ' +
+            'without breaking a requirement.'
+        ],
+        example: 'With delta plus Simple-8b the demo measures 1 080 bytes sorted against 3 880 ' +
+          'shuffled. That is a factor of 3.59.'
       },
       {
         term: 'Zigzag is what makes delta coding safe for signed values',
@@ -184,10 +190,13 @@
         formal: 'zigzag(n) = 2n for n ≥ 0 and −2n − 1 otherwise',
         readAs: 'Zigzag maps a non-negative number to twice itself and a negative one to minus ' +
           'twice itself minus one.',
-        detail: 'Without it a two’s-complement −1 is all ones, and a variable-length integer coder ' +
-          'spends ten bytes on it. With it, −1 costs the same as 1. This matters the moment a ' +
-          'column is not perfectly ascending, which is most real data, and it is the reason ' +
-          'delta-plus-varint is the standard pairing rather than delta alone.',
+        detail: [
+          'Without it a two’s-complement −1 is all ones, and a variable-length integer coder spends ' +
+            'ten bytes on it.',
+          'With it, −1 costs the same as 1.',
+          'This matters the moment a column is not perfectly ascending, which is most real data. It ' +
+            'is the reason delta-plus-varint is the standard pairing rather than delta alone.'
+        ],
         example: 'The demo zigzags every delta before encoding, which is what keeps the shuffled ' +
           'column at 3 961 bytes rather than far more.'
       },
@@ -195,13 +204,16 @@
         term: 'One width for a block means one outlier costs the block',
         plain: 'Bit-packing sizes everything by the largest value present.',
         formal: 'width = max over the block of bitsFor(value); the cost is width × count bits',
-        detail: 'That is a real failure mode on data with occasional spikes, and it is what ' +
-          'frame-of-reference and Simple-8b exist to fix. Frame-of-reference subtracts a block ' +
-          'minimum and re-chooses the width per block, so an outlier costs one block; Simple-8b ' +
-          'chooses a width per 64-bit word, so an outlier costs one word. The trade is a small ' +
-          'per-block or per-word header against robustness to spikes.',
+        detail: [
+          'That is a real failure mode on data with occasional spikes, and it is what ' +
+            'frame-of-reference and Simple-8b exist to fix.',
+          'Frame-of-reference subtracts a block minimum and re-chooses the width per block, so an ' +
+            'outlier costs one block. Simple-8b chooses a width per 64-bit word, so an outlier ' +
+            'costs one word.',
+          'The trade is a small per-block or per-word header, against robustness to spikes.'
+        ],
         example: 'The demo measures the sorted timestamp column at 8 000 bytes bit-packed and ' +
-          '1 278 with frame-of-reference — the same deltas, differently framed.'
+          '1 278 with frame-of-reference. The same deltas, differently framed.'
       },
       {
         term: 'A dictionary turns strings into small integers, and its width is a logarithm',
@@ -209,11 +221,14 @@
         formal: 'width = ⌈log₂(cardinality)⌉ bits per value, plus the dictionary itself',
         readAs: 'Each code is as wide as the base-two logarithm of the number of distinct values, ' +
           'rounded up.',
-        detail: 'Below a few hundred distinct values a dictionary is close to free and the codes ' +
-          'run-length code beautifully once the column is sorted. Above that the dictionary ' +
-          'itself starts to dominate, and at cardinality equal to the row count it is pure ' +
-          'overhead. That is why a high-cardinality column — a UUID, a free-text field — is the ' +
-          'one that decides a columnar file’s size, and why nothing recovers it.',
+        detail: [
+          'Below a few hundred distinct values a dictionary is close to free, and the codes ' +
+            'run-length code beautifully once the column is sorted.',
+          'Above that the dictionary itself starts to dominate, and at cardinality equal to the row ' +
+            'count it is pure overhead.',
+          'That is why a high-cardinality column, such as a UUID or a free-text field, is the one ' +
+            'that decides a columnar file’s size. Nothing recovers it.'
+        ],
         example: 'The demo measures 516 bytes at two distinct values and 26 248 at four thousand, ' +
           'over the same 4 000 rows.'
       },
@@ -223,11 +238,13 @@
         formal: 'store the bits between the leading and trailing zeros of x ⊕ previous, with control bits for the common cases',
         readAs: 'Exclusive-or each value with the one before it, and store only the bits between ' +
           'the leading and trailing zeros of the result.',
-        detail: 'It works because IEEE 754 puts the sign, the exponent and the high mantissa bits ' +
-          '— the parts that do not change on a slow metric — at the top of the word. So the XOR ' +
-          'is nearly all zeros and the meaningful window is a handful of bits. The encoding is ' +
-          'lossless: every stored bit is a real bit of the original double, and the round-trip is ' +
-          'exact.',
+        detail: [
+          'It works because IEEE 754 puts the sign, the exponent and the high mantissa bits at the ' +
+            'top of the word. Those are the parts that do not change on a slow metric.',
+          'So the XOR is nearly all zeros, and the meaningful window is a handful of bits.',
+          'The encoding is lossless. Every stored bit is a real bit of the original double, and the ' +
+            'round-trip is exact.'
+        ],
         example: 'The demo verifies 6 of 6 series returning bit-for-bit, including one of uniform ' +
           'noise.'
       },
@@ -235,23 +252,28 @@
         term: 'Gorilla’s ratio is a fact about the mantissa, not about the encoder',
         plain: 'Store what you measured, not what the float type can hold.',
         formal: 'every low mantissa bit that moves widens the XOR window and costs a bit per sample',
-        detail: 'A gauge that reports to one decimal place, held in a double, carries fifty-odd ' +
-          'mantissa bits of noise — and every one of them defeats the XOR. Rounding to the ' +
-          'precision the metric actually has is not lossy in any meaningful sense; it is ' +
-          'declining to store digits that were never measured. The difference this makes is an ' +
-          'order of magnitude, which is far larger than any encoder choice.',
-        example: 'The demo measures the same random walk at 1.32× in full precision and 9.23× ' +
-          'rounded to 0.1 — and 59.93× rounded to whole units.'
+        detail: [
+          'A gauge that reports to one decimal place, held in a double, carries fifty-odd mantissa ' +
+            'bits of noise. Every one of them defeats the XOR.',
+          'Rounding to the precision the metric actually has is not lossy in any meaningful sense. ' +
+            'It is declining to store digits that were never measured.',
+          'The difference this makes is an order of magnitude, which is far larger than any encoder ' +
+            'choice.'
+        ],
+        example: 'The demo measures the same random walk at 1.32× in full precision, 9.23× rounded ' +
+          'to 0.1, and 59.93× rounded to whole units.'
       },
       {
         term: 'The floor and the ceiling are both worth measuring',
         plain: 'A constant series and a noise series bound what any encoder can do.',
         formal: 'a constant costs one control bit per value; uniform noise costs the full window every time',
-        detail: 'Reporting only the flattering case is how a time-series benchmark misleads. The ' +
-          'demo runs a constant series, a monotone counter, three walks at different precisions ' +
-          'and uniform noise — so a reader can see both ends and place their own data between ' +
-          'them. The noise row is the honest floor, and any encoder that appears to beat it on ' +
-          'genuinely random doubles is measuring something else.',
+        detail: [
+          'Reporting only the flattering case is how a time-series benchmark misleads.',
+          'The demo runs a constant series, a monotone counter, three walks at different precisions ' +
+            'and uniform noise. A reader can see both ends and place their own data between them.',
+          'The noise row is the honest floor, and any encoder that appears to beat it on genuinely ' +
+            'random doubles is measuring something else.'
+        ],
         example: 'The demo measures 62.02× on a constant series and 1.32× on the full-precision ' +
           'walk, with the noise series reported rather than omitted.'
       }

@@ -50,36 +50,48 @@
     };
   }
 
-  function orientation() {
+  function orientationIntegers() {
     return [
-      '**A general-purpose compressor sees bytes; a columnar writer knows what the column ' +
-        'means.** Sorted timestamps, low-cardinality labels, a metric that barely moves — each ' +
-        'of those facts is worth more than any amount of Huffman coding, because it selects a ' +
-        'representation rather than coding a bad one better.',
+      '**A general-purpose compressor sees bytes. A columnar writer knows what the column means.** ' +
+        'Sorted timestamps, low-cardinality labels and a metric that barely moves are each worth ' +
+        'more than any amount of Huffman coding.',
+      'Each of those facts selects a representation, rather than coding a bad one better.',
       '**Delta coding is the first move on anything ordered.** Sorted timestamps become gaps of ' +
-        'one to four; the demo measures the same column at 8 bytes per value raw and well under ' +
-        'one after delta plus a variable-length code.',
+        'one to four.',
+      'The demo measures the same column at 8 bytes per value raw, and well under one after delta ' +
+        'plus a variable-length code.',
       '**Zigzag is what makes delta safe for signed values.** Mapping −1 to 1 and 1 to 2 keeps ' +
-        'small magnitudes small, where a two’s-complement −1 would be all ones and cost ten ' +
-        'varint bytes.',
+        'small magnitudes small.',
+      'Without it a two’s-complement −1 would be all ones, and cost ten varint bytes.',
       '**Bit-packing is one width for the whole block, so a single outlier costs everything.** ' +
         'Frame-of-reference fixes it by subtracting a block minimum and re-choosing the width per ' +
-        'block; Simple-8b goes further and re-chooses per 64-bit word.',
-      '**Sorting the column is usually worth more than the encoding choice.** The demo runs the ' +
-        'identical encoder on the identical values, sorted and shuffled: the delta-based ' +
-        'encodings differ by nearly four times. That is why columnar formats care about ' +
-        'clustering keys, and it is the first thing to try.',
-      '**A dictionary plus run-length coding is the whole story for a label column** — and the ' +
-        'run count depends entirely on whether the column is sorted. The demo shows a ' +
-        'five-distinct-value column going from over sixteen hundred runs to five.',
-      '**Gorilla XORs consecutive doubles and stores only the bits between the leading and ' +
-        'trailing zeros.** It works because IEEE 754 puts the exponent and the high mantissa — ' +
-        'the parts that do not change on a slowly-varying metric — at the top of the word.',
-      '**Gorilla’s ratio is a fact about the mantissa, not about the encoder.** A metric stored ' +
-        'at full double precision compresses about 1.3×; the same metric rounded to the precision ' +
-        'it is genuinely measured at compresses over ten times. Store what you measured, not what ' +
-        'the float type can hold.'
+        'block.',
+      'Simple-8b goes further and re-chooses per 64-bit word.'
     ];
+  }
+
+  function orientationColumns() {
+    return [
+      '**Sorting the column is usually worth more than the encoding choice.** The demo runs the ' +
+        'identical encoder on the identical values, sorted and shuffled, and the delta-based ' +
+        'encodings differ by nearly four times.',
+      'That is why columnar formats care about clustering keys, and it is the first thing to try.',
+      '**A dictionary plus run-length coding is the whole story for a label column**, and the run ' +
+        'count depends entirely on whether the column is sorted.',
+      'The demo shows a five-distinct-value column going from over sixteen hundred runs to five.',
+      '**Gorilla XORs consecutive doubles and stores only the bits between the leading and ' +
+        'trailing zeros.** It works because IEEE 754 puts the exponent and the high mantissa at ' +
+        'the top of the word.',
+      'Those are the parts that do not change on a slowly-varying metric.',
+      '**Gorilla’s ratio is a fact about the mantissa, not about the encoder.** A metric stored at ' +
+        'full double precision compresses about 1.3×.',
+      'The same metric rounded to the precision it is genuinely measured at compresses over ten ' +
+        'times. Store what you measured, not what the float type can hold.'
+    ];
+  }
+
+  function orientation() {
+    return orientationIntegers().concat(orientationColumns());
   }
 
   function config() {
@@ -93,11 +105,11 @@
       diagram: diagram(),
       insight: '**Sorting before encoding is often worth more than the encoding choice, which is ' +
         'why columnar formats care so much about clustering keys.** The Gorilla rows carry a ' +
-        'second habit worth taking away: check what precision your data actually has before ' +
+        'second habit worth taking away. Check what precision your data actually has before ' +
         'storing it. A gauge that reports to one decimal place, held in a double, has fifty-odd ' +
-        'mantissa bits of noise in it — and every one of those bits defeats the XOR window, ' +
-        'turns a ten-times ratio into a one-point-three, and costs storage forever. Rounding to ' +
-        'the measured precision is not lossy in any meaningful sense; it is declining to store ' +
+        'mantissa bits of noise in it. Every one of those bits defeats the XOR window, turns a ' +
+        'ten-times ratio into a one-point-three, and costs storage forever. Rounding to the ' +
+        'measured precision is not lossy in any meaningful sense. It is declining to store ' +
         'digits that were never measured.'
     };
   }
