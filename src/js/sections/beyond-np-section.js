@@ -83,49 +83,67 @@
     };
   }
 
-  function orientation() {
+  function orientationQbf() {
     return [
       '**A quantified Boolean formula is the same clauses with a quantifier in front of every ' +
-        'variable, and asking whether the sentence is true.** ∃ for the variables you choose, ' +
-        '∀ for the ones an adversary chooses, in the order the prefix names. With every ' +
-        'quantifier existential it is exactly SAT. With ∀ anywhere it is a different problem, ' +
-        'and the demo shows the answer changing while the clauses do not.',
-      '**QBF is the canonical PSPACE-complete problem, and the reason is that it is a game.** ' +
-        'The existential player picks the ∃ variables, the universal player picks the ∀ ones, ' +
-        'they alternate, and the existential player wins when the clauses end up satisfied. ' +
-        'Deciding who wins a game is the shape of PSPACE-completeness — generalised chess, go ' +
-        'and geography are all in this family for the same reason.',
+        'variable, and asking whether the sentence is true.** ∃ marks the variables you choose ' +
+        'and ∀ the ones an adversary chooses, in the order the prefix names.',
+      'With every quantifier existential it is exactly SAT.',
+      'With ∀ anywhere it is a different problem, and the demo shows the answer changing while ' +
+        'the clauses do not.',
+      '**QBF is the canonical PSPACE-complete problem, and the reason is that it is a game.** The ' +
+        'existential player picks the ∃ variables and the universal player picks the ∀ ones, ' +
+        'alternating.',
+      'The existential player wins when the clauses end up satisfied.',
+      'Deciding who wins a game is the shape of PSPACE-completeness, and generalised chess, go and ' +
+        'geography are all in this family for the same reason.',
       '**The certificate is what changed, and it is the whole practical difference.** A ' +
-        'satisfiable SAT instance has a certificate one line long. A true QBF sentence with k ' +
-        'universal variables has, in general, no certificate shorter than a STRATEGY: a ' +
-        'function from the opponent’s moves to yours, which takes 2ᵏ entries to write down. ' +
-        '"Easy to check" stops being available, and that is why the class is different rather ' +
-        'than merely larger.',
-      '**Expanding the quantifiers away is correct and does not help.** Conjoining a copy of ' +
-        'the matrix for every assignment of the universal variables produces one ordinary CNF ' +
-        'with the same answer — the demo builds it — and it doubles in size per ∀ variable. ' +
-        'Twenty universals is a million copies. That is the honest reason "just call a SAT ' +
-        'solver" is not a strategy for QBF, and why QBF solvers are their own field.',
-      '**Σ₂ is one alternation and it is the shape of an enormous number of real problems.** ' +
-        '"Find the smallest configuration that no adversary can break" is ∃ config ∀ attack. ' +
-        'So is "find the shortest program equivalent to this one", and "find a schedule ' +
-        'robust to every failure in this set". These are qualitatively harder than plain ' +
-        'optimisation, not just bigger, and recognising the ∀ is what tells you so.',
-      '**The polynomial hierarchy is that pattern repeated.** Σₖ is k alternating blocks ' +
-        'starting with ∃; Πₖ starts with ∀. Each level is believed strictly larger than the ' +
-        'last, and if any two adjacent levels are equal the whole hierarchy collapses to that ' +
-        'point. P = NP would collapse it entirely, which is one more reason to doubt it.',
-      '**#P is counting rather than deciding, and it is harder in a way that is easy to miss.** ' +
-        'Counting satisfying assignments is #P-complete even for problems whose DECISION ' +
-        'version is in P — counting perfect matchings in a bipartite graph is #P-complete, ' +
-        'while FINDING one is polynomial. Any time a requirement says "how many" rather than ' +
-        '"is there", check whether the counting version has jumped class.',
-      '**EXPTIME is the one place the tower is known to separate.** The time hierarchy theorem ' +
-        'proves P ≠ EXPTIME, so at least one containment between them is strict — and nobody ' +
-        'knows which. That single proved separation is the whole of what is settled about this ' +
-        'diagram, which is worth remembering the next time a containment picture is presented ' +
-        'as established fact.'
+        'satisfiable SAT instance has a certificate one line long.',
+      'A true QBF sentence with k universal variables has, in general, no certificate shorter than ' +
+        'a STRATEGY: a function from the opponent’s moves to yours, which takes 2ᵏ entries to ' +
+        'write down.',
+      '"Easy to check" stops being available, and that is why the class is different rather than ' +
+        'merely larger.',
+      '**Expanding the quantifiers away is correct and does not help.** Conjoining a copy of the ' +
+        'matrix for every assignment of the universal variables produces one ordinary CNF with the ' +
+        'same answer, and the demo builds it.',
+      'It doubles in size per ∀ variable. Twenty universals is a million copies.',
+      'That is the honest reason "just call a SAT solver" is not a strategy for QBF, and why QBF ' +
+        'solvers are their own field.'
     ];
+  }
+
+  function orientationHierarchy() {
+    return [
+      '**Σ₂ is one alternation and it is the shape of an enormous number of real problems.** ' +
+        '"Find the smallest configuration that no adversary can break" is ∃ config ∀ attack.',
+      'So is "find the shortest program equivalent to this one", and "find a schedule robust to ' +
+        'every failure in this set".',
+      'These are qualitatively harder than plain optimisation, not just bigger, and recognising ' +
+        'the ∀ is what tells you so.',
+      '**The polynomial hierarchy is that pattern repeated.** Σₖ is k alternating blocks starting ' +
+        'with ∃, and Πₖ starts with ∀.',
+      'Each level is believed strictly larger than the last, and if any two adjacent levels are ' +
+        'equal the whole hierarchy collapses to that point.',
+      'P = NP would collapse it entirely, which is one more reason to doubt it.',
+      '**#P is counting rather than deciding, and it is harder in a way that is easy to miss.** ' +
+        'Counting satisfying assignments is #P-complete even for problems whose DECISION version ' +
+        'is in P.',
+      'Counting perfect matchings in a bipartite graph is #P-complete, while FINDING one is ' +
+        'polynomial.',
+      'Any time a requirement says "how many" rather than "is there", check whether the counting ' +
+        'version has jumped class.',
+      '**EXPTIME is the one place the tower is known to separate.** The time hierarchy theorem ' +
+        'proves P ≠ EXPTIME, so at least one containment between them is strict, and nobody knows ' +
+        'which.',
+      'That single proved separation is the whole of what is settled about this diagram.',
+      'It is worth remembering the next time a containment picture is presented as established ' +
+        'fact.'
+    ];
+  }
+
+  function orientation() {
+    return orientationQbf().concat(orientationHierarchy());
   }
 
   function config() {
@@ -138,15 +156,15 @@
       },
       diagram: diagram(),
       insight: '**Look for the ∀ in the requirement.** "Pick a configuration" is an optimisation ' +
-        'problem and there is a large toolbox for it. "Pick a configuration that survives every ' +
+        'problem, and there is a large toolbox for it. "Pick a configuration that survives every ' +
         'input in this set" has an adversary inside it, and no amount of solver tuning turns the ' +
-        'second into the first — it is a level up the hierarchy, and the practical consequences ' +
-        'are immediate: no short certificate to log, no incremental warm start between related ' +
-        'queries, and a solver whose progress you cannot report because "how much of the ' +
-        'adversary space is left" is not a number it holds. The engineering move is almost always ' +
-        'to bound the adversary explicitly — enumerate the failure set, fix a threat model, cap ' +
-        'the horizon — which converts a ∀ into a finite conjunction and puts the problem back in ' +
-        'NP where the tools live.'
+        'second into the first. It is a level up the hierarchy, and the practical consequences ' +
+        'are immediate. There is no short certificate to log, and no incremental warm start ' +
+        'between related queries. The solver’s progress cannot be reported either, because "how ' +
+        'much of the adversary space is left" is not a number it holds. The engineering move is ' +
+        'almost always to bound the adversary explicitly: enumerate the failure set, fix a threat ' +
+        'model, cap the horizon. That converts a ∀ into a finite conjunction and puts the problem ' +
+        'back in NP where the tools live.'
     };
   }
 

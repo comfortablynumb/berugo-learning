@@ -12,12 +12,14 @@
         formal: '∃x₁ ∀x₂ ∃x₃ … φ(x₁, x₂, x₃, …), with φ in CNF',
         readAs: 'There exists x-one such that for all x-two there exists x-three, and so on, ' +
           'making the clause set true.',
-        detail: 'With every quantifier existential the sentence is exactly SAT, so QBF contains ' +
-          'SAT as a special case. Putting a single ∀ anywhere changes it into a different ' +
-          'question, and the demo shows the answer flipping while the clauses stay byte for ' +
-          'byte the same. That is the cleanest possible demonstration that PSPACE is a different ' +
-          'question rather than a bigger one — nothing about the instance grew, and the problem ' +
-          'became harder.',
+        detail: [
+          'With every quantifier existential the sentence is exactly SAT, so QBF contains SAT as a ' +
+            'special case.',
+          'Putting a single ∀ anywhere changes it into a different question, and the demo shows the ' +
+            'answer flipping while the clauses stay byte for byte the same.',
+          'That is the cleanest possible demonstration that PSPACE is a different question rather ' +
+            'than a bigger one. Nothing about the instance grew, and the problem became harder.'
+        ],
         example: 'At 10 variables and 14 clauses the demo reports TRUE for the all-existential ' +
           'prefix and FALSE for three of the four prefixes containing a ∀.'
       },
@@ -35,28 +37,33 @@
         },
         plain: 'The existential player picks the ∃ variables, the universal player picks the ∀ ones, alternating.',
         formal: 'the sentence is true exactly when the existential player has a winning strategy in the move order the prefix names',
-        detail: 'Deciding who wins a game is the canonical shape of a PSPACE-complete problem, ' +
-          'and generalised chess, go and geography are all in this family for the same reason. ' +
-          'The recursion that evaluates a QBF is exactly a minimax search: take the OR over an ' +
-          '∃ level and the AND over a ∀ level. Space is what bounds it — the recursion is only ' +
-          'as deep as the prefix — while time is exponential, which is the trade PSPACE names.',
+        detail: [
+          'Deciding who wins a game is the canonical shape of a PSPACE-complete problem, and ' +
+            'generalised chess, go and geography are all in this family for the same reason.',
+          'The recursion that evaluates a QBF is exactly a minimax search. Take the OR over an ∃ ' +
+            'level and the AND over a ∀ level.',
+          'Space is what bounds it, because the recursion is only as deep as the prefix. Time is ' +
+            'exponential, which is the trade PSPACE names.'
+        ],
         example: 'The demo evaluates ∀x ∃y matching games as trees of 6, 19, 51 and 127 nodes ' +
           'for one to four rounds.'
       },
       {
         term: 'The certificate is what changed, and it is now a strategy',
-        plain: 'A true QBF sentence has no short witness; the witness is a function of the opponent’s moves.',
+        plain: 'A true QBF sentence has no short witness. The witness is a function of the opponent’s moves.',
         formal: 'a strategy for k universal variables is a map from 2ᵏ opponent move sequences to your replies',
         readAs: 'A strategy for k universal variables is a table with two-to-the-k entries, one ' +
           'per sequence of opponent moves.',
-        detail: 'This is the practical content of the class jump and it is easy to state: a ' +
-          'satisfiable SAT instance hands you one line you can check in microseconds, and a true ' +
-          'QBF sentence hands you a table exponential in the number of universal variables. ' +
-          '"Easy to check" stops being available, so every design that depended on it — logging ' +
-          'the certificate, auditing the answer, warm-starting from a previous one — has to be ' +
-          'redesigned rather than scaled.',
+        detail: [
+          'This is the practical content of the class jump, and it is easy to state.',
+          'A satisfiable SAT instance hands you one line you can check in microseconds. A true QBF ' +
+            'sentence hands you a table exponential in the number of universal variables.',
+          '"Easy to check" stops being available. So every design that depended on it — logging the ' +
+            'certificate, auditing the answer, warm-starting from a previous one — has to be ' +
+            'redesigned rather than scaled.'
+        ],
         example: 'The demo’s four-round matching game is TRUE and its winning strategy has 16 ' +
-          'entries; the same clauses with the prefix reversed are FALSE and have none.'
+          'entries. The same clauses with the prefix reversed are FALSE and have none.'
       },
       {
         term: 'Expanding the quantifiers is correct and does not help',
@@ -64,12 +71,15 @@
         formal: 'the expansion has 2ᵘ copies and 2ᵘ·m clauses for u universal variables and m clauses',
         readAs: 'The expansion has two-to-the-u copies of the matrix and that many times m ' +
           'clauses, for u universal variables and m clauses.',
-        detail: 'The construction is straightforward and exactly right: fix the universal ' +
-          'variables to each of their assignments in turn, give each copy its own fresh ' +
-          'existential variables, and conjoin. The result is one ordinary CNF with the same ' +
-          'answer, and it doubles in size for every ∀ added. Twenty universals is a million ' +
-          'copies. That is the honest reason "just call a SAT solver" is not a strategy for QBF, ' +
-          'and why QBF solvers are a separate field with their own techniques.',
+        detail: [
+          'The construction is straightforward and exactly right. Fix the universal variables to ' +
+            'each of their assignments in turn, give each copy its own fresh existential variables, ' +
+            'and conjoin.',
+          'The result is one ordinary CNF with the same answer, and it doubles in size for every ∀ ' +
+            'added. Twenty universals is a million copies.',
+          'That is the honest reason "just call a SAT solver" is not a strategy for QBF, and why QBF ' +
+            'solvers are a separate field with their own techniques.'
+        ],
         example: 'The demo’s five prefixes expand to 14, 152, 208, 78 and 264 clauses from the ' +
           'same 14-clause matrix.'
       },
@@ -77,14 +87,18 @@
         term: 'One alternation is Σ₂, and it is the shape of a great many real problems',
         plain: '"Find a configuration no adversary can break" is exists-then-forall.',
         formal: 'Σ₂ᴾ = { L : x ∈ L ⟺ ∃y ∀z, V(x, y, z) accepts }, with V polynomial-time',
-        readAs: 'The second existential level of the hierarchy holds the languages where x ' +
-          'belongs exactly when there is a y such that for every z a polynomial verifier accepts.',
-        detail: 'Robust optimisation, minimum equivalent circuit, and "the shortest program with ' +
-          'this behaviour" are all this shape. The practical difference from plain optimisation ' +
-          'is not the running time: it is that a candidate answer cannot be checked without ' +
-          'solving a co-NP problem, so there is no cheap certificate and no incremental progress ' +
-          'report. Recognising the ∀ in a requirement is what tells you which of the two you are ' +
-          'in, and it is usually visible in the sentence people say out loud.',
+        readAs: 'The second existential level of the hierarchy holds a particular kind of ' +
+          'language. A string belongs exactly when there is a y such that for every z a ' +
+          'polynomial verifier accepts.',
+        detail: [
+          'Robust optimisation, minimum equivalent circuit, and "the shortest program with this ' +
+            'behaviour" are all this shape.',
+          'The practical difference from plain optimisation is not the running time. A candidate ' +
+            'answer cannot be checked without solving a co-NP problem, so there is no cheap ' +
+            'certificate and no incremental progress report.',
+          'Recognising the ∀ in a requirement is what tells you which of the two you are in, and it ' +
+            'is usually visible in the sentence people say out loud.'
+        ],
         example: 'The demo’s Σ₂ row is the EA prefix: 5 universal variables, FALSE, and 223 ' +
           'evaluation nodes where the all-existential prefix took 37.'
       },
@@ -93,14 +107,17 @@
         plain: 'k alternating quantifier blocks give the k-th level, and equality of two adjacent levels collapses everything above.',
         formal: 'if Σₖ = Πₖ for any k then PH = Σₖ; P = NP collapses the hierarchy to P',
         readAs: 'If the k-th existential level equals the k-th universal level then the whole ' +
-          'hierarchy collapses to that level, and P equalling NP would collapse it all the way ' +
-          'down to P.',
-        detail: 'The hierarchy is believed to be strict at every level, and the collapse property ' +
-          'is what makes that belief load-bearing: a great many results are stated as "unless ' +
-          'the polynomial hierarchy collapses", which is a stronger hypothesis than P ≠ NP and ' +
-          'is therefore a stronger reason to stop looking for an algorithm. It is also why P = ' +
-          'NP is regarded as so implausible — it would flatten an entire infinite tower, not ' +
-          'just one containment.',
+          'hierarchy collapses to that level. P equalling NP would collapse it all the way down ' +
+          'to P.',
+        detail: [
+          'The hierarchy is believed to be strict at every level, and the collapse property is what ' +
+            'makes that belief load-bearing.',
+          'A great many results are stated as "unless the polynomial hierarchy collapses". That is a ' +
+            'stronger hypothesis than P ≠ NP, and therefore a stronger reason to stop looking for ' +
+            'an algorithm.',
+          'It is also why P = NP is regarded as so implausible. It would flatten an entire infinite ' +
+            'tower, not just one containment.'
+        ],
         example: 'The demo sweeps prefixes with 0, 1, 2 and 3 alternations, showing the answer ' +
           'and the evaluation cost changing with the alternation count rather than with size.'
       },
@@ -108,12 +125,15 @@
         term: 'Counting is harder than deciding, and the gap can be enormous',
         plain: '#P asks how many certificates there are, and it is hard even for easy problems.',
         formal: 'counting perfect matchings in a bipartite graph is #P-complete, while finding one is polynomial',
-        detail: 'That single example is the one to remember, because it separates the two ' +
-          'questions in a case where the decision version is not merely easy but classical: ' +
-          'Hopcroft–Karp finds a perfect matching in polynomial time and Valiant proved counting ' +
-          'them is as hard as anything in #P. Toda’s theorem then places the entire polynomial ' +
-          'hierarchy inside P with one call to a #P oracle. Any requirement that says "how many" ' +
-          'rather than "is there" deserves a check that the class did not jump.',
+        detail: [
+          'That single example is the one to remember, because it separates the two questions in a ' +
+            'case where the decision version is not merely easy but classical.',
+          'Hopcroft–Karp finds a perfect matching in polynomial time, and Valiant proved counting ' +
+            'them is as hard as anything in #P.',
+          'Toda’s theorem then places the entire polynomial hierarchy inside P with one call to a #P ' +
+            'oracle. Any requirement that says "how many" rather than "is there" deserves a check ' +
+            'that the class did not jump.'
+        ],
         example: 'The demo’s class table lists #P with "none — the answer is a number, not a ' +
           'witness" in the certificate column, which is what makes it different in kind.'
       },
@@ -123,12 +143,14 @@
         formal: 'the time hierarchy theorem gives P ⊊ EXPTIME, so at least one containment between them is strict',
         readAs: 'The time hierarchy theorem gives P strictly inside EXPTIME, so at least one of ' +
           'the containments between them must be strict.',
-        detail: 'Everything else in the containment diagram — P inside NP, NP inside PH, PH ' +
-          'inside PSPACE, PSPACE inside EXPTIME — is known but not known to be strict. The time ' +
-          'hierarchy theorem, which is a diagonalisation argument two pages long, is the whole of ' +
-          'what is settled. That is worth remembering the next time a containment picture is ' +
-          'presented as established fact: the picture is established, and almost none of its ' +
-          'gaps are.',
+        detail: [
+          'Everything else in the containment diagram is known but not known to be strict. That ' +
+            'covers P inside NP, NP inside PH, PH inside PSPACE, and PSPACE inside EXPTIME.',
+          'The time hierarchy theorem, which is a diagonalisation argument two pages long, is the ' +
+            'whole of what is settled.',
+          'That is worth remembering the next time a containment picture is presented as established ' +
+            'fact. The picture is established, and almost none of its gaps are.'
+        ],
         example: 'The demo’s class table marks EXPTIME as "provably not polynomial", and it is ' +
           'the only row that can say so.'
       }
