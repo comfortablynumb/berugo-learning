@@ -13,12 +13,16 @@
         readAs: 'A node\'s bounding rectangle is the union of its children\'s — the smallest box holding all ' +
           'of them. Unlike a k-d tree, sibling boxes are allowed to overlap, and that overlap is what ' +
           'forces a query down more than one path.',
-        detail: 'This is the one structural difference from every other index in the milestone, and every ' +
-          'property of an R-tree follows from it. A quadtree or a k-d tree partitions space, so a point lies in ' +
-          'exactly one leaf and a point query follows one path. An R-tree covers space, so a point can lie inside ' +
-          'several MBRs and a point query may have to follow several paths at once. That makes the height almost ' +
-          'irrelevant and the overlap decisive, which is why the split heuristic - the thing that creates the ' +
-          'overlap - is the whole design.',
+        detail: [
+          'This is the one structural difference from every other index in the milestone, and every ' +
+            'property of an R-tree follows from it.',
+          'A quadtree or a k-d tree partitions space, so a point lies in exactly one leaf and a ' +
+            'point query follows one path.',
+          'An R-tree covers space, so a point can lie inside several MBRs and a point query may ' +
+            'have to follow several paths at once.',
+          'That makes the height almost irrelevant and the overlap decisive, which is why the split ' +
+            'heuristic - the thing that creates the overlap - is the whole design.'
+        ],
         example: '20 000 rectangles: the same height 6 gives 2 250.07 candidates per query at 113.69% overlap and 239.13 at 24.49%.'
       },
       {
@@ -39,12 +43,16 @@
         readAs: 'The Π is a product rather than a sum: multiply together, level by level, one plus how much ' +
           'the boxes overlap. Overlap compounds down the tree, which is why a small amount high up ' +
           'costs so much.',
-        detail: 'Two trees can hold the same rectangles at the same height with the same fan-out and differ by an ' +
-          'order of magnitude in query cost, which is not something the usual "O(log n)" summary can express. ' +
-          'Overlap accumulates multiplicatively down the levels, so a small excess near the root is far more ' +
-          'expensive than the same excess at the leaves. Measuring the total sibling intersection area as a ' +
-          'fraction of the covered area gives one number that ranks the heuristics correctly, and it ranks them ' +
-          'in the same order as the measured query cost.',
+        detail: [
+          'Two trees can hold the same rectangles at the same height with the same fan-out and ' +
+            'differ by an order of magnitude in query cost.',
+          'That is not something the usual "O(log n)" summary can express.',
+          'Overlap accumulates multiplicatively down the levels, so a small excess near the root is ' +
+            'far more expensive than the same excess at the leaves.',
+          'Measuring the total sibling intersection area as a fraction of the covered area gives ' +
+            'one number that ranks the heuristics correctly. It ranks them in the same order as the ' +
+            'measured query cost.'
+        ],
         example: 'first-fit 113.69% overlap → 356.04 nodes visited; R* 24.49% → 36.69. Same height, same data.'
       },
       {
@@ -53,34 +61,47 @@
         formal: 'argmin area(MBR(child) ∪ r) − area(MBR(child)), ties to smaller area',
         readAs: '"argmin" means "the child that minimises this", not the value itself. Choose whichever child ' +
           'grows least when the new rectangle is added, and break ties towards the smaller box.',
-        detail: 'The tie-break is not cosmetic. Enlargement is frequently zero for several children at once - any ' +
-          'child already containing the new rectangle enlarges by nothing - and without a second criterion the ' +
-          'first such child wins every time, so one node grows fat and the tree skews. Choosing the smallest ' +
-          'among the zero-enlargement candidates keeps the rectangles balanced by area, which is what keeps the ' +
-          'overlap down at the next level.',
+        detail: [
+          'The tie-break is not cosmetic.',
+          'Enlargement is frequently zero for several children at once, because any child already ' +
+            'containing the new rectangle enlarges by nothing.',
+          'Without a second criterion the first such child wins every time, so one node grows fat ' +
+            'and the tree skews.',
+          'Choosing the smallest among the zero-enlargement candidates keeps the rectangles ' +
+            'balanced by area, which is what keeps the overlap down at the next level.'
+        ],
         example: 'Both quadratic and R* use this rule; they differ only in what happens when the chosen node overflows.'
       },
       {
         term: 'The split heuristic is the design',
         plain: 'When a node overflows, how you divide its entries decides how much the two halves overlap forever after.',
         formal: 'linear O(M), quadratic O(M²), R* O(M log M) over 4 sorted orders',
-        detail: 'Guttman offered linear and quadratic and argued the quadratic pick was worth its extra cost; the ' +
-          'R*-tree replaced both with a two-stage rule - choose the axis by the smallest total perimeter, then ' +
-          'the cut on that axis by the smallest overlap. Measured on 20 000 rectangles the ranking is not the one ' +
-          'the folklore gives: R* is decisively best, and linear very slightly beats quadratic. That is worth ' +
-          'knowing before spending O(M²) on a heuristic that is not buying anything on your data.',
+        detail: [
+          'Guttman offered linear and quadratic, and argued the quadratic pick was worth its extra ' +
+            'cost.',
+          'The R*-tree replaced both with a two-stage rule: choose the axis by the smallest total ' +
+            'perimeter, then the cut on that axis by the smallest overlap.',
+          'Measured on 20 000 rectangles the ranking is not the one the folklore gives. R* is ' +
+            'decisively best, and linear very slightly beats quadratic.',
+          'That is worth knowing before spending O(M²) on a heuristic that is not buying anything ' +
+            'on your data.'
+        ],
         example: 'Overlap ratio: first-fit 113.69%, linear 57.67%, quadratic 59.58%, R* 24.49%.'
       },
       {
         term: 'Forced reinsertion undoes an early mistake',
         plain: 'On the first overflow, take the entries furthest from the node\'s centre out and insert them again from the root.',
         formal: 'remove the outer 30% by centre distance, reinsert closest-first, at most once per insertion',
-        detail: 'A split can only divide the entries a node happens to hold, so a rectangle placed badly early - ' +
-          'when the tree was small and every choice looked equal - stays badly placed and is split around forever. ' +
-          'Reinsertion is a chance to reconsider with the tree as it is now, and it is where most of the R*-tree\'s ' +
-          'advantage comes from. It must be limited to once per insertion or the recursion does not terminate, ' +
-          'and it must be queued rather than run mid-descent, or a split can replace a node the outer recursion ' +
-          'is still holding.',
+        detail: [
+          'A split can only divide the entries a node happens to hold. A rectangle placed badly ' +
+            'early - when the tree was small and every choice looked equal - stays badly placed and ' +
+            'is split around forever.',
+          'Reinsertion is a chance to reconsider with the tree as it is now, and it is where most ' +
+            'of the R*-tree\'s advantage comes from.',
+          'It must be limited to once per insertion, or the recursion does not terminate.',
+          'It must also be queued rather than run mid-descent, or a split can replace a node the ' +
+            'outer recursion is still holding.'
+        ],
         example: 'R* reaches 24.49% overlap where the same split rule without reinsertion cannot get near it.'
       },
       {
@@ -90,34 +111,47 @@
         readAs: 'Sort-tile-recursive packing: cut the points into that many vertical slices, then fill each ' +
           'slice with full pages. Bulk-loading this way gives far less overlap than inserting one at a ' +
           'time.',
-        detail: 'Incremental insertion leaves pages about 70% full because every split makes two half-empty ' +
-          'nodes, so the tree is taller than it needs to be and every query pays for the extra level. A ' +
-          'sort-tile-recursive build fills pages to capacity and produces near-disjoint tiles rather than ' +
-          'whatever the insertion order happened to leave. It also breaks Guttman\'s minimum-fill invariant on ' +
-          'purpose - the last page of each slice is short - so a test asserting that invariant against an STR ' +
-          'tree is checking the wrong structure.',
+        detail: [
+          'Incremental insertion leaves pages about 70% full, because every split makes two ' +
+            'half-empty nodes.',
+          'The tree is therefore taller than it needs to be, and every query pays for the extra ' +
+            'level.',
+          'A sort-tile-recursive build fills pages to capacity and produces near-disjoint tiles ' +
+            'rather than whatever the insertion order happened to leave.',
+          'It also breaks Guttman\'s minimum-fill invariant on purpose - the last page of each ' +
+            'slice is short. A test asserting that invariant against an STR tree is checking the ' +
+            'wrong structure.'
+        ],
         example: 'Incremental: 3 186 leaves, 69.7% full, height 6. STR: 2 254 leaves, 98.6% full, height 5.'
       },
       {
         term: 'Rebuild rather than maintain',
         plain: 'A bulk-loaded tree beats an incrementally built one so reliably that most systems rebuild periodically.',
         formal: 'STR: 28.43 nodes visited per query against 85.32 for incremental quadratic',
-        detail: 'The measured gap is a factor of three on query cost and it does not close as the tree ages - it ' +
-          'widens, because every insertion adds overlap and nothing removes it. Against that, a rebuild is O(n ' +
-          'log n) and takes the index offline or needs a shadow copy. Systems resolve it the same way they ' +
-          'resolve every other version of this question: rebuild during a maintenance window, or keep a small ' +
-          'incremental delta over a large bulk-loaded base and merge on a schedule.',
+        detail: [
+          'The measured gap is a factor of three on query cost, and it does not close as the tree ' +
+            'ages.',
+          'It widens, because every insertion adds overlap and nothing removes it.',
+          'Against that, a rebuild is O(n log n) and takes the index offline or needs a shadow copy.',
+          'Systems resolve it the same way they resolve every other version of this question. ' +
+            'Rebuild during a maintenance window, or keep a small incremental delta over a large ' +
+            'bulk-loaded base and merge on a schedule.'
+        ],
         example: 'STR answers with 28.43 node visits and 247.48 candidates; R* with 36.69 and 239.13; quadratic with 85.32 and 547.07.'
       },
       {
         term: 'This is the spatial index databases actually ship',
         plain: 'PostGIS, SQLite, Oracle and SQL Server all index geometry with an R-tree or a close relative.',
         formal: 'GiST over R-tree operators in PostgreSQL; the R*Tree virtual table in SQLite',
-        detail: 'The reason is that an R-tree indexes *extents* rather than points, which is what geometry ' +
-          'actually is, and that it is a paged structure with a controllable fan-out - a node is a disk page, and ' +
-          'the fan-out is chosen so it fills one. A quadtree over a bounded domain would need the domain fixed at ' +
-          'schema time; a k-d tree cannot be updated in place. Neither objection applies to an R-tree, and both ' +
-          'are fatal for a database.',
+        detail: [
+          'The reason is that an R-tree indexes *extents* rather than points, which is what ' +
+            'geometry actually is.',
+          'It is also a paged structure with a controllable fan-out: a node is a disk page, and the ' +
+            'fan-out is chosen so it fills one.',
+          'A quadtree over a bounded domain would need the domain fixed at schema time, and a k-d ' +
+            'tree cannot be updated in place.',
+          'Neither objection applies to an R-tree, and both are fatal for a database.'
+        ],
         example: 'Fan-out 9 here for legibility; a real 8 KB page holds on the order of 100 entries and gives height 4 for 10⁸ rows.'
       }
     ],

@@ -33,21 +33,24 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'An R-tree *covers* space rather than partitioning it: every node stores the smallest rectangle ' +
-          'containing its children, and two siblings are allowed to overlap. That single difference decides ' +
-          'everything. A quadtree or a k-d tree sends a point query down one path; an R-tree may have to follow ' +
-          'several, so the height is nearly irrelevant and the overlap is decisive — and the split heuristic, ' +
-          'which is what creates the overlap, is the whole design.',
-        'Four heuristics on the same 20 000 rectangles at the same fan-out produce the same height 6 and a 9.7× ' +
-          'range in node visits, ordered exactly by overlap: 113.69% for a naive first-fit cut, 57.67% linear, ' +
-          '59.58% quadratic and 24.49% for R*. Note the pair in the middle. Guttman argued the O(M²) quadratic ' +
-          'pick was worth its cost; on this data the O(M) linear pick beats it on both overlap and query cost, ' +
-          'which is worth checking on your own rectangles before paying for it.',
-        'Bulk loading removes the splits rather than improving them. Sort-tile-recursive packing fills pages to ' +
-          '98.6% against an incremental build\'s 69.7%, so the tree is one level shorter, and it answers the ' +
-          'same queries in 28.43 node visits against 85.32 — a factor of three, and effectively a draw with a ' +
-          'properly tuned R*. Since every insertion adds overlap and nothing removes it, most systems schedule ' +
-          'a rebuild rather than tune the split further.'
+        'An R-tree *covers* space rather than partitioning it. Every node stores the smallest ' +
+          'rectangle containing its children, and two siblings are allowed to overlap. That single ' +
+          'difference decides everything. A quadtree or a k-d tree sends a point query down one ' +
+          'path; an R-tree may have to follow several. So the height is nearly irrelevant and the ' +
+          'overlap is decisive, and the split heuristic — which is what creates the overlap — is ' +
+          'the whole design.',
+        'Four heuristics on the same 20 000 rectangles at the same fan-out produce the same height ' +
+          '6 and a 9.7× range in node visits, ordered exactly by overlap. A naive first-fit cut ' +
+          'gives 113.69%, linear 57.67%, quadratic 59.58% and R* 24.49%. Note the pair in the ' +
+          'middle. Guttman argued the O(M²) quadratic pick was worth its cost. On this data the ' +
+          'O(M) linear pick beats it on both overlap and query cost, which is worth checking on ' +
+          'your own rectangles before paying for it.',
+        'Bulk loading removes the splits rather than improving them. Sort-tile-recursive packing ' +
+          'fills pages to 98.6% against an incremental build\'s 69.7%, so the tree is one level ' +
+          'shorter. It answers the same queries in 28.43 node visits against 85.32 — a factor of ' +
+          'three, and effectively a draw with a properly tuned R*. Since every insertion adds ' +
+          'overlap and nothing removes it, most systems schedule a rebuild rather than tune the ' +
+          'split further.'
       ],
       demo: { title: 'Interactive demo — five builds, one rectangle set', markup: root.RTreesTemplate.render() },
       diagram: {
@@ -68,11 +71,12 @@
           '    Q --> B'
         ].join('\n')
       },
-      insight: 'R-tree query cost is governed by MBR overlap, not by height — two trees with the same data, the ' +
-        'same fan-out and the same height can differ tenfold. And bulk loading beats incremental insertion so ' +
-        'consistently that most systems rebuild rather than maintain: insertion adds overlap monotonically, ' +
-        'nothing removes it, and a periodic O(n log n) rebuild is cheaper than the accumulated tax. If you are ' +
-        'tuning a split heuristic before you have measured the overlap, you are tuning the wrong thing.'
+      insight: 'R-tree query cost is governed by MBR overlap, not by height. Two trees with the ' +
+        'same data, the same fan-out and the same height can differ tenfold. Bulk loading also ' +
+        'beats incremental insertion so consistently that most systems rebuild rather than ' +
+        'maintain. Insertion adds overlap monotonically, nothing removes it, and a periodic ' +
+        'O(n log n) rebuild is cheaper than the accumulated tax. If you are tuning a split ' +
+        'heuristic before you have measured the overlap, you are tuning the wrong thing.'
     };
   }
 
