@@ -24,11 +24,14 @@
         },
         plain: 'Everything before the fault has completed; nothing after it has had any effect.',
         formal: 'the state at the handler is the state a one-instruction-at-a-time machine would have',
-        detail: 'That promise is what the whole software stack assumes: a debugger showing a '
-          + 'coherent state, a page-fault handler restarting the access it just fixed, a '
-          + 'context switch saving a register set. None of them work without it, and none of '
-          + 'them would be written differently if the hardware were slightly cheaper and '
-          + 'imprecise — they would simply be impossible.',
+        detail: [
+          'That promise is what the whole software stack assumes.',
+          'A debugger showing a coherent state, a page-fault handler restarting the access it just '
+            + 'fixed, a context switch saving a register set: none of them work without it.',
+          'None of them would be written differently if the hardware were slightly cheaper and '
+            + 'imprecise.',
+          'They would simply be impossible.'
+        ],
         example: 'At the same number of retired instructions, this pipelined machine\'s '
           + 'registers are identical to the M34 behavioural simulator\'s on all five fault '
           + 'classes.'
@@ -37,11 +40,14 @@
         term: 'It is free on a single-cycle machine and it is not free here',
         plain: 'One instruction at a time has nothing to be imprecise about.',
         formal: 'five in flight: two younger than the fault, two older and not yet committed',
-        detail: 'The M34 machine got precision by construction and the cost only appears once '
-          + 'instructions overlap. That is the general shape of an abstraction: it is cheap '
-          + 'while the implementation happens to match it and expensive once the implementation '
-          + 'diverges — and the abstraction is kept anyway, because everything above it depends '
-          + 'on it.',
+        detail: [
+          'The M34 machine got precision by construction, and the cost only appears once '
+            + 'instructions overlap.',
+          'That is the general shape of an abstraction.',
+          'It is cheap while the implementation happens to match it, and expensive once the '
+            + 'implementation diverges.',
+          'The abstraction is kept anyway, because everything above it depends on it.'
+        ],
         example: 'Precision here costs a flag per stage, a squash path from every stage back to '
           + 'fetch, and a commit point; in M36 it costs an entire reorder buffer.'
       },
@@ -49,12 +55,14 @@
         term: 'Faults are detected in different stages and the flag travels',
         plain: 'Fetch, decode, execute and memory can each raise one.',
         formal: 'the fault is recorded on the instruction rather than acted on where it was found',
-        detail: 'A misaligned fetch is known at fetch, an illegal opcode at decode, an '
-          + 'environment call at execute, and a misaligned or unmapped data access at memory. '
-          + 'Acting immediately would break the ordering — an older instruction still in the '
-          + 'pipeline has to finish first — so the flag rides along and the trap happens at the '
-          + 'commit point, which is the only place where "everything older is done" is true by '
-          + 'construction.',
+        detail: [
+          'A misaligned fetch is known at fetch, an illegal opcode at decode, an environment call '
+            + 'at execute, and a misaligned or unmapped data access at memory.',
+          'Acting immediately would break the ordering, because an older instruction still in the '
+            + 'pipeline has to finish first.',
+          'So the flag rides along and the trap happens at the commit point.',
+          'That is the only place where "everything older is done" is true by construction.'
+        ],
         example: 'A misaligned load is detected in the memory stage and the trap commits one '
           + 'cycle later, at write-back.'
       },
@@ -62,11 +70,14 @@
         term: 'Squash immediately, commit late, and both are load-bearing',
         plain: 'Squashing alone loses work; committing alone lets a younger store escape.',
         formal: 'younger instructions are killed at detection; the trap is taken at write-back',
-        detail: 'If the trap were taken at detection, the older instructions still in the '
-          + 'pipeline would be thrown away with it and the handler would see a state that never '
-          + 'existed. If the squash waited for the commit point, a store two stages behind the '
-          + 'fault would reach memory first, which is precisely what precise forbids. Neither '
-          + 'half is optional and neither is obvious from the definition alone.',
+        detail: [
+          'If the trap were taken at detection, the older instructions still in the pipeline would '
+            + 'be thrown away with it, and the handler would see a state that never existed.',
+          'If the squash waited for the commit point, a store two stages behind the fault would '
+            + 'reach memory first.',
+          'That is precisely what precise forbids.',
+          'Neither half is optional and neither is obvious from the definition alone.'
+        ],
         example: 'On a misaligned load the trap commits one cycle after detection, and five '
           + 'instructions fetched after it never commit anything.'
       },
@@ -74,11 +85,14 @@
         term: 'A fault on the wrong path is not a fault',
         plain: 'Fetch reads past the end of a mispredicted branch and finds zeros.',
         formal: 'the flag has to be as speculative as the instruction carrying it',
-        detail: 'Decoding zeros as an illegal instruction is correct; acting on it is not, '
-          + 'because that instruction was never going to execute. A machine that freezes on '
-          + 'such a flag and does not unfreeze when the branch resolves stops dead on the first '
-          + 'mispredicted loop exit — which is exactly what this simulator did before the check '
-          + 'existed. Speculative state includes speculative exceptions.',
+        detail: [
+          'Decoding zeros as an illegal instruction is correct. Acting on it is not, because that '
+            + 'instruction was never going to execute.',
+          'A machine that freezes on such a flag and does not unfreeze when the branch resolves '
+            + 'stops dead on the first mispredicted loop exit.',
+          'That is exactly what this simulator did before the check existed.',
+          'Speculative state includes speculative exceptions.'
+        ],
         example: 'Each iteration of a loop with an unpredicted exit fetches past the end and '
           + 'raises an illegal-instruction flag that is squashed a cycle later.'
       },
@@ -86,12 +100,15 @@
         term: 'mret and control-register writes are serialising',
         plain: 'The pipeline drains around them.',
         formal: 'there is no forwarding path from a control register',
-        detail: 'A trap handler reads mcause into a register and branches on it, writes mepc, '
-          + 'and then returns through mret — which reads the mepc the instruction two ahead of '
-          + 'it just wrote. Nothing forwards a control register, so the only correct answer is '
-          + 'to drain. That is a real cost, it is why a trap is far more expensive than its '
-          + 'instruction count suggests, and it is the same reason system calls are expensive '
-          + 'enough to have shaped every high-performance I/O interface.',
+        detail: [
+          'A trap handler reads mcause into a register and branches on it, writes mepc, and then '
+            + 'returns through mret.',
+          'That mret reads the mepc the instruction two ahead of it just wrote.',
+          'Nothing forwards a control register, so the only correct answer is to drain.',
+          'That is a real cost. It is why a trap is far more expensive than its instruction count '
+            + 'suggests, and the same reason system calls are expensive enough to have shaped '
+            + 'every high-performance I/O interface.'
+        ],
         example: 'The six-instruction handler in the demo drains the pipeline twice, once for '
           + 'the mepc write and once for the mret.'
       },
@@ -99,11 +116,13 @@
         term: 'Branch recovery and exception recovery are the same machinery',
         plain: 'Both kill younger instructions and redirect fetch.',
         formal: 'speculation is the ability to undo, and exceptions are an undo',
-        detail: 'That is not a coincidence and it is worth noticing, because it means a machine '
-          + 'that already speculates on branches gets precise exceptions almost free, and a '
-          + 'machine that wants precise exceptions has most of what speculation needs. It also '
-          + 'explains why both got much harder at the same moment in history: out-of-order '
-          + 'execution broke the ordering that made both of them easy.',
+        detail: [
+          'That is not a coincidence and it is worth noticing.',
+          'A machine that already speculates on branches gets precise exceptions almost free, and '
+            + 'a machine that wants precise exceptions has most of what speculation needs.',
+          'It also explains why both got much harder at the same moment in history.',
+          'Out-of-order execution broke the ordering that made both of them easy.'
+        ],
         example: 'The same squash path serves a mispredicted branch and a memory fault in this '
           + 'machine.'
       },
@@ -111,11 +130,14 @@
         term: 'Everything in M36 exists to break the order while preserving the illusion',
         plain: 'Finish in any order; commit in program order.',
         formal: 'a reorder buffer holds results until they can be committed in sequence',
-        detail: 'Out-of-order execution lets instructions complete whenever their operands '
-          + 'allow, which destroys every "yes, by construction" this machine relies on: writes '
-          + 'no longer happen in order, a squashed instruction may already have finished, and a '
-          + 'store may be waiting in a buffer. Each of those becomes a hardware structure whose '
-          + 'only purpose is to make the machine look like this one again.',
+        detail: [
+          'Out-of-order execution lets instructions complete whenever their operands allow.',
+          'That destroys every "yes, by construction" this machine relies on.',
+          'Writes no longer happen in order, a squashed instruction may already have finished, and '
+            + 'a store may be waiting in a buffer.',
+          'Each of those becomes a hardware structure whose only purpose is to make the machine '
+            + 'look like this one again.'
+        ],
         example: 'Register renaming, the reorder buffer and the store buffer are three answers '
           + 'to three properties this pipeline gets for nothing.'
       }

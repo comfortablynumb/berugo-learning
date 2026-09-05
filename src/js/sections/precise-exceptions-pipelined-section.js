@@ -117,18 +117,18 @@
   function insight() {
     return '**"Precise" is the name for a lie the hardware tells, and the entire software '
       + 'stack is built on believing it.** At the moment a fault is taken there are five '
-      + 'instructions inside this machine at various stages of completion, two of them younger '
-      + 'than the one that failed and already executing. The architecture promises that none '
-      + 'of that is observable: the state is exactly what a machine doing one instruction at a '
-      + 'time would have produced. Every debugger, every page-fault handler that fixes a '
-      + 'mapping and re-runs the access, every context switch that saves a register set — all '
-      + 'of them assume it, and none of them would work without it. What makes this worth '
+      + 'instructions inside this machine at various stages of completion. Two of them are '
+      + 'younger than the one that failed and already executing. The architecture promises that '
+      + 'none of that is observable: the state is exactly what a machine doing one instruction '
+      + 'at a time would have produced. Every debugger, every page-fault handler that fixes a '
+      + 'mapping and re-runs the access, every context switch that saves a register set: all '
+      + 'of them assume it. None of them would work without it. What makes this worth '
       + 'more than the mechanism is that it is the clearest example in the curriculum of an '
       + 'abstraction that is expensive precisely because it is simple. Keeping it costs a '
-      + 'squash path, a commit point, and in M36 an entire reorder buffer; abandoning it would '
+      + 'squash path, a commit point, and in M36 an entire reorder buffer. Abandoning it would '
       + 'save all of that and make the machine unprogrammable. That is the trade behind every '
-      + 'strong guarantee in a system — serialisable transactions, exactly-once delivery, '
-      + 'linearisable reads — and the reason the ones that survive are the ones where the '
+      + 'strong guarantee in a system: serialisable transactions, exactly-once delivery, '
+      + 'linearisable reads. The ones that survive are the ones where the '
       + 'implementation cost buys a simplification that everybody above them gets to assume.';
   }
 
