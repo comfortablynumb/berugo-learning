@@ -327,12 +327,16 @@
         },
         plain: 'Nothing is stored on a node. Balance is two rules about the tree as a whole.',
         formal: 'node = { key, value, left, right }',
-        detail: 'Every other family here pays for balance in per-node storage: a height, a colour ' +
-          'bit, a priority, a subtree size. A scapegoat tree pays nothing. It keeps two counters for ' +
-          'the entire structure — the live count and the high-water mark — and derives everything ' +
-          'else by walking the tree when it needs to. That matters when a node is large, when it ' +
-          'lives on disk and every header byte costs, or when the node layout is fixed by something ' +
-          'else and there is nowhere to put a colour bit.',
+        detail: [
+          'Every other family here pays for balance in per-node storage: a height, a colour bit, a ' +
+            'priority, a subtree size.',
+          'A scapegoat tree pays nothing. It keeps two counters for the entire structure — the ' +
+            'live count and the high-water mark — and derives everything else by walking the tree ' +
+            'when it needs to.',
+          'That matters when a node is large, or when it lives on disk and every header byte costs.',
+          'It also matters when the node layout is fixed by something else and there is nowhere to ' +
+            'put a colour bit.'
+        ],
         example: 'The same 10 000 keys need one height field per node in AVL and nothing at all here.'
       },
       {
@@ -342,12 +346,16 @@
         readAs: 'The balance parameter α sits strictly between a half and one, and the depth the tree is ' +
           'allowed to reach is log of n taken to base 1/α. Push α towards 1 and you tolerate a deeper ' +
           'tree in exchange for rebuilding less often.',
-        detail: 'α is the single dial. It defines what counts as too lopsided, and through that it ' +
-          'defines the depth limit an insertion is allowed to reach before triggering a repair — ' +
-          'which is why a stricter α gives a shallower tree and more rebuilding. The relationship is ' +
-          'not subtle: at n = 10 000, α = 0.55 caps the depth at 16 and rebuilds 40.3 nodes per ' +
-          'insertion, while α = 0.9 caps it at 88 and rebuilds 7.5. Both are amortised O(log n); the ' +
-          'constant is yours to choose.',
+        detail: [
+          'α is the single dial.',
+          'It defines what counts as too lopsided, and through that it defines the depth limit an ' +
+            'insertion is allowed to reach before triggering a repair. That is why a stricter α ' +
+            'gives a shallower tree and more rebuilding.',
+          'The relationship is not subtle. At n = 10 000, α = 0.55 caps the depth at 16 and ' +
+            'rebuilds 40.3 nodes per insertion. At α = 0.9 the cap is 88 and the rebuild is 7.5 ' +
+            'nodes.',
+          'Both are amortised O(log n); the constant is yours to choose.'
+        ],
         example: 'α = 0.65 gives a depth limit of 22 at 10 000 keys and rebuilds 18.7 nodes per insertion.'
       },
       {
@@ -356,24 +364,30 @@
         formal: 'size(child) > α · size(node)',
         readAs: 'A node is out of balance when one of its children holds more than the fraction α of the ' +
           'whole subtree. At α = 0.7, a child holding over 70% of the nodes triggers a rebuild.',
-        detail: 'When an insertion lands deeper than the limit, the tree walks back up from the new ' +
-          'node computing subtree sizes, and stops at the first node that fails the weight test. ' +
-          'That node is the scapegoat, and its whole subtree is rebuilt perfectly balanced. The ' +
-          'search is affordable for a specific reason: as it walks up it already knows the size of ' +
-          'the side it came from, so it only has to measure the sibling — and the siblings near the ' +
-          'bottom are the small ones. Choosing the *lowest* such node keeps the rebuild small.',
+        detail: [
+          'When an insertion lands deeper than the limit, the tree walks back up from the new node ' +
+            'computing subtree sizes. It stops at the first node that fails the weight test.',
+          'That node is the scapegoat, and its whole subtree is rebuilt perfectly balanced.',
+          'The search is affordable for a specific reason. As it walks up it already knows the ' +
+            'size of the side it came from, so it only has to measure the sibling. The siblings ' +
+            'near the bottom are the small ones.',
+          'Choosing the *lowest* such node keeps the rebuild small.'
+        ],
         example: 'A sorted insertion at α = 0.65 finds a scapegoat on 8 584 of 10 000 insertions, and still averages 18.7 nodes rebuilt.'
       },
       {
         term: 'The rebuild',
         plain: 'Flatten the subtree in order, then rebuild it perfectly balanced. One linear pass each way.',
         formal: 'in-order to array, then recursive midpoint',
-        detail: 'A rebuild is two walks: flatten the subtree into a sorted array by in-order ' +
-          'traversal, then rebuild by taking the midpoint as the root and recursing on the halves. ' +
-          'Both are linear in the subtree size and neither allocates a node — the same nodes are ' +
-          'relinked. This is where the structure earns its keep on disk: a rebuild writes one ' +
-          'contiguous run of nodes, which is a sequential write, while rotations scatter small ' +
-          'writes across the structure.',
+        detail: [
+          'A rebuild is two walks. Flatten the subtree into a sorted array by in-order traversal, ' +
+            'then rebuild by taking the midpoint as the root and recursing on the halves.',
+          'Both are linear in the subtree size and neither allocates a node: the same nodes are ' +
+            'relinked.',
+          'This is where the structure earns its keep on disk. A rebuild writes one contiguous run ' +
+            'of nodes, which is a sequential write, while rotations scatter small writes across ' +
+            'the structure.'
+        ],
         example: 'The rebuilt subtree comes out at exactly ⌈log₂(size + 1)⌉ deep, which buys the maximum headroom.'
       },
       {
@@ -382,37 +396,48 @@
         formal: 'rebuild everything when live count < α · high-water mark',
         readAs: 'Deletions do not rebuild anything until the number of live keys falls below the fraction α ' +
           'of the largest the tree has ever been. That delay is what keeps the amortised cost down.',
-        detail: 'Deletion is the plain BST algorithm with no repair at all. The tree is permitted to ' +
-          'become sparse, and only when the live count drops below α times the largest it has ever ' +
-          'been does the whole thing get rebuilt — once, in a single linear pass, resetting the ' +
-          'high-water mark. Deleting half of a 10 000-key tree triggers exactly one such rebuild, of ' +
-          '6 499 nodes, at the moment the count crosses 6 500. It is the crudest deletion strategy ' +
-          'in this milestone and its amortised cost is still O(log n).',
+        detail: [
+          'Deletion is the plain BST algorithm with no repair at all.',
+          'The tree is permitted to become sparse. Only when the live count drops below α times ' +
+            'the largest it has ever been does the whole thing get rebuilt. That happens once, in ' +
+            'a single linear pass, resetting the high-water mark.',
+          'Deleting half of a 10 000-key tree triggers exactly one such rebuild, of 6 499 nodes, ' +
+            'at the moment the count crosses 6 500.',
+          'It is the crudest deletion strategy in this milestone, and its amortised cost is still ' +
+            'O(log n).'
+        ],
         example: 'Deleting 5 000 of 10 000 keys at α = 0.65: exactly one whole-tree rebuild, of 6 499 nodes.'
       },
       {
         term: 'Amortised, and what that hides',
         plain: 'O(log n) per operation on average over a sequence; a single insertion can rebuild the entire tree.',
         formal: 'amortised O(log n), worst case O(n)',
-        detail: 'The credit argument is the one from M01.3: each insertion below the limit banks ' +
-          'enough credit that when a rebuild finally happens, the imbalance that triggered it has ' +
-          'already been paid for. The measured amortised figure tracks log n closely — 18.7 nodes ' +
-          'rebuilt per insertion against log₂ 10 000 = 13.3. What it hides is the tail: the ' +
-          'insertion that rebuilds the root subtree touches everything, so a latency-sensitive path ' +
-          'sees a spike that no average can describe. That is the same objection M01.3 raises ' +
-          'against amortised bounds generally.',
+        detail: [
+          'The credit argument is the one from M01.3. Each insertion below the limit banks enough ' +
+            'credit that when a rebuild finally happens, the imbalance that triggered it has ' +
+            'already been paid for.',
+          'The measured amortised figure tracks log n closely: 18.7 nodes rebuilt per insertion ' +
+            'against log₂ 10 000 = 13.3.',
+          'What it hides is the tail. The insertion that rebuilds the root subtree touches ' +
+            'everything, so a latency-sensitive path sees a spike that no average can describe.',
+          'That is the same objection M01.3 raises against amortised bounds generally.'
+        ],
         example: 'The amortised cost is 18.7 nodes per insert; the worst single insert rebuilds the whole tree.'
       },
       {
         term: 'The input still matters',
         plain: 'Sorted insertion triggers a rebuild almost every time; shuffled insertion almost never does.',
         formal: 'the depth limit is only reached when the tree is lopsided',
-        detail: 'Unlike AVL or red-black, whose work is roughly input-independent, a scapegoat tree ' +
-          'only does work when the input is making it lopsided. Sorted insertion at α = 0.65 finds a ' +
-          'scapegoat 8 584 times and rebuilds 18.7 nodes per insertion; the same keys shuffled find ' +
-          'one 439 times and rebuild 0.21 nodes per insertion — a factor of ninety. Both end at ' +
-          'height 22. So the structure is nearly free on friendly input and pays only for the ' +
-          'disorder it is actually handed.',
+        detail: [
+          'Unlike AVL or red-black, whose work is roughly input-independent, a scapegoat tree only ' +
+            'does work when the input is making it lopsided.',
+          'Sorted insertion at α = 0.65 finds a scapegoat 8 584 times and rebuilds 18.7 nodes per ' +
+            'insertion. The same keys shuffled find one 439 times and rebuild 0.21 nodes per ' +
+            'insertion — a factor of ninety.',
+          'Both end at height 22.',
+          'So the structure is nearly free on friendly input, and pays only for the disorder it is ' +
+            'actually handed.'
+        ],
         example: 'Sorted: 8 584 rebuilds and 18.7 nodes per insert. Shuffled: 439 rebuilds and 0.21 nodes per insert.'
       },
       {
@@ -421,12 +446,16 @@
         formal: 'BB[α] trees: rotate when the weight ratio is exceeded',
         readAs: 'Weight-balanced trees measure balance by subtree size rather than height, and rotate as soon ' +
           'as the ratio between two siblings passes a threshold set by α.',
-        detail: 'Weight-balanced trees use the same α-weight condition but store the subtree size on ' +
-          'each node and repair with rotations, giving worst-case O(log n) per operation rather than ' +
-          'amortised. The stored size is not wasted — it is the order-statistic augmentation from ' +
-          'M04.8, so rank and select come free. The trade against scapegoat is exactly the usual ' +
-          'one: pay a field per node and a little work on every operation, or pay nothing until a ' +
-          'rebuild is unavoidable and then pay a lot at once.',
+        detail: [
+          'Weight-balanced trees use the same α-weight condition but store the subtree size on ' +
+            'each node and repair with rotations. That gives worst-case O(log n) per operation ' +
+            'rather than amortised.',
+          'The stored size is not wasted: it is the order-statistic augmentation from M04.8, so ' +
+            'rank and select come free.',
+          'The trade against scapegoat is exactly the usual one. Pay a field per node and a little ' +
+            'work on every operation, or pay nothing until a rebuild is unavoidable and then pay a ' +
+            'lot at once.'
+        ],
         example: 'Haskell\'s Data.Map and several functional libraries are weight-balanced, which is why they offer index lookup.'
       }
     ]

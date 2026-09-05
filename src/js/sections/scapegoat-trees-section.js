@@ -31,11 +31,11 @@
         'Every other family in this milestone stores something on the node: a height, a colour, a ' +
           'priority, a subtree size. A scapegoat tree stores nothing at all — a node is a key, a ' +
           'value and two children. Balance comes from two rules applied to the tree as a whole.',
-        'The first rule watches depth. An insertion that lands deeper than log_{1/α}(n) walks back ' +
-          'up until it finds the node whose subtree is more than α-heavy on one side — the ' +
-          'scapegoat — and rebuilds that subtree perfectly balanced in linear time. The second rule ' +
-          'watches deletions: once the live count falls below α times the high-water mark, the whole ' +
-          'tree is rebuilt.',
+        'The first rule watches depth. An insertion that lands deeper than log_{1/α}(n) walks ' +
+          'back up until it finds the node whose subtree is more than α-heavy on one side — the ' +
+          'scapegoat. That subtree is then rebuilt perfectly balanced, in linear time. The second ' +
+          'rule watches deletions: once the live count falls below α times the high-water mark, ' +
+          'the whole tree is rebuilt.',
         'A rebuild is O(size of the subtree), so the worst single operation is bad. The amortised ' +
           'cost is still O(log n), by the same credit argument the doubling array uses in M01.3 — ' +
           'and the metric below reports it directly rather than asserting it.'
@@ -54,10 +54,11 @@
           '    S -->|yes| R["this node is the scapegoat<br/>rebuild its subtree perfectly balanced"]'
         ].join('\n')
       },
-      insight: '"Rebuild it periodically" is a legitimate balancing strategy and often the right one ' +
-        'when nodes are large or stored on disk — a rebuild writes one contiguous run, while ' +
-        'rotations scatter small writes across the structure. It is also the strategy that needs no ' +
-        'per-node metadata, which matters when a node is a disk page and every byte of header costs.'
+      insight: '"Rebuild it periodically" is a legitimate balancing strategy, and often the right ' +
+        'one when nodes are large or stored on disk. A rebuild writes one contiguous run, while ' +
+        'rotations scatter small writes across the structure. It is also the strategy that needs ' +
+        'no per-node metadata, which matters when a node is a disk page and every byte of header ' +
+        'costs.'
     };
   }
 
