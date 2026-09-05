@@ -512,13 +512,18 @@
         formal: 'children of i are 2i and 2i+1',
         readAs: 'In an array-backed binary tree, node i keeps its children at positions 2i and 2i+1, so no ' +
           'pointers are stored at all — the arithmetic is the structure.',
-        detail: 'Eytzinger order writes the implicit binary search tree level by level, so the root ' +
-          'and the first few levels are adjacent in memory and arrive together in one or two cache ' +
-          'lines. Every search visits those nodes, so after the first query they are permanently ' +
-          'resident and the top of the tree becomes free. Navigation is index arithmetic — children ' +
-          'of i are 2i and 2i + 1 — with no stored pointers, and the root is placed at index 1 with ' +
-          'index 0 unused so that the doubling stays branch-free. The cost is that the layout is ' +
-          'built for one static array; inserting into it means rebuilding.',
+        detail: [
+          'Eytzinger order writes the implicit binary search tree level by level, so the root and ' +
+            'the first few levels are adjacent in memory. They arrive together in one or two ' +
+            'cache lines.',
+          'Every search visits those nodes, so after the first query they are permanently ' +
+            'resident and the top of the tree becomes free.',
+          'Navigation is index arithmetic, with no stored pointers: the children of i are 2i and ' +
+            '2i + 1. The root is placed at index 1, with index 0 unused, so that the doubling ' +
+            'stays branch-free.',
+          'The cost is that the layout is built for one static array. Inserting into it means ' +
+            'rebuilding.'
+        ],
         example: 'Root at index 1; index 0 is left unused to keep the arithmetic branch-free.'
       },
       {
@@ -527,39 +532,47 @@
         formal: 'B = line size / key size',
         readAs: 'The branching factor B is how many keys fit in one cache line: the line size divided by the ' +
           'size of a key. It is the number of comparisons you get for a single memory fetch.',
-        detail: 'If a fetch delivers 64 bytes regardless, the layout should put 64 bytes of useful ' +
-          'keys there: sixteen 4-byte keys fill a line exactly, so one fetch answers a sixteen-way ' +
-          'decision instead of a two-way one. The tree\'s fan-out rises from 2 to B and its height ' +
-          'falls from log₂ n to log_B n, which is the same argument that makes B-trees the right ' +
-          'structure on disk, applied one level up the hierarchy. The comparisons inside a block are ' +
-          'nearly free because the data is already in L1 — this is the trade of arithmetic for ' +
-          'memory traffic, made deliberately.',
+        detail: [
+          'If a fetch delivers 64 bytes regardless, the layout should put 64 bytes of useful keys ' +
+            'there. Sixteen 4-byte keys fill a line exactly, so one fetch answers a sixteen-way ' +
+            'decision instead of a two-way one.',
+          'The tree\'s fan-out rises from 2 to B, and its height falls from log₂ n to log_B n.',
+          'That is the same argument that makes B-trees the right structure on disk, applied one ' +
+            'level up the hierarchy.',
+          'The comparisons inside a block are nearly free because the data is already in L1. This ' +
+            'is the trade of arithmetic for memory traffic, made deliberately.'
+        ],
         example: '16 four-byte keys fill exactly one 64-byte line.'
       },
       {
         term: 'Locality of reference',
         plain: 'Recently and nearby accessed data is cheap; anything else costs a line fetch.',
         formal: 'temporal and spatial locality',
-        detail: 'Caches make one bet: that a program will reuse what it just touched (temporal ' +
-          'locality) and touch what is next to it (spatial locality). Code that honours the bet ' +
-          'runs at cache speed and code that violates it runs at memory speed, an order of magnitude ' +
-          'apart, for identical instruction counts. A binary search over a sorted array violates ' +
-          'both at first: its early probes are half an array apart, so each lands on a fresh line ' +
-          'and uses one key out of sixteen. That is the specific weakness the layouts in this ' +
-          'section attack, and it is why they win without changing the algorithm.',
+        detail: [
+          'Caches make one bet: that a program will reuse what it just touched (temporal ' +
+            'locality) and touch what is next to it (spatial locality).',
+          'Code that honours the bet runs at cache speed and code that violates it runs at memory ' +
+            'speed, an order of magnitude apart, for identical instruction counts.',
+          'A binary search over a sorted array violates both at first. Its early probes are half ' +
+            'an array apart, so each lands on a fresh line and uses one key out of sixteen.',
+          'That is the specific weakness the layouts in this section attack, and it is why they ' +
+            'win without changing the algorithm.'
+        ],
         example: 'Binary search has neither in its early probes.'
       },
       {
         term: 'False sharing',
         plain: 'Two threads writing different variables in the same line contend for it anyway.',
         formal: 'same line, different addresses',
-        detail: 'Cache coherence is maintained per line, not per byte, so two threads writing ' +
-          'distinct variables that happen to share a line invalidate each other\'s copy on every ' +
-          'write. There is no logical sharing and no race, and the performance behaves as though ' +
-          'there were a contended lock — the line ping-pongs between cores and throughput can drop ' +
-          'by an order of magnitude. The classic instance is an array of per-thread counters, and ' +
-          'the fix is to pad each to its own line so the hardware stops seeing a conflict that the ' +
-          'program never had.',
+        detail: [
+          'Cache coherence is maintained per line, not per byte. Two threads writing distinct ' +
+            'variables that happen to share a line invalidate each other\'s copy on every write.',
+          'There is no logical sharing and no race, and yet the performance behaves as though ' +
+            'there were a contended lock. The line ping-pongs between cores, and throughput can ' +
+            'drop by an order of magnitude.',
+          'The classic instance is an array of per-thread counters. The fix is to pad each to its ' +
+            'own line, so the hardware stops seeing a conflict that the program never had.'
+        ],
         example: 'Padding counters to a line each fixes it (M38).'
       },
       {
@@ -568,26 +581,31 @@
         formal: 'same Θ, different constant',
         readAs: 'Two layouts with the identical growth rate can still differ by a large fixed multiplier, and ' +
           'that multiplier is the memory system rather than the algorithm.',
-        detail: 'All three layouts in this section run the same logarithmic search and differ only in ' +
-          'where the keys sit, so asymptotics cannot tell them apart — and on 256 KB of keys the ' +
-          'blocked layout takes 2.8 times fewer misses than the sorted array. That gap is entirely ' +
-          'in the constant that Θ discards. The general lesson is that once an algorithm is in the ' +
-          'right complexity class, the remaining wins usually come from data layout rather than ' +
-          'from a cleverer algorithm, and they are invisible to any analysis that counts operations ' +
-          'instead of memory traffic.',
+        detail: [
+          'All three layouts in this section run the same logarithmic search and differ only in ' +
+            'where the keys sit, so asymptotics cannot tell them apart.',
+          'On 256 KB of keys the blocked layout takes 2.8 times fewer misses than the sorted ' +
+            'array. That gap is entirely in the constant that Θ discards.',
+          'The general lesson is that once an algorithm is in the right complexity class, the ' +
+            'remaining wins usually come from data layout rather than from a cleverer algorithm.',
+          'They are invisible to any analysis that counts operations instead of memory traffic.'
+        ],
         example: 'A blocked layout misses 2.8× less than a sorted array on 256 KB of keys.'
       },
       {
         term: 'Residency, not distinct lines',
         plain: 'One query touches about log n lines whatever the layout; what differs is how much survives between queries.',
         formal: 'misses = lines touched − lines still resident',
-        detail: 'Counting the distinct lines a single query touches finds almost no difference ' +
-          'between layouts, because every binary search visits about log n nodes and each is likely ' +
-          'to be on its own line. The difference appears across queries: what matters is how many of ' +
-          'those lines are still in cache when the next query arrives. Eytzinger wins by keeping ' +
-          'the top of the tree — the part every query visits — packed into few lines, so 512 lines ' +
-          'hold 13 levels of the tree against a sorted array\'s 9. Measure misses against a bounded ' +
-          'cache over a query stream, not lines per query.',
+        detail: [
+          'Counting the distinct lines a single query touches finds almost no difference between ' +
+            'layouts. Every binary search visits about log n nodes, and each is likely to be on ' +
+            'its own line.',
+          'The difference appears across queries. What matters is how many of those lines are ' +
+            'still in cache when the next query arrives.',
+          'Eytzinger wins by keeping the top of the tree — the part every query visits — packed ' +
+            'into few lines. So 512 lines hold 13 levels of the tree, against a sorted array\'s 9.',
+          'Measure misses against a bounded cache over a query stream, not lines per query.'
+        ],
         example: 'Eytzinger keeps 13 levels of the tree in 512 lines; a sorted array keeps 9.'
       },
       {
@@ -603,26 +621,33 @@
         },
         plain: 'A cache-conscious layout is worth nothing while the structure fits in cache, and everything once it does not.',
         formal: 'advantage appears at structure bytes > cache bytes',
-        detail: 'While the whole structure is resident, every layout hits in cache and they are ' +
-          'indistinguishable: at 4 KiB all three measure 0.128 misses per query. Once the structure ' +
-          'outgrows the cache, the layout decides what stays and the gap opens abruptly — at ' +
-          '256 KiB the same three measure 4.472, 3.452 and 1.478. So the benefit is not a property ' +
-          'of the layout alone but of the ratio between the structure and the cache, which means ' +
-          'benchmarking one of these on a small input will correctly report that it changes nothing. ' +
-          'Size the experiment past the cache, or do not run it.',
+        detail: [
+          'While the whole structure is resident, every layout hits in cache and they are ' +
+            'indistinguishable. At 4 KiB all three measure 0.128 misses per query.',
+          'Once the structure outgrows the cache, the layout decides what stays and the gap opens ' +
+            'abruptly. At 256 KiB the same three measure 4.472, 3.452 and 1.478.',
+          'So the benefit is not a property of the layout alone, but of the ratio between the ' +
+            'structure and the cache.',
+          'Benchmarking one of these on a small input will correctly report that it changes ' +
+            'nothing. Size the experiment past the cache, or do not run it.'
+        ],
         example: 'At 4 KiB the three layouts tie at 0.128 misses per query; at 256 KiB they are 4.472, 3.452 and 1.478.'
       },
       {
         term: 'Trading comparisons for misses',
         plain: 'A layout that does more arithmetic to touch fewer lines is winning, because the two are not priced alike.',
         formal: 'one DRAM miss ≈ 80 arithmetic operations',
-        detail: 'Operation counting implicitly assumes all operations cost the same, and they differ ' +
-          'by roughly two orders of magnitude: a DRAM miss is worth about eighty arithmetic ' +
-          'instructions. At that exchange rate, spending extra comparisons to avoid a single miss is ' +
-          'obviously profitable — the blocked layout does 39% more comparisons and takes a third of ' +
-          'the misses, so it wins comfortably despite doing more work by the traditional measure. ' +
+        detail: [
+          'Operation counting implicitly assumes all operations cost the same, and they differ by ' +
+            'roughly two orders of magnitude. A DRAM miss is worth about eighty arithmetic ' +
+            'instructions.',
+          'At that exchange rate, spending extra comparisons to avoid a single miss is obviously ' +
+            'profitable.',
+          'The blocked layout does 39% more comparisons and takes a third of the misses, so it ' +
+            'wins comfortably despite doing more work by the traditional measure.',
           'This is the reason a raw operation count can rank two implementations in exactly the ' +
-          'wrong order, and why misses are the metric this section reports.',
+            'wrong order, and why misses are the metric this section reports.'
+        ],
         example: 'The blocked layout does 39% more comparisons and takes a third of the misses.'
       }
     ]

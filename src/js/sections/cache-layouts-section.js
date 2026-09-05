@@ -24,20 +24,20 @@
     root.jQuery('#' + SECTION_ID + '-content').html(app.shell.render({
       sectionId: SECTION_ID,
       orientation: [
-        'Binary search over a sorted array is optimal in comparisons and poor in memory behaviour: ' +
-          'the first probe lands in the middle, the next a quarter away, and every early step touches ' +
-          'a cache line it will never use again.',
+        'Binary search over a sorted array is optimal in comparisons and poor in memory ' +
+          'behaviour. The first probe lands in the middle and the next a quarter away, so every ' +
+          'early step touches a cache line it will never use again.',
         'The Eytzinger layout stores the same keys in breadth-first order, so the root and the first ' +
           'levels sit next to each other and arrive together. A blocked layout goes further and packs ' +
           'B keys per node, so one line answers B comparisons — the B-tree idea applied to a static ' +
           'array.',
-        'The number to watch is misses, not distinct lines: every layout touches about log n lines ' +
-          'per query, but the top of an Eytzinger tree is a handful of adjacent lines that stay ' +
-          'resident across queries, while the equivalent levels of a sorted binary search are spread ' +
+        'The number to watch is misses, not distinct lines. Every layout touches about log n ' +
+          'lines per query. The top of an Eytzinger tree is a handful of adjacent lines that stay ' +
+          'resident across queries. The equivalent levels of a sorted binary search are spread ' +
           'one line apiece across the whole array.',
-        'The model here has no prefetcher. Real Eytzinger implementations gain again from prefetching ' +
-          'several levels ahead and from branch-free code, which is where the published ~2× comes ' +
-          'from; what the demo isolates is the residency effect alone.'
+        'The model here has no prefetcher. Real Eytzinger implementations gain again from ' +
+          'prefetching several levels ahead and from branch-free code, which is where the ' +
+          'published ~2× comes from. What the demo isolates is the residency effect alone.'
       ],
       demo: { title: 'Interactive demo — three layouts, one search', markup: root.CacheLayoutsTemplate.render() },
       diagram: {
