@@ -50,9 +50,10 @@
           '    P3 --> D'
         ].join('\n')
       },
-      insight: 'VS Code moved from a gap buffer to a piece table for a reason you can reproduce here: ' +
-        'the cost of a large paste followed by edits scattered around the file. Undo comes almost free ' +
-        'with a piece table too, because nothing was ever overwritten.'
+      insight: 'VS Code moved from a gap buffer to a piece table for a reason you can reproduce ' +
+        'here. What decided it was the cost of a large paste followed by edits scattered around ' +
+        'the file. Undo comes almost free with a piece table too, because nothing was ever ' +
+        'overwritten.'
     }));
 
     app.shell.mount({ sectionId: SECTION_ID, app: app });

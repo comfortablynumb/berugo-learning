@@ -351,14 +351,17 @@
         },
         plain: 'Free space held at the cursor, so typing there costs nothing and moving the cursor costs the distance.',
         formal: 'text = prefix + gap + suffix',
-        detail: 'A gap buffer is one contiguous array with a run of unused space parked at the ' +
-          'cursor. Inserting is a write into the gap, deleting widens it, and both are constant ' +
-          'time, so sustained typing in one place is as fast as anything can be. Moving the cursor ' +
-          'is what costs: the gap must travel with it, which copies every character it passes. That ' +
-          'makes the structure\'s cost proportional to cursor travel rather than to the number of ' +
-          'edits, which is an excellent bet for a human typing and a poor one for a program applying ' +
-          'scattered edits. The whole document stays contiguous, so search and rendering are ' +
-          'straightforward.',
+        detail: [
+          'A gap buffer is one contiguous array with a run of unused space parked at the cursor.',
+          'Inserting is a write into the gap and deleting widens it, both constant time, so ' +
+            'sustained typing in one place is as fast as anything can be.',
+          'Moving the cursor is what costs. The gap must travel with it, which copies every ' +
+            'character it passes.',
+          'That makes the structure\'s cost proportional to cursor travel rather than to the ' +
+            'number of edits. It is an excellent bet for a human typing and a poor one for a ' +
+            'program applying scattered edits.',
+          'The whole document stays contiguous, so search and rendering are straightforward.'
+        ],
         example: 'Emacs; excellent for sequential typing.'
       },
       {
@@ -375,95 +378,120 @@
         },
         plain: 'An immutable original, an append-only added buffer and a list of pieces. Text is never moved.',
         formal: 'document = concat(pieces)',
-        detail: 'A piece table never edits text at all. The loaded file is immutable, new text is ' +
-          'appended to a second buffer that only ever grows, and the document is a list of pieces ' +
-          'naming a buffer, an offset and a length. An edit splits a piece and inserts one — a few ' +
-          'list operations regardless of document size or where the edit lands, so it has no bad ' +
-          'position the way a gap buffer does. The costs are indirection on read, since the ' +
-          'document is scattered across two buffers, and a piece list that grows with the number of ' +
-          'edits and eventually wants compaction.',
+        detail: [
+          'A piece table never edits text at all.',
+          'The loaded file is immutable, and new text is appended to a second buffer that only ' +
+            'ever grows. The document is a list of pieces, each naming a buffer, an offset and a ' +
+            'length.',
+          'An edit splits a piece and inserts one: a few list operations, regardless of document ' +
+            'size or where the edit lands. It has no bad position the way a gap buffer does.',
+          'The costs are indirection on read, since the document is scattered across two buffers, ' +
+            'and a piece list that grows with the number of edits and eventually wants compaction.'
+        ],
         example: 'VS Code; excellent after a large paste.'
       },
       {
         term: 'Rope',
         plain: 'A balanced tree of string leaves, so split and concatenate are O(log n) and never copy the document.',
         formal: 'internal nodes carry subtree lengths',
-        detail: 'A rope stores the text in the leaves of a balanced tree, with each internal node ' +
-          'carrying the total length of its subtree. That single piece of bookkeeping turns position ' +
-          'lookup into a descent, and makes split and concatenate O(log n) operations that rearrange ' +
-          'pointers instead of moving characters. Ropes therefore scale to files where any ' +
-          'contiguous representation would be hopeless, and they make structural operations — ' +
-          'joining two documents, extracting a range — cheap rather than linear. The price is ' +
-          'tree overhead per leaf, worse locality than a flat array, and the need to keep the tree ' +
-          'balanced.',
+        detail: [
+          'A rope stores the text in the leaves of a balanced tree, with each internal node ' +
+            'carrying the total length of its subtree.',
+          'That single piece of bookkeeping turns position lookup into a descent. It makes split ' +
+            'and concatenate O(log n) operations that rearrange pointers instead of moving ' +
+            'characters.',
+          'Ropes therefore scale to files where any contiguous representation would be hopeless, ' +
+            'and they make structural operations cheap rather than linear: joining two documents, ' +
+            'extracting a range.',
+          'The price is tree overhead per leaf, worse locality than a flat array, and the need to ' +
+            'keep the tree balanced.'
+        ],
         example: 'Xi and several editors for very large files.'
       },
       {
         term: 'Undo for free',
         plain: 'A structure that never overwrites can represent undo as an older version of the piece list.',
         formal: 'keep the previous piece list',
-        detail: 'When no operation destroys data, previous states remain reachable, so undo stops ' +
-          'being a separate mechanism. A piece table keeps every character ever typed in the add ' +
-          'buffer, so an old version of the document is just an old piece list — retaining it costs ' +
-          'the size of that list rather than a copy of the text, and redo is symmetric. Compare the ' +
-          'usual approach of recording inverse operations, which has to get every inverse exactly ' +
-          'right and stay consistent with the buffer. This is the same trade persistent data ' +
-          'structures make everywhere: never overwrite, and history becomes free.',
+        detail: [
+          'When no operation destroys data, previous states remain reachable, so undo stops being ' +
+            'a separate mechanism.',
+          'A piece table keeps every character ever typed in the add buffer, so an old version of ' +
+            'the document is just an old piece list. Retaining it costs the size of that list ' +
+            'rather than a copy of the text, and redo is symmetric.',
+          'Compare the usual approach of recording inverse operations, which has to get every ' +
+            'inverse exactly right and stay consistent with the buffer.',
+          'This is the same trade persistent data structures make everywhere: never overwrite, ' +
+            'and history becomes free.'
+        ],
         example: 'Piece tables get undo almost by construction.'
       },
       {
         term: 'Line index',
         plain: 'Editors need line numbers constantly, so the structure has to maintain them incrementally.',
         formal: 'line starts, updated per edit',
-        detail: 'Rendering, cursor movement, diagnostics and go-to-line all ask "where does line k ' +
-          'start", and no text representation answers that without an index. Building one is a scan ' +
-          'of the whole document, which is fine once at load and disastrous per keystroke — this is ' +
-          'the most common accidental O(n) in an editor, and it is invisible until the file gets ' +
-          'large. The fix is to maintain it incrementally: an edit changes line starts only after ' +
-          'its position, so the update is a shift of the tail plus any newlines added or removed, ' +
-          'and a rope can hold the line count per subtree instead.',
+        detail: [
+          'Rendering, cursor movement, diagnostics and go-to-line all ask "where does line k ' +
+            'start", and no text representation answers that without an index.',
+          'Building one is a scan of the whole document. That is fine once at load and disastrous ' +
+            'per keystroke: it is the most common accidental O(n) in an editor, and it is ' +
+            'invisible until the file gets large.',
+          'The fix is to maintain it incrementally. An edit changes line starts only after its ' +
+            'position, so the update is a shift of the tail plus any newlines added or removed.',
+          'A rope can hold the line count per subtree instead.'
+        ],
         example: 'Rebuilding the index per keystroke is the usual accidental O(n).'
       },
       {
         term: 'Cursor locality',
         plain: 'A gap buffer is fast where the cursor is and pays to move it. Its cost is measured in cursor travel, not in edits.',
         formal: 'move cost = distance moved',
-        detail: 'The right cost model for a gap buffer is total cursor travel, not the number of ' +
-          'edits, and that single reframing explains all of its behaviour. Three hundred edits at ' +
-          'one position move about 100 000 characters, while the same three hundred scattered around ' +
-          'a document move 9 529 894 — a factor of 95 for identical edits, decided entirely by where ' +
-          'they landed. So the structure is superb for a human typing a paragraph and unsuitable for ' +
-          'multi-cursor editing, a find-and-replace pass or a language server applying edits across ' +
-          'a file. Measure the workload\'s locality before choosing it.',
+        detail: [
+          'The right cost model for a gap buffer is total cursor travel, not the number of edits, ' +
+            'and that single reframing explains all of its behaviour.',
+          'Three hundred edits at one position move about 100 000 characters. The same three ' +
+            'hundred scattered around a document move 9 529 894 — a factor of 95 for identical ' +
+            'edits, decided entirely by where they landed.',
+          'So the structure is superb for a human typing a paragraph, and unsuitable for ' +
+            'multi-cursor editing, a find-and-replace pass or a language server applying edits ' +
+            'across a file.',
+          'Measure the workload\'s locality before choosing it.'
+        ],
         example: '300 edits at one place move 100 000 characters; the same 300 scattered move 9 529 894.'
       },
       {
         term: 'Immutable original',
         plain: 'A piece table never modifies the loaded file: it holds a list of spans into it and into an append-only add buffer.',
         formal: 'piece = (buffer, start, length)',
-        detail: 'Because the original buffer is never written, opening a document costs nothing ' +
-          'beyond reading it: the initial state is a single piece covering the whole file, with zero ' +
-          'characters copied even for a 100 000-character document. The original can then be shared, ' +
-          'memory-mapped or left on disk, and it stays byte-identical for as long as the session ' +
-          'lasts, which is what makes cheap undo and reliable diffing possible. Everything the user ' +
-          'types goes to the append-only add buffer, so the only structure that changes during ' +
-          'editing is the piece list itself.',
+        detail: [
+          'Because the original buffer is never written, opening a document costs nothing beyond ' +
+            'reading it. The initial state is a single piece covering the whole file, with zero ' +
+            'characters copied even for a 100 000-character document.',
+          'The original can then be shared, memory-mapped or left on disk. It stays ' +
+            'byte-identical for as long as the session lasts, which is what makes cheap undo and ' +
+            'reliable diffing possible.',
+          'Everything the user types goes to the append-only add buffer, so the only structure ' +
+            'that changes during editing is the piece list itself.'
+        ],
         example: 'Opening a 100 000-character file costs one piece and zero characters copied.'
       },
       {
         term: 'Rebalancing',
         plain: 'A rope that only ever appends grows a spine and degenerates into a list. Rebuilding restores the logarithmic depth.',
         formal: 'rebuild when height > c·log₂(leaves)',
-        readAs: 'Rebuild the tree once its height exceeds some fixed multiple of log base 2 of its leaf count ' +
-          '— that is, once it is more than a constant factor deeper than a perfectly balanced tree of ' +
-          'the same size would be.',
-        detail: 'A rope\'s guarantees are all statements about its height, and nothing in the ' +
-          'insertion rule preserves height on its own: appending repeatedly hangs each new leaf off ' +
-          'the right edge, and the tree becomes a linked list with O(n) descents. The structure has ' +
-          'to notice and repair it — rebuild when the height exceeds a constant times log₂ of the ' +
-          'leaf count. The repair is not free, and pretending otherwise hides real work: 300 ' +
-          'insertions at one position triggered 10 rebuilds that copied 15.1 million characters, ' +
-          'which is why a rope is the wrong structure for a small file edited in one place.',
+        readAs: 'Rebuild the tree once its height exceeds some fixed multiple of log base 2 of ' +
+          'its leaf count. That is, once it is more than a constant factor deeper than a ' +
+          'perfectly balanced tree of the same size would be.',
+        detail: [
+          'A rope\'s guarantees are all statements about its height, and nothing in the insertion ' +
+            'rule preserves height on its own.',
+          'Appending repeatedly hangs each new leaf off the right edge, and the tree becomes a ' +
+            'linked list with O(n) descents.',
+          'The structure has to notice and repair it: rebuild when the height exceeds a constant ' +
+            'times log₂ of the leaf count.',
+          'The repair is not free, and pretending otherwise hides real work. Here, 300 insertions ' +
+            'at one position triggered 10 rebuilds that copied 15.1 million characters. That is ' +
+            'why a rope is the wrong structure for a small file edited in one place.'
+        ],
         example: '300 insertions at one position triggered 10 rebuilds and copied 15.1 million characters.'
       }
     ],
