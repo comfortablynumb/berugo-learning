@@ -52,10 +52,11 @@
           '    ROT["after a rotation:<br/>recompute the lower node,<br/>then the upper one"] --> N'
         ].join('\n')
       },
-      insight: 'The augmentation rule — the field must be computable from the node and its children — ' +
-        'is the whole theory; everything else is bookkeeping on rotation. It is also the test to ' +
-        'apply before designing one: "the median of my subtree" fails it, "the size of my subtree" ' +
-        'passes, and that single question decides whether the idea is O(log n) or O(n).'
+      insight: 'The augmentation rule — the field must be computable from the node and its ' +
+        'children — is the whole theory; everything else is bookkeeping on rotation. It is also ' +
+        'the test to apply before designing one. "The median of my subtree" fails it, "the size ' +
+        'of my subtree" passes, and that single question decides whether the idea is O(log n) or ' +
+        'O(n).'
     };
   }
 

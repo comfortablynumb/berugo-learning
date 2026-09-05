@@ -174,26 +174,33 @@
         },
         plain: 'A field can be maintained if and only if it is computable from the node and the same field on its two children.',
         formal: 'field(node) = f(node, field(left), field(right))',
-        detail: 'This one sentence is the entire theory, and it is a decision procedure rather than a ' +
-          'guideline. If the rule holds, a rotation can repair the field in constant time by ' +
-          'recomputing the two nodes that moved, so every operation keeps its O(log n) cost. If it ' +
-          'does not, repairing after a rotation means walking a subtree and the structure degrades ' +
-          'to linear. Before designing an augmentation, ask the question in that exact form: "can I ' +
-          'compute this from my own value and my two children\'s values?" Subtree size, sum, min, ' +
-          'max and height all pass; median and distinct-count both fail.',
+        detail: [
+          'This one sentence is the entire theory, and it is a decision procedure rather than a ' +
+            'guideline.',
+          'If the rule holds, a rotation can repair the field in constant time by recomputing the ' +
+            'two nodes that moved, so every operation keeps its O(log n) cost.',
+          'If it does not, repairing after a rotation means walking a subtree, and the structure ' +
+            'degrades to linear.',
+          'Before designing an augmentation, ask the question in that exact form: "can I compute ' +
+            'this from my own value and my two children\'s values?" Subtree size, sum, min, max ' +
+            'and height all pass; median and distinct-count both fail.'
+        ],
         example: 'Subtree size passes: 1 + size(left) + size(right). Subtree median fails: the median of a union is not a function of the two medians.'
       },
       {
         term: 'Maintaining it through a rotation',
         plain: 'Recompute the node that moved down first, then the node that moved up. The order is not optional.',
         formal: 'augment(lower) then augment(upper)',
-        detail: 'A rotation changes the children of exactly two nodes, so exactly two fields need ' +
-          'recomputing — but the node that ends up on top reads its children, one of which is the ' +
-          'node that ended up below. Recompute the upper one first and it reads a stale value from ' +
-          'the lower one, producing a field that is wrong in a way nothing else notices: queries ' +
-          'return plausible answers that are quietly incorrect. This is the single most common bug ' +
-          'in augmented trees, and the reason the platform\'s invariant checker recomputes every ' +
-          'field from the children and compares.',
+        detail: [
+          'A rotation changes the children of exactly two nodes, so exactly two fields need ' +
+            'recomputing. But the node that ends up on top reads its children, one of which is the ' +
+            'node that ended up below.',
+          'Recompute the upper one first and it reads a stale value from the lower one. The field ' +
+            'is then wrong in a way nothing else notices: queries return plausible answers that ' +
+            'are quietly incorrect.',
+          'This is the single most common bug in augmented trees, and the reason the platform\'s ' +
+            'invariant checker recomputes every field from the children and compares.'
+        ],
         example: 'A stale size makes select(k) return the wrong key while the tree remains a perfectly valid search tree.'
       },
       {
@@ -211,75 +218,96 @@
         },
         plain: 'Store the subtree size and the tree answers "the k-th smallest" and "how many are below this" in one descent.',
         formal: 'select(k) and rank(key), both O(log n)',
-        detail: 'With sizes on hand, select descends by comparison rather than by counting: if the ' +
-          'left subtree holds L keys then the k-th smallest is in the left subtree when k ≤ L, is ' +
-          'this node when k = L + 1, and is the (k − L − 1)-th of the right subtree otherwise. Rank ' +
-          'is the mirror image, accumulating left sizes as it goes. Both are a single root-to-leaf ' +
-          'walk — 13 node visits at 100 000 keys — where a sorted array gives select for free and ' +
-          'cannot support insertion, and a plain tree supports insertion and needs a full scan to ' +
-          'count.',
+        detail: [
+          'With sizes on hand, select descends by comparison rather than by counting.',
+          'If the left subtree holds L keys, then the k-th smallest is in the left subtree when ' +
+            'k ≤ L. It is this node when k = L + 1, and the (k − L − 1)-th of the right subtree ' +
+            'otherwise.',
+          'Rank is the mirror image, accumulating left sizes as it goes.',
+          'Both are a single root-to-leaf walk — 13 node visits at 100 000 keys. A sorted array ' +
+            'gives select for free and cannot support insertion; a plain tree supports insertion ' +
+            'and needs a full scan to count.'
+        ],
         example: 'select(50 000) on a 100 000-key tree visits 13 nodes; a scan would visit 50 000.'
       },
       {
         term: 'Interval trees',
         plain: 'Store the maximum endpoint in each subtree and a stabbing query can skip whole subtrees.',
         formal: 'maxEnd(node) = max(node.end, maxEnd(left), maxEnd(right))',
-        detail: 'Intervals are keyed by their start, which makes the tree ordered but not obviously ' +
-          'useful — an interval containing a point can start anywhere below it. The maximum-endpoint ' +
-          'field fixes that: if a subtree\'s maxEnd is below the query point, no interval in it can ' +
-          'contain the point, and the whole subtree is skipped without being visited. That single ' +
-          'test turns a scan into a search. The pruning is what the demo counts, and it is the ' +
-          'difference between visiting 22 nodes and scanning 18 211.',
+        detail: [
+          'Intervals are keyed by their start, which makes the tree ordered but not obviously ' +
+            'useful. An interval containing a point can start anywhere below it.',
+          'The maximum-endpoint field fixes that. If a subtree\'s maxEnd is below the query point, ' +
+            'no interval in it can contain the point, and the whole subtree is skipped without ' +
+            'being visited.',
+          'That single test turns a scan into a search.',
+          'The pruning is what the demo counts, and it is the difference between visiting 22 nodes ' +
+            'and scanning 18 211.'
+        ],
         example: 'Stabbing a point in 18 211 intervals visits 22 nodes and prunes 6 whole subtrees.'
       },
       {
         term: 'Range-sum trees',
         plain: 'Store the subtree sum and a range query adds whole subtrees instead of walking them.',
         formal: 'sum(node) = value + sum(left) + sum(right)',
-        detail: 'The field alone is not enough — the query has to use it. A range sum that visits ' +
-          'every node between the bounds is correct and pointless, costing O(range) and making the ' +
-          'augmentation decorative. The version that pays off carries the bounds down the recursion: ' +
-          'when a subtree lies entirely inside the range, its stored sum is added and the descent ' +
-          'stops there; when it lies entirely outside, it is dropped. Only the two boundary paths ' +
-          'are walked, which is O(log n) regardless of how many keys the range holds.',
+        detail: [
+          'The field alone is not enough — the query has to use it.',
+          'A range sum that visits every node between the bounds is correct and pointless, costing ' +
+            'O(range) and making the augmentation decorative.',
+          'The version that pays off carries the bounds down the recursion. When a subtree lies ' +
+            'entirely inside the range, its stored sum is added and the descent stops there; when ' +
+            'it lies entirely outside, it is dropped.',
+          'Only the two boundary paths are walked, which is O(log n) regardless of how many keys ' +
+            'the range holds.'
+        ],
         example: 'Summing 1 001 keys visits 51 nodes with pruning and 1 020 without — same answer, twenty times the work.'
       },
       {
         term: 'Composability',
         plain: 'Several fields can be maintained at once, because each one only depends on itself.',
         formal: 'augment(node) recomputes every configured field',
-        detail: 'Because the rule is per-field, adding a second augmentation costs nothing but the ' +
-          'storage and the recomputation: one tree can carry size, sum and max-endpoint together and ' +
-          'answer all three families of query. That is why the demo can offer three structures on ' +
-          'one tree rather than three trees. The practical limit is memory and cache: every extra ' +
-          'field makes the node bigger, and a node that no longer fits in a cache line costs more on ' +
-          'every traversal than the query saves.',
+        detail: [
+          'Because the rule is per-field, adding a second augmentation costs nothing but the ' +
+            'storage and the recomputation. One tree can carry size, sum and max-endpoint ' +
+            'together, and answer all three families of query.',
+          'That is why the demo can offer three structures on one tree rather than three trees.',
+          'The practical limit is memory and cache. Every extra field makes the node bigger, and a ' +
+            'node that no longer fits in a cache line costs more on every traversal than the query ' +
+            'saves.'
+        ],
         example: 'One tree here carries all three fields, so rank, stabbing and range sums are answered from the same nodes.'
       },
       {
         term: 'The fields that cannot be augmented',
         plain: 'Anything needing more than the node and its two children — a median, a distinct count, a k-th value.',
         formal: 'the rule fails ⇒ repair after a rotation is not O(1)',
-        readAs: 'If the augmented value at a node cannot be recomputed from its two children alone, then a ' +
-          'rotation cannot fix it in constant time and the whole augmentation stops paying for itself.',
-        detail: 'The instructive failures are the ones that look plausible. A subtree median cannot ' +
-          'be computed from two child medians, because the answer depends on how the two ' +
-          'distributions interleave. A distinct-value count cannot be computed from two child counts, ' +
-          'because the children may share values and neither one knows. The useful move when a field ' +
-          'fails the rule is to look for a different field that passes and answers the same question ' +
-          'by descent: a median is not augmentable, and size is — and select(n/2) is the median.',
+        readAs: 'If the augmented value at a node cannot be recomputed from its two children ' +
+          'alone, a rotation cannot fix it in constant time. The whole augmentation then stops ' +
+          'paying for itself.',
+        detail: [
+          'The instructive failures are the ones that look plausible.',
+          'A subtree median cannot be computed from two child medians, because the answer depends ' +
+            'on how the two distributions interleave.',
+          'A distinct-value count cannot be computed from two child counts, because the children ' +
+            'may share values and neither one knows.',
+          'The useful move when a field fails the rule is to look for a different field that ' +
+            'passes and answers the same question by descent. A median is not augmentable, and ' +
+            'size is — and select(n/2) is the median.'
+        ],
         example: 'The median fails the rule, so an order-statistic tree computes it as select(⌈n/2⌉) instead.'
       },
       {
         term: 'Where the balance comes from',
         plain: 'Augmentation is orthogonal to the balance rule: it works on AVL, red-black, treaps or weight-balanced trees alike.',
         formal: 'any family whose rotations are local',
-        detail: 'Nothing in the augmentation depends on how the tree stays balanced — only on the ' +
-          'fact that its structural changes are rotations touching two nodes. So the field can be ' +
-          'bolted onto whichever family you already use, which is why std::map cannot do rank ' +
-          'queries and Haskell\'s Data.Map can: the latter is weight-balanced and therefore already ' +
-          'stores the subtree size the balance rule needs. The augmentation was free because the ' +
-          'balance rule had already paid for it.',
+        detail: [
+          'Nothing in the augmentation depends on how the tree stays balanced, only on the fact ' +
+            'that its structural changes are rotations touching two nodes.',
+          'So the field can be bolted onto whichever family you already use.',
+          'That is why std::map cannot do rank queries and Haskell\'s Data.Map can. The latter is ' +
+            'weight-balanced, and therefore already stores the subtree size the balance rule needs.',
+          'The augmentation was free because the balance rule had already paid for it.'
+        ],
         example: 'A weight-balanced tree stores subtree sizes for its balance rule, so it gets rank and select for nothing.'
       }
     ]
