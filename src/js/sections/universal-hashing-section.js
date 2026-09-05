@@ -28,10 +28,10 @@
         'A fixed hash function has a fixed set of colliding keys, and anyone can compute it. If your ' +
           'service turns request parameters into map keys, that set is a denial-of-service payload: ' +
           'n keys in one bucket cost Θ(n²) to insert.',
-        'Universal hashing is the fix, and it is a guarantee rather than a hope: pick the function at ' +
-          'random from a family in which any two distinct keys collide with probability at most 1/m. ' +
-          'Multiply-shift is two instructions and gives exactly that; tabulation hashing gives more ' +
-          'independence for a few table lookups.',
+        'Universal hashing is the fix, and it is a guarantee rather than a hope. Pick the ' +
+          'function at random from a family in which any two distinct keys collide with ' +
+          'probability at most 1/m. Multiply-shift is two instructions and gives exactly that; ' +
+          'tabulation hashing gives more independence for a few table lookups.',
         'This is why every serious runtime randomises its hash seed at start-up, and why iteration ' +
           'order is deliberately unspecified. If you persist hashes across processes, or ship a ' +
           'fixed seed, you have handed the property back.'

@@ -200,13 +200,16 @@
         readAs: 'Pick a hash function at random from the family H. For any two different keys you care to ' +
           'name, the chance that this randomly chosen function maps them to the same slot is at most 1 ' +
           'in m. The randomness is in the choice of function, never in the keys.',
-        detail: 'A single fixed hash function always has bad key sets — the pigeonhole principle ' +
-          'guarantees it, and an attacker who can read your source can find them. Universality moves ' +
-          'the randomness out of the input and into the choice of function: for any two distinct ' +
-          'keys, picked in advance and adversarially, the probability of collision over the random ' +
-          'draw of h is at most 1/m. That is a guarantee about every key pair rather than about ' +
-          'typical inputs, which is why it survives an adversary. Note what it does not claim: for ' +
-          'the function you actually drew, some pair does collide.',
+        detail: [
+          'A single fixed hash function always has bad key sets. The pigeonhole principle ' +
+            'guarantees it, and an attacker who can read your source can find them.',
+          'Universality moves the randomness out of the input and into the choice of function. For ' +
+            'any two distinct keys, picked in advance and adversarially, the probability of ' +
+            'collision over the random draw of h is at most 1/m.',
+          'That is a guarantee about every key pair rather than about typical inputs, which is why ' +
+            'it survives an adversary.',
+          'Note what it does not claim. For the function you actually drew, some pair does collide.'
+        ],
         example: 'The guarantee holds for every key pair, including ones an attacker chose.'
       },
       {
@@ -216,13 +219,16 @@
         readAs: 'Multiply the key by a randomly chosen odd number, keep the low w bits, then shift the top m ' +
           'of those down to use as the index. Multiplying carries information upward, so the top bits ' +
           'are the well-mixed ones.',
-        detail: 'Dietzfelbinger\'s multiply-shift is about as cheap as a hash can be — one multiply ' +
-          'and one shift — and it is provably universal when a is drawn at random from the odd ' +
-          'integers. The high bits are the ones with the guarantee, because multiplication mixes ' +
-          'upward: bit 0 of the product depends only on bit 0 of the input, while the top bits ' +
-          'depend on everything. That is why the shift takes from the top, and why using the low ' +
-          'bits of a multiplicative hash forfeits the proof. Choosing the family is just "pick a new ' +
-          'odd a", which makes per-process seeding trivial.',
+        detail: [
+          'Dietzfelbinger\'s multiply-shift is about as cheap as a hash can be: one multiply and ' +
+            'one shift. It is provably universal when a is drawn at random from the odd integers.',
+          'The high bits are the ones with the guarantee, because multiplication mixes upward. ' +
+            'Bit 0 of the product depends only on bit 0 of the input, while the top bits depend ' +
+            'on everything.',
+          'That is why the shift takes from the top, and why using the low bits of a ' +
+            'multiplicative hash forfeits the proof.',
+          'Choosing the family is just "pick a new odd a", which makes per-process seeding trivial.'
+        ],
         example: 'Dietzfelbinger\'s scheme; the whole family is "pick a new odd a".'
       },
       {
@@ -232,13 +238,17 @@
         readAs: 'Split the key into bytes, look each byte up in its own table of random numbers, and XOR all ' +
           'the results together. One table per byte position, so the same byte value in a different ' +
           'position gives a different number.',
-        detail: 'Tabulation hashing pre-fills one table of random words per byte position, then ' +
-          'hashes by XOR-ing the four lookups. It has no arithmetic mixing at all, and it is ' +
-          '3-independent — a stronger guarantee than multiply-shift — which is what bounds the ' +
-          'longest chain rather than just the mean. In practice it is also fast: the tables are 4 KB ' +
-          'and stay resident, so the four lookups hit L1. The costs are that memory, the ' +
-          'initialisation, and a key length fixed at table-construction time, which is why it suits ' +
-          'integer keys better than arbitrary strings.',
+        detail: [
+          'Tabulation hashing pre-fills one table of random words per byte position, then hashes ' +
+            'by XOR-ing the four lookups.',
+          'It has no arithmetic mixing at all, and it is 3-independent — a stronger guarantee than ' +
+            'multiply-shift. That is what bounds the longest chain rather than just the mean.',
+          'In practice it is also fast. The tables are 4 KB and stay resident, so the four lookups ' +
+            'hit L1.',
+          'The costs are that memory, the initialisation, and a key length fixed at ' +
+            'table-construction time. That is why it suits integer keys better than arbitrary ' +
+            'strings.'
+        ],
         example: 'Three-independent, four cache lookups, and it beats multiply-shift on adversarial inputs.'
       },
       {
@@ -256,13 +266,16 @@
         formal: 'n keys in one bucket ⇒ Θ(n²) work',
         readAs: 'Land every key in the same bucket and each insert scans everything already there, so n ' +
           'inserts do roughly n²/2 comparisons. The ⇒ is "which means".',
-        detail: 'If the hash function is fixed and public, an attacker can precompute keys that all ' +
-          'land in one bucket and send them as form fields, JSON keys or headers. Every insertion ' +
-          'then walks the whole chain, so n keys cost Θ(n²) comparisons and a few thousand ' +
-          'parameters in one request can occupy a core for seconds — a denial of service with no ' +
-          'traffic volume behind it. Crosby and Wallach described it in 2003; it was rediscovered ' +
-          'against essentially every web framework in 2011, which is when per-process hash seeding ' +
-          'became standard everywhere.',
+        detail: [
+          'If the hash function is fixed and public, an attacker can precompute keys that all land ' +
+            'in one bucket, and send them as form fields, JSON keys or headers.',
+          'Every insertion then walks the whole chain, so n keys cost Θ(n²) comparisons. A few ' +
+            'thousand parameters in one request can occupy a core for seconds — a denial of ' +
+            'service with no traffic volume behind it.',
+          'Crosby and Wallach described it in 2003. It was rediscovered against essentially every ' +
+            'web framework in 2011, which is when per-process hash seeding became standard ' +
+            'everywhere.'
+        ],
         example: 'Crosby and Wallach, 2003; rediscovered against web frameworks in 2011.'
       },
       {
@@ -278,26 +291,35 @@
         },
         plain: 'Choosing the function at start-up is what makes the attacker\'s precomputation useless.',
         formal: 'seed drawn once from a CSPRNG',
-        detail: 'Universality is only worth something if the function is genuinely drawn at random, ' +
-          'so the seed is taken once at start-up from a cryptographic source and never shipped in ' +
-          'the source. An attacker can then no longer precompute a colliding set, because the target ' +
-          'they would need is different in every process. The visible consequence is that iteration ' +
-          'order over a hash map differs between runs, which several languages made deliberate and ' +
-          'documented so that nobody would depend on it. The other consequence is that a hash value ' +
-          'must never be persisted or sent across processes.',
+        detail: [
+          'Universality is only worth something if the function is genuinely drawn at random. The ' +
+            'seed is therefore taken once at start-up from a cryptographic source, and never ' +
+            'shipped in the source.',
+          'An attacker can then no longer precompute a colliding set, because the target they ' +
+            'would need is different in every process.',
+          'The visible consequence is that iteration order over a hash map differs between runs, ' +
+            'which several languages made deliberate and documented so that nobody would depend ' +
+            'on it.',
+          'The other consequence is that a hash value must never be persisted or sent across ' +
+            'processes.'
+        ],
         example: 'It is also why iteration order differs between runs — deliberately.'
       },
       {
         term: 'Keyed hash',
         plain: 'A short-input PRF like SipHash: fast enough for a table, and not invertible without the key.',
         formal: 'SipHash-2-4(k, m)',
-        detail: 'Universal families stop an attacker who can only guess the parameter; they do not ' +
-          'stop one who can observe outputs and solve for it, which is possible when hash values ' +
-          'leak through iteration order or timing. A keyed pseudo-random function like SipHash ' +
-          'closes that: without the key, the output is computationally indistinguishable from ' +
-          'random, so collisions cannot be constructed even from observations. It costs several ' +
-          'times a multiply-shift and is still fast enough to sit under a general-purpose hash map, ' +
-          'which is why Rust\'s default hasher and Python\'s string hash both use it.',
+        detail: [
+          'Universal families stop an attacker who can only guess the parameter. They do not stop ' +
+            'one who can observe outputs and solve for it, which is possible when hash values leak ' +
+            'through iteration order or timing.',
+          'A keyed pseudo-random function like SipHash closes that. Without the key, the output is ' +
+            'computationally indistinguishable from random, so collisions cannot be constructed ' +
+            'even from observations.',
+          'It costs several times a multiply-shift and is still fast enough to sit under a ' +
+            'general-purpose hash map. That is why Rust\'s default hasher and Python\'s string ' +
+            'hash both use it.'
+        ],
         example: 'Rust\'s default hasher and Python\'s string hash both use it.'
       },
       {
@@ -307,13 +329,16 @@
         readAs: 'For a randomly drawn multiplier a, any two fixed distinct keys collide with probability at ' +
           'most 2 in m. The 2 rather than 1 is the price of the multiply-shift construction being ' +
           'cheap; it costs nothing that matters.',
-        detail: 'The probability in the definition is over the draw of the parameter, not over the ' +
-          'keys — so a "universal" hash with the parameter hard-coded has a probability of either 0 ' +
-          'or 1 for any given pair, and the guarantee has evaporated. The failure is not subtle when ' +
-          'the constant is unlucky: multiply-shift with a random odd a collides on adjacent keys ' +
-          '0.108% of the time, while the same scheme with a = 2¹⁶ + 1 leaves 960 of 1 024 buckets ' +
-          'empty. Copying a hash function out of a paper and pinning its constant is exactly this ' +
-          'mistake, and it is common.',
+        detail: [
+          'The probability in the definition is over the draw of the parameter, not over the keys.',
+          'So a "universal" hash with the parameter hard-coded has a probability of either 0 or 1 ' +
+            'for any given pair, and the guarantee has evaporated.',
+          'The failure is not subtle when the constant is unlucky. Multiply-shift with a random ' +
+            'odd a collides on adjacent keys 0.108% of the time. The same scheme with ' +
+            'a = 2¹⁶ + 1 leaves 960 of 1 024 buckets empty.',
+          'Copying a hash function out of a paper and pinning its constant is exactly this ' +
+            'mistake, and it is common.'
+        ],
         example: 'Multiply-shift with a random odd a collides on adjacent keys 0.108% of the time; with a = 2¹⁶ + 1 it leaves 960 of 1 024 buckets empty.'
       },
       {
@@ -323,14 +348,16 @@
         readAs: 'How many keys the family guarantees behave independently at once. 2-independent means any ' +
           'two keys land independently; k-independent extends that to any k of them, and each step up ' +
           'costs more work per hash.',
-        detail: 'k-independence says any k distinct keys are mapped independently and uniformly, and ' +
-          'the level you need depends on which statistic you are trying to control. Pairwise ' +
-          '(2-independent) is enough for the expected chain length, because that is a sum over ' +
-          'pairs and linearity of expectation does the rest. Bounding the longest chain requires ' +
-          'reasoning about a maximum, which needs a concentration argument, which needs more ' +
-          'independence than that. This is why tabulation hashing, at 3-independent, has ' +
-          'well-behaved worst-case buckets where multiply-shift does not, despite both being ' +
-          'universal.',
+        detail: [
+          'k-independence says any k distinct keys are mapped independently and uniformly, and the ' +
+            'level you need depends on which statistic you are trying to control.',
+          'Pairwise (2-independent) is enough for the expected chain length, because that is a sum ' +
+            'over pairs and linearity of expectation does the rest.',
+          'Bounding the longest chain requires reasoning about a maximum, which needs a ' +
+            'concentration argument, which needs more independence than that.',
+          'This is why tabulation hashing, at 3-independent, has well-behaved worst-case buckets ' +
+            'where multiply-shift does not, despite both being universal.'
+        ],
         example: 'Tabulation hashing is 3-independent, which is why its worst-case bucket behaves and multiply-shift\'s does not.'
       }
     ],
