@@ -324,24 +324,30 @@
           'the gap between their two distances to any node you have already measured. The bars are ' +
           'absolute value — sign discarded — and that inequality is what lets you skip a subtree ' +
           'without looking in it.',
-        detail: 'A BK-tree keys each child by its distance to its parent, and the triangle inequality ' +
-          'turns that key into a bound: a child at distance j from the node cannot be closer than ' +
-          '|d − j| to a query at distance d, so subtrees outside the window are provably empty and ' +
-          'are skipped without a single distance computation. That is the entire structure — there ' +
-          'is no balancing, no ordering, nothing else — and it is why the choice of metric is a ' +
-          'correctness question rather than a quality one.',
+        detail: [
+          'A BK-tree keys each child by its distance to its parent, and the triangle inequality ' +
+            'turns that key into a bound.',
+          'A child at distance j from the node cannot be closer than |d − j| to a query at ' +
+            'distance d. So subtrees outside the window are provably empty, and are skipped ' +
+            'without a single distance computation.',
+          'That is the entire structure — there is no balancing, no ordering, nothing else.',
+          'It is why the choice of metric is a correctness question rather than a quality one.'
+        ],
         example: 'a distance-1 query over 883 words visits 289 nodes and computes 289 distances.'
       },
       {
         term: 'A non-metric silently loses answers',
         plain: 'Swap in a similarity that breaks the triangle inequality and the pruning drops matches.',
         formal: 'pruning is sound only if d is a metric',
-        detail: 'This is the failure mode worth naming loudly, because it produces no error. Many ' +
-          'attractive similarity measures — normalised scores, weighted edits with asymmetric ' +
-          'costs, anything divided by length — are not metrics, and dropping one into a BK-tree ' +
-          'gives a structure that still builds, still answers, and quietly omits correct results. ' +
-          'The only way to notice is to compare against brute force, which is why the check belongs ' +
-          'in the test suite rather than in a code review.',
+        detail: [
+          'This is the failure mode worth naming loudly, because it produces no error.',
+          'Many attractive similarity measures are not metrics: normalised scores, weighted edits ' +
+            'with asymmetric costs, anything divided by length.',
+          'Dropping one into a BK-tree gives a structure that still builds, still answers, and ' +
+            'quietly omits correct results.',
+          'The only way to notice is to compare against brute force, which is why the check ' +
+            'belongs in the test suite rather than in a code review.'
+        ],
         example: 'Levenshtein over the word list satisfies the inequality on every triple checked.'
       },
       {
@@ -350,12 +356,15 @@
         formal: 'row_{next}[i] = min(row_next[i−1] + 1, row[i] + 1, row[i−1] + cost)',
         readAs: 'Each cell of the edit-distance table is the cheapest of three moves: insert, delete, or ' +
           'substitute. cost is 0 when the two characters match and 1 when they do not.',
-        detail: 'The classical construction builds an explicit DFA for "within k edits of this ' +
-          'query" and intersects it with the dictionary. Carrying the DP row down the trie is the ' +
-          'same machine with its state written out rather than numbered, and it is far easier to ' +
-          'get right. The prune is that the row\'s minimum can never decrease as the walk goes ' +
-          'deeper, so a subtree whose row minimum already exceeds the budget cannot contain a ' +
-          'match and is cut whole.',
+        detail: [
+          'The classical construction builds an explicit DFA for "within k edits of this query" ' +
+            'and intersects it with the dictionary.',
+          'Carrying the DP row down the trie is the same machine with its state written out rather ' +
+            'than numbered, and it is far easier to get right.',
+          'The prune is that the row\'s minimum can never decrease as the walk goes deeper. So a ' +
+            'subtree whose row minimum already exceeds the budget cannot contain a match, and is ' +
+            'cut whole.'
+        ],
         example: 'a distance-1 query cuts most of the 2 562-node trie and visits 291 nodes.'
       },
       {
@@ -364,12 +373,15 @@
         formal: 'recall = |returned ∩ correct| / |correct|',
         readAs: 'Of the answers that were genuinely correct, what fraction did you return? The ∩ is the ' +
           'overlap of the two sets and the bars are "how many".',
-        detail: 'A fuzzy search that returns 30% of the matches looks exactly like one that returns ' +
-          'all of them: the results are relevant, the latency is good, and the missing answers are ' +
-          'invisible from the outside. The only signal is a user saying "it did not find my thing", ' +
-          'which nobody files as a bug. So recall is the first column to read and the first thing ' +
-          'to ask a library for — and a back-end that cannot state its recall is stating that ' +
-          'nobody measured it.',
+        detail: [
+          'A fuzzy search that returns 30% of the matches looks exactly like one that returns all ' +
+            'of them. The results are relevant, the latency is good, and the missing answers are ' +
+            'invisible from the outside.',
+          'The only signal is a user saying "it did not find my thing", which nobody files as a ' +
+            'bug.',
+          'So recall is the first column to read and the first thing to ask a library for. A ' +
+            'back-end that cannot state its recall is stating that nobody measured it.'
+        ],
         example: 'distance 1 from "cat": BK-tree and automaton return all 7; the n-gram index returns 2.'
       },
       {
@@ -379,50 +391,61 @@
         readAs: 'How many q-grams two strings must share to be within k edits: the number in the query, less ' +
           'one, less the grams each edit can destroy. If it comes out zero or negative the filter ' +
           'rejects nothing and you are paying for it for no reason.',
-        detail: 'Indexing every word by its character n-grams and retrieving those sharing enough of ' +
-          'them is the cheapest fuzzy search there is — two orders of magnitude fewer visits than ' +
-          'an exact method. The rule for how many is enough is derived from how many n-grams k ' +
-          'edits can destroy, and it is exact only for long words: a four-letter word has five ' +
-          'bigrams and two edits can destroy all of them, so the correct threshold would be zero, ' +
-          'which retrieves the whole index. Every practical threshold is therefore a recall ' +
-          'decision in disguise.',
+        detail: [
+          'Indexing every word by its character n-grams and retrieving those sharing enough of ' +
+            'them is the cheapest fuzzy search there is. It visits two orders of magnitude fewer ' +
+            'nodes than an exact method.',
+          'The rule for how many is enough is derived from how many n-grams k edits can destroy, ' +
+            'and it is exact only for long words.',
+          'A four-letter word has five bigrams and two edits can destroy all of them, so the ' +
+            'correct threshold would be zero, which retrieves the whole index.',
+          'Every practical threshold is therefore a recall decision in disguise.'
+        ],
         example: '"recieve" within 2 edits: the index verifies 0 candidates and misses the 1 answer.'
       },
       {
         term: 'Subtree maxima make top-k a best-first search',
         plain: 'Store the best score anywhere below each node, and abandon subtrees that cannot win.',
         formal: 'skip a subtree when best(subtree) ≤ score of the current k-th answer',
-        detail: 'Without them, the only correct way to return the eight best completions of a prefix ' +
-          'is to enumerate the whole subtree and sort it — which for a common prefix means ' +
-          'enumerating most of the dictionary to return eight rows. With one number per node the ' +
-          'walk becomes a best-first search that visits the promising branches first and cuts the ' +
-          'rest, and the cost drops from the size of the subtree to something close to k. The ' +
-          'number is maintained on insert and costs one comparison per node on the path.',
+        detail: [
+          'Without them, the only correct way to return the eight best completions of a prefix is ' +
+            'to enumerate the whole subtree and sort it.',
+          'For a common prefix that means enumerating most of the dictionary to return eight rows.',
+          'With one number per node the walk becomes a best-first search that visits the promising ' +
+            'branches first and cuts the rest. The cost drops from the size of the subtree to ' +
+            'something close to k.',
+          'The number is maintained on insert, and costs one comparison per node on the path.'
+        ],
         example: 'the top 8 completions of "con" cost 38 node visits and skip 3 subtrees.'
       },
       {
         term: 'Prefix search and fuzzy search are different queries',
         plain: 'Completion walks down from a prefix; fuzzy match walks the whole structure with a budget.',
         formal: 'complete(p, k) is O(k · depth); fuzzy(q, k) touches many branches',
-        detail: 'A search box usually wants both and they share no machinery: completion is a ' +
-          'downward walk with scores, and fuzzy match is a bounded search over the whole ' +
-          'dictionary. Conflating them produces the common design error of running a fuzzy search ' +
-          'on every keystroke when the user is simply typing a prefix that exists — orders of ' +
-          'magnitude more work for an answer the prefix walk already had. The rule is to try the ' +
-          'prefix first and fall back to fuzzy only when it returns too little.',
+        detail: [
+          'A search box usually wants both and they share no machinery. Completion is a downward ' +
+            'walk with scores, and fuzzy match is a bounded search over the whole dictionary.',
+          'Conflating them produces the common design error of running a fuzzy search on every ' +
+            'keystroke when the user is simply typing a prefix that exists.',
+          'That is orders of magnitude more work for an answer the prefix walk already had.',
+          'The rule is to try the prefix first and fall back to fuzzy only when it returns too ' +
+            'little.'
+        ],
         example: '"con" has 22 completions in 38 visits; a distance-1 fuzzy search visits 289.'
       },
       {
         term: 'Visits are not comparable across back-ends',
         plain: 'A BK-tree visit is a distance computation; a trie visit is a pointer step.',
         formal: 'cost = visits × cost-per-visit, and the second factor differs by an order of magnitude',
-        detail: 'The visit counts in the comparison table are the honest measure each structure ' +
-          'exposes, and reading them as a ranking is a mistake: a BK-tree visit computes a full ' +
-          'edit distance between two words, an automaton visit advances one DP row by one ' +
-          'character, and an n-gram visit verifies one candidate. So the automaton visiting more ' +
-          'nodes than the BK-tree does not make it slower. The columns are there to show the shape ' +
-          'of the search, and a wall-clock comparison is a different measurement that has to be ' +
-          'made separately.',
+        detail: [
+          'The visit counts in the comparison table are the honest measure each structure exposes, ' +
+            'and reading them as a ranking is a mistake.',
+          'A BK-tree visit computes a full edit distance between two words. An automaton visit ' +
+            'advances one DP row by one character, and an n-gram visit verifies one candidate.',
+          'So the automaton visiting more nodes than the BK-tree does not make it slower.',
+          'The columns are there to show the shape of the search. A wall-clock comparison is a ' +
+            'different measurement that has to be made separately.'
+        ],
         example: 'distance 1 from "cat": BK-tree 289 visits, automaton 291 — different units.'
       }
     ]

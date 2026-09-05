@@ -27,22 +27,23 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'A BK-tree keys each child by its edit distance to its parent, and prunes with the triangle ' +
-          'inequality: if the query is distance d from a node, only children at distances d − k … ' +
-          'd + k can hold an answer within budget k. That is the entire structure, and it is why ' +
-          'the metric must be a real metric — swap in a similarity that violates the triangle ' +
-          'inequality and the pruning drops correct answers without any error at all.',
+        'A BK-tree keys each child by its edit distance to its parent, and prunes with the ' +
+          'triangle inequality. If the query is distance d from a node, only children at ' +
+          'distances d − k … d + k can hold an answer within budget k. That is the entire ' +
+          'structure, and it is why the metric must be a real metric. Swap in a similarity that ' +
+          'violates the triangle inequality and the pruning drops correct answers without any ' +
+          'error at all.',
         'A Levenshtein automaton walks the dictionary carrying the dynamic-programming row as its ' +
-          'state, and cuts a subtree the moment that row\'s minimum passes the budget, because no ' +
+          'state. It cuts a subtree the moment that row\'s minimum passes the budget, because no ' +
           'descendant can bring it back down. It scales with the alphabet and the budget rather ' +
           'than with the dictionary, which is why it is the one that survives a dictionary of ' +
           'millions.',
-        'An n-gram index is the fast, approximate option: index each word by its character n-grams, ' +
-          'retrieve everything sharing enough of them, verify each candidate. It visits two orders ' +
-          'of magnitude fewer nodes and returns a *subset* of the answers — a short word within ' +
-          'distance k may share no n-grams with the query at all. That is a legitimate trade for ' +
-          'a suggestion box and a bug for a lookup, and the difference is which one you were told ' +
-          'you were getting.'
+        'An n-gram index is the fast, approximate option: index each word by its character ' +
+          'n-grams, retrieve everything sharing enough of them, verify each candidate. It visits ' +
+          'two orders of magnitude fewer nodes and returns a *subset* of the answers. A short ' +
+          'word within distance k may share no n-grams with the query at all. That is a ' +
+          'legitimate trade for a suggestion box and a bug for a lookup, and the difference is ' +
+          'which one you were told you were getting.'
       ],
       demo: {
         title: 'Interactive demo — three back-ends, one query, and the recall column',
@@ -61,10 +62,10 @@
           '    R -->|6| C6["boarding — skipped"]'
         ].join('\n')
       },
-      insight: 'Ask any fuzzy search what its recall is before asking what its latency is. A back-end ' +
-        'that returns 60% of the matches and a back-end that returns all of them look identical ' +
-        'from the outside, and the gap only ever shows up as a user saying "it did not find my ' +
-        'thing" — which nobody files as a bug.'
+      insight: 'Ask any fuzzy search what its recall is before asking what its latency is. A ' +
+        'back-end that returns 60% of the matches and a back-end that returns all of them look ' +
+        'identical from the outside. The gap only ever shows up as a user saying "it did not find ' +
+        'my thing", which nobody files as a bug.'
     };
   }
 
