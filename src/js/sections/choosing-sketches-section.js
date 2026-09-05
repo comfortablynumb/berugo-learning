@@ -84,24 +84,27 @@
           'system can survive? And do two of them merge, because a system that shards will eventually ' +
           'need to combine them and retrofitting mergeability means changing the sketch. The table ' +
           'below is those three columns for every structure in the milestone.',
-        'The option people forget to price is exactness. A Set holding 21 619 string keys costs about ' +
-          '1.2 MB here, which is a lot against a Bloom filter\'s 26 KB and nothing at all against the ' +
-          'machine it would run on. Sketches earn their place when the key count is genuinely large, ' +
-          'when there are many streams rather than one, or when the answer has to move over a network ' +
-          '— and the chooser prices the exact option in every ranking so the comparison is visible.',
-        'Every structure here assumes the keys are independent of the hash, and an attacker who knows ' +
-          'the seed breaks that for the price of arithmetic. Fifty false positives can be manufactured ' +
-          'against a 1% filter for about 104 probes each, and a count-min sketch at 32 × 3 can have one ' +
-          'key\'s estimate driven from 100 to 40 100 by finding eight keys that collide with it ' +
-          'in every row. Both attacks evaporate against a seed the attacker does not have.'
+        'The option people forget to price is exactness. A Set holding 21 619 string keys costs ' +
+          'about 1.2 MB here. That is a lot against a Bloom filter\'s 26 KB and nothing at all ' +
+          'against the machine it would run on. Sketches earn their place when the key count is ' +
+          'large, when there are many streams rather than one, or when the answer has to move over ' +
+          'a network. The chooser prices the exact option in every ranking so the comparison is ' +
+          'visible.',
+        'Every structure here assumes the keys are independent of the hash, and an attacker who ' +
+          'knows the seed breaks that for the price of arithmetic. Fifty false positives can be ' +
+          'manufactured against a 1% filter for about 104 probes each. A count-min sketch at ' +
+          '32 × 3 can have one key\'s estimate driven from 100 to 40 100, by finding eight keys ' +
+          'that collide with it in every row. Both attacks evaporate against a seed the attacker ' +
+          'does not have.'
       ],
       demo: { title: 'Interactive demo — the chooser, and two attacks', markup: root.ChoosingSketchesTemplate.render() },
       diagram: diagram(),
       insight: 'The sketch is usually the easy part; the hard parts are seeding it against adversarial ' +
-        'keys and having a plan for when the input exceeds the sizing assumption. Both of those are ' +
-        'operational work that no library does for you: a per-process seed that is never logged, and ' +
-        'an exported counter of how many keys have gone in against how many the structure was built ' +
-        'for. A sketch with neither is a correctness incident with a delay fuse on it.'
+        'keys and having a plan for when the input exceeds the sizing assumption. Both of those ' +
+        'are operational work that no library does for you. You need a per-process seed that is ' +
+        'never logged, and an exported counter of how many keys have gone in against how many the ' +
+        'structure was built for. A sketch with neither is a correctness incident with a delay ' +
+        'fuse on it.'
     };
   }
 

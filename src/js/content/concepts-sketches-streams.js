@@ -326,12 +326,14 @@
         term: 'Three questions, not one',
         plain: 'What is the error on, which direction can it go, and do two of them merge?',
         formal: 'the trade-off table is those three columns plus the size',
-        detail: 'Size is the column everybody quotes and the least useful of the four. What the error ' +
-          'is measured on decides whether a guarantee means anything for your requirement — a rank ' +
-          'bound is silent about milliseconds. Its direction decides whether the system survives ' +
-          'being wrong. And mergeability decides whether the design still works after the service is ' +
-          'sharded, which it will be, and retrofitting it means changing the sketch rather than ' +
-          'tuning it.',
+        detail: [
+          'Size is the column everybody quotes and the least useful of the four.',
+          'What the error is measured on decides whether a guarantee means anything for your ' +
+            'requirement — a rank bound is silent about milliseconds.',
+          'Its direction decides whether the system survives being wrong.',
+          'Mergeability decides whether the design still works after the service is sharded, which ' +
+            'it will be. Retrofitting it means changing the sketch rather than tuning it.'
+        ],
         example: 'Count-min and count-sketch differ in exactly one of those columns, and it is decisive.'
       },
       {
@@ -349,36 +351,44 @@
         formal: 'exact memory = Θ(distinct keys × key size)',
         readAs: 'Counting exactly costs one entry per distinct key. Every sketch in this milestone is a way ' +
           'of not paying that, and each one gives up something different in exchange.',
-        detail: 'A Set holding 21 619 string keys is about 1.2 MB, which is a lot next to a Bloom ' +
-          'filter\'s 26 KB and nothing at all next to the machine it runs on. Sketches earn their ' +
-          'place when the key count is genuinely large, when there are thousands of streams rather ' +
-          'than one, or when the answer has to cross a network — and not simply because the exact ' +
-          'structure sounds expensive. The chooser prices the exact option in every ranking for ' +
-          'exactly this reason.',
+        detail: [
+          'A Set holding 21 619 string keys is about 1.2 MB. That is a lot next to a Bloom ' +
+            'filter\'s 26 KB and nothing at all next to the machine it runs on.',
+          'Sketches earn their place when the key count is genuinely large, when there are ' +
+            'thousands of streams rather than one, or when the answer has to cross a network.',
+          'They do not earn it simply because the exact structure sounds expensive.',
+          'The chooser prices the exact option in every ranking for exactly this reason.'
+        ],
         example: '1.2 MB exact against 26 KB approximate — a real difference only at scale or in bulk.'
       },
       {
         term: 'Mergeability is a design constraint, not a feature',
         plain: 'A system that shards will need to combine sketches, and not all of them can.',
         formal: 'HLL and DDSketch merge exactly; cuckoo filters do not merge at all',
-        detail: 'HyperLogLog and DDSketch merge exactly, count-min merges by addition unless it uses ' +
-          'conservative update, quotient filters merge in one linear pass, Bloom filters merge only ' +
-          'at identical shape and seed, and cuckoo filters do not merge at all because the bucket ' +
-          'assignment depends on the table size. Discovering that after the service is sharded means ' +
-          'replacing the structure, which means a migration of stored state — which is why the ' +
-          'column belongs in the first comparison rather than the last.',
+        detail: [
+          'HyperLogLog and DDSketch merge exactly. Count-min merges by addition unless it uses ' +
+            'conservative update, and quotient filters merge in one linear pass.',
+          'Bloom filters merge only at identical shape and seed, and cuckoo filters do not merge at ' +
+            'all, because the bucket assignment depends on the table size.',
+          'Discovering that after the service is sharded means replacing the structure, which means ' +
+            'a migration of stored state.',
+          'That is why the column belongs in the first comparison rather than the last.'
+        ],
         example: 'Conservative update tightens count-min by 1.8× and costs it merging by addition.'
       },
       {
         term: 'Composing sketches inherits the worst of both',
         plain: 'A per-key HLL inside a count-min is one-sided outside and two-sided inside.',
         formal: 'the composed error is neither bounded like the outer sketch nor like the inner one',
-        detail: 'Sketch-of-sketches designs are common — distinct users per URL, distinct sources per ' +
-          'flow — and their guarantees do not compose in any convenient way. The outer structure\'s ' +
-          'collisions merge two inner sketches that should have been separate, so the inner estimate ' +
-          'is now over a union it was not meant to see, and the outer bound says nothing about that. ' +
+        detail: [
+          'Sketch-of-sketches designs are common — distinct users per URL, distinct sources per ' +
+            'flow — and their guarantees do not compose in any convenient way.',
+          'The outer structure\'s collisions merge two inner sketches that should have been ' +
+            'separate. The inner estimate is now over a union it was not meant to see, and the ' +
+            'outer bound says nothing about that.',
           'The honest approach is to measure the composition end to end against an exact reference, ' +
-          'because there is no formula to appeal to.',
+            'because there is no formula to appeal to.'
+        ],
         example: 'The outer bound is on counts; the inner error is relative. Neither describes the pair.'
       },
       {
@@ -388,12 +398,15 @@
         readAs: 'An attacker who can test membership needs about one over the error rate attempts to ' +
           'manufacture one false positive. At a 1% rate that is a hundred probes — which is nothing, if ' +
           'the hash is not keyed.',
-        detail: 'Every structure here assumes keys are independent of the hash, and an attacker who ' +
-          'can compute the hash chooses keys that are not. Against a 1% filter it costs about 104 ' +
-          'probes to find a key the filter accepts, and 50 of them took 5 179 candidates — a search ' +
-          'that runs offline in milliseconds. Lowering ε does not fix it: halving the error doubles ' +
-          'the attacker\'s work and doubles your memory, which is the wrong exchange rate. A ' +
-          'per-process seed makes the whole precomputation worthless.',
+        detail: [
+          'Every structure here assumes keys are independent of the hash, and an attacker who can ' +
+            'compute the hash chooses keys that are not.',
+          'Against a 1% filter it costs about 104 probes to find a key the filter accepts. Fifty of ' +
+            'them took 5 179 candidates, a search that runs offline in milliseconds.',
+          'Lowering ε does not fix it: halving the error doubles the attacker\'s work and doubles ' +
+            'your memory, which is the wrong exchange rate.',
+          'A per-process seed makes the whole precomputation worthless.'
+        ],
         example: '50 manufactured false positives from 5 179 probes; 0 of them survive a different seed.'
       },
       {
@@ -403,36 +416,45 @@
         readAs: 'The error guarantee is a fraction of the total stream, so an attacker who inflates the ' +
           'stream inflates the allowance too. The sketch keeps its promise and the promise stops ' +
           'meaning anything.',
-        detail: 'Finding eight keys that collide with a victim in every row of a 32 × 3 sketch takes ' +
-          '305 021 candidate probes, and pushing 5 000 events through each drives the victim\'s ' +
-          'estimate from 100 to 40 100. Count-min has not been violated: N grew, so ε·N grew with ' +
-          'it. The specification is intact and a rate limiter reading that number would ban a user ' +
-          'who did nothing, which is the distinction between a proof about a structure and a claim ' +
-          'about a system.',
+        detail: [
+          'Finding eight keys that collide with a victim in every row of a 32 × 3 sketch takes ' +
+            '305 021 candidate probes.',
+          'Pushing 5 000 events through each drives the victim\'s estimate from 100 to 40 100.',
+          'Count-min has not been violated: N grew, so ε·N grew with it.',
+          'The specification is intact, and a rate limiter reading that number would ban a user who ' +
+            'did nothing. That is the distinction between a proof about a structure and a claim ' +
+            'about a system.'
+        ],
         example: 'True count 100, estimate 40 100, and the ε·N bound was never exceeded.'
       },
       {
         term: 'Test the stated bound, not a tolerance',
         plain: 'Assert ε·N, 1.04/√m or α computed from the structure\'s own parameters.',
         formal: 'a hand-tuned tolerance outlives the reason it was chosen',
-        detail: '"Within 15%" written into a test survives long after anyone remembers why 15%, and ' +
-          'the next person to see it fail widens it. A bound computed from the sketch\'s parameters ' +
-          'fails when the structure changes rather than when the measurement drifts, which is the ' +
-          'behaviour a regression test is for. It also documents the guarantee in the one place ' +
-          'somebody will definitely read, which is more than the comment above the constructor ' +
-          'manages.',
+        detail: [
+          '"Within 15%" written into a test survives long after anyone remembers why 15%, and the ' +
+            'next person to see it fail widens it.',
+          'A bound computed from the sketch\'s parameters fails when the structure changes rather ' +
+            'than when the measurement drifts, which is the behaviour a regression test is for.',
+          'It also documents the guarantee in the one place somebody will definitely read, which is ' +
+            'more than the comment above the constructor manages.'
+        ],
         example: 'Assert est ≤ truth + (e/w)·N, not est ≤ truth × 1.15.'
       },
       {
         term: 'Six assertions every sketch\'s test suite needs',
         plain: 'No false negatives; the stated bound; the error direction; the merge; adversarial input; behaviour past the sizing.',
         formal: 'each one catches a specific class of change',
-        detail: 'No false negatives catches a filter that lost a key during a resize. The stated ' +
-          'bound catches a quietly widened tolerance. The direction, checked key by key, catches a ' +
-          'switch from count-min to count-sketch made for accuracy. Merge equality catches a merge ' +
-          'that drops a shard, which would still look plausible. An adversarial key set catches ' +
-          'correlated hash rows. And running past the sized n catches every assumption that was ' +
-          'never written down — which is most of them.',
+        detail: [
+          'No false negatives catches a filter that lost a key during a resize. The stated bound ' +
+            'catches a quietly widened tolerance.',
+          'The direction, checked key by key, catches a switch from count-min to count-sketch made ' +
+            'for accuracy.',
+          'Merge equality catches a merge that drops a shard, which would still look plausible. An ' +
+            'adversarial key set catches correlated hash rows.',
+          'Running past the sized n catches every assumption that was never written down — which is ' +
+            'most of them.'
+        ],
         example: 'Merge equality is the one that would otherwise pass: a dropped shard still estimates plausibly.'
       }
     ]
