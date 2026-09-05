@@ -27,20 +27,23 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'A hash array mapped trie splits the 32-bit hash into 5-bit chunks, so every level branches 32 ways and ' +
-          'the whole map is at most seven levels deep. The trick that makes it practical is the node layout: a ' +
-          '32-bit bitmap says which children exist, and the child for chunk c sits at index popcount(bitmap & ' +
-          '((1 << c) − 1)) of an array holding only the occupied slots. Over 15 695 keys that is 3 930 nodes ' +
-          'holding 19 624 slots — a mean fan-out of 4.99 rather than 32.',
-        'The saving is the difference between paying for the slots you have and paying for the slots you could ' +
-          'have had: 219 872 bytes sparse against 1 037 520 dense, 4.72×. It costs one popcount per level, ' +
-          'which is a single instruction on every processor this will ever run on, and it is the reason ' +
-          'Clojure, Scala and Haskell all ship the same structure.',
-        'A persistent vector is the same trie keyed by the index instead of a hash, and it exposes the cost ' +
-          'that pure structures always have: building 20 000 elements one at a time allocates 1 840 nodes ' +
-          'because every append copies the path it touches. A transient — a temporarily mutable copy with an ' +
-          'ownership token — brings that to 645 by mutating the 1 195 nodes it already owns, 2.85× fewer, and ' +
-          'hands back an ordinary persistent vector at the end.'
+        'A hash array mapped trie splits the 32-bit hash into 5-bit chunks, so every level ' +
+          'branches 32 ways and the whole map is at most seven levels deep. The trick that makes ' +
+          'it practical is the node layout. A 32-bit bitmap says which children exist. The child ' +
+          'for chunk c sits at index popcount(bitmap & ((1 << c) − 1)) of an array holding only ' +
+          'the occupied slots. Over 15 695 keys that is 3 930 nodes holding 19 624 slots — a ' +
+          'mean fan-out of 4.99 rather than 32.',
+        'The saving is the difference between paying for the slots you have and paying for the ' +
+          'slots you could have had. That is 219 872 bytes sparse against 1 037 520 dense, 4.72×. ' +
+          'It costs ' +
+          'one popcount per level, which is a single instruction on every processor this will ever ' +
+          'run on. It is the reason Clojure, Scala and Haskell all ship the same structure.',
+        'A persistent vector is the same trie keyed by the index instead of a hash, and it exposes ' +
+          'the cost that pure structures always have. Building 20 000 elements one at a time ' +
+          'allocates 1 840 nodes, because every append copies the path it touches. A transient — a ' +
+          'temporarily mutable copy with an ownership token — brings that to 645 by mutating the ' +
+          '1 195 nodes it already owns, 2.85× fewer. It hands back an ordinary persistent vector ' +
+          'at the end.'
       ],
       demo: {
         title: 'Interactive demo — sparse nodes, and the transient that pays for the build',
@@ -61,12 +64,13 @@
           '    P --> S["slots[2] — the third of three pointers"]'
         ].join('\n')
       },
-      insight: 'The bitmap-and-popcount node is the transferable idea here, and it is not specific to maps: any ' +
-        'time a fixed-width array is mostly empty, one word of presence bits plus a population count turns it ' +
-        'into a dense array with O(1) indexing. The transient is the other half of the lesson — a persistent ' +
-        'structure built one operation at a time pays for versions nobody will ever look at, and the fix is not ' +
-        'to abandon persistence but to admit the intermediate versions are unobservable and mutate them under ' +
-        'an ownership token that makes the admission checkable.'
+      insight: 'The bitmap-and-popcount node is the transferable idea here, and it is not specific ' +
+        'to maps. Any time a fixed-width array is mostly empty, one word of presence bits plus a ' +
+        'population count turns it into a dense array with O(1) indexing. The transient is the ' +
+        'other half of the lesson. A persistent structure built one operation at a time pays for ' +
+        'versions nobody will ever look at. The fix is not to abandon persistence, but to admit ' +
+        'the intermediate versions are unobservable and mutate them under an ownership token that ' +
+        'makes the admission checkable.'
     };
   }
 

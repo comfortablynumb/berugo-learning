@@ -24,25 +24,32 @@
         readAs: 'Consuming 5 bits of the hash per level, a 32-bit hash runs out after 7 levels — and 7 levels ' +
           'of 32-way branching addresses 34 billion entries. The tree is effectively constant depth for ' +
           'any real map.',
-        detail: 'This is where "O(log₃₂ n)" comes from and why immutable collections get away with calling ' +
-          'themselves effectively constant time. The claim is fair rather than a fudge: seven levels covers ' +
-          'thirty-four billion elements, so the depth is bounded by a small number in any program that fits in ' +
-          'memory. What is *not* constant is the work per level, and a wide node makes that the thing to worry ' +
-          'about - which is what the sparse layout is for.',
+        detail: [
+          'This is where "O(log₃₂ n)" comes from, and why immutable collections get away with ' +
+            'calling themselves effectively constant time.',
+          'The claim is fair rather than a fudge. Seven levels covers thirty-four billion elements, ' +
+            'so the depth is bounded by a small number in any program that fits in memory.',
+          'What is *not* constant is the work per level.',
+          'A wide node makes that the thing to worry about, which is what the sparse layout is for.'
+        ],
         example: '15 695 keys reach depth 6 of a possible 7; 200 000 vector elements need four levels of 32.'
       },
       {
         term: 'popcount(bitmap & (bit − 1)) is the whole structure',
         plain: 'Store a 32-bit occupancy map and a dense array of only the occupied children; that expression is the index.',
         formal: 'slot = popcount(bitmap & (bit − 1)), where bit = 1 << fragment',
-        readAs: 'Mask off every bit below the one you want, then count the bits that remain set — that count ' +
-          'is the index into the compact child array. popcount is "how many bits are 1", and it is a ' +
-          'single CPU instruction.',
-        detail: 'Without it a 32-way node is a 32-slot array that is almost entirely empty, and the structure ' +
-          'allocates hundreds of bytes per node forever. With it a node holding three children is an array of ' +
-          'three, and finding the right one is a mask, an AND and a population count - no search and no ' +
-          'indirection. It is the single line that makes the whole family practical, and it is why hardware ' +
-          'popcount instructions matter to a data structure at all.',
+        readAs: 'Mask off every bit below the one you want, then count the bits that remain set. ' +
+          'That count is the index into the compact child array. popcount is "how many bits ' +
+          'are 1", and it is a single CPU instruction.',
+        detail: [
+          'Without it a 32-way node is a 32-slot array that is almost entirely empty, and the ' +
+            'structure allocates hundreds of bytes per node forever.',
+          'With it a node holding three children is an array of three.',
+          'Finding the right one is a mask, an AND and a population count - no search and no ' +
+            'indirection.',
+          'It is the single line that makes the whole family practical, and it is why hardware ' +
+            'popcount instructions matter to a data structure at all.'
+        ],
         example: 'Mean fan-out 4.99 across 3 930 nodes: sparse 219 872 bytes against 1 037 520 for dense 32-slot nodes.'
       },
       {
@@ -52,22 +59,31 @@
         readAs: 'The array holds exactly as many children as the bitmap has bits set — no gaps and no spares. ' +
           'That is what makes the node compact, and it is the first thing a bug in the bitmap ' +
           'arithmetic breaks.',
-        detail: 'The bitmap and the array are two representations of the same fact, and the index arithmetic ' +
-          'assumes they agree. If an insertion updates the bitmap without splicing the array - or splices at ' +
-          'the wrong offset - every subsequent lookup on that node reads a neighbour\'s child, which returns ' +
-          'plausible wrong values rather than crashing. Asserting the invariant is one line and it is the ' +
-          'difference between a bug found in a test and one found in production.',
+        detail: [
+          'The bitmap and the array are two representations of the same fact, and the index ' +
+            'arithmetic assumes they agree.',
+          'Suppose an insertion updates the bitmap without splicing the array, or splices at the ' +
+            'wrong offset.',
+          'Every subsequent lookup on that node then reads a neighbour\'s child, which returns ' +
+            'plausible wrong values rather than crashing.',
+          'Asserting the invariant is one line, and it is the difference between a bug found in a ' +
+            'test and one found in production.'
+        ],
         example: 'The shape report counts nodes whose array length disagrees with their popcount; it must be zero.'
       },
       {
         term: 'Hash collisions still have to be handled',
         plain: 'Two keys whose hashes agree in all 32 bits can never be separated by going deeper.',
         formal: 'at shift ≥ 32 the trie is exhausted and the entry must hold a bucket',
-        detail: 'The depth bound is exactly what creates this case: once the key material runs out there is no ' +
-          'further level to push the colliding keys into, so the leaf has to hold a list. It is rare and it is ' +
-          'not optional - a HAMT that recurses on equal hashes loops forever, and one that overwrites loses ' +
-          'keys silently. The same situation arises whenever the hash is weak, which makes this a correctness ' +
-          'requirement rather than a tail case.',
+        detail: [
+          'The depth bound is exactly what creates this case.',
+          'Once the key material runs out there is no further level to push the colliding keys ' +
+            'into, so the leaf has to hold a list.',
+          'It is rare and it is not optional. A HAMT that recurses on equal hashes loops forever, ' +
+            'and one that overwrites loses keys silently.',
+          'The same situation arises whenever the hash is weak, which makes this a correctness ' +
+            'requirement rather than a tail case.'
+        ],
         example: '400 keys placed and 400 retrieved, with the collision path exercised deliberately.'
       },
       {
@@ -76,32 +92,45 @@
         formal: 'element i lives at path (i >>> shift) & 31 for shift = level·5 down to 0',
         readAs: 'Read the index 5 bits at a time, from the top down: shift the bits you want into place and ' +
           'mask off the rest. Each group of 5 bits picks one of 32 children.',
-        detail: 'Nothing about the structure changes; only where the five-bit fragments come from. Because ' +
-          'positions are dense the nodes are full rather than sparse, so the bitmap is unnecessary and the ' +
-          'child array is a plain 32-slot block. That is what makes indexing a handful of array reads and why ' +
-          'Clojure, Scala and Immutable.js all ship this rather than a balanced tree of elements.',
+        detail: [
+          'Nothing about the structure changes; only where the five-bit fragments come from.',
+          'Because positions are dense the nodes are full rather than sparse, so the bitmap is ' +
+            'unnecessary and the child array is a plain 32-slot block.',
+          'That is what makes indexing a handful of array reads.',
+          'It is also why Clojure, Scala and Immutable.js all ship this rather than a balanced tree ' +
+            'of elements.'
+        ],
         example: '200 000 elements in four levels of 32, and any index reachable in three pointer hops plus a read.'
       },
       {
         term: 'The tail buffer is where the appends go',
         plain: 'Keep the last up-to-32 elements outside the trie; thirty-one appends in thirty-two touch nothing else.',
         formal: 'append writes the tail; every 32nd append pushes the full tail into the trie',
-        detail: 'This is a small detail that carries most of the observed performance, and it is easy to omit ' +
-          'when reimplementing from a description. Without it every append rebuilds a root-to-leaf path; with ' +
-          'it the common case is one array copy of at most 32 elements and no trie work at all. The same idea ' +
-          'appears as a write buffer in an LSM tree and as a partial block in a chunked list - defer the ' +
-          'structural work until there is a whole unit of it to do.',
+        detail: [
+          'This is a small detail that carries most of the observed performance, and it is easy to ' +
+            'omit when reimplementing from a description.',
+          'Without it every append rebuilds a root-to-leaf path.',
+          'With it the common case is one array copy of at most 32 elements and no trie work at ' +
+            'all.',
+          'The same idea appears as a write buffer in an LSM tree and as a partial block in a ' +
+            'chunked list. Defer the structural work until there is a whole unit of it to do.'
+        ],
         example: '20 000 appends allocate 1 840 nodes; without the tail every one of them would rebuild a path.'
       },
       {
         term: 'Transients: own your nodes and mutate them',
         plain: 'A batch build marks the nodes it creates and overwrites them in place, then withdraws the licence.',
         formal: 'a node may be mutated iff its owner token matches the batch\'s',
-        detail: 'The persistent structure is correct because nobody else can see a node the batch just created, ' +
-          'and the owner token is how that is checked. Every node created during the batch is fair game; every ' +
-          'node inherited from before it is copied as usual. Once the batch ends the token is discarded and the ' +
-          'result is an ordinary persistent value. It is the mechanism behind Clojure\'s transients and ' +
-          'Immutable.js\'s `withMutations`, and it is why building a large immutable collection is not slow.',
+        detail: [
+          'The persistent structure is correct because nobody else can see a node the batch just ' +
+            'created, and the owner token is how that is checked.',
+          'Every node created during the batch is fair game; every node inherited from before it is ' +
+            'copied as usual.',
+          'Once the batch ends the token is discarded and the result is an ordinary persistent ' +
+            'value.',
+          'It is the mechanism behind Clojure\'s transients and Immutable.js\'s `withMutations`, ' +
+            'and it is why building a large immutable collection is not slow.'
+        ],
         example: '20 000 appends: 1 840 nodes allocated persistently against 645 with a transient - 2.85× fewer.'
       },
       {
@@ -111,11 +140,15 @@
         readAs: 'Log to base 32 is a small number — 7 at most — so both figures are effectively constant. The ' +
           'one that costs you is the allocation, because it is real garbage rather than just pointer ' +
           'chasing.',
-        detail: 'A persistent update is a logarithm of pointer writes, which is not slow by any reasonable ' +
-          'standard. What is expensive is that each of those writes is a *new object*, so a tight update loop ' +
-          'produces garbage at a rate the collector notices. That is the whole reason transients exist, and ' +
-          'recognising it is what turns "immutable data structures are slow" into the more useful "batch your ' +
-          'writes and the difference disappears".',
+        detail: [
+          'A persistent update is a logarithm of pointer writes, which is not slow by any ' +
+            'reasonable standard.',
+          'What is expensive is that each of those writes is a *new object*, so a tight update loop ' +
+            'produces garbage at a rate the collector notices.',
+          'That is the whole reason transients exist.',
+          'Recognising it is what turns "immutable data structures are slow" into the more useful ' +
+            '"batch your writes and the difference disappears".'
+        ],
         example: 'The same 20 000 appends, the same answer, and 1 195 nodes written in place instead of allocated.'
       }
     ],
