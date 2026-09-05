@@ -173,11 +173,14 @@
         term: 'Counters instead of bits',
         plain: 'A small counter per cell makes removal possible, at four times the memory.',
         formal: 'add: c += 1; remove: c −= 1; has: all counters > 0',
-        detail: 'Nobody reads the counters — they are not there to count anything. They exist so that ' +
-          'decrementing on behalf of one key cannot clear a cell another key still needs, which is ' +
-          'the precise reason a plain Bloom filter cannot delete. Four bits per cell is the standard ' +
-          'choice and it costs exactly 4× the memory: 95 851 bytes against 23 963 for the same m and ' +
-          'k. That factor, not the arithmetic, is why counting filters are reached for reluctantly.',
+        detail: [
+          'Nobody reads the counters — they are not there to count anything.',
+          'They exist so that decrementing on behalf of one key cannot clear a cell another key ' +
+            'still needs, which is the precise reason a plain Bloom filter cannot delete.',
+          'Four bits per cell is the standard choice and it costs exactly 4× the memory: 95 851 ' +
+            'bytes against 23 963 for the same m and k.',
+          'That factor, not the arithmetic, is why counting filters are reached for reluctantly.'
+        ],
         example: '95 851 bytes against 23 963 for the identical m = 191 702 and k = 7.'
       },
       {
@@ -198,12 +201,16 @@
         readAs: 'A counter with b bits saturates at its maximum value, and once there it can never be ' +
           'decremented safely — you no longer know how many increments it swallowed. That slot is ' +
           'permanently stuck.',
-        detail: 'Once a 4-bit counter reaches 15 it has lost track of how many keys it really ' +
-          'represents, so decrementing it could take it below the true count and make a live key ' +
-          'vanish. The correct behaviour is to freeze it, and the cost is that the filter slowly ' +
-          'stops forgetting: those cells stay set forever and the error rate drifts back towards a ' +
-          'filter nothing was ever removed from. On a multiset load — each key inserted four times — ' +
-          '1 260 cells freeze and 2 052 increments are lost outright at 4 bits, and 31 858 freeze at 3.',
+        detail: [
+          'Once a 4-bit counter reaches 15 it has lost track of how many keys it really ' +
+            'represents. Decrementing it could take it below the true count and make a live key ' +
+            'vanish.',
+          'The correct behaviour is to freeze it, and the cost is that the filter slowly stops ' +
+            'forgetting. Those cells stay set forever, and the error rate drifts back towards a ' +
+            'filter nothing was ever removed from.',
+          'On a multiset load — each key inserted four times — 1 260 cells freeze and 2 052 ' +
+            'increments are lost outright at 4 bits. At 3 bits, 31 858 freeze.'
+        ],
         example: 'Each key inserted 4 times: 1 260 of 191 702 cells frozen at 4 bits, 31 858 at 3.'
       },
       {
@@ -212,51 +219,63 @@
         formal: 'block = h₁ mod b; the k offsets are within the block',
         readAs: 'Pick one block from the first hash, then place all k bits inside that block. Every probe for ' +
           'a key then lands in the same cache line, so a lookup is one memory fetch instead of k.',
-        detail: 'A standard filter\'s k bit positions are spread uniformly over the whole array, so a ' +
-          'query touches up to k different cache lines — 6.95 measured at k = 7 — and every one of ' +
-          'them is an unpredictable access the prefetcher cannot help with. A blocked filter picks ' +
-          'one 512-bit block with the first hash and puts all k bits inside it, so the query is one ' +
-          'line. At a query rate where the filter is the hot loop, that is the difference between the ' +
-          'structure being free and being the bottleneck.',
+        detail: [
+          'A standard filter\'s k bit positions are spread uniformly over the whole array, so a ' +
+            'query touches up to k different cache lines — 6.95 measured at k = 7.',
+          'Every one of them is an unpredictable access the prefetcher cannot help with.',
+          'A blocked filter picks one 512-bit block with the first hash and puts all k bits inside ' +
+            'it, so the query is one line.',
+          'At a query rate where the filter is the hot loop, that is the difference between the ' +
+            'structure being free and being the bottleneck.'
+        ],
         example: '1.00 cache lines per query against 6.95 for the standard filter.'
       },
       {
         term: 'Blocking costs accuracy, and the price is measurable',
         plain: 'Block occupancy varies, and the overloaded blocks add more error than the empty ones save.',
         formal: 'measured inflation at the same m and k, by block size',
-        detail: 'Keys are distributed over blocks by a hash, so some blocks end up with more keys ' +
-          'than average and those blocks are denser than the global fill. Error is convex in ' +
-          'density, so the heavy blocks cost more than the light ones save and the net effect is ' +
-          'always an increase. It is a function of block size and nothing else: 1.21× at 512 bits, ' +
-          '1.37× at 256, 1.68× at 128 and 2.56× at 64, while a 4 096-bit block matches the standard ' +
-          'filter exactly and costs eight cache lines, which gives the whole idea back.',
+        detail: [
+          'Keys are distributed over blocks by a hash, so some blocks end up with more keys than ' +
+            'average, and those blocks are denser than the global fill.',
+          'Error is convex in density, so the heavy blocks cost more than the light ones save and ' +
+            'the net effect is always an increase.',
+          'It is a function of block size and nothing else: 1.21× at 512 bits, 1.37× at 256, 1.68× ' +
+            'at 128 and 2.56× at 64.',
+          'A 4 096-bit block matches the standard filter exactly and costs eight cache lines, ' +
+            'which gives the whole idea back.'
+        ],
         example: '512-bit blocks: 1.204% measured against 0.992% for the standard filter, 1.21×.'
       },
       {
         term: 'A block must be an aligned cache line',
         plain: 'The saving is real only when the block does not straddle a line boundary.',
         formal: 'blockBits = 512 and the array is 64-byte aligned',
-        detail: 'The entire argument for a blocked filter is one memory access, and a 512-bit block ' +
-          'that starts halfway through a cache line spans two of them — so it costs the same as a ' +
-          '1 024-bit block while carrying the accuracy penalty of a 512-bit one. This is a rare case ' +
-          'where alignment is not a micro-optimisation but the whole feature, and it is why real ' +
-          'implementations allocate the array with an explicit alignment rather than trusting the ' +
-          'allocator.',
+        detail: [
+          'The entire argument for a blocked filter is one memory access.',
+          'A 512-bit block that starts halfway through a cache line spans two of them. So it costs ' +
+            'the same as a 1 024-bit block while carrying the accuracy penalty of a 512-bit one.',
+          'This is a rare case where alignment is not a micro-optimisation but the whole feature.',
+          'It is why real implementations allocate the array with an explicit alignment rather ' +
+            'than trusting the allocator.'
+        ],
         example: 'A 1 024-bit block measures 2.00 lines per query, so it is not the same structure.'
       },
       {
         term: 'Layers for an unknown n',
         plain: 'When the newest layer fills, add a larger one with a tighter target in front of it.',
         formal: 'layer i: capacity n₀·s^i, target p·r^i',
-        readAs: 'Each layer of a scalable filter is s times bigger than the last and aims at r times the ' +
-          'accuracy, so the sizes grow geometrically while the error rates shrink geometrically — and ' +
-          'the total error stays bounded.',
-        detail: 'The whole difficulty with a Bloom filter is that the sizing needs an n, and a ' +
-          'scalable filter is the answer when that number is genuinely unknowable. Each new layer is ' +
-          'sized larger and aims lower, so the errors form a geometric series and their sum stays ' +
-          'under the overall target however many layers appear. The demo starts with a layer sized ' +
-          'for a tenth of the real key count and ends with four layers holding 2 000, 4 000, 8 000 ' +
-          'and 5 866 keys at targets that halve down the chain.',
+        readAs: 'Each layer of a scalable filter is s times bigger than the last and aims at r ' +
+          'times the accuracy. The sizes grow geometrically while the error rates shrink ' +
+          'geometrically, and the total error stays bounded.',
+        detail: [
+          'The whole difficulty with a Bloom filter is that the sizing needs an n, and a scalable ' +
+            'filter is the answer when that number is genuinely unknowable.',
+          'Each new layer is sized larger and aims lower, so the errors form a geometric series ' +
+            'and their sum stays under the overall target however many layers appear.',
+          'The demo starts with a layer sized for a tenth of the real key count. It ends with four ' +
+            'layers holding 2 000, 4 000, 8 000 and 5 866 keys, at targets that halve down the ' +
+            'chain.'
+        ],
         example: 'Sized for 2 000 and given 20 000: four layers, measured 0.95% against a 1% target.'
       },
       {
@@ -265,25 +284,31 @@
         formal: 'cost(miss) = Σ over layers of k_i probes',
         readAs: 'A key that is absent has to be ruled out by every layer, so a miss costs the sum of all ' +
           'their probe counts. Hits are cheap and misses get steadily dearer as layers accumulate.',
-        detail: 'The layers are searched in order and a hit short-circuits, but the negative answer — ' +
-          'which is the answer a filter exists to give quickly — has to prove absence in all of them. ' +
-          'The measured cost is 9.11 cache lines per query against the standard filter\'s 6.95, and ' +
-          'it grows with the number of times the original sizing estimate was wrong. A scalable ' +
-          'filter is therefore a bet that being unable to size the structure is worse than paying for ' +
-          'the misses, and that is a judgement about the workload rather than about the algorithm.',
+        detail: [
+          'The layers are searched in order and a hit short-circuits.',
+          'But the negative answer — which is the answer a filter exists to give quickly — has to ' +
+            'prove absence in all of them.',
+          'The measured cost is 9.11 cache lines per query against the standard filter\'s 6.95, ' +
+            'and it grows with the number of times the original sizing estimate was wrong.',
+          'A scalable filter is therefore a bet that being unable to size the structure is worse ' +
+            'than paying for the misses. That is a judgement about the workload rather than about ' +
+            'the algorithm.'
+        ],
         example: '9.11 lines per query for the four-layer chain against 6.95 for one filter.'
       },
       {
         term: 'Partitioned against shared arrays',
         plain: 'Giving each hash its own m/k slice, rather than sharing one array of m bits.',
         formal: 'the partitioned variant is very slightly worse and much easier to reason about',
-        detail: 'In the shared layout every hash may address any of the m bits; in the partitioned ' +
-          'layout hash i addresses only its own slice of m/k. The partitioned form makes each hash ' +
-          'independent of the others by construction and lets the k probes proceed in parallel ' +
-          'without conflict, at the cost of a marginally higher error rate — each slice is smaller, ' +
-          'so each fills faster. The distinction matters most when the filter is being built ' +
-          'concurrently, where the shared layout needs atomics on a single word that all k hashes ' +
-          'may target.',
+        detail: [
+          'In the shared layout every hash may address any of the m bits. In the partitioned ' +
+            'layout hash i addresses only its own slice of m/k.',
+          'The partitioned form makes each hash independent of the others by construction, and ' +
+            'lets the k probes proceed in parallel without conflict.',
+          'The cost is a marginally higher error rate: each slice is smaller, so each fills faster.',
+          'The distinction matters most when the filter is being built concurrently, where the ' +
+            'shared layout needs atomics on a single word that all k hashes may target.'
+        ],
         example: 'Each of k hashes owns m/k bits, so the k probes never contend for one word.'
       }
     ],

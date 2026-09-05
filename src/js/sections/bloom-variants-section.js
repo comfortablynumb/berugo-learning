@@ -36,16 +36,17 @@
           'the memory: 95 851 bytes against 23 963 for the same m and k. The counters are not there to ' +
           'count — nobody reads them — they are there so that removing one key does not clear a cell ' +
           'another key is relying on.',
-        'A blocked filter puts all k bits of a key inside one aligned block, so a query touches one ' +
-          'cache line rather than k scattered ones: 1.00 lines against 6.95 measured. It is not free. ' +
-          'Block occupancy varies, the overloaded blocks contribute more false positives than the ' +
-          'empty ones save, and at 512-bit blocks the measured error is 1.21× the standard filter\'s ' +
-          'at identical m and k. Smaller blocks make that worse fast — 2.56× at 64 bits.',
-        'A scalable filter is a chain. When the newest layer reaches the capacity it was sized for, a ' +
-          'larger one with a tighter target error is added in front of it, and the errors form a ' +
-          'geometric series so the whole chain stays under the target however many layers appear. The ' +
-          'cost is on the miss path: a "no" has to consult every layer, so the query cost grows with ' +
-          'the number of times your original estimate was wrong.'
+        'A blocked filter puts all k bits of a key inside one aligned block, so a query touches ' +
+          'one cache line rather than k scattered ones. That is 1.00 lines against 6.95 measured. ' +
+          'It is not free. Block occupancy varies, and the overloaded blocks contribute more ' +
+          'false positives than the empty ones save. At 512-bit blocks the measured error is ' +
+          '1.21× the standard filter\'s at identical m and k. Smaller blocks make that worse ' +
+          'fast — 2.56× at 64 bits.',
+        'A scalable filter is a chain. When the newest layer reaches the capacity it was sized ' +
+          'for, a larger one with a tighter target error is added in front of it. The errors form ' +
+          'a geometric series, so the whole chain stays under the target however many layers ' +
+          'appear. The cost is on the miss path: a "no" has to consult every layer, so the query ' +
+          'cost grows with the number of times your original estimate was wrong.'
       ],
       demo: { title: 'Interactive demo — four filters, one workload', markup: root.BloomVariantsTemplate.render() },
       diagram: {
@@ -66,10 +67,10 @@
         ].join('\n')
       },
       insight: 'A blocked filter trades a little accuracy for one memory access instead of k. At a ' +
-        'query rate where the filter is the hot loop that is the whole difference, and the 21% more ' +
-        'false positives cost nothing if the thing behind the filter is cheap. Work out which side of ' +
-        'that you are on before choosing: if the miss path is a disk read, buy the accuracy; if it is ' +
-        'an in-memory map, buy the cache line.'
+        'query rate where the filter is the hot loop, that is the whole difference. The 21% more ' +
+        'false positives cost nothing if the thing behind the filter is cheap. Work out which ' +
+        'side of that you are on before choosing. If the miss path is a disk read, buy the ' +
+        'accuracy; if it is an in-memory map, buy the cache line.'
     };
   }
 
