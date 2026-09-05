@@ -33,21 +33,22 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'A broad phase may propose pairs that do not touch and may never miss one that does. That asymmetry is ' +
-          'what lets it use boxes and grids — a false positive costs one exact test and a false negative costs ' +
-          'a bug nobody can reproduce — and it fixes the two numbers worth reporting. On 400 discs, all pairs ' +
-          'costs 79 800 tests per frame, sweep and prune 2 370.47 and a rebuilt grid 109.97, all returning the ' +
-          'identical 70.78 touching pairs.',
-        'Sweep and prune is justified by temporal coherence rather than by asymptotics. Sorting 400 bodies from ' +
-          'scratch costs about n²/4 swaps with an insertion sort, and the first frame duly costs 41 177; every ' +
-          'frame after it costs about 165, because almost nothing changed order. This is the one place where ' +
-          'insertion sort is the correct choice rather than the naive one — O(n log n) is a lower bound on ' +
-          'comparisons for *random* input, and this input is not random.',
-        'It is also worth being honest about which phase wins here. Sweep and prune prunes on one axis, so two ' +
-          'discs far apart vertically and overlapping horizontally are still tested; a grid prunes both and ' +
-          'tests 21.6× fewer pairs on this scene. Sweep and prune earns its place when object sizes vary enough ' +
-          'to break a uniform grid, when the world is unbounded, or when per-frame allocation is unacceptable — ' +
-          'not by default.'
+        'A broad phase may propose pairs that do not touch and may never miss one that does. That ' +
+          'asymmetry is what lets it use boxes and grids: a false positive costs one exact test, ' +
+          'and a false negative costs a bug nobody can reproduce. It also fixes the two numbers ' +
+          'worth reporting. On 400 discs, all pairs costs 79 800 tests per frame, sweep and prune ' +
+          '2 370.47 and a rebuilt grid 109.97, all returning the identical 70.78 touching pairs.',
+        'Sweep and prune is justified by temporal coherence rather than by asymptotics. Sorting ' +
+          '400 bodies from scratch costs about n²/4 swaps with an insertion sort, and the first ' +
+          'frame duly costs 41 177. Every frame after it costs about 165, because almost nothing ' +
+          'changed order. This is the one place where insertion sort is the correct choice rather ' +
+          'than the naive one. O(n log n) is a lower bound on comparisons for *random* input, and ' +
+          'this input is not random.',
+        'It is also worth being honest about which phase wins here. Sweep and prune prunes on one ' +
+          'axis, so two discs far apart vertically and overlapping horizontally are still tested. ' +
+          'A grid prunes both and tests 21.6× fewer pairs on this scene. Sweep and prune earns its ' +
+          'place when object sizes vary enough to break a uniform grid, when the world is ' +
+          'unbounded, or when per-frame allocation is unacceptable. It is not the default.'
       ],
       demo: { title: 'Interactive demo — three phases, one scripted scene, and the tunnelling wall', markup: root.BroadPhaseTemplate.render() },
       diagram: {
@@ -64,12 +65,13 @@
           '    N["A vs C: 120 > 114, so the scan from A stopped before it"] -.-> C'
         ].join('\n')
       },
-      insight: 'Temporal coherence is the whole reason sweep and prune works: the sort is almost sorted every ' +
-        'frame, so insertion sort is the right choice for once. But the failure this section really exists for ' +
-        'is tunnelling, and no broad phase fixes it — a body moving further than its own diameter in a step can ' +
-        'be on either side of another and touch it at neither sample, and an exhaustive all-pairs test at the ' +
-        'frame boundary misses it just as thoroughly as the cheapest grid. The usable rule is a bound on ' +
-        'maximum speed × time step against the smallest radius, enforced by substepping when it is exceeded.'
+      insight: 'Temporal coherence is the whole reason sweep and prune works: the sort is almost ' +
+        'sorted every frame, so insertion sort is the right choice for once. But the failure this ' +
+        'section really exists for is tunnelling, and no broad phase fixes it. A body moving ' +
+        'further than its own diameter in a step can be on either side of another and touch it at ' +
+        'neither sample. An exhaustive all-pairs test at the frame boundary misses it just as ' +
+        'thoroughly as the cheapest grid. The usable rule is a bound on maximum speed × time step ' +
+        'against the smallest radius, enforced by substepping when it is exceeded.'
     };
   }
 

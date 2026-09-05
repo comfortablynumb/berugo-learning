@@ -316,11 +316,14 @@
         readAs: 'The broad phase must return a superset of the real collisions — never missing one — and the ' +
           'narrow phase then does the exact test on that shortlist. Missing a pair in the broad phase ' +
           'is unrecoverable; including extras is only slow.',
-        detail: 'That asymmetry is what makes the split work and what makes the broad phase cheap: it can use ' +
-          'axis-aligned boxes, a grid, anything conservative, because a false positive costs one exact test and ' +
-          'a false negative costs a bug nobody can reproduce. It also fixes the only two numbers worth reporting ' +
-          '- pairs tested and pairs found - since their ratio is the whole difference between a working broad ' +
-          'phase and an expensive no-op that happens to return the right answer.',
+        detail: [
+          'That asymmetry is what makes the split work and what makes the broad phase cheap.',
+          'It can use axis-aligned boxes, a grid, anything conservative, because a false positive ' +
+            'costs one exact test and a false negative costs a bug nobody can reproduce.',
+          'It also fixes the only two numbers worth reporting: pairs tested and pairs found.',
+          'Their ratio is the whole difference between a working broad phase and an expensive no-op ' +
+            'that happens to return the right answer.'
+        ],
         example: '400 bodies: all pairs tests 79 800 per frame, sweep and prune 2 370.47, a grid 109.97 - all returning the same 70.78 pairs.'
       },
       {
@@ -330,11 +333,15 @@
         readAs: 'Once the boxes are sorted along an axis, the first one starting past the current box\'s end ' +
           'cannot overlap it — and neither can anything after it. That early exit is what makes sweep ' +
           'and prune near-linear.',
-        detail: 'The early exit is the whole algorithm, and it prunes on one axis only - which is the honest ' +
-          'limitation. Two objects far apart vertically but overlapping horizontally are still tested, so on a ' +
-          'scene that is wide in both directions the pruning is one-dimensional and a grid does better. It is ' +
-          'chosen anyway when objects vary wildly in size, which breaks a uniform grid, or when the world is ' +
-          'unbounded, or when allocation per frame is unacceptable.',
+        detail: [
+          'The early exit is the whole algorithm, and it prunes on one axis only - which is the ' +
+            'honest limitation.',
+          'Two objects far apart vertically but overlapping horizontally are still tested.',
+          'On a scene that is wide in both directions the pruning is one-dimensional, and a grid ' +
+            'does better.',
+          'It is chosen anyway when objects vary wildly in size, which breaks a uniform grid, or ' +
+            'when the world is unbounded, or when allocation per frame is unacceptable.'
+        ],
         example: 'On this scene sweep and prune tests 2 370.47 pairs per frame and a spatial hash tests 109.97 - the grid wins by 21×.'
       },
       {
@@ -343,54 +350,73 @@
         formal: 'insertion sort is O(n + inversions), and inversions per frame is near zero',
         readAs: 'Between frames almost nothing changes order, so re-sorting costs about n. This is the one ' +
           'place where insertion sort being adaptive is the reason for the whole design.',
-        detail: 'This is the one place where insertion sort is the correct choice rather than the naive one, and ' +
-          'it is worth seeing the two numbers side by side: the first frame is a full sort of a random order at ' +
-          'about n²/4 swaps, and every frame after it is a couple of hundred. A comparison-optimal sort would be ' +
-          'slower here, because O(n log n) is a *lower bound* on comparisons and insertion sort is not paying it ' +
-          '- the input is not random.',
+        detail: [
+          'This is the one place where insertion sort is the correct choice rather than the naive ' +
+            'one, and it is worth seeing the two numbers side by side.',
+          'The first frame is a full sort of a random order at about n²/4 swaps, and every frame ' +
+            'after it is a couple of hundred.',
+          'A comparison-optimal sort would be slower here, because O(n log n) is a *lower bound* on ' +
+            'comparisons and insertion sort is not paying it.',
+          'The input is not random.'
+        ],
         example: '400 bodies: frame 1 costs 41 177 swaps, frame 2 costs 165, and the mean over the rest is 164.15.'
       },
       {
         term: 'A grid prunes in two dimensions and rebuilds each frame',
         plain: 'Bucket the boxes by cell every frame and test only within and across neighbouring cells.',
         formal: 'cost = n insertions + n queries, with no state carried between frames',
-        detail: 'Having no state is both the cost and the point: the grid does strictly more work per frame than ' +
-          'an incremental structure on a well-behaved scene, and it is completely unbothered by an object that ' +
-          'teleports, spawns or despawns - the cases that corrupt an incrementally maintained sorted order if ' +
-          'the bookkeeping is not exactly right. On a scene of similarly sized objects in a bounded world it also ' +
-          'happens to be the fastest thing here.',
+        detail: [
+          'Having no state is both the cost and the point.',
+          'The grid does strictly more work per frame than an incremental structure on a ' +
+            'well-behaved scene.',
+          'It is also completely unbothered by an object that teleports, spawns or despawns - the ' +
+            'cases that corrupt an incrementally maintained sorted order if the bookkeeping is not ' +
+            'exactly right.',
+          'On a scene of similarly sized objects in a bounded world it also happens to be the ' +
+            'fastest thing here.'
+        ],
         example: 'The grid tests 109.97 pairs per frame against sweep and prune\'s 2 370.47, for the identical pair set.'
       },
       {
         term: 'Tunnelling: a contact neither endpoint of the step can see',
         plain: 'A body moving further than its own size can be on either side of another and touch it at neither sample.',
         formal: 'the swept test has a root in [0, dt] and neither frame\'s contact set contains the pair',
-        detail: 'This is a property of the time step, not of the index: no broad phase fixes it, and testing all ' +
-          'pairs exactly at the frame boundaries misses it just as thoroughly as the cheapest grid does. It is ' +
-          'also worth defining precisely, because the loose version over-counts badly - a contact that begins ' +
-          'mid-step and is still a contact at the next sample is one frame of latency, which every discrete ' +
-          'engine has, and is not tunnelling at all.',
+        detail: [
+          'This is a property of the time step, not of the index.',
+          'No broad phase fixes it, and testing all pairs exactly at the frame boundaries misses it ' +
+            'just as thoroughly as the cheapest grid does.',
+          'It is also worth defining precisely, because the loose version over-counts badly.',
+          'A contact that begins mid-step and is still a contact at the next sample is one frame of ' +
+            'latency, which every discrete engine has, and is not tunnelling at all.'
+        ],
         example: 'A static disc and one crossing it at 1 200 units/s: apart at the start of the step, apart at the end, overlapping in between.'
       },
       {
         term: 'The miss rate is a function of travel per frame',
         plain: 'Express speed as diameters travelled per step and the failure appears exactly where you would expect.',
         formal: 'misses ≈ 0 below ~0.5 diameters per step, and climb steeply above 1',
-        detail: 'Below half a diameter of travel the samples overlap enough that essentially nothing is missed; ' +
-          'at one diameter the failure is already material, and beyond that it dominates. That makes the ' +
-          'engineering rule concrete rather than folkloric - bound the product of maximum speed and time step ' +
-          'against the smallest object radius, and either clamp the speed or subdivide the step when the bound is ' +
-          'exceeded.',
+        detail: [
+          'Below half a diameter of travel the samples overlap enough that essentially nothing is ' +
+            'missed.',
+          'At one diameter the failure is already material, and beyond that it dominates.',
+          'That makes the engineering rule concrete rather than folkloric.',
+          'Bound the product of maximum speed and time step against the smallest object radius, and ' +
+            'either clamp the speed or subdivide the step when the bound is exceeded.'
+        ],
         example: '400 bodies of radius 6 over 120 frames: 0 misses at 0.04 diameters per step, 61 at 0.42, 4 510 at 1.67 and 15 445 at 3.33.'
       },
       {
         term: 'Shrinking the step is the blunt fix, and it works',
         plain: 'Halving the time step roughly quarters the missed contacts, at twice the frames.',
         formal: 'misses fall super-linearly in dt because both the travel and the exposure shrink',
-        detail: 'It is not elegant and it is what most engines actually do, under the name substepping, because ' +
-          'the alternative - continuous collision detection for every pair - is far more expensive and far more ' +
-          'code. The usual production compromise is to substep only the fast bodies, or to run a swept test only ' +
-          'for pairs whose combined travel exceeds their combined radius, which is a cheap conservative filter.',
+        detail: [
+          'It is not elegant, and it is what most engines actually do, under the name substepping.',
+          'The alternative - continuous collision detection for every pair - is far more expensive ' +
+            'and far more code.',
+          'The usual production compromise is to substep only the fast bodies.',
+          'The other is to run a swept test only for pairs whose combined travel exceeds their ' +
+            'combined radius, which is a cheap conservative filter.'
+        ],
         example: 'At 600 units/s: 32.96% of contacts missed at dt = 1/30, 5.14% at 1/60, 0.66% at 1/120 and 0.07% at 1/240.'
       },
       {
@@ -398,14 +424,19 @@
         plain: 'Relative motion is a straight line, so "do these two ever touch during the step" is a root-finding question.',
         formal: '|Δp + tΔv|² = (r₁ + r₂)² has a root in [0, dt]',
         readAs: 'Two moving circles touch when the squared distance between them equals the squared sum of ' +
-          'their radii. Δ is "the difference in", so this is a quadratic in t, and a solution between 0 ' +
-          'and the frame time means they collided during the frame — even if they never overlap at ' +
-          'either end of it.',
-        detail: 'Writing it down is what turns tunnelling from a mystery into arithmetic, and the same quadratic ' +
-          'is the exact-time-of-impact solver a continuous engine uses. Two cases have to be handled before the ' +
-          'discriminant: already overlapping at t = 0, which returns immediately, and zero relative velocity, ' +
-          'which has no quadratic term at all and would divide by zero. Both are common - resting contacts and ' +
-          'bodies moving together are the normal state of a physics scene.',
+          'their radii. Here Δ is "the difference in", so this is a quadratic in t. A solution ' +
+          'between 0 and the frame time means they collided during the frame — even if they never ' +
+          'overlap at either end of it.',
+        detail: [
+          'Writing it down is what turns tunnelling from a mystery into arithmetic, and the same ' +
+            'quadratic is the exact-time-of-impact solver a continuous engine uses.',
+          'Two cases have to be handled before the discriminant. The first is already overlapping ' +
+            'at t = 0, which returns immediately.',
+          'The second is zero relative velocity, which has no quadratic term at all and would ' +
+            'divide by zero.',
+          'Both are common: resting contacts and bodies moving together are the normal state of a ' +
+            'physics scene.'
+        ],
         example: 'A disc at rest and one at 1 200 units/s 20 units away: the root lies at about 0.015 s, inside a 0.033 s step.'
       }
     ]
