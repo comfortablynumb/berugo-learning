@@ -35,21 +35,23 @@
       sectionId: SECTION_ID,
       orientation: [
         'An average latency answers a question nobody asked. On the bimodal stream in the demo the ' +
-          'mean sits at 58 ms, the median at 21 ms and the 99th percentile at 739 ms: the mean is ' +
-          'not the typical experience and it is not the bad one either, it is an artefact of mixing ' +
-          'them. Exact quantiles need the values sorted, and keeping 200 000 doubles to answer "what ' +
-          'is p99" costs 1.6 MB per stream per window.',
-        'Four sketches, four different bargains. A reservoir keeps k values uniformly and is honest ' +
-          'in the middle and useless in the tail — 1 000 samples hold one observation past p99.9, so ' +
-          'the answer there is a single measurement and reads 38.8% low. t-digest sizes its centroids ' +
-          'by a scale function that keeps them tiny at both ends, so its rank error at p99.9 is 0.013 ' +
-          'percentage points from 944 bytes. KLL gives a proven rank bound. DDSketch buckets values ' +
-          'logarithmically and guarantees the *value* to within a relative α.',
-        'The distinction the section is built on is which of those two errors a guarantee is about. ' +
-          'An SLO is written in values — "p99 under 250 ms" — and only DDSketch bounds that: it is ' +
-          'within 0.53% everywhere here at α = 1%. t-digest and KLL bound the rank, and on a stream ' +
-          'with a gap between two modes a tiny rank error lands a long way away in value: t-digest is ' +
-          '0.267 percentage points out at p90 and that is a 23.6% error in milliseconds.'
+          'mean sits at 58 ms, the median at 21 ms and the 99th percentile at 739 ms. The mean is ' +
+          'not the typical experience and it is not the bad one either. It is an artefact of ' +
+          'mixing them. Exact quantiles need the values sorted, and keeping 200 000 doubles to ' +
+          'answer "what is p99" costs 1.6 MB per stream per window.',
+        'Four sketches, four different bargains. A reservoir keeps k values uniformly, honest in ' +
+          'the middle and useless in the tail. At k = 1 000, one observation lands past p99.9, so ' +
+          'the answer there is a single measurement and reads 38.8% low. The t-digest sizes its ' +
+          'centroids by a scale function that keeps them tiny at both ends. Its rank error at ' +
+          'p99.9 is 0.013 percentage points from 944 bytes. KLL gives a proven rank bound. ' +
+          'DDSketch buckets values logarithmically and guarantees the *value* to within a ' +
+          'relative α.',
+        'The distinction the section is built on is which of those two errors a guarantee is ' +
+          'about. An SLO is written in values — "p99 under 250 ms" — and only DDSketch bounds ' +
+          'that, to within 0.53% everywhere here at α = 1%. The t-digest and KLL bound the rank ' +
+          'instead. On a stream with a gap between two modes a tiny rank error lands a long way ' +
+          'away in value. The t-digest is 0.267 percentage points out at p90, and that is a 23.6% ' +
+          'error in milliseconds.'
       ],
       demo: { title: 'Interactive demo — four sketches on one latency stream', markup: root.QuantileSketchesTemplate.render() },
       diagram: {
@@ -70,7 +72,7 @@
       },
       insight: 'Averaging p99s across shards is meaningless, and this section is the one to point at ' +
         'when someone builds a dashboard that does it. With eight shards where one is degraded, the ' +
-        'mean of the per-shard p99s reads 17.4% *below* the true global p99 — it hides the outage ' +
+        'mean of the per-shard p99s reads 17.4% *below* the true global p99. It hides the outage ' +
         'rather than showing it. Merging the sketches instead lands within 0.95%, and that is the ' +
         'only reason to care whether a quantile sketch is mergeable.'
     };

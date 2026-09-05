@@ -325,12 +325,16 @@
         },
         plain: 'On a bimodal distribution the mean is neither the typical experience nor the bad one.',
         formal: 'mean 58 ms, median 21 ms, p99 739 ms on the same stream',
-        detail: 'A latency distribution with a fast path and a slow path has a mean that sits in the ' +
-          'gap between them, describing an experience nobody had. Worse, the mean moves when the ' +
-          'slow mode\'s *share* changes and also when its *depth* changes, so it cannot distinguish ' +
-          '"more requests are slow" from "the slow ones got slower". Quantiles separate those and ' +
-          'they are what every SLO is written in, which is why a system that only records means ' +
-          'cannot answer the question it is being asked.',
+        detail: [
+          'A latency distribution with a fast path and a slow path has a mean that sits in the gap ' +
+            'between them, describing an experience nobody had.',
+          'Worse, the mean moves when the slow mode\'s *share* changes and also when its *depth* ' +
+            'changes. It cannot distinguish "more requests are slow" from "the slow ones got ' +
+            'slower".',
+          'Quantiles separate those, and they are what every SLO is written in.',
+          'That is why a system that only records means cannot answer the question it is being ' +
+            'asked.'
+        ],
         example: 'The mean of 58 ms sits between a 21 ms median and a 739 ms p99.'
       },
       {
@@ -339,11 +343,14 @@
         formal: 'exact selection over an unordered stream needs Ω(n) space',
         readAs: 'You cannot report an exact quantile of a stream without keeping essentially all of it. That ' +
           'lower bound is why quantile sketches exist at all.',
-        detail: 'The p99 of a stream cannot be maintained incrementally without keeping enough of the ' +
-          'stream to identify it, and the adversary argument is the usual one: whatever you discard ' +
-          'could have been the answer. Keeping 200 000 doubles is 1.6 MB per stream per window, ' +
-          'which is affordable for one service and not for ten thousand of them at per-endpoint ' +
-          'granularity. Every sketch here is a different way of deciding what to throw away.',
+        detail: [
+          'The p99 of a stream cannot be maintained incrementally without keeping enough of the ' +
+            'stream to identify it.',
+          'The adversary argument is the usual one: whatever you discard could have been the answer.',
+          'Keeping 200 000 doubles is 1.6 MB per stream per window, which is affordable for one ' +
+            'service and not for ten thousand of them at per-endpoint granularity.',
+          'Every sketch here is a different way of deciding what to throw away.'
+        ],
         example: '200 000 samples kept exactly is 1.6 MB; the sketches range from 944 to 8 000 bytes.'
       },
       {
@@ -352,12 +359,15 @@
         formal: 'every item is in the sample with probability k/n, at every point',
         readAs: 'Reservoir sampling keeps every item equally likely to be in the sample, at every moment, ' +
           'without ever knowing how long the stream will be.',
-        detail: 'The invariant is stronger than "uniform at the end": after any number of items the ' +
-          'sample is a uniform draw without replacement from everything seen so far, which is what ' +
-          'makes it safe to query a reservoir at any moment. It is the most general of the four — the ' +
-          'sample answers any question about the distribution, not only quantiles — and the weakest ' +
-          'in the tail, because a k-item sample holds only k·(1 − p) observations past the p-th ' +
-          'quantile and at p99.9 with k = 1 000 that is one.',
+        detail: [
+          'The invariant is stronger than "uniform at the end". After any number of items the ' +
+            'sample is a uniform draw without replacement from everything seen so far. That is ' +
+            'what makes it safe to query a reservoir at any moment.',
+          'It is the most general of the four: the sample answers any question about the ' +
+            'distribution, not only quantiles.',
+          'It is also the weakest in the tail. A k-item sample holds only k·(1 − p) observations ' +
+            'past the p-th quantile, and at p99.9 with k = 1 000 that is one.'
+        ],
         example: 'p99.9 from 1 000 samples is one observation, and reads 38.8% low.'
       },
       {
@@ -367,39 +377,51 @@
         readAs: 'The scale function stretches the ends of the distribution and squashes the middle, so ' +
           'centroids near the extremes stay small. A centroid may absorb another only while the change ' +
           'in scale stays under one, which is what keeps the tails accurate.',
-        detail: 'The scale function is flat near q = 0.5 and steep as q approaches 0 or 1, so the ' +
-          'merging rule allows a centroid to swallow thousands of points in the middle and only a ' +
-          'handful at the edges. That puts the resolution where the interesting quantiles are: with ' +
-          'δ = 100 the whole digest is about 60 centroids and 944 bytes, and its rank error at p99.9 ' +
-          'is 0.013 percentage points — better than the reservoir at eight times the memory. There is ' +
-          'no formal bound; the argument for it is empirical and the demo is the evidence.',
+        detail: [
+          'The scale function is flat near q = 0.5 and steep as q approaches 0 or 1. The merging ' +
+            'rule therefore allows a centroid to swallow thousands of points in the middle and ' +
+            'only a handful at the edges.',
+          'That puts the resolution where the interesting quantiles are.',
+          'With δ = 100 the whole digest is about 60 centroids and 944 bytes. Its rank error at ' +
+            'p99.9 is 0.013 percentage points, better than the reservoir at eight times the memory.',
+          'There is no formal bound; the argument for it is empirical and the demo is the evidence.'
+        ],
         example: '60 centroids, 944 bytes, rank error 0.013 pp at p99.9.'
       },
       {
         term: 'KLL compactors',
         plain: 'Level h holds items of weight 2^h; a full level is sorted and every second item is promoted.',
         formal: 'capacity grows geometrically up the stack, so the sketch is O(k) items',
-        detail: 'Compacting a sorted buffer by taking alternate items halves the data and doubles the ' +
-          'weight, which is exact in expectation and wrong by at most one item\'s worth of rank per ' +
-          'compaction. The coin that decides odd or even is what keeps it unbiased — always keeping ' +
-          'the same parity biases every quantile in one direction, and the error accumulates instead ' +
-          'of cancelling. KLL is the family with a proven rank-error bound, which is what separates ' +
-          'it from t-digest in a specification even where t-digest measures better.',
+        detail: [
+          'Compacting a sorted buffer by taking alternate items halves the data and doubles the ' +
+            'weight.',
+          'That is exact in expectation and wrong by at most one item\'s worth of rank per ' +
+            'compaction.',
+          'The coin that decides odd or even is what keeps it unbiased. Always keeping the same ' +
+            'parity biases every quantile in one direction, and the error accumulates instead of ' +
+            'cancelling.',
+          'KLL is the family with a proven rank-error bound, which is what separates it from ' +
+            't-digest in a specification even where t-digest measures better.'
+        ],
         example: '2 152 bytes and a worst rank error of 0.489 percentage points across four quantiles.'
       },
       {
         term: 'DDSketch bounds the value, not the rank',
         plain: 'Logarithmic buckets: bucket i covers [γ^i, γ^(i+1)) for γ = (1+α)/(1−α).',
         formal: '|v̂ − v| ≤ α·v, for every quantile, always',
-        readAs: 'The estimate is within a fixed fraction of the true value — a relative guarantee rather than ' +
-          'an absolute one, which is what latency work needs, because being 1 ms out matters at p50 and ' +
-          'not at p99.9.',
-        detail: 'Every value in a bucket is within a relative α of the bucket\'s representative, so ' +
-          'the returned value is within α of *some* value at the requested rank — a guarantee about ' +
-          'milliseconds rather than about position. That is the form an SLO is written in, and it is ' +
-          'the reason DDSketch is 0.53% out at worst across p50 to p99.9 on a stream where t-digest ' +
-          'is 23.55% out at p90. The cost is memory proportional to the number of decades the data ' +
-          'spans, which is fine for latency and wrong for something unbounded.',
+        readAs: 'The estimate is within a fixed fraction of the true value. That is a relative ' +
+          'guarantee rather than an absolute one, which is what latency work needs, because being ' +
+          '1 ms out matters at p50 and not at p99.9.',
+        detail: [
+          'Every value in a bucket is within a relative α of the bucket\'s representative. So the ' +
+            'returned value is within α of *some* value at the requested rank — a guarantee about ' +
+            'milliseconds rather than about position.',
+          'That is the form an SLO is written in.',
+          'It is also the reason DDSketch is 0.53% out at worst across p50 to p99.9 on a stream ' +
+            'where t-digest is 23.55% out at p90.',
+          'The cost is memory proportional to the number of decades the data spans, which is fine ' +
+            'for latency and wrong for something unbounded.'
+        ],
         example: 'α = 1%: worst value error 0.53% across p50, p90, p99 and p99.9.'
       },
       {
@@ -409,11 +431,15 @@
         readAs: 'An error in rank turns into an error in value by dividing by how tightly packed the data is ' +
           'there — the Δ is "an error in". Where points are sparse, being a few ranks out moves the ' +
           'reported value a long way.',
-        detail: 'On a bimodal stream the quantile function is nearly vertical between the modes, so a ' +
-          'sketch that is 0.267 percentage points out in rank at p90 is 23.55% out in milliseconds — ' +
-          'and both numbers describe the same answer. Reporting only one of them makes three of the ' +
-          'four sketches look either flawless or broken. Which one matters is decided by the question: ' +
-          '"the 90th percentile request" is a rank and "under 250 ms" is a value.',
+        detail: [
+          'On a bimodal stream the quantile function is nearly vertical between the modes. A sketch ' +
+            'that is 0.267 percentage points out in rank at p90 is 23.55% out in milliseconds, and ' +
+            'both numbers describe the same answer.',
+          'Reporting only one of them makes three of the four sketches look either flawless or ' +
+            'broken.',
+          'Which one matters is decided by the question: "the 90th percentile request" is a rank ' +
+            'and "under 250 ms" is a value.'
+        ],
         example: 't-digest at p90: 0.267 pp of rank, 23.55% of value, one answer.'
       },
       {
@@ -422,12 +448,15 @@
         formal: 'quantile(∪ S_i) ≠ mean_i quantile(S_i)',
         readAs: 'Averaging the p99s of several shards does not give the p99 of the whole. It is a genuinely ' +
           'wrong operation, and it is the most common mistake in latency dashboards.',
-        detail: 'It is not a worse estimate; it is an estimate of nothing. When the shards are ' +
-          'statistically identical the two numbers happen to be close and the dashboard looks ' +
-          'correct, which is why the mistake survives. The moment one shard is degraded — the only ' +
-          'case anybody cares about — the average reads 17.4% *below* the true global p99, because ' +
-          'seven healthy shards outvote the one that is failing. Merging the sketches and querying ' +
-          'once lands within 0.95%.',
+        detail: [
+          'It is not a worse estimate; it is an estimate of nothing.',
+          'When the shards are statistically identical the two numbers happen to be close and the ' +
+            'dashboard looks correct, which is why the mistake survives.',
+          'The moment one shard is degraded — the only case anybody cares about — the average ' +
+            'reads 17.4% *below* the true global p99. Seven healthy shards outvote the one that is ' +
+            'failing.',
+          'Merging the sketches and querying once lands within 0.95%.'
+        ],
         example: 'Eight shards, one degraded: averaged 644.7 ms, merged 772.9, true 780.4.'
       }
     ]
