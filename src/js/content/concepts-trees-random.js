@@ -177,24 +177,31 @@
         },
         plain: 'Every access rotates the touched node to the root, in pairs rather than one step at a time.',
         formal: 'zig; zig-zig; zig-zag',
-        detail: 'The operation is not "rotate the node up until it is the root" — that version, ' +
-          'move-to-root, also puts the node on top and has no amortised bound at all. Splaying looks ' +
-          'at two levels: if the node and its parent lean the same way it rotates the *parent* first ' +
-          'and then the node, and if they lean opposite ways it rotates the node twice. That ' +
-          'difference halves the depth of every node on the access path instead of merely shifting ' +
-          'them, which is what the potential argument needs.',
+        detail: [
+          'The operation is not "rotate the node up until it is the root". That version, ' +
+            'move-to-root, also puts the node on top and has no amortised bound at all.',
+          'Splaying looks at two levels. If the node and its parent lean the same way it rotates ' +
+            'the *parent* first and then the node; if they lean opposite ways it rotates the node ' +
+            'twice.',
+          'That difference halves the depth of every node on the access path instead of merely ' +
+            'shifting them, which is what the potential argument needs.'
+        ],
         example: 'A 2 000-key tree under a skewed workload does about 33 000 zig-zigs and 30 000 zig-zags per 20 000 accesses.'
       },
       {
         term: 'The three cases',
         plain: 'zig when the node is a child of the root; zig-zig on the same side; zig-zag on opposite sides.',
         formal: 'zig ends the splay; the other two repeat',
-        detail: 'zig is the terminating case and happens at most once per splay, when only one level ' +
-          'is left. zig-zig is the case that does the real work: rotating the grandparent-parent pair ' +
-          'first pulls the whole path up rather than pivoting around the node. zig-zag is the ' +
-          'symmetric case and behaves like a double rotation in AVL. Counting them separately is ' +
-          'worth doing because their proportions tell you about the access pattern: a sequential ' +
-          'scan produces mostly zig-zigs, and a scattered one produces a mix.',
+        detail: [
+          'zig is the terminating case and happens at most once per splay, when only one level is ' +
+            'left.',
+          'zig-zig is the case that does the real work. Rotating the grandparent-parent pair first ' +
+            'pulls the whole path up, rather than pivoting around the node.',
+          'zig-zag is the symmetric case and behaves like a double rotation in AVL.',
+          'Counting them separately is worth doing because their proportions tell you about the ' +
+            'access pattern. A sequential scan produces mostly zig-zigs, and a scattered one ' +
+            'produces a mix.'
+        ],
         example: 'Higher skew means shorter paths, so both pair counts fall: at skew 2.0 the same run does 8 331 zig-zigs against 57 726 at skew 0.6.'
       },
       {
@@ -204,12 +211,16 @@
         readAs: 'The charged cost of a splay is what it really cost plus the change in the stored potential Φ ' +
           '— the triangle is "change in". Averaged over any sequence that comes to O(log n) per ' +
           'operation, even though a single splay can be far worse.',
-        detail: 'The analysis is the potential method from M01.3, with the potential defined as the ' +
-          'sum over nodes of the log of the subtree size. A deep access is expensive in real work, ' +
-          'but it also flattens the path it walked, which lowers Φ by roughly as much — so the ' +
-          'amortised cost comes out O(log n) even though a single access can cost O(n). The choice ' +
-          'of Φ is the whole proof, and it is why splay trees are the standard illustration of the ' +
-          'potential method rather than of any particular data-structure idea.',
+        detail: [
+          'The analysis is the potential method from M01.3, with the potential defined as the sum ' +
+            'over nodes of the log of the subtree size.',
+          'A deep access is expensive in real work, but it also flattens the path it walked, which ' +
+            'lowers Φ by roughly as much. So the amortised cost comes out O(log n) even though a ' +
+            'single access can cost O(n).',
+          'The choice of Φ is the whole proof, and it is why splay trees are the standard ' +
+            'illustration of the potential method rather than of any particular data-structure ' +
+            'idea.'
+        ],
         example: 'One access can cost n comparisons; the next accesses on that path are correspondingly cheap.'
       },
       {
@@ -225,12 +236,15 @@
         },
         plain: 'Accessing a key costs O(log of how many distinct keys were touched since it was last accessed).',
         formal: 'cost = O(log t(x)), t = distinct keys touched since',
-        detail: 'This is the property no balanced tree has, and it is stronger than "hot keys are ' +
-          'near the root". It says the cost depends on the recent access history rather than on the ' +
-          'size of the tree: a working set of 50 keys inside a million-key tree is served at the ' +
-          'cost of a 50-key tree, and it adapts as the working set moves. That is why splay trees ' +
-          'behave like a cache with no cache-management code, and why the measured advantage grows ' +
-          'so sharply with skew.',
+        detail: [
+          'This is the property no balanced tree has, and it is stronger than "hot keys are near ' +
+            'the root".',
+          'It says the cost depends on the recent access history rather than on the size of the ' +
+            'tree. A working set of 50 keys inside a million-key tree is served at the cost of a ' +
+            '50-key tree, and it adapts as the working set moves.',
+          'That is why splay trees behave like a cache with no cache-management code, and why the ' +
+            'measured advantage grows so sharply with skew.'
+        ],
         example: 'At Zipf skew 2.0 the tree answers in 2.77 comparisons per access, against a balanced tree at 11.60.'
       },
       {
@@ -240,49 +254,60 @@
         readAs: 'Add up, over every key, how often it is asked for times the log of one over that frequency. ' +
           'That total is the entropy of the access pattern, and a splay tree matches it without ever ' +
           'being told what the frequencies are.',
-        detail: 'If you knew the access probabilities in advance you could build the optimal static ' +
-          'search tree by dynamic programming, and its cost is the entropy of the distribution. A ' +
-          'splay tree achieves that within a constant factor without being told the probabilities, ' +
-          'and without storing any statistics. The dynamic-optimality conjecture asks the much harder ' +
-          'question — whether splaying is within a constant factor of the best possible *dynamic* ' +
-          'strategy for any sequence — and it has been open since 1985.',
+        detail: [
+          'If you knew the access probabilities in advance you could build the optimal static ' +
+            'search tree by dynamic programming, and its cost is the entropy of the distribution.',
+          'A splay tree achieves that within a constant factor without being told the ' +
+            'probabilities, and without storing any statistics.',
+          'The dynamic-optimality conjecture asks the much harder question: whether splaying is ' +
+            'within a constant factor of the best possible *dynamic* strategy for any sequence. It ' +
+            'has been open since 1985.'
+        ],
         example: 'A uniform distribution has maximum entropy, which is exactly where splaying has nothing to gain.'
       },
       {
         term: 'The crossover',
         plain: 'On a flat access pattern splaying loses. The advantage only appears once the traffic concentrates.',
         formal: 'measured crossover between Zipf skew 0.8 and 1.0',
-        detail: 'Splaying is not free: every access rotates, which is work a balanced tree does not ' +
-          'do. On a uniform pattern that work buys nothing, and the measured cost is a quarter higher ' +
-          'than AVL. As the distribution skews, the hot keys rise and the cost falls, crossing the ' +
-          'balanced tree between skew 0.8 and 1.0 and reaching a quarter of it by skew 2.0. Quoting ' +
-          'the win without stating the skew is the classic overclaim; the crossover is the honest ' +
-          'summary.',
+        detail: [
+          'Splaying is not free. Every access rotates, which is work a balanced tree does not do.',
+          'On a uniform pattern that work buys nothing, and the measured cost is a quarter higher ' +
+            'than AVL.',
+          'As the distribution skews, the hot keys rise and the cost falls, crossing the balanced ' +
+            'tree between skew 0.8 and 1.0 and reaching a quarter of it by skew 2.0.',
+          'Quoting the win without stating the skew is the classic overclaim. The crossover is the ' +
+            'honest summary.'
+        ],
         example: 'skew 0.6: splay costs 1.26× AVL. skew 1.2: 0.71×. skew 2.0: 0.24×.'
       },
       {
         term: 'A read is a write',
         plain: 'Splaying restructures on lookup, which rules the tree out of anything shared or read-only.',
         formal: 'find() mutates the tree',
-        detail: 'This is the property that decides most real adoption questions, and no amortised ' +
-          'bound can compensate for it. Two threads reading the same splay tree both want to ' +
-          'restructure it, so every read needs the write lock and the structure cannot be made ' +
-          'lock-free. A memory-mapped or read-only page cannot be splayed at all. Even ' +
-          'single-threaded it interacts badly with copy-on-write and with any cache that assumed ' +
-          'reads were pure. It is also why measured throughput can disappoint despite excellent ' +
-          'comparison counts.',
+        detail: [
+          'This is the property that decides most real adoption questions, and no amortised bound ' +
+            'can compensate for it.',
+          'Two threads reading the same splay tree both want to restructure it, so every read ' +
+            'needs the write lock and the structure cannot be made lock-free.',
+          'A memory-mapped or read-only page cannot be splayed at all. Even single-threaded it ' +
+            'interacts badly with copy-on-write, and with any cache that assumed reads were pure.',
+          'It is also why measured throughput can disappoint despite excellent comparison counts.'
+        ],
         example: 'The demo does about 6.8 rotations per read — every one a write to a tree another thread may be reading.'
       },
       {
         term: 'No metadata at all',
         plain: 'No heights, no colours, no sizes, no priorities. A node is a key, a value and two pointers.',
         formal: 'the smallest node of any family here',
-        detail: 'Splay trees store nothing beyond the tree itself, which makes them the cheapest ' +
-          'family per node and the shortest to implement correctly — the entire structure is one ' +
-          'splay function and the operations built on it. Deletion, in particular, is unusually ' +
-          'pleasant: splay the target to the root, drop it, splay the largest key of the left ' +
-          'subtree to that subtree\'s root, and hang the right subtree off it, with no comparisons ' +
-          'and no case analysis.',
+        detail: [
+          'Splay trees store nothing beyond the tree itself, which makes them the cheapest family ' +
+            'per node and the shortest to implement correctly.',
+          'The entire structure is one splay function and the operations built on it.',
+          'Deletion, in particular, is unusually pleasant. Splay the target to the root, drop it, ' +
+            'splay the largest key of the left subtree to that subtree\'s root, and hang the right ' +
+            'subtree off it.',
+          'There are no comparisons and no case analysis.'
+        ],
         example: 'Deletion needs no case analysis: splay, drop, splay the predecessor, attach.'
       }
     ],

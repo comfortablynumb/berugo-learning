@@ -36,17 +36,17 @@
       sectionId: SECTION_ID,
       orientation: [
         'A splay tree has no balance rule and no per-node bookkeeping. Every access — read or ' +
-          'write — rotates the touched node all the way to the root, in pairs: zig when it is a ' +
-          'child of the root, zig-zig when the node and its parent lean the same way, zig-zag when ' +
-          'they do not.',
-        'Doing the pairs in that order is the whole algorithm. Repeatedly rotating a node with its ' +
-          'parent also brings it to the root and gives no amortised bound at all; splaying halves ' +
-          'the depth of everything on the path, which is what the potential argument needs. The ' +
-          'result is O(log n) amortised, plus two properties no balanced tree has: the working-set ' +
-          'property, and static optimality.',
+          'write — rotates the touched node all the way to the root, in pairs. It is zig when the ' +
+          'node is a child of the root, zig-zig when the node and its parent lean the same way, ' +
+          'and zig-zag when they do not.',
+        'Doing the pairs in that order is the whole algorithm. Repeatedly rotating a node with ' +
+          'its parent also brings it to the root, and gives no amortised bound at all. Splaying ' +
+          'halves the depth of everything on the path, which is what the potential argument ' +
+          'needs. The result is O(log n) amortised, plus two properties no balanced tree has: the ' +
+          'working-set property, and static optimality.',
         'The cost is that a read is a write. That rules the structure out of anything concurrent, ' +
-          'memory-mapped or shared — and it is why the measurement below is about a skewed workload, ' +
-          'because on a uniform one there is nothing to win.'
+          'memory-mapped or shared. It is also why the measurement below is about a skewed ' +
+          'workload, because on a uniform one there is nothing to win.'
       ],
       demo: { title: 'Interactive demo — the workload decides', markup: root.SplayTreesTemplate.render() },
       diagram: {
