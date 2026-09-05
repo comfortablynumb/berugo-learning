@@ -24,11 +24,14 @@
         },
         plain: 'Two cross-coupled gates have two stable states and hold the one they were driven to.',
         formal: 'q = not (r or notQ); notQ = not (s or q) — a cycle, not a tree',
-        detail: 'Every circuit before this one could be evaluated in a single topological pass. '
-          + 'A latch cannot: the simulator has to relax it to a fixed point, and the answer '
-          + 'depends on where it started. That is not an implementation detail — it is the '
-          + 'definition of state, and it is why a truth table stops being a complete description '
-          + 'the moment a wire feeds backwards.',
+        detail: [
+          'Every circuit before this one could be evaluated in a single topological pass.',
+          'A latch cannot. The simulator has to relax it to a fixed point, and the answer depends '
+            + 'on where it started.',
+          'That is not an implementation detail. It is the definition of state.',
+          'It is why a truth table stops being a complete description the moment a wire feeds '
+            + 'backwards.'
+        ],
         example: 'In the demo\'s SR sequence, steps 2 and 4 apply identical inputs — set and '
           + 'reset both low — and leave q at 0 and then at 1.'
       },
@@ -36,11 +39,14 @@
         term: 'The SR latch is the smallest memory and it has a forbidden input',
         plain: 'Set forces q high, reset forces it low, neither holds, both is illegal.',
         formal: 'set and reset both high drives q and not-q to the same value, which is not a state',
-        detail: 'Releasing both together leaves the pair to settle wherever its delays send it, '
-          + 'which is a race with no defined winner — a real non-determinism inside a circuit '
-          + 'made of deterministic parts. Two gates and eight transistors is the whole cost, '
-          + 'which is why the SR latch is still used for arbitration and debouncing, and why '
-          + 'every other storage cell on this page is built out of one.',
+        detail: [
+          'Releasing both together leaves the pair to settle wherever its delays send it, which '
+            + 'is a race with no defined winner.',
+          'That is a real non-determinism inside a circuit made of deterministic parts.',
+          'Two gates and eight transistors is the whole cost.',
+          'That is why the SR latch is still used for arbitration and debouncing, and why every '
+            + 'other storage cell on this page is built out of one.'
+        ],
         example: 'The SR latch is 2 gates and 8 transistors; driving both inputs high makes the '
           + 'demo\'s complementary-outputs metric report failure.'
       },
@@ -48,12 +54,14 @@
         term: 'A D latch removes the forbidden input and adds transparency',
         plain: 'One data input, one enable, and the output follows the data while the enable is high.',
         formal: 'q follows d while enable = 1, and holds when enable = 0',
-        detail: 'It is a genuine trade rather than a strict improvement: the illegal '
-          + 'combination is gone, and in exchange there is a window during which the stored '
-          + 'value is whatever the data line happens to be — glitches included. Latch-based '
-          + 'design exploits that transparency deliberately, letting logic borrow time across '
-          + 'the boundary, and pays for it with timing analysis that is much harder to get '
-          + 'right.',
+        detail: [
+          'It is a genuine trade rather than a strict improvement.',
+          'The illegal combination is gone, and in exchange there is a window during which the '
+            + 'stored value is whatever the data line happens to be, glitches included.',
+          'Latch-based design exploits that transparency deliberately, letting logic borrow time '
+            + 'across the boundary.',
+          'It pays for that with timing analysis that is much harder to get right.'
+        ],
         example: 'The D latch is 5 gates and 22 transistors; in the demo\'s sequence its output '
           + 'follows the data falling to 0 while the enable is still high.'
       },
@@ -61,12 +69,14 @@
         term: 'A flip-flop is two latches with opposite enables and is never transparent',
         plain: 'The master follows while the clock is low, the slave while it is high.',
         formal: 'q takes the value d held at the rising edge, and no path is open end to end',
-        detail: 'That is the property the whole of synchronous design rests on: every storage '
-          + 'element in the machine samples at the same instant, so the logic between them has '
-          + 'a whole clock period to settle and its glitches are invisible. The cost is roughly '
-          + 'twice a latch — the demo measures 11 gates against 5 — and in a real library about '
-          + '24 transistors against 12, which is why latches survive where area matters more '
-          + 'than simplicity.',
+        detail: [
+          'That is the property the whole of synchronous design rests on.',
+          'Every storage element in the machine samples at the same instant, so the logic between '
+            + 'them has a whole clock period to settle and its glitches are invisible.',
+          'The cost is roughly twice a latch: the demo measures 11 gates against 5, and a real '
+            + 'library about 24 transistors against 12.',
+          'That is why latches survive where area matters more than simplicity.'
+        ],
         example: 'In the demo\'s sequence the flip-flop ignores the data falling to 0 while the '
           + 'clock is high, where the D latch follows it.'
       },
@@ -74,12 +84,15 @@
         term: 'Setup and hold are constraints on the data, and only one is fixed by a slower clock',
         plain: 'Stable for a setup time before the edge and a hold time after it.',
         formal: 'setup: the longest path must arrive early enough. hold: the shortest path must not arrive too early.',
-        detail: 'A setup violation means the logic did not finish, and slowing the clock always '
-          + 'fixes it. A hold violation means a path is too fast — the next value overwrites '
-          + 'the one being captured — and slowing the clock changes nothing at all, because '
-          + 'both edges move together. The only fix is to insert buffers whose purpose is to be '
-          + 'slow, which is the one place in engineering where the answer is to make something '
-          + 'worse.',
+        detail: [
+          'A setup violation means the logic did not finish, and slowing the clock always fixes '
+            + 'it.',
+          'A hold violation means a path is too fast: the next value overwrites the one being '
+            + 'captured.',
+          'Slowing the clock changes nothing at all there, because both edges move together.',
+          'The only fix is to insert buffers whose purpose is to be slow, which is the one place '
+            + 'in engineering where the answer is to make something worse.'
+        ],
         example: 'The demo\'s timing table names, for each constraint, what violating it does '
           + 'and which fixes do not work.'
       },
@@ -88,12 +101,15 @@
         plain: 'Data changing inside the aperture can leave the flip-flop balanced between states.',
         formal: 'the probability of still being undecided decays exponentially with the time allowed',
         readAs: 'the chance of still being undecided falls off exponentially with the time you allow it.',
-        detail: 'There is no circuit that decides an arbitrarily close race in bounded time; '
-          + 'the standard result is that any bistable element has an unbounded settling time '
-          + 'for some input timing. The engineering answer is to allow more time — two '
-          + 'flip-flops in series, so the second sees a settled value — and to quote a mean '
-          + 'time between failures rather than a guarantee. Every clock-domain crossing is this '
-          + 'calculation.',
+        detail: [
+          'There is no circuit that decides an arbitrarily close race in bounded time.',
+          'The standard result is that any bistable element has an unbounded settling time for '
+            + 'some input timing.',
+          'The engineering answer is to allow more time: two flip-flops in series, so the second '
+            + 'sees a settled value.',
+          'The other half of the answer is to quote a mean time between failures rather than a '
+            + 'guarantee. Every clock-domain crossing is this calculation.'
+        ],
         example: 'The demo cannot show a metastable event, because the simulator is discrete — '
           + 'which is itself worth knowing about simulation.'
       },
@@ -101,12 +117,15 @@
         term: 'A register is n flip-flops on one clock, and the enable must not gate the clock',
         plain: 'Recirculate the old value through a multiplexer when the write enable is low.',
         formal: 'd_next = enable ? d : q, with the clock untouched',
-        detail: 'Gating the clock saves a multiplexer per bit and introduces skew: the gated '
-          + 'clock arrives later than the ungated one, so two registers no longer sample at the '
-          + 'same instant. Modern designs do gate clocks — it is the main lever for dynamic '
-          + 'power — but with dedicated cells and careful analysis rather than an AND gate '
-          + 'somebody added. The demo\'s register recirculates, which is the version that is '
-          + 'always safe.',
+        detail: [
+          'Gating the clock saves a multiplexer per bit and introduces skew.',
+          'The gated clock arrives later than the ungated one, so two registers no longer sample '
+            + 'at the same instant.',
+          'Modern designs do gate clocks, because it is the main lever for dynamic power. They do '
+            + 'it with dedicated cells and careful analysis rather than an AND gate somebody '
+            + 'added.',
+          'The demo\'s register recirculates, which is the version that is always safe.'
+        ],
         example: 'A 4-bit register is 52 gates — 13 per bit — and matches its reference on all '
           + 'six clocked cycles the demo drives.'
       },
@@ -114,12 +133,15 @@
         term: 'Read-during-write has two correct answers, and the design must pick one',
         plain: 'A port read before the edge sees the old value; after the edge, the new one.',
         formal: 'the same cycle yields different data depending on which side of the edge it is sampled',
-        detail: 'Both are legitimate and both appear in real register files. The demo makes the '
-          + 'ambiguity concrete by reporting the same cycle read twice, and the two columns '
-          + 'differ on exactly the cycles where a port reads the register being written. That is '
-          + 'the hardware form of a read-write race, and it is why a pipeline that reads its '
-          + 'operands in the same cycle a previous instruction writes them needs a forwarding '
-          + 'path.',
+        detail: [
+          'Both are legitimate and both appear in real register files.',
+          'The demo makes the ambiguity concrete by reporting the same cycle read twice.',
+          'The two columns differ on exactly the cycles where a port reads the register being '
+            + 'written.',
+          'That is the hardware form of a read-write race. It is why a pipeline that reads its '
+            + 'operands in the same cycle a previous instruction writes them needs a forwarding '
+            + 'path.'
+        ],
         example: 'On the demo\'s six-cycle schedule, 3 cycles read the register being written, '
           + 'and on those the before-edge and after-edge readings differ.'
       }

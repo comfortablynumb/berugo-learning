@@ -58,7 +58,7 @@
       '**Feedback is what makes memory, and it turns the netlist into something a truth table '
         + 'cannot describe.** Two NOR gates wired into each other have two stable states, and '
         + 'which one they sit in depends on what was applied earlier. Every circuit before this '
-        + 'section could be evaluated in one pass over a directed acyclic graph; this one has a '
+        + 'section could be evaluated in one pass over a directed acyclic graph. This one has a '
         + 'cycle, so the simulator has to relax it to a fixed point instead.',
       '**The SR latch is the smallest thing that remembers, and it has an input you must not '
         + 'apply.** Set forces the output high, reset forces it low, neither holds — and both '
@@ -66,7 +66,7 @@
         + 'they are released together the pair settles wherever the delays send it, which is a '
         + 'race with no defined winner.',
       '**The D latch removes the forbidden input and adds transparency instead.** One data '
-        + 'input, one enable, and no way to ask for the illegal combination — but while the '
+        + 'input, one enable, and no way to ask for the illegal combination. But while the '
         + 'enable is high the output follows the input, so a glitch on the data line during '
         + 'that window is stored. That is a real trade, not a strict improvement.',
       '**A flip-flop is two latches with opposite enables, and it is never transparent.** The '
@@ -80,8 +80,8 @@
         + 'can fix.',
       '**Metastability is not a bug that can be removed.** If the data changes inside the '
         + 'aperture, the flip-flop can sit balanced between its two stable states for an '
-        + 'unbounded time. The probability decays exponentially with the time allowed, which is '
-        + 'why crossing a clock domain uses two flip-flops in series and why the answer is a '
+        + 'unbounded time. The probability decays exponentially with the time allowed. That is '
+        + 'why crossing a clock domain uses two flip-flops in series, and why the answer is a '
         + 'mean time between failures rather than a guarantee.',
       '**A register is n flip-flops on one clock, and the write enable must not gate the clock.** '
         + 'Recirculating the old value through a multiplexer when the enable is low keeps every '
@@ -106,22 +106,23 @@
   }
 
   function insight() {
-    return '**Synchronous design is a discipline that buys away an entire class of problems, '
-      + 'and it is the same bargain as a transaction boundary in a database or a frame boundary '
-      + 'in a renderer.** Combinational logic glitches: the previous sections measured circuits '
+    return '**Synchronous design is a discipline that buys away an entire class of problems.** '
+      + 'It is the same bargain as a transaction boundary in a database or a frame boundary '
+      + 'in a renderer. Combinational logic glitches: the previous sections measured circuits '
       + 'whose outputs dip and wobble for several gate delays before settling on the right '
       + 'answer. A synchronous machine simply agrees not to look during that time. Every '
-      + 'storage element samples at the same edge, the clock period is chosen to be longer than '
-      + 'the worst path between any two of them, and in exchange nobody has to reason about the '
+      + 'storage element samples at the same edge, and the clock period is chosen to be longer '
+      + 'than the worst path between any two of them. In exchange nobody has to reason about the '
       + 'order in which signals arrive. That is an enormous simplification, and it is paid for '
-      + 'in throughput — the whole machine runs at the speed of its slowest path, whatever the '
+      + 'in throughput: the whole machine runs at the speed of its slowest path, whatever the '
       + 'data. The place the discipline breaks is where a signal enters from outside the clock '
-      + 'domain, and there you get metastability: not a bug to be fixed but a probability to be '
-      + 'managed, with two flip-flops in series buying enough time that the mean time between '
-      + 'failures exceeds the life of the product. Every asynchronous boundary in software has '
-      + 'the same shape — a lock-free queue between two threads, a signal handler, a hardware '
-      + 'interrupt — and the same answer: define one place where the crossing happens, make it '
-      + 'as narrow as possible, and be rigorous there so the rest of the system can be simple.';
+      + 'domain, and there you get metastability. It is not a bug to be fixed but a probability '
+      + 'to be managed. Two flip-flops in series buy enough time that the mean time '
+      + 'between failures exceeds the life of the product. Every asynchronous boundary in '
+      + 'software has the same shape: a lock-free queue between two threads, a signal handler, a '
+      + 'hardware interrupt. It has the same answer too. Define one place where the crossing '
+      + 'happens, make it as narrow as possible, and be rigorous there so the rest of the system '
+      + 'can be simple.';
   }
 
   function render(app) {
