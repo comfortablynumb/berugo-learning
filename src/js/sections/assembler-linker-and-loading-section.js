@@ -71,8 +71,8 @@
         + 'address. The second pass encodes, now that the addresses exist. One pass could only '
         + 'assemble a program with no forward branches, which is no program at all.',
       '**An object file is three things: bytes, symbols and holes.** The bytes are what could '
-        + 'be encoded, the symbols are what this file offers to others, and the relocations '
-        + 'are what it could not fill in — a list of "at this address, there is a hole of this '
+        + 'be encoded, and the symbols are what this file offers to others. The relocations '
+        + 'are what it could not fill in: a list of "at this address, there is a hole of this '
         + 'shape, for this name". That triple is the entire content of an object format, ELF '
         + 'included.',
       '**A relocation has a shape, and patching the wrong one is worse than failing.** A '
@@ -82,7 +82,7 @@
         + 'of bug to see.',
       '**Placement decides the addresses, and the addresses decide whether relocations fit.** '
         + 'The linker gives each object a base and builds one symbol table. Only then is it '
-        + 'possible to say what offset a branch needs — which is why "out of range" is a '
+        + 'possible to say what offset a branch needs. That is why "out of range" is a '
         + 'linker error rather than an assembler one, and why it appears only after the code '
         + 'grows.',
       '**Out of range must be reported, never truncated.** A branch that cannot reach its '
@@ -95,8 +95,8 @@
         + 'of tiny functions nobody wrote. The fourth scenario builds one and runs it.',
       '**Report every failure, not the first.** A linker that stops at the first undefined '
         + 'symbol makes you rebuild once per missing name. Collecting them all is a small '
-        + 'change in the code and a large change in how the tool feels to use — which is true '
-        + 'of type checkers, parsers and validators too.',
+        + 'change in the code and a large change in how the tool feels to use. The same is true '
+        + 'of type checkers, parsers and validators.',
       '**Loading is placement again, at run time.** The image was linked for particular '
         + 'addresses; the loader copies it there and jumps to the entry symbol. When the '
         + 'addresses cannot be known in advance you need position-independent code or '
@@ -117,19 +117,19 @@
 
   function insight() {
     return '**"Why does this link and that one not" is almost always a question about ranges '
-      + 'and names, and both are decided by information that does not exist until the last '
-      + 'possible moment.** An assembler cannot know how far away a function in another file '
-      + 'is, so it leaves a hole with a shape; a linker cannot know whether the hole is big '
+      + 'and names.** Both are decided by information that does not exist until the last '
+      + 'possible moment. An assembler cannot know how far away a function in another file '
+      + 'is, so it leaves a hole with a shape. A linker cannot know whether the hole is big '
       + 'enough until every object has an address. That is why a program can compile perfectly, '
       + 'link perfectly for years, and then fail to link the day somebody adds a few thousand '
-      + 'bytes in between — the code that broke is not the code that changed. The fix real '
+      + 'bytes in between. The code that broke is not the code that changed. The fix real '
       + 'toolchains apply is the veneer: a stub near enough to reach, which reaches further '
       + 'itself, and which nobody wrote. It is worth recognising this as a general shape rather '
       + 'than a linker curiosity, because deferred binding appears everywhere and always with '
       + 'the same two failure modes. A name that resolves at run time can be missing; a '
       + 'reference that is encoded with a limited reach can become unreachable. Dynamic '
       + 'libraries, plugin registries, service discovery, database foreign keys and message '
-      + 'schemas are all this pattern, and the good implementations of all of them do exactly '
+      + 'schemas are all this pattern. The good implementations of all of them do exactly '
       + 'what this linker does: fail loudly, name the symbol, and say what it would have taken '
       + 'to succeed.';
   }

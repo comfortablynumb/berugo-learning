@@ -25,12 +25,15 @@
         },
         plain: 'What it encoded, what it defines, and what it still needs.',
         formal: 'a relocation is (address, shape, symbol) — a hole of a known kind',
-        detail: 'The bytes are everything the assembler could work out on its own. The symbols '
-          + 'are what this file offers to others. The relocations are what it could not fill in: '
-          + 'a list of "at this address there is a hole of this shape, for this name". Being '
-          + 'able to write down what you do not know is exactly what lets a file be assembled '
-          + 'in isolation, and it is why a change to one source file does not mean re-assembling '
-          + 'the other thousand.',
+        detail: [
+          'The bytes are everything the assembler could work out on its own.',
+          'The symbols are what this file offers to others.',
+          'The relocations are what it could not fill in: a list of "at this address there is a '
+            + 'hole of this shape, for this name".',
+          'Being able to write down what you do not know is exactly what lets a file be assembled '
+            + 'in isolation. It is why a change to one source file does not mean re-assembling '
+            + 'the other thousand.'
+        ],
         example: 'main.o is 20 bytes, defines _start, and needs target — one branch-shaped hole '
           + 'at address 8.'
       },
@@ -38,12 +41,14 @@
         term: 'Two passes, because a label can be used before it is defined',
         plain: 'Measure everything first, then encode.',
         formal: 'pass one assigns addresses; pass two encodes against them',
-        detail: 'Every instruction\'s size is known without knowing any addresses, so the first '
-          + 'pass can walk the source and give every label an address. Only then can a forward '
-          + 'branch be encoded, because its offset is the difference between two addresses that '
-          + 'now both exist. A single-pass assembler could only handle programs with no forward '
-          + 'references, which is to say no loops with a bottom test and no calls to anything '
-          + 'defined later.',
+        detail: [
+          'Every instruction\'s size is known without knowing any addresses, so the first pass '
+            + 'can walk the source and give every label an address.',
+          'Only then can a forward branch be encoded, because its offset is the difference '
+            + 'between two addresses that now both exist.',
+          'A single-pass assembler could only handle programs with no forward references.',
+          'That means no loops with a bottom test, and no calls to anything defined later.'
+        ],
         example: 'Pseudo-instructions complicate this: li of a large constant is two words, so '
           + 'the first pass has to know the expansion to get the addresses right.'
       },
@@ -51,11 +56,15 @@
         term: 'A relocation has a shape, and patching the wrong one is worse than failing',
         plain: 'A branch offset, a jump offset and a data word go in different places.',
         formal: 'the linker re-packs through the same field tables the assembler used',
-        detail: 'The B-format immediate is scrambled across four bit ranges; the J-format across '
-          + 'four different ones; a data word is a plain 32 bits. Writing a value into the wrong '
-          + 'field produces an instruction that decodes perfectly and goes somewhere else, which '
-          + 'is far harder to find than a link error. Driving both the assembler and the linker '
-          + 'from one field table is what makes it impossible for them to disagree.',
+        detail: [
+          'The B-format immediate is scrambled across four bit ranges, the J-format across four '
+            + 'different ones, and a data word is a plain 32 bits.',
+          'Writing a value into the wrong field produces an instruction that decodes perfectly '
+            + 'and goes somewhere else.',
+          'That is far harder to find than a link error.',
+          'Driving both the assembler and the linker from one field table is what makes it '
+            + 'impossible for them to disagree.'
+        ],
         example: 'The linker clears the immediate bits by mask and re-packs with the ISA\'s own '
           + 'packImmediate, so there is no second implementation to keep in step.'
       },
@@ -63,11 +72,15 @@
         term: 'Placement is where addresses first exist, which is why range errors are linker errors',
         plain: 'Until each object has a base, no distance can be computed.',
         formal: 'offset = target address - relocation address, and both come from placement',
-        detail: 'An assembler cannot know how far away a function in another file is, so it '
-          + 'cannot know whether a branch will reach. The linker gives every object a base, '
-          + 'builds one symbol table, and only then can each hole be measured. That is why '
-          + '"relocation out of range" appears the day somebody adds a few thousand bytes '
-          + 'somewhere unrelated, and why the code that broke is never the code that changed.',
+        detail: [
+          'An assembler cannot know how far away a function in another file is, so it cannot know '
+            + 'whether a branch will reach.',
+          'The linker gives every object a base, builds one symbol table, and only then can each '
+            + 'hole be measured.',
+          'That is why "relocation out of range" appears the day somebody adds a few thousand '
+            + 'bytes somewhere unrelated.',
+          'It is why the code that broke is never the code that changed.'
+        ],
         example: 'The same branch links cleanly with the target 12 bytes away and fails at 5 012 '
           + 'bytes — the source of both is identical.'
       },
@@ -75,11 +88,14 @@
         term: 'Out of range must be reported, never truncated',
         plain: 'There is no correct encoding, so refuse.',
         formal: 'the B field reaches -4 096 to 4 094; anything else is an error with the number',
-        detail: 'Keeping the low bits of an offset that does not fit produces a branch to a '
-          + 'plausible-looking address, which decodes and executes and goes somewhere wrong. '
-          + 'Refusing costs a build and saves a debugging session that could take days. The '
-          + 'report is much more useful with the number in it: "needs 5012" tells you how far '
-          + 'over you are, and therefore whether the fix is a veneer or a reorganisation.',
+        detail: [
+          'Keeping the low bits of an offset that does not fit produces a branch to a '
+            + 'plausible-looking address, which decodes and executes and goes somewhere wrong.',
+          'Refusing costs a build and saves a debugging session that could take days.',
+          'The report is much more useful with the number in it.',
+          '"Needs 5012" tells you how far over you are, and therefore whether the fix is a veneer '
+            + 'or a reorganisation.'
+        ],
         example: 'The demo reports "out of range for a conditional branch, plus or minus 4 KB: '
           + 'needs 5012" and produces no image at all.'
       },
@@ -87,11 +103,14 @@
         term: 'A veneer is what a real linker inserts when the offset does not fit',
         plain: 'Branch to a nearby stub, and let the stub take the longer jump.',
         formal: 'a branch reaches 4 KB and a jump reaches 1 MB, so two hops cover what one cannot',
-        detail: 'The stub costs an instruction and a few bytes, and it is generated by the '
-          + 'linker rather than written by anybody — which is why a disassembly of a large '
-          + 'binary is full of tiny functions with machine-generated names. It also explains why '
-          + 'link times and binary sizes grow non-linearly with code size: past a threshold, '
-          + 'calls that used to be direct start needing help.',
+        detail: [
+          'The stub costs an instruction and a few bytes, and it is generated by the linker '
+            + 'rather than written by anybody.',
+          'That is why a disassembly of a large binary is full of tiny functions with '
+            + 'machine-generated names.',
+          'It also explains why link times and binary sizes grow non-linearly with code size.',
+          'Past a threshold, calls that used to be direct start needing help.'
+        ],
         example: 'The veneer scenario links and runs: the branch reaches the stub 12 bytes away '
           + 'and the stub jumps 5 004 bytes to the real target.'
       },
@@ -99,11 +118,14 @@
         term: 'Report every failure, not the first',
         plain: 'A linker that stops at the first undefined symbol makes you build once per name.',
         formal: 'collect the failures and return them all',
-        detail: 'It is a small change in the code — accumulate rather than throw — and a large '
-          + 'change in how the tool feels to use, because the cost of a build cycle is what '
-          + 'makes a slow feedback loop expensive. The same argument applies to type checkers, '
-          + 'parsers, form validators and configuration loaders: any tool whose output is a list '
-          + 'of problems should produce the list.',
+        detail: [
+          'It is a small change in the code: accumulate rather than throw.',
+          'It is a large change in how the tool feels to use, because the cost of a build cycle '
+            + 'is what makes a slow feedback loop expensive.',
+          'The same argument applies to type checkers, parsers, form validators and configuration '
+            + 'loaders.',
+          'Any tool whose output is a list of problems should produce the list.'
+        ],
         example: 'The link result carries an applied entry per relocation, each with its own '
           + 'verdict, rather than throwing on the first bad one.'
       },
@@ -111,12 +133,16 @@
         term: 'Loading is placement again, at run time',
         plain: 'Copy the image to the addresses it was linked for and jump to the entry symbol.',
         formal: 'the loader honours the addresses the linker chose',
-        detail: 'That works as long as those addresses are available, which stops being true the '
-          + 'moment several programs or libraries share an address space. Then you need '
-          + 'position-independent code, which addresses everything relative to the program '
-          + 'counter, or load-time relocation, which redoes the linker\'s patching with the real '
-          + 'base. That choice is the start of M39, and it is also why address-space layout '
-          + 'randomisation is possible at all.',
+        detail: [
+          'That works as long as those addresses are available, which stops being true the moment '
+            + 'several programs or libraries share an address space.',
+          'Then you need position-independent code, which addresses everything relative to the '
+            + 'program counter.',
+          'The alternative is load-time relocation, which redoes the linker\'s patching with the '
+            + 'real base.',
+          'That choice is the start of M39, and it is also why address-space layout randomisation '
+            + 'is possible at all.'
+        ],
         example: 'The demo loads at 0 and jumps to _start; the whole image is 28 bytes in the '
           + 'simple case.'
       }
