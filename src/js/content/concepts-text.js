@@ -21,16 +21,19 @@
         },
         plain: 'Every node is a prefix of at least one key, and every prefix of a key is a node.',
         formal: 'nodes = |{ p : p is a prefix of some key }|',
-        readAs: 'The trie holds one node per distinct prefix of any key. The outer bars mean "how many", the ' +
-          'braces are a set, and the colon reads "such that" — so the whole line is "the count of ' +
-          'strings p such that p is a prefix of some key".',
-        detail: 'This is the whole data structure stated once, and every property follows from it. ' +
+        readAs: 'The trie holds one node per distinct prefix of any key. The outer bars mean "how ' +
+          'many", the braces are a set, and the colon reads "such that". So the whole line is "the ' +
+          'count of strings p such that p is a prefix of some key".',
+        detail: [
+          'This is the whole data structure stated once, and every property follows from it.',
           'The node count is the number of distinct prefixes, not the number of keys and not the ' +
-          'number of characters: 883 English words hold 4 732 characters between them and produce ' +
-          '2 562 nodes, because the words share their beginnings. Lookup is a walk down that ' +
-          'sequence of prefixes, so it costs one step per query character and never touches a key ' +
-          'it is not spelling. It also means the structure is entirely determined by the key set — ' +
-          'insertion order changes nothing, which is a property no comparison-based tree has.',
+            'number of characters. Take 883 English words: they hold 4 732 characters between them ' +
+            'and produce 2 562 nodes, because the words share their beginnings.',
+          'Lookup is a walk down that sequence of prefixes, so it costs one step per query ' +
+            'character and never touches a key it is not spelling.',
+          'It also means the structure is entirely determined by the key set. Insertion order ' +
+            'changes nothing, which is a property no comparison-based tree has.'
+        ],
         example: '2 562 nodes for 883 words: 2.90 nodes per key, 0.54 per character.'
       },
       {
@@ -40,12 +43,15 @@
         readAs: 'A node stores a key exactly when it is marked terminal. Both directions matter: an unmarked ' +
           'node is a waypoint even if it spells a real word, and a marked node is a key even if it has ' +
           'children below it.',
-        detail: 'The alternative is to append a sentinel character to every key so that keys always ' +
-          'end at leaves. It works and it costs a node per key: "an" and "ant" become "an$" and ' +
-          '"ant$", which share only "an" and need two extra nodes where a terminal flag needs one ' +
-          'bit each. The flag also keeps the invariant simple — a node is a key or it is not, ' +
-          'independent of whether anything hangs below it — which matters for deletion, where the ' +
-          'node for "an" has to survive the removal of "ant".',
+        detail: [
+          'The alternative is to append a sentinel character to every key so that keys always end ' +
+            'at leaves.',
+          'It works and it costs a node per key. "an" and "ant" become "an$" and "ant$", which ' +
+            'share only "an" and need two extra nodes where a terminal flag needs one bit each.',
+          'The flag also keeps the invariant simple: a node is a key or it is not, independent of ' +
+            'whether anything hangs below it.',
+          'That matters for deletion, where the node for "an" has to survive the removal of "ant".'
+        ],
         example: 'insert("an") then insert("ant") adds one node; with a sentinel it would add two.'
       },
       {
@@ -55,12 +61,15 @@
         readAs: 'A prefix query costs the length of the prefix to walk down, plus the size of what it returns ' +
           'to collect. The bars mean length. Nothing in that depends on how many keys the trie holds, ' +
           'which is what a hash table cannot match.',
-        detail: 'This is the query a hash table cannot answer at all, because hashing deliberately ' +
-          'destroys the ordering it needs. A hash table asked for every key beginning with "con" ' +
-          'has to test all 883 keys; the trie walks three nodes and then enumerates a subtree of ' +
-          '22 answers. That asymmetry is the actual reason to reach for a trie, and it generalises: ' +
-          'anything that is a downward-closed question about key structure — prefixes, ordered ' +
-          'ranges, longest match — is cheap here and impossible there.',
+        detail: [
+          'This is the query a hash table cannot answer at all, because hashing deliberately ' +
+            'destroys the ordering it needs.',
+          'A hash table asked for every key beginning with "con" has to test all 883 keys. The ' +
+            'trie walks three nodes and then enumerates a subtree of 22 answers.',
+          'That asymmetry is the actual reason to reach for a trie, and it generalises.',
+          'Anything that is a downward-closed question about key structure — prefixes, ordered ' +
+            'ranges, longest match — is cheap here and impossible there.'
+        ],
         example: '"con" walks 3 nodes and enumerates 22 completions out of 883 words.'
       },
       {
@@ -76,26 +85,32 @@
         },
         plain: 'On membership alone a hash table wins on memory and on steps per lookup.',
         formal: 'trie: |query| character steps; hash: one hash, one probe',
-        detail: 'The trie costs 92.8 bytes per key with map nodes against roughly 40 for an ' +
-          'open-addressing hash table at a sane load factor, and a lookup takes 5.04 character ' +
-          'steps against one hash and one probe. Each of those steps is a pointer chase into an ' +
-          'unpredictable location, which is far worse for the cache than a single probe. The trie ' +
-          'is not the faster structure; it is the structure that answers a different question, and ' +
-          'a design that reaches for it to speed up membership has read the reputation rather than ' +
-          'the numbers.',
+        detail: [
+          'The trie costs 92.8 bytes per key with map nodes, against roughly 40 for an ' +
+            'open-addressing hash table at a sane load factor. A lookup takes 5.04 character steps ' +
+            'against one hash and one probe.',
+          'Each of those steps is a pointer chase into an unpredictable location, which is far ' +
+            'worse for the cache than a single probe.',
+          'The trie is not the faster structure. It is the structure that answers a different ' +
+            'question, and a design that reaches for it to speed up membership has read the ' +
+            'reputation rather than the numbers.'
+        ],
         example: '92.8 bytes per key against a hash table\'s ~40, and 5.04 steps against 1.'
       },
       {
         term: 'The child-storage decision',
         plain: 'How a node stores its children changes the memory by an order of magnitude and the structure not at all.',
         formal: 'map; alphabet-sized array; sorted array + binary search',
-        detail: 'A map per node costs one entry per real child. An array with a slot per alphabet ' +
-          'symbol makes each step a single index and pays for every unused slot. A sorted child ' +
-          'array with a binary search pays nothing per symbol and costs log(children) comparisons ' +
-          'per step. Over the same 2 562-node trie the three cost 81 968, 573 888 and 64 041 bytes ' +
-          '— a factor of nine between the extremes for identical behaviour. This is the decision ' +
-          'the "tries waste memory" reputation is really about, and it is a property of one layout ' +
-          'rather than of the idea.',
+        detail: [
+          'A map per node costs one entry per real child.',
+          'An array with a slot per alphabet symbol makes each step a single index and pays for ' +
+            'every unused slot. A sorted child array pays nothing per symbol and costs ' +
+            'log(children) comparisons per step.',
+          'Over the same 2 562-node trie the three cost 81 968, 573 888 and 64 041 bytes — a ' +
+            'factor of nine between the extremes for identical behaviour.',
+          'This is the decision the "tries waste memory" reputation is really about, and it is a ' +
+            'property of one layout rather than of the idea.'
+        ],
         example: 'array 573 888 bytes, map 81 968, sorted 64 041 — same 2 562 nodes.'
       },
       {
@@ -105,36 +120,47 @@
         readAs: 'How much of an array-per-node is empty: the alphabet size minus the children actually ' +
           'present, over the alphabet size. Σ here is the alphabet, not a sum, and the bars are its ' +
           'size.',
-        detail: 'A 256-slot node is the natural choice for arbitrary bytes and it is the wrong one ' +
-          'almost always, because fan-out is not uniform: a DNA sequence uses 4 of those 256 slots, ' +
-          'which is 98% waste per node, and even English text leaves most nodes with a handful of ' +
-          'children. The tax is worst exactly where tries are most attractive — deep structures ' +
-          'over small alphabets — which is why every serious implementation either sizes the node ' +
-          'by its fan-out or abandons the array entirely.',
+        detail: [
+          'A 256-slot node is the natural choice for arbitrary bytes, and it is the wrong one ' +
+            'almost always, because fan-out is not uniform.',
+          'A DNA sequence uses 4 of those 256 slots, which is 98% waste per node, and even English ' +
+            'text leaves most nodes with a handful of children.',
+          'The tax is worst exactly where tries are most attractive: deep structures over small ' +
+            'alphabets.',
+          'That is why every serious implementation either sizes the node by its fan-out or ' +
+            'abandons the array entirely.'
+        ],
         example: 'a 4-symbol DNA alphabet in a 256-slot node leaves 98% of the slots empty.'
       },
       {
         term: 'Longest-prefix match',
         plain: 'The longest key that is a prefix of a query, found in one downward walk.',
         formal: 'longestPrefixOf(t) = the deepest terminal node on the path spelling t',
-        detail: 'The walk remembers the last terminal node it passed and returns it when the path ' +
-          'ends or falls off the trie, so the whole query costs one pass rather than one lookup per ' +
-          'candidate length. This is the routing-table query and the filesystem-mount query and the ' +
-          'URL-router query, and every one of them is a linear scan of the rule table without it. ' +
-          'It is also the operation that makes a trie the right structure for dispatch even when ' +
-          'the key set is small enough that a hash table would be fine for membership.',
+        detail: [
+          'The walk remembers the last terminal node it passed, and returns it when the path ends ' +
+            'or falls off the trie. The whole query costs one pass rather than one lookup per ' +
+            'candidate length.',
+          'This is the routing-table query and the filesystem-mount query and the URL-router ' +
+            'query, and every one of them is a linear scan of the rule table without it.',
+          'It is also the operation that makes a trie the right structure for dispatch. That holds ' +
+            'even when the key set is small enough that a hash table would be fine for membership.'
+        ],
         example: 'longestPrefixOf("contracts") returns "contract" — one walk, not eight lookups.'
       },
       {
         term: 'Deletion has to prune',
         plain: 'Clearing the terminal flag is correct and leaves the node behind.',
         formal: 'after removal, walk up while childCount = 0 and not terminal',
-        detail: 'A trie that never prunes stays correct forever — the key set it reports is exactly ' +
-          'right — and its node count only grows. That is the failure mode: a long-running trie ' +
-          'under an insert-delete workload silently accumulates the skeleton of every key it has ' +
-          'ever held, and the memory graph looks like a leak with no leak in it. The fix is a walk ' +
-          'back up the insertion path detaching any node that is neither a key nor a parent, which ' +
-          'costs the same length as the deletion itself and has to be written on purpose.',
+        detail: [
+          'A trie that never prunes stays correct forever — the key set it reports is exactly ' +
+            'right — and its node count only grows.',
+          'That is the failure mode. A long-running trie under an insert-delete workload silently ' +
+            'accumulates the skeleton of every key it has ever held. The memory graph then looks ' +
+            'like a leak with no leak in it.',
+          'The fix is a walk back up the insertion path detaching any node that is neither a key ' +
+            'nor a parent. It costs the same length as the deletion itself, and has to be written ' +
+            'on purpose.'
+        ],
         example: 'deleting 442 of 883 words takes the trie from 2 562 nodes to 1 504.'
       }
     ],

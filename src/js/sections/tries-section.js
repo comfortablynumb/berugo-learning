@@ -37,14 +37,14 @@
           'node is a key when it carries a terminal marker — not when it is a leaf, because "an" ' +
           'and "ant" both have to be storable.',
         'It is not a faster hash table. Over an 883-word list the map-node trie holds 2 562 nodes ' +
-          'at 93 bytes per key, and a lookup takes five character steps where a hash table takes ' +
-          'one hash and one probe. What the trie buys is the query a hash table cannot answer at ' +
+          'at 93 bytes per key. A lookup takes five character steps where a hash table takes one ' +
+          'hash and one probe. What the trie buys is the query a hash table cannot answer at ' +
           'all: every key under a prefix, in sorted order, in time proportional to the answer.',
         'The child storage is a real decision and the demo makes it visible. A 26-slot array per ' +
           'node is one index per step and 650 bytes per key; a sorted child array is a binary ' +
           'search per step and 73. On a 4-letter DNA alphabet in a 256-slot array, 98% of the ' +
-          'slots are empty — which is where the "tries waste memory" reputation comes from, and ' +
-          'it is a property of one layout rather than of the structure.'
+          'slots are empty. That is where the "tries waste memory" reputation comes from, and it ' +
+          'is a property of one layout rather than of the structure.'
       ],
       demo: { title: 'Interactive demo — the search box, and what a node costs', markup: root.TriesTemplate.render() },
       diagram: {
