@@ -44,18 +44,19 @@
         'A radix trie keeps a node only where the key set branches or ends, and puts the characters ' +
           'in between on the edge. The node count stops being "one per character" and becomes ' +
           '"one per branch", which is bounded by 2k − 1 for k keys however long the keys are. The ' +
-          'saving is therefore a property of the keys: on 400 English words it is 2.1×, and on 400 ' +
-          'filesystem-style paths — long, and distinct only near the end — it is 10×.',
-        'Insertion has three cases and only the third is interesting. When the incoming key and an ' +
-          'existing edge agree for a while and then differ, the edge splits: an internal node ' +
+          'saving is therefore a property of the keys. On 400 English words it is 2.1×, and on ' +
+          '400 filesystem-style paths — long, and distinct only near the end — it is 10×.',
+        'Insertion has three cases and only the third is interesting. When the incoming key and ' +
+          'an existing edge agree for a while and then differ, the edge splits. An internal node ' +
           'appears at the divergence point and the old child hangs below it. The case that gets ' +
-          'written wrong is the one where the new key *ends* exactly at the split point — the new ' +
+          'written wrong is the one where the new key *ends* exactly at the split point. The new ' +
           'internal node is itself a key, and forgetting that loses it silently.',
-        'PATRICIA is the same structure over the alphabet {0, 1}, which is what makes it a routing ' +
-          'table: an IPv4 prefix is a bit string, and "which route applies" is longest-prefix ' +
-          'match, one downward walk. Adaptive radix trees add the last piece — a node stores its ' +
-          'children in a layout chosen by fan-out, so the small nodes, which are almost all of ' +
-          'them, stay small. That is what makes ART competitive with a hash table in a ' +
+        'PATRICIA is the same structure over the alphabet {0, 1}, which is what makes it a ' +
+          'routing table. An IPv4 prefix is a bit string, and "which route applies" is ' +
+          'longest-prefix match, one downward walk. Adaptive radix trees add the last piece. A ' +
+          'node stores its children in a layout chosen by fan-out, so the small nodes, which are ' +
+          'almost all of them, stay small. That is what makes ART competitive with a hash table ' +
+          'in a ' +
           'main-memory database.'
       ],
       demo: {

@@ -179,15 +179,18 @@
         },
         plain: 'Collapse every non-branching chain into one edge carrying a substring.',
         formal: 'nodes ≤ 2k − 1 for k keys, whatever the key length',
-        readAs: 'A compressed trie over k keys has at most 2k − 1 nodes, no matter how long the keys are — ' +
-          'because every internal node has at least two children, and a binary tree with k leaves has ' +
-          'fewer than k internal nodes.',
-        detail: 'A plain trie\'s node count is bounded by the total number of characters; a radix ' +
-          'trie\'s is bounded by the number of keys, because a node exists only where the key set ' +
-          'branches or a key ends. That bound is independent of key length, which is the whole ' +
-          'point: doubling the length of every key doubles a plain trie and leaves a radix trie ' +
-          'exactly as it was. The cost is that a step now compares a substring rather than a ' +
-          'character, so lookups do more character work per node and fewer pointer chases.',
+        readAs: 'A compressed trie over k keys has at most 2k − 1 nodes, no matter how long the ' +
+          'keys are. Every internal node has at least two children, and a binary tree with k ' +
+          'leaves has fewer than k internal nodes.',
+        detail: [
+          'A plain trie\'s node count is bounded by the total number of characters. A radix ' +
+            'trie\'s is bounded by the number of keys, because a node exists only where the key ' +
+            'set branches or a key ends.',
+          'That bound is independent of key length, which is the whole point. Doubling the length ' +
+            'of every key doubles a plain trie and leaves a radix trie exactly as it was.',
+          'The cost is that a step now compares a substring rather than a character, so lookups do ' +
+            'more character work per node and fewer pointer chases.'
+        ],
         example: '400 hex keys of 32 characters: 12 212 plain nodes against 544 radix nodes.'
       },
       {
@@ -197,12 +200,15 @@
         readAs: 'Compression saves one node for every character in a key\'s unshared tail, less the one node ' +
           'that tail still needs. So the saving tracks how distinctive the keys are, not how many there ' +
           'are.',
-        detail: 'This is the sentence that clears up the usual confusion. A plain trie already ' +
-          'shares prefixes; that is what a trie *is*. What it cannot do is collapse the run of ' +
-          'single-child nodes that follows the point where a key stops sharing, and that run is as ' +
-          'long as the key\'s unique tail. So the compression factor is set by how long the tails ' +
-          'are: 2.14× on English words, which diverge after two or three characters and then end ' +
-          'quickly, and 22× on 32-character hex keys, which diverge immediately and then run on.',
+        detail: [
+          'This is the sentence that clears up the usual confusion.',
+          'A plain trie already shares prefixes; that is what a trie *is*.',
+          'What it cannot do is collapse the run of single-child nodes that follows the point ' +
+            'where a key stops sharing. That run is as long as the key\'s unique tail.',
+          'So the compression factor is set by how long the tails are. English words diverge after ' +
+            'two or three characters and then end quickly, giving 2.14×; 32-character hex keys ' +
+            'diverge immediately and then run on, giving 22×.'
+        ],
         example: '400 words: 2.14×. 400 paths: 9.98×. 400 hex keys: 22.45×.'
       },
       {
@@ -220,50 +226,65 @@
         formal: 'edge → head(shared) + tail(rest), new leaf under head',
         readAs: 'Splitting an edge means cutting it into the part the new key shares and the part it does ' +
           'not, then hanging the new leaf off the join. The arrow is "becomes".',
-        detail: 'Insertion has three cases and only this one is interesting. The shared part becomes ' +
-          'a new internal node, the old child keeps the remainder of its label and hangs below it, ' +
-          'and the incoming key hangs beside it. The case that gets written wrong is the one where ' +
-          'the incoming key *ends* exactly at the split point: the new internal node is itself a ' +
-          'key, and code that always creates a leaf for the new key loses it silently. That bug ' +
-          'survives every "insert then look up" test that does not happen to insert a key which is ' +
-          'a proper prefix of another.',
+        detail: [
+          'Insertion has three cases and only this one is interesting.',
+          'The shared part becomes a new internal node, the old child keeps the remainder of its ' +
+            'label and hangs below it, and the incoming key hangs beside it.',
+          'The case that gets written wrong is the one where the incoming key *ends* exactly at ' +
+            'the split point. The new internal node is itself a key, and code that always creates ' +
+            'a leaf for the new key loses it silently.',
+          'That bug survives every "insert then look up" test that does not happen to insert a key ' +
+            'which is a proper prefix of another.'
+        ],
         example: 'inserting 400 English words performs 163 splits.'
       },
       {
         term: 'A prefix can end inside an edge',
         plain: 'A prefix query may stop halfway along an edge label, and that is still a valid prefix.',
         formal: 'descend(p) may return (node, partial) with p shorter than the edge',
-        detail: 'This is the query-side counterpart of the split, and it breaks a naive port of the ' +
-          'plain-trie code. Searching for "conn" in a trie whose edge reads "connect" ends four ' +
-          'characters into a seven-character label. For membership the answer is no — the walk did ' +
-          'not end on a node. For a prefix query the answer is the entire subtree below that edge, ' +
-          'and the completion text has to be reconstructed as the consumed prefix plus the rest of ' +
-          'the label. Code that treats a partial match as a miss returns nothing for exactly the ' +
-          'prefixes a user is most likely to type.',
+        detail: [
+          'This is the query-side counterpart of the split, and it breaks a naive port of the ' +
+            'plain-trie code.',
+          'Searching for "conn" in a trie whose edge reads "connect" ends four characters into a ' +
+            'seven-character label.',
+          'For membership the answer is no, because the walk did not end on a node.',
+          'For a prefix query the answer is the entire subtree below that edge. The completion ' +
+            'text has to be reconstructed as the consumed prefix plus the rest of the label.',
+          'Code that treats a partial match as a miss returns nothing for exactly the prefixes a ' +
+            'user is most likely to type.'
+        ],
         example: 'the prefix "conn" ends inside the edge "connect" and still has completions.'
       },
       {
         term: 'PATRICIA is a radix trie over bits',
         plain: 'Make the alphabet {0, 1} and the edges bit ranges, and you have a routing table.',
         formal: 'longest-prefix match over binary strings = one downward walk',
-        detail: 'An IPv4 prefix is a bit string with a length: 10.0.0.0/8 is the first eight bits of ' +
-          '00001010…. "Which route applies to this address" is longest-prefix match over those bit ' +
-          'strings, which is exactly the query a radix trie answers in one walk down. That is why ' +
-          'routers do not scan their tables: with several matching prefixes the walk naturally ends ' +
-          'at the deepest one, and the walk length is bounded by 32 bits regardless of how many ' +
-          'routes there are.',
+        detail: [
+          'An IPv4 prefix is a bit string with a length: 10.0.0.0/8 is the first eight bits of ' +
+            '00001010….',
+          '"Which route applies to this address" is longest-prefix match over those bit strings, ' +
+            'which is exactly the query a radix trie answers in one walk down.',
+          'That is why routers do not scan their tables. With several matching prefixes the walk ' +
+            'naturally ends at the deepest one, and the walk length is bounded by 32 bits ' +
+            'regardless of how many routes there are.'
+        ],
         example: '10.1.2.7 matches /0, /8, /16 and /24; the walk ends at /24 without comparing them.'
       },
       {
         term: 'Adaptive node sizes',
         plain: 'Choose the child layout by fan-out: a small list for few children, an array for many.',
         formal: 'node4; node16; node48; node256',
-        detail: 'Fan-out is not uniform, and over 400 English words 94.5% of the radix nodes have ' +
-          'four children or fewer. Sizing every node for the maximum therefore wastes almost all of ' +
-          'the memory, and sizing them all as maps costs an indirection on the hot path. ART picks ' +
-          'a layout per node from a small set and promotes a node when it outgrows its class, which ' +
-          'is what makes a radix trie competitive with a hash table in a main-memory database — the ' +
-          'small nodes, which are nearly all of them, stay small and stay scannable.',
+        detail: [
+          'Fan-out is not uniform, and over 400 English words 94.5% of the radix nodes have four ' +
+            'children or fewer.',
+          'Sizing every node for the maximum therefore wastes almost all of the memory, and sizing ' +
+            'them all as maps costs an indirection on the hot path.',
+          'ART picks a layout per node from a small set, and promotes a node when it outgrows its ' +
+            'class.',
+          'That is what makes a radix trie competitive with a hash table in a main-memory ' +
+            'database: the small nodes, which are nearly all of them, stay small and stay ' +
+            'scannable.'
+        ],
         example: 'over 400 words: 533 node4, 30 node16, 1 node48, 0 node256.'
       },
       {
@@ -272,25 +293,31 @@
         formal: 'bytes = header + label + capacity(class) × slot',
         readAs: 'What one adaptive node costs: its header, its edge label, and the slots its size class ' +
           'reserves multiplied by the slot width. Growing a node means moving to the next class up.',
-        detail: 'The adaptive scheme trades a little waste for a lot of locality, and on a small ' +
-          'key set the trade can go the wrong way — a map node holding one child costs one entry ' +
-          'where a node4 costs four slots. That is worth stating rather than hiding, because it ' +
-          'sets where the technique belongs: ART is for a large index where the alternative is a ' +
-          'pointer chase per level, not for a few hundred keys where a map is already small enough ' +
-          'to sit in cache.',
+        detail: [
+          'The adaptive scheme trades a little waste for a lot of locality, and on a small key set ' +
+            'the trade can go the wrong way.',
+          'A map node holding one child costs one entry where a node4 costs four slots.',
+          'That is worth stating rather than hiding, because it sets where the technique belongs.',
+          'ART is for a large index where the alternative is a pointer chase per level. It is not ' +
+            'for a few hundred keys, where a map is already small enough to sit in cache.'
+        ],
         example: 'on 400 words the ART layout costs more bytes per key than plain map nodes.'
       },
       {
         term: 'Lookups do more character work',
         plain: 'Compression moves cost from pointer chases into substring comparisons.',
         formal: 'plain: |query| pointer steps; radix: fewer steps, each comparing a label',
-        detail: 'This is the honest counterweight to the node-count column. A plain-trie lookup takes ' +
-          'one step per query character, each a hash or an index into a child container. A radix ' +
-          'lookup takes one step per *edge*, and each step compares the whole edge label against ' +
-          'the query — so it does at least as many character comparisons and far fewer pointer ' +
-          'dereferences. On a machine where a cache miss costs about eighty comparisons that trade ' +
-          'is strongly favourable, which is a hardware argument rather than an algorithmic one, and ' +
-          'the counters alone will not show it.',
+        detail: [
+          'This is the honest counterweight to the node-count column.',
+          'A plain-trie lookup takes one step per query character, each a hash or an index into a ' +
+            'child container.',
+          'A radix lookup takes one step per *edge*, and each step compares the whole edge label ' +
+            'against the query. It does at least as many character comparisons and far fewer ' +
+            'pointer dereferences.',
+          'On a machine where a cache miss costs about eighty comparisons that trade is strongly ' +
+            'favourable. That is a hardware argument rather than an algorithmic one, and the ' +
+            'counters alone will not show it.'
+        ],
         example: '400 words: 9.46 character steps per radix lookup against 5.56 in the plain trie.'
       }
     ],
