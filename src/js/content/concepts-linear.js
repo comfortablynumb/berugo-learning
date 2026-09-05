@@ -355,13 +355,17 @@
         term: 'Node overhead',
         plain: 'Every element carries at least one pointer, and usually an allocation header too.',
         formal: 'bytes per element = payload + pointer(s) + header',
-        detail: 'A list element is never just its payload. A singly linked node adds one pointer, a ' +
-          'doubly linked one adds two, and a separately allocated node also carries the allocator\'s ' +
-          'header and is rounded up to a size class. For a 4-byte integer on a 64-bit machine that ' +
-          'is easily 32 bytes per element against the 4 an array uses — eight times the memory, and ' +
-          'therefore eight times the cache lines to walk the same data. Before any discussion of ' +
-          'asymptotics, this factor alone decides most array-versus-list questions in favour of the ' +
-          'array.',
+        detail: [
+          'A list element is never just its payload.',
+          'A singly linked node adds one pointer, and a doubly linked one adds two. A separately ' +
+            'allocated node also carries the allocator\'s header and is rounded up to a size ' +
+            'class.',
+          'For a 4-byte integer on a 64-bit machine that is easily 32 bytes per element against ' +
+            'the 4 an array uses. Eight times the memory means eight times the cache lines to ' +
+            'walk the same data.',
+          'Before any discussion of asymptotics, this factor alone decides most array-versus-list ' +
+            'questions in favour of the array.'
+        ],
         example: 'A list of 4-byte integers can cost 32 bytes per element.'
       },
       {
@@ -378,39 +382,50 @@
         },
         plain: 'The address of the next element is only known after reading the current one, so nothing can be prefetched.',
         formal: 'load depends on the previous load',
-        detail: 'Modern processors hide memory latency by having many loads in flight at once, which ' +
-          'requires knowing the addresses in advance. A linked traversal defeats that completely: ' +
-          'the address of node i + 1 is stored inside node i, so each load must complete before the ' +
-          'next can even be issued. The misses serialise into a dependent chain, and the cost is the ' +
-          'full latency of every one of them rather than their throughput. An array walk has the ' +
-          'opposite property — every address is computable immediately, so the prefetcher runs ahead ' +
-          'and the misses overlap.',
+        detail: [
+          'Modern processors hide memory latency by having many loads in flight at once, which ' +
+            'requires knowing the addresses in advance.',
+          'A linked traversal defeats that completely. The address of node i + 1 is stored inside ' +
+            'node i, so each load must complete before the next can even be issued.',
+          'The misses serialise into a dependent chain, and the cost is the full latency of every ' +
+            'one of them rather than their throughput.',
+          'An array walk has the opposite property. Every address is computable immediately, so ' +
+            'the prefetcher runs ahead and the misses overlap.'
+        ],
         example: 'A scattered list walk is a dependent-load chain, one cache miss deep each.'
       },
       {
         term: 'Misses, not lines',
         plain: 'A single traversal touches every line holding a node exactly once, whichever order the nodes sit in.',
         formal: 'distinct lines is layout-independent for one pass',
-        detail: 'It is tempting to measure a layout by how many distinct cache lines it touches, and ' +
-          'for one full pass that measure is blind: every node has to be visited once, so every line ' +
-          'holding a node is fetched once whatever the arrangement. What separates a compact list ' +
-          'from a scattered one is residency — whether the lines already fetched are still there ' +
-          'when the walk returns to them, and how much of each line the walk uses. That is why the ' +
-          'simulator in this section counts misses against a bounded LRU cache, and why the ' +
-          'scattered walk costs about seven times more only once the list outgrows that cache.',
+        detail: [
+          'It is tempting to measure a layout by how many distinct cache lines it touches, and ' +
+            'for one full pass that measure is blind. Every node has to be visited once, so every ' +
+            'line holding a node is fetched once whatever the arrangement.',
+          'What separates a compact list from a scattered one is residency. Are the lines already ' +
+            'fetched still there when the walk returns to them, and how much of each line does ' +
+            'the walk use?',
+          'That is why the simulator in this section counts misses against a bounded LRU cache. ' +
+            'The scattered walk costs about seven times more only once the list outgrows that ' +
+            'cache.'
+        ],
         example: 'The scattered walk costs 7× more only once the list outgrows the cache.'
       },
       {
         term: 'Intrusive list',
         plain: 'The link fields live inside the element, so linking costs no allocation.',
         formal: 'struct { data; next; } embedded in the object',
-        detail: 'An intrusive list puts the next and prev fields inside the element rather than in a ' +
-          'separate node that points at it. That removes the second allocation, the second ' +
-          'indirection and the header, and it makes linking and unlinking infallible — there is no ' +
-          'allocation to fail, which is exactly why kernels use them in paths that cannot return an ' +
-          'error. It also lets one object belong to several lists at once by carrying several link ' +
-          'fields. The trade is that the element type has to know it may be listed, so the container ' +
-          'is no longer generic over types it did not anticipate.',
+        detail: [
+          'An intrusive list puts the next and prev fields inside the element, rather than in a ' +
+            'separate node that points at it.',
+          'That removes the second allocation, the second indirection and the header. It also ' +
+            'makes linking and unlinking infallible: there is no allocation to fail, which is ' +
+            'exactly why kernels use them in paths that cannot return an error.',
+          'It also lets one object belong to several lists at once by carrying several link ' +
+            'fields.',
+          'The trade is that the element type has to know it may be listed, so the container is ' +
+            'no longer generic over types it did not anticipate.'
+        ],
         example: 'Kernel lists work this way; it is why lists survive there.'
       },
       {
@@ -426,52 +441,67 @@
         },
         plain: 'A dummy head or tail that removes the empty-list and end-of-list special cases.',
         formal: 'always at least one node',
-        detail: 'Most of the bugs in hand-written list code live in the boundary cases: inserting ' +
-          'into an empty list, removing the only element, removing the head. A sentinel — a ' +
-          'permanent node that holds no data — makes those cases disappear by guaranteeing every ' +
-          'real node has both a predecessor and a successor, so insertion and removal are the same ' +
-          'few pointer writes everywhere. With a circular sentinel there are no null checks at all. ' +
-          'The cost is one node\'s worth of memory and remembering that the sentinel is not an ' +
-          'element, which iteration and length must both respect.',
+        detail: [
+          'Most of the bugs in hand-written list code live in the boundary cases: inserting into ' +
+            'an empty list, removing the only element, removing the head.',
+          'A sentinel is a permanent node that holds no data. It makes those cases disappear by ' +
+            'guaranteeing every real node has both a predecessor and a successor, so insertion ' +
+            'and removal are the same few pointer writes everywhere.',
+          'With a circular sentinel there are no null checks at all.',
+          'The cost is one node\'s worth of memory, and remembering that the sentinel is not an ' +
+            'element — which iteration and length must both respect.'
+        ],
         example: 'Insertion needs no null check when a sentinel is present.'
       },
       {
         term: 'Cycle detection',
         plain: 'Brent\'s algorithm finds a loop with one pointer and a doubling step limit, and reports its length.',
         formal: 'power-of-two teleport plus a scan',
-        detail: 'A corrupted list can contain a cycle, and a traversal that meets one simply never ' +
-          'ends. Brent\'s algorithm detects it by keeping one saved node and walking forward, ' +
-          'doubling the distance before saving again: if the walker meets the saved node within the ' +
-          'current limit, that limit is the cycle length. It uses one moving pointer rather than ' +
-          'the tortoise and hare\'s two, so it does fewer node visits, and it hands back the cycle ' +
-          'length directly instead of needing a second phase. Either way the point is the same: a ' +
-          'structure that can be corrupted needs a bounded traversal, not a hopeful one.',
+        detail: [
+          'A corrupted list can contain a cycle, and a traversal that meets one simply never ends.',
+          'Brent\'s algorithm keeps one saved node and walks forward, doubling the distance ' +
+            'before saving again. If the walker meets the saved node within the current limit, ' +
+            'that limit is the cycle length.',
+          'It uses one moving pointer rather than the tortoise and hare\'s two, so it does fewer ' +
+            'node visits. It also hands back the cycle length directly, instead of needing a ' +
+            'second phase.',
+          'Either way the point is the same: a structure that can be corrupted needs a bounded ' +
+            'traversal, not a hopeful one.'
+        ],
         example: 'Used to detect a corrupted list before it hangs a traversal.'
       },
       {
         term: 'Splice',
         plain: 'Move a node, or a whole run of nodes, between lists by rewriting a fixed number of links.',
         formal: '6 pointer writes, independent of the list length',
-        detail: 'Splicing is the operation lists are actually for. Moving a node — or an entire run ' +
-          'of nodes — to another position costs six pointer writes regardless of how much data is ' +
-          'involved, because nothing is copied and nothing after it shifts. An array doing the same ' +
-          'thing moves elements. The canonical use is an LRU cache: a hit moves a node to the front ' +
-          'for six writes, against roughly n/2 element moves in an array, and the node keeps its ' +
-          'address so the hash map pointing at it stays valid. Splicing whole ranges in O(1) is also ' +
-          'why lists back merge-based sorts that must not allocate.',
+        detail: [
+          'Splicing is the operation lists are actually for.',
+          'Moving a node, or an entire run of nodes, to another position costs six pointer ' +
+            'writes. That holds regardless of how much data is involved, because nothing is ' +
+            'copied and nothing after it shifts. An array doing the same thing moves elements.',
+          'The canonical use is an LRU cache. A hit moves a node to the front for six writes, ' +
+            'against roughly n/2 element moves in an array. The node keeps its address, so the ' +
+            'hash map pointing at it stays valid.',
+          'Splicing whole ranges in O(1) is also why lists back merge-based sorts that must not ' +
+            'allocate.'
+        ],
         example: 'LRU move-to-front: 6 writes per hit, against roughly n/2 element moves in an array.'
       },
       {
         term: 'Stable addresses',
         plain: 'A node stays where it was allocated, so anything else may hold a pointer to it. Arrays do not offer this.',
         formal: 'insertion and removal do not move other nodes',
-        detail: 'Every node is allocated once and never moved, so a pointer to it stays valid for as ' +
-          'long as the node lives, whatever happens to the rest of the list. That is a property an ' +
-          'array cannot offer at any price, since growth relocates everything. It is what allows ' +
-          'another structure to index into the list from outside — an LRU cache is exactly a hash ' +
-          'map from key to list node, and the design only works because the node never moves. When ' +
-          'you see a list in code that would otherwise obviously be an array, stable addresses are ' +
-          'usually the reason.',
+        detail: [
+          'Every node is allocated once and never moved, so a pointer to it stays valid for as ' +
+            'long as the node lives, whatever happens to the rest of the list.',
+          'That is a property an array cannot offer at any price, since growth relocates ' +
+            'everything.',
+          'It is what allows another structure to index into the list from outside. An LRU cache ' +
+            'is exactly a hash map from key to list node, and the design only works because the ' +
+            'node never moves.',
+          'When you see a list in code that would otherwise obviously be an array, stable ' +
+            'addresses are usually the reason.'
+        ],
         example: 'An LRU cache keeps a hash map from key to node — only possible because the node never moves.'
       },
       {
@@ -480,13 +510,17 @@
         formal: 'k elements per node ⇒ n/k pointer follows',
         readAs: 'Pack k items into each node and you follow n divided by k pointers instead of n. The ⇒ is ' +
           '"which means": the pointer chasing falls by exactly the factor you packed.',
-        detail: 'An unrolled list keeps a small array of k elements in each node, which is the ' +
-          'obvious middle point between the two structures and is closer to optimal than either for ' +
-          'many workloads. Pointer follows drop by a factor of k, the per-element pointer overhead ' +
-          'drops by the same factor, and the elements inside a node are contiguous so a scan gets ' +
-          'array-like locality — with k = 16 a traversal touches a sixteenth of the lines. Splices ' +
-          'still rewrite a constant number of links, though insertion inside a full node now has to ' +
-          'split it, and nodes are only partly full, so some space is traded back.',
+        detail: [
+          'An unrolled list keeps a small array of k elements in each node. It is the obvious ' +
+            'middle point between the two structures, and closer to optimal than either for many ' +
+            'workloads.',
+          'Pointer follows drop by a factor of k, and the per-element pointer overhead drops by ' +
+            'the same factor.',
+          'The elements inside a node are contiguous, so a scan gets array-like locality: with ' +
+            'k = 16 a traversal touches a sixteenth of the lines.',
+          'Splices still rewrite a constant number of links. Insertion inside a full node now has ' +
+            'to split it, though, and nodes are only partly full, so some space is traded back.'
+        ],
         example: 'With k = 16 the scan touches a sixteenth of the lines and a splice still rewrites a constant number of links.'
       }
     ],
