@@ -165,12 +165,16 @@
         readAs: 'The suffix array holds starting positions, sorted by how the suffixes compare ' +
           'alphabetically. It is a permutation of 0 … n−1 and nothing more, which is why it costs one ' +
           'integer per character.',
-        detail: 'The array holds no characters and no pointers — the text is already there, and a ' +
-          'suffix is fully described by where it starts. That is the entire space argument: four ' +
-          'bytes per character where a suffix tree needs a node with four fields, and the ' +
-          'difference is not asymptotic, it is a constant of about five that decides whether a ' +
-          'human genome fits in memory. Everything else in the section is about recovering the ' +
-          'suffix tree\'s abilities from this much smaller object.',
+        detail: [
+          'The array holds no characters and no pointers. The text is already there, and a suffix ' +
+            'is fully described by where it starts.',
+          'That is the entire space argument: four bytes per character, where a suffix tree needs ' +
+            'a node with four fields.',
+          'The difference is not asymptotic. It is a constant of about five that decides whether a ' +
+            'human genome fits in memory.',
+          'Everything else in the section is about recovering the suffix tree\'s abilities from ' +
+            'this much smaller object.'
+        ],
         example: 'mississippi: sa = 10, 7, 4, 1, 0, 9, 8, 6, 3, 5, 2.'
       },
       {
@@ -189,12 +193,16 @@
         formal: 'occurrences(P) = sa[first … last), found in O(m log n)',
         readAs: 'Every occurrence of a pattern sits in one contiguous stretch of the suffix array, because ' +
           'the suffixes are sorted and they all begin the same way. Two binary searches find its ends.',
-        detail: 'This follows immediately from sorting and it is the property the structure exists ' +
-          'for: if two suffixes both begin with P then everything sorting between them also begins ' +
-          'with P. So the answer set is an interval, and the two ends are found by binary search ' +
-          'with an O(m) comparison at each of the log n steps. No index of positions is needed and ' +
-          'no auxiliary structure is consulted — which is why a suffix array is the smallest thing ' +
-          'that can answer "where does this occur" without scanning.',
+        detail: [
+          'This follows immediately from sorting, and it is the property the structure exists for.',
+          'If two suffixes both begin with P then everything sorting between them also begins ' +
+            'with P.',
+          'So the answer set is an interval, and the two ends are found by binary search with an ' +
+            'O(m) comparison at each of the log n steps.',
+          'No index of positions is needed and no auxiliary structure is consulted. That is why a ' +
+            'suffix array is the smallest thing that can answer "where does this occur" without ' +
+            'scanning.'
+        ],
         example: 'in mississippi, "ssi" occupies ranks 9 and 10 — a range of 2.'
       },
       {
@@ -213,27 +221,35 @@
         formal: 'lcp[i] = |longest common prefix of sa[i − 1] and sa[i]|',
         readAs: 'How many characters each sorted suffix shares with the one before it. The bars are length. ' +
           'This array is what turns the suffix array from a search structure into a substring one.',
-        detail: 'It is what turns a sorted list into the equal of a tree. The internal nodes of a ' +
-          'suffix tree correspond exactly to the local minima structure of the LCP array, so ' +
-          'anything the tree answers by finding a deep internal node, the array answers by finding ' +
-          'a large LCP entry. The longest repeated substring is the maximum entry. The number of ' +
-          'distinct substrings is n(n+1)/2 minus the sum. Reading the LCP column beside the ' +
-          'suffixes is reading the repeated structure of the text directly.',
+        detail: [
+          'It is what turns a sorted list into the equal of a tree.',
+          'The internal nodes of a suffix tree correspond exactly to the local minima structure of ' +
+            'the LCP array. So anything the tree answers by finding a deep internal node, the ' +
+            'array answers by finding a large LCP entry.',
+          'The longest repeated substring is the maximum entry. The number of distinct substrings ' +
+            'is n(n+1)/2 minus the sum.',
+          'Reading the LCP column beside the suffixes is reading the repeated structure of the ' +
+            'text directly.'
+        ],
         example: 'mississippi: the largest LCP entry is 4, and the repeat it marks is "issi".'
       },
       {
         term: 'Kasai\'s amortised walk',
         plain: 'Compute the LCPs in text order, not array order, and carry the match length.',
         formal: 'h can fall by at most 1 per step, so total work is O(n)',
-        readAs: 'Kasai\'s argument: the shared-prefix length loses at most one character each time you move ' +
-          'to the next position, so although it can rise a lot, it can only fall n times in total.',
-        detail: 'The trick is a one-line observation with a large consequence: if suffix i shares h ' +
-          'characters with its neighbour, then suffix i + 1 — the same string with the first ' +
-          'character removed — shares at least h − 1 with *its* neighbour. So walking the suffixes ' +
-          'in text order and carrying h means h decreases at most n times overall and therefore ' +
-          'increases at most 2n times, giving a linear algorithm out of what looks like it must be ' +
-          'quadratic. Walking in array order instead gives no such bound, and that is the version ' +
-          'people write first.',
+        readAs: 'Kasai\'s argument: the shared-prefix length loses at most one character each time ' +
+          'you move to the next position. So although it can rise a lot, it can only fall n times ' +
+          'in total.',
+        detail: [
+          'The trick is a one-line observation with a large consequence.',
+          'Suffix i + 1 is suffix i with the first character removed. So if suffix i shares h ' +
+            'characters with its neighbour, suffix i + 1 shares at least h − 1 with *its* ' +
+            'neighbour.',
+          'So walking the suffixes in text order and carrying h means h decreases at most n times ' +
+            'overall, and therefore increases at most 2n times.',
+          'That gives a linear algorithm out of what looks like it must be quadratic. Walking in ' +
+            'array order instead gives no such bound, and that is the version people write first.'
+        ],
         example: 'over 4 000 characters Kasai does about 8 000 character steps, not 8 million.'
       },
       {
@@ -243,53 +259,66 @@
         readAs: 'To sort by twice as many characters, pair each position\'s existing rank with the rank of ' +
           'the position k further along. Sorting those pairs doubles the compared length per round, so ' +
           'log n rounds cover the whole string.',
-        detail: 'The insight is that once suffixes are ranked by their first k characters, comparing ' +
-          'the first 2k characters of two suffixes is comparing a pair of integers rather than a ' +
-          'pair of strings — because the second half of a suffix starting at i is a suffix starting ' +
-          'at i + k, whose rank is already known. That makes each round a sort of integer pairs and ' +
-          'there are log n rounds. It also gives the rank table, which is the algorithm made ' +
-          'visible: watching it stop changing is watching the suffixes become distinguishable.',
+        detail: [
+          'The insight is that once suffixes are ranked by their first k characters, comparing the ' +
+            'first 2k characters of two suffixes is comparing integers rather than strings.',
+          'That works because the second half of a suffix starting at i is a suffix starting at ' +
+            'i + k, whose rank is already known.',
+          'So each round is a sort of integer pairs, and there are log n rounds.',
+          'It also gives the rank table, which is the algorithm made visible. Watching it stop ' +
+            'changing is watching the suffixes become distinguishable.'
+        ],
         example: 'mississippi needs 3 rounds — the ranks are all distinct after 4 characters.'
       },
       {
         term: 'SA-IS sorts by induction',
         plain: 'Classify positions S or L, place the LMS seeds, and induce the rest twice.',
         formal: 'S-type: suffix i < suffix i + 1; LMS: an S-type after an L-type',
-        detail: 'The linear construction does no character comparisons after the first pass. It ' +
-          'classifies each position by whether its suffix sorts before the next one, places the ' +
-          'left-most S-type positions into their buckets, and then derives the order of every other ' +
-          'suffix from those seeds by two scans — L-types left to right from the bucket heads, ' +
-          'S-types right to left from the tails. If the seeds are not yet distinguishable it ' +
-          'recurses on a reduced string. The whole algorithm is bucket arithmetic, which is why it ' +
-          'is linear and why it is hard to read.',
+        detail: [
+          'The linear construction does no character comparisons after the first pass.',
+          'It classifies each position by whether its suffix sorts before the next one, and places ' +
+            'the left-most S-type positions into their buckets.',
+          'It then derives the order of every other suffix from those seeds by two scans: L-types ' +
+            'left to right from the bucket heads, S-types right to left from the tails.',
+          'If the seeds are not yet distinguishable it recurses on a reduced string.',
+          'The whole algorithm is bucket arithmetic, which is why it is linear and why it is hard ' +
+            'to read.'
+        ],
         example: '4 000 characters of DNA: 4 recursions, zero character comparisons.'
       },
       {
         term: 'The naive construction is the reference',
         plain: 'Sorting the suffixes as strings is slow, obviously correct, and therefore useful.',
         formal: 'O(n² log n): each of the O(n log n) comparisons is O(n)',
-        detail: 'A construction that is fast and wrong is the failure mode here, and it is not ' +
-          'catchable by inspection — an off-by-one in the induced sort produces an array that looks ' +
-          'entirely plausible and answers most queries correctly. Keeping the obviously-correct ' +
-          'version and asserting the two agree on every corpus, including a one-letter alphabet, is ' +
-          'the only cheap defence. The cost column also makes the point the section is about: the ' +
-          'naive version does 77 million character comparisons where the others do none.',
+        detail: [
+          'A construction that is fast and wrong is the failure mode here, and it is not catchable ' +
+            'by inspection. An off-by-one in the induced sort produces an array that looks ' +
+            'entirely plausible and answers most queries correctly.',
+          'Keeping the obviously-correct version and asserting the two agree on every corpus, ' +
+            'including a one-letter alphabet, is the only cheap defence.',
+          'The cost column also makes the point the section is about: the naive version does 77 ' +
+            'million character comparisons where the others do none.'
+        ],
         example: 'DNA 4 000: naive 42 555 comparisons touching 77 241 942 characters.'
       },
       {
         term: 'Distinct substrings, two ways',
         plain: 'n(n+1)/2 minus the sum of the LCP array, which a suffix automaton must agree with.',
         formal: 'distinct = n(n+1)/2 − Σ lcp[i]',
-        readAs: 'Every substring is a prefix of some suffix, so counting them is counting all n(n+1)/2 ' +
-          'prefixes and subtracting the ones already seen — which is exactly what the shared-prefix ' +
-          'lengths total up to.',
-        detail: 'Every substring is a prefix of some suffix, so summing the suffix lengths counts ' +
-          'every substring once per suffix it prefixes; subtracting the LCP sum removes exactly the ' +
-          'duplicates, because two adjacent suffixes share precisely lcp[i] prefixes. The value is ' +
-          'worth computing not for itself but because a suffix automaton computes the same quantity ' +
-          'by a completely different route — summing len(v) − len(link(v)) over its states — and ' +
-          'two independent computations agreeing is a far stronger check than either passing its ' +
-          'own tests.',
+        readAs: 'Every substring is a prefix of some suffix, so counting them is counting all ' +
+          'n(n+1)/2 prefixes and subtracting the ones already seen. That is exactly what the ' +
+          'shared-prefix lengths total up to.',
+        detail: [
+          'Every substring is a prefix of some suffix, so summing the suffix lengths counts every ' +
+            'substring once per suffix it prefixes.',
+          'Subtracting the LCP sum removes exactly the duplicates, because two adjacent suffixes ' +
+            'share precisely lcp[i] prefixes.',
+          'The value is worth computing not for itself, but because a suffix automaton computes ' +
+            'the same quantity by a completely different route: summing len(v) − len(link(v)) ' +
+            'over its states.',
+          'Two independent computations agreeing is a far stronger check than either passing its ' +
+            'own tests.'
+        ],
         example: 'mississippi: 66 − 13 = 53 distinct substrings, and the automaton also says 53.'
       }
     ],

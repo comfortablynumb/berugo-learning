@@ -30,21 +30,21 @@
       sectionId: SECTION_ID,
       orientation: [
         'A suffix array is the list of suffix start positions in sorted order — one integer per ' +
-          'character, against a suffix tree\'s node with four fields. Searching for a pattern is a ' +
-          'binary search over that list, O(m log n), and the answer is a contiguous range: every ' +
-          'suffix beginning with the pattern sorts together, which is the whole reason the ' +
+          'character, against a suffix tree\'s node with four fields. Searching for a pattern is ' +
+          'a binary search over that list, O(m log n), and the answer is a contiguous range. ' +
+          'Every suffix beginning with the pattern sorts together, which is the whole reason the ' +
           'structure works.',
-        'The LCP array is what makes it as powerful as the tree. lcp[i] is how many characters ' +
-          'suffix sa[i] shares with sa[i−1], and Kasai computes the whole array in O(n) by walking ' +
-          'the suffixes in *text* order rather than array order: dropping the leading character of a ' +
-          'suffix can shorten its overlap with its neighbour by at most one, so the counter falls by ' +
-          'at most one per step and can only rise n times overall.',
+        'The LCP array is what makes it as powerful as the tree. Entry lcp[i] is how many ' +
+          'characters suffix sa[i] shares with sa[i−1]. Kasai computes the whole array in O(n) by ' +
+          'walking the suffixes in *text* order rather than array order. Dropping the leading ' +
+          'character of a suffix can shorten its overlap with its neighbour by at most one. So ' +
+          'the counter falls by at most one per step, and can only rise n times overall.',
         'Construction is where the engineering is. Sorting the suffixes as strings is O(n² log n) ' +
-          'because each comparison is O(n). Prefix doubling sorts by the first character, then uses ' +
-          'the resulting ranks to sort by the first 2, 4, 8 … characters — log n rounds, each a ' +
-          'sort of integer pairs. SA-IS classifies each position as S or L, places the LMS ' +
-          'substrings by induced sorting and recurses on the reduced string, and is linear. All ' +
-          'three must produce the identical array, including on a one-letter alphabet.'
+          'because each comparison is O(n). Prefix doubling sorts by the first character, then ' +
+          'uses the resulting ranks to sort by the first 2, 4, 8 … characters. That is log n ' +
+          'rounds, each a sort of integer pairs. SA-IS classifies each position as S or L, places ' +
+          'the LMS substrings by induced sorting and recurses on the reduced string, and is ' +
+          'linear. All three must produce the identical array, including on a one-letter alphabet.'
       ],
       demo: {
         title: 'Interactive demo — the array, the LCPs and the doubling rounds',
