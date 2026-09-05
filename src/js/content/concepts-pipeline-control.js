@@ -304,11 +304,14 @@
         },
         plain: 'A branch whose outcome is decided by what two earlier branches did.',
         formal: 'its own history is a coin flip; its behaviour is perfectly determined',
-        detail: 'A counter indexed only by address sees a 50/50 branch and settles on whichever '
-          + 'outcome is more common, which caps it well below what is achievable. The '
-          + 'information it needs exists — it is in the outcomes of the earlier branches — and '
-          + 'it simply never reaches the predictor. That is the gap gshare closes, and it is '
-          + 'why the fixture that demonstrates it has to be constructed rather than found.',
+        detail: [
+          'A counter indexed only by address sees a 50/50 branch and settles on whichever outcome '
+            + 'is more common, which caps it well below what is achievable.',
+          'The information it needs exists, in the outcomes of the earlier branches.',
+          'It simply never reaches the predictor.',
+          'That is the gap gshare closes, and it is why the fixture that demonstrates it has to be '
+            + 'constructed rather than found.'
+        ],
         example: 'On the correlated site: a per-site counter reaches 73.3% and a history-indexed '
           + 'one reaches 88.8%.'
       },
@@ -316,11 +319,14 @@
         term: 'gshare is one exclusive-or, and that is the whole idea',
         plain: 'Index the table with the address combined with recent outcomes.',
         formal: 'slot = address bits XOR global history bits',
-        detail: 'Mixing the history into the index gives each branch site several counters, one '
-          + 'per history pattern, so each case can be learned separately. It is a remarkably '
-          + 'small change to a bimodal predictor and it is the one that made correlation '
-          + 'predictable. The cost is that a single site now occupies several entries, which '
-          + 'crowds the table and makes aliasing worse.',
+        detail: [
+          'Mixing the history into the index gives each branch site several counters, one per '
+            + 'history pattern, so each case can be learned separately.',
+          'It is a remarkably small change to a bimodal predictor.',
+          'It is also the one that made correlation predictable.',
+          'The cost is that a single site now occupies several entries, which crowds the table and '
+            + 'makes aliasing worse.'
+        ],
         example: 'On the alternating fixture, where a per-site counter is at 0.0%, gshare '
           + 'reaches 97.0%.'
       },
@@ -328,22 +334,26 @@
         term: 'History helps some branches and hurts others',
         plain: 'gshare can be worse than bimodal on a well-behaved loop.',
         formal: 'spreading one site over many counters costs it whenever it did not need to be spread',
-        detail: 'A loop branch with a stable pattern was already predicted perfectly by one '
-          + 'counter; giving it eight, one per history pattern, means each of them sees a '
-          + 'fraction of the training and none of them settles as firmly. That is a real '
-          + 'regression, it appears in the demo, and it is the reason nobody ships gshare '
-          + 'alone.',
+        detail: [
+          'A loop branch with a stable pattern was already predicted perfectly by one counter.',
+          'Giving it eight, one per history pattern, means each of them sees a fraction of the '
+            + 'training and none of them settles as firmly.',
+          'That is a real regression and it appears in the demo.',
+          'It is the reason nobody ships gshare alone.'
+        ],
         example: 'On the plain loop fixture: bimodal 88.0%, gshare 64.0%.'
       },
       {
         term: 'A tournament predictor runs two and learns which to believe',
         plain: 'A chooser counter per site, updated only when they disagree.',
         formal: 'more area than either, and fewer surprises than both',
-        detail: 'Real programs contain both kinds of branch — some that need history and some '
-          + 'that are hurt by it — so neither predictor wins everywhere and a design that picks '
-          + 'per site wins overall. Updating the chooser only when the two disagree is the '
-          + 'detail that makes it work: agreement carries no information about which one to '
-          + 'trust.',
+        detail: [
+          'Real programs contain both kinds of branch: some that need history and some that are '
+            + 'hurt by it.',
+          'So neither predictor wins everywhere, and a design that picks per site wins overall.',
+          'Updating the chooser only when the two disagree is the detail that makes it work.',
+          'Agreement carries no information about which one to trust.'
+        ],
         example: 'On the loop fixture, where gshare regressed to 64.0%, the tournament reaches '
           + '92.0% — better than either component alone.'
       },
@@ -351,12 +361,15 @@
         term: 'TAGE gives each branch the history length it actually needs',
         plain: 'Tagged tables at geometric history lengths; the longest match answers.',
         formal: 'a branch needing two bits and one needing fifty are both served well',
-        detail: 'The insight is that "how much history does this branch need" is itself a '
-          + 'per-branch question, and a single history length is a compromise that suits '
-          + 'neither extreme. Tagging lets a table say "this entry really is for this branch '
-          + 'and this history" rather than guessing, and allocating a longer table on a '
-          + 'mispredict lets a branch migrate to the length it needs. It has won every '
-          + 'prediction championship for nearly twenty years.',
+        detail: [
+          'The insight is that "how much history does this branch need" is itself a per-branch '
+            + 'question.',
+          'A single history length is a compromise that suits neither extreme.',
+          'Tagging lets a table say "this entry really is for this branch and this history" rather '
+            + 'than guessing.',
+          'Allocating a longer table on a mispredict lets a branch migrate to the length it needs. '
+            + 'TAGE has won every prediction championship for nearly twenty years.'
+        ],
         example: 'On the alternating and nested fixtures TAGE is the best of the four, at 98.5% '
           + 'and 95.8%.'
       },
@@ -364,11 +377,13 @@
         term: 'A table too small makes history a regression rather than an improvement',
         plain: 'Aliasing gets worse before it gets better.',
         formal: 'each site occupies several entries, so a small table collides more than bimodal would',
-        detail: 'This is the trade nobody mentions when describing gshare as an improvement: it '
-          + 'is an improvement given enough entries and a regression without them. The demo '
-          + 'exposes the index width as a control precisely so the crossover is visible, '
-          + 'because "this technique is better" is not a statement that survives without its '
-          + 'resource budget attached.',
+        detail: [
+          'This is the trade nobody mentions when describing gshare as an improvement.',
+          'It is an improvement given enough entries, and a regression without them.',
+          'The demo exposes the index width as a control precisely so the crossover is visible.',
+          '"This technique is better" is not a statement that survives without its resource budget '
+            + 'attached.'
+        ],
         example: 'With four index bits — sixteen counters for every site and every history — '
           + 'gshare collapses on every fixture.'
       },
@@ -376,11 +391,14 @@
         term: 'Indirect branches are a harder and largely unsolved problem',
         plain: 'A direction is one bit; a target is a full address.',
         formal: 'a virtual call through a varying pointer has no small answer to remember',
-        detail: 'Predicting which of many targets an indirect jump will take needs a target '
-          + 'predictor with its own history, and it is much less accurate than direction '
-          + 'prediction. That is why devirtualisation is worth so much to a compiler, why hot '
-          + 'loops in performance-critical code avoid polymorphism, and why a jump table can be '
-          + 'slower than a chain of well-predicted comparisons.',
+        detail: [
+          'Predicting which of many targets an indirect jump will take needs a target predictor '
+            + 'with its own history.',
+          'It is much less accurate than direction prediction.',
+          'That is why devirtualisation is worth so much to a compiler, and why hot loops in '
+            + 'performance-critical code avoid polymorphism.',
+          'It is also why a jump table can be slower than a chain of well-predicted comparisons.'
+        ],
         example: 'The return-address stack is the one indirect case with a clean answer, and it '
           + 'works only because calls and returns nest.'
       },
@@ -388,11 +406,14 @@
         term: '98% is not a finished sentence',
         plain: 'Multiply the miss rate by the penalty before calling a predictor good.',
         formal: 'at a branch every 5 instructions, 2% wrong is 4 mispredicts per 1 000',
-        detail: 'Four mispredicts per thousand instructions at a twenty-cycle penalty is eighty '
-          + 'lost cycles per thousand — around 7% of a machine that would otherwise retire one '
-          + 'instruction per cycle. From a predictor everybody would call excellent. Going from '
-          + '98% to 99% halves that, which is why two decades of research went into the last '
-          + 'percentage point of something that already looked solved.',
+        detail: [
+          'Four mispredicts per thousand instructions at a twenty-cycle penalty is eighty lost '
+            + 'cycles per thousand.',
+          'That is around 7% of a machine that would otherwise retire one instruction per cycle.',
+          'It comes from a predictor everybody would call excellent.',
+          'Going from 98% to 99% halves that, which is why two decades of research went into the '
+            + 'last percentage point of something that already looked solved.'
+        ],
         example: 'The demo reports mispredicts per thousand instructions and the share of '
           + 'runtime beside the accuracy, because the accuracy alone settles nothing.'
       }

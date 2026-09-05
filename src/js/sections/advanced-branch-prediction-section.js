@@ -58,8 +58,8 @@
     return [
       '**Branches correlate with each other, and a per-site predictor cannot see it.** If a '
         + 'branch is taken exactly when two earlier ones were, then its own history is a coin '
-        + 'flip and its behaviour is perfectly determined — by information a counter indexed '
-        + 'only by address never receives.',
+        + 'flip and its behaviour is perfectly determined. It is determined by information a '
+        + 'counter indexed only by address never receives.',
       '**Global history is a shift register of recent outcomes, and gshare exclusive-ors it '
         + 'with the address.** That gives one branch site several counters, one per history '
         + 'pattern, so each case gets its own answer. It is a remarkably small change to a '
@@ -79,7 +79,7 @@
         + 'nearly twenty years.',
       '**Aliasing is the cost of every indexed table, and history makes it worse.** Two sites '
         + 'that share an index share a counter and interfere. Adding history bits spreads one '
-        + 'site over more entries, which helps that site and crowds everything else — so a '
+        + 'site over more entries, which helps that site and crowds everything else. So a '
         + 'table too small for the working set can make gshare worse than bimodal.',
       '**Indirect branches are a different problem and mostly an unsolved one.** A direction is '
         + 'one bit; an indirect target is a full address chosen from many. A virtual call or a '
@@ -87,8 +87,8 @@
         + 'worth so much to a compiler.',
       '**98% sounds finished until you multiply.** At a branch every five instructions and a '
         + '20-cycle penalty, 2% wrong is 4 mispredicts per thousand instructions and 80 lost '
-        + 'cycles per thousand — around 7% of runtime spent on work that gets thrown away, '
-        + 'from a predictor everybody would call excellent.'
+        + 'cycles per thousand. That is around 7% of runtime spent on work that gets thrown '
+        + 'away, from a predictor everybody would call excellent.'
     ];
   }
 
@@ -107,15 +107,15 @@
     return '**A prediction accuracy is not a result until it has been multiplied by what a '
       + 'mistake costs, and the multiplication is where the intuition breaks.** Ninety-eight '
       + 'per cent sounds like a solved problem. At a branch every five instructions that is '
-      + 'four mispredicts per thousand instructions, and at a twenty-cycle penalty those four '
-      + 'cost eighty cycles — against a thousand instructions that would ideally take a '
+      + 'four mispredicts per thousand instructions. At a twenty-cycle penalty those four '
+      + 'cost eighty cycles, against a thousand instructions that would ideally take a '
       + 'thousand cycles. Seven per cent of the machine, from a predictor nobody would '
-      + 'criticise. Going from 98% to 99% halves that, which is why an enormous amount of '
+      + 'criticise. Going from 98% to 99% halves that. That is why an enormous amount of '
       + 'silicon and two decades of research went into the last percentage point of something '
       + 'that already looked finished. The transferable habit is to stop quoting rates and '
       + 'start quoting the product of the rate and the cost. A cache at 95% is excellent or '
       + 'catastrophic depending entirely on whether a miss costs 10 nanoseconds or 10 '
-      + 'milliseconds; a retry policy that succeeds 99% of the time is fine or fatal depending '
+      + 'milliseconds. A retry policy that succeeds 99% of the time is fine or fatal depending '
       + 'on what the 1% does. The number that ends an argument is always rate times cost, and '
       + 'the number that starts one is always just the rate.';
   }
