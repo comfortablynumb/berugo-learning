@@ -670,102 +670,131 @@
         },
         plain: 'Object keys are coerced to strings; Map keys are values compared by SameValueZero.',
         formal: 'obj[1] === obj["1"]; map.get(1) !== map.get("1")',
-        detail: 'A plain object is not a hash map with a nicer syntax. Its keys are strings and ' +
-          'symbols only, so every other key is coerced: the number 1 and the string "1" are the same ' +
-          'property, and an object used as a key becomes the string "[object Object]", silently ' +
-          'merging every such key into one. A Map keeps keys as values and compares them with ' +
-          'SameValueZero, so numbers, objects and strings stay distinct. It also has no prototype ' +
-          'chain to collide with, which removes the whole class of bugs around keys named ' +
-          '"constructor" or "__proto__".',
+        detail: [
+          'A plain object is not a hash map with a nicer syntax. Its keys are strings and symbols ' +
+            'only, so every other key is coerced.',
+          'The number 1 and the string "1" are the same property. An object used as a key becomes ' +
+            'the string "[object Object]", silently merging every such key into one.',
+          'A Map keeps keys as values and compares them with SameValueZero, so numbers, objects ' +
+            'and strings stay distinct.',
+          'It also has no prototype chain to collide with, which removes the whole class of bugs ' +
+            'around keys named "constructor" or "__proto__".'
+        ],
         example: 'An object used as an object key becomes "[object Object]".'
       },
       {
         term: 'Dictionary mode',
         plain: 'V8 stores objects with a fixed shape until you delete a property; then it switches to a real hash table.',
         formal: 'hidden class → dictionary',
-        detail: 'V8 represents an ordinary object as a hidden class plus a flat array of values, so a ' +
-          'property access compiles down to an offset load and can be inline-cached. Deleting a ' +
-          'property — or adding a great many, or using an object as a dynamic dictionary — forces a ' +
-          'transition to a genuine hash table representation. That transition is silent, effectively ' +
-          'permanent for the object, and it disables the inline caches at every site that touches ' +
-          'it, so the cost lands in code far away from the delete. Using a Map for map-like data ' +
-          'avoids the question entirely.',
+        detail: [
+          'V8 represents an ordinary object as a hidden class plus a flat array of values, so a ' +
+            'property access compiles down to an offset load and can be inline-cached.',
+          'Deleting a property forces a transition to a genuine hash table representation. So does ' +
+            'adding a great many, or using an object as a dynamic dictionary.',
+          'That transition is silent and effectively permanent for the object. It disables the ' +
+            'inline caches at every site that touches it, so the cost lands in code far away from ' +
+            'the delete.',
+          'Using a Map for map-like data avoids the question entirely.'
+        ],
         example: 'The transition is silent, permanent for that object, and disables inline caches.'
       },
       {
         term: 'Insertion-ordered iteration',
         plain: 'Map guarantees it. The structure behind it is an entries array plus an index.',
         formal: 'entries[] + Map<key, position>',
-        detail: 'Map is specified to iterate in insertion order, which a bare hash table cannot do, ' +
-          'so the implementation is a dense array of entries in insertion order plus a hash index ' +
-          'from key to position. Iteration walks the array, which is contiguous and fast, and does ' +
-          'not depend on the table\'s capacity the way iterating a chained table does. Deletion is ' +
-          'the awkward case: removing from the middle of the array would move everything after it, ' +
-          'so a hole is left and the array is compacted when the holes get numerous enough.',
+        detail: [
+          'Map is specified to iterate in insertion order, which a bare hash table cannot do. The ' +
+            'implementation is therefore a dense array of entries in insertion order, plus a hash ' +
+            'index from key to position.',
+          'Iteration walks the array, which is contiguous and fast, and does not depend on the ' +
+            'table\'s capacity the way iterating a chained table does.',
+          'Deletion is the awkward case. Removing from the middle of the array would move ' +
+            'everything after it, so a hole is left and the array is compacted when the holes get ' +
+            'numerous enough.'
+        ],
         example: 'Delete leaves a hole; the array must be compacted or it grows forever.'
       },
       {
         term: 'WeakMap',
         plain: 'Keys are held weakly, so an entry disappears when its key becomes unreachable.',
         formal: 'not enumerable, not iterable',
-        detail: 'A WeakMap does not keep its keys alive: once nothing else references a key object, ' +
-          'the entry becomes collectable, which makes it the correct structure for metadata attached ' +
-          'to objects you do not own — caches, private fields, listener registries. A Map used for ' +
-          'the same purpose is a memory leak, because it holds every key it was ever given. The ' +
-          'restrictions follow from the semantics: it cannot be iterated or sized, since exposing ' +
-          'that would make garbage collection timing observable, and its keys must be objects.',
+        detail: [
+          'A WeakMap does not keep its keys alive. Once nothing else references a key object, the ' +
+            'entry becomes collectable.',
+          'That makes it the correct structure for metadata attached to objects you do not own: ' +
+            'caches, private fields, listener registries.',
+          'A Map used for the same purpose is a memory leak, because it holds every key it was ' +
+            'ever given.',
+          'The restrictions follow from the semantics. It cannot be iterated or sized, since ' +
+            'exposing that would make garbage collection timing observable, and its keys must be ' +
+            'objects.'
+        ],
         example: 'The right structure for per-object metadata that must not leak.'
       },
       {
         term: 'Hash caching',
         plain: 'Storing the hash with the entry avoids recomputing it on resize and speeds up comparison.',
         formal: 'entry = {hash, key, value}',
-        detail: 'Keeping the hash beside the entry pays twice: a resize can rehash without touching ' +
-          'the keys at all, and a lookup can reject a candidate by comparing 32-bit integers before ' +
-          'it compares two long strings. That is why Java caches String hash codes and why most ' +
-          'table implementations store the hash in the slot. Two cautions: the cached value must be ' +
-          'invalidated if the key can mutate, which is why hash keys should be immutable, and a ' +
-          'cached hash that is persisted or exposed across processes reintroduces the flooding ' +
-          'surface that per-process seeding was meant to close.',
+        detail: [
+          'Keeping the hash beside the entry pays twice. A resize can rehash without touching the ' +
+            'keys at all, and a lookup can reject a candidate by comparing 32-bit integers before ' +
+            'it compares two long strings.',
+          'That is why Java caches String hash codes, and why most table implementations store the ' +
+            'hash in the slot.',
+          'Two cautions. The cached value must be invalidated if the key can mutate, which is why ' +
+            'hash keys should be immutable.',
+          'And a cached hash that is persisted or exposed across processes reintroduces the ' +
+            'flooding surface that per-process seeding was meant to close.'
+        ],
         example: 'Java caches String hashes; the cache is also a hash-flooding surface if persisted.'
       },
       {
         term: 'Probes versus time',
         plain: 'Probe counts are exact and portable; timings belong to one machine, engine and day.',
         formal: 'report both, and the run count',
-        detail: 'Probe counts are deterministic, reproducible and comparable across machines, which ' +
-          'makes them the right basis for a claim about a scheme. Times are what users experience ' +
-          'and are valid only for the machine, engine and moment that produced them. Reporting both ' +
-          'is what makes a disagreement between them visible, and that disagreement is nearly always ' +
-          'the interesting finding: it means memory behaviour the probe count cannot see — a ' +
-          'contiguous run versus scattered lines, or a table that has left cache — is deciding the ' +
-          'outcome.',
+        detail: [
+          'Probe counts are deterministic, reproducible and comparable across machines, which ' +
+            'makes them the right basis for a claim about a scheme.',
+          'Times are what users experience, and are valid only for the machine, engine and moment ' +
+            'that produced them.',
+          'Reporting both is what makes a disagreement between them visible, and that disagreement ' +
+            'is nearly always the interesting finding.',
+          'It means memory behaviour the probe count cannot see is deciding the outcome — a ' +
+            'contiguous run versus scattered lines, or a table that has left cache.'
+        ],
         example: 'When they disagree it is usually memory behaviour the probe count cannot see.'
       },
       {
         term: 'The workload picks the scheme',
         plain: 'There is no ordering of these tables. Change the delete rate and the ranking changes with it.',
         formal: 'rank(scheme) is a function of the operation mix',
-        detail: 'Every scheme in this milestone wins some workload and loses another, so a general ' +
-          'ranking does not exist and any article offering one has fixed a workload without saying ' +
-          'so. Backward-shift deletion is best-equal on a read-heavy stream and last under 45% ' +
-          'deletions; tombstones are the reverse. The operating parameters that flip the order are ' +
-          'few and easy to measure — the read/write/delete mix, the load factor, the key size and ' +
-          'whether the final count is known — so the practical method is to measure your mix rather ' +
-          'than to inherit someone else\'s conclusion.',
+        detail: [
+          'Every scheme in this milestone wins some workload and loses another. A general ranking ' +
+            'does not exist, and any article offering one has fixed a workload without saying so.',
+          'Backward-shift deletion is best-equal on a read-heavy stream and last under 45% ' +
+            'deletions. Tombstones are the reverse.',
+          'The operating parameters that flip the order are few and easy to measure: the ' +
+            'read/write/delete mix, the load factor, the key size, and whether the final count is ' +
+            'known.',
+          'So the practical method is to measure your mix, rather than to inherit someone else\'s ' +
+            'conclusion.'
+        ],
         example: 'Backward-shift deletion is best-equal on a read-heavy stream and last under 45% deletions.'
       },
       {
         term: 'Memory is part of the answer',
         plain: 'A table that probes less may simply be holding more slots. Compare probes and capacity together, or the comparison says nothing.',
         formal: 'probes at equal load, or probes and load side by side',
-        detail: 'Probe count falls as the table gets emptier, so any scheme can be made to look good ' +
-          'by giving it more memory — and a benchmark that reports only probes will report that as a ' +
-          'victory. In this section\'s measurements the tombstone table beats backward shift 2.13 ' +
-          'probes to 3.72, while holding 8 192 slots against 4 096: it is not faster, it is twice as ' +
-          'large, because its tombstones triggered a growth. Compare at equal load factor, or report ' +
-          'probes and capacity side by side; a single-number comparison between hash tables is ' +
-          'almost always hiding one of the two.',
+        detail: [
+          'Probe count falls as the table gets emptier, so any scheme can be made to look good by ' +
+            'giving it more memory. A benchmark that reports only probes will report that as a ' +
+            'victory.',
+          'In this section\'s measurements the tombstone table beats backward shift 2.13 probes to ' +
+            '3.72, while holding 8 192 slots against 4 096.',
+          'It is not faster, it is twice as large, because its tombstones triggered a growth.',
+          'Compare at equal load factor, or report probes and capacity side by side. A ' +
+            'single-number comparison between hash tables is almost always hiding one of the two.'
+        ],
         example: 'Tombstones beat backward shift 2.13 to 3.72 probes — while holding 8 192 slots against 4 096.'
       }
     ]

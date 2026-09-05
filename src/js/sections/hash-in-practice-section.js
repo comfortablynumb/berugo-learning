@@ -26,10 +26,11 @@
           'key to a string, so 1 and "1" are the same key and an object key becomes "[object Object]". ' +
           'A `Map` compares keys by SameValueZero, which means NaN is a usable key and -0 and 0 are ' +
           'the same one.',
-        'The performance difference has a cause worth knowing: V8 stores objects with a hidden class ' +
-          'describing a fixed shape, and deleting a property forces the object into dictionary mode — ' +
-          'a real hash table, with none of the inline-cache benefits, and it never goes back. Using ' +
-          'an object as a map with deletes puts you there permanently and silently.',
+        'The performance difference has a cause worth knowing. V8 stores objects with a hidden ' +
+          'class describing a fixed shape, and deleting a property forces the object into ' +
+          'dictionary mode. That is a real hash table, with none of the inline-cache benefits, ' +
+          'and it never goes back. Using an object as a map with deletes puts you there ' +
+          'permanently and silently.',
         'The ranking below changes with the workload. Probe counts are exact and portable; timings ' +
           'belong to this machine and this engine on this day. When they disagree, the timing is ' +
           'usually telling you about memory behaviour the probe count cannot see (M02).'
@@ -54,7 +55,7 @@
         ].join('\n')
       },
       insight: 'Using an object as a map moves it into dictionary mode after the first delete, and ' +
-        'the shape transition is silent — nothing in the profile says "this object changed ' +
+        'the shape transition is silent. Nothing in the profile says "this object changed ' +
         'representation". `Map` exists for a reason.'
     }));
 
