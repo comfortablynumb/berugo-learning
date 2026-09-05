@@ -165,11 +165,13 @@
         },
         plain: 'No operands, no decoded instruction, nothing about this execution.',
         formal: 'predict from the program counter alone, before decode',
-        detail: 'At the moment fetch needs an answer, the instruction has not been decoded, the '
-          + 'registers have not been read, and nothing about the current values is known. '
-          + 'Everything a predictor does is inference from what happened at this address '
-          + 'before, which is why the whole field is about what to remember and how to index '
-          + 'it rather than about how to compute the branch condition sooner.',
+        detail: [
+          'At the moment fetch needs an answer, the instruction has not been decoded, the '
+            + 'registers have not been read, and nothing about the current values is known.',
+          'Everything a predictor does is inference from what happened at this address before.',
+          'That is why the whole field is about what to remember and how to index it.',
+          'It is not about how to compute the branch condition sooner.'
+        ],
         example: 'A branch target buffer and a direction predictor are both indexed by the '
           + 'address, because it is the only input available.'
       },
@@ -177,11 +179,15 @@
         term: 'A one-bit predictor misses twice per loop, not once',
         plain: 'It gets the exit wrong, then gets the next entry wrong too.',
         formal: 'a loop of n iterations entered m times costs 2m mispredicts',
-        detail: 'On the exit it predicts taken and the branch falls through; it then remembers '
-          + '"not taken" and predicts that on the first iteration of the next entry, which is '
-          + 'taken. Both are wrong, and the second one is the surprise. Adding a second bit '
-          + 'means a single mistake only weakens the prediction rather than reversing it, which '
-          + 'removes the second miss — one extra bit, half the mispredicts on loop code.',
+        detail: [
+          'On the exit it predicts taken and the branch falls through.',
+          'It then remembers "not taken" and predicts that on the first iteration of the next '
+            + 'entry, which is taken.',
+          'Both are wrong, and the second one is the surprise.',
+          'Adding a second bit means a single mistake only weakens the prediction rather than '
+            + 'reversing it, which removes the second miss. One extra bit, half the mispredicts '
+            + 'on loop code.'
+        ],
         example: 'On the nested-loop fixture: one-bit 65.0%, two-bit 80.8%, over the same 120 '
           + 'branches.'
       },
@@ -189,12 +195,15 @@
         term: 'The per-site accuracy matters and the average hides it',
         plain: 'One hot branch at 50% inside a program at 95% overall.',
         formal: 'sort by mispredicts, not by address',
-        detail: 'A predictor\'s overall accuracy is dominated by whichever branches execute '
-          + 'most, and the ones that execute most are usually the easy ones. So a hot, '
-          + 'unpredictable branch can be invisible in the total while costing most of the lost '
-          + 'cycles. Every real profiler reports mispredicts per branch address for exactly '
-          + 'this reason, and the table in the demo is sorted by misses rather than by address '
-          + 'so the expensive site is at the top.',
+        detail: [
+          'A predictor\'s overall accuracy is dominated by whichever branches execute most, and '
+            + 'the ones that execute most are usually the easy ones.',
+          'So a hot, unpredictable branch can be invisible in the total while costing most of the '
+            + 'lost cycles.',
+          'Every real profiler reports mispredicts per branch address for exactly this reason.',
+          'The table in the demo is sorted by misses rather than by address, so the expensive site '
+            + 'is at the top.'
+        ],
         example: 'On the nested fixture the overall figure is 80.8% and the inner loop branch '
           + 'is at 79.0% over 100 executions, while the outer one is at 90.0% over 20.'
       },
@@ -202,12 +211,15 @@
         term: 'A history table aliases, and the aliasing is invisible in the total',
         plain: 'Two branch sites whose indices collide share a counter.',
         formal: 'the index is a few bits of the address, so different addresses can map together',
-        detail: 'Interference between unrelated branches degrades both, and it shows up only as '
-          + 'a slightly worse overall number that could be explained by a dozen other things. '
-          + 'More index bits cost area and fewer cost accuracy, and the working set of active '
-          + 'branch sites in a real program is far larger than any fixture suggests — which is '
-          + 'why a predictor that looks excellent on a microbenchmark can disappoint on real '
-          + 'code.',
+        detail: [
+          'Interference between unrelated branches degrades both.',
+          'It shows up only as a slightly worse overall number that could be explained by a dozen '
+            + 'other things.',
+          'More index bits cost area and fewer cost accuracy, and the working set of active branch '
+            + 'sites in a real program is far larger than any fixture suggests.',
+          'That is why a predictor that looks excellent on a microbenchmark can disappoint on real '
+            + 'code.'
+        ],
         example: 'The demo\'s tables are 1 024 entries, which is roomy for a fixture with two '
           + 'branch sites and small for a program with thousands.'
       },
@@ -215,12 +227,15 @@
         term: 'A return-address stack is a different mechanism, not a better table',
         plain: 'A call pushes; a return pops.',
         formal: 'a return is predicted from where its call was, not from where this site last went',
-        detail: 'A target buffer predicts a return by remembering where that return instruction '
-          + 'went last time, which is wrong every time the function is called from somewhere '
-          + 'new — and a function worth having is called from many places. A stack is right '
-          + 'essentially always, because calls and returns nest. That is not a better '
-          + 'statistical model of the same data; it is a mechanism that knows something about '
-          + 'the structure of the program.',
+        detail: [
+          'A target buffer predicts a return by remembering where that return instruction went '
+            + 'last time.',
+          'That is wrong every time the function is called from somewhere new, and a function '
+            + 'worth having is called from many places.',
+          'A stack is right essentially always, because calls and returns nest.',
+          'That is not a better statistical model of the same data. It is a mechanism that knows '
+            + 'something about the structure of the program.'
+        ],
         example: 'A function called from twenty places: a target buffer is wrong on nineteen '
           + 'returns in twenty, and a return-address stack is right on all of them.'
       },
@@ -228,11 +243,15 @@
         term: 'The stack has a fixed depth, and beyond it recursion gets quietly slower',
         plain: 'The oldest entries are pushed out and never come back.',
         formal: 'a stack of depth d predicts the innermost d returns and mispredicts the rest',
-        detail: 'Recursion deeper than the hardware stack loses the outermost frames, so those '
-          + 'returns mispredict on the way back out. It is a genuine performance cliff, it '
-          + 'depends on a hardware parameter nobody documents prominently, and it appears in a '
-          + 'profiler as nothing more informative than "this got slower". It is one of the real '
-          + 'reasons deep recursion is discouraged in performance-critical code.',
+        detail: [
+          'Recursion deeper than the hardware stack loses the outermost frames, so those returns '
+            + 'mispredict on the way back out.',
+          'It is a genuine performance cliff, and it depends on a hardware parameter nobody '
+            + 'documents prominently.',
+          'It appears in a profiler as nothing more informative than "this got slower".',
+          'It is one of the real reasons deep recursion is discouraged in performance-critical '
+            + 'code.'
+        ],
         example: 'Eight or sixteen entries is typical, so a recursion thirty deep mispredicts '
           + 'roughly half its returns.'
       },
@@ -240,10 +259,13 @@
         term: 'The floor is chance, and a comparison without it proves nothing',
         plain: 'Nothing predicts a coin flip better than 50%.',
         formal: 'the random fixture exists so no predictor can be called good without a reference',
-        detail: 'Every predictor scores well on a long loop and badly on random outcomes, so a '
-          + 'tournament run only on friendly patterns measures nothing. Including the floor is '
-          + 'what makes the other numbers mean something, and it is the same discipline as '
-          + 'including a brute-force oracle in an algorithm comparison.',
+        detail: [
+          'Every predictor scores well on a long loop and badly on random outcomes.',
+          'So a tournament run only on friendly patterns measures nothing.',
+          'Including the floor is what makes the other numbers mean something.',
+          'It is the same discipline as including a brute-force oracle in an algorithm '
+            + 'comparison.'
+        ],
         example: 'On coin flips all four predictors land between 47.5% and 50.2%, which is '
           + 'chance and nothing else.'
       },
@@ -251,11 +273,14 @@
         term: 'Counter values are worth showing raw',
         plain: 'A loop branch sits at 3; an unpredictable one oscillates around 1 and 2.',
         formal: 'four states, named rather than numbered',
-        detail: 'A two-bit saturating counter is small enough to display completely, and '
-          + 'watching where the counters settle explains the accuracy figure above them better '
-          + 'than any description of the state machine. It also makes the aliasing visible: two '
-          + 'sites sharing a counter show up as a counter that never settles, which is a '
-          + 'different failure from a genuinely unpredictable branch.',
+        detail: [
+          'A two-bit saturating counter is small enough to display completely.',
+          'Watching where the counters settle explains the accuracy figure above them better than '
+            + 'any description of the state machine.',
+          'It also makes the aliasing visible.',
+          'Two sites sharing a counter show up as a counter that never settles, which is a '
+            + 'different failure from a genuinely unpredictable branch.'
+        ],
         example: 'After the nested fixture, the two live counters both sit at 2 — weakly taken '
           + '— because the inner loop exits often enough to keep pulling them down.'
       }

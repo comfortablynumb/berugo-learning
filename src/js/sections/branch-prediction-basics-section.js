@@ -85,7 +85,7 @@
       '**A return-address stack predicts returns almost perfectly, and it is not a target '
         + 'buffer.** A call pushes the address after it; a return pops. So a return is '
         + 'predicted from where its call was rather than from where this return site went last '
-        + 'time — which matters enormously, because a function called from twenty places '
+        + 'time. That matters enormously, because a function called from twenty places '
         + 'returns to twenty different addresses.',
       '**Recursion deeper than the stack silently stops being free.** The stack has a fixed '
         + 'depth — eight or sixteen entries typically — and beyond it the oldest entry is '
@@ -109,19 +109,19 @@
     return '**The return-address stack is the clearest example in computer architecture of a '
       + 'predictor that works because it exploits structure rather than statistics, and the '
       + 'difference in outcome is enormous.** A branch target buffer predicts a return by '
-      + 'remembering where this return instruction went last time, which is wrong every time '
-      + 'the function is called from somewhere new — and a function worth having is called '
+      + 'remembering where this return instruction went last time. That is wrong every time '
+      + 'the function is called from somewhere new, and a function worth having is called '
       + 'from many places. A return-address stack predicts it from where the matching call '
       + 'was, which is right essentially always, because calls and returns nest. That is not a '
       + 'better statistical model of the same data; it is a different mechanism that knows '
       + 'something about the program\'s structure. The lesson generalises directly to caching '
-      + 'and prefetching in software: a predictor that has been told the shape of the access '
-      + 'pattern beats one that has to infer it, and by a margin no amount of history will '
+      + 'and prefetching in software. A predictor that has been told the shape of the access '
+      + 'pattern beats one that has to infer it, by a margin no amount of history will '
       + 'close. It also has a sharp edge worth knowing about. The stack is a fixed depth, so '
       + 'recursion deeper than it silently loses the outer frames and the returns start '
-      + 'mispredicting — a performance cliff that shows up in no profiler as anything more '
-      + 'informative than "this got slower", and one of the real reasons deep recursion is '
-      + 'discouraged in performance-critical code.';
+      + 'mispredicting. That is a performance cliff which shows up in no profiler as anything '
+      + 'more informative than "this got slower". It is one of the real reasons deep recursion '
+      + 'is discouraged in performance-critical code.';
   }
 
   function render(app) {
