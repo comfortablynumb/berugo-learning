@@ -35,16 +35,18 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'A quadtree subdivides *space* rather than the data: a node owns a square, and when it holds more than ' +
-          'its capacity it splits into four children of a quarter the area. That is the one structural ' +
-          'difference from a k-d tree and everything else follows from it — the square is computable from the ' +
-          'path with nothing stored, the tree adapts to where the points are, and the depth is unbounded when ' +
-          'points crowd together. 20 000 clustered points at capacity 8 build 7 721 nodes and reach depth 11; ' +
-          'the same count uniform reaches depth 7.',
-        'The capacity is not really a query-cost dial. Across a 32-fold change the candidates a query tests ' +
-          'move from 50.31 to 87.73 — a factor of 1.74 — while the node count falls 25×, the memory falls 3.6× ' +
-          'and the node visits fall 7.4×. Anything between about 4 and 16 is defensible, and the choice should ' +
-          'be made on what a node costs in your memory layout rather than on the candidate column.',
+        'A quadtree subdivides *space* rather than the data. A node owns a square, and when it ' +
+          'holds more than its capacity it splits into four children of a quarter the area. That ' +
+          'is the one structural difference from a k-d tree, and everything else follows from it. ' +
+          'The square is computable from the path with nothing stored, the tree adapts to where ' +
+          'the points are, and the depth is unbounded when points crowd together. At capacity 8, ' +
+          '20 000 clustered points build 7 721 nodes and reach depth 11; the same count uniform ' +
+          'reaches depth 7.',
+        'The capacity is not really a query-cost dial. Across a 32-fold change the candidates a ' +
+          'query tests move from 50.31 to 87.73, a factor of 1.74. Over the same range the node ' +
+          'count falls 25×, the memory falls 3.6× and the node visits fall 7.4×. Anything between ' +
+          'about 4 and 16 is defensible, and the choice should be made on what a node costs in ' +
+          'your memory layout rather than on the candidate column.',
         'The depth cap is a correctness requirement, not a tuning knob. Coincident points never separate, so ' +
           '"split until a leaf holds at most `capacity`" has no fixed point and recurses until the stack dies. ' +
           'The fix is two rules together: cap the depth *and* let the leaf bucket overflow once the cap is ' +
@@ -69,11 +71,11 @@
           '    NE --> D["NE.SE — 2 points"]'
         ].join('\n')
       },
-      insight: 'Coincident points are what actually breaks quadtrees in production, and they are not exotic: ' +
-        'rounded GPS fixes, default positions, grid-snapped level data and any integer coordinate system ' +
-        'produce them by the thousand. A depth cap with an overflowing bucket is not an optimisation, it is ' +
-        'what makes insertion terminate — and a test suite for a quadtree that has no coincident-point case has ' +
-        'not tested the thing most likely to take it down.'
+      insight: 'Coincident points are what actually breaks quadtrees in production, and they are ' +
+        'not exotic. Rounded GPS fixes, default positions, grid-snapped level data and any integer ' +
+        'coordinate system produce them by the thousand. A depth cap with an overflowing bucket is ' +
+        'not an optimisation; it is what makes insertion terminate. A test suite for a quadtree ' +
+        'that has no coincident-point case has not tested the thing most likely to take it down.'
     };
   }
 

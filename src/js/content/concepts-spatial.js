@@ -180,12 +180,17 @@
         formal: 'a node at depth d owns a square of side S/2^d',
         readAs: 'Each level halves the side of the region, so depth d covers the whole space divided by 2 to ' +
           'the power d. Ten levels take a kilometre down to a metre.',
-        detail: 'This is the one structural difference from a k-d tree and everything else follows from it. The ' +
-          'splits are at fixed geometric positions, so the tree\'s shape is a function of the coordinates rather ' +
-          'than of the data - which makes a node\'s square computable from its path with no stored bounds, makes ' +
-          'the structure trivially parallelisable, and makes the depth unbounded when points crowd together. A ' +
-          'k-d tree splits at a data point and is therefore balanced by construction; a quadtree is not, and buys ' +
-          'simplicity with that.',
+        detail: [
+          'This is the one structural difference from a k-d tree and everything else follows from ' +
+            'it.',
+          'The splits are at fixed geometric positions, so the tree\'s shape is a function of the ' +
+            'coordinates rather than of the data.',
+          'That makes a node\'s square computable from its path with no stored bounds, makes the ' +
+            'structure trivially parallelisable, and makes the depth unbounded when points crowd ' +
+            'together.',
+          'A k-d tree splits at a data point and is therefore balanced by construction. A quadtree ' +
+            'is not, and buys simplicity with that.'
+        ],
         example: '20 000 clustered points at capacity 8 build 7 721 nodes and reach depth 11; the same count uniform reaches depth 7.'
       },
       {
@@ -205,55 +210,75 @@
         readAs: 'Two points at identical coordinates can never be separated by splitting, so the tree grows ' +
           'forever trying. This is the degenerate case every quadtree implementation has to handle ' +
           'explicitly.',
-        detail: 'This is the bug that actually takes quadtrees down in production, and it is not an edge case: ' +
-          'duplicate coordinates arrive from rounded GPS fixes, from default positions, from grid-snapped level ' +
-          'data and from any integer coordinate system. The fix is two rules together - cap the depth, and let a ' +
-          'leaf bucket exceed its capacity once the cap is reached. Either alone is wrong: a cap with a hard ' +
-          'capacity has nowhere to put the point, and an overflowing bucket without a cap still recurses.',
+        detail: [
+          'This is the bug that actually takes quadtrees down in production, and it is not an edge ' +
+            'case.',
+          'Duplicate coordinates arrive from rounded GPS fixes, from default positions, from ' +
+            'grid-snapped level data and from any integer coordinate system.',
+          'The fix is two rules together: cap the depth, and let a leaf bucket exceed its capacity ' +
+            'once the cap is reached.',
+          'Either alone is wrong. A cap with a hard capacity has nowhere to put the point, and an ' +
+            'overflowing bucket without a cap still recurses.'
+        ],
         example: '20 000 points on 3 distinct sites, capacity 8: the tree stops at the cap with 137 nodes and a leaf holding 6 667.'
       },
       {
         term: 'Capacity trades nodes against candidates',
         plain: 'A small bucket means a deep tree with tight leaves; a large one means a shallow tree with loose leaves.',
         formal: 'nodes ≈ n/capacity · 4/3; candidates per query grows with capacity',
-        detail: 'Both ends of the sweep are real costs and neither dominates. Small buckets waste memory on nodes ' +
-          'and waste time descending them; large buckets test objects the query has already excluded ' +
-          'geometrically. The curve is shallow in the middle, which is the practical point: anything from about ' +
-          'four to sixteen is defensible and the choice is usually made by what a node costs in your memory ' +
-          'layout, not by the query count.',
+        detail: [
+          'Both ends of the sweep are real costs and neither dominates.',
+          'Small buckets waste memory on nodes and waste time descending them; large buckets test ' +
+            'objects the query has already excluded geometrically.',
+          'The curve is shallow in the middle, which is the practical point.',
+          'Anything from about four to sixteen is defensible, and the choice is usually made by ' +
+            'what a node costs in your memory layout rather than by the query count.'
+        ],
         example: 'Capacity 2 → 29 893 nodes and 50.31 candidates per query; capacity 64 → 1 185 nodes and 87.73.'
       },
       {
         term: 'The empty-node problem',
         plain: 'A split makes four children whether or not anything is in them, so sparse regions cost nodes that hold nothing.',
         formal: 'empty leaves grow with the variance of the density',
-        detail: 'A quadtree over clustered data spends a real fraction of its memory describing emptiness, ' +
-          'because a split is triggered by one crowded quadrant and pays for all four. The classic answers are a ' +
-          'linear quadtree, which stores only the occupied leaves keyed by their Morton code and drops the ' +
-          'pointers entirely (see 8.6), or simply not subdividing children that would be empty. Measuring it is ' +
-          'the first step: if the empty fraction is small, the pointer version is fine and simpler.',
+        detail: [
+          'A quadtree over clustered data spends a real fraction of its memory describing ' +
+            'emptiness, because a split is triggered by one crowded quadrant and pays for all four.',
+          'The classic answer is a linear quadtree, which stores only the occupied leaves keyed by ' +
+            'their Morton code and drops the pointers entirely (see 8.6).',
+          'The other is simply not subdividing children that would be empty.',
+          'Measuring it is the first step: if the empty fraction is small, the pointer version is ' +
+            'fine and simpler.'
+        ],
         example: 'Clustered, capacity 4: 2 016 of 11 428 leaves are empty. Uniform: 86 of 4 858.'
       },
       {
         term: 'Pruning is a number, not a claim',
         plain: 'Count the nodes a query rejects without looking inside them; that count is what the tree bought.',
         formal: 'visited + pruned = nodes reached; the useful work is visited',
-        detail: 'Every structure in this milestone claims to prune, and the claim is worth exactly what the ' +
-          'counter says. Reporting both halves also catches the case where a tree prunes beautifully and still ' +
-          'loses, because the nodes it visits are cheap to reject but numerous - which is what a deep tree over ' +
-          'clustered data does. The pair of numbers is more informative than either, and it is the pair that ' +
-          'makes two different structures comparable at all.',
+        detail: [
+          'Every structure in this milestone claims to prune, and the claim is worth exactly what ' +
+            'the counter says.',
+          'Reporting both halves also catches the case where a tree prunes beautifully and still ' +
+            'loses, because the nodes it visits are cheap to reject but numerous.',
+          'That is what a deep tree over clustered data does.',
+          'The pair of numbers is more informative than either, and it is the pair that makes two ' +
+            'different structures comparable at all.'
+        ],
         example: 'Clustered, capacity 8: a radius query visits 29.84 nodes and prunes 20.07, testing 57.78 points.'
       },
       {
         term: 'Loose quadtrees, for objects with extent',
         plain: 'Inflate each node\'s square by a factor for containment, so a box straddling a boundary still fits a child.',
         formal: 'loose(node) = centre ± halfSize · k, typically k = 1.5 or 2',
-        detail: 'An object with size does not fit any child once it crosses the midline, so a plain quadtree ' +
-          'strands it at the parent and a query near the boundary tests every stranded object. Inflating the ' +
-          'boxes pushes most of them back down at the cost of overlapping siblings, so a query now descends into ' +
-          'more than one child. The two effects fight, and the result is not monotone in the looseness: measured ' +
-          'over 5 000 boxes, 1.5 is three times better than a tight tree and 2.0 is worse than 1.5.',
+        detail: [
+          'An object with size does not fit any child once it crosses the midline. A plain quadtree ' +
+            'strands it at the parent, and a query near the boundary tests every stranded object.',
+          'Inflating the boxes pushes most of them back down at the cost of overlapping siblings, ' +
+            'so a query now descends into more than one child.',
+          'The two effects fight, and the result is not monotone in the looseness.',
+          'Measured over 5 000 boxes, 1.5 is three times better than a tight tree and 2.0 is worse ' +
+            'than 1.5.'
+        ],
         example: '5 000 boxes of side ~60: looseness 1 tests 1 792.18 candidates per query, 1.5 tests 606.29, 2 tests 1 159.50.'
       },
       {
@@ -263,11 +288,14 @@
         readAs: 'Where an object settles in a loose tree: log base 2 of how many times its size divides into ' +
           'the world. Big objects sit near the root, small ones near the leaves, and nothing has to be ' +
           'duplicated.',
-        detail: 'This is the property that makes loose quadtrees the standard choice for moving objects: an ' +
-          'object that moves a little stays in the same node, because the node it belongs to is decided by its ' +
-          'size rather than by its exact position. It also explains a result that looks like a bug the first ' +
-          'time you see it - raising the depth cap changes nothing at all, because the tree was never limited by ' +
-          'the cap. The natural depth is set by the object, and the cap only ever binds for points.',
+        detail: [
+          'This is the property that makes loose quadtrees the standard choice for moving objects.',
+          'An object that moves a little stays in the same node, because the node it belongs to is ' +
+            'decided by its size rather than by its exact position.',
+          'It also explains a result that looks like a bug the first time you see it. Raising the ' +
+            'depth cap changes nothing at all, because the tree was never limited by the cap.',
+          'The natural depth is set by the object, and the cap only ever binds for points.'
+        ],
         example: '5 000 boxes of side ~60 in a 1 000-unit world build only 321-393 nodes, five levels deep, at any cap.'
       },
       {
@@ -277,11 +305,16 @@
         readAs: 'A quadtree in 2 dimensions has 4 children, an octree in 3 has 8, and in d dimensions it is 2 ' +
           'to the power d. By 10 dimensions that is 1 024 children per node, which is why these ' +
           'structures stop at 3.',
-        detail: 'The generalisation is mechanical and the cost is not. Fan-out doubles, so the tree is shallower ' +
-          'for the same point count, but a node carries eight pointers instead of four and a split creates eight ' +
-          'children for one crowded octant, so the empty-node problem gets worse in exactly the ratio the fan-out ' +
-          'improved. Past three dimensions this stops being useful at all: sixteen children per node in four ' +
-          'dimensions is why nobody writes a hextree, and why 8.8 reaches for a different family entirely.',
+        detail: [
+          'The generalisation is mechanical and the cost is not.',
+          'Fan-out doubles, so the tree is shallower for the same point count. But a node carries ' +
+            'eight pointers instead of four, and a split creates eight children for one crowded ' +
+            'octant.',
+          'So the empty-node problem gets worse in exactly the ratio the fan-out improved.',
+          'Past three dimensions this stops being useful at all. Sixteen children per node in four ' +
+            'dimensions is why nobody writes a hextree, and why 8.8 reaches for a different family ' +
+            'entirely.'
+        ],
         example: 'A node costs 8 child pointers against 4, and one crowded octant creates 8 children rather than 4.'
       }
     ],
