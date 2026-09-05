@@ -5182,6 +5182,43 @@ counts…`).
 `--strict` exits non-zero on any section over budget. It is deliberately not
 wired into `npm test` yet; that happens when the last section lands.
 
+### Where the pass stopped (2026-09-04)
+
+**160 of 364 sections are inside the budget**, and the tree is green. Every
+section committed here printed `ok` from `node tools/readability.js <id>`, and
+the four content/notation unit tests plus `npm run lint:size` ran before each
+commit; the full `npm test`, render audit included, was run over the batch.
+
+Overall: mean sentence 20.5 -> **18.7** words, sentences over 30 words
+15.7% -> **9.5%**, single-block explanations 2 471 -> **1 645**.
+
+Done this session, in curriculum order: the rest of `authenticated-encryption`,
+then `public-key-cryptography`, `signatures-and-pki`, `protocol-construction`,
+`constant-time-programming`, `applied-constructions` (finishing M23), and the
+nine of M24 from `memory-layout` through `cache-layouts`.
+
+**Resume at `hash-functions`** — it is section 161 in
+`Curriculum.teachingSections()` order, and everything to 160 prints `ok`. Run
+`node tools/readability.js` and work down the curriculum order; anything not
+printing `ok` is outstanding.
+
+Three things about the sentence splitter, learned the expensive way:
+
+- **A sentence that begins with a digit or a brace is not seen as a new
+  sentence.** `… small-large-small. {u8, f64, u8} pays 7 bytes …` measured as
+  one 37-word sentence. Rephrase so the second sentence opens with a word
+  (`A record of {u8, f64, u8} pays …`, `Holding 11 000 node indices is …`).
+- **A semicolon does not split**, so a two-clause sentence joined by one still
+  counts as a single long sentence. It is fine inside a short pair and wrong as
+  a way to dodge the budget.
+- **Exactly 30 words passes** (`long` counts sentences *over* 30), which makes
+  a 30-word sentence a bad place to stop. Split it anyway.
+
+The per-section loop that costs the least: readability for the id, then the
+four content/notation tests plus `lint:size`, then commit. The render audit is
+~46 s a shard and prose-only edits do not move it, so it was run over the batch
+rather than per section — but it must be green before the pass is called done.
+
 ### Where the pass stopped (2026-09-03, second session)
 
 **57 of 364 sections are inside the budget**, and the tree is green: `npm test`
