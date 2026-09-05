@@ -31,22 +31,23 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'A cuckoo filter stores an f-bit fingerprint of each key in one of two candidate buckets. The ' +
-          'second bucket is derived from the first by XOR with a hash of the *fingerprint*, so a ' +
-          'relocation can compute where an evicted fingerprint may go without the key it came from — ' +
-          'which is what makes the structure possible at all, since the keys were never stored. That ' +
-          'XOR is an involution only when the bucket count is a power of two.',
-        'The trade against Bloom is space against a ceiling. At 8-bit fingerprints and four slots per ' +
-          'bucket the table fills to 97.1% and costs 8.24 bits per item at a measured 2.98% error; a ' +
-          'Bloom filter at that error costs about 7 bits. Below a per-cent or so the ranking reverses, ' +
-          'because Bloom pays 1.44·log₂(1/ε) and the fingerprint pays log₂(1/ε) plus the bucket ' +
-          'overhead. The ceiling has no equivalent at all: past 97% an insert simply fails.',
-        'A quotient filter reaches the same place from the other side. The fingerprint is split into a ' +
-          'slot index and a remainder, and three metadata bits per slot record enough to rebuild which ' +
-          'remainder belongs to which quotient after linear probing moved it. A query reads one ' +
-          'contiguous run — 1.00 cache lines against a Bloom filter\'s 6.88 — and the whole table can ' +
-          'be read out in ascending fingerprint order, which is what makes two of them mergeable ' +
-          'without either key set.'
+        'A cuckoo filter stores an f-bit fingerprint of each key in one of two candidate buckets. ' +
+          'The second bucket is derived from the first by XOR with a hash of the *fingerprint*. So ' +
+          'a relocation can compute where an evicted fingerprint may go without the key it came ' +
+          'from. That is what makes the structure possible at all, since the keys were never ' +
+          'stored. The XOR is an involution only when the bucket count is a power of two.',
+        'The trade against Bloom is space against a ceiling. At 8-bit fingerprints and four slots ' +
+          'per bucket the table fills to 97.1% and costs 8.24 bits per item at a measured 2.98% ' +
+          'error. A Bloom filter at that error costs about 7 bits. Below a per-cent or so the ' +
+          'ranking reverses, because Bloom pays 1.44·log₂(1/ε) and the fingerprint pays ' +
+          'log₂(1/ε) plus the bucket overhead. The ceiling has no equivalent at all: past 97% an ' +
+          'insert simply fails.',
+        'A quotient filter reaches the same place from the other side. The fingerprint is split ' +
+          'into a slot index and a remainder. Three metadata bits per slot record enough to ' +
+          'rebuild which remainder belongs to which quotient after linear probing moved it. A ' +
+          'query reads one contiguous run — 1.00 cache lines against a Bloom filter\'s 6.88. The ' +
+          'whole table can be read out in ascending fingerprint order, which is what makes two of ' +
+          'them mergeable without either key set.'
       ],
       demo: { title: 'Interactive demo — filling, failing, deleting and merging', markup: root.FingerprintFiltersTemplate.render() },
       diagram: {
@@ -66,11 +67,12 @@
           '    B1 -->|"XOR h(f)"| B2'
         ].join('\n')
       },
-      insight: 'Deleting an item you never inserted corrupts a cuckoo filter silently. The API looks ' +
-        'like a set — add, contains, remove — and it is not one: remove finds *a* matching fingerprint ' +
-        'and clears it, which may belong to a different key entirely. Every production use needs an ' +
-        'invariant on the caller\'s side that a removal is only ever issued for something that was ' +
-        'inserted, and that invariant lives outside the filter where nothing enforces it.'
+      insight: 'Deleting an item you never inserted corrupts a cuckoo filter silently. The API ' +
+        'looks like a set — add, contains, remove — and it is not one. Remove finds *a* matching ' +
+        'fingerprint and clears it, which may belong to a different key entirely. Every ' +
+        'production use needs an invariant on the caller\'s side that a removal is only ever ' +
+        'issued for something that was inserted. That invariant lives outside the filter, where ' +
+        'nothing enforces it.'
     };
   }
 

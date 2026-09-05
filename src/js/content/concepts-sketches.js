@@ -331,12 +331,16 @@
         readAs: 'For a cuckoo filter the error rate is set by the fingerprint length f: roughly the number of ' +
           'fingerprints you compare against, divided by 2 to the power f. Each extra fingerprint bit ' +
           'halves the rate.',
-        detail: 'Bloom filters cannot delete because the bits are shared and unattributable. A ' +
-          'fingerprint is a single object, so removing it removes exactly what one key put there — ' +
-          'subject to the caveat that two keys with the same fingerprint in the same bucket are ' +
-          'indistinguishable. The error rate follows directly from the fingerprint width and the ' +
-          'number of slots a query examines, which is why the two dials of a cuckoo filter — how ' +
-          'full it gets and how often it lies — are independent.',
+        detail: [
+          'Bloom filters cannot delete because the bits are shared and unattributable.',
+          'A fingerprint is a single object, so removing it removes exactly what one key put ' +
+            'there. The caveat is that two keys with the same fingerprint in the same bucket are ' +
+            'indistinguishable.',
+          'The error rate follows directly from the fingerprint width and the number of slots a ' +
+            'query examines.',
+          'That is why the two dials of a cuckoo filter — how full it gets and how often it ' +
+            'lies — are independent.'
+        ],
         example: '8-bit fingerprints, four slots per bucket: 2.98% measured against 3.08% predicted.'
       },
       {
@@ -346,60 +350,78 @@
         readAs: 'The second bucket is the first XORed with a hash of the fingerprint. XOR undoes itself, so ' +
           'from either bucket you can compute the other using only the fingerprint — which is what ' +
           'makes eviction possible without ever storing the key.',
-        detail: 'Ordinary cuckoo hashing recomputes both candidate positions from the key, and a ' +
-          'filter has thrown the key away. The trick is to derive the second bucket from the first ' +
-          'and the *fingerprint*, using XOR so that applying it again returns the original: from ' +
-          'either bucket, the other is one XOR away. This is what makes relocation possible at all ' +
-          'and it is why the bucket count must be a power of two — with any other modulus the ' +
-          'operation stops being an involution and evicted fingerprints are lost silently.',
+        detail: [
+          'Ordinary cuckoo hashing recomputes both candidate positions from the key, and a filter ' +
+            'has thrown the key away.',
+          'The trick is to derive the second bucket from the first and the *fingerprint*, using ' +
+            'XOR so that applying it again returns the original. From either bucket, the other is ' +
+            'one XOR away.',
+          'This is what makes relocation possible at all, and it is why the bucket count must be a ' +
+            'power of two.',
+          'With any other modulus the operation stops being an involution, and evicted fingerprints ' +
+            'are lost silently.'
+        ],
         example: 'Powers of two only: with any other modulus the XOR is not an involution.'
       },
       {
         term: 'A hard load ceiling',
         plain: 'Past about 95% full an insert fails outright, and no amount of retrying helps.',
         formal: 'the eviction chain exceeds maxKicks and the item has nowhere to go',
-        detail: 'A Bloom filter degrades: put in more keys and the error rate rises. A cuckoo filter ' +
-          'stops: at 97.1% load an insert walks its full eviction budget and returns failure. That ' +
-          'is a much better failure mode — it is loud, it happens at a known point, and it can be ' +
-          'handled — but it is a failure mode a Bloom filter does not have, and code that treats ' +
-          '`add` as infallible will drop items. The last orphan of a failed chain must be kept in a ' +
-          'victim slot rather than dropped, or the filter acquires a false negative at the moment it ' +
-          'fills.',
+        detail: [
+          'A Bloom filter degrades: put in more keys and the error rate rises.',
+          'A cuckoo filter stops. At 97.1% load an insert walks its full eviction budget and ' +
+            'returns failure.',
+          'That is a much better failure mode — it is loud, it happens at a known point, and it ' +
+            'can be handled. But it is a failure mode a Bloom filter does not have, and code that ' +
+            'treats `add` as infallible will drop items.',
+          'The last orphan of a failed chain must be kept in a victim slot rather than dropped, or ' +
+            'the filter acquires a false negative at the moment it fills.'
+        ],
         example: '7 957 of 8 192 slots filled, then the 7 958th insert fails and the filter is full.'
       },
       {
         term: 'Four slots per bucket',
         plain: 'One slot jams at half full; four reaches 97%, and eight barely improves on that.',
         formal: 'measured load ceiling: 0.498, 0.880, 0.971, 0.993 for b = 1, 2, 4, 8',
-        detail: 'With one slot per bucket the structure is plain cuckoo hashing with two choices, and ' +
-          'the classic result is that it jams just under half full. Adding slots gives each ' +
-          'relocation somewhere to go and the ceiling climbs steeply, then flattens: the step from ' +
-          'two to four is worth nine percentage points and the step from four to eight is worth two, ' +
-          'while wider buckets mean more slots examined per query and a proportionally worse error ' +
-          'rate. Four is where every implementation lands, and the table is the reason.',
+        detail: [
+          'With one slot per bucket the structure is plain cuckoo hashing with two choices, and ' +
+            'the classic result is that it jams just under half full.',
+          'Adding slots gives each relocation somewhere to go and the ceiling climbs steeply, then ' +
+            'flattens.',
+          'The step from two to four is worth nine percentage points and the step from four to ' +
+            'eight is worth two.',
+          'Wider buckets also mean more slots examined per query and a proportionally worse error ' +
+            'rate. Four is where every implementation lands, and the table is the reason.'
+        ],
         example: 'b = 2 reaches 88.0%, b = 4 reaches 97.1%, b = 8 reaches 99.3%.'
       },
       {
         term: 'The eviction tail',
         plain: 'Most inserts evict nothing; a few walk hundreds of buckets.',
         formal: 'mean 1.94 kicks, maximum 408, over one complete fill',
-        detail: '86.4% of inserts find a free slot immediately and cost nothing at all. The mean of ' +
-          '1.94 is made almost entirely of the minority that do relocate, and the longest chain in a ' +
-          'single fill ran 408 buckets — 210 times the mean. An insert cost quoted as an average is ' +
-          'therefore not a latency budget, and the `maxKicks` limit is not a tuning parameter but a ' +
-          'bound on the worst case: without it a nearly full table can walk indefinitely.',
+        detail: [
+          '86.4% of inserts find a free slot immediately and cost nothing at all.',
+          'The mean of 1.94 is made almost entirely of the minority that do relocate, and the ' +
+            'longest chain in a single fill ran 408 buckets — 210 times the mean.',
+          'An insert cost quoted as an average is therefore not a latency budget.',
+          'The `maxKicks` limit is not a tuning parameter but a bound on the worst case. Without ' +
+            'it a nearly full table can walk indefinitely.'
+        ],
         example: '86.4% of inserts evict nothing; the longest chain in one fill was 408.'
       },
       {
         term: 'Deleting what you never inserted',
         plain: 'The delete finds a matching fingerprint and clears it, whoever it belonged to.',
         formal: 'remove(x) has no way to verify that x was ever added',
-        detail: 'The API reads like a set — add, contains, remove — and it is not one. A removal ' +
-          'searches the two candidate buckets for a matching fingerprint and clears the first it ' +
-          'finds; if the caller never inserted that key, the fingerprint it matched belongs to ' +
-          'somebody else. Nothing is reported, and from that moment the filter answers "no" about a ' +
-          'key it holds. Over 4 000 phantom deletes against a filter holding 4 000 keys, 59 were ' +
-          'accepted and produced exactly 59 false negatives.',
+        detail: [
+          'The API reads like a set — add, contains, remove — and it is not one.',
+          'A removal searches the two candidate buckets for a matching fingerprint and clears the ' +
+            'first it finds. If the caller never inserted that key, the fingerprint it matched ' +
+            'belongs to somebody else.',
+          'Nothing is reported, and from that moment the filter answers "no" about a key it holds.',
+          'Over 4 000 phantom deletes against a filter holding 4 000 keys, 59 were accepted and ' +
+            'produced exactly 59 false negatives.'
+        ],
         example: '59 of 4 000 phantom deletes accepted, producing 59 false negatives and no error.'
       },
       {
@@ -409,12 +431,16 @@
         readAs: 'Split the fingerprint in two: the top part q picks the slot, and the remainder r bits are ' +
           'what gets stored there. Three metadata bits per slot record how the runs that collide are ' +
           'laid out.',
-        detail: 'A quotient filter stores only the remainder, and recovers the quotient from *where* ' +
-          'the remainder sits — which is a saving of q bits per item, paid for with three metadata ' +
-          'bits. is_occupied marks a slot as some fingerprint\'s canonical home, is_continuation ' +
-          'marks a slot as part of the run started to its left, and is_shifted marks an element that ' +
-          'linear probing moved. Those three bits are exactly enough to reconstruct the mapping ' +
-          'after any amount of shifting, which is the whole trick.',
+        detail: [
+          'A quotient filter stores only the remainder, and recovers the quotient from *where* the ' +
+            'remainder sits. That is a saving of q bits per item, paid for with three metadata ' +
+            'bits.',
+          'The flag is_occupied marks a slot as some fingerprint\'s canonical home. The flag ' +
+            'is_continuation marks a slot as part of the run started to its left, and is_shifted ' +
+            'marks an element that linear probing moved.',
+          'Those three bits are exactly enough to reconstruct the mapping after any amount of ' +
+            'shifting, which is the whole trick.'
+        ],
         example: 'r = 7 remainder bits plus 3 metadata bits stores a 20-bit fingerprint in 10.'
       },
       {
@@ -424,12 +450,16 @@
         readAs: 'Doubling a quotient filter moves one bit from the stored remainder into the slot index. The ' +
           'total fingerprint length p is unchanged and no original key is needed, which is why a ' +
           'quotient filter can resize and a Bloom filter cannot.',
-        detail: 'Because runs are ordered by quotient and remainders are sorted within a run, a ' +
-          'linear scan of the table produces every stored fingerprint in ascending order. Two such ' +
-          'streams merge in one pass into a filter with one more quotient bit and one fewer ' +
-          'remainder bit — the same p, the same fingerprints, nothing rehashed, and no access to the ' +
-          'original keys, which is essential because there are none. That is the property a ' +
-          'per-shard filter needs and the one a cuckoo filter does not have.',
+        detail: [
+          'Because runs are ordered by quotient and remainders are sorted within a run, a linear ' +
+            'scan of the table produces every stored fingerprint in ascending order.',
+          'Two such streams merge in one pass into a filter with one more quotient bit and one ' +
+            'fewer remainder bit.',
+          'The same p, the same fingerprints, nothing rehashed, and no access to the original ' +
+            'keys — which is essential, because there are none.',
+          'That is the property a per-shard filter needs, and the one a cuckoo filter does not ' +
+            'have.'
+        ],
         example: '1 999 + 1 999 fingerprints merge into 3 998, exactly, with r going 10 → 9.'
       }
     ]
