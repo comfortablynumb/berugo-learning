@@ -24,11 +24,14 @@
         },
         plain: 'Five instructions in flight, one finishing per cycle, each taking five cycles.',
         formal: 'throughput approaches one instruction per cycle; latency is the stage count',
-        detail: 'The instruction itself takes longer than it did on the single-cycle machine, '
-          + 'because every stage boundary costs a register\'s setup and clock-to-output time. '
-          + 'What improved is the rate at which instructions finish when there are many of '
-          + 'them — which is only an improvement if there are many of them. That distinction '
-          + 'is the whole of the section and it reappears in every system that overlaps work.',
+        detail: [
+          'The instruction itself takes longer than it did on the single-cycle machine, because '
+            + 'every stage boundary costs a register\'s setup and clock-to-output time.',
+          'What improved is the rate at which instructions finish when there are many of them.',
+          'That is only an improvement if there are many of them.',
+          'The distinction is the whole of the section, and it reappears in every system that '
+            + 'overlaps work.'
+        ],
         example: 'One instruction end to end takes 755 gate delays here against 178 on the '
           + 'single-cycle machine; the throughput is 0.827 instructions per cycle.'
       },
@@ -36,13 +39,16 @@
         term: 'An unbalanced pipeline gains almost nothing, and this one is unbalanced',
         plain: 'The period is the longest stage, so one fat stage sets it.',
         formal: 'the ALU is 148 of the datapath\'s 175 gate delays',
-        detail: 'Cutting a datapath into five stages only shortens the clock if the work '
-          + 'divides evenly. This one does not: the ALU is a 32-bit ripple-carry design and '
-          + 'holds 85% of the logic delay, so a five-stage split gives a period of 151 against '
-          + 'the single-cycle 178. That is a 15% saving bought with fill, stalls and flushes, '
-          + 'and on these programs it comes out slower overall. Pipelining is not a technique '
-          + 'that can be applied to an arbitrary design; it is a technique that pays after the '
-          + 'stages have been balanced.',
+        detail: [
+          'Cutting a datapath into five stages only shortens the clock if the work divides '
+            + 'evenly.',
+          'This one does not. The ALU is a 32-bit ripple-carry design and holds 85% of the logic '
+            + 'delay, so a five-stage split gives a period of 151 against the single-cycle 178.',
+          'That is a 15% saving bought with fill, stalls and flushes, and on these programs it '
+            + 'comes out slower overall.',
+          'Pipelining is not a technique that can be applied to an arbitrary design. It is a '
+            + 'technique that pays after the stages have been balanced.'
+        ],
         example: 'The sum program: 7 654 gate delays single-cycle, 7 852 pipelined as built, '
           + 'and 1 976 with the logic divided evenly at 38 delays a stage.'
       },
@@ -50,12 +56,14 @@
         term: 'A pipeline register carries everything a later stage will need',
         plain: 'Nothing can be looked up later, because by then the instruction is gone.',
         formal: 'the destination register number is read in decode and used in write-back, four stages later',
-        detail: 'The register file is being read by a different instruction by the time this '
-          + 'one reaches execute; the ALU is computing something else in the next cycle; the '
-          + 'instruction word itself has long since been overwritten in the fetch latch. So '
-          + 'every field an instruction still needs has to travel with it, which is why the '
-          + 'destination register number appears in three of the four pipeline registers and '
-          + 'why the latches are wider than a first sketch suggests.',
+        detail: [
+          'The register file is being read by a different instruction by the time this one '
+            + 'reaches execute, and the ALU is computing something else in the next cycle.',
+          'The instruction word itself has long since been overwritten in the fetch latch.',
+          'So every field an instruction still needs has to travel with it.',
+          'That is why the destination register number appears in three of the four pipeline '
+            + 'registers, and why the latches are wider than a first sketch suggests.'
+        ],
         example: 'ID/EX carries both source values, the immediate, the destination number and '
           + 'the whole control vector — everything the last three stages will ask for.'
       },
@@ -63,12 +71,16 @@
         term: 'The ideal speed-up is the stage count and nobody gets it',
         plain: 'Fill, stalls and flushes are the difference.',
         formal: 'cycles = instructions + fill + stalls + flushes, and the totals reconcile exactly',
-        detail: 'Filling the pipeline costs four cycles at the start and again after every '
-          + 'trap; a stall costs one; a redirect costs two. Attributing every cycle to one of '
-          + 'those causes is what turns "pipelining has overheads" into a number, and the '
-          + 'attribution has to be exact — a model whose cycles do not add up is measuring '
-          + 'something it has not described. The demo charges every empty write-back cycle to '
-          + 'whatever created the bubble that arrived there, which is exact by construction.',
+        detail: [
+          'Filling the pipeline costs four cycles at the start and again after every trap. A '
+            + 'stall costs one, and a redirect costs two.',
+          'Attributing every cycle to one of those causes is what turns "pipelining has '
+            + 'overheads" into a number.',
+          'The attribution has to be exact. A model whose cycles do not add up is measuring '
+            + 'something it has not described.',
+          'The demo charges every empty write-back cycle to whatever created the bubble that '
+            + 'arrived there, which is exact by construction.'
+        ],
         example: 'The sum program: 52 cycles = 43 retired + 1 trap + 4 of fill + 4 of flush, '
           + 'with no stalls at all.'
       },
@@ -76,12 +88,14 @@
         term: 'IPC and clock period are two factors and only their product is a result',
         plain: 'Instructions per cycle says how full the pipeline is; the period says how long a cycle is.',
         formal: 'time = instructions x CPI x clock period',
-        detail: 'This is the same equation M34.6 used to reject the multi-cycle machine, and it '
-          + 'applies with equal force here. A pipeline with a wonderful IPC and a period that '
-          + 'barely moved is not faster; a pipeline with a short period and an IPC of 0.3 is '
-          + 'not either. Quoting one factor is how a design gets approved and then '
-          + 'disappoints, and it is why every comparison in this milestone is reported in gate '
-          + 'delays rather than in cycles.',
+        detail: [
+          'This is the same equation M34.6 used to reject the multi-cycle machine, and it applies '
+            + 'with equal force here.',
+          'A pipeline with a wonderful IPC and a period that barely moved is not faster.',
+          'A pipeline with a short period and an IPC of 0.3 is not either.',
+          'Quoting one factor is how a design gets approved and then disappoints. It is why every '
+            + 'comparison in this milestone is reported in gate delays rather than in cycles.'
+        ],
         example: 'IPC 0.827 at a period of 151 is 7 852 gate delays; the same IPC at a balanced '
           + '38 would be 1 976.'
       },
@@ -89,25 +103,31 @@
         term: 'Latency gets worse, and nobody advertises it',
         plain: 'Five short stages take longer end to end than one long one.',
         formal: 'each stage boundary adds the flip-flop overhead to the total path',
-        detail: 'A single instruction, alone in the machine, is slower on a pipelined processor '
-          + 'than on an unpipelined one — five periods instead of one, and each period includes '
-          + 'a register delay the unpipelined machine never paid. For a stream of instructions '
-          + 'that is irrelevant because they overlap; for a workload that cares about one '
-          + 'operation finishing quickly it is a real regression, and it is why a deeply '
-          + 'pipelined machine can feel worse on latency-sensitive work than a shallower one.',
+        detail: [
+          'A single instruction, alone in the machine, is slower on a pipelined processor than on '
+            + 'an unpipelined one.',
+          'It takes five periods instead of one, and each period includes a register delay the '
+            + 'unpipelined machine never paid.',
+          'For a stream of instructions that is irrelevant, because they overlap.',
+          'For a workload that cares about one operation finishing quickly it is a real '
+            + 'regression. It is why a deeply pipelined machine can feel worse on '
+            + 'latency-sensitive work than a shallower one.'
+        ],
         example: '5 x 151 = 755 gate delays for one instruction, against 178 unpipelined.'
       },
       {
         term: 'Overlap creates hazards, and they are the rest of the milestone',
         plain: 'Three ways an instruction can be unable to proceed.',
         formal: 'structural, data and control hazards — none of which exist one instruction at a time',
-        detail: 'A structural hazard is two stages wanting one resource; a data hazard is an '
-          + 'instruction reading a register an instruction still in flight has not written; a '
-          + 'control hazard is not knowing what to fetch next. Every one of them is created by '
-          + 'the overlap and none of them existed in M34. That is the pattern: a technique that '
-          + 'improves one thing usually creates a new class of problem, and the honest '
-          + 'accounting is the improvement minus the new problems rather than the improvement '
-          + 'alone.',
+        detail: [
+          'A structural hazard is two stages wanting one resource.',
+          'A data hazard is an instruction reading a register an instruction still in flight has '
+            + 'not written, and a control hazard is not knowing what to fetch next.',
+          'Every one of them is created by the overlap, and none of them existed in M34.',
+          'That is the pattern. A technique that improves one thing usually creates a new class '
+            + 'of problem, and the honest accounting is the improvement minus the new problems '
+            + 'rather than the improvement alone.'
+        ],
         example: 'On the array-maximum program the hazards cost 16 of 62 cycles — 5 stalls and '
           + '10 flushes plus the fill.'
       },
@@ -115,13 +135,17 @@
         term: 'The throughput-for-latency trade appears everywhere work is overlapped',
         plain: 'Every pipeline anywhere makes the individual unit slower.',
         formal: 'batching, request pipelining and wide parallelism are all this trade',
-        detail: 'HTTP request pipelining raises the requests a connection can carry and makes '
-          + 'one slow response block everything behind it. Batching raises a queue\'s '
-          + 'throughput and delays every message arriving just after a batch closes. A GPU runs '
-          + 'thousands of threads to hide memory latency and each thread is far slower than a '
-          + 'CPU thread would be. In every case the question is not "is this faster" but "which '
-          + 'of throughput and latency does this workload actually pay for", and a trading '
-          + 'system and a batch job want opposite answers from the same hardware.',
+        detail: [
+          'HTTP request pipelining raises the requests a connection can carry, and makes one slow '
+            + 'response block everything behind it.',
+          'Batching raises a queue\'s throughput and delays every message arriving just after a '
+            + 'batch closes.',
+          'A GPU runs thousands of threads to hide memory latency, and each thread is far slower '
+            + 'than a CPU thread would be.',
+          'In every case the question is not "is this faster" but "which of throughput and '
+            + 'latency does this workload actually pay for".',
+          'A trading system and a batch job want opposite answers from the same hardware.'
+        ],
         example: 'Head-of-line blocking in HTTP/1.1 pipelining is precisely this section\'s '
           + 'latency cost, which is why HTTP/2 multiplexes and QUIC goes further.'
       }

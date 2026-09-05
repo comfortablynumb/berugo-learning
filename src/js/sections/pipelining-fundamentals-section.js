@@ -94,7 +94,7 @@
         + 'than quietly assuming an even split.',
       '**Balance the stages and the same pipeline is nearly four times faster.** Divided '
         + 'evenly, 175 gate delays over five stages is 35 each, so the period would be 38 '
-        + 'rather than 151. That gap is the entire benefit of pipelining, and getting it means '
+        + 'rather than 151. That gap is the entire benefit of pipelining. Getting it means '
         + 'replacing the ripple-carry adder from 33.6 — which is why "pipeline it" is not a '
         + 'design and "balance it, then pipeline it" is.',
       '**A pipeline register has to carry everything a later stage will need.** The '
@@ -108,20 +108,20 @@
         + 'reconcile exactly, which is the check that keeps the model honest.',
       '**Latency gets worse and it is not a small effect.** Each pipeline register adds its '
         + 'own setup and clock-to-output time, so five short stages take longer end to end '
-        + 'than one long one. Nobody advertises this, and it is why a deeply pipelined '
+        + 'than one long one. Nobody advertises this. It is why a deeply pipelined '
         + 'processor can feel worse on a latency-sensitive workload than a shallower one.',
       '**IPC is the number to watch, and it is not the whole story either.** Instructions per '
         + 'cycle says how well the pipeline is being kept full; the clock period says how long '
         + 'a cycle is. The product is time, and 34.6 is the section that showed what happens '
         + 'when somebody quotes one of them.',
       '**The same trade appears wherever work is overlapped.** Request pipelining in HTTP, '
-        + 'batching in a message queue, a GPU running many threads to hide memory latency — '
-        + 'every one of them raises throughput by making each individual unit of work take '
-        + 'longer, and every one of them is a bad idea for a workload that cares about the '
+        + 'batching in a message queue, a GPU running many threads to hide memory latency. '
+        + 'Every one of them raises throughput by making each individual unit of work take '
+        + 'longer. Every one of them is a bad idea for a workload that cares about the '
         + 'individual unit.',
-      '**Overlap creates hazards, and the next three sections are the bill.** An instruction '
-        + 'reading a register that an instruction still in flight has not written yet; two '
-        + 'stages wanting one memory; a branch whose direction is not known until three '
+      '**Overlap creates hazards, and the next three sections are the bill.** One instruction '
+        + 'reads a register that an instruction still in flight has not written yet. Two '
+        + 'stages want one memory. A branch has a direction that is not known until three '
         + 'instructions later have been fetched. None of these exist in a machine that does '
         + 'one instruction at a time.'
     ];
@@ -140,20 +140,20 @@
 
   function insight() {
     return '**Pipelining is the first place in this curriculum where making something faster '
-      + 'means making every individual unit of work slower, and recognising that shape is '
-      + 'worth more than the mechanism.** One instruction now takes five cycles instead of '
-      + 'one, and each of those cycles has a pipeline register\'s setup time charged to it, so '
-      + 'the latency of a single instruction in isolation is worse than it was. What improved '
-      + 'is the rate at which instructions finish when there are many of them — and that is '
-      + 'only an improvement if there are many of them. The same trade is everywhere once you '
-      + 'know to look: HTTP request pipelining raises the number of requests a connection can '
-      + 'carry and raises the latency of the one behind a slow response; batching raises a '
-      + 'queue\'s throughput and delays every message that arrives just after a batch closes; '
-      + 'a GPU runs thousands of threads to hide memory latency and each thread is far slower '
-      + 'than a CPU thread would be. In every case the honest question is the same one, and it '
-      + 'is not "is this faster" but "which of throughput and latency does this workload '
-      + 'actually pay for". A trading system and a batch analytics job want opposite answers '
-      + 'from the same hardware, and the reason they do is on this page.';
+      + 'means making every individual unit of work slower.** Recognising that shape is '
+      + 'worth more than the mechanism. One instruction now takes five cycles instead of '
+      + 'one, and each of those cycles has a pipeline register\'s setup time charged to it. '
+      + 'The latency of a single instruction in isolation is therefore worse than it was. What '
+      + 'improved is the rate at which instructions finish when there are many of them, and '
+      + 'that is only an improvement if there are many of them. The same trade is everywhere '
+      + 'once you know to look. HTTP request pipelining raises the number of requests a '
+      + 'connection can carry, and raises the latency of the one behind a slow response. '
+      + 'Batching raises a queue\'s throughput and delays every message that arrives just after '
+      + 'a batch closes. A GPU runs thousands of threads to hide memory latency, and each '
+      + 'thread is far slower than a CPU thread would be. In every case the honest question is '
+      + 'the same one, and it is not "is this faster" but "which of throughput and latency does '
+      + 'this workload actually pay for". A trading system and a batch analytics job want '
+      + 'opposite answers from the same hardware, and the reason they do is on this page.';
   }
 
   function render(app) {
