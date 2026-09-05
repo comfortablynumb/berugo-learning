@@ -166,12 +166,15 @@
         plain: 'Merge minterms differing in one variable, replacing it with a dash, until nothing merges.',
         formal: 'an implicant not contained in any other implicant of the function',
         readAs: 'a product term covering only rows where the function is one, and maximal among such terms.',
-        detail: 'This half of minimisation is exact, cheap and has no judgement in it. Two rows '
-          + 'that differ in exactly one variable can be covered by one term that does not '
-          + 'mention that variable, and repeating the merge to a fixed point leaves terms that '
-          + 'cannot grow. Quine–McCluskey is that procedure written down. The reason it is not '
-          + 'the whole story is that the primes usually overlap, and choosing among them is a '
-          + 'different and much harder problem.',
+        detail: [
+          'This half of minimisation is exact, cheap and has no judgement in it.',
+          'Two rows that differ in exactly one variable can be covered by one term that does not '
+            + 'mention that variable.',
+          'Repeating the merge to a fixed point leaves terms that cannot grow, and '
+            + 'Quine–McCluskey is that procedure written down.',
+          'The reason it is not the whole story is that the primes usually overlap, and choosing '
+            + 'among them is a different and much harder problem.'
+        ],
         example: 'The demo\'s four-variable function has 10 minterms and exactly 6 prime '
           + 'implicants, of which 2 are essential.'
       },
@@ -194,12 +197,14 @@
         plain: 'Cover every 1-row with the fewest terms and literals.',
         formal: 'minimise |S| over subsets S of the primes such that every minterm is covered by some term in S',
         readAs: 'pick the smallest set of prime implicants that still covers every row that must be one.',
-        detail: 'Espresso and every other production minimiser is a heuristic for this, and '
-          + 'the demo makes the gap measurable by also running an exhaustive search over every '
-          + 'subset of the primes. On most functions they agree, which is why greedy is '
-          + 'shipped. On a function with no essential primes the greedy answer takes a large '
-          + 'term early and needs extras to mop up what it left, and the cheapest cover uses no '
-          + 'large term at all.',
+        detail: [
+          'Espresso and every other production minimiser is a heuristic for this.',
+          'The demo makes the gap measurable by also running an exhaustive search over every '
+            + 'subset of the primes.',
+          'On most functions they agree, which is why greedy is shipped.',
+          'On a function with no essential primes the greedy answer takes a large term early and '
+            + 'needs extras to mop up what it left. The cheapest cover uses no large term at all.'
+        ],
         example: 'On the trap function, greedy gives 4 terms and 8 literals where an exhaustive '
           + 'search over 64 subsets of 6 primes finds 3 terms and 6 literals.'
       },
@@ -207,12 +212,15 @@
         term: 'An essential prime implicant is forced, and it is why greedy usually wins',
         plain: 'If a row is covered by exactly one prime, that prime is in every cover.',
         formal: 'a prime that uniquely covers some minterm',
-        detail: 'Taking the essentials first is free — no search can avoid them — and on most '
-          + 'real functions they cover nearly everything, leaving greedy very little room to '
-          + 'get it wrong. That is the whole reason a heuristic is acceptable in a tool that '
-          + 'ships. It also tells you exactly when to be suspicious: a function whose prime '
-          + 'implicant chart has no essentials at all is one where the covering step is doing '
-          + 'all the work and can lose.',
+        detail: [
+          'Taking the essentials first is free, because no search can avoid them.',
+          'On most real functions they cover nearly everything, leaving greedy very little room '
+            + 'to get it wrong.',
+          'That is the whole reason a heuristic is acceptable in a tool that ships.',
+          'It also tells you exactly when to be suspicious. A function whose prime implicant '
+            + 'chart has no essentials at all is one where the covering step is doing all the '
+            + 'work and can lose.'
+        ],
         example: 'The classic function has 2 essentials of 6 primes and greedy matches the '
           + 'minimum; the trap function has 0 essentials and greedy loses by 2 literals.'
       },
@@ -220,12 +228,15 @@
         term: 'Don\'t-cares are free minimisation, which is an argument for partial specifications',
         plain: 'A row the specification does not constrain can be in a term or out of it, whichever helps.',
         formal: 'primes may cover don\'t-care rows; the cover must include every care row and may include any don\'t-care',
-        detail: 'This is the one place where saying less gets you a cheaper circuit, and it is '
-          + 'a genuine engineering lesson rather than a trick. An input combination that cannot '
-          + 'occur, or an output nobody reads, is information the minimiser can use to grow a '
-          + 'term. Over-specifying — writing down what the circuit happens to do rather than '
-          + 'what it must do — throws that away, and the same is true of an over-tight '
-          + 'assertion in software.',
+        detail: [
+          'This is the one place where saying less gets you a cheaper circuit, and it is a '
+            + 'genuine engineering lesson rather than a trick.',
+          'An input combination that cannot occur, or an output nobody reads, is information the '
+            + 'minimiser can use to grow a term.',
+          'Over-specifying means writing down what the circuit happens to do rather than what it '
+            + 'must do, and it throws that away.',
+          'The same is true of an over-tight assertion in software.'
+        ],
         example: 'The demo\'s don\'t-care function leaves 3 of 16 rows unconstrained, and the '
           + 'minimiser uses them to enlarge terms rather than adding any.'
       },
@@ -234,12 +245,16 @@
         plain: 'Rows and columns in Gray-code order, so neighbouring cells differ in one variable.',
         formal: 'cells at Hamming distance 1 are adjacent, including across the edges',
         readAs: 'two cells next to each other differ in exactly one input bit, and the map wraps around.',
-        detail: 'It is a human interface to the same merging the algorithm performs, and it '
-          + 'stops working at four or five variables because the eye cannot see adjacency in '
-          + 'more dimensions. The algorithm does not stop, which is the practical point: the '
-          + 'map is worth learning because it makes the idea of adjacency concrete, not because '
-          + 'anybody minimises real logic by hand. The demo prints the map with each 1 labelled '
-          + 'by how many chosen terms cover it, so overlap is visible too.',
+        detail: [
+          'It is a human interface to the same merging the algorithm performs, and it stops '
+            + 'working at four or five variables because the eye cannot see adjacency in more '
+            + 'dimensions.',
+          'The algorithm does not stop, which is the practical point.',
+          'The map is worth learning because it makes the idea of adjacency concrete, not because '
+            + 'anybody minimises real logic by hand.',
+          'The demo prints the map with each 1 labelled by how many chosen terms cover it, so '
+            + 'overlap is visible too.'
+        ],
         example: 'A four-variable map is 4 by 4 with both edges wrapping; the demo prints it '
           + 'directly from the same minterm list the algorithm reads.'
       },
@@ -247,12 +262,16 @@
         term: 'A static hazard is a correct circuit with a wrong waveform',
         plain: 'Two adjacent 1-rows covered by different terms, and no term covering both.',
         formal: 'as the differing variable changes, one product turns off before the other turns on',
-        detail: 'The output dips for a few gate delays even though the truth table is right on '
-          + 'every row, because the two product terms have different path lengths — one goes '
-          + 'through an inverter and the other does not. The fix is to add the redundant term '
-          + 'that covers both rows, which is precisely the term minimisation removed for being '
-          + 'unnecessary. Correctness and glitch-freedom are different properties, and '
-          + 'minimising for one costs the other.',
+        detail: [
+          'The output dips for a few gate delays even though the truth table is right on every '
+            + 'row.',
+          'The two product terms have different path lengths: one goes through an inverter and '
+            + 'the other does not.',
+          'The fix is to add the redundant term that covers both rows, which is precisely the '
+            + 'term minimisation removed for being unnecessary.',
+          'Correctness and glitch-freedom are different properties, and minimising for one costs '
+            + 'the other.'
+        ],
         example: 'The minimised classic function glitches on 4 of its 13 adjacent 1-pairs; '
           + 'adding the redundant terms takes it to 0 of 13, at 22 gates instead of 10.'
       },
@@ -260,12 +279,16 @@
         term: 'Whether a glitch matters depends entirely on what is downstream',
         plain: 'Into a flip-flop that samples once a cycle, a settled glitch is invisible.',
         formal: 'a transient that resolves before the setup window has no effect on a synchronous load',
-        detail: 'This is why synchronous design tolerates hazards and why hazard-free covers '
-          + 'are not the default. If the only consumer samples at a clock edge and the circuit '
-          + 'has settled by then, the dip never happened as far as the machine is concerned. '
-          + 'The exceptions are where the clock is not there to save you: an asynchronous latch '
-          + 'enable, a clock line, a reset, a signal crossing into another clock domain, or an '
-          + 'output leaving the chip. In those places the same dip is a fault.',
+        detail: [
+          'This is why synchronous design tolerates hazards, and why hazard-free covers are not '
+            + 'the default.',
+          'If the only consumer samples at a clock edge and the circuit has settled by then, the '
+            + 'dip never happened as far as the machine is concerned.',
+          'The exceptions are where the clock is not there to save you. They are an '
+            + 'asynchronous latch enable, a clock line, a reset, a signal crossing into another '
+            + 'clock domain, or an output leaving the chip.',
+          'In those places the same dip is a fault.'
+        ],
         example: 'Adding the redundant terms costs 12 extra gates and 8 extra gate delays on '
           + 'the demo\'s function — real money, spent only where it buys something.'
       },
@@ -274,12 +297,14 @@
         plain: 'If no two 1-rows differ in one variable, nothing merges and nothing shrinks.',
         formal: 'parity is 1 exactly on odd-weight inputs, so every pair of 1-rows differs in at least two bits',
         readAs: 'the parity function is one exactly on those inputs that carry an odd number of ones.',
-        detail: 'Parity is the standard counterexample and it is worth internalising, because '
-          + 'it explains why the answer to an expensive parity function is not a better '
-          + 'minimiser but a different structure — a tree of exclusive-ors, which is '
-          + 'multi-level logic. Two-level minimisation is a local optimum over a restricted '
-          + 'shape, and some functions simply live outside that shape. Error-correcting codes '
-          + 'and cryptographic primitives are made of them.',
+        detail: [
+          'Parity is the standard counterexample and it is worth internalising.',
+          'It explains why the answer to an expensive parity function is not a better minimiser '
+            + 'but a different structure: a tree of exclusive-ors, which is multi-level logic.',
+          'Two-level minimisation is a local optimum over a restricted shape, and some functions '
+            + 'simply live outside that shape.',
+          'Error-correcting codes and cryptographic primitives are made of them.'
+        ],
         example: 'The demo\'s parity function is 32 literals canonically and 32 literals after '
           + 'minimisation, with 0 adjacent pairs of ones.'
       }

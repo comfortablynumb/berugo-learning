@@ -58,8 +58,8 @@
   function orientation() {
     return [
       '**A prime implicant is a product term that cannot be made any larger.** Start from the '
-        + 'rows where the output is 1, merge any two that differ in exactly one variable — '
-        + 'replacing that variable with a dash — and repeat until nothing merges. What is left '
+        + 'rows where the output is 1 and merge any two that differ in exactly one variable, '
+        + 'replacing that variable with a dash. Repeat until nothing merges. What is left '
         + 'unmerged is prime. This step is exact and cheap, and it is the half of minimisation '
         + 'that has no judgement in it.',
       '**Choosing which primes to keep is set cover, and set cover is NP-hard.** Every row that '
@@ -70,7 +70,7 @@
       '**An essential prime implicant is forced, and it is what makes greedy usually fine.** If '
         + 'a row is covered by exactly one prime, that prime is in every cover, so it can be '
         + 'taken without thought. On most real functions the essentials cover almost everything '
-        + 'and greedy has little left to get wrong — the `trap` function in the demo has no '
+        + 'and greedy has little left to get wrong. The `trap` function in the demo has no '
         + 'essentials at all, which is exactly when it loses.',
       '**Don\'t-cares are free minimisation, and they are why specifications should be partial.** '
         + 'A row the specification does not constrain can be included in a term when that makes '
@@ -83,19 +83,19 @@
         + 'same merging the algorithm does, it stops working past four or five variables, and '
         + 'the algorithm does not.',
       '**Quine–McCluskey is the algorithm, espresso is what runs in production.** The exact '
-        + 'method is exponential in the number of variables and the number of primes; real '
+        + 'method is exponential in the number of variables and the number of primes. Real '
         + 'synthesis uses heuristics (expand, irredundant, reduce) that do not guarantee the '
         + 'minimum and finish on functions with a hundred inputs. The demo shows the exact '
         + 'answer because it can, and reports when it refuses.',
-      '**A static hazard is a correct circuit with a wrong waveform.** When two adjacent rows '
-        + 'are covered by different terms and no single term covers both, the variable that '
+      '**A static hazard is a correct circuit with a wrong waveform.** Suppose two adjacent '
+        + 'rows are covered by different terms and no single term covers both. The variable that '
         + 'changes turns one term off before the other turns on, and the output dips for a few '
         + 'gate delays. The fix is to add back the redundant term that covers the pair — the '
         + 'term minimisation just removed.',
       '**Whether that glitch matters depends on what is downstream.** Into a flip-flop that '
         + 'samples once per clock, a dip that settles before the edge is invisible, which is why '
         + 'synchronous design tolerates hazards. Into an asynchronous latch, a clock line or a '
-        + 'reset, the same dip is a fault — so hazard-free covers are a real requirement in '
+        + 'reset, the same dip is a fault. Hazard-free covers are a real requirement in '
         + 'exactly the places where the clock is not there to save you.'
     ];
   }
@@ -112,15 +112,15 @@
   }
 
   function insight() {
-    return '**Minimisation is a set-cover problem wearing a hardware costume, and the reason it '
+    return '**Minimisation is a set-cover problem wearing a hardware costume.** The reason it '
       + 'is worth understanding is that the same shape turns up everywhere you are choosing a '
-      + 'small set of things to cover a large set of requirements.** Test selection, index '
-      + 'selection in a database, cache-line packing, choosing which feature flags to keep — '
-      + 'all of them are "cover every requirement with the fewest items", all of them are '
-      + 'NP-hard, and all of them are solved in practice by taking the forced choices first and '
+      + 'small set of things to cover a large set of requirements. Test selection, index '
+      + 'selection in a database, cache-line packing, choosing which feature flags to keep. All '
+      + 'of them are "cover every requirement with the fewest items", and all of them are '
+      + 'NP-hard. All of them are solved in practice by taking the forced choices first and '
       + 'then being greedy. The `trap` function in the demo is the miniature version of why '
-      + 'that occasionally goes wrong: when nothing is forced, greedy picks a large term early '
-      + 'and then needs extra terms to mop up what it left, and the cheapest answer uses no '
+      + 'that occasionally goes wrong. When nothing is forced, greedy picks a large term early '
+      + 'and then needs extra terms to mop up what it left. The cheapest answer uses no '
       + 'large term at all. The second lesson is the hazard, and it generalises further. A '
       + 'transformation that preserves the specified behaviour can still change unspecified '
       + 'behaviour, and somebody downstream may depend on it. That is the same failure as a '
