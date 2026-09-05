@@ -10,11 +10,15 @@
         term: 'A full adder is three in, two out, and addition is a chain of them',
         plain: 'Sum is the exclusive-or of all three inputs; carry is the majority of them.',
         formal: 'sum = a xor b xor cin; carry = (a and b) or (cin and (a xor b))',
-        detail: 'Nothing new is needed to add — both of those functions were built in the '
-          + 'first section of this milestone — only a lot of them, arranged so that the carry '
-          + 'reaches the top of the word in time. That is the whole subject: the function is '
-          + 'trivial and the timing is not. Every adder on this page computes exactly the same '
-          + 'thing and differs only in how the carry gets from bit zero to bit sixty-three.',
+        detail: [
+          'Nothing new is needed to add. Both of those functions were built in the first section '
+            + 'of this milestone.',
+          'What is needed is a lot of them, arranged so that the carry reaches the top of the '
+            + 'word in time.',
+          'That is the whole subject: the function is trivial and the timing is not.',
+          'Every adder on this page computes exactly the same thing, and differs only in how the '
+            + 'carry gets from bit zero to bit sixty-three.'
+        ],
         example: 'Majority of three, the carry function, is 5 gates at depth 6 when built from '
           + 'two-input gates.'
       },
@@ -23,12 +27,15 @@
         plain: 'Bit i cannot finish until bit i-1 has decided its carry.',
         formal: 'delay is proportional to n, the number of bits',
         readAs: 'the delay of the adder grows in direct proportion to the number of bits in the word.',
-        detail: 'This is fine at four bits and unusable at sixty-four, and it is the reason '
-          + 'every real datapath contains something else. What makes it worth building anyway '
-          + 'is that it is the baseline every other adder is measured against, and that its '
-          + 'worst case is data-dependent in a way the others are not: given operands that '
-          + 'generate no carries it settles almost immediately, and given all-ones plus one it '
-          + 'takes the entire chain.',
+        detail: [
+          'This is fine at four bits and unusable at sixty-four, and it is the reason every real '
+            + 'datapath contains something else.',
+          'What makes it worth building anyway is that it is the baseline every other adder is '
+            + 'measured against.',
+          'Its worst case is also data-dependent in a way the others are not.',
+          'Given operands that generate no carries it settles almost immediately, and given '
+            + 'all-ones plus one it takes the entire chain.'
+        ],
         example: 'At 4, 8 and 16 bits the ripple adder is 20, 40 and 80 gates at depths 19, 35 '
           + 'and 67 — the depth doubling with the width.'
       },
@@ -54,12 +61,15 @@
         plain: 'A bit generates a carry when both operands are 1 and passes one on when exactly one is.',
         formal: 'c_(i+1) = g_i or (p_i and c_i), where g_i = a_i and b_i, p_i = a_i xor b_i',
         readAs: 'the carry out of a position is generate, or else propagate combined with the carry in.',
-        detail: 'The recurrence is associative, and any associative recurrence can be evaluated '
-          + 'as a balanced tree in logarithmic depth rather than as a chain in linear depth. '
-          + 'That is the same parallel prefix scan the algorithms track spends a section on, '
-          + 'and it is why a 64-bit add fits in one cycle. Recognising an associative '
-          + 'recurrence is the single most valuable pattern-match in this milestone, because it '
-          + 'is what separates the operations that parallelise from the ones that do not.',
+        detail: [
+          'The recurrence is associative, and any associative recurrence can be evaluated as a '
+            + 'balanced tree in logarithmic depth rather than as a chain in linear depth.',
+          'That is the same parallel prefix scan the algorithms track spends a section on, and it '
+            + 'is why a 64-bit add fits in one cycle.',
+          'Recognising an associative recurrence is the single most valuable pattern-match in '
+            + 'this milestone.',
+          'It is what separates the operations that parallelise from the ones that do not.'
+        ],
         example: 'Adding 255 and 1 at 8 bits: one position generates and seven propagate, which '
           + 'is the worst case for a ripple adder and the reason its settling time is 32.'
       },
@@ -67,12 +77,14 @@
         term: 'Carry lookahead buys depth with gates, quadratically',
         plain: 'Expand the recurrence so every carry is a two-level expression over g and p.',
         formal: 'c_2 = g_1 or (p_1 and g_0) or (p_1 and p_0 and c_0), and so on for every bit',
-        detail: 'Each carry becomes constant depth over signals that are all available at once, '
-          + 'and the number of terms grows with the square of the width. That is why no real '
-          + 'adder does this across a whole word: production designs build lookahead in '
-          + 'four-bit blocks and ripple between the blocks, or use a Kogge–Stone prefix tree '
-          + 'which is logarithmic depth with a regular layout. The demo shows the quadratic '
-          + 'term becoming unaffordable in three steps.',
+        detail: [
+          'Each carry becomes constant depth over signals that are all available at once, and the '
+            + 'number of terms grows with the square of the width.',
+          'That is why no real adder does this across a whole word.',
+          'Production designs build lookahead in four-bit blocks and ripple between the blocks, '
+            + 'or use a Kogge–Stone prefix tree which is logarithmic depth with a regular layout.',
+          'The demo shows the quadratic term becoming unaffordable in three steps.'
+        ],
         example: 'Lookahead at 4, 8 and 16 bits is 42, 180 and 1 000 gates against the ripple '
           + 'adder\'s 20, 40 and 80 — for depths of 16, 26 and 44.'
       },
@@ -80,12 +92,14 @@
         term: 'Carry select buys speed with duplication instead of fan-in',
         plain: 'Compute the top half twice, for both possible carries, and choose when the truth arrives.',
         formal: 'delay is the lower half plus one multiplexer',
-        detail: 'It is a different point on the same line and often the practical one, because '
-          + 'duplicating a small ripple adder is cheap and regular where a wide lookahead term '
-          + 'is neither. The idea generalises: speculate on the value you are waiting for, '
-          + 'compute both answers in parallel, and select when the answer arrives. That is '
-          + 'branch prediction, prefetching and eager evaluation in one sentence, and its cost '
-          + 'is always the wasted half.',
+        detail: [
+          'It is a different point on the same line, and often the practical one. Duplicating a '
+            + 'small ripple adder is cheap and regular, where a wide lookahead term is neither.',
+          'The idea generalises. Speculate on the value you are waiting for, compute both answers '
+            + 'in parallel, and select when the answer arrives.',
+          'That is branch prediction, prefetching and eager evaluation in one sentence.',
+          'Its cost is always the wasted half.'
+        ],
         example: 'At 16 bits carry select is 129 gates at depth 38, against 80 at depth 67 for '
           + 'ripple and 1 000 at depth 44 for lookahead.'
       },
@@ -94,12 +108,15 @@
         plain: 'Invert the second operand, force the carry in, and the adder computes a minus b.',
         formal: 'a - b = a + (not b) + 1',
         readAs: 'a minus b equals a plus the bitwise complement of b plus one, using the same adder.',
-        detail: 'There is no subtractor in a datapath. The sign bit needs no special case, '
-          + 'comparison is subtraction with the result discarded, and negation is inversion plus '
-          + 'one — which is why the two\'s-complement range is asymmetric and the most negative '
-          + 'number has no positive counterpart. Every one of those facts is a consequence of '
-          + 'the representation rather than of the circuit, which is the argument for choosing '
-          + 'a representation carefully.',
+        detail: [
+          'There is no subtractor in a datapath.',
+          'The sign bit needs no special case, comparison is subtraction with the result '
+            + 'discarded, and negation is inversion plus one.',
+          'That is why the two\'s-complement range is asymmetric, and why the most negative '
+            + 'number has no positive counterpart.',
+          'Every one of those facts is a consequence of the representation rather than of the '
+            + 'circuit, which is the argument for choosing a representation carefully.'
+        ],
         example: 'The ALU section measures 0 minus 128 at 8 bits as 128 with overflow set, '
           + 'because negating the most negative value is not representable.'
       },
@@ -108,12 +125,16 @@
         plain: 'One AND per pair of bits, then an array of adders to sum the partial products.',
         formal: 'n^2 partial product bits, reduced by n-1 additions',
         readAs: 'the number of partial-product bits is the square of the width of the two operands.',
-        detail: 'The partial products all appear in one gate delay; the cost is entirely in '
-          + 'adding them up. That is why multiply is three or four cycles where add is one, why '
-          + 'compilers turn a multiply by a constant into shifts and adds, and why Wallace and '
-          + 'Dadda trees exist — they reduce the array in logarithmic depth using carry-save '
-          + 'adders instead of rippling. Division is worse still, because its recurrence is not '
-          + 'associative and no tree flattens it.',
+        detail: [
+          'The partial products all appear in one gate delay; the cost is entirely in adding them '
+            + 'up.',
+          'That is why multiply is three or four cycles where add is one, and why compilers turn '
+            + 'a multiply by a constant into shifts and adds.',
+          'It is also why Wallace and Dadda trees exist. They reduce the array in logarithmic '
+            + 'depth using carry-save adders instead of rippling.',
+          'Division is worse still, because its recurrence is not associative and no tree '
+            + 'flattens it.'
+        ],
         example: 'Array multipliers at 2, 3 and 4 bits are 14, 39 and 76 gates at depths 13, 27 '
           + 'and 41, each verified against every possible product.'
       },
@@ -121,12 +142,14 @@
         term: 'Depth is the worst case; settling time is this data',
         plain: 'The clock must assume the worst path because it cannot ask what the operands are.',
         formal: 'critical path = max over all inputs; settling time = the measurement for one transition',
-        detail: 'A ripple adder given operands with no carries settles in a couple of gate '
-          + 'delays; the same adder given all-ones plus one takes the full chain. Timing '
-          + 'analysis has to budget for the second, which means most cycles waste most of their '
-          + 'period. That gap between typical and worst is why asynchronous and '
-          + 'variable-latency designs keep being proposed, and why they keep losing to the '
-          + 'simplicity of a fixed clock.',
+        detail: [
+          'A ripple adder given operands with no carries settles in a couple of gate delays.',
+          'The same adder given all-ones plus one takes the full chain.',
+          'Timing analysis has to budget for the second, which means most cycles waste most of '
+            + 'their period.',
+          'That gap between typical and worst is why asynchronous and variable-latency designs '
+            + 'keep being proposed, and why they keep losing to the simplicity of a fixed clock.'
+        ],
         example: 'The 8-bit ripple adder has a critical path of 35 gate delays and settles in '
           + '32 on the worst-case transition the demo drives.'
       }

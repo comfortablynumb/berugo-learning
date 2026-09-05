@@ -64,7 +64,7 @@
     return [
       '**A full adder is three inputs and two outputs, and the whole of addition is a chain of '
         + 'them.** Sum is the exclusive-or of all three inputs; carry is the majority of them. '
-        + 'Both were built in the first section of this milestone, which is the point: nothing '
+        + 'Both were built in the first section of this milestone, which is the point. Nothing '
         + 'new is needed to add, only a lot of it, arranged so the carry reaches the top of the '
         + 'word in time.',
       '**Ripple carry is correct and its delay is linear in the width.** Bit one cannot finish '
@@ -74,11 +74,11 @@
       '**Generate and propagate turn the carry chain into a prefix computation.** Bit i '
         + 'generates a carry when both operands are 1 and propagates one when exactly one is. '
         + 'Those signals are available in one gate delay everywhere at once, and the carry '
-        + 'recurrence over them is associative — so it can be evaluated as a tree, which is '
+        + 'recurrence over them is associative. So it can be evaluated as a tree, which is '
         + 'exactly the parallel prefix scan from the algorithms track.',
       '**Carry lookahead trades gates for depth, quadratically.** Expanding the recurrence for '
-        + 'every bit gives constant depth per carry and a term count that grows with the square '
-        + 'of the width, which is why real adders build lookahead in four-bit blocks and ripple '
+        + 'every bit gives constant depth per carry, and a term count that grows with the square '
+        + 'of the width. That is why real adders build lookahead in four-bit blocks and ripple '
         + 'between blocks, or use a Kogge–Stone tree that is log-depth with a regular layout.',
       '**Carry select buys speed with duplication instead of with fan-in.** Compute the top half '
         + 'twice, once for each possible incoming carry, and let a multiplexer choose when the '
@@ -86,17 +86,17 @@
         + 'about 1.5 times a ripple adder — a different point on the same line.',
       '**Subtraction is addition, and that is what two\'s complement is for.** Invert the second '
         + 'operand, set the carry in, and the same adder computes a minus b. No subtractor '
-        + 'exists in a datapath; the sign bit needs no special case; and overflow is detected by '
+        + 'exists in a datapath, and the sign bit needs no special case. Overflow is detected by '
         + 'comparing the carry into the top bit with the carry out of it.',
       '**Multiplication is quadratic in gates and linear in depth, and no identity removes that.** '
         + 'One AND gate per pair of bits gives the partial products in one delay, and then they '
-        + 'have to be added. That is why multiply is three or four cycles where add is one, why '
-        + 'compilers turn a multiply by a constant into shifts and adds, and why division is '
-        + 'worse still.',
+        + 'have to be added. That is why multiply is three or four cycles where add is one, and '
+        + 'why compilers turn a multiply by a constant into shifts and adds. Division is worse '
+        + 'still.',
       '**The delay in the metrics is the worst case; the settling time is this data.** A ripple '
         + 'adder given operands that generate no carries settles in a couple of gate delays and '
         + 'given all-ones plus one takes the full chain. Real timing has to assume the worst '
-        + 'case because the clock cannot ask; that gap between typical and worst is the whole '
+        + 'case, because the clock cannot ask. That gap between typical and worst is the whole '
         + 'business of static timing analysis two sections from here.'
     ];
   }
@@ -114,19 +114,19 @@
 
   function insight() {
     return '**Addition is a prefix scan, and once you see that, half of parallel computing and '
-      + 'most of a datapath become the same subject.** The carry recurrence — carry out equals '
-      + 'generate, or propagate and carry in — is associative, and any associative recurrence '
+      + 'most of a datapath become the same subject.** The carry recurrence is associative: '
+      + 'carry out equals generate, or propagate and carry in. Any associative recurrence '
       + 'can be evaluated as a balanced tree in logarithmic depth instead of a chain in linear '
-      + 'depth. That single fact is what makes a 64-bit add fit in one cycle; it is also what '
+      + 'depth. That single fact is what makes a 64-bit add fit in one cycle. It is also what '
       + 'makes a parallel prefix sum, a segmented scan, a stream compaction and a parallel '
-      + 'tokeniser work, and it is why the algorithms track spent a section on scan. The second '
+      + 'tokeniser work. It is why the algorithms track spent a section on scan. The second '
       + 'thing to carry away is the shape of the cost table. Add and subtract are one cycle '
       + 'because they are log-depth prefix networks. Shift is one cycle because it is a mux '
       + 'tree. Multiply is a few cycles because it is a quadratic array of adders that has to '
       + 'be reduced. Divide is many cycles because its recurrence is not associative — each '
       + 'step needs the previous remainder — so no tree exists to flatten it. When a compiler '
       + 'replaces `x / 10` with a multiply and a shift, it is buying its way out of exactly '
-      + 'that non-associativity, and the reason it can is that the divisor was known at compile '
+      + 'that non-associativity. The reason it can is that the divisor was known at compile '
       + 'time.';
   }
 
