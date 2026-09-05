@@ -13,12 +13,16 @@
         readAs: 'Divide each coordinate by the cell size and round down, and you have the cell a point lives ' +
           'in. A query within radius r has to read every cell touching the square from x−r to x+r and ' +
           'y−r to y+r.',
-        detail: 'There is no tree, no balancing and no comparison: the cell index is two divisions and the bucket ' +
-          'is an array offset. That is the entire structure, and it is why a grid beats every tree in this ' +
-          'milestone whenever the data is evenly dense - the constant factor of "compute an index, read an array" ' +
-          'is unbeatable by anything that follows pointers. Everything a grid gets wrong follows from the same ' +
-          'fact: the cells are fixed before the data arrives, so the structure cannot react to where the data ' +
-          'actually is.',
+        detail: [
+          'There is no tree, no balancing and no comparison: the cell index is two divisions and ' +
+            'the bucket is an array offset.',
+          'That is the entire structure, and it is why a grid beats every tree in this milestone ' +
+            'whenever the data is evenly dense.',
+          'The constant factor of "compute an index, read an array" is unbeatable by anything that ' +
+            'follows pointers.',
+          'Everything a grid gets wrong follows from the same fact. The cells are fixed before the ' +
+            'data arrives, so the structure cannot react to where the data actually is.'
+        ],
         example: '20 000 points in 1 000 × 1 000 with 25-unit cells: a radius-25 query reads 9 cells and tests 109.98 points to return 38.48.'
       },
       {
@@ -36,15 +40,19 @@
         },
         plain: 'Small cells scan many nearly empty buckets; large cells scan few buckets full of far-away objects.',
         formal: 'work(c) ≈ (⌈2r/c⌉+1)² + ρ·((⌈2r/c⌉+1)·c)²',
-        readAs: 'Two costs pulling opposite ways: the number of cells you visit, which grows as cells get ' +
-          'smaller, plus the points inside them, which grows as cells get larger. ρ is the point ' +
-          'density. The best cell size is where the two curves cross.',
-        detail: 'Both terms are visible in the same sweep and they move in opposite directions, so the total has a ' +
-          'genuine minimum rather than a monotone slope. The folklore answer - "make the cell the query radius" - ' +
-          'is close but not exact: on 20 000 uniform points with radius 25 the measured minimum is at a cell of ' +
-          '15, where 18.84 cells and 82.22 candidates cost less than the 9 cells and 109.98 candidates at c = 25. ' +
-          'The right move is to sweep it once against your own density and query radius, because both appear in ' +
-          'the formula and neither is a constant of nature.',
+        readAs: 'Two costs pull in opposite ways. The number of cells you visit grows as cells get ' +
+          'smaller, and the points inside them grow as cells get larger. Here ρ is the point ' +
+          'density, and the best cell size is where the two curves cross.',
+        detail: [
+          'Both terms are visible in the same sweep and they move in opposite directions, so the ' +
+            'total has a genuine minimum rather than a monotone slope.',
+          'The folklore answer - "make the cell the query radius" - is close but not exact.',
+          'On 20 000 uniform points with radius 25 the measured minimum is at a cell of 15. There, ' +
+            '18.84 cells and 82.22 candidates cost less than the 9 cells and 109.98 candidates at ' +
+            'c = 25.',
+          'The right move is to sweep it once against your own density and query radius, because ' +
+            'both appear in the formula and neither is a constant of nature.'
+        ],
         example: 'Cells of 5, 15, 25 and 200 cost 180.1, 101.1, 119.0 and 1 150.0 units of work for the same answer.'
       },
       {
@@ -53,11 +61,15 @@
         formal: 'selectivity = πr² / (scanned cell area)',
         readAs: 'What fraction of the area you scanned actually falls inside the query circle. πr² is the ' +
           'circle\'s area; everything beyond it is work you did and threw away.',
-        detail: 'Raw counts cannot be compared across structures whose nodes mean different things - a quadtree ' +
-          'node and a grid cell are not the same unit - but "points examined per point returned" is the same ' +
-          'quantity everywhere and is what actually costs time. It also exposes the failure mode that a hit rate ' +
-          'hides: a query returning the right answer after testing forty times as many candidates is correct and ' +
-          'useless, and no correctness test will ever complain about it.',
+        detail: [
+          'Raw counts cannot be compared across structures whose nodes mean different things, ' +
+            'because a quadtree node and a grid cell are not the same unit.',
+          '"Points examined per point returned" is the same quantity everywhere, and it is what ' +
+            'actually costs time.',
+          'It also exposes the failure mode that a hit rate hides. A query returning the right ' +
+            'answer after testing forty times as many candidates is correct and useless, and no ' +
+            'correctness test will ever complain about it.'
+        ],
         example: 'On clustered points the grid tests 4.31 candidates per result, the quadtree 1.68 and the k-d tree 1.69.'
       },
       {
@@ -66,12 +78,16 @@
         formal: 'cost is ρ_local·(scanned area), and ρ_local can be many times the mean ρ',
         readAs: 'The cost depends on the density where the query lands, not the average density of the whole ' +
           'map. A grid sized on the mean falls apart in a city centre.',
-        detail: 'The mean density is unchanged when the data clusters - the same 20 000 points are in the same ' +
-          'box - so a sizing calculation based on the average is still "right" and the query is still slow, ' +
-          'because a query only ever meets local density. That is why the trees in the rest of this milestone ' +
-          'exist: they subdivide where the data is, so the number of objects per leaf stays bounded whatever the ' +
-          'distribution does. It is also why the grid keeps its place - when density really is uniform, the trees ' +
-          'are paying for an adaptation they do not need.',
+        detail: [
+          'The mean density is unchanged when the data clusters - the same 20 000 points are in ' +
+            'the same box.',
+          'So a sizing calculation based on the average is still "right" and the query is still ' +
+            'slow, because a query only ever meets local density.',
+          'That is why the trees in the rest of this milestone exist. They subdivide where the data ' +
+            'is, so the number of objects per leaf stays bounded whatever the distribution does.',
+          'It is also why the grid keeps its place: when density really is uniform, the trees are ' +
+            'paying for an adaptation they do not need.'
+        ],
         example: 'Clustered: the grid tests 148.19 candidates for 34.41 results and the longest bucket holds 269 points.'
       },
       {
@@ -80,23 +96,32 @@
         formal: 'bucket = mix(cx·p₁ ⊕ cy·p₂) mod m',
         readAs: 'Turn a pair of cell coordinates into one bucket index: multiply each by its own large prime, ' +
           'XOR them together, mix, and take the remainder. Unbounded space, bounded memory.',
-        detail: 'A direct-addressed grid costs memory proportional to the *area* it covers, occupied or not, which ' +
-          'is fatal for sparse or unbounded worlds. Hashing makes memory proportional to the objects instead, at ' +
-          'the price that two unrelated cells can share a bucket and a query then examines objects nowhere near ' +
-          'it. Those phantom candidates are invisible unless they are counted, and their rate is set entirely by ' +
-          'the table load: the fix is a bigger table, and the decision is memory against wasted comparisons like ' +
-          'any other hash table.',
-        example: '20 000 points spread over 100× the area: a direct grid needs 160 000 cells and 1.6 MB for 2 257 occupied ones; the hash needs 4 096 buckets and 345 KB.'
+        detail: [
+          'A direct-addressed grid costs memory proportional to the *area* it covers, occupied or ' +
+            'not, which is fatal for sparse or unbounded worlds.',
+          'Hashing makes memory proportional to the objects instead, at the price that two ' +
+            'unrelated cells can share a bucket and a query then examines objects nowhere near it.',
+          'Those phantom candidates are invisible unless they are counted, and their rate is set ' +
+            'entirely by the table load.',
+          'The fix is a bigger table, and the decision is memory against wasted comparisons like ' +
+            'any other hash table.'
+        ],
+        example: 'Spread 20 000 points over 100× the area. A direct grid needs 160 000 cells and 1.6 MB for 2 257 occupied ones; the hash needs 4 096 buckets and 345 KB.'
       },
       {
         term: 'Phantom candidates are the hash\'s real price',
         plain: 'Objects found in the right bucket but the wrong cell, rejected by a coordinate check the direct grid never makes.',
         formal: 'phantoms per query ≈ (occupied cells / buckets) × candidates',
-        detail: 'The rate halves every time the table doubles, exactly as a chained hash table\'s chain length ' +
-          'does, and it is worth measuring rather than assuming because the numbers are larger than intuition ' +
-          'suggests. At 1 600 occupied cells and a 256-entry table, 86.3% of everything a query touches is a ' +
-          'phantom; a 4 096-entry table brings that to 29.1% and an 8 192-entry one to 16.5%. A spatial hash ' +
-          'sized "roughly like the object count" is usually running at the wrong end of that curve.',
+        detail: [
+          'The rate halves every time the table doubles, exactly as a chained hash table\'s chain ' +
+            'length does.',
+          'It is worth measuring rather than assuming, because the numbers are larger than ' +
+            'intuition suggests.',
+          'At 1 600 occupied cells and a 256-entry table, 86.3% of everything a query touches is a ' +
+            'phantom. A 4 096-entry table brings that to 29.1% and an 8 192-entry one to 16.5%.',
+          'A spatial hash sized "roughly like the object count" is usually running at the wrong end ' +
+            'of that curve.'
+        ],
         example: 'At 25-unit cells: 256 buckets cost 694.11 phantoms per query, 4 096 cost 45.22 and 8 192 cost 21.76.'
       },
       {
@@ -105,12 +130,16 @@
         formal: 'placements(o) = ⌈w/c + 1⌉ · ⌈h/c + 1⌉',
         readAs: 'How many cells one object of width w and height h can straddle, worst case. An object larger ' +
           'than a cell has to be registered in every cell it touches, and this is that count.',
-        detail: 'There are exactly two workable answers and one broken one. Store the object in every cell it ' +
-          'overlaps and deduplicate at query time - which is what this module does, and it reports the repeats ' +
-          'rather than hiding them - or store it once at a coarser level, which is the loose quadtree of 8.2. The ' +
-          'broken answer is to store it in the cell of its centre, which silently misses every query that ' +
-          'overlaps the object but not its middle. Duplicate placement also makes the memory a function of the ' +
-          'cell size, and at small cells that dominates everything else.',
+        detail: [
+          'There are exactly two workable answers and one broken one.',
+          'Store the object in every cell it overlaps and deduplicate at query time - which is what ' +
+            'this module does, and it reports the repeats rather than hiding them.',
+          'Or store it once at a coarser level, which is the loose quadtree of 8.2.',
+          'The broken answer is to store it in the cell of its centre, which silently misses every ' +
+            'query that overlaps the object but not its middle.',
+          'Duplicate placement also makes the memory a function of the cell size, and at small ' +
+            'cells that dominates everything else.'
+        ],
         example: '5 000 boxes of side ~60 with 10-unit cells cost 64.56 placements each; with 50-unit cells, 5.62.'
       },
       {
@@ -119,11 +148,16 @@
         formal: 'E[candidates] = (n/A) · ((⌈2r/c⌉+1)·c)²',
         readAs: 'On average, the density (points over area) times the area you scan. It is the formula the ' +
           'demo\'s candidate counts are checked against.',
-        detail: 'Agreement means the data really is uniform at the scale the query works at, and the grid is the ' +
-          'right structure. Disagreement is the single cheapest signal that it is not, and it arrives before any ' +
-          'user notices a slow tail. This is the same discipline as reporting a predicted false-positive rate ' +
-          'next to a measured one: the formula is a claim the structure makes about itself, and a system that ' +
-          'never checks it finds out from a latency graph months later.',
+        detail: [
+          'Agreement means the data really is uniform at the scale the query works at, and the grid ' +
+            'is the right structure.',
+          'Disagreement is the single cheapest signal that it is not, and it arrives before any ' +
+            'user notices a slow tail.',
+          'This is the same discipline as reporting a predicted false-positive rate next to a ' +
+            'measured one.',
+          'The formula is a claim the structure makes about itself, and a system that never checks ' +
+            'it finds out from a latency graph months later.'
+        ],
         example: 'Uniform, cell 25: predicted 112.50 candidates, measured 109.98 - 2.2% apart. Clustered: predicted 112.50, measured 148.19.'
       }
     ],

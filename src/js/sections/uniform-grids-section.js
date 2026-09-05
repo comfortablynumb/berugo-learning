@@ -28,53 +28,60 @@
     });
   }
 
+  function diagram() {
+    return {
+      title: 'Diagram — a query circle overlapping four cells',
+      caption: 'The query reads whole cells, so it tests every object in all nine cells its bounding box ' +
+        'touches and then measures each against the circle. The ratio of the two is the only number that ' +
+        'says whether the cell size is right.',
+      definition: [
+        'flowchart LR',
+        '    Q["radius query at (x, y)"] --> B["bounding box x±r, y±r"]',
+        '    B --> C["cells ⌊(x−r)/c⌋ … ⌊(x+r)/c⌋"]',
+        '    C --> S1["cell (3,4): 12 points"]',
+        '    C --> S2["cell (4,4): 14 points"]',
+        '    C --> S3["cell (3,5): 11 points"]',
+        '    C --> S4["cell (4,5): 13 points"]',
+        '    S1 --> T["50 candidates measured against the circle"]',
+        '    S2 --> T',
+        '    S3 --> T',
+        '    S4 --> T',
+        '    T --> R["38 results returned"]'
+      ].join('\n')
+    };
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'A grid has no tree, nothing to balance and nothing to compare: two divisions give the cell, the ' +
-          'bucket is an array offset, and a query reads only the cells its own box touches. On evenly dense ' +
-          'data that constant factor beats every tree in this milestone. 20 000 uniform points in a ' +
-          '1 000 × 1 000 domain with 25-unit cells answer a radius-25 query by reading 9 cells and testing ' +
-          '109.98 points to return 38.48 — against a prediction of 112.50 from density alone.',
-        'The cell size is a genuine minimum rather than a rule of thumb. Small cells scan many nearly empty ' +
-          'buckets and large cells scan few buckets full of far-away objects, so the total has a knee: the ' +
-          'measured optimum here is a cell of 15 at 101.06 units of work, against 118.98 at the folklore c = r ' +
-          'and 1 150.00 at c = 200. The prediction is exact when the cell divides the query diameter and an ' +
-          'over-estimate otherwise, because it is a worst case over alignments.',
-        'Everything a grid gets wrong follows from the cells being fixed before the data arrives. Cluster the ' +
-          'same 20 000 points and the sizing formula still says 112.50 while the measurement says 148.19, ' +
-          'because a query meets local density and the formula knows only the mean — one bucket holds 269 ' +
-          'points against a mean of 12.5. Hashing the cell coordinate removes the bounded domain and adds ' +
-          'collisions: at 1 600 occupied cells and a 256-entry table, 86.3% of everything a query touches is a ' +
-          'phantom.'
+        'A grid has no tree, nothing to balance and nothing to compare. Two divisions give the cell, ' +
+          'the bucket is an array offset, and a query reads only the cells its own box touches. On ' +
+          'evenly dense data that constant factor beats every tree in this milestone. Take 20 000 ' +
+          'uniform points in a 1 000 × 1 000 domain with 25-unit cells. A radius-25 query reads 9 ' +
+          'cells and tests 109.98 points to return 38.48, against a prediction of 112.50 from ' +
+          'density alone.',
+        'The cell size is a genuine minimum rather than a rule of thumb. Small cells scan many ' +
+          'nearly empty buckets and large cells scan few buckets full of far-away objects, so the ' +
+          'total has a knee. The measured optimum here is a cell of 15 at 101.06 units of work, ' +
+          'against 118.98 at the folklore c = r and 1 150.00 at c = 200. The prediction is exact ' +
+          'when the cell divides the query diameter and an over-estimate otherwise, because it is a ' +
+          'worst case over alignments.',
+        'Everything a grid gets wrong follows from the cells being fixed before the data arrives. ' +
+          'Cluster the same 20 000 points and the sizing formula still says 112.50 while the ' +
+          'measurement says 148.19. A query meets local density and the formula knows only the ' +
+          'mean: one bucket holds 269 points against a mean of 12.5. Hashing the cell coordinate ' +
+          'removes the bounded domain and adds collisions. At 1 600 occupied cells and a 256-entry ' +
+          'table, 86.3% of everything a query touches is a phantom.'
       ],
       demo: { title: 'Interactive demo — the cells, the sweep and the prediction', markup: root.UniformGridsTemplate.render() },
-      diagram: {
-        title: 'Diagram — a query circle overlapping four cells',
-        caption: 'The query reads whole cells, so it tests every object in all nine cells its bounding box ' +
-          'touches and then measures each against the circle. The ratio of the two is the only number that ' +
-          'says whether the cell size is right.',
-        definition: [
-          'flowchart LR',
-          '    Q["radius query at (x, y)"] --> B["bounding box x±r, y±r"]',
-          '    B --> C["cells ⌊(x−r)/c⌋ … ⌊(x+r)/c⌋"]',
-          '    C --> S1["cell (3,4): 12 points"]',
-          '    C --> S2["cell (4,4): 14 points"]',
-          '    C --> S3["cell (3,5): 11 points"]',
-          '    C --> S4["cell (4,5): 13 points"]',
-          '    S1 --> T["50 candidates measured against the circle"]',
-          '    S2 --> T',
-          '    S3 --> T',
-          '    S4 --> T',
-          '    T --> R["38 results returned"]'
-        ].join('\n')
-      },
+      diagram: diagram(),
       insight: 'For uniformly dense data a grid beats every tree in this milestone, and the trees earn their ' +
-        'keep only when density varies. The cheapest way to know which case you are in costs one line: compute ' +
-        'what a uniform grid should test from density and radius, and compare it with what it actually tested. ' +
-        'Agreement means the grid is the right structure; disagreement is the signal to move to a quadtree or a ' +
-        'k-d tree, and it arrives long before a user notices a slow tail.'
+        'keep only when density varies. The cheapest way to know which case you are in costs one ' +
+        'line. Compute what a uniform grid should test from density and radius, and compare it ' +
+        'with what it actually tested. Agreement means the grid is the right structure. ' +
+        'Disagreement is the signal to move to a quadtree or a k-d tree, and it arrives long ' +
+        'before a user notices a slow tail.'
     };
   }
 
