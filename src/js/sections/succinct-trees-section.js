@@ -25,6 +25,25 @@
     });
   }
 
+  function diagram() {
+    return {
+      title: 'Diagram — LOUDS, level by level',
+      caption: 'Each node contributes one 1 per child and a terminating 0, in level order, after a "10" for ' +
+        'the super-root. The k-th 1 in the string is node k, so navigation is rank and select and nothing ' +
+        'else — no node is stored anywhere.',
+      definition: [
+        'flowchart TD',
+        '    A["tree: root with children B, C; B with child D"] --> B["level order: root, B, C, D"]',
+        '    B --> C["super-root: 10"]',
+        '    C --> D["root has 2 children: 110"]',
+        '    D --> E["B has 1 child: 10"]',
+        '    E --> F["C has none: 0"]',
+        '    F --> G["D has none: 0"]',
+        '    G --> H["10 110 10 0 0 — 2n + 1 bits"]'
+      ].join('\n')
+    };
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
@@ -34,44 +53,32 @@
           'per child of each node followed by a 0; on 5 000 nodes that is 10 001 bits, 2.0002 per node. ' +
           'Navigation is then arithmetic on rank and select: firstChild, nextSibling and parent are each one ' +
           'select plus one rank, with no pointer dereferenced anywhere.',
-        'The saving against pointers is large and the qualifier is essential. 1 358 bytes including the ' +
-          'rank/select index, against 240 000 bytes as 48-byte node objects, is 177× — for the shape. Add ' +
-          '5 000 eight-byte values back and the total is 41 358 bytes and the saving is 5.8×, because the ' +
-          'payload was never in the 2n bits and is not compressed by any of this.',
-        'Balanced parentheses encodes the same tree in exactly 2 bits per node and answers different ' +
-          'questions: subtree size is (close − open + 1) / 2 and depth is the excess, both of which LOUDS ' +
-          'cannot give directly. Its navigation is only constant-time with a range-min-max tree, which this ' +
-          'implementation does not build — it scans, and the section says so rather than quoting a bound for ' +
-          'code that is not here. The wavelet tree applies the same rank-and-select idea to a sequence: 8 bits ' +
-          'per symbol over a 256-symbol alphabet, exactly the entropy-free bound, answering the k-th smallest ' +
-          'in a range in 16.0 rank calls.'
+        'The saving against pointers is large and the qualifier is essential. 1 358 bytes ' +
+          'including the rank/select index, against 240 000 bytes as 48-byte node objects, is ' +
+          '177× — for the shape. Add 5 000 eight-byte values back and the total is 41 358 bytes ' +
+          'and the saving is 5.8×. The payload was never in the 2n bits and is not compressed by ' +
+          'any of this.',
+        'Balanced parentheses encodes the same tree in exactly 2 bits per node and answers ' +
+          'different questions. Subtree size is (close − open + 1) / 2 and depth is the excess, ' +
+          'both of which LOUDS cannot give directly. Its navigation is only constant-time with a ' +
+          'range-min-max tree, which this implementation does not build. It scans, and the section ' +
+          'says so rather than quoting a bound for code that is not here. The wavelet tree applies ' +
+          'the same rank-and-select idea to a sequence. It costs 8 bits per symbol over a ' +
+          '256-symbol alphabet, exactly the entropy-free bound, and answers the k-th smallest in a ' +
+          'range in 16.0 rank calls.'
       ],
       demo: {
         title: 'Interactive demo — 2n bits, the payload it excludes, and the sequence version',
         markup: root.SuccinctTreesTemplate.render()
       },
-      diagram: {
-        title: 'Diagram — LOUDS, level by level',
-        caption: 'Each node contributes one 1 per child and a terminating 0, in level order, after a "10" for ' +
-          'the super-root. The k-th 1 in the string is node k, so navigation is rank and select and nothing ' +
-          'else — no node is stored anywhere.',
-        definition: [
-          'flowchart TD',
-          '    A["tree: root with children B, C; B with child D"] --> B["level order: root, B, C, D"]',
-          '    B --> C["super-root: 10"]',
-          '    C --> D["root has 2 children: 110"]',
-          '    D --> E["B has 1 child: 10"]',
-          '    E --> F["C has none: 0"]',
-          '    F --> G["D has none: 0"]',
-          '    G --> H["10 110 10 0 0 — 2n + 1 bits"]'
-        ].join('\n')
-      },
+      diagram: diagram(),
       insight: 'Succinct structures trade cache misses for instructions, and that trade only pays at the scale ' +
-        'where the pointer version stops being resident. On 5 000 nodes both representations fit in L2 and the ' +
-        'pointer tree is faster; on 5 000 000 the difference is 240 MB against 41 MB and the arithmetic wins ' +
-        'because the alternative is a disk. The discipline the subject demands is naming what the bound covers: ' +
-        '2n bits is the shape, the payload is separate, and constant-time parenthesis navigation needs an index ' +
-        'that is easy to describe and easy to forget to build.'
+        'where the pointer version stops being resident. On 5 000 nodes both representations fit ' +
+        'in L2 and the pointer tree is faster. On 5 000 000 the difference is 240 MB against ' +
+        '41 MB, and the arithmetic wins because the alternative is a disk. The discipline the ' +
+        'subject demands is naming what the bound covers. 2n bits is the shape, the payload is ' +
+        'separate, and constant-time parenthesis navigation needs an index that is easy to ' +
+        'describe and easy to forget to build.'
     };
   }
 

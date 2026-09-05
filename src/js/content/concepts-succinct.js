@@ -164,11 +164,15 @@
         readAs: 'Count how many distinct trees of n nodes exist, take the log base 2, and you have the fewest ' +
           'bits any encoding could use. It comes to about 2 bits per node — which is the target every ' +
           'succinct tree encoding is measured against.',
-        detail: 'The information-theoretic argument is what makes 2 bits the target rather than a lucky ' +
-          'encoding: there are Catalan-many shapes, and naming one of them takes about 2n bits however you ' +
-          'write it down. Both encodings in this section hit that bound, and the difference against a pointer ' +
-          'representation is not a percentage - it is the difference between an index that fits in memory and ' +
-          'one that does not.',
+        detail: [
+          'The information-theoretic argument is what makes 2 bits the target rather than a lucky ' +
+            'encoding.',
+          'There are Catalan-many shapes, and naming one of them takes about 2n bits however you ' +
+            'write it down.',
+          'Both encodings in this section hit that bound.',
+          'The difference against a pointer representation is not a percentage. It is the ' +
+            'difference between an index that fits in memory and one that does not.'
+        ],
         example: '5 000 nodes: 1 358 bytes as LOUDS including its index, against 240 000 as pointers - 177× less.'
       },
       {
@@ -178,11 +182,15 @@
         readAs: 'Write the tree as bits: for every node in level order, one 1 per child followed by a 0. The ' +
           'superscript means repetition. Two bits per node, and navigation becomes rank and select over ' +
           'that string.',
-        detail: 'The encoding has two indexes hiding in it, and seeing them is what makes the navigation ' +
-          'obvious. The k-th one in the whole string is node k, because every node except the super-root is ' +
-          'pointed at by exactly one 1. And node v\'s children are described in the run that starts just past ' +
-          'the v-th zero, because the zeros terminate the blocks in the same order. Both facts are one ' +
-          'rank/select call.',
+        detail: [
+          'The encoding has two indexes hiding in it, and seeing them is what makes the navigation ' +
+            'obvious.',
+          'The k-th one in the whole string is node k, because every node except the super-root is ' +
+            'pointed at by exactly one 1.',
+          'Node v\'s children are described in the run that starts just past the v-th zero, because ' +
+            'the zeros terminate the blocks in the same order.',
+          'Both facts are one rank/select call.'
+        ],
         example: 'firstChild(v) = rank1(select0(v) + 1) + 1, and parent(v) = rank0(select1(v)).'
       },
       {
@@ -191,69 +199,92 @@
         formal: 'subtree size = (close − open + 1) / 2; depth = excess at that position',
         readAs: 'In a balanced-parentheses encoding, a subtree\'s size is how far apart its brackets sit, ' +
           'halved. Its depth is how many brackets are still open at that point.',
-        detail: 'BP and LOUDS encode the same tree in the same 2n bits and are good at different questions. ' +
-          'BP gives subtree size and depth directly, which LOUDS does not, and it is the encoding of choice ' +
-          'when those matter. The catch is that navigation needs `findClose`, and that is only constant time ' +
-          'with a range-min-max tree over the excess - the implementation here scans, and says so rather than ' +
-          'quoting a bound it did not build.',
+        detail: [
+          'BP and LOUDS encode the same tree in the same 2n bits, and are good at different ' +
+            'questions.',
+          'BP gives subtree size and depth directly, which LOUDS does not, and it is the encoding ' +
+            'of choice when those matter.',
+          'The catch is that navigation needs `findClose`, and that is only constant time with a ' +
+            'range-min-max tree over the excess.',
+          'The implementation here scans, and says so rather than quoting a bound it did not build.'
+        ],
         example: 'Exactly 2 bits per node, subtree size of the root = 5 000, and a findClose that scans.'
       },
       {
         term: 'Navigation becomes arithmetic, not dereferencing',
         plain: 'There are no pointers to follow; a child is a position computed from two table lookups.',
         formal: 'each of firstChild, nextSibling and parent is one select plus one rank',
-        detail: 'The consequence for real systems is about memory rather than instruction count. A pointer ' +
-          'chase is a cache miss whose address depends on the previous load; a rank/select pair reads two ' +
-          'small tables that stay resident and one word of the bit string. On a structure that no longer fits ' +
-          'in cache as pointers but does fit as bits, the succinct version is faster despite doing more ' +
-          'arithmetic - which is the whole reason to accept the complexity.',
+        detail: [
+          'The consequence for real systems is about memory rather than instruction count.',
+          'A pointer chase is a cache miss whose address depends on the previous load.',
+          'A rank/select pair reads two small tables that stay resident, and one word of the bit ' +
+            'string.',
+          'On a structure that no longer fits in cache as pointers but does fit as bits, the ' +
+            'succinct version is faster despite doing more arithmetic. That is the whole reason to ' +
+            'accept the complexity.'
+        ],
         example: '15 000 navigation calls over a 5 000-node tree cost 14 999 selects and 9 998 ranks and no pointer at all.'
       },
       {
         term: 'The values still have to go somewhere',
         plain: '2n bits encodes the *shape*; the payload at each node is a separate array.',
         formal: 'total = shape bits + n · sizeof(value)',
-        detail: 'This is the honest qualifier on the headline figure, and leaving it out is how the 177× ' +
-          'becomes a misrepresentation. The succinct encoding removes the *structure* cost - the child arrays ' +
-          'and the object headers - and does nothing about the data itself, which is stored in level order or ' +
-          'preorder and indexed by the same node numbers. When the payload dominates, the saving is ' +
-          'proportionally smaller and still worth having.',
+        detail: [
+          'This is the honest qualifier on the headline figure, and leaving it out is how the 177× ' +
+            'becomes a misrepresentation.',
+          'The succinct encoding removes the *structure* cost: the child arrays and the object ' +
+            'headers.',
+          'It does nothing about the data itself, which is stored in level order or preorder and ' +
+            'indexed by the same node numbers.',
+          'When the payload dominates, the saving is proportionally smaller and still worth having.'
+        ],
         example: '5 000 nodes: 1 358 bytes of shape and 40 000 bytes of 8-byte values, against 240 000 for pointers.'
       },
       {
         term: 'Wavelet trees: the same idea over an alphabet',
         plain: 'At each level record which half of the alphabet each symbol went to, and recurse on rank.',
         formal: 'n log₂ σ bits; access, rank and select in O(log σ) bit-vector operations',
-        readAs: 'A wavelet tree costs the same bits as storing the text — n characters times the bits per ' +
-          'character, σ being the alphabet size — and answers rank and select in a number of steps set ' +
-          'by the alphabet, not by the text length.',
-        detail: 'A bit vector answers rank and select for a two-symbol alphabet. A wavelet tree lifts that to ' +
-          'any alphabet by splitting it in half at each level, so a symbol\'s path through the levels *is* its ' +
-          'binary representation and the bit vectors record which way each occurrence went. The size is ' +
-          'exactly what an uncompressed array of log σ-bit symbols would cost, and the queries it answers are ' +
-          'far larger.',
+        readAs: 'A wavelet tree costs the same bits as storing the text: n characters times the ' +
+          'bits per character, σ being the alphabet size. It answers rank and select in a number ' +
+          'of steps set by the alphabet, not by the text length.',
+        detail: [
+          'A bit vector answers rank and select for a two-symbol alphabet.',
+          'A wavelet tree lifts that to any alphabet by splitting it in half at each level.',
+          'A symbol\'s path through the levels *is* its binary representation, and the bit vectors ' +
+            'record which way each occurrence went.',
+          'The size is exactly what an uncompressed array of log σ-bit symbols would cost, and the ' +
+            'queries it answers are far larger.'
+        ],
         example: '4 000 symbols over a 256-letter alphabet: exactly 8 bits per symbol, which is log₂ 256.'
       },
       {
         term: 'Range quantiles for free',
         plain: 'The k-th smallest symbol in a range is one descent, counting how many went left at each level.',
         formal: 'at each level, compare k against the number of zeros in the mapped range',
-        detail: 'This is the query that justifies the structure. The same descent that answers access also ' +
-          'answers "the median of positions 400 to 900", because the bit vector at each level lets the range ' +
-          'be mapped down into the correct half in O(1). It is the third structure in this platform to answer ' +
-          'a range order statistic - after M08\'s merge-sort tree and 9.3\'s persistent segment tree - and it ' +
-          'is the one that also stores the sequence.',
+        detail: [
+          'This is the query that justifies the structure.',
+          'The same descent that answers access also answers "the median of positions 400 to 900". ' +
+            'The bit vector at each level lets the range be mapped down into the correct half in ' +
+            'O(1).',
+          'It is the third structure in this platform to answer a range order statistic, after ' +
+            'M08\'s merge-sort tree and 9.3\'s persistent segment tree.',
+          'It is the one that also stores the sequence.'
+        ],
         example: '16 rank calls per range-quantile query over 4 000 symbols: two per level, eight levels.'
       },
       {
         term: 'Where succinct actually pays',
         plain: 'When the structure has to be resident and the pointer version does not fit.',
         formal: 'the trade is instruction count against cache and memory footprint',
-        detail: 'Succinct structures are not faster in a microbenchmark on a small input; they do more work per ' +
-          'operation and win only when the alternative is a cache miss or a disk read. That makes them a ' +
-          'systems decision rather than an algorithmic one: they are what genome indexes, full-text search ' +
-          'engines and on-device dictionaries are built from, and they are the wrong choice for a tree of ' +
-          'five thousand nodes that was never going to be a problem.',
+        detail: [
+          'Succinct structures are not faster in a microbenchmark on a small input.',
+          'They do more work per operation, and win only when the alternative is a cache miss or a ' +
+            'disk read.',
+          'That makes them a systems decision rather than an algorithmic one.',
+          'They are what genome indexes, full-text search engines and on-device dictionaries are ' +
+            'built from. They are the wrong choice for a tree of five thousand nodes that was ' +
+            'never going to be a problem.'
+        ],
         example: 'The 177× applies to the shape; it becomes decisive at the scale where 240 MB and 1.4 MB differ.'
       }
     ],
