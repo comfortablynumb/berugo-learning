@@ -26,17 +26,17 @@
       sectionId: SECTION_ID,
       orientation: [
         'An array heap cannot merge. Two heaps of n and m elements have to be concatenated and ' +
-          'rebuilt, which is O(n + m) — and if merging is something your program does, that is the ' +
+          'rebuilt, which is O(n + m). If merging is something your program does, that is the ' +
           'operation the structure has to be chosen for.',
         'The mergeable families make meld the primitive and derive everything else from it: insert ' +
           'is melding a singleton, and pop is melding the root\'s children. A leftist heap keeps a ' +
           'null-path length per node so the right spine stays under log₂(n + 1), and meld walks only ' +
           'that spine. A skew heap throws the field away, swaps its children unconditionally, and ' +
           'gets the same bound amortised.',
-        'A binomial heap takes a different route: a forest of trees of size 2^k, one per set bit of ' +
-          'the element count. Merging two of them is adding two binary numbers, carries and all — ' +
-          'which is also why insertion is O(1) amortised, by the same argument the binary counter ' +
-          'uses in M01.3.'
+        'A binomial heap takes a different route: a forest of trees of size 2^k, one per set bit ' +
+          'of the element count. Merging two of them is adding two binary numbers, carries and ' +
+          'all. That is also why insertion is O(1) amortised, by the same argument the binary ' +
+          'counter uses in M01.3.'
       ],
       demo: { title: 'Interactive demo — meld as the primitive', markup: root.MergeableHeapsTemplate.render() },
       diagram: {
@@ -52,8 +52,8 @@
         ].join('\n')
       },
       insight: 'Once meld is the primitive, insert is "meld a singleton" and pop is "meld the ' +
-        'children". Structures with one primitive are the ones you can still write correctly a year ' +
-        'later — which is the real argument for a leftist heap over a binomial one, since the ' +
+        'children". Structures with one primitive are the ones you can still write correctly a ' +
+        'year later. That is the real argument for a leftist heap over a binomial one: the ' +
         'binomial forest needs carry bookkeeping that the leftist heap simply does not have.'
     };
   }

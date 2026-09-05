@@ -470,12 +470,15 @@
         },
         plain: 'Make merging the one operation, and insert and pop fall out of it in a line each.',
         formal: 'insert = meld(h, singleton); pop = meld(left, right)',
-        detail: 'An array heap treats insert and extract as primitives and cannot merge at all. The ' +
-          'mergeable families invert that: meld is the only structural operation, insert melds a ' +
-          'one-node heap, and pop drops the root and melds its two children. There is no other ' +
-          'structural code in a leftist heap — no sift, no rebalance, no consolidation — which is ' +
-          'why it is the mergeable heap you can still write correctly from memory. Structures with ' +
-          'one primitive are the ones that survive contact with a deadline.',
+        detail: [
+          'An array heap treats insert and extract as primitives and cannot merge at all.',
+          'The mergeable families invert that. Meld is the only structural operation, insert melds ' +
+            'a one-node heap, and pop drops the root and melds its two children.',
+          'There is no other structural code in a leftist heap: no sift, no rebalance, no ' +
+            'consolidation. That is why it is the mergeable heap you can still write correctly ' +
+            'from memory.',
+          'Structures with one primitive are the ones that survive contact with a deadline.'
+        ],
         example: 'A complete leftist heap is about forty lines, and thirty of them are meld.'
       },
       {
@@ -484,25 +487,32 @@
         formal: 'npl(node) = 1 + min(npl(left), npl(right))',
         readAs: 'A node\'s null path length is one more than the shorter of its two children\'s. Keeping the ' +
           'shorter side on the right is what stops a leftist heap degenerating into a list.',
-        detail: 'The field measures how far you must walk to fall out of the tree, taking the shortest ' +
-          'route. Insisting that npl(left) ≥ npl(right) forces the short paths to the right, which ' +
-          'means the right spine is the shortest root-to-null path in the tree and therefore has ' +
-          'length at most log₂(n + 1). Since meld only ever walks right spines, that bound is the ' +
-          'operation cost. The tree itself is allowed to be wildly lopsided — a leftist heap of ' +
-          '100 000 elements measured height 33 with a right spine of 13, and both numbers are fine.',
+        detail: [
+          'The field measures how far you must walk to fall out of the tree, taking the shortest ' +
+            'route.',
+          'Insisting that npl(left) ≥ npl(right) forces the short paths to the right. The right ' +
+            'spine is then the shortest root-to-null path in the tree, and therefore has length at ' +
+            'most log₂(n + 1).',
+          'Since meld only ever walks right spines, that bound is the operation cost.',
+          'The tree itself is allowed to be wildly lopsided. A leftist heap of 100 000 elements ' +
+            'measured height 33 with a right spine of 13, and both numbers are fine.'
+        ],
         example: 'At n = 100 000 the right spine measured 13 against a bound of 16, while the tree was 33 deep.'
       },
       {
         term: 'Skew heaps',
         plain: 'Drop the field and the rule; swap the children after every meld. The bound survives, amortised.',
         formal: 'no metadata, O(log n) amortised',
-        detail: 'A skew heap is the self-adjusting version of a leftist heap, standing in the same ' +
-          'relation to it as a splay tree does to an AVL tree: no stored field, no invariant to ' +
-          'maintain, and a bound that holds on average over a sequence rather than on every ' +
-          'operation. The unconditional swap is what keeps the right spine from growing, and it is ' +
-          'not free — measured over 100 000 pushes a skew heap performed 1 044 536 child swaps ' +
-          'against a leftist heap\'s 74 364, and ended with a longer spine. What it buys is a node ' +
-          'with nothing on it but a key and two pointers.',
+        detail: [
+          'A skew heap is the self-adjusting version of a leftist heap, standing in the same ' +
+            'relation to it as a splay tree does to an AVL tree.',
+          'There is no stored field, no invariant to maintain, and a bound that holds on average ' +
+            'over a sequence rather than on every operation.',
+          'The unconditional swap is what keeps the right spine from growing, and it is not free. ' +
+            'Measured over 100 000 pushes a skew heap performed 1 044 536 child swaps against a ' +
+            'leftist heap\'s 74 364, and ended with a longer spine.',
+          'What it buys is a node with nothing on it but a key and two pointers.'
+        ],
         example: 'Over 100 000 pushes: 74 364 child swaps for leftist, 1 044 536 for skew.'
       },
       {
@@ -511,11 +521,14 @@
         formal: 'B_k = two B_(k−1) linked; |B_k| = 2^k',
         readAs: 'A binomial tree of order k is two trees of order k−1 joined at the root, so it holds exactly ' +
           '2 to the power of k nodes. The bars mean "the size of".',
-        detail: 'The definition is recursive and the consequences are all arithmetic. A binomial tree ' +
-          'of order k has exactly 2^k nodes, height k, and a root with exactly k children whose ' +
-          'orders are k − 1, k − 2, …, 0. The name comes from the level sizes, which are the binomial ' +
-          'coefficients. Two trees of the same order link into one of the next order in constant time ' +
-          'by comparing the roots — that single operation is everything the structure does.',
+        detail: [
+          'The definition is recursive and the consequences are all arithmetic.',
+          'A binomial tree of order k has exactly 2^k nodes, height k, and a root with exactly k ' +
+            'children whose orders are k − 1, k − 2, …, 0.',
+          'The name comes from the level sizes, which are the binomial coefficients.',
+          'Two trees of the same order link into one of the next order in constant time by ' +
+            'comparing the roots. That single operation is everything the structure does.'
+        ],
         example: 'A B₃ holds 8 nodes, is 3 deep, and its root has children of order 2, 1 and 0.'
       },
       {
@@ -524,50 +537,61 @@
         formal: 'n = Σ 2^k over the tree orders present',
         readAs: 'The trees a binomial heap holds are exactly the 1 bits of n written in binary: n nodes ' +
           'total, split into powers of two. Merging two heaps is binary addition, carries and all.',
-        detail: 'This is the reading that makes the whole family obvious rather than clever. Since ' +
-          'each tree holds a power of two and no order repeats, the multiset of orders is the binary ' +
-          'expansion of the size — and every operation is arithmetic on that number. Inserting is ' +
-          'adding one; merging two heaps is adding two numbers; and a carry is literally two trees of ' +
-          'the same order linking into one of the next. The demo prints the size in binary next to ' +
-          'the forest for exactly this reason.',
+        detail: [
+          'This is the reading that makes the whole family obvious rather than clever.',
+          'Since each tree holds a power of two and no order repeats, the multiset of orders is ' +
+            'the binary expansion of the size. Every operation is arithmetic on that number.',
+          'Inserting is adding one, merging two heaps is adding two numbers, and a carry is ' +
+            'literally two trees of the same order linking into one of the next.',
+          'The demo prints the size in binary next to the forest for exactly this reason.'
+        ],
         example: 'A heap of 100 000 elements is 11000011010100000 in binary, and holds 6 trees.'
       },
       {
         term: 'Merge is binary addition',
         plain: 'Walk the orders from the bottom, linking two trees of equal order into one of the next. The carry propagates.',
         formal: 'O(log n) orders, each carrying at most once',
-        detail: 'Because there are only log n orders and each one produces at most one carry, the ' +
-          'merge is O(log n) worst case — the same argument that makes adding two binary numbers ' +
-          'linear in their length. Insertion is the special case of adding 1, and its amortised O(1) ' +
-          'cost is the binary-counter argument from M01.3: a long carry chain is rare in exactly the ' +
-          'proportion that makes the average constant. Extract-min is the interesting one: removing ' +
-          'a root of order k releases k subtrees of every smaller order, which is one more heap to ' +
-          'merge in.',
+        detail: [
+          'Because there are only log n orders and each one produces at most one carry, the merge ' +
+            'is O(log n) worst case. It is the same argument that makes adding two binary numbers ' +
+            'linear in their length.',
+          'Insertion is the special case of adding 1, and its amortised O(1) cost is the ' +
+            'binary-counter argument from M01.3. A long carry chain is rare in exactly the ' +
+            'proportion that makes the average constant.',
+          'Extract-min is the interesting one. Removing a root of order k releases k subtrees of ' +
+            'every smaller order, which is one more heap to merge in.'
+        ],
         example: 'Merging a heap of 3 (011) with a heap of 1 (001) carries twice and yields a single B₂.'
       },
       {
         term: 'What an array heap cannot do',
         plain: 'Melding two array heaps is O(n + m): concatenate and rebuild. There is no shortcut.',
         formal: 'no structure to reuse, so the build is the meld',
-        detail: 'The implicit representation is what makes the array heap fast and it is exactly what ' +
-          'makes merging impossible to do cheaply: two dense arrays cannot be joined without moving ' +
-          'one of them, and once moved the heap property has to be re-established from scratch. That ' +
-          'is a linear operation where the mergeable families are logarithmic, and it is the whole ' +
-          'reason those families exist. If your program never merges, the array heap is the right ' +
-          'answer and this section is background; if it merges in a loop, the asymptotics are on the ' +
-          'other side.',
+        detail: [
+          'The implicit representation is what makes the array heap fast, and it is exactly what ' +
+            'makes merging impossible to do cheaply.',
+          'Two dense arrays cannot be joined without moving one of them, and once moved the heap ' +
+            'property has to be re-established from scratch.',
+          'That is a linear operation where the mergeable families are logarithmic, and it is the ' +
+            'whole reason those families exist.',
+          'If your program never merges, the array heap is the right answer and this section is ' +
+            'background. If it merges in a loop, the asymptotics are on the other side.'
+        ],
         example: 'Folding 16 heaps of 1 000 elements: the array heap did 513 212 comparisons against the leftist heap\'s 222 679.'
       },
       {
         term: 'Choosing between them',
         plain: 'Leftist for a worst-case bound and a field, skew for no field, binomial when the forest reading helps.',
         formal: 'all three are O(log n) per operation',
-        detail: 'They are close enough that the decision is usually about code rather than cost. A ' +
-          'leftist heap gives a worst-case bound for one integer per node and about forty lines. A ' +
-          'skew heap gives the same bound amortised for nothing per node and about thirty lines, at ' +
-          'the price of far more pointer writing. A binomial heap is more code than either and earns ' +
-          'it when the binary-counter structure is doing something for you — as it does in a ' +
-          'Fibonacci heap, which is a binomial heap with the consolidation deferred.',
+        detail: [
+          'They are close enough that the decision is usually about code rather than cost.',
+          'A leftist heap gives a worst-case bound for one integer per node and about forty lines.',
+          'A skew heap gives the same bound amortised for nothing per node and about thirty lines, ' +
+            'at the price of far more pointer writing.',
+          'A binomial heap is more code than either, and earns it when the binary-counter ' +
+            'structure is doing something for you. It does exactly that in a Fibonacci heap, which ' +
+            'is a binomial heap with the consolidation deferred.'
+        ],
         example: 'The Fibonacci heap of the next section is a binomial heap that puts off the carrying until it must.'
       }
     ]
