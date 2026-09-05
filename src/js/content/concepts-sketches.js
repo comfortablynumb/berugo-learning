@@ -23,12 +23,15 @@
         readAs: 'If the key really is in the set the filter always says yes — no false negatives, ever. The ' +
           'reverse does not follow: a yes does not prove membership, and ⇏ is exactly that "does not ' +
           'imply".',
-        detail: 'The asymmetry is the entire structure. Adding a key only ever turns bits on, so if any ' +
-          'of the k bits a key tests is clear, that key was definitely never added — the filter has ' +
-          'found positive evidence of absence. A set bit carries no such evidence, because any of the ' +
-          'other keys could have set it. Every use of a Bloom filter has to be arranged so that the ' +
-          'cheap answer is the "no" and the expensive path is only taken on a "maybe", which is why ' +
-          'it works in front of a disk read and not in place of one.',
+        detail: [
+          'The asymmetry is the entire structure.',
+          'Adding a key only ever turns bits on, so if any of the k bits a key tests is clear, that ' +
+            'key was definitely never added. The filter has found positive evidence of absence.',
+          'A set bit carries no such evidence, because any of the other keys could have set it.',
+          'Every use of a Bloom filter has to be arranged so that the cheap answer is the "no" and ' +
+            'the expensive path is only taken on a "maybe". That is why it works in front of a ' +
+            'disk read and not in place of one.'
+        ],
         example: '20 000 keys checked against the filter that holds them: 0 false negatives, always.'
       },
       {
@@ -38,12 +41,15 @@
         readAs: 'Bits per key, given the false-positive rate p you want. About 1.44 bits for every halving of ' +
           'the rate — so 1% costs roughly 9.6 bits per key and 0.1% costs 14.4, whatever the key ' +
           'actually is.',
-        detail: 'Bits per key depends only on the target error rate, never on the keys themselves: a ' +
-          '1% filter costs 9.59 bits per key whether the keys are three characters or three kilobytes, ' +
-          'because only a hash of each key is ever consulted. That is what makes the structure so ' +
-          'attractive for long identifiers — URLs, content hashes, file paths — and it is also the ' +
-          'source of the standing 1.44 factor: an information-theoretic optimum would need ' +
-          'log₂(1/p) bits and a Bloom filter always pays 44% more.',
+        detail: [
+          'Bits per key depends only on the target error rate, never on the keys themselves.',
+          'A 1% filter costs 9.59 bits per key whether the keys are three characters or three ' +
+            'kilobytes, because only a hash of each key is ever consulted.',
+          'That is what makes the structure so attractive for long identifiers: URLs, content ' +
+            'hashes, file paths.',
+          'It is also the source of the standing 1.44 factor. An information-theoretic optimum ' +
+            'would need log₂(1/p) bits, and a Bloom filter always pays 44% more.'
+        ],
         example: '1% costs 9.59 bits per key with k = 7; 0.1% costs 14.38 with k = 10.'
       },
       {
@@ -64,24 +70,32 @@
         readAs: 'The best number of hash functions is the bits-per-key figure times the natural log of 2, ' +
           'about 0.693. At that setting exactly half the bit array ends up set — which is the point of ' +
           'maximum information per bit.',
-        detail: 'Raising k gives a query more chances to find a clear bit, which lowers the error; it ' +
-          'also fills the array faster, which raises it. The two curves cross at k = (m/n) ln 2, and ' +
-          'that is precisely the k at which half the array is set — a memorable check, because a ' +
-          'correctly sized filter measured at capacity always reads about 50% full. Being wrong about ' +
-          'k is forgiving: the curve is flat near the optimum, and k = 1 or k = 12 in a filter sized ' +
-          'for 7 costs error but never correctness.',
+        detail: [
+          'Raising k gives a query more chances to find a clear bit, which lowers the error. It ' +
+            'also fills the array faster, which raises it.',
+          'The two curves cross at k = (m/n) ln 2, and that is precisely the k at which half the ' +
+            'array is set.',
+          'It is a memorable check, because a correctly sized filter measured at capacity always ' +
+            'reads about 50% full.',
+          'Being wrong about k is forgiving. The curve is flat near the optimum, and k = 1 or ' +
+            'k = 12 in a filter sized for 7 costs error but never correctness.'
+        ],
         example: 'At the sized n the measured fill is 51.9% — the optimum is a half-full array.'
       },
       {
         term: 'Two hashes are enough',
         plain: 'g_i(x) = h₁(x) + i·h₂(x) behaves like k independent hashes for the error rate.',
         formal: 'Kirsch-Mitzenmacher: the asymptotic false-positive rate is unchanged',
-        detail: 'Computing k independent hashes of every key would make the filter k times more ' +
-          'expensive to use, and it is unnecessary: a linear combination of two independent hashes ' +
-          'gives an indistinguishable false-positive rate. The implementation here adds an i² term ' +
-          'because h₂ can share a factor with m and then the sequence cycles early, revisiting the ' +
-          'same bits. The trick does not transfer to every sketch — a count-min sketch built the same ' +
-          'way breaks, because its guarantee needs the rows to be genuinely independent.',
+        detail: [
+          'Computing k independent hashes of every key would make the filter k times more ' +
+            'expensive to use, and it is unnecessary.',
+          'A linear combination of two independent hashes gives an indistinguishable ' +
+            'false-positive rate.',
+          'The implementation here adds an i² term because h₂ can share a factor with m, and then ' +
+            'the sequence cycles early, revisiting the same bits.',
+          'The trick does not transfer to every sketch. A count-min sketch built the same way ' +
+            'breaks, because its guarantee needs the rows to be genuinely independent.'
+        ],
         example: 'One murmur3 with two seeds gives all 7 probe positions at 1% error.'
       },
       {
@@ -91,24 +105,30 @@
         readAs: 'The chance of a false positive after n insertions: one minus the chance a given bit is still ' +
           'clear, raised to the power of the number of hashes. It only ever rises as you add keys, ' +
           'which is why a filter has a capacity rather than a load factor.',
-        detail: 'A filter sized for 10 000 keys at 1% measures 1.010% at 10 000, 5.82% at 15 000 and ' +
-          '16.05% at 20 000. There is no discontinuity, no counter that crosses a line and no way for ' +
-          'the filter to notice: the predicted and measured curves agree the whole way, which is ' +
-          'exactly why the failure is invisible. The only thing that knows is the insert counter, and ' +
-          'that has to be exported deliberately — a filter that only reports yes and no cannot report ' +
-          'this at all.',
+        detail: [
+          'A filter sized for 10 000 keys at 1% measures 1.010% at 10 000, 5.82% at 15 000 and ' +
+            '16.05% at 20 000.',
+          'There is no discontinuity, no counter that crosses a line and no way for the filter to ' +
+            'notice. The predicted and measured curves agree the whole way, which is exactly why ' +
+            'the failure is invisible.',
+          'The only thing that knows is the insert counter, and that has to be exported ' +
+            'deliberately. A filter that only reports yes and no cannot report this at all.'
+        ],
         example: 'At 2n the filter that promised 1% measures 16.05%, and reports nothing.'
       },
       {
         term: 'No deletion, ever',
         plain: 'Clearing a bit may remove a key that was relying on it, which is a false negative.',
         formal: 'bits are shared, so clearing is not the inverse of setting',
-        detail: 'A bit set by "apple" may also be one of the bits "banana" tests, so clearing it on ' +
-          'behalf of "apple" makes "banana" disappear. There is no way to tell from the array which ' +
-          'keys depend on a bit, because keys are not stored — that is the whole economy of the ' +
-          'structure. The consequences are architectural: a Bloom filter cannot model a set that ' +
-          'shrinks, so anything with eviction, expiry or tenancy changes needs a counting filter, a ' +
-          'cuckoo filter, or a periodic rebuild from the authoritative source.',
+        detail: [
+          'A bit set by "apple" may also be one of the bits "banana" tests, so clearing it on ' +
+            'behalf of "apple" makes "banana" disappear.',
+          'There is no way to tell from the array which keys depend on a bit, because keys are not ' +
+            'stored. That is the whole economy of the structure.',
+          'The consequences are architectural. A Bloom filter cannot model a set that shrinks.',
+          'Anything with eviction, expiry or tenancy changes needs a counting filter, a cuckoo ' +
+            'filter, or a periodic rebuild from the authoritative source.'
+        ],
         example: 'The repair is a counting filter at four times the memory, or a rebuild.'
       },
       {
@@ -118,12 +138,15 @@
         readAs: 'Bitwise OR of two filters gives exactly the filter of the combined set. Bitwise AND does not ' +
           'give the intersection: a key can set its bits from A in one place and from B in another, and ' +
           'the AND keeps both.',
-        detail: 'OR works because a key\'s bits are set in the result exactly when they were set on ' +
-          'either side, which is what the union means. AND fails because a key absent from both sets ' +
-          'may still have each of its bits covered — bit 3 by a key on the left, bit 9 by a different ' +
-          'key on the right — so the intersection filter reports keys neither filter ever held. Both ' +
-          'operations also require identical m, k and seed: two filters built independently share no ' +
-          'bit positions and combining them produces noise.',
+        detail: [
+          'OR works because a key\'s bits are set in the result exactly when they were set on ' +
+            'either side, which is what the union means.',
+          'AND fails because a key absent from both sets may still have each of its bits covered. ' +
+            'Bit 3 comes from a key on the left, bit 9 from a different key on the right.',
+          'So the intersection filter reports keys neither filter ever held.',
+          'Both operations also require identical m, k and seed. Two filters built independently ' +
+            'share no bit positions, and combining them produces noise.'
+        ],
         example: 'Both operations need identical m, k and seed — otherwise the bits mean nothing.'
       },
       {
@@ -132,12 +155,15 @@
         formal: 'n̂ = −(m/k) · ln(1 − fill)',
         readAs: 'Estimate how many keys went in by looking at how full the bit array is. The hat on the n ' +
           'means "estimated", and the logarithm inverts the filling curve.',
-        detail: 'Counting the set bits and inverting the fill formula recovers the insert count to ' +
-          'within a fraction of a per cent — 99 905 recovered from a filter holding 100 000 keys. ' +
-          'It is not a substitute for the counter, because it needs a full scan of the array and it ' +
-          'degrades badly once the filter is nearly saturated, but it is the only way to audit a ' +
-          'filter you inherited: given the bytes and the parameters, you can tell whether the thing ' +
-          'is inside its design envelope without any access to the stream that filled it.',
+        detail: [
+          'Counting the set bits and inverting the fill formula recovers the insert count to ' +
+            'within a fraction of a per cent. A filter holding 100 000 keys reports 99 905.',
+          'It is not a substitute for the counter. It needs a full scan of the array, and it ' +
+            'degrades badly once the filter is nearly saturated.',
+          'But it is the only way to audit a filter you inherited. Given the bytes and the ' +
+            'parameters, you can tell whether the thing is inside its design envelope without any ' +
+            'access to the stream that filled it.'
+        ],
         example: 'A filter holding 100 000 keys reports 99 905 from its bits alone.'
       }
     ],

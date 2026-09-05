@@ -62,23 +62,23 @@
           'not proof of presence, because some other key may have set it, so a yes is only ever ' +
           '"probably".',
         'The sizing is two formulas and both are in the demo. For n keys at a target error p, ' +
-          'm = −n ln p / (ln 2)² bits and k = (m/n) ln 2 hashes; at p = 1% that is 9.59 bits per key ' +
-          'and 7 hashes, whatever the keys are and however long they are. The achieved error is ' +
-          '(1 − e^(−kn/m))^k, and the measured rate over 20 000 absent keys lands on it: 1.010% ' +
-          'against a predicted 1.004%.',
-        'The failure mode is not the false-positive rate. It is n. The curve does not stop at the n ' +
-          'you sized for and the filter has no idea it has passed it: at 1.5n the same filter measures ' +
-          '5.82% and at 2n it measures 16.05%, having promised 1%. There is no signal, no counter that ' +
-          'crosses a line, and no way to shrink it back — the only repair is to build a new one, which ' +
-          'means knowing the count you were not tracking.'
+          'm = −n ln p / (ln 2)² bits and k = (m/n) ln 2 hashes. At p = 1% that is 9.59 bits per ' +
+          'key and 7 hashes, whatever the keys are and however long they are. The achieved error ' +
+          'is (1 − e^(−kn/m))^k, and the measured rate over 20 000 absent keys lands on it: ' +
+          '1.010% against a predicted 1.004%.',
+        'The failure mode is not the false-positive rate. It is n. The curve does not stop at the ' +
+          'n you sized for, and the filter has no idea it has passed it. At 1.5n the same filter ' +
+          'measures 5.82% and at 2n it measures 16.05%, having promised 1%. There is no signal, ' +
+          'no counter that crosses a line, and no way to shrink it back. The only repair is to ' +
+          'build a new one, which means knowing the count you were not tracking.'
       ],
       demo: { title: 'Interactive demo — size it, fill it, then overfill it', markup: root.BloomFiltersTemplate.render() },
       diagram: diagram(),
       insight: 'The number to monitor is not the false-positive rate, which you cannot measure in ' +
         'production without the exact answer you built the filter to avoid. It is the insert count ' +
-        'against the n you sized for. Export that counter, alert on it, and the filter never surprises ' +
-        'you; leave it out and the first symptom is a downstream system doing twenty times the work ' +
-        'it was doing last month.'
+        'against the n you sized for. Export that counter, alert on it, and the filter never ' +
+        'surprises you. Leave it out and the first symptom is a downstream system doing twenty ' +
+        'times the work it was doing last month.'
     };
   }
 
