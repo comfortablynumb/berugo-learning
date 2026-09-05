@@ -12,12 +12,17 @@
         formal: 'Σ |suffix i| = n(n+1)/2',
         readAs: 'Add up the lengths of all n suffixes — n, then n−1, then n−2, down to 1 — and the total is ' +
           'n(n+1)/2, about half of n squared. That is why you never store the suffixes themselves.',
-        detail: 'The idea is obvious and the naive form is unusable: put every suffix into a trie ' +
-          'and substring search becomes a walk down. For a 2 000-character text that is two million ' +
-          'nodes, and for a genome it is not a structure, it is a joke. Compressing every ' +
-          'non-branching chain into one edge fixes the space — the compressed tree has at most 2n ' +
-          'nodes because there are n leaves and every internal node branches — but it does not fix ' +
-          'the construction, which is still quadratic if each suffix is inserted from the root.',
+        detail: [
+          'The idea is obvious and the naive form is unusable. Put every suffix into a trie and ' +
+            'substring search becomes a walk down.',
+          'For a 2 000-character text that is two million nodes, and for a genome it is not a ' +
+            'structure, it is a joke.',
+          'Compressing every non-branching chain into one edge fixes the space. The compressed ' +
+            'tree has at most 2n nodes, because there are n leaves and every internal node ' +
+            'branches.',
+          'It does not fix the construction, which is still quadratic if each suffix is inserted ' +
+            'from the root.'
+        ],
         example: 'banana has 21 suffix-trie nodes and 11 suffix-tree nodes.'
       },
       {
@@ -34,14 +39,17 @@
         },
         plain: 'Appending a character that occurs nowhere else makes every suffix end at its own leaf.',
         formal: 'no suffix is a prefix of another ⇒ leaves = n + 1',
-        readAs: 'Append a character that appears nowhere else and no suffix can be a prefix of another, so ' +
-          'every suffix gets its own leaf: n + 1 of them, counting the empty one.',
-        detail: 'Without it a suffix that is also a prefix of a longer suffix ends inside an edge, ' +
-          'with nothing to mark it — the tree is *implicit*, and questions like "how many times ' +
-          'does P occur" become wrong because counting leaves under a match point misses the ' +
-          'suffixes that have no leaf. The terminator costs one character and one leaf and makes ' +
-          'every suffix explicit. It also has to genuinely not occur in the text, which is worth ' +
-          'enforcing rather than assuming: a "$" in user input silently corrupts the tree.',
+        readAs: 'Append a character that appears nowhere else and no suffix can be a prefix of ' +
+          'another. Every suffix then gets its own leaf: n + 1 of them, counting the empty one.',
+        detail: [
+          'Without it a suffix that is also a prefix of a longer suffix ends inside an edge, with ' +
+            'nothing to mark it.',
+          'The tree is then *implicit*, and questions like "how many times does P occur" become ' +
+            'wrong. Counting leaves under a match point misses the suffixes that have no leaf.',
+          'The terminator costs one character and one leaf, and makes every suffix explicit.',
+          'It also has to genuinely not occur in the text, which is worth enforcing rather than ' +
+            'assuming: a "$" in user input silently corrupts the tree.'
+        ],
         example: 'banana$ gives 7 leaves for 7 suffixes; banana alone would give 4.'
       },
       {
@@ -51,25 +59,33 @@
         readAs: 'A leaf edge is stored as running to infinity rather than to a fixed position, so extending ' +
           'the text extends every leaf at once without touching any of them. The infinity is read as ' +
           '"however far we have got".',
-        detail: 'This is the first of Ukkonen\'s three tricks and the easiest to miss when reading ' +
-          'the algorithm, because it is a representation choice rather than a step. In the ' +
-          'phase-by-phase definition, every existing leaf must be extended by the new character; ' +
-          'storing the end index as a shared "current position" makes all of those extensions ' +
-          'happen for free, at once, by incrementing one variable. Without it the construction ' +
-          'does Θ(n) leaf updates per phase and is quadratic no matter what else is clever.',
+        detail: [
+          'This is the first of Ukkonen\'s three tricks and the easiest to miss when reading the ' +
+            'algorithm, because it is a representation choice rather than a step.',
+          'In the phase-by-phase definition, every existing leaf must be extended by the new ' +
+            'character.',
+          'Storing the end index as a shared "current position" makes all of those extensions ' +
+            'happen for free, at once, by incrementing one variable.',
+          'Without it the construction does Θ(n) leaf updates per phase, and is quadratic no ' +
+            'matter what else is clever.'
+        ],
         example: 'one variable increment extends every leaf, so rule 1 costs nothing per phase.'
       },
       {
         term: 'The active point',
         plain: 'Where the last insertion happened: a node, an edge and a distance along it.',
         formal: '(activeNode, activeEdge, activeLength)',
-        detail: 'The naive construction restarts at the root for every suffix of every prefix, which ' +
-          'is where the second factor of n comes from. The active point is the memory that removes ' +
-          'it: the next insertion begins where the last one ended. Keeping it correct is most of ' +
-          'the implementation work, because it has to be adjusted after every rule application and ' +
-          'the adjustment differs depending on whether the active node is the root. It is also ' +
-          'exactly what a step-through visualisation should show, because the three numbers *are* ' +
-          'the algorithm\'s state.',
+        detail: [
+          'The naive construction restarts at the root for every suffix of every prefix, which is ' +
+            'where the second factor of n comes from.',
+          'The active point is the memory that removes it: the next insertion begins where the ' +
+            'last one ended.',
+          'Keeping it correct is most of the implementation work. It has to be adjusted after ' +
+            'every rule application, and the adjustment differs depending on whether the active ' +
+            'node is the root.',
+          'It is also exactly what a step-through visualisation should show, because the three ' +
+            'numbers *are* the algorithm\'s state.'
+        ],
         example: 'after phase 6 of banana$ the active point is (root, "a", 3) with remainder 3.'
       },
       {
@@ -79,25 +95,31 @@
         readAs: 'A suffix link takes the node spelling some string with its first character chopped off. ' +
           'Following one is how the construction jumps to where it needs to work next instead of ' +
           'walking back down from the root.',
-        detail: 'After splitting at some point inside suffix i, the corresponding point in suffix ' +
-          'i + 1 is the same string with its first character removed — and the suffix link goes ' +
-          'straight there instead of walking down from the root again. Every internal node created ' +
-          'during a phase gets a link to the next internal node created in that phase, which is why ' +
-          'they can be built in the same pass that uses them. They are also what makes the tree ' +
-          'more than a set of answers: algorithms like matching statistics and Ukkonen\'s own ' +
-          'analysis are stated in terms of the links, not the edges.',
+        detail: [
+          'After splitting at some point inside suffix i, the corresponding point in suffix i + 1 ' +
+            'is the same string with its first character removed.',
+          'The suffix link goes straight there, instead of walking down from the root again.',
+          'Every internal node created during a phase gets a link to the next internal node ' +
+            'created in that phase. That is why they can be built in the same pass that uses them.',
+          'They are also what makes the tree more than a set of answers. Algorithms like matching ' +
+            'statistics and Ukkonen\'s own analysis are stated in terms of the links, not the ' +
+            'edges.'
+        ],
         example: 'the node for "ana" links to the node for "na", which links to the root.'
       },
       {
         term: 'The remainder',
         plain: 'How many suffixes the tree still owes.',
         formal: 'incremented once per phase, decremented once per rule-2 application',
-        detail: 'Each phase adds a character and therefore owes one more suffix. Rule 2 — split an ' +
-          'edge or hang a new leaf — pays one back. Rule 3 — the character is already on the edge — ' +
-          'ends the phase immediately and leaves the debt outstanding, because those suffixes are ' +
-          'present implicitly, inside an edge, with no leaf of their own. Watching the remainder ' +
-          'rise through banana\'s repeated "ana" and collapse to zero when the terminator arrives ' +
-          'is the clearest way to see what "implicit tree" means.',
+        detail: [
+          'Each phase adds a character and therefore owes one more suffix.',
+          'Rule 2 — split an edge or hang a new leaf — pays one back.',
+          'Rule 3 — the character is already on the edge — ends the phase immediately and leaves ' +
+            'the debt outstanding. Those suffixes are present implicitly, inside an edge, with no ' +
+            'leaf of their own.',
+          'Watching the remainder rise through banana\'s repeated "ana" and collapse to zero when ' +
+            'the terminator arrives is the clearest way to see what "implicit tree" means.'
+        ],
         example: 'banana$: the remainder climbs to 3 by phase 6 and drops to 0 at the terminator.'
       },
       {
@@ -106,24 +128,31 @@
         formal: 'count(P) = leaves below the locus of P',
         readAs: 'How many times a pattern occurs is how many leaves hang under the node where the pattern ' +
           'runs out — each leaf being one starting position in the text.',
-        detail: 'Every leaf is a suffix start position, and every suffix starting with P corresponds ' +
-          'to an occurrence of P, so the number of occurrences is the number of leaves below the ' +
-          'point where the pattern walk ends. That makes existence O(m) and counting O(m + occ) ' +
-          'unless the leaf counts are precomputed, in which case counting is O(m) too. The same ' +
-          'walk answers "where" by listing those leaves, which is the query a plain index of ' +
-          'positions would need to have been built for in advance.',
+        detail: [
+          'Every leaf is a suffix start position, and every suffix starting with P corresponds to ' +
+            'an occurrence of P.',
+          'So the number of occurrences is the number of leaves below the point where the pattern ' +
+            'walk ends.',
+          'That makes existence O(m) and counting O(m + occ), unless the leaf counts are ' +
+            'precomputed, in which case counting is O(m) too.',
+          'The same walk answers "where" by listing those leaves, which is the query a plain index ' +
+            'of positions would need to have been built for in advance.'
+        ],
         example: 'in banana, "ana" ends above 2 leaves and occurs at positions 1 and 3.'
       },
       {
         term: 'Twenty bytes was never the number',
         plain: 'Measured node counts put a straightforward implementation near 40 bytes per character.',
         formal: 'nodes/char × bytes/node, both measured rather than quoted',
-        detail: 'The figure repeated in textbooks is Kurtz\'s heavily engineered 20 bytes per input ' +
-          'character, which took a paper to achieve. A direct implementation stores start, end, ' +
-          'suffix link and parent per node and holds 1.5 to 2.0 nodes per character, which lands ' +
-          'between 35 and 48. A suffix array plus an LCP array answers the same questions in 9. ' +
+        detail: [
+          'The figure repeated in textbooks is Kurtz\'s heavily engineered 20 bytes per input ' +
+            'character, which took a paper to achieve.',
+          'A direct implementation stores start, end, suffix link and parent per node, and holds ' +
+            '1.5 to 2.0 nodes per character. That lands between 35 and 48.',
+          'A suffix array plus an LCP array answers the same questions in 9.',
           'Quoting the engineered constant while writing the direct implementation is how a design ' +
-          'ends up with a structure five times the size it was budgeted for.',
+            'ends up with a structure five times the size it was budgeted for.'
+        ],
         example: 'DNA: 1.76 nodes per character, 42.3 bytes per character against the array\'s 9.'
       }
     ],

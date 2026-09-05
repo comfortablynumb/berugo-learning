@@ -29,18 +29,18 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'A suffix trie holds every suffix of a text, so it answers "does P occur" in O(|P|) whatever ' +
-          'the text length — and costs n(n+1)/2 nodes, which for 2 000 characters is two million. ' +
-          'Compressing every non-branching chain into one edge brings that to under 2n nodes, and a ' +
-          'unique terminator makes every suffix end at its own leaf so nothing is hidden inside an ' +
-          'edge.',
+        'A suffix trie holds every suffix of a text, so it answers "does P occur" in O(|P|) ' +
+          'whatever the text length. It costs n(n+1)/2 nodes, which for 2 000 characters is two ' +
+          'million. Compressing every non-branching chain into one edge brings that to under 2n ' +
+          'nodes. A unique terminator makes every suffix end at its own leaf, so nothing is ' +
+          'hidden inside an edge.',
         'Ukkonen builds it online, left to right, in linear time, out of three ideas that only work ' +
           'together. Leaves carry an open end index, so extending the text extends every leaf for ' +
           'free. The active point remembers where the last insertion happened so the next one does ' +
           'not restart at the root. Suffix links connect a point in suffix i to the same point in ' +
           'suffix i + 1, so the walk down is never repeated.',
         'The remainder is the counter to watch. Each phase adds a character and owes one more ' +
-          'suffix; rule 2 splits an edge and pays one back, rule 3 finds the character already ' +
+          'suffix. Rule 2 splits an edge and pays one back; rule 3 finds the character already ' +
           'present and ends the phase with the debt still outstanding. A tree with a positive ' +
           'remainder is *implicit* — some suffix has no leaf yet — which is exactly what the ' +
           'terminator fixes at the end.'
