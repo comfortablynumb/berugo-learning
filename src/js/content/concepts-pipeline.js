@@ -307,12 +307,15 @@
         },
         plain: 'The value exists; it is just not in the register file yet.',
         formal: 'a result is computed at the end of execute and written back two stages later',
-        detail: 'A machine that only reads the register file gets a stale value for any '
-          + 'instruction whose producer is still in flight, which on a five-stage pipeline '
-          + 'means the two instructions ahead of it. There are only two possible fixes: wait '
-          + 'until the value arrives, or fetch it from the latch it is currently sitting in. '
-          + 'The second is forwarding, it costs two multiplexers and some comparators, and it '
-          + 'removes almost every stall a dependency chain would otherwise pay.',
+        detail: [
+          'A machine that only reads the register file gets a stale value for any instruction '
+            + 'whose producer is still in flight.',
+          'On a five-stage pipeline that means the two instructions ahead of it.',
+          'There are only two possible fixes: wait until the value arrives, or fetch it from the '
+            + 'latch it is currently sitting in.',
+          'The second is forwarding. It costs two multiplexers and some comparators, and it '
+            + 'removes almost every stall a dependency chain would otherwise pay.'
+        ],
         example: 'Without forwarding a four-instruction dependency chain takes 15 cycles; with '
           + 'it, 9.'
       },
@@ -320,11 +323,14 @@
         term: 'Read-after-write is the only kind that can happen in order',
         plain: 'The other two need instructions to finish out of order.',
         formal: 'WAR needs a later write before an earlier read; WAW needs out-of-order completion',
-        detail: 'Write-after-read cannot happen because reads happen in program order and '
-          + 'before any later instruction\'s write; write-after-write cannot happen because '
-          + 'write-back is in order. Both reappear the moment M36 lets instructions complete '
-          + 'out of order, and register renaming exists precisely to remove them — they are not '
-          + 'real dependences on data, only on the reuse of a register name.',
+        detail: [
+          'Write-after-read cannot happen, because reads happen in program order and before any '
+            + 'later instruction\'s write.',
+          'Write-after-write cannot happen, because write-back is in order.',
+          'Both reappear the moment M36 lets instructions complete out of order, and register '
+            + 'renaming exists precisely to remove them.',
+          'They are not real dependences on data, only on the reuse of a register name.'
+        ],
         example: 'Three of the four dependence kinds are impossible here, and all three become '
           + 'hardware structures in the next milestone.'
       },
@@ -332,12 +338,16 @@
         term: 'The most recent producer wins, and getting that backwards is the classic bug',
         plain: 'Check the EX/MEM latch before the MEM/WB one.',
         formal: 'two instructions ahead may both write the register you are reading',
-        detail: 'When two instructions in a row write the same register, the value you want is '
-          + 'the newer one — the instruction one ahead, in EX/MEM — not the one two ahead in '
-          + 'MEM/WB. A unit that checks the latches in the other order produces a machine that '
-          + 'is correct on almost every program, because it needs two back-to-back writes to '
-          + 'the same register and then a read. Hand-written test programs rarely contain that '
-          + 'shape; register allocators produce it constantly.',
+        detail: [
+          'When two instructions in a row write the same register, the value you want is the '
+            + 'newer one.',
+          'That is the instruction one ahead, in EX/MEM, not the one two ahead in MEM/WB.',
+          'A unit that checks the latches in the other order produces a machine that is correct '
+            + 'on almost every program. The bug needs two back-to-back writes to the same '
+            + 'register and then a read.',
+          'Hand-written test programs rarely contain that shape; register allocators produce it '
+            + 'constantly.'
+        ],
         example: 'The naive order gets 4 instead of 14 on the double-hazard fixture, and 59 049 '
           + '235 instead of 37 on the array-maximum program.'
       },
@@ -345,11 +355,15 @@
         term: 'One hazard cannot be forwarded away at all',
         plain: 'A load\'s value does not exist until the end of the memory stage.',
         formal: 'load-use: the consumer stalls one cycle whatever the wiring',
-        detail: 'There is no wire to draw, because the value has not been produced when the '
-          + 'consumer needs it. That single unavoidable bubble is the reason instruction '
-          + 'scheduling exists as a compiler pass: the hardware cannot remove it, so software '
-          + 'fills it with something useful. Every load followed immediately by a use of what '
-          + 'it loaded costs a cycle on every in-order machine ever built.',
+        detail: [
+          'There is no wire to draw, because the value has not been produced when the consumer '
+            + 'needs it.',
+          'That single unavoidable bubble is the reason instruction scheduling exists as a '
+            + 'compiler pass.',
+          'The hardware cannot remove it, so software fills it with something useful.',
+          'Every load followed immediately by a use of what it loaded costs a cycle on every '
+            + 'in-order machine ever built.'
+        ],
         example: 'The load-use fixture takes 12 cycles with full forwarding and would take 11 '
           + 'if the stall could be removed.'
       },
@@ -357,10 +371,13 @@
         term: 'A compiler removes the stall by filling the slot, not by eliminating it',
         plain: 'Move an unrelated instruction between the load and its use.',
         formal: 'the same 12 cycles, retiring 8 instructions instead of 7',
-        detail: 'That is the honest version of what scheduling buys: the bubble is replaced by '
-          + 'work rather than deleted. It pays exactly when there is genuinely something else '
-          + 'to do, which is why scheduling gets harder in tight loops with short dependency '
-          + 'chains and why unrolling helps — it creates independent work to fill slots with.',
+        detail: [
+          'That is the honest version of what scheduling buys: the bubble is replaced by work '
+            + 'rather than deleted.',
+          'It pays exactly when there is genuinely something else to do.',
+          'That is why scheduling gets harder in tight loops with short dependency chains.',
+          'It is also why unrolling helps: it creates independent work to fill slots with.'
+        ],
         example: 'The scheduled fixture is one instruction longer than the load-use one and '
           + 'takes the same number of cycles.'
       },
@@ -368,11 +385,14 @@
         term: 'Forwarding is invisible in the answer and visible in the cycle count',
         plain: 'The program computes the same value either way.',
         formal: 'stalling and forwarding are both correct; only one is fast',
-        detail: 'That is what makes the double-hazard bug dangerous: an incorrect forwarding '
-          + 'unit is also invisible in the cycle count, and only wrong in the answer, and only '
-          + 'on programs with a particular shape. So the check that catches it cannot be a '
-          + 'performance measurement or a hand-written test — it has to be a differential '
-          + 'against a machine that computes the answer a different way.',
+        detail: [
+          'That is what makes the double-hazard bug dangerous.',
+          'An incorrect forwarding unit is also invisible in the cycle count, and only wrong in '
+            + 'the answer, and only on programs with a particular shape.',
+          'So the check that catches it cannot be a performance measurement or a hand-written '
+            + 'test.',
+          'It has to be a differential against a machine that computes the answer a different way.'
+        ],
         example: 'All three forwarding units produce 30 on the chain fixture; only the naive '
           + 'one is wrong on the double hazard.'
       },
@@ -380,11 +400,13 @@
         term: 'The provenance of an operand is worth displaying',
         plain: 'Register file, EX/MEM forward, MEM/WB forward, or a stall.',
         formal: 'each source operand has exactly one origin per execution',
-        detail: 'Forwarding is one of the few mechanisms that is genuinely hard to believe '
-          + 'until you can see an operand arriving from somewhere other than the register file. '
-          + 'Printing the origin per instruction turns it from a diagram into an observation, '
-          + 'and it also makes the load-use case obvious: it is the one where no origin is '
-          + 'available and the machine waits instead.',
+        detail: [
+          'Forwarding is one of the few mechanisms that is genuinely hard to believe until you '
+            + 'can see an operand arriving from somewhere other than the register file.',
+          'Printing the origin per instruction turns it from a diagram into an observation.',
+          'It also makes the load-use case obvious.',
+          'That is the one where no origin is available and the machine waits instead.'
+        ],
         example: 'In the double-hazard fixture, four of the operands come from a latch and one '
           + 'from the register file.'
       },
@@ -392,11 +414,15 @@
         term: 'A register file that writes early and reads late needs one path fewer',
         plain: 'Write in the first half of the cycle, read in the second.',
         formal: 'the MEM/WB case is then handled by the storage rather than by a forwarding path',
-        detail: 'That is why textbook diagrams disagree about whether the second forwarding '
-          + 'path exists: it depends on a timing decision inside the register file rather than '
-          + 'on the pipeline structure. It is the same trick as the split memory access in the '
-          + 'structural-hazard section — pipelining a resource in time instead of duplicating '
-          + 'it — and it costs timing margin rather than area.',
+        detail: [
+          'That is why textbook diagrams disagree about whether the second forwarding path '
+            + 'exists.',
+          'It depends on a timing decision inside the register file rather than on the pipeline '
+            + 'structure.',
+          'It is the same trick as the split memory access in the structural-hazard section: '
+            + 'pipelining a resource in time instead of duplicating it.',
+          'It costs timing margin rather than area.'
+        ],
         example: 'Both designs are correct and they differ only in where the multiplexer lives, '
           + 'which is a good reminder that a block diagram is not a specification.'
       }
