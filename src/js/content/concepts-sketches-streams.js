@@ -23,12 +23,16 @@
         readAs: 'The chance two sets share their smallest hash equals the fraction of their combined elements ' +
           'that they have in common. That single identity is what turns similarity into something you ' +
           'can sample.',
-        detail: 'Take the union of the two sets and hash every element. The smallest hash in the union ' +
-          'belongs to some element, and that element is equally likely to be any of them; the two ' +
-          'minima agree exactly when it lies in the intersection. So a single hash is a Bernoulli ' +
-          'trial with success probability equal to the Jaccard similarity, and averaging L of them ' +
-          'is an unbiased estimate with standard error 1/√L. Nothing about the sets\' sizes enters ' +
-          'the argument, which is why documents of wildly different lengths compare fine.',
+        detail: [
+          'Take the union of the two sets and hash every element.',
+          'The smallest hash in the union belongs to some element, and that element is equally ' +
+            'likely to be any of them. The two minima agree exactly when it lies in the ' +
+            'intersection.',
+          'So a single hash is a Bernoulli trial with success probability equal to the Jaccard ' +
+            'similarity. Averaging L of them is an unbiased estimate with standard error 1/√L.',
+          'Nothing about the sets\' sizes enters the argument, which is why documents of wildly ' +
+            'different lengths compare fine.'
+        ],
         example: 'L = 128 gives a standard error of 8.84%; the worst pair in the demo corpus is 10.34% out.'
       },
       {
@@ -37,12 +41,16 @@
         formal: 'shingles(t, k) = { t[i..i+k) : 0 ≤ i ≤ |t| − k }',
         readAs: 'Cut the text into every window of k consecutive characters. The square-then-round bracket ' +
           'means the window includes its start and excludes its end, and the colon reads "such that".',
-        detail: 'MinHash compares sets, so the first decision is what the set is, and it is a bigger ' +
-          'decision than the sketch parameters. A bag of words treats a reordering as identical; ' +
-          'five-character shingles do not, because reordering breaks the windows that spanned the ' +
-          'boundary. Short shingles make everything look similar and long ones make near-duplicates ' +
-          'look unrelated, so the width is a threshold in disguise and has to be tuned against the ' +
-          'same corpus as b and r.',
+        detail: [
+          'MinHash compares sets, so the first decision is what the set is, and it is a bigger ' +
+            'decision than the sketch parameters.',
+          'A bag of words treats a reordering as identical. Five-character shingles do not, because ' +
+            'reordering breaks the windows that spanned the boundary.',
+          'Short shingles make everything look similar and long ones make near-duplicates look ' +
+            'unrelated.',
+          'The width is a threshold in disguise, and it has to be tuned against the same corpus as ' +
+            'b and r.'
+        ],
         example: 'Five-character shingles over 60-word documents: 1 770 pairs, 11 above 50% similarity.'
       },
       {
@@ -63,24 +71,30 @@
         readAs: 'With b bands of r rows each, two items become candidates unless every band misses. The shape ' +
           'of that curve is an S: similar pairs almost always pass, dissimilar ones almost never, and b ' +
           'and r set where the step falls.',
-        detail: 'The curve is flat near zero, rises steeply, and flattens near one — which is exactly ' +
-          'the shape a threshold wants, except that it is a probability rather than a cut. Its steep ' +
-          'part sits near (1/b)^(1/r), and moving b and r moves it: 16 bands of 8 rows turns at ' +
-          '0.707 and 32 bands of 4 turns at 0.420, from the identical 128 hashes. Choosing the split ' +
-          'is choosing the retrieval policy, and doing it by picking a signature length first gets ' +
-          'the decision made by accident.',
+        detail: [
+          'The curve is flat near zero, rises steeply, and flattens near one. That is exactly the ' +
+            'shape a threshold wants, except that it is a probability rather than a cut.',
+          'Its steep part sits near (1/b)^(1/r), and moving b and r moves it. With 16 bands of 8 ' +
+            'rows the turn is at 0.707; with 32 bands of 4 it is at 0.420, from the identical 128 ' +
+            'hashes.',
+          'Choosing the split is choosing the retrieval policy, and doing it by picking a signature ' +
+            'length first gets the decision made by accident.'
+        ],
         example: '16 × 8 proposes 3 pairs of 1 770; 32 × 4 proposes 22. Same signature.'
       },
       {
         term: 'The split is the precision/recall dial',
         plain: 'More bands finds more true pairs and more false ones; fewer bands finds neither.',
         formal: 'recall and precision move in opposite directions along b',
-        detail: 'On the demo corpus with a 50% duplicate threshold, 8 bands of 16 rows proposes ' +
-          'nothing at all — perfect precision, zero recall — while 32 bands of 4 finds every true ' +
-          'pair and is wrong about half the time. Neither is correct in the abstract: the right split ' +
-          'is the one whose false-positive load the verification stage can afford, because every ' +
-          'candidate pair is normally checked exactly afterwards. That makes the choice a question ' +
-          'about the downstream cost rather than about hashing.',
+        detail: [
+          'On the demo corpus with a 50% duplicate threshold, 8 bands of 16 rows proposes nothing ' +
+            'at all — perfect precision, zero recall.',
+          'With 32 bands of 4 it finds every true pair and is wrong about half the time.',
+          'Neither is correct in the abstract. The right split is the one whose false-positive load ' +
+            'the verification stage can afford, because every candidate pair is normally checked ' +
+            'exactly afterwards.',
+          'That makes the choice a question about the downstream cost rather than about hashing.'
+        ],
         example: '8 × 16: recall 0%. 16 × 8: recall 27%, precision 100%. 32 × 4: recall 100%, precision 50%.'
       },
       {
@@ -90,27 +104,32 @@
         readAs: 'For random hyperplane hashes, the chance two signatures differ in a bit is the angle between ' +
           'the vectors over π. Invert it and the Hamming distance between signatures estimates the ' +
           'cosine similarity.',
-        detail: 'MinHash estimates set overlap and SimHash estimates the angle between weighted ' +
-          'vectors, and those rank a corpus differently: two documents can share most of their ' +
-          'tokens while emphasising them very differently. SimHash is far cheaper — 8 bytes per ' +
-          'document against 512 — and its threshold is a Hamming distance rather than a similarity, ' +
-          'so a cut tuned on Jaccard does not transfer. The tuning has to be redone against the same ' +
-          'corpus, which is what the cutoff table in the demo is.',
+        detail: [
+          'MinHash estimates set overlap and SimHash estimates the angle between weighted vectors, ' +
+            'and those rank a corpus differently.',
+          'Two documents can share most of their tokens while emphasising them very differently.',
+          'SimHash is far cheaper — 8 bytes per document against 512. Its threshold is a Hamming ' +
+            'distance rather than a similarity, so a cut tuned on Jaccard does not transfer.',
+          'The tuning has to be redone against the same corpus, which is what the cutoff table in ' +
+            'the demo is.'
+        ],
         example: '64-bit SimHash: 8 bytes per document, and a cutoff of 20 bits reaches full recall at 37% precision.'
       },
       {
         term: 'Random projection and Johnson-Lindenstrauss',
         plain: 'A random ±1/√k matrix preserves every pairwise distance to within 1 ± ε, given enough k.',
         formal: 'k ≥ 8 ln n / ε² suffices for n points',
-        readAs: 'The Johnson-Lindenstrauss bound: to keep all pairwise distances within ε for n points you ' +
-          'need only about 8 ln n over ε squared dimensions — a number that depends on how many points ' +
-          'you have, and not at all on how many dimensions they started in.',
-        detail: 'The lemma is a worst-case statement over every pair and its constant is generous. ' +
-          'For 60 points at ε = 0.3 it asks for 364 dimensions; projecting the same points into 64 ' +
-          'measures a worst distortion of 29.95% — just inside the promise — and a mean of 6.68%. So ' +
-          'the formula tells you a dimension that certainly works and measurement tells you the one ' +
-          'you can get away with, and the gap between them is often a factor of five. The lemma is ' +
-          'also independent of the source dimension, which is the surprising part.',
+        readAs: 'The Johnson-Lindenstrauss bound: to keep all pairwise distances within ε for n ' +
+          'points you need only about 8 ln n over ε squared dimensions. That number depends on how ' +
+          'many points you have, and not at all on how many dimensions they started in.',
+        detail: [
+          'The lemma is a worst-case statement over every pair and its constant is generous.',
+          'For 60 points at ε = 0.3 it asks for 364 dimensions. Projecting the same points into 64 ' +
+            'measures a worst distortion of 29.95% — just inside the promise — and a mean of 6.68%.',
+          'So the formula tells you a dimension that certainly works, and measurement tells you the ' +
+            'one you can get away with. The gap between them is often a factor of five.',
+          'The lemma is also independent of the source dimension, which is the surprising part.'
+        ],
         example: 'JL asks for 364 dimensions; 64 measured a worst distortion of 29.95% against a promised 30%.'
       },
       {
@@ -119,12 +138,16 @@
         formal: 'E[estimate] = s, with variance s(1 − s)/L',
         readAs: 'The estimate is right on average, and its spread shrinks as one over the signature length L. ' +
           'Longer signatures cost linear time and buy square-root accuracy.',
-        detail: 'Every position of the signature is an independent Bernoulli trial for the same ' +
-          'probability, so the fraction that agree is an unbiased estimator and the scatter of ' +
-          'estimate against truth is centred on the y = x line rather than lying above it. That ' +
-          'means a similarity threshold applied to the estimate misses genuine pairs about as often ' +
-          'as it admits spurious ones, and it is why the band index exists: it is cheaper to be ' +
-          'generous at the candidate stage and exact at the verification stage.',
+        detail: [
+          'Every position of the signature is an independent Bernoulli trial for the same ' +
+            'probability.',
+          'So the fraction that agree is an unbiased estimator, and the scatter of estimate against ' +
+            'truth is centred on the y = x line rather than above it.',
+          'That means a similarity threshold applied to the estimate misses genuine pairs about as ' +
+            'often as it admits spurious ones.',
+          'It is also why the band index exists: it is cheaper to be generous at the candidate ' +
+            'stage and exact at the verification stage.'
+        ],
         example: 'The scatter of 1 770 pairs straddles y = x, with a spread of 1/√128 = 8.84%.'
       },
       {
@@ -133,12 +156,14 @@
         formal: 'candidates ≪ n(n − 1)/2',
         readAs: 'The number of pairs actually examined is far smaller than all n(n−1)/2 of them. That gap is ' +
           'the whole value of the scheme.',
-        detail: 'A signature that estimates similarity accurately still needs every pair compared, ' +
-          'and at 60 documents that is 1 770 comparisons — at a million it is 5×10¹¹. The band index ' +
-          'turns the problem into a hash lookup: documents that share any band bucket are candidates ' +
-          'and everything else is never examined. On the demo corpus that is 22 pairs of 1 770, a ' +
-          '98.8% reduction, and the saving grows with the square of the corpus while the signature ' +
-          'cost stays linear.',
+        detail: [
+          'A signature that estimates similarity accurately still needs every pair compared, and at ' +
+            '60 documents that is 1 770 comparisons. At a million it is 5×10¹¹.',
+          'The band index turns the problem into a hash lookup: documents that share any band ' +
+            'bucket are candidates and everything else is never examined.',
+          'On the demo corpus that is 22 pairs of 1 770, a 98.8% reduction.',
+          'The saving grows with the square of the corpus while the signature cost stays linear.'
+        ],
         example: '22 candidate pairs examined of 1 770 — 98.8% never looked at.'
       }
     ],

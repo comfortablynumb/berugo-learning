@@ -35,13 +35,14 @@
       orientation: [
         'MinHash rests on one identity. For a random permutation of the universe, the probability that ' +
           'two sets have the same minimum element is exactly their Jaccard similarity, |A ∩ B| / ' +
-          '|A ∪ B|. So take L independent hashes, record each one\'s minimum over the set, and the ' +
+          '|A ∪ B|. So take L independent hashes and record each one\'s minimum over the set. The ' +
           'fraction of positions where two signatures agree is an unbiased estimate of that ' +
-          'similarity — with standard error 1/√L, which is 8.8% at L = 128 and does not depend on how ' +
-          'big the documents are.',
+          'similarity. Its standard error is 1/√L, which is 8.8% at L = 128 and does not depend on ' +
+          'how big the documents are.',
         'Banding turns the estimate into a search. Split the signature into b bands of r rows and ' +
-          'call two documents candidates if any whole band matches: P = 1 − (1 − s^r)^b, an S-curve ' +
-          'whose steep part sits near (1/b)^(1/r). The same 128-hash signature at 16×8 turns at 0.707 ' +
+          'call two documents candidates if any whole band matches. The probability is ' +
+          'P = 1 − (1 − s^r)^b, an S-curve whose steep part sits near (1/b)^(1/r). The same ' +
+          '128-hash signature at 16×8 turns at 0.707 ' +
           'and proposes 3 pairs out of 1 770; at 32×4 it turns at 0.420 and proposes 22. Choosing b ' +
           'and r is choosing where on that curve you want to be wrong.',
         'SimHash answers the cosine question rather than the overlap one: one random hyperplane per ' +
@@ -70,11 +71,11 @@
           '    C --> V["verify with the exact similarity"]'
         ].join('\n')
       },
-      insight: 'Banding turns a similarity threshold into a probability curve you tune; choosing r and ' +
-        'b is choosing your false-positive/false-negative split, and the S-curve makes it explicit. ' +
-        'The mistake is to pick a signature length first and treat b and r as an implementation ' +
-        'detail — they are the whole retrieval policy, and the same 128 hashes will find everything ' +
-        'or almost nothing depending on how they are cut up.'
+      insight: 'Banding turns a similarity threshold into a probability curve you tune. Choosing r ' +
+        'and b is choosing your false-positive/false-negative split, and the S-curve makes it ' +
+        'explicit. The mistake is to pick a signature length first and treat b and r as an ' +
+        'implementation detail. They are the whole retrieval policy, and the same 128 hashes will ' +
+        'find everything or almost nothing depending on how they are cut up.'
     };
   }
 
