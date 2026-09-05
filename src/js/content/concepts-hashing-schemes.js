@@ -352,25 +352,33 @@
         },
         plain: 'O(1) amortised says nothing about the one call that moved a million entries.',
         formal: 'total O(n), single op O(n)',
-        detail: 'The amortised bound is true and it is an average over a sequence, so it is silent ' +
-          'about the individual insert that rehashes the whole table. That insert is not rare in any ' +
-          'useful sense — it happens at every power of two, deterministically — and it is ' +
-          'proportional to the current size, so the largest spikes come last. In a service, those ' +
-          'calls are your p99.9: a request that happens to trigger the rehash of a million-entry ' +
-          'table wears the entire cost. Amortised analysis is the right tool for capacity planning ' +
-          'and the wrong one for a latency budget.',
+        detail: [
+          'The amortised bound is true and it is an average over a sequence, so it is silent about ' +
+            'the individual insert that rehashes the whole table.',
+          'That insert is not rare in any useful sense. It happens at every power of two, ' +
+            'deterministically, and it is proportional to the current size, so the largest spikes ' +
+            'come last.',
+          'In a service, those calls are your p99.9. A request that happens to trigger the rehash ' +
+            'of a million-entry table wears the entire cost.',
+          'Amortised analysis is the right tool for capacity planning and the wrong one for a ' +
+            'latency budget.'
+        ],
         example: 'Your p99.9 is made of exactly those calls.'
       },
       {
         term: 'Growth trigger',
         plain: 'Grow when the load factor crosses a threshold — counting tombstones, not just live entries.',
         formal: '(n + tombstones) / m > maxLoad',
-        detail: 'Probe cost is driven by how many slots are unavailable, and a tombstone is ' +
-          'unavailable for probing even though it holds no entry. A trigger that looks only at the ' +
-          'live count therefore never fires on a table that is full of tombstones, and probe lengths ' +
-          'climb indefinitely while the table reports itself as half empty. Counting both is the ' +
-          'fix — with the refinement from the Swiss-table section that a table failing the test ' +
-          'because of tombstones should be rebuilt at the same capacity rather than doubled.',
+        detail: [
+          'Probe cost is driven by how many slots are unavailable, and a tombstone is unavailable ' +
+            'for probing even though it holds no entry.',
+          'A trigger that looks only at the live count therefore never fires on a table that is ' +
+            'full of tombstones. Probe lengths climb indefinitely while the table reports itself ' +
+            'as half empty.',
+          'Counting both is the fix. The Swiss-table section adds the refinement: a table failing ' +
+            'the test because of tombstones should be rebuilt at the same capacity rather than ' +
+            'doubled.'
+        ],
         example: 'Growing on live entries alone lets a tombstoned table degrade forever.'
       },
       {
@@ -387,52 +395,65 @@
         },
         plain: 'Keep both tables and move k buckets per operation until the old one is empty.',
         formal: 'reads check old then new; writes go to new',
-        detail: 'Instead of migrating everything in one call, keep both tables live and move a few ' +
-          'buckets on each subsequent operation. Reads consult the old table and then the new one, ' +
-          'writes go to the new one, and a cursor records how far the migration has reached. The ' +
-          'spike disappears and total work rises slightly, since every operation during the ' +
-          'migration pays a little extra. Redis is the canonical implementation — ht[0], ht[1] and a ' +
-          'rehash index — and the same pattern shows up wherever a latency budget outranks ' +
-          'throughput.',
+        detail: [
+          'Instead of migrating everything in one call, keep both tables live and move a few ' +
+            'buckets on each subsequent operation.',
+          'Reads consult the old table and then the new one, writes go to the new one, and a ' +
+            'cursor records how far the migration has reached.',
+          'The spike disappears and total work rises slightly, since every operation during the ' +
+            'migration pays a little extra.',
+          'Redis is the canonical implementation — ht[0], ht[1] and a rehash index — and the same ' +
+            'pattern shows up wherever a latency budget outranks throughput.'
+        ],
         example: 'Redis: ht[0], ht[1] and a rehash cursor.'
       },
       {
         term: 'Doubled memory',
         plain: 'During migration both tables are allocated, so peak memory is the real cost of a flat tail.',
         formal: 'peak ≈ 3m slots',
-        detail: 'Both the old and the new table are allocated for the whole migration, so the memory ' +
-          'high-water mark is the sum — about three times the original slot count, since the new ' +
-          'table is twice the old. For a one-shot rehash that peak lasts microseconds; for an ' +
-          'incremental one it lasts as long as the migration does, which is why an incremental ' +
-          'rehash that stalls because traffic stopped is worse than either alternative. It is also ' +
-          'why implementations force progress on a timer or finish the migration when the table is ' +
-          'idle, rather than relying on operations to arrive.',
+        detail: [
+          'Both the old and the new table are allocated for the whole migration, so the memory ' +
+            'high-water mark is the sum. That is about three times the original slot count, since ' +
+            'the new table is twice the old.',
+          'For a one-shot rehash that peak lasts microseconds. For an incremental one it lasts as ' +
+            'long as the migration does, which is why an incremental rehash that stalls because ' +
+            'traffic stopped is worse than either alternative.',
+          'It is also why implementations force progress on a timer, or finish the migration when ' +
+            'the table is idle, rather than relying on operations to arrive.'
+        ],
         example: 'Which is why the migration should finish, not linger.'
       },
       {
         term: 'Iterator invalidation',
         plain: 'Resizing moves entries, so any iterator taken before the resize is meaningless after it.',
         formal: 'modification during iteration is undefined',
-        detail: 'An iterator over a hash table is a position in a slot array, and a resize rehashes ' +
-          'every key into a different array — so the position now refers to unrelated data. ' +
+        detail: [
+          'An iterator over a hash table is a position in a slot array, and a resize rehashes ' +
+            'every key into a different array. The position now refers to unrelated data.',
           'Continuing would silently skip entries or return some twice, which is worse than ' +
-          'failing. Implementations therefore either detect the change and throw, as Java does with ' +
-          'ConcurrentModificationException, or declare the behaviour undefined and let it corrupt, ' +
-          'as C++ does. The practical rule is the same either way: collect the keys you intend to ' +
-          'modify, finish iterating, and then modify.',
+            'failing.',
+          'Implementations therefore either detect the change and throw, as Java does with ' +
+            'ConcurrentModificationException, or declare the behaviour undefined and let it ' +
+            'corrupt, as C++ does.',
+          'The practical rule is the same either way: collect the keys you intend to modify, ' +
+            'finish iterating, and then modify.'
+        ],
         example: 'Java throws ConcurrentModificationException rather than returning nonsense.'
       },
       {
         term: 'Pre-sizing',
         plain: 'If you know the count, allocate for it once and no rehash happens at all.',
         formal: 'capacity ≥ n / maxLoad',
-        detail: 'Every rehash exists because the final size was unknown, so when it is known — a ' +
-          'query with a row count, a file with a length, a collection being copied — sizing the ' +
-          'table up front removes the entire problem rather than mitigating it. The capacity needed ' +
-          'is n divided by the maximum load factor, rounded up to the implementation\'s granularity, ' +
-          'and forgetting to divide is the common error: reserving exactly n leaves the table at ' +
-          '100% load and it grows anyway. This is the cheapest fix available and it is usually ' +
-          'available.',
+        detail: [
+          'Every rehash exists because the final size was unknown. Sometimes it is known: a query ' +
+            'with a row count, a file with a length, a collection being copied.',
+          'Sizing the table up front then removes the entire problem rather than mitigating it.',
+          'The capacity needed is n divided by the maximum load factor, rounded up to the ' +
+            'implementation\'s granularity.',
+          'Forgetting to divide is the common error. Reserving exactly n leaves the table at 100% ' +
+            'load and it grows anyway.',
+          'This is the cheapest fix available and it is usually available.'
+        ],
         example: 'The cheapest possible fix, and it is usually available.'
       },
       {
@@ -441,26 +462,33 @@
         formal: 'capacity = ⌈n / maxLoad⌉, rounded to a power of two',
         readAs: 'To hold n entries without resizing, reserve n divided by the maximum load factor, rounded up ' +
           'and then up again to a power of two. Reserving up front skips every intermediate rehash.',
-        detail: 'Reserving is not merely the smoothest option, it is the cheapest: 20 000 inserts ' +
-          'cost 36 043 units of work from a reserved table, against 84 633 growing from an initial ' +
-          '16 and 149 468 with an incremental migration. Growth pays to move entries repeatedly, and ' +
-          'the incremental scheme pays extra per operation on top of that to spread the cost out. So ' +
-          'the ordering is unambiguous when the size is known, and incremental rehashing is the ' +
-          'answer only to the case where it is not — where the choice is between a spike and a ' +
-          'smear, not between either and avoiding the work.',
+        detail: [
+          'Reserving is not merely the smoothest option, it is the cheapest. Twenty thousand ' +
+            'inserts cost 36 043 units of work from a reserved table, against 84 633 growing from ' +
+            'an initial 16, and 149 468 with an incremental migration.',
+          'Growth pays to move entries repeatedly, and the incremental scheme pays extra per ' +
+            'operation on top of that to spread the cost out.',
+          'So the ordering is unambiguous when the size is known. Incremental rehashing is the ' +
+            'answer only when it is not — where the choice is between a spike and a smear, not ' +
+            'between either and avoiding the work.'
+        ],
         example: '20 000 inserts cost 36 043 units from a reserved table, against 84 633 growing from 16 and 149 468 incrementally.'
       },
       {
         term: 'Migration is a correctness problem',
         plain: 'While two tables are live every operation consults both, and a slot vacated in the old table must not cut its probe chain.',
         formal: 'mark migrated slots DEAD, never EMPTY',
-        detail: 'Incremental rehashing is usually presented as a latency technique, and its hardest ' +
-          'part is correctness. Both tables are probed, and the old one is still being probed while ' +
-          'entries are removed from it — so a migrated slot left EMPTY cuts every probe chain ' +
-          'passing through it, and a key already scanned past by the cursor but not yet copied is ' +
-          'reachable in neither table. Marking migrated slots DEAD, exactly like a tombstone, keeps ' +
-          'the chains intact. The invariant to test is that every key is findable after every ' +
-          'single step of the migration, not merely at the end.',
+        detail: [
+          'Incremental rehashing is usually presented as a latency technique, and its hardest part ' +
+            'is correctness.',
+          'Both tables are probed, and the old one is still being probed while entries are removed ' +
+            'from it.',
+          'So a migrated slot left EMPTY cuts every probe chain passing through it. A key already ' +
+            'scanned past by the cursor but not yet copied is then reachable in neither table.',
+          'Marking migrated slots DEAD, exactly like a tombstone, keeps the chains intact.',
+          'The invariant to test is that every key is findable after every single step of the ' +
+            'migration, not merely at the end.'
+        ],
         example: 'Emptying them loses keys that the cursor has passed and not yet copied — reachable in neither table.'
       }
     ],

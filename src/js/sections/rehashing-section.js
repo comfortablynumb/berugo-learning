@@ -31,9 +31,9 @@
         'A hash table grows by allocating a bigger array and re-inserting everything, because every ' +
           'key\'s slot depends on the capacity. That is O(n) in one call, amortised to O(1) across the ' +
           'n insertions that led to it — and the amortised figure is what hides the problem.',
-        'A service does not experience the average. It experiences the one request that arrived while ' +
-          'the map with a million entries doubled, and that request shows up in your p99.9 as a ' +
-          'multi-millisecond outlier with no obvious cause in the code path.',
+        'A service does not experience the average. It experiences the one request that arrived ' +
+          'while the map with a million entries doubled. That request shows up in your p99.9 as a ' +
+          'multi-millisecond outlier, with no obvious cause in the code path.',
         'Incremental rehash keeps both tables alive and moves a fixed number of buckets per operation. ' +
           'Every key stays findable throughout — lookups check the old table first — and the peak ' +
           'collapses. The costs are real: more total work, doubled memory during migration, and ' +
