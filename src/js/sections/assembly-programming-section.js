@@ -59,16 +59,16 @@
     return [
       '**Assembly is a data-movement language with arithmetic attached.** Almost every line '
         + 'either moves a value between a register and memory or combines two registers. The '
-        + 'skill is not knowing the instructions — there are forty — it is keeping track of '
-        + 'where each value currently lives, which is exactly the bookkeeping a register '
+        + 'skill is not knowing the instructions, of which there are forty. It is keeping track '
+        + 'of where each value currently lives, which is exactly the bookkeeping a register '
         + 'allocator does for you in a compiler.',
       '**A loop is a compare and a branch, and the compiler writes it backwards.** The natural '
-        + 'form tests at the top and jumps to the bottom on failure; the efficient form falls '
+        + 'form tests at the top and jumps to the bottom on failure. The efficient form falls '
         + 'through into the body and branches backwards at the end, which costs one branch per '
         + 'iteration instead of two. Recognising the second shape is most of reading compiler '
         + 'output.',
       '**The calling convention is an agreement, not a mechanism.** Nothing in the hardware '
-        + 'stops a function from clobbering a saved register; the convention says which '
+        + 'stops a function from clobbering a saved register. The convention says which '
         + 'registers a caller may rely on across a call and which it must save itself. Every '
         + 'compiled language on a platform agrees to the same one, which is why they can call '
         + 'each other at all.',
@@ -78,7 +78,7 @@
         + 'save it, which is the whole reason a frame exists.',
       '**A frame is a stack-pointer adjustment and some stores.** Subtract at entry, store what '
         + 'must survive, use the space, load it back, add at exit. Get the addition wrong and '
-        + 'the caller returns to nonsense — which is one of the few bugs in this course that '
+        + 'the caller returns to nonsense. It is one of the few bugs in this course that '
         + 'produces no error message at all, just a jump to an address nobody chose.',
       '**Recursion needs nothing special from the hardware.** Each invocation subtracts its own '
         + 'frame, so each has its own saved argument and return address. The demo\'s factorial '
@@ -90,9 +90,10 @@
         + 'precisely because this is unacceptable, and the base set stays small so that a '
         + 'minimal implementation is genuinely minimal.',
       '**Reading the compiler\'s assembly is the most durable skill in this track.** It is how '
-        + 'you settle "did that get optimised" without guessing, how you find the bounds check '
-        + 'that did not get removed, and how you discover that your carefully written branchless '
-        + 'code compiled to a branch. Everything above assembly is a claim; this is the '
+        + 'you settle "did that get optimised" without guessing, and how you find the bounds '
+        + 'check that did not get removed. It is how you discover that your carefully written '
+        + 'branchless code compiled to a branch. Everything above assembly is a claim; this is '
+        + 'the '
         + 'evidence.'
     ];
   }
@@ -113,17 +114,17 @@
       + 'enforced by anything.** No gate checks that a callee preserved `s0`; no instruction '
       + 'faults when a function returns with the stack pointer in the wrong place. It is a '
       + 'document that every compiler, every assembler-writing human and every library on a '
-      + 'platform agrees to follow, and the entire ecosystem of separately compiled code rests '
+      + 'platform agrees to follow. The entire ecosystem of separately compiled code rests '
       + 'on that agreement. That is worth sitting with, because it is the same shape as every '
-      + 'important interface you will work with: a protocol nobody validates, held together by '
+      + 'important interface you will work with. A protocol nobody validates, held together by '
       + 'everybody implementing it correctly, where a single participant who breaks the rules '
       + 'produces failures far from the mistake. A function that clobbers a saved register does '
-      + 'not crash — its caller does, later, doing something unrelated. The practical skill '
+      + 'not crash: its caller does, later, doing something unrelated. The practical skill '
       + 'that follows is being able to read the assembly a compiler produced and check the '
-      + 'convention by eye: is the return address saved before the first call, is the stack '
-      + 'pointer restored on every path out, does the epilogue match the prologue. That is also '
-      + 'exactly what a stack-unwinding debugger, a profiler and an exception handler do, which '
-      + 'is why they all break in the same way when a hand-written routine gets it wrong.';
+      + 'convention by eye. Is the return address saved before the first call, is the stack '
+      + 'pointer restored on every path out, does the epilogue match the prologue? That is also '
+      + 'exactly what a stack-unwinding debugger, a profiler and an exception handler do. It is '
+      + 'why they all break in the same way when a hand-written routine gets it wrong.';
   }
 
   function render(app) {
