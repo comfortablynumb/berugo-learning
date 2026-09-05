@@ -30,16 +30,17 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'A binary heap is an array that is read as a tree. The children of index i are at 2i + 1 and ' +
-          '2i + 2 and the parent is at ⌊(i − 1)/2⌋, so there are no pointers, no allocation per ' +
+        'A binary heap is an array that is read as a tree. The children of index i are at 2i + 1 ' +
+          'and 2i + 2, and the parent is at ⌊(i − 1)/2⌋. There are no pointers, no allocation per ' +
           'element and no shape to maintain — the tree is complete because the array is dense.',
-        'One rule holds it together: a parent outranks both of its children. That is weaker than a ' +
-          'search tree, which is why a heap cannot answer "is this key present" any faster than a ' +
-          'scan, and it is exactly strong enough for the one question a priority queue asks: what is ' +
-          'the smallest thing here.',
-        'The counter-intuitive part is the build. Inserting n elements one at a time is O(n log n) in ' +
-          'the worst case; heapifying the same array in place is O(n), because most nodes are near ' +
-          'the bottom and can barely sink. The table below tallies that sum rather than asserting it.'
+        'One rule holds it together: a parent outranks both of its children. That is weaker than ' +
+          'a search tree, which is why a heap cannot answer "is this key present" any faster than ' +
+          'a scan. It is exactly strong enough for the one question a priority queue asks: what ' +
+          'is the smallest thing here.',
+        'The counter-intuitive part is the build. Inserting n elements one at a time is O(n log n) ' +
+          'in the worst case. Heapifying the same array in place is O(n), because most nodes are ' +
+          'near the bottom and can barely sink. The table below tallies that sum rather than ' +
+          'asserting it.'
       ],
       demo: { title: 'Interactive demo — one structure, two views', markup: root.BinaryHeapsTemplate.render() },
       diagram: {
@@ -56,10 +57,11 @@
           '    P["parent of i = ⌊(i − 1)/2⌋"] -.-> A'
         ].join('\n')
       },
-      insight: 'The O(n) build is the counter-intuitive one: most nodes are near the bottom and can ' +
-        'barely sink, so the sum Σ h·n/2^(h+1) converges to n rather than to n log n. That summation ' +
-        'is worth being able to reproduce on a whiteboard — and worth knowing that it only beats ' +
-        'repeated insertion by 7× on the input that forces it, and by 21% on random input.'
+      insight: 'The O(n) build is the counter-intuitive one. Most nodes are near the bottom and ' +
+        'can barely sink, so the sum Σ h·n/2^(h+1) converges to n rather than to n log n. That ' +
+        'summation is worth being able to reproduce on a whiteboard. It is also worth knowing ' +
+        'that it only beats repeated insertion by 7× on the input that forces it, and by 21% on ' +
+        'random input.'
     };
   }
 

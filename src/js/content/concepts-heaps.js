@@ -22,13 +22,16 @@
         },
         plain: 'The tree is an array. Children of i are at 2i + 1 and 2i + 2; the parent is at ⌊(i − 1)/2⌋.',
         formal: 'no pointers, no nodes, no allocation per element',
-        detail: 'This is why a heap is the fastest priority queue for the common case. There is no ' +
-          'node object, no per-element allocation and no pointer to chase — a sift walks a straight ' +
-          'line through one contiguous array, which is the access pattern hardware is best at. The ' +
-          'index arithmetic replaces the structure entirely: the shape property is not maintained by ' +
-          'any code, it is a consequence of the array being dense. The cost of that packing is that ' +
-          'nothing else can hold a reference to an element, because elements move — which is what ' +
-          'makes decrease-key need a separate position map.',
+        detail: [
+          'This is why a heap is the fastest priority queue for the common case.',
+          'There is no node object, no per-element allocation and no pointer to chase. A sift ' +
+            'walks a straight line through one contiguous array, which is the access pattern ' +
+            'hardware is best at.',
+          'The index arithmetic replaces the structure entirely. The shape property is not ' +
+            'maintained by any code; it is a consequence of the array being dense.',
+          'The cost of that packing is that nothing else can hold a reference to an element, ' +
+            'because elements move. That is what makes decrease-key need a separate position map.'
+        ],
         example: 'A million-element heap is one array of a million slots, with no headers and no pointers at all.'
       },
       {
@@ -37,23 +40,29 @@
         formal: 'key(parent) ≤ key(child), for every node',
         readAs: 'Every node is at most its children — that is the entire heap rule. It says nothing about ' +
           'left versus right, which is why a heap is far cheaper to maintain than a search tree.',
-        detail: 'The rule is much weaker than a search tree\'s, and the weakness is the point. It is ' +
-          'strong enough to put the minimum at the root, and cheap enough to restore with a single ' +
-          'root-to-leaf walk after any change. What it cannot do is find an arbitrary key: nothing ' +
-          'about the invariant says which subtree a given key is in, so `has(key)` is a linear scan. ' +
-          'A heap is not a set with a fast minimum; it is a structure that answers exactly one ' +
-          'question and refuses the rest.',
+        detail: [
+          'The rule is much weaker than a search tree\'s, and the weakness is the point.',
+          'It is strong enough to put the minimum at the root, and cheap enough to restore with a ' +
+            'single root-to-leaf walk after any change.',
+          'What it cannot do is find an arbitrary key. Nothing about the invariant says which ' +
+            'subtree a given key is in, so `has(key)` is a linear scan.',
+          'A heap is not a set with a fast minimum. It is a structure that answers exactly one ' +
+            'question and refuses the rest.'
+        ],
         example: 'Finding whether a heap contains 42 costs a full scan; finding its minimum costs one array read.'
       },
       {
         term: 'Sift up and sift down',
         plain: 'The two repairs. A new element walks up until its parent outranks it; a displaced root walks down while a child outranks it.',
         formal: 'siftUp on insert, siftDown on extract',
-        detail: 'Every heap operation is one of these two walks and nothing else. An insert appends ' +
-          'to the end and sifts up, comparing against one parent per level. An extract moves the last ' +
-          'element to the root and sifts down, comparing against both children per level to find the ' +
-          'better one. That asymmetry — one comparison per level going up, d going down — is exactly ' +
-          'what makes the arity of the next section a real trade rather than a detail.',
+        detail: [
+          'Every heap operation is one of these two walks and nothing else.',
+          'An insert appends to the end and sifts up, comparing against one parent per level.',
+          'An extract moves the last element to the root and sifts down, comparing against both ' +
+            'children per level to find the better one.',
+          'That asymmetry — one comparison per level going up, d going down — is exactly what ' +
+            'makes the arity of the next section a real trade rather than a detail.'
+        ],
         example: 'A sift-up does one comparison per level; a sift-down in a binary heap does two.'
       },
       {
@@ -75,37 +84,48 @@
         readAs: 'Add up, over every level height h, that height times how many nodes sit at it. The node ' +
           'counts halve as the heights grow, so the total stays below n — which is why building a heap ' +
           'is linear rather than n log n.',
-        detail: 'The naive reading is that n elements each sift down log n levels, which would be ' +
-          'O(n log n). The correction is that almost none of them sift that far: half the nodes are ' +
-          'leaves with height 0 and do no work at all, a quarter are at height 1 and can sink one ' +
-          'level, and so on. Summing h·n/2^(h+1) over all heights gives a series that converges to n. ' +
-          'The measured swap count backs it: 74 217 swaps to heapify 100 000 random elements, against ' +
-          'a tabulated bound of 100 058.',
+        detail: [
+          'The naive reading is that n elements each sift down log n levels, which would be ' +
+            'O(n log n).',
+          'The correction is that almost none of them sift that far. Half the nodes are leaves ' +
+            'with height 0 and do no work at all, a quarter are at height 1 and can sink one ' +
+            'level, and so on.',
+          'Summing h·n/2^(h+1) over all heights gives a series that converges to n.',
+          'The measured swap count backs it: 74 217 swaps to heapify 100 000 random elements, ' +
+            'against a tabulated bound of 100 058.'
+        ],
         example: 'Building a 100 000-element heap moves 74 217 elements — under one swap per element.'
       },
       {
         term: 'Build against repeated insertion',
         plain: 'The famous gap is a worst-case statement. On random input it is 21%; on descending input it is 7×.',
         formal: 'build O(n) against insert O(n log n) worst case',
-        detail: 'Both methods produce a valid heap and the textbook contrast suggests one is ' +
-          'dramatically better. Measured at n = 100 000, the truth depends entirely on the input: ' +
-          'ascending input costs both methods exactly one comparison per element (nothing sifts at ' +
-          'all), random input costs 1.88 against 2.28 comparisons per element, and descending input — ' +
-          'where every insertion walks the whole spine — costs 2.00 against 14.69. The gap is real ' +
-          'and it is a property of the input, which is worth knowing before quoting the asymptotics ' +
-          'at a code review.',
+        detail: [
+          'Both methods produce a valid heap, and the textbook contrast suggests one is ' +
+            'dramatically better.',
+          'Measured at n = 100 000, the truth depends entirely on the input. Ascending input costs ' +
+            'both methods exactly one comparison per element, because nothing sifts at all.',
+          'Random input costs 1.88 against 2.28 comparisons per element. Descending input — where ' +
+            'every insertion walks the whole spine — costs 2.00 against 14.69.',
+          'The gap is real and it is a property of the input, which is worth knowing before ' +
+            'quoting the asymptotics at a code review.'
+        ],
         example: 'At n = 100 000: descending input costs 14.69 comparisons per element to push and 2.00 to build.'
       },
       {
         term: 'peek, pop and the last element',
         plain: 'Extract moves the last element to the root and sifts it down. The last element is the only one that can be removed cheaply.',
         formal: 'pop = read root, move tail to root, siftDown(0)',
-        detail: 'A heap can only shrink at the end without breaking the shape, so an extract cannot ' +
-          'simply delete the root — the hole has to be filled by the one element whose removal is ' +
-          'free. That element is almost certainly large, so it usually sinks all the way back down, ' +
-          'which is why an extract costs a full log n while an insert usually stops early. The same ' +
-          'reasoning explains why deleting an arbitrary element needs its position first, and why ' +
-          'the standard trick is to decrease its key to −∞ and pop.',
+        detail: [
+          'A heap can only shrink at the end without breaking the shape, so an extract cannot ' +
+            'simply delete the root. The hole has to be filled by the one element whose removal is ' +
+            'free.',
+          'That element is almost certainly large, so it usually sinks all the way back down. An ' +
+            'insert usually stops early, which is why an extract costs a full log n and an insert ' +
+            'does not.',
+          'The same reasoning explains why deleting an arbitrary element needs its position first, ' +
+            'and why the standard trick is to decrease its key to −∞ and pop.'
+        ],
         example: 'An insert sifts up 1.6 levels on average; an extract sifts down almost the full height.'
       },
       {
@@ -115,24 +135,32 @@
         readAs: 'Where a node\'s children live in the array, in the two indexing conventions. Counting from 1 ' +
           'gives the tidier arithmetic; counting from 0 is what JavaScript gives you, and mixing the ' +
           'two is the classic off-by-one in this structure.',
-        detail: 'The 1-based layout wastes slot zero and buys simpler index arithmetic: the children ' +
-          'of i are 2i and 2i + 1, and the parent is i >> 1. The 0-based layout uses every slot and ' +
-          'pays an extra add per index. In a language with 0-based arrays the second is idiomatic and ' +
-          'the difference is immaterial — but the textbooks use 1-based, so translating pseudocode ' +
-          'is where off-by-one bugs come from. This platform uses 0-based, and the parent formula ' +
-          '⌊(i − 1)/d⌋ is the one to check first when a heap misbehaves.',
+        detail: [
+          'The 1-based layout wastes slot zero and buys simpler index arithmetic: the children of ' +
+            'i are 2i and 2i + 1, and the parent is i >> 1.',
+          'The 0-based layout uses every slot and pays an extra add per index.',
+          'In a language with 0-based arrays the second is idiomatic and the difference is ' +
+            'immaterial. But the textbooks use 1-based, so translating pseudocode is where ' +
+            'off-by-one bugs come from.',
+          'This platform uses 0-based, and the parent formula ⌊(i − 1)/d⌋ is the one to check ' +
+            'first when a heap misbehaves.'
+        ],
         example: 'CLRS uses 1-based indexing, so its PARENT(i) = ⌊i/2⌋ is wrong in a 0-based array.'
       },
       {
         term: 'What a heap costs to hold',
         plain: 'One array slot per element, and nothing else — which is the real reason it wins.',
         formal: 'no node header, no pointers, no fragmentation',
-        detail: 'Comparison counts systematically understate the implicit heap. A pointer-based ' +
-          'priority queue does fewer comparisons on most mixes — a pairing heap push is one link — ' +
-          'and still loses in practice, because every one of those links is an allocation and every ' +
-          'traversal is a dependent load. The array heap has one allocation for the whole structure, ' +
-          'perfect locality on the sift path, and nothing for the allocator to fragment. That is the ' +
-          'gap between the operation count and the clock, and it is the theme M05.5 measures directly.',
+        detail: [
+          'Comparison counts systematically understate the implicit heap.',
+          'A pointer-based priority queue does fewer comparisons on most mixes — a pairing heap ' +
+            'push is one link — and still loses in practice. Every one of those links is an ' +
+            'allocation, and every traversal is a dependent load.',
+          'The array heap has one allocation for the whole structure, perfect locality on the sift ' +
+            'path, and nothing for the allocator to fragment.',
+          'That is the gap between the operation count and the clock, and it is the theme M05.5 ' +
+            'measures directly.'
+        ],
         example: 'A 100 000-element pairing heap holds 100 000 objects; the equivalent binary heap holds one array.'
       }
     ],
