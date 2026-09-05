@@ -21,13 +21,16 @@
         },
         plain: 'Divide the instruction count by the longest dependence chain and you have the ceiling.',
         formal: 'the highest IPC any machine could reach is instructions / critical path',
-        detail: 'On a machine with unlimited width, an unlimited window and perfect '
-          + 'prediction, a program takes exactly as long as its longest chain of real '
-          + 'dependences. Everything else can happen in parallel. So the ratio of the '
-          + 'instruction count to that chain is a hard ceiling on instructions per cycle, and '
-          + 'it is computed from the program alone. That is what makes it useful as a check: '
-          + 'a simulator reporting an IPC above it has a timing bug that no correctness test '
-          + 'could find, because both machines still produce the right answer.',
+        detail: [
+          'On a machine with unlimited width, an unlimited window and perfect prediction, a '
+            + 'program takes exactly as long as its longest chain of real dependences.',
+          'Everything else can happen in parallel.',
+          'So the ratio of the instruction count to that chain is a hard ceiling on instructions '
+            + 'per cycle, and it is computed from the program alone.',
+          'That is what makes it useful as a check. A simulator reporting an IPC above it has a '
+            + 'timing bug that no correctness test could find, because both machines still '
+            + 'produce the right answer.'
+        ],
         example: 'The `chain` fixture is 33 instructions with a critical path of 33, so its '
           + 'bound is 1.00 and the simulator measures 0.868.'
       },
@@ -35,13 +38,17 @@
         term: 'Three dependence kinds, and only read-after-write is real',
         plain: 'The other two exist because there are only thirty-two register names.',
         formal: 'RAW is a dependence on a value; WAR and WAW are dependences on a name',
-        detail: 'A read-after-write dependence means the second instruction needs the number '
-          + 'the first produced, and no hardware can remove it. Write-after-read and '
-          + 'write-after-write are different in kind: they exist only because the instruction '
-          + 'set has a fixed, small set of register names that the compiler has to reuse. Give '
-          + 'the two writers different physical registers and there is nothing left to '
-          + 'conflict over. Recognising which of the three you are looking at is what decides '
-          + 'whether a rewrite can help.',
+        detail: [
+          'A read-after-write dependence means the second instruction needs the number the first '
+            + 'produced, and no hardware can remove it.',
+          'Write-after-read and write-after-write are different in kind. They exist only because '
+            + 'the instruction set has a fixed, small set of register names that the compiler has '
+            + 'to reuse.',
+          'Give the two writers different physical registers and there is nothing left to conflict '
+            + 'over.',
+          'Recognising which of the three you are looking at is what decides whether a rewrite can '
+            + 'help.'
+        ],
         example: 'On the `independent` trace there are 0 read-after-write edges and 28 '
           + 'write-after-write ones, all of them removable.'
       },
@@ -49,12 +56,15 @@
         term: 'The trace matters, not the source',
         plain: 'A loop run forty times has a chain forty long.',
         formal: 'the graph is built over the executed instructions, one node per execution',
-        detail: 'A static analysis of a loop body sees a short chain and a back edge; the '
-          + 'thing that decides the running time is the chain through the whole execution, '
-          + 'which is the body repeated once per iteration. Building the graph over a trace '
-          + 'also gives the memory addresses, which is the only way to know whether two memory '
-          + 'accesses actually conflict. Both of those are reasons the analysis lives after '
-          + 'the program has run rather than before.',
+        detail: [
+          'A static analysis of a loop body sees a short chain and a back edge.',
+          'The thing that decides the running time is the chain through the whole execution, which '
+            + 'is the body repeated once per iteration.',
+          'Building the graph over a trace also gives the memory addresses, which is the only way '
+            + 'to know whether two memory accesses actually conflict.',
+          'Both of those are reasons the analysis lives after the program has run rather than '
+            + 'before.'
+        ],
         example: 'The `stride` trace is 164 instructions from a 9-instruction loop body, and '
           + 'its critical path is 35.'
       },
@@ -62,13 +72,15 @@
         term: 'Memory dependences cannot be read off the instruction text',
         plain: 'Whether a load depends on a store is a question about their addresses.',
         formal: 'two memory accesses conflict when their addresses overlap, which is a run-time fact',
-        detail: 'Register dependences are visible in the encoding: the register numbers are '
-          + 'right there in the instruction. Memory dependences are not, because the address '
-          + 'is computed. A machine that will not let a load pass a store whose address is not '
-          + 'yet known is correct and serialises heavily; one that lets it go is fast and '
-          + 'occasionally wrong. That single unknowable is the reason memory dependence '
-          + 'speculation exists, and it is why the memory model is the hardest part of an '
-          + 'out-of-order design.',
+        detail: [
+          'Register dependences are visible in the encoding: the register numbers are right there '
+            + 'in the instruction.',
+          'Memory dependences are not, because the address is computed.',
+          'A machine that will not let a load pass a store whose address is not yet known is '
+            + 'correct and serialises heavily. One that lets it go is fast and occasionally wrong.',
+          'That single unknowable is the reason memory dependence speculation exists, and it is '
+            + 'why the memory model is the hardest part of an out-of-order design.'
+        ],
         example: 'On `hiddenDisjoint` the conservative bound is 2.54 against 5.92 when the '
           + 'machine may guess.'
       },
@@ -76,12 +88,16 @@
         term: 'Latency and resources give two different bounds, and both hold',
         plain: 'Unit latency is the classic figure; the machine\'s own latencies give a tighter one.',
         formal: 'the bound falls as the assumed latencies rise, and the measurement is under both',
-        detail: 'Setting every operation to one cycle gives the "infinite resources" figure '
-          + 'the classic studies reported. Using the simulator\'s own latencies - a load takes '
-          + 'two cycles rather than one - lengthens the critical path and lowers the bound, '
-          + 'and the real machine cannot beat that one either. A cache miss makes a real load '
-          + 'slower still, which only moves the measurement further below both. Having two '
-          + 'bounds that must both hold is a stronger check than having one.',
+        detail: [
+          'Setting every operation to one cycle gives the "infinite resources" figure the classic '
+            + 'studies reported.',
+          'Using the simulator\'s own latencies - a load takes two cycles rather than one - '
+            + 'lengthens the critical path and lowers the bound.',
+          'The real machine cannot beat that one either.',
+          'A cache miss makes a real load slower still, which only moves the measurement further '
+            + 'below both. Having two bounds that must both hold is a stronger check than having '
+            + 'one.'
+        ],
         example: 'On `stride` the unit-latency bound is 4.69 and the machine-latency bound '
           + '4.56; the measurement is 1.302.'
       },
@@ -89,13 +105,16 @@
         term: 'The parallelism profile is spiky, and that is the economic problem',
         plain: 'A few very wide cycles, and a long flat stretch between them.',
         formal: 'the peak of the profile is far above its mean, and hardware is built for the peak',
-        detail: 'Plotting how many instructions could start in each cycle of an unlimited '
-          + 'machine produces a shape with a few tall spikes over a long plain. The spikes '
-          + 'decide how wide a machine would have to be to exploit the parallelism; the mean '
-          + 'decides how often that width is used. Since hardware is paid for in every cycle '
-          + 'and used in few, the returns fall away long before the parallelism does. This is '
-          + 'the shape behind the disappointing conclusions of the ILP studies of the late '
-          + '1980s.',
+        detail: [
+          'Plotting how many instructions could start in each cycle of an unlimited machine '
+            + 'produces a shape with a few tall spikes over a long plain.',
+          'The spikes decide how wide a machine would have to be to exploit the parallelism. The '
+            + 'mean decides how often that width is used.',
+          'Since hardware is paid for in every cycle and used in few, the returns fall away long '
+            + 'before the parallelism does.',
+          'This is the shape behind the disappointing conclusions of the ILP studies of the late '
+            + '1980s.'
+        ],
         example: '`factorial` offers 26 instructions in its first cycle and between 1 and 10 '
           + 'in every cycle after it.'
       },
@@ -103,13 +122,16 @@
         term: 'The gap between bound and measurement says what to change',
         plain: 'A small gap means fix the code; a large one means the machine is the limit.',
         formal: 'headroom = bound / measured IPC',
-        detail: 'When the measurement is already close to the bound, the processor is doing '
-          + 'nearly everything the code permits and no microarchitectural change will help; '
-          + 'the only remaining move is to change the dependence structure, which means '
-          + 'changing the program. When the gap is large the code has parallelism the machine '
-          + 'is failing to use, and questions about width, window, ports and memory are the '
-          + 'right ones. Most performance arguments that go in circles are ones where nobody '
-          + 'computed this first.',
+        detail: [
+          'When the measurement is already close to the bound, the processor is doing nearly '
+            + 'everything the code permits and no microarchitectural change will help.',
+          'The only remaining move is to change the dependence structure, which means changing the '
+            + 'program.',
+          'When the gap is large the code has parallelism the machine is failing to use, and '
+            + 'questions about width, window, ports and memory are the right ones.',
+          'Most performance arguments that go in circles are ones where nobody computed this '
+            + 'first.'
+        ],
         example: '`chain` has a headroom of 1.15x and `independent` of 21.00x, and they want '
           + 'opposite responses.'
       },
@@ -117,13 +139,16 @@
         term: 'A bound is an oracle a correctness test cannot be',
         plain: 'Two machines can both compute the right answer and one of them lie about the time.',
         formal: 'the differential checks values; the bound checks cycles',
-        detail: 'Comparing an out-of-order simulator against an in-order reference catches '
-          + 'every kind of wrong answer and no kind of wrong timing, because a timing bug '
-          + 'leaves the architectural state perfect. An independently computed ceiling on IPC '
-          + 'is the check that closes that hole: it is derived from the program rather than '
-          + 'from the machine, so agreeing with it is evidence rather than a tautology. This '
-          + 'is the same discipline as the published test vectors in M23 and the exact optimum '
-          + 'in M10.',
+        detail: [
+          'Comparing an out-of-order simulator against an in-order reference catches every kind of '
+            + 'wrong answer and no kind of wrong timing.',
+          'A timing bug leaves the architectural state perfect.',
+          'An independently computed ceiling on IPC is the check that closes that hole. It is '
+            + 'derived from the program rather than from the machine, so agreeing with it is '
+            + 'evidence rather than a tautology.',
+          'This is the same discipline as the published test vectors in M23 and the exact optimum '
+            + 'in M10.'
+        ],
         example: 'The test suite asserts the measured IPC is under both bounds for every '
           + 'program at every issue width.'
       }

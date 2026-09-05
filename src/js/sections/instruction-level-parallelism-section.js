@@ -100,7 +100,7 @@
   function opening() {
     return [
       '**Instruction-level parallelism is a property of the code, not of the processor.** '
-        + 'Draw the dependence graph of a run and find the longest chain through it: that '
+        + 'Draw the dependence graph of a run and find the longest chain through it. That '
         + 'chain is how many cycles the program takes on a machine with unlimited width, an '
         + 'unlimited window and perfect prediction. Divide the instruction count by it and '
         + 'you have the highest instructions-per-cycle any machine could ever report. The '
@@ -114,13 +114,13 @@
       '**The two matched fixtures show exactly what that is worth.** `chain` is 32 additions '
         + 'in one chain: critical path 33, ILP bound 1.00, and nothing helps. `independent` '
         + 'is the same 32 additions with no true dependence at all, written over four '
-        + 'register names — bound 32.00 on a machine that renames, and 4.00 on one that does '
-        + 'not. Same instruction count, same arithmetic, an eight-fold difference that is '
+        + 'register names. The bound is 32.00 on a machine that renames, and 4.00 on one that '
+        + 'does not. Same instruction count, same arithmetic, an eight-fold difference that is '
         + 'entirely about register naming.',
       '**Memory dependences are the ones you cannot read off the source.** Whether a load '
         + 'depends on an older store is a question about their addresses, and the addresses '
         + 'are computed at run time. A machine that will not let a load pass a store whose '
-        + 'address is unknown is correct and slow; the `disjoint` fixture is built to show '
+        + 'address is unknown is correct and slow. The `disjoint` fixture is built to show '
         + 'the cost, and 36.5 is where the machine guesses instead.',
       '**The bound is an oracle, and that is why it is in the first section.** Every later '
         + 'page claims a cycle count. A differential against the in-order reference cannot '
@@ -140,10 +140,10 @@
         + 'whether to change the machine or the program.',
       '**The classic ILP studies found small numbers, and the parallelism profile says '
         + 'why.** Plot how many instructions could start in each cycle and the shape is a few '
-        + 'tall spikes over a long flat plain — `factorial` offers 26 instructions in its '
-        + 'first cycle and between 1 and 10 in every cycle after. A machine wide enough for '
-        + 'the spikes is idle for the rest of the run, which is the economic argument against '
-        + 'width and the reason practical machines stopped at four to six.',
+        + 'tall spikes over a long flat plain. The `factorial` trace offers 26 instructions in '
+        + 'its first cycle and between 1 and 10 in every cycle after. A machine wide enough for '
+        + 'the spikes is idle for the rest of the run. That is the economic argument against '
+        + 'width, and the reason practical machines stopped at four to six.',
       '**Latency is a separate axis and both bounds are valid.** With unit latency the bound '
         + 'is the classic "infinite resources" figure. With the simulator\'s own latencies — '
         + 'a load takes two cycles — the bound is lower and tighter, and the machine cannot '
@@ -151,28 +151,28 @@
         + 'moves the measurement further below both.',
       '**When a loop will not go faster, the chain is usually the reason.** That is the '
         + 'senior version of this page. Before reaching for a wider machine, a better '
-        + 'compiler or a profiler, ask what the longest dependence chain through the loop is '
-        + '— because if it is the loop-carried accumulator, no microarchitecture on the '
+        + 'compiler or a profiler, ask what the longest dependence chain through the loop is. '
+        + 'If it is the loop-carried accumulator, no microarchitecture on the '
         + 'roadmap will help and the fix is to break the chain in the source.'
     ];
   }
 
   function insight() {
-    return '**The most useful thing on this page is a habit: before asking why a machine is '
-      + 'slow, compute what the code would allow a perfect machine to do.** Two numbers come '
-      + 'out of that, and they point in opposite directions. If the bound is close to the '
-      + 'measurement — `chain` at 1.00 against 0.868 — the processor is already doing almost '
+    return '**The most useful thing on this page is a habit.** Before asking why a machine is '
+      + 'slow, compute what the code would allow a perfect machine to do. Two numbers come '
+      + 'out of that, and they point in opposite directions. Suppose the bound is close to the '
+      + 'measurement — `chain` at 1.00 against 0.868. The processor is already doing almost '
       + 'everything the code permits, and every microarchitectural idea in the rest of this '
-      + 'milestone is worth nothing here; the only remaining move is to change the '
-      + 'dependence structure, which means changing the program. If the bound is far above '
-      + 'the measurement — `independent` at 32.00 against 1.524 — the code has parallelism '
+      + 'milestone is worth nothing here. The only remaining move is to change the '
+      + 'dependence structure, which means changing the program. Now suppose the bound is far '
+      + 'above the measurement — `independent` at 32.00 against 1.524. The code has parallelism '
       + 'the machine is failing to use, and now the questions about width, window, ports and '
       + 'memory are the right ones. Nearly every argument about performance that goes in '
-      + 'circles is one where nobody computed this first, and the two sides are answering '
+      + 'circles is one where nobody computed this first. The two sides are answering '
       + 'different questions: one is talking about the ceiling and the other about the gap '
-      + 'to it. The same split runs through the whole curriculum — an algorithm\'s '
-      + 'complexity class is a ceiling and its constant factor is the gap, a network\'s '
-      + 'bandwidth-delay product is a ceiling and its window is the gap — and in every case '
+      + 'to it. The same split runs through the whole curriculum. An algorithm\'s '
+      + 'complexity class is a ceiling and its constant factor is the gap. A network\'s '
+      + 'bandwidth-delay product is a ceiling and its window is the gap. In every case '
       + 'the ceiling has to be computed first, because it decides which conversation is '
       + 'worth having.';
   }
