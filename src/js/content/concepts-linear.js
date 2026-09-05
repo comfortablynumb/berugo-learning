@@ -689,28 +689,35 @@
         formal: 'index ← (index + 1) mod capacity',
         readAs: 'Step the index forward by one, then take the remainder after dividing by the capacity — so ' +
           'the position after the last one is 0 again. That wrap-around is the whole idea of a ring.',
-        detail: 'A ring is one preallocated array with a head and a tail index that wrap when they ' +
-          'reach the end. Nothing is allocated after construction, nothing is shifted, and both ' +
-          'operations are a write plus an index update, so the cost per item is constant and, more ' +
-          'importantly, predictable. That predictability is why rings dominate the places where a ' +
-          'pause is unacceptable — audio callbacks, network receive paths, kernel logging — and the ' +
-          'fixed capacity is a feature there rather than a limitation, because it makes the memory ' +
-          'footprint known before the program starts.',
+        detail: [
+          'A ring is one preallocated array with a head and a tail index that wrap when they ' +
+            'reach the end.',
+          'Nothing is allocated after construction and nothing is shifted. Both operations are a ' +
+            'write plus an index update, so the cost per item is constant and, more importantly, ' +
+            'predictable.',
+          'That predictability is why rings dominate the places where a pause is unacceptable: ' +
+            'audio callbacks, network receive paths, kernel logging.',
+          'The fixed capacity is a feature there rather than a limitation, because it makes the ' +
+            'memory footprint known before the program starts.'
+        ],
         example: 'Audio, networking and logging buffers are all rings.'
       },
       {
         term: 'Masking',
         plain: 'A power-of-two capacity turns the modulo into a bitwise AND.',
         formal: '(index + 1) & (capacity − 1)',
-        readAs: 'When the capacity is a power of two, capacity − 1 is a run of 1 bits, and a bitwise AND ' +
-          'against it keeps only the low bits — which is exactly the remainder, computed in one ' +
-          'instruction instead of a division.',
-        detail: 'Integer division and remainder are among the slowest arithmetic instructions, tens ' +
-          'of cycles on many machines, and a naive ring performs one per operation. Choosing a ' +
-          'power-of-two capacity replaces it with a bitwise AND against capacity − 1, which is a ' +
-          'single-cycle instruction with no branch: capacity 16 becomes & 15. The rounding-up of ' +
-          'capacity is almost always worth it, and the technique reappears throughout the ' +
-          'curriculum — hash tables mask their slot index the same way, and for the same reason.',
+        readAs: 'When the capacity is a power of two, capacity − 1 is a run of 1 bits. A bitwise ' +
+          'AND against it keeps only the low bits, which is exactly the remainder — computed in ' +
+          'one instruction instead of a division.',
+        detail: [
+          'Integer division and remainder are among the slowest arithmetic instructions, tens of ' +
+            'cycles on many machines, and a naive ring performs one per operation.',
+          'Choosing a power-of-two capacity replaces it with a bitwise AND against capacity − 1, ' +
+            'which is a single-cycle instruction with no branch. Capacity 16 becomes & 15.',
+          'The rounding-up of capacity is almost always worth it, and the technique reappears ' +
+            'throughout the curriculum. Hash tables mask their slot index the same way, and for ' +
+            'the same reason.'
+        ],
         example: 'Capacity 16 means & 15, which is one instruction.'
       },
       {
@@ -727,41 +734,50 @@
         },
         plain: 'Head equals tail in both states, so an implementation must break the tie.',
         formal: 'waste one slot, or keep a count',
-        detail: 'With two indices there are capacity + 1 possible occupancies but only capacity ' +
-          'distinct index differences, so full and empty collide: head == tail in both. There are ' +
-          'three standard resolutions — waste one slot so full means head is one behind tail, keep ' +
-          'an explicit count, or let the indices run unbounded and mask only when indexing. Which ' +
-          'you choose matters most in concurrent code: a count is a third shared variable that both ' +
-          'sides must update, whereas the wasted slot keeps producer and consumer each writing one ' +
-          'index and reading the other, which is what makes a single-producer single-consumer ring ' +
-          'lock-free.',
+        detail: [
+          'With two indices there are capacity + 1 possible occupancies but only capacity ' +
+            'distinct index differences, so full and empty collide: head == tail in both.',
+          'There are three standard resolutions. Waste one slot, so full means head is one behind ' +
+            'tail; keep an explicit count; or let the indices run unbounded and mask only when ' +
+            'indexing.',
+          'Which you choose matters most in concurrent code. A count is a third shared variable ' +
+            'that both sides must update.',
+          'The wasted slot keeps producer and consumer each writing one index and reading the ' +
+            'other, which is what makes a single-producer single-consumer ring lock-free.'
+        ],
         example: 'Wasting a slot avoids a second shared variable, which matters for lock-free queues.'
       },
       {
         term: 'Bounded queue policy',
         plain: 'What a full queue does: block, reject, or drop the oldest. Each is a different promise.',
         formal: 'block | reject | overwrite',
-        detail: 'A bounded queue must decide what happens when it fills, and the three answers are ' +
-          'three different systems. Blocking propagates the slowdown to the producer, which is ' +
-          'backpressure and is usually right inside a process. Rejecting fails fast and pushes the ' +
-          'decision to the caller, which is what a server should do to shed load. Overwriting the ' +
-          'oldest keeps the newest data and silently loses history, which is right for a telemetry ' +
-          'or sensor stream and catastrophic for a transaction log. The one option that is never ' +
-          'right is an unbounded queue, which converts a temporary slowdown into an out-of-memory ' +
-          'kill.',
+        detail: [
+          'A bounded queue must decide what happens when it fills, and the three answers are ' +
+            'three different systems.',
+          'Blocking propagates the slowdown to the producer, which is backpressure and is usually ' +
+            'right inside a process. Rejecting fails fast and pushes the decision to the caller, ' +
+            'which is what a server should do to shed load.',
+          'Overwriting the oldest keeps the newest data and silently loses history. That is right ' +
+            'for a telemetry or sensor stream, and catastrophic for a transaction log.',
+          'The one option that is never right is an unbounded queue, which converts a temporary ' +
+            'slowdown into an out-of-memory kill.'
+        ],
         example: 'Rejecting pushes backpressure upstream; overwriting loses data silently.'
       },
       {
         term: 'Deque',
         plain: 'A queue with both ends open. A ring buffer gives it for the same cost.',
         formal: 'push/pop at head and tail',
-        detail: 'A ring already tracks two indices, so allowing pushes and pops at both ends costs ' +
-          'nothing extra and yields a double-ended queue — a superset of both stack and queue with ' +
-          'the same constant-time operations. That generality is what work-stealing schedulers are ' +
-          'built on: the owning thread pushes and pops at one end for locality, while thieves steal ' +
-          'from the other end, so the two sides contend only when the deque is nearly empty. A deque ' +
-          'is also the natural structure for a sliding-window maximum and for any algorithm that ' +
-          'needs to unread an item.',
+        detail: [
+          'A ring already tracks two indices, so allowing pushes and pops at both ends costs ' +
+            'nothing extra. The result is a double-ended queue: a superset of both stack and ' +
+            'queue, with the same constant-time operations.',
+          'That generality is what work-stealing schedulers are built on. The owning thread ' +
+            'pushes and pops at one end for locality, while thieves steal from the other end. The ' +
+            'two sides contend only when the deque is nearly empty.',
+          'A deque is also the natural structure for a sliding-window maximum, and for any ' +
+            'algorithm that needs to unread an item.'
+        ],
         example: 'Work-stealing schedulers need exactly this (M47).'
       },
       {
@@ -771,13 +787,17 @@
         readAs: 'Utilisation (rho) is the arrival rate (lambda) divided by the service rate (mu) — work ' +
           'coming in, over work going out. Below 1 the queue stays finite; at or above 1 it grows ' +
           'without limit, because more arrives than can leave.',
-        detail: 'Utilisation is arrival rate divided by service rate, and the queue is stable only ' +
-          'while it stays below 1 — at ρ ≥ 1 the backlog grows without limit whatever the capacity. ' +
-          'What surprises people is the shape of the approach: queue length goes as ρ/(1 − ρ), so ' +
-          'it is not linear in load but hyperbolic. At ρ = 0.833 the queue holds about 5 items; at ' +
-          'ρ = 0.99 it holds 99. That is why a system running at 70% capacity feels fine and the ' +
-          'same system at 95% feels broken, and why capacity planning targets a utilisation rather ' +
-          'than a throughput.',
+        detail: [
+          'Utilisation is arrival rate divided by service rate, and the queue is stable only ' +
+            'while it stays below 1. At ρ ≥ 1 the backlog grows without limit, whatever the ' +
+            'capacity.',
+          'What surprises people is the shape of the approach. Queue length goes as ρ/(1 − ρ), so ' +
+            'it is not linear in load but hyperbolic.',
+          'At ρ = 0.833 the queue holds about 5 items; at ρ = 0.99 it holds 99.',
+          'That is why a system running at 70% capacity feels fine and the same system at 95% ' +
+            'feels broken, and why capacity planning targets a utilisation rather than a ' +
+            'throughput.'
+        ],
         example: 'At ρ = 0.833 the queue holds 5 items; at ρ = 0.99 it holds 99.'
       },
       {
@@ -787,13 +807,17 @@
         readAs: 'The number of items in the system equals the arrival rate multiplied by the time each one ' +
           'spends there. It holds for any queue at all, whatever the arrival pattern or service order, ' +
           'which is what makes it so useful.',
-        detail: 'Little\'s law says the average number of items in a system equals the arrival rate ' +
-          'times the average time each spends there, and its power is how few assumptions it needs: ' +
-          'no distribution, no independence, no service discipline — only that the system is stable ' +
-          'over the interval measured. That makes it a measurement tool rather than a model. If you ' +
-          'can observe two of the three quantities you get the third for free, which is how a queue ' +
-          'depth of 19 items at 11 400 arrivals per second is known to mean 1.67 ms of waiting, ' +
-          'without instrumenting a single request.',
+        detail: [
+          'Little\'s law says the average number of items in a system equals the arrival rate ' +
+            'times the average time each spends there.',
+          'Its power is how few assumptions it needs: no distribution, no independence, no ' +
+            'service discipline. It asks only that the system is stable over the interval ' +
+            'measured.',
+          'That makes it a measurement tool rather than a model. If you can observe two of the ' +
+            'three quantities you get the third for free.',
+          'A queue depth of 19 items at 11 400 arrivals per second therefore means 1.67 ms of ' +
+            'waiting, without instrumenting a single request.'
+        ],
         example: 'A queue of 19 items at 11 400 arrivals a second is 1.67 ms of waiting, whatever the distribution.'
       },
       {
@@ -809,13 +833,17 @@
         },
         plain: 'One slow item at the front stalls every item behind it, however much capacity the ring has.',
         formal: 'FIFO service, one server',
-        detail: 'Strict FIFO order plus a single server means the item at the front owns the queue ' +
-          'until it completes, so one slow item delays every item behind it by its full duration — a ' +
-          'single 50 ms request in a queue of 2 048 adds 50 ms to all 2 047 others. Capacity does ' +
-          'not help, because the problem is service order rather than space. The fixes all break one ' +
-          'of the two premises: multiple servers so others can proceed, multiple queues so unrelated ' +
-          'work is not serialised behind it, or an out-of-order protocol. HTTP/2 over one TCP ' +
-          'connection is the famous case, and it is why HTTP/3 moved to QUIC.',
+        detail: [
+          'Strict FIFO order plus a single server means the item at the front owns the queue ' +
+            'until it completes. One slow item then delays every item behind it by its full ' +
+            'duration.',
+          'A single 50 ms request in a queue of 2 048 adds 50 ms to all 2 047 others. Capacity ' +
+            'does not help, because the problem is service order rather than space.',
+          'The fixes all break one of the two premises: multiple servers so others can proceed, ' +
+            'multiple queues so unrelated work is not serialised behind it, or an out-of-order ' +
+            'protocol.',
+          'HTTP/2 over one TCP connection is the famous case, and it is why HTTP/3 moved to QUIC.'
+        ],
         example: 'A single 50 ms item in a queue of 2 048 delays all 2 047 behind it by 50 ms.'
       }
     ]

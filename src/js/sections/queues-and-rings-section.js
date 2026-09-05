@@ -48,7 +48,7 @@
           '    Partial --> Empty: shift drains the last item'
         ].join('\n')
       },
-      insight: 'The wasted slot is not a memory optimisation you missed — it is what makes the ' +
+      insight: 'The wasted slot is not a memory optimisation you missed. It is what makes the ' +
         'empty/full test a single comparison with no extra shared counter, and that is precisely ' +
         'what a lock-free producer and consumer need.'
     }));
