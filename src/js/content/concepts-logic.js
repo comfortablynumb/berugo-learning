@@ -314,12 +314,15 @@
         term: 'A multiplexer is the universal combinational element',
         plain: 'Select one of several inputs with an address.',
         formal: 'y = d[s], where s is the select value read as a binary number',
-        detail: 'Reading a register, forwarding a result, choosing a cache way, picking the '
-          + 'next program counter — all of them are "select one of these", and all of them are '
-          + 'this block. A lookup table in an FPGA is a multiplexer whose data inputs are held '
-          + 'in configuration bits, which is why an FPGA can implement any function of its '
-          + 'input count. When an instruction set limits how many sources an operand can have, '
-          + 'the limit is usually this block\'s depth.',
+        detail: [
+          'Reading a register, forwarding a result, choosing a cache way, picking the next '
+            + 'program counter: all of them are "select one of these".',
+          'All of them are this block.',
+          'A lookup table in an FPGA is a multiplexer whose data inputs are held in configuration '
+            + 'bits, which is why an FPGA can implement any function of its input count.',
+          'When an instruction set limits how many sources an operand can have, the limit is '
+            + 'usually this block\'s depth.'
+        ],
         example: 'A 4:1 tree is 3 gates at depth 6; the same function flat is 13 gates at depth '
           + '9, and both agree on all 64 input vectors.'
       },
@@ -344,18 +347,20 @@
             '    end'
           ].join('\n'),
           caption: 'The same 4:1 multiplexer twice. The flat form is constant depth only if a '
-            + 'wide AND and a wide OR are single gates; built from two-input gates it is both '
+            + 'wide AND and a wide OR are single gates. Built from two-input gates it is both '
             + 'larger and deeper, which is what the demo measures.'
         },
         plain: 'A tree of 2:1 stages, or one level of decoded terms.',
         formal: 'tree: depth grows as log2 of the width, gates linearly. Flat: a term per input.',
         readAs: 'the tree has a depth of about the base-two logarithm of the number of data inputs.',
-        detail: 'The flat form is described everywhere as constant depth, and that is only true '
-          + 'with unbounded fan-in — a PLA row, a memory word line, a domino AND-OR. In a '
-          + 'standard cell library the wide AND and the wide OR are themselves trees, so the '
-          + 'flat multiplexer pays a logarithm twice and loses on both axes. The demo builds '
-          + 'both from two-input gates and prints the result, which is more useful than the '
-          + 'slogan it replaces.',
+        detail: [
+          'The flat form is described everywhere as constant depth, and that is only true with '
+            + 'unbounded fan-in: a PLA row, a memory word line, a domino AND-OR.',
+          'In a standard cell library the wide AND and the wide OR are themselves trees.',
+          'So the flat multiplexer pays a logarithm twice and loses on both axes.',
+          'The demo builds both from two-input gates and prints the result, which is more useful '
+            + 'than the slogan it replaces.'
+        ],
         example: 'At 16:1 the tree is 15 gates at depth 12 and the flat form is 83 gates at '
           + 'depth 17 — larger and slower.'
       },
@@ -363,12 +368,16 @@
         term: 'A decoder turns an address into one hot wire, and it is the mux\'s dual',
         plain: 'n address lines drive 2 to the n outputs, exactly one of which is high.',
         formal: 'y_v = 1 exactly when the address equals v',
-        detail: 'Every memory, register file and jump table contains one, and it is the same '
-          + 'structure as the flat multiplexer with the data inputs removed — which is why the '
-          + 'two share a cost curve. Recognising the duality is what stops a memory from '
-          + 'looking like a new kind of circuit: it is a decoder on the write side, a '
-          + 'multiplexer on the read side, and some storage in between. Both grow with the '
-          + 'number of addresses, which is why address decoding is pipelined in large arrays.',
+        detail: [
+          'Every memory, register file and jump table contains one.',
+          'It is the same structure as the flat multiplexer with the data inputs removed, which '
+            + 'is why the two share a cost curve.',
+          'Recognising the duality is what stops a memory from looking like a new kind of '
+            + 'circuit. It is a decoder on the write side, a multiplexer on the read side, and '
+            + 'some storage in between.',
+          'Both grow with the number of addresses, which is why address decoding is pipelined in '
+            + 'large arrays.'
+        ],
         example: 'A 2-bit decoder is 6 gates at depth 3 and agrees with its model on all 4 '
           + 'input vectors; the 3-bit version is 19 gates at depth 5.'
       },
@@ -376,12 +385,14 @@
         term: 'A priority encoder is a chain, and that is why interrupt latency grows',
         plain: 'Report the index of the highest set input, plus a valid flag.',
         formal: 'input i wins exactly when it is set and nothing above it is',
-        detail: 'The "nothing above" signal has to ripple down the whole width, so unlike '
-          + 'equality — which is a tree because OR is associative — priority cannot be '
-          + 'flattened. It is the same distinction as a parallel reduction against a sequential '
-          + 'fold, and it has the same consequence: adding requesters adds latency rather than '
-          + 'just area. The valid flag has to exist because "no input set" and "input zero set" '
-          + 'would otherwise produce the same index.',
+        detail: [
+          'The "nothing above" signal has to ripple down the whole width.',
+          'Equality is a tree because OR is associative; priority cannot be flattened that way.',
+          'It is the same distinction as a parallel reduction against a sequential fold, and it '
+            + 'has the same consequence: adding requesters adds latency rather than just area.',
+          'The valid flag has to exist because "no input set" and "input zero set" would '
+            + 'otherwise produce the same index.'
+        ],
         example: 'A 4-input priority encoder is 9 gates at depth 7, checked on all 16 vectors; '
           + 'the depth is the chain, not the encode.'
       },
@@ -389,12 +400,15 @@
         term: 'Equality is a tree and magnitude is a chain',
         plain: 'Equal is an XNOR per bit and an AND tree; less-than needs the most significant differing bit.',
         formal: 'a < b when at the highest bit where they differ, a has 0 and b has 1',
-        detail: 'The structural difference is why an unsigned comparison costs about as much as '
-          + 'a subtraction — the comparator is a subtractor that throws the difference away — '
-          + 'while equality is cheap and shallow. That asymmetry shows up in an instruction set '
-          + 'as branch-if-equal being available everywhere and branch-if-less-than sometimes '
-          + 'costing more, and in a cache as tag comparison being an equality test rather than '
-          + 'an ordering one.',
+        detail: [
+          'The structural difference is why an unsigned comparison costs about as much as a '
+            + 'subtraction, while equality is cheap and shallow.',
+          'The comparator is a subtractor that throws the difference away.',
+          'That asymmetry shows up in an instruction set as branch-if-equal being available '
+            + 'everywhere and branch-if-less-than sometimes costing more.',
+          'It shows up in a cache as tag comparison being an equality test rather than an '
+            + 'ordering one.'
+        ],
         example: 'A 4-bit comparator is 24 gates and 152 transistors at depth 13, verified on '
           + 'all 256 input pairs.'
       },
@@ -403,12 +417,15 @@
         plain: 'One multiplexer stage per bit of the shift amount, each moving by a power of two.',
         formal: 'log2(width) stages handle any distance, with depth independent of the amount',
         readAs: 'the number of shifting stages is the base-two logarithm of the width of the word.',
-        detail: 'The alternative — shifting one place at a time — has a delay proportional to '
-          + 'the distance, which is both slow and a timing side channel: an attacker who can '
-          + 'measure how long a shift took learns the operand. Constant-time behaviour is a '
-          + 'property of the structure, not of the code. The same block with the wrap-around '
-          + 'wired in becomes a rotator, which is why rotate is as cheap as shift on most '
-          + 'machines and free in a cryptographic primitive.',
+        detail: [
+          'The alternative is shifting one place at a time, which has a delay proportional to the '
+            + 'distance.',
+          'That is both slow and a timing side channel: an attacker who can measure how long a '
+            + 'shift took learns the operand.',
+          'Constant-time behaviour is a property of the structure, not of the code.',
+          'The same block with the wrap-around wired in becomes a rotator, which is why rotate is '
+            + 'as cheap as shift on most machines and free in a cryptographic primitive.'
+        ],
         example: 'An 8-bit barrel shifter is 24 gates and 288 transistors at depth 9, verified '
           + 'on all 2 048 input vectors.'
       },
@@ -417,12 +434,15 @@
         plain: 'A block with eleven inputs has 2 048 possible vectors; drive them all.',
         formal: 'for a combinational block, correctness is a finite statement over 2^n vectors',
         readAs: 'the number of possible input vectors is two raised to the power of the input count.',
-        detail: 'The model must be written from the specification in arithmetic rather than '
-          + 'derived from the circuit, or it agrees by construction and proves nothing. That is '
-          + 'the single most transferable idea in this section: an oracle that shares structure '
-          + 'with the implementation is not an oracle. Where the space is too large — twenty '
-          + 'inputs is a million vectors and thirty-two is four billion — the honest report says '
-          + 'so rather than implying coverage it did not have.',
+        detail: [
+          'The model must be written from the specification in arithmetic rather than derived '
+            + 'from the circuit, or it agrees by construction and proves nothing.',
+          'That is the single most transferable idea in this section: an oracle that shares '
+            + 'structure with the implementation is not an oracle.',
+          'Sometimes the space is too large. Twenty inputs is a million vectors and thirty-two is '
+            + 'four billion.',
+          'The honest report says so rather than implying coverage it did not have.'
+        ],
         example: 'The demo checks every one of the 2 048 vectors of the barrel shifter, and '
           + 'refuses the 16:1 multiplexer at 20 inputs, saying why.'
       },
@@ -430,12 +450,16 @@
         term: 'Each block\'s cost shape becomes a limit somewhere in a real machine',
         plain: 'Depth is time, width is area, and both show up as design limits.',
         formal: 'forwarding sources, read ports and interrupt sources each add to a block on a critical path',
-        detail: 'A pipeline forwards from three places rather than ten because each source is '
-          + 'another input on a multiplexer in front of the ALU. A register file has two read '
-          + 'ports because a third duplicates a multiplexer tree per bit. An interrupt '
-          + 'controller has a priority chain, so its latency grows with the number of sources. '
-          + 'None of these appear as reasons in a manual — only as numbers — and all of them '
-          + 'are the cost curves on this page.',
+        detail: [
+          'A pipeline forwards from three places rather than ten, because each source is another '
+            + 'input on a multiplexer in front of the ALU.',
+          'A register file has two read ports because a third duplicates a multiplexer tree per '
+            + 'bit.',
+          'An interrupt controller has a priority chain, so its latency grows with the number of '
+            + 'sources.',
+          'None of these appear as reasons in a manual, only as numbers. All of them are the cost '
+            + 'curves on this page.'
+        ],
         example: 'The demo\'s table names, for each block, the datapath it sits in and the '
           + 'failure its cost causes.'
       }
