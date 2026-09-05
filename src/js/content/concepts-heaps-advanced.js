@@ -323,11 +323,15 @@
         formal: 'locating an arbitrary key is Θ(n) without an index',
         readAs: 'A heap can find its minimum instantly and any other element not at all. Changing a specific ' +
           'key needs a separate map from key to position, kept in step with every swap.',
-        detail: 'Every statement of the decrease-key bound quietly assumes you already hold a pointer ' +
-          'to the node. In an array heap you do not: the element for node 4 711 is at whatever slot ' +
-          'the sifts have left it in, and finding it means scanning. That turns an O(log n) operation ' +
-          'into an O(n) one and makes the whole idea pointless — which is why an indexed priority ' +
-          'queue is not an optimisation but the precondition for the operation existing at all.',
+        detail: [
+          'Every statement of the decrease-key bound quietly assumes you already hold a pointer to ' +
+            'the node.',
+          'In an array heap you do not. The element for node 4 711 is at whatever slot the sifts ' +
+            'have left it in, and finding it means scanning.',
+          'That turns an O(log n) operation into an O(n) one, and makes the whole idea pointless.',
+          'So an indexed priority queue is not an optimisation but the precondition for the ' +
+            'operation existing at all.'
+        ],
         example: 'Without a position map, Dijkstra with decrease-key is O(V²) rather than O(E log V).'
       },
       {
@@ -337,12 +341,15 @@
         readAs: 'The index and the heap agree: whatever id sits at heap position i, the index maps that id ' +
           'back to i. Every swap has to update both, and this is the invariant a bug in that update ' +
           'breaks.',
-        detail: 'The map is the whole mechanism, and the invariant is one line: the slot recorded for ' +
-          'a handle is the slot that actually holds it. Maintaining it means every swap writes three ' +
-          'things rather than two, which is a real cost on the hottest path in the structure. The ' +
-          'invariant is also the thing to assert in tests, because a stale entry does not crash — it ' +
-          'silently decreases the wrong element, and the algorithm above happily produces a wrong ' +
-          'answer that looks plausible.',
+        detail: [
+          'The map is the whole mechanism, and the invariant is one line: the slot recorded for a ' +
+            'handle is the slot that actually holds it.',
+          'Maintaining it means every swap writes three things rather than two, which is a real ' +
+            'cost on the hottest path in the structure.',
+          'The invariant is also the thing to assert in tests, because a stale entry does not ' +
+            'crash. It silently decreases the wrong element, and the algorithm above happily ' +
+            'produces a wrong answer that looks plausible.'
+        ],
         example: 'A missed position update makes decreaseKey edit a neighbour\'s key, and Dijkstra returns short distances.'
       },
       {
@@ -358,72 +365,92 @@
         },
         plain: 'Do not decrease anything: push a second entry with the better key and ignore the stale one when it surfaces.',
         formal: 'push on improvement, skip on pop if already settled',
-        detail: 'The alternative removes the handle map entirely. When a shorter path is found, push a ' +
-          'new entry rather than editing the old one; when a pop produces a node that has already ' +
-          'been settled — or whose key is worse than the recorded distance — discard it and pop ' +
-          'again. The structure needs nothing beyond push and pop, so any heap works, and the code is ' +
-          'shorter than the indexed version by the entire position map. This is what most shipped ' +
-          'Dijkstra implementations actually contain.',
+        detail: [
+          'The alternative removes the handle map entirely.',
+          'When a shorter path is found, push a new entry rather than editing the old one.',
+          'When a pop produces a node that has already been settled — or whose key is worse than ' +
+            'the recorded distance — discard it and pop again.',
+          'The structure needs nothing beyond push and pop, so any heap works, and the code is ' +
+            'shorter than the indexed version by the entire position map.',
+          'This is what most shipped Dijkstra implementations actually contain.'
+        ],
         example: 'On the demo graph, lazy insertion pushed 29 573 entries and discarded 7 073 of them as stale.'
       },
       {
         term: 'What lazy costs',
         plain: 'More pushes, more comparisons, a larger queue — and it still usually wins on the clock.',
         formal: 'queue bounded by E rather than V',
-        detail: 'The lazy version does more of everything the counters measure: on a 22 500-node grid ' +
-          'it pushed 29 573 entries against 22 500, made 444 333 comparisons against 336 961, and ' +
-          'peaked at 398 queue entries against 291. It finished first anyway, because none of its ' +
-          'operations touch a hash map and its heap is a plain array. That is the same lesson as ' +
-          'M05.5 from the other direction: the counter and the clock disagree, and which one matters ' +
-          'depends on what the machine is actually charging for.',
+        detail: [
+          'The lazy version does more of everything the counters measure. On a 22 500-node grid it ' +
+            'pushed 29 573 entries against 22 500, made 444 333 comparisons against 336 961, and ' +
+            'peaked at 398 queue entries against 291.',
+          'It finished first anyway, because none of its operations touch a hash map and its heap ' +
+            'is a plain array.',
+          'That is the same lesson as M05.5 from the other direction. The counter and the clock ' +
+            'disagree, and which one matters depends on what the machine is actually charging for.'
+        ],
         example: '32% more comparisons, 37% larger queue, and faster in wall clock on the same graph.'
       },
       {
         term: 'The unbounded queue',
         plain: 'A lazy queue grows with the number of improvements, not the number of nodes — and nothing stops it.',
         formal: 'worst case one entry per edge',
-        detail: 'This is the failure mode people forget. The indexed queue holds at most one entry per ' +
-          'node, so its memory is bounded by V and cannot surprise you. The lazy queue holds one ' +
-          'entry per improvement, which on a dense graph approaches E — an order of magnitude more — ' +
-          'and on a pathological input, more still. Nothing in the algorithm notices until the ' +
-          'allocator does, and the fix is not to abandon the technique but to bound it: cap the ' +
-          'queue, or fall back to the indexed form above a threshold.',
+        detail: [
+          'This is the failure mode people forget.',
+          'The indexed queue holds at most one entry per node, so its memory is bounded by V and ' +
+            'cannot surprise you.',
+          'The lazy queue holds one entry per improvement, which on a dense graph approaches E — ' +
+            'an order of magnitude more — and on a pathological input, more still.',
+          'Nothing in the algorithm notices until the allocator does. The fix is not to abandon ' +
+            'the technique but to bound it: cap the queue, or fall back to the indexed form above ' +
+            'a threshold.'
+        ],
         example: 'On a dense graph the lazy queue can hold |E| entries where the indexed one holds |V|.'
       },
       {
         term: 'Stale-entry detection',
         plain: 'Two checks: has this node been settled, and is this key worse than the best known?',
         formal: 'if (done[v]) skip; if (key > distance[v]) skip',
-        detail: 'Both checks are needed and they catch different things. The settled check discards ' +
-          'entries for nodes already finalised, which is the common case. The key check discards ' +
-          'entries superseded by a later improvement for a node not yet settled — the second push ' +
-          'made the first obsolete. Omitting the second is a subtle bug: the algorithm still ' +
-          'terminates and still produces correct distances, but it relaxes edges from stale ' +
-          'distances and does measurably more work.',
+        detail: [
+          'Both checks are needed and they catch different things.',
+          'The settled check discards entries for nodes already finalised, which is the common ' +
+            'case.',
+          'The key check discards entries superseded by a later improvement for a node not yet ' +
+            'settled: the second push made the first obsolete.',
+          'Omitting the second is a subtle bug. The algorithm still terminates and still produces ' +
+            'correct distances, but it relaxes edges from stale distances and does measurably more ' +
+            'work.'
+        ],
         example: 'The demo counted 7 073 stale pops out of 29 573 pushes — a quarter of the queue traffic.'
       },
       {
         term: 'Handles beyond Dijkstra',
         plain: 'Anything that changes a queued item\'s priority needs one: schedulers, event loops, cache eviction.',
         formal: 'update-in-place requires identity',
-        detail: 'The pattern generalises past graph algorithms. A scheduler that reprioritises a ' +
-          'runnable task, an event loop that reschedules a timer, an LRU-with-priorities cache that ' +
-          'promotes an entry — all of them need to reach into the queue and change something, and ' +
-          'all of them face the same choice. Either give the structure identity through a handle ' +
-          'map, or make entries immutable and tolerate duplicates. Which is right depends on whether ' +
-          'the memory or the code is the scarcer resource.',
+        detail: [
+          'The pattern generalises past graph algorithms.',
+          'Think of a scheduler that reprioritises a runnable task, an event loop that reschedules ' +
+            'a timer, or an LRU-with-priorities cache that promotes an entry. All of them need to ' +
+            'reach into the queue and change something.',
+          'All of them face the same choice. Either give the structure identity through a handle ' +
+            'map, or make entries immutable and tolerate duplicates.',
+          'Which is right depends on whether the memory or the code is the scarcer resource.'
+        ],
         example: 'A timer reschedule is a decrease-key, and the same lazy-versus-indexed decision applies.'
       },
       {
         term: 'The simpler option is usually right',
         plain: 'Lazy insertion is faster and shorter. Reach for the indexed heap when the memory bound matters.',
         formal: 'simplicity is a measurable property',
-        detail: 'The indexed heap is the version in the textbooks and the lazy one is the version in ' +
-          'the repositories, and the measurements support the repositories. The honest decision rule ' +
-          'is about the queue size rather than the speed: if the graph is sparse and the queue stays ' +
-          'small, take the simpler code; if the graph is dense, or the input is adversarial, or the ' +
-          'memory ceiling is real, pay for the handle map. Either way, measure the peak queue size — ' +
-          'it is the number the choice actually turns on.',
+        detail: [
+          'The indexed heap is the version in the textbooks and the lazy one is the version in the ' +
+            'repositories, and the measurements support the repositories.',
+          'The honest decision rule is about the queue size rather than the speed.',
+          'If the graph is sparse and the queue stays small, take the simpler code. If the graph ' +
+            'is dense, or the input is adversarial, or the memory ceiling is real, pay for the ' +
+            'handle map.',
+          'Either way, measure the peak queue size. It is the number the choice actually turns on.'
+        ],
         example: 'The peak queue size is the metric to instrument, because it is the one that fails a machine.'
       }
     ],

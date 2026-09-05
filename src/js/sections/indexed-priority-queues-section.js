@@ -25,16 +25,17 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'Decrease-key has a problem the bound never mentions: finding the element. A heap is an array ' +
-          'in no useful order, so locating the entry for node 4 711 is a linear scan — which turns an ' +
-          'O(log n) operation into an O(n) one and undoes the whole point.',
+        'Decrease-key has a problem the bound never mentions: finding the element. A heap is an ' +
+          'array in no useful order, so locating the entry for node 4 711 is a linear scan. That ' +
+          'turns an O(log n) operation into an O(n) one, and undoes the whole point.',
         'The fix is a second structure: a map from handle to heap position, updated on every swap. ' +
           'That is an indexed priority queue, and it is what makes decrease-key genuinely logarithmic. ' +
           'The cost is the map itself, an extra write on every sift step, and an invariant that has ' +
           'to hold after every operation.',
-        'The alternative is to not decrease anything. Push a duplicate entry with the better key and ' +
-          'ignore the stale one when it surfaces — the queue grows, but nothing needs a handle map ' +
-          'and the code is four lines shorter. The demo runs both and reports what each actually costs.'
+        'The alternative is to not decrease anything. Push a duplicate entry with the better key ' +
+          'and ignore the stale one when it surfaces. The queue grows, but nothing needs a handle ' +
+          'map and the code is four lines shorter. The demo runs both and reports what each ' +
+          'actually costs.'
       ],
       demo: { title: 'Interactive demo — decrease-key against duplicates', markup: root.IndexedPriorityQueuesTemplate.render() },
       diagram: {
@@ -49,9 +50,10 @@
         ].join('\n')
       },
       insight: 'Lazy deletion is usually faster and always simpler, at the cost of an unbounded ' +
-        'queue. Bounding it is the thing people forget, and it is where the memory goes: a queue that ' +
-        'holds one entry per edge improvement rather than one per node can be an order of magnitude ' +
-        'larger on a dense graph, and nothing in the algorithm notices until the allocator does.'
+        'queue. Bounding it is the thing people forget, and it is where the memory goes. A queue ' +
+        'that holds one entry per edge improvement rather than one per node can be an order of ' +
+        'magnitude larger on a dense graph. Nothing in the algorithm notices until the allocator ' +
+        'does.'
     };
   }
 
