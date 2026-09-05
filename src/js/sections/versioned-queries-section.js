@@ -25,50 +25,58 @@
     });
   }
 
+  function diagram() {
+    return {
+      title: 'Diagram — the difference of two versions',
+      caption: 'The quantile index keeps one version per prefix. Version r counts the values in positions ' +
+        '1..r and version l − 1 counts those in 1..l − 1, so their difference is the count for the interval — ' +
+        'and the descent reads both trees together rather than building a third.',
+      definition: [
+        'flowchart LR',
+        '    A["version l − 1<br/>counts for 1..l−1"] --> D{"left child count<br/>v_r.left − v_{l−1}.left"}',
+        '    B["version r<br/>counts for 1..r"] --> D',
+        '    D -- "k ≤ that count" --> E["descend left"]',
+        '    D -- "k > that count" --> F["k −= count<br/>descend right"]',
+        '    E --> G["leaf reached: the k-th smallest in l..r"]',
+        '    F --> G'
+      ].join('\n')
+    };
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'A segment tree update rewrites one root-to-leaf path, so making it persistent costs nothing beyond ' +
-          'not overwriting: build the ⌈log₂ n⌉ + 1 nodes on that path, point them at the siblings the previous ' +
-          'version already had, and keep the new root. On 1 024 elements that is exactly 11 nodes per update, ' +
-          'and 500 updates leave every one of the 501 versions queryable for 241 504 bytes against the ' +
-          '32 817 504 a snapshot per version would need.',
-        'The queries themselves are not slower. A version is a root pointer, so a range sum at version 12 is ' +
-          'the same descent as a range sum at the head — there is no version index to search and no log factor ' +
-          'to pay. The demo checks that claim rather than asserting it: 2 004 range sums spread over every ' +
-          'version, each compared against the array as it stood at that moment, with 0 disagreements.',
-        'The second use is the one that has no non-persistent equivalent. Build one version per array prefix, ' +
-          'each counting how many values so far fall in each part of the value domain; the counts for ' +
-          'positions l to r are the difference of versions r and l − 1, and a descent guided by that ' +
-          'difference finds the k-th smallest in the range in a single pass — 10.0 descents per query over a ' +
-          '1 000-value domain, for 10.98 nodes per value.'
+        'A segment tree update rewrites one root-to-leaf path, so making it persistent costs ' +
+          'nothing beyond not overwriting. Build the ⌈log₂ n⌉ + 1 nodes on that path, point them ' +
+          'at the siblings the previous version already had, and keep the new root. On 1 024 ' +
+          'elements that is exactly 11 nodes per update. After 500 updates every one of the 501 ' +
+          'versions is queryable for 241 504 bytes, against the 32 817 504 a snapshot per version ' +
+          'would need.',
+        'The queries themselves are not slower. A version is a root pointer, so a range sum at ' +
+          'version 12 is the same descent as a range sum at the head. There is no version index to ' +
+          'search and no log factor to pay. The demo checks that claim rather than asserting it. ' +
+          'It runs 2 004 range sums spread over every version, each compared against the array as ' +
+          'it stood at that moment, with 0 disagreements.',
+        'The second use is the one that has no non-persistent equivalent. Build one version per ' +
+          'array prefix, each counting how many values so far fall in each part of the value ' +
+          'domain. The counts for positions l to r are the difference of versions r and l − 1. A ' +
+          'descent guided by that difference finds the k-th smallest in the range in a single ' +
+          'pass. That is 10.0 descents per query over a 1 000-value domain, for 10.98 nodes per ' +
+          'value.'
       ],
       demo: {
         title: 'Interactive demo — every version queryable, and the quantile index that needs them',
         markup: root.VersionedQueriesTemplate.render()
       },
-      diagram: {
-        title: 'Diagram — the difference of two versions',
-        caption: 'The quantile index keeps one version per prefix. Version r counts the values in positions ' +
-          '1..r and version l − 1 counts those in 1..l − 1, so their difference is the count for the interval — ' +
-          'and the descent reads both trees together rather than building a third.',
-        definition: [
-          'flowchart LR',
-          '    A["version l − 1<br/>counts for 1..l−1"] --> D{"left child count<br/>v_r.left − v_{l−1}.left"}',
-          '    B["version r<br/>counts for 1..r"] --> D',
-          '    D -- "k ≤ that count" --> E["descend left"]',
-          '    D -- "k > that count" --> F["k −= count<br/>descend right"]',
-          '    E --> G["leaf reached: the k-th smallest in l..r"]',
-          '    F --> G'
-        ].join('\n')
-      },
-      insight: 'The reason this works is that a persistent structure makes "the state at time t" a first-class ' +
-        'value rather than a reconstruction. Once versions are values you can subtract them, and a whole class ' +
-        'of queries that look like they need a different index — order statistics on a range, "how many ' +
-        'distinct values before position i", a snapshot read from an hour ago — collapse into one descent over ' +
-        'a structure you already keep. The cost is a garbage-collection question rather than a query one: ' +
-        'nothing is ever freed until the version pointing at it is dropped.'
+      diagram: diagram(),
+      insight: 'The reason this works is that a persistent structure makes "the state at time t" a ' +
+        'first-class value rather than a reconstruction. Once versions are values you can subtract ' +
+        'them. A whole class of queries that look like they need a different index collapses into ' +
+        'one descent over a structure you already keep. Order statistics on a range, "how many ' +
+        'distinct values before position i", a snapshot read from an hour ago: all of them. The ' +
+        'cost is a garbage-collection question rather than a query one: nothing is ever freed ' +
+        'until the version pointing at it is dropped.'
     };
   }
 

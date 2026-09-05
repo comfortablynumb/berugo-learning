@@ -299,11 +299,15 @@
         formal: 'exactly ⌈log₂ n⌉ + 1 new nodes per update',
         readAs: 'Each update rebuilds only the root-to-leaf path, which is the tree height plus the leaf ' +
           'itself. Everything else is shared with the previous version, untouched.',
-        detail: 'This is the cleanest instance of structural sharing there is, because the count is exact ' +
-          'rather than expected: a segment tree over n leaves is perfectly balanced, there is no rebalancing, ' +
-          'and an update touches precisely the path. The measured figure and the bound are the same number, ' +
-          'which makes it the right structure to see the idea in before meeting the ones where rotations blur ' +
-          'it.',
+        detail: [
+          'This is the cleanest instance of structural sharing there is, because the count is exact ' +
+            'rather than expected.',
+          'A segment tree over n leaves is perfectly balanced, there is no rebalancing, and an ' +
+            'update touches precisely the path.',
+          'The measured figure and the bound are the same number.',
+          'That makes it the right structure to see the idea in, before meeting the ones where ' +
+            'rotations blur it.'
+        ],
         example: '1 024 leaves and 500 updates: 11 nodes per update against a bound of ⌈log₂ 1 024⌉ + 1 = 11.'
       },
       {
@@ -322,22 +326,29 @@
         formal: 'O(n + u log n) against O(u · n) for snapshots',
         readAs: 'Persistence costs one build plus a log per update. Taking a full snapshot per update costs a ' +
           'copy each time. The gap between those two is the entire reason the structure exists.',
-        detail: 'The arithmetic is worth doing once because the ratio is larger than intuition suggests. 500 ' +
-          'versions of a 1 024-element array is half a million element-slots if each version is a copy, and ' +
-          'about seven and a half thousand nodes if the versions share - and the gap widens linearly with the ' +
-          'number of versions. That is why snapshotting a database by copying pages is a completely different ' +
-          'engineering proposition from snapshotting it by sharing them.',
+        detail: [
+          'The arithmetic is worth doing once, because the ratio is larger than intuition suggests.',
+          'Take 500 versions of a 1 024-element array. That is half a million element-slots if each ' +
+            'version is a copy, and about seven and a half thousand nodes if the versions share.',
+          'The gap widens linearly with the number of versions.',
+          'That is why snapshotting a database by copying pages is a completely different ' +
+            'engineering proposition from snapshotting it by sharing them.'
+        ],
         example: '241 504 bytes for 501 versions, against 32 817 504 if each version were copied - 135.9× less.'
       },
       {
         term: 'Query any version at the cost of the current one',
         plain: 'A historical query is an ordinary descent from that version\'s root; nothing about it is slower.',
         formal: 'the version is a root pointer, not a search key',
-        detail: 'This is what separates a persistent structure from a change log. Reconstructing a past state ' +
-          'from a log is O(changes); reading it from a persistent structure is O(log n) and identical to reading ' +
-          'the present. That property is what makes time-travel queries and snapshot isolation feasible rather ' +
-          'than merely possible, and it is why a database\'s MVCC layer stores versions as structure rather than ' +
-          'as deltas to replay.',
+        detail: [
+          'This is what separates a persistent structure from a change log.',
+          'Reconstructing a past state from a log is O(changes). Reading it from a persistent ' +
+            'structure is O(log n), and identical to reading the present.',
+          'That property is what makes time-travel queries and snapshot isolation feasible rather ' +
+            'than merely possible.',
+          'It is why a database\'s MVCC layer stores versions as structure rather than as deltas to ' +
+            'replay.'
+        ],
         example: '2 004 historical range-sum queries spread over all 501 versions: 0 disagreed with the model.'
       },
       {
@@ -347,44 +358,61 @@
         readAs: 'Subtract one persistent version from another and what remains is exactly the elements added ' +
           'between them — the square brackets meaning both ends are included. Two roots and a ' +
           'subtraction answer a range query with no extra structure.',
-        detail: 'The trick is worth learning as a technique rather than as a structure. Two persistent trees ' +
-          'built from the same shape can be walked *together*, and the difference of their stored counts is the ' +
-          'count for the interval between them - so a descent guided by that difference finds the k-th smallest ' +
-          'value in a range in one pass. No subtraction of trees actually happens; the descent just reads both ' +
-          'and takes the difference at each step.',
+        detail: [
+          'The trick is worth learning as a technique rather than as a structure.',
+          'Two persistent trees built from the same shape can be walked *together*, and the ' +
+            'difference of their stored counts is the count for the interval between them.',
+          'So a descent guided by that difference finds the k-th smallest value in a range in one ' +
+            'pass.',
+          'No subtraction of trees actually happens; the descent just reads both and takes the ' +
+            'difference at each step.'
+        ],
         example: '512 values over a 1 000-value domain: k-th smallest in any range in 10.0 descents, 0 wrong of 300.'
       },
       {
         term: 'It beats the merge-sort tree it replaces',
         plain: 'The same query cost M08 O(log² n) time and O(n log n) memory; this costs O(log n) and O(n log n) nodes.',
         formal: 'one descent of the value domain rather than a binary search inside every canonical node',
-        detail: 'M08.7 answered "how many values below x in this range" with a merge-sort tree, which stores a ' +
-          'sorted copy of the data at every level and binary-searches inside each of the canonical nodes a query ' +
-          'decomposes into. The persistent construction answers the harder question - the k-th smallest, not ' +
-          'just a count - in a single descent, because the version difference has already done the ' +
-          'decomposition. It is a good example of a structure being replaced by a *representation*.',
+        detail: [
+          'M08.7 answered "how many values below x in this range" with a merge-sort tree.',
+          'That tree stores a sorted copy of the data at every level, and binary-searches inside ' +
+            'each of the canonical nodes a query decomposes into.',
+          'The persistent construction answers the harder question - the k-th smallest, not just a ' +
+            'count - in a single descent, because the version difference has already done the ' +
+            'decomposition.',
+          'It is a good example of a structure being replaced by a *representation*.'
+        ],
         example: '10.98 nodes per value stored, and a query that is 10 descents rather than 45 nodes and 58 comparisons.'
       },
       {
         term: 'Copy-on-write is the same idea at page granularity',
         plain: 'Filesystems and databases share unchanged pages between snapshots and rewrite only the touched path.',
         formal: 'B-tree path copying: a write rebuilds one root-to-leaf path of pages',
-        detail: 'ZFS, Btrfs, LMDB and every modern storage engine that offers snapshots implements exactly the ' +
-          'structure in this section with a page as the node and a disk block as the pointer. The consequences ' +
-          'are the ones the section predicts: snapshots are almost free, a write amplifies to a path of pages ' +
-          'rather than one, and old versions live until something decides they are unreachable. Recognising it ' +
-          'is what makes storage-engine documentation legible.',
+        detail: [
+          'ZFS, Btrfs, LMDB and every modern storage engine that offers snapshots implements ' +
+            'exactly the structure in this section. A page is the node and a disk block is the ' +
+            'pointer.',
+          'The consequences are the ones the section predicts.',
+          'Snapshots are almost free, a write amplifies to a path of pages rather than one, and old ' +
+            'versions live until something decides they are unreachable.',
+          'Recognising it is what makes storage-engine documentation legible.'
+        ],
         example: 'A 4 KB page tree of depth 4 rewrites 4 pages per update and shares the rest, whatever the snapshot count.'
       },
       {
         term: 'The version is data, and it can be branched',
         plain: 'Nothing forces versions to form a line; updating an old version makes a tree of versions.',
         formal: 'partial persistence gives a path, full persistence gives a DAG',
-        detail: 'Because an update takes a root and returns a root, applying one to an *old* root produces a ' +
-          'branch rather than an extension - which is full persistence, and which is what makes this structure ' +
-          'the natural fit for anything with a branching history. Git is the obvious example and a database ' +
-          'with long-lived read snapshots is the common one. The only thing branching costs is that "the ' +
-          'latest version" stops being a well-defined idea.',
+        detail: [
+          'Because an update takes a root and returns a root, applying one to an *old* root ' +
+            'produces a branch rather than an extension.',
+          'That is full persistence, and it is what makes this structure the natural fit for ' +
+            'anything with a branching history.',
+          'Git is the obvious example, and a database with long-lived read snapshots is the common ' +
+            'one.',
+          'The only thing branching costs is that "the latest version" stops being a well-defined ' +
+            'idea.'
+        ],
         example: 'Every version here is a root pointer, so branching from version 200 is the same call as extending version 500.'
       },
       {
@@ -393,11 +421,14 @@
         formal: 'nodes(v) − nodes(v−1) is the number the structure is chosen for',
         readAs: 'The figure that matters is how many nodes one more version costs, not how many exist in ' +
           'total. If that difference is the tree height, the sharing is working.',
-        detail: 'A total node count grows with the history whatever the structure does, so it cannot ' +
-          'distinguish sharing from copying. The per-version delta can, and it is also the number an operator ' +
-          'needs: it says what one more snapshot will cost, which is the question actually being asked when ' +
-          'somebody wonders whether to keep hourly snapshots for a month. Reporting the total instead is how a ' +
-          'structure that has stopped sharing goes unnoticed.',
+        detail: [
+          'A total node count grows with the history whatever the structure does, so it cannot ' +
+            'distinguish sharing from copying.',
+          'The per-version delta can, and it is also the number an operator needs.',
+          'It says what one more snapshot will cost, which is the question actually being asked ' +
+            'when somebody wonders whether to keep hourly snapshots for a month.',
+          'Reporting the total instead is how a structure that has stopped sharing goes unnoticed.'
+        ],
         example: 'Every update adds exactly 11 nodes here, whatever the version number or the history length.'
       }
     ]
