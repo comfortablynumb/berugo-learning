@@ -20,13 +20,16 @@
         formal: 'batches = ⌈n / size⌉',
         readAs: 'The number of batches is n divided by the batch size, rounded up — the ceiling bars — ' +
           'because a final partial batch still has to run.',
-        detail: 'Batch size decides how many times a fixed cost is paid, and that is usually the ' +
-          'dominant term: 10 000 rows sent one at a time is 10 000 round trips, and in batches of ' +
-          '500 it is 20. Because the number of batches falls as n/size, the benefit is steep at ' +
-          'first and then flattens — going from 1 to 100 removes 99% of the overhead, and going from ' +
-          '100 to 10 000 removes most of what little remains. That shape is why the right batch size ' +
-          'is rarely the largest one: past the knee you are buying almost no throughput and paying ' +
-          'for it in latency and memory.',
+        detail: [
+          'Batch size decides how many times a fixed cost is paid, and that is usually the ' +
+            'dominant term. Sending 10 000 rows one at a time is 10 000 round trips; in batches ' +
+            'of 500 it is 20.',
+          'Because the number of batches falls as n/size, the benefit is steep at first and then ' +
+            'flattens. Going from 1 to 100 removes 99% of the overhead, and going from 100 to ' +
+            '10 000 removes most of what little remains.',
+          'That shape is why the right batch size is rarely the largest one. Past the knee you ' +
+            'are buying almost no throughput and paying for it in latency and memory.'
+        ],
         example: '10 000 rows in batches of 500 is 20 round trips instead of 10 000.'
       },
       {
@@ -35,26 +38,31 @@
         formal: 'total = n·per-item + batches·overhead',
         readAs: 'Total cost is the per-item work done n times, plus the fixed per-batch cost paid once per ' +
           'batch. Bigger batches shrink the second term and leave the first alone.',
-        detail: 'Cost splits into a part that scales with items and a part that is charged per batch, ' +
-          'and knowing which is which tells you immediately whether batching will help at all. If ' +
-          'the fixed cost is a 1 ms commit and per-row work is a microsecond, the fixed cost ' +
-          'dominates until the batch reaches a few thousand rows — so batching is the entire ' +
-          'optimisation. If the fixed cost is negligible, batching buys nothing and only adds ' +
-          'latency. Measure the two terms separately before tuning: run one batch of 1 and one of ' +
-          '1 000 and the difference gives you both numbers.',
+        detail: [
+          'Cost splits into a part that scales with items and a part that is charged per batch. ' +
+            'Knowing which is which tells you immediately whether batching will help at all.',
+          'Suppose the fixed cost is a 1 ms commit and per-row work is a microsecond. The fixed ' +
+            'cost then dominates until the batch reaches a few thousand rows, so batching is the ' +
+            'entire optimisation.',
+          'If the fixed cost is negligible, batching buys nothing and only adds latency.',
+          'Measure the two terms separately before tuning. Run one batch of 1 and one of 1 000, ' +
+            'and the difference gives you both numbers.'
+        ],
         example: 'A 1 ms commit dominates until the batch reaches a few thousand rows.'
       },
       {
         term: 'Time to first result',
         plain: 'How long before anything comes out. It rises with batch size.',
         formal: 'first output after batch × stages items',
-        detail: 'A batch produces nothing until it is full, so the first output waits for a whole ' +
-          'batch to accumulate and then to traverse every stage of the pipeline. Increasing the ' +
-          'batch improves throughput and delays that first result in direct proportion, which is the ' +
-          'trade at the heart of this section. Which side matters is a property of the consumer, not ' +
-          'of the pipeline: a user interface is judged on when the first row appears, while a ' +
-          'nightly job is judged on when the last one does and should batch as large as memory ' +
-          'allows.',
+        detail: [
+          'A batch produces nothing until it is full, so the first output waits for a whole batch ' +
+            'to accumulate and then to traverse every stage of the pipeline.',
+          'Increasing the batch improves throughput and delays that first result in direct ' +
+            'proportion, which is the trade at the heart of this section.',
+          'Which side matters is a property of the consumer, not of the pipeline. A user ' +
+            'interface is judged on when the first row appears. A nightly job is judged on when ' +
+            'the last one does, and should batch as large as memory allows.'
+        ],
         example: 'A UI wants the first row; a nightly job does not care.'
       },
       {
@@ -71,26 +79,32 @@
         },
         plain: 'A bounded buffer forces the producer to slow to the consumer\'s rate rather than accumulating.',
         formal: 'producer blocks when the buffer is full',
-        detail: 'When a consumer is slower than its producer, the difference has to go somewhere. A ' +
-          'bounded buffer puts it back on the producer: the buffer fills, the producer blocks, and ' +
-          'the whole pipeline settles at the rate of its slowest stage. An unbounded queue instead ' +
-          'accumulates the difference in memory, which looks like it is working right up to the ' +
-          'out-of-memory kill, and degrades latency the whole way there because every item now waits ' +
-          'behind a growing backlog. Bounding a queue is what converts an invisible memory leak into ' +
-          'a visible, survivable slowdown.',
+        detail: [
+          'When a consumer is slower than its producer, the difference has to go somewhere.',
+          'A bounded buffer puts it back on the producer. The buffer fills, the producer blocks, ' +
+            'and the whole pipeline settles at the rate of its slowest stage.',
+          'An unbounded queue instead accumulates the difference in memory. That looks like it is ' +
+            'working right up to the out-of-memory kill, and it degrades latency the whole way ' +
+            'there, because every item now waits behind a growing backlog.',
+          'Bounding a queue is what converts an invisible memory leak into a visible, survivable ' +
+            'slowdown.'
+        ],
         example: 'An unbounded queue converts a slowdown into an out-of-memory kill.'
       },
       {
         term: 'Double buffering',
         plain: 'Fill one buffer while the other is processed, so neither side waits.',
         formal: 'two buffers, swapped per batch',
-        detail: 'With a single buffer the producer and consumer take turns, so each is idle for ' +
-          'exactly as long as the other is working and the total is the sum of the two times. Two ' +
-          'buffers, swapped when both sides are done, let them overlap: the total becomes the ' +
-          'maximum rather than the sum, which nearly doubles throughput when the stages are ' +
-          'balanced. The cost is twice the buffer memory and a synchronisation point at each swap. ' +
-          'It is the same idea as pipeline depth applied to storage, and it is why graphics and I/O ' +
-          'subsystems have used it for decades.',
+        detail: [
+          'With a single buffer the producer and consumer take turns. Each is idle for exactly as ' +
+            'long as the other is working, and the total is the sum of the two times.',
+          'Two buffers, swapped when both sides are done, let them overlap. The total becomes the ' +
+            'maximum rather than the sum, which nearly doubles throughput when the stages are ' +
+            'balanced.',
+          'The cost is twice the buffer memory and a synchronisation point at each swap.',
+          'It is the same idea as pipeline depth applied to storage, and it is why graphics and ' +
+            'I/O subsystems have used it for decades.'
+        ],
         example: 'Standard in graphics and in I/O pipelines.'
       },
       {
@@ -107,14 +121,18 @@
         },
         plain: 'A per-batch cost divided by the batch size. Doubling the batch halves it, and nothing else changes.',
         formal: 'per item = perItem + fixed/batch',
-        readAs: 'Divide the whole cost by n and the fixed cost per batch is spread across the items in it, so ' +
-          'the per-item figure falls as the batch grows — but only towards perItem, never below it.',
-        detail: 'The per-item cost of a batched pipeline is the intrinsic per-item work plus the ' +
-          'fixed cost divided by the batch size, and only the second term moves when you tune. A ' +
-          '1 ms commit is 1 ms per row at batch 1, 1 µs per row at batch 1 000 and 0.1 µs per row at ' +
-          'batch 10 000 — which also shows where tuning stops paying, because by then the fixed term ' +
-          'has fallen below the intrinsic one and further increases change nothing measurable. ' +
-          'Compute the two terms and you can predict the whole curve instead of searching it.',
+        readAs: 'Divide the whole cost by n and the fixed cost per batch is spread across the ' +
+          'items in it. The per-item figure therefore falls as the batch grows — but only towards ' +
+          'perItem, never below it.',
+        detail: [
+          'The per-item cost of a batched pipeline is the intrinsic per-item work plus the fixed ' +
+            'cost divided by the batch size, and only the second term moves when you tune.',
+          'A 1 ms commit is 1 ms per row at batch 1, 1 µs per row at batch 1 000 and 0.1 µs per ' +
+            'row at batch 10 000.',
+          'That also shows where tuning stops paying. By then the fixed term has fallen below the ' +
+            'intrinsic one, and further increases change nothing measurable.',
+          'Compute the two terms and you can predict the whole curve instead of searching it.'
+        ],
         example: 'A 1 ms commit is 1 ms per row at batch 1 and 0.1 µs per row at batch 10 000.'
       },
       {
@@ -123,13 +141,16 @@
         formal: 'batch ≤ budget / (perRow × stages)',
         readAs: 'The largest batch you can afford is your latency budget divided by the work one row costs ' +
           'across every stage. Anything larger overshoots the deadline.',
-        detail: 'Throughput improves monotonically with batch size, so it cannot choose a batch size ' +
-          'on its own — it always says "larger". The binding constraint is the deadline: a batch ' +
-          'must be assembled and pushed through every stage within the latency budget, which caps ' +
-          'the size at budget divided by the per-row cost times the number of stages. A 10 ms p99 ' +
-          'budget at 0.4 µs per row per stage allows about 8 000 rows. Deriving the cap this way ' +
-          'turns batch size from a tuning parameter into a consequence of a stated requirement, ' +
-          'which is also what makes it defensible in review.',
+        detail: [
+          'Throughput improves monotonically with batch size, so it cannot choose a batch size on ' +
+            'its own. It always says "larger".',
+          'The binding constraint is the deadline. A batch must be assembled and pushed through ' +
+            'every stage within the latency budget. That caps the size at the budget divided by ' +
+            'the per-row cost times the number of stages.',
+          'A 10 ms p99 budget at 0.4 µs per row per stage allows about 8 000 rows.',
+          'Deriving the cap this way turns batch size from a tuning parameter into a consequence ' +
+            'of a stated requirement, which is also what makes it defensible in review.'
+        ],
         example: 'A 10 ms p99 budget at 0.4 µs per row per stage allows a batch of about 8 000.'
       },
       {
@@ -138,13 +159,16 @@
         formal: 'throughput = 1 / max(stage time)',
         readAs: 'A pipeline emits one result per slowest-stage time, so its rate is one divided by that ' +
           'stage. Speeding up any other stage changes nothing at all.',
-        detail: 'Once a pipeline is full, every stage is working on a different batch at the same ' +
-          'time, so a new result emerges every max(stage time) rather than every sum of stage times: ' +
-          'three stages of 0.4 µs deliver a row every 0.4 µs, not every 1.2 µs. Two consequences ' +
-          'follow. Throughput is set entirely by the slowest stage, so optimising any other stage ' +
-          'changes nothing at all — the only useful work is on the bottleneck. And latency is ' +
-          'unchanged or slightly worse, since an individual row still traverses every stage; the ' +
-          'pipeline buys rate, not response time.',
+        detail: [
+          'Once a pipeline is full, every stage is working on a different batch at the same time. ' +
+            'A new result then emerges every max(stage time), rather than every sum of stage ' +
+            'times.',
+          'Three stages of 0.4 µs deliver a row every 0.4 µs, not every 1.2 µs.',
+          'Two consequences follow. Throughput is set entirely by the slowest stage, so optimising ' +
+            'any other stage changes nothing at all: the only useful work is on the bottleneck.',
+          'And latency is unchanged or slightly worse, since an individual row still traverses ' +
+            'every stage. The pipeline buys rate, not response time.'
+        ],
         example: 'Three stages of 0.4 µs run at 0.4 µs per row once the pipeline is full, not 1.2 µs.'
       }
     ],
