@@ -5184,23 +5184,51 @@ wired into `npm test` yet; that happens when the last section lands.
 
 ### Where the pass stopped (2026-09-04)
 
-**160 of 364 sections are inside the budget**, and the tree is green. Every
+**191 of 364 sections are inside the budget**, and the tree is green. Every
 section committed here printed `ok` from `node tools/readability.js <id>`, and
 the four content/notation unit tests plus `npm run lint:size` ran before each
-commit; the full `npm test`, render audit included, was run over the batch.
+commit; the full `npm test`, render audit included, was run over each batch.
 
-Overall: mean sentence 20.5 -> **18.7** words, sentences over 30 words
-15.7% -> **9.5%**, single-block explanations 2 471 -> **1 645**.
+Overall: mean sentence 20.5 -> **18.3** words, sentences over 30 words
+15.7% -> **7.8%**, single-block explanations 2 471 -> **1 397**.
 
 Done this session, in curriculum order: the rest of `authenticated-encryption`,
-then `public-key-cryptography`, `signatures-and-pki`, `protocol-construction`,
-`constant-time-programming`, `applied-constructions` (finishing M23), and the
-nine of M24 from `memory-layout` through `cache-layouts`.
+then `public-key-cryptography` … `applied-constructions` (finishing M23), the
+nine of M24 (`memory-layout` … `cache-layouts`), all nine of M25
+(`hash-functions` … `hash-in-practice`), the ten of M26 (`bst-rotations` …
+`disjoint-sets`), the seven of M27 (`binary-heaps` … `timers-and-events`), and
+the first four of M28 (`tries` … `suffix-trees`). Plus `beyond-np`, which the
+tooling fix below revealed had never actually been measured.
 
-**Resume at `hash-functions`** — it is section 161 in
-`Curriculum.teachingSections()` order, and everything to 160 prints `ok`. Run
-`node tools/readability.js` and work down the curriculum order; anything not
-printing `ok` is outstanding.
+**Resume at `suffix-arrays`** — section 192 in `Curriculum.teachingSections()`
+order, and everything to 191 prints `ok`. Run `node tools/readability.js` and
+work down the curriculum order; anything not printing `ok` is outstanding.
+
+### The scanner was not reading a third of the orientations
+
+CI went red on five M23 sections, and the cause was worth more than the fix.
+`tests/unit/crypto-disclaimer.test.js` read a section's orientation by scraping
+the first quoted string out of `function orientation() {`. Those five now
+delegate — `return orientationModes().concat(orientationAttacks())` — so the
+scrape found no string and compared `""` against the required warning bullet.
+
+`tools/prose-scan.js` stopped at exactly the same place, which is the larger
+problem: **every orientation held in two named halves was reported as absent and
+never measured.** This pass has been splitting long orientations into halves
+since `decision-problems`, so a growing share of the curriculum's opening prose
+was scoring as if it did not exist. `functionProse` now follows the calls in a
+delegating `return`, in the order they are joined, with a seen-list against
+loops. The crypto test asks `prose-scan` for the paragraphs instead of scraping,
+so the two cannot drift again, and two new cases in `prose-scan.test.js` pin the
+split shape and the loop.
+
+Re-measuring found exactly one section that had been passing on unmeasured
+prose (`beyond-np`, max 42). If a new orientation shape is ever introduced, add
+a case to `prose-scan.test.js` in the same commit.
+
+**Verify `npm test` by its exit code, not its tail.** Two full runs were
+recorded as green here while five tests were failing, because `npm test 2>&1 |
+tail -8` reports *tail's* status. Use `npm test > /tmp/t.log 2>&1; echo $?`.
 
 Three things about the sentence splitter, learned the expensive way:
 
