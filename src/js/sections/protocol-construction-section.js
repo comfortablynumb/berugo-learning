@@ -55,9 +55,10 @@
       '**⚠ Teaching code: not constant-time, not audited, never for real data.** Use libsignal, ' +
         'Noise or TLS 1.3 rather than assembling a protocol from primitives.',
       '**A protocol is what turns primitives into a conversation.** Encryption protects a ' +
-        'message; a protocol decides who the other party is, which keys this session uses, what ' +
-        'happens when a message arrives twice or out of order, and what state survives a restart. ' +
-        'Every one of those is a place to be attacked, and none of them is a primitive.',
+        'message. A protocol decides who the other party is and which keys this session uses. It ' +
+        'also decides what happens when a message arrives twice or out of order, and what state ' +
+        'survives a restart. Every one of those is a place to be attacked, and none of them is a ' +
+        'primitive.',
       '**Key agreement without authentication buys nothing against an active attacker.** ' +
         'Diffie–Hellman with an unauthenticated peer agrees a key with whoever answered, which ' +
         'may be a machine in the middle running two exchanges. Binding the exchange to an ' +
@@ -72,8 +73,8 @@
         'attacker loses access.',
       '**"We use TLS" answers neither question about your stored messages.** TLS gives forward ' +
         'secrecy on the wire and ends at the server. If the application then stores the plaintext ' +
-        'or a long-lived key, the properties the transport provided do not extend to that store, ' +
-        'and the threat model that matters is a different one.',
+        'or a long-lived key, the properties the transport provided do not extend to that store. ' +
+        'The threat model that matters is a different one.',
       '**Freshness and replay protection are separate again.** An attacker who cannot read or ' +
         'modify a message can still send it twice. Counters, per-message nonces bound into the ' +
         'derivation and windowed sequence checks are what stop that, and none of them is implied ' +
@@ -95,13 +96,13 @@
       },
       diagram: diagram(),
       insight: '**Forward secrecy and post-compromise security are different properties with ' +
-        'different mechanisms, and "we use TLS" answers neither question about your ' +
-        'application-layer message store.** The demo makes the difference concrete: the ' +
-        'symmetric ratchet protects the past and does nothing for the future, the DH ratchet ' +
-        'protects the future and does nothing for the past, and you need both to bound a ' +
-        'compromise on either side. The application lesson follows directly — transport security ' +
-        'ends at the server, so if your messages sit in a database under a key that has not ' +
-        'changed since deployment, neither property applies to the data that actually matters.'
+        'different mechanisms.** "We use TLS" answers neither question about your ' +
+        'application-layer message store. The demo makes the difference concrete. The symmetric ' +
+        'ratchet protects the past and does nothing for the future; the DH ratchet protects the ' +
+        'future and does nothing for the past. You need both to bound a compromise on either ' +
+        'side. The application lesson follows directly. Transport security ends at the server. ' +
+        'If your messages sit in a database under a key that has not changed since deployment, ' +
+        'neither property applies to the data that actually matters.'
     };
   }
 

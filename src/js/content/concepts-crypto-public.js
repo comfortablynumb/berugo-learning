@@ -292,12 +292,15 @@
         term: 'A protocol is what turns primitives into a conversation',
         plain: 'Who is the peer, which keys, what about replays, what survives a restart.',
         formal: 'a protocol specifies identity binding, key schedule, message ordering, freshness and state handling',
-        detail: 'Each of those is a place to be attacked and none is a primitive. Encryption ' +
-          'protects a message; it does not decide who the other party is, which keys this session ' +
-          'uses, what happens when a message arrives twice or out of order, or what an attacker ' +
-          'learns from stored state after a crash. Assembling a protocol from primitives is a ' +
-          'research activity, which is why Noise, TLS 1.3 and the double ratchet exist as ' +
-          'analysed designs to adopt.',
+        detail: [
+          'Each of those is a place to be attacked, and none is a primitive.',
+          'Encryption protects a message. It does not decide who the other party is, or which ' +
+            'keys this session uses.',
+          'Nor does it say what happens when a message arrives twice or out of order, or what an ' +
+            'attacker learns from stored state after a crash.',
+          'Assembling a protocol from primitives is a research activity. That is why Noise, ' +
+            'TLS 1.3 and the double ratchet exist as analysed designs to adopt.'
+        ],
         example: 'The demo runs an 8-message conversation with 10 ratchet steps and checks that ' +
           'both sides derived matching keys every time.'
       },
@@ -315,12 +318,14 @@
         },
         plain: 'You agree a key with whoever answered.',
         formal: 'unauthenticated Diffie–Hellman is secure against eavesdropping and defenceless against a machine in the middle',
-        detail: 'An attacker who can modify traffic runs two exchanges — one with each party — ' +
-          'and reads everything while both sides believe they have a secure channel. Binding the ' +
-          'exchange to an identity is the other half of the protocol: a signature over the ' +
-          'transcript, a certificate chain, or a pre-shared key. Which of those you use is a ' +
-          'trust-model decision, and having none of them is not a weaker choice but a different ' +
-          'threat model.',
+        detail: [
+          'An attacker who can modify traffic runs two exchanges, one with each party. They read ' +
+            'everything while both sides believe they have a secure channel.',
+          'Binding the exchange to an identity is the other half of the protocol: a signature ' +
+            'over the transcript, a certificate chain, or a pre-shared key.',
+          'Which of those you use is a trust-model decision. Having none of them is not a weaker ' +
+            'choice but a different threat model.'
+        ],
         example: 'The public-key section’s exchange table has no authentication in any of its ' +
           '5 rows, and says so.'
       },
@@ -328,11 +333,14 @@
         term: 'Forward secrecy: a key stolen today does not open yesterday',
         plain: 'Derive the message key, then replace the chain key with a hash of itself.',
         formal: 'the chain runs one way, so earlier message keys cannot be reconstructed from a later state',
-        detail: 'The mechanism is one hash per message and nothing else. An attacker who steals ' +
-          'the chain state at message k derives every message key from k onward, because deriving ' +
-          'forward is exactly what the legitimate party does, and can recover nothing before k, ' +
-          'because hashing does not invert. That bounds the past perfectly and the future not at ' +
-          'all, which is precisely why a second mechanism is required.',
+        detail: [
+          'The mechanism is one hash per message and nothing else.',
+          'An attacker who steals the chain state at message k derives every message key from k ' +
+            'onward, because deriving forward is exactly what the legitimate party does. They ' +
+            'recover nothing before k, because hashing does not invert.',
+          'That bounds the past perfectly and the future not at all, which is precisely why a ' +
+            'second mechanism is required.'
+        ],
         example: 'The demo steals the state at message 3 of 10 and reports 3 messages closed and ' +
           'the rest exposed.'
       },
@@ -340,11 +348,14 @@
         term: 'Post-compromise security: a key stolen today stops working tomorrow',
         plain: 'Mix new Diffie–Hellman output into the root on every change of direction.',
         formal: 'a DH ratchet introduces secret material the attacker never observed, so the chain they track diverges',
-        detail: 'This is the opposite bound from forward secrecy and needs a different mechanism, ' +
-          'because a one-way chain cannot introduce anything new. The important property is that ' +
-          'recovery is not a repair action anybody takes: nobody detected the compromise and ' +
-          'nobody rotated anything. The protocol heals because turning the ratchet is what it ' +
-          'does anyway when the conversation changes direction.',
+        detail: [
+          'This is the opposite bound from forward secrecy, and it needs a different mechanism. A ' +
+            'one-way chain cannot introduce anything new.',
+          'The important property is that recovery is not a repair action anybody takes. Nobody ' +
+            'detected the compromise and nobody rotated anything.',
+          'The protocol heals because turning the ratchet is what it does anyway when the ' +
+            'conversation changes direction.'
+        ],
         example: 'The demo’s attacker reads messages 3, 4 and 5 and loses access at message 6, ' +
           'where the ratchet turns.'
       },
@@ -352,11 +363,14 @@
         term: 'The double ratchet is double because neither half suffices',
         plain: 'The symmetric ratchet protects the past; the DH ratchet protects the future.',
         formal: 'a hash chain per message plus a key exchange per turn, and each provides only its own property',
-        detail: 'Treating these as degrees of "how secure is the protocol" is the mistake the ' +
-          'demo is built to prevent. They are separate questions with separate answers, and a ' +
-          'system can have either, both or neither. The costs are also different: one hash per ' +
-          'message is nothing, while a key exchange per turn is real work, which is why the DH ' +
-          'ratchet runs on direction changes rather than on every message.',
+        detail: [
+          'Treating these as degrees of "how secure is the protocol" is the mistake the demo is ' +
+            'built to prevent. They are separate questions with separate answers, and a system ' +
+            'can have either, both or neither.',
+          'The costs are also different. One hash per message is nothing, while a key exchange ' +
+            'per turn is real work.',
+          'That is why the DH ratchet runs on direction changes rather than on every message.'
+        ],
         example: 'The demo’s conversation shows 5 direction changes across 8 messages, each ' +
           'triggering a ratchet on both sides.'
       },
@@ -364,11 +378,15 @@
         term: 'Replay protection is a separate property again',
         plain: 'An attacker who cannot read or modify can still send it twice.',
         formal: 'freshness needs counters, a sliding acceptance window and keys deleted after use; authenticated encryption does not imply it',
-        detail: 'A captured ciphertext with a valid tag remains valid forever unless something ' +
-          'tracks what has already been accepted. The ratchet gets this by construction, because ' +
-          'a message key is used once and discarded. TLS 1.3\'s 0-RTT mode is the instructive ' +
-          'counterexample: early data is replayable by design, traded deliberately for a round ' +
-          'trip, which is why it is restricted to idempotent requests.',
+        detail: [
+          'A captured ciphertext with a valid tag remains valid forever, unless something tracks ' +
+            'what has already been accepted.',
+          'The ratchet gets this by construction, because a message key is used once and ' +
+            'discarded.',
+          'TLS 1.3\'s 0-RTT mode is the instructive counterexample. Early data is replayable by ' +
+            'design, traded deliberately for a round trip, which is why it is restricted to ' +
+            'idempotent requests.'
+        ],
         example: 'The demo’s properties table gives replay its own row and names 0-RTT as the ' +
           'explicit exception.'
       },
@@ -376,11 +394,13 @@
         term: 'Downgrade attacks target the negotiation',
         plain: 'If both ends can be steered to a weaker option, the strong one is irrelevant.',
         formal: 'authenticate the transcript of the negotiation, and remove negotiable options entirely',
-        detail: 'TLS 1.3 responded on both fronts: it cut the negotiable surface to almost ' +
-          'nothing — no static RSA key transport, no CBC suites, no compression, a short list of ' +
-          'curves — and it authenticates the handshake transcript, so an attacker who edits the ' +
-          'ClientHello to remove strong options changes the transcript and both ends detect it. ' +
-          'Removing the option is the stronger fix, because it cannot be misconfigured.',
+        detail: [
+          'TLS 1.3 responded on both fronts. It cut the negotiable surface to almost nothing: no ' +
+            'static RSA key transport, no CBC suites, no compression, a short list of curves.',
+          'It also authenticates the handshake transcript. An attacker who edits the ClientHello ' +
+            'to remove strong options changes the transcript, and both ends detect it.',
+          'Removing the option is the stronger fix, because it cannot be misconfigured.'
+        ],
         example: 'The demo’s handshake table shows the signature and the Finished MAC both ' +
           'covering the transcript rather than the message.'
       },
@@ -388,12 +408,14 @@
         term: '"We use TLS" answers neither question about your store',
         plain: 'Transport security ends at the server.',
         formal: 'properties of the channel do not extend to data the application then writes down',
-        detail: 'TLS gives forward secrecy on the wire and terminates at the server; if the ' +
-          'application then stores plaintext, or stores ciphertext under a key that has not ' +
-          'changed since deployment, neither forward secrecy nor post-compromise security applies ' +
-          'to the data that actually matters. The threat model for the store is a different one, ' +
-          'and answering it needs a design at the application layer rather than a transport ' +
-          'setting.',
+        detail: [
+          'TLS gives forward secrecy on the wire, and it terminates at the server.',
+          'Suppose the application then stores plaintext, or stores ciphertext under a key that ' +
+            'has not changed since deployment. Neither forward secrecy nor post-compromise ' +
+            'security applies to the data that actually matters.',
+          'The threat model for the store is a different one, and answering it needs a design at ' +
+            'the application layer rather than a transport setting.'
+        ],
         example: 'The section’s insight makes this the practical consequence of separating the ' +
           'two properties.'
       }
