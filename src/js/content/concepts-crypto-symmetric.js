@@ -356,9 +356,9 @@
         detail: [
           'Routing headers, message types, version numbers and sequence numbers belong here. They ' +
             'are visible to the network and unchangeable without detection.',
-          'It is the channel that makes an AEAD sufficient for a protocol rather than just for a ' +
-            'payload, because binding the header to the ciphertext stops an attacker replaying a ' +
-            'valid ciphertext under a different header.',
+          'This channel is what makes an AEAD enough for a whole protocol, not just for a ' +
+            'payload. Binding the header to the ciphertext stops an attacker replaying a valid ' +
+            'ciphertext under a different header.',
           'Forgetting to include the header in the associated data is a common and quiet mistake.'
         ],
         example: 'The demo changes only the associated data, leaving the ciphertext untouched, ' +
@@ -418,12 +418,15 @@
         term: 'Counter nonces have no ceiling and no analysis',
         plain: 'Use a counter when one writer owns the key.',
         formal: 'a monotonic counter never repeats by construction; it fails only on restart, cloning or two writers',
-        detail: 'The counter is the better default precisely because it removes the arithmetic: ' +
-          'there is no message budget to compute and no probability to bound. Its failure modes ' +
-          'are operational rather than statistical — a restart from stale stored state, a cloned ' +
-          'VM image, or two processes sharing a key through a config file — and each of those is ' +
-          'a systems problem with a systems answer. Where writers genuinely cannot coordinate, ' +
-          'XChaCha20\'s 192-bit nonce removes the ceiling instead.',
+        detail: [
+          'A counter is the better default because it removes the arithmetic. There is no message ' +
+            'budget to compute and no probability to bound.',
+          'Its failure modes are operational rather than statistical: a restart from stale stored ' +
+            'state, a cloned VM image, or two processes sharing a key through a config file. Each ' +
+            'of those is a systems problem with a systems answer.',
+          'Where writers genuinely cannot coordinate, XChaCha20\'s 192-bit nonce removes the ' +
+            'ceiling instead.'
+        ],
         example: 'The demo’s nonce table gives four strategies with the failure condition and the ' +
           'situation each one suits.'
       },
@@ -431,12 +434,15 @@
         term: 'Misuse-resistant modes degrade instead of collapsing',
         plain: 'AES-GCM-SIV derives its nonce from the message.',
         formal: 'under SIV, a repeated nonce leaks only that two messages were identical',
-        detail: 'The trade is a second pass over the plaintext, because the synthetic ' +
-          'initialisation vector must be computed before encryption can start, which rules out ' +
-          'streaming. In exchange, the worst case stops being catastrophic: a repeat reveals ' +
-          'equality of messages rather than handing over the keystream and the authentication ' +
-          'key. Where nonce uniqueness cannot be guaranteed — many writers, unreliable state, ' +
-          'restarts — that is a good price.',
+        detail: [
+          'The trade is a second pass over the plaintext. The synthetic initialisation vector ' +
+            'must be computed before encryption can start, which rules out streaming.',
+          'In exchange, the worst case stops being catastrophic. A repeat reveals that two ' +
+            'messages were equal rather than handing over the keystream and the authentication ' +
+            'key.',
+          'Where nonce uniqueness cannot be guaranteed — many writers, unreliable state, ' +
+            'restarts — that is a good price.'
+        ],
         example: 'The demo’s nonce table gives SIV its own row and names the residual leak ' +
           'explicitly.'
       }

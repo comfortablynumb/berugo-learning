@@ -94,13 +94,12 @@
         markup: root.AeadTemplate.render()
       },
       diagram: diagram(),
-      insight: '**GCM\'s 96-bit nonce means random nonces are unsafe past roughly 2^32 messages ' +
-        'per key; a counter nonce plus a key-rotation policy is the design most systems should ' +
-        'have written down and did not.** The number is the uncomfortable part: 2^32 messages ' +
-        'sounds astronomical until it is a fleet of services sharing one key through a config ' +
-        'file, and then it is a few months. What makes it dangerous is that nothing announces ' +
-        'the crossing — no error, no metric, no degradation — and the failure when a nonce does ' +
-        'repeat is not partial. The engineering answer is boring and rarely written down: use a ' +
+      insight: '**With GCM, random nonces are unsafe past roughly 2^32 messages per key.** The ' +
+        'fix is a counter nonce and a key-rotation policy, and most systems have neither written ' +
+        'down. 2^32 messages sounds astronomical. It stops sounding astronomical once it is a ' +
+        'fleet of services sharing one key through a config file, and then it is a few months. ' +
+        'Nothing announces the crossing — no error, no metric, no degradation — and the failure ' +
+        'when a nonce does repeat is not partial. The engineering answer is boring: use a ' +
         'counter when you have one, bound the message count per key when you do not, and rotate.'
     };
   }
