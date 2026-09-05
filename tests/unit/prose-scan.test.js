@@ -103,6 +103,45 @@ test('an orientation lifted into its own function is still scanned', function ()
   assert.deepStrictEqual(scan.proseFor(source, 'insight'), ['Closing line.']);
 });
 
+test('an orientation split into two named halves is scanned, in order', function () {
+  const source = [
+    '(function (root) {',
+    '  function orientationFirst() {',
+    '    return [',
+    "      'Opening paragraph.'",
+    '    ];',
+    '  }',
+    '',
+    '  function orientationSecond() {',
+    '    return [',
+    "      'Closing paragraph.'",
+    '    ];',
+    '  }',
+    '',
+    '  function orientation() {',
+    '    return orientationFirst().concat(orientationSecond());',
+    '  }',
+    '}(window));'
+  ].join('\n');
+
+  assert.deepStrictEqual(scan.proseFor(source, 'orientation'),
+    ['Opening paragraph.', 'Closing paragraph.']);
+});
+
+test('a delegation that loops back reports what it found rather than hanging', function () {
+  const source = [
+    '  function orientation() {',
+    '    return orientationHalf();',
+    '  }',
+    '',
+    '  function orientationHalf() {',
+    '    return orientation();',
+    '  }'
+  ].join('\n');
+
+  assert.deepStrictEqual(scan.proseFor(source, 'orientation'), []);
+});
+
 test('an inline orientation array is preferred over any function of that name', function () {
   const source = [
     '  function config() {',

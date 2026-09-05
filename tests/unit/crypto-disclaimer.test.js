@@ -10,6 +10,12 @@
  * emits a warning callout with a disclaimer id, the controller writes a
  * module's DISCLAIMER into it, and the section's own orientation opens with the
  * warning so a learner reading the Description tab meets it before any code.
+ *
+ * The orientation is read through `tools/prose-scan.js` rather than scraped
+ * here, because a section may hold its paragraphs inline, in an `orientation()`
+ * function, or in two named halves that `orientation()` concatenates. A scrape
+ * that knows only one of those shapes reports the others as empty, which is a
+ * green test on a section whose warning has actually gone missing.
  */
 
 const test = require('node:test');
@@ -19,6 +25,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const Curriculum = require('../../src/js/core/curriculum.js');
+const scan = require('../../tools/prose-scan.js');
 
 const SECTIONS = path.join(__dirname, '..', '..', 'src', 'js', 'sections');
 const ALGORITHMS = path.join(__dirname, '..', '..', 'src', 'js', 'algorithms');
@@ -69,11 +76,10 @@ crypto.forEach(function (id) {
   });
 
   test('crypto: ' + id + ' opens its orientation with the warning', function () {
-    const controller = read(id + '-section.js');
-    const orientation = controller.match(/function orientation\(\) \{[\s\S]*?\n  \}/);
+    const paragraphs = scan.proseFor(read(id + '-section.js'), 'orientation');
 
-    assert.ok(orientation, id + ' has no orientation function');
-    const first = orientation[0].split('\'')[1] || '';
+    assert.ok(paragraphs.length, id + ' has no orientation paragraphs');
+    const first = paragraphs[0];
 
     assert.match(first, /^\*\*⚠/,
       id + ' does not begin its orientation with the warning bullet: "' + first.slice(0, 40) + '"');

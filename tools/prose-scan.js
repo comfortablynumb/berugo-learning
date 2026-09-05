@@ -76,7 +76,7 @@ function valuesFor(source, key) {
  * stopped at the key would report those sections as having no orientation and
  * quietly pass them.
  */
-function functionProse(source, key) {
+function functionProse(source, key, seen) {
   const at = source.indexOf('\n  function ' + key + '() {');
 
   if (at < 0) return [];
@@ -84,7 +84,32 @@ function functionProse(source, key) {
   const end = source.indexOf('\n  }', at);
 
   if (open < 0 || end < 0 || open > end) return [];
-  return stringsIn(valueAt(source, open + 'return '.length));
+  const body = valueAt(source, open + 'return '.length);
+  const direct = stringsIn(body);
+
+  return direct.length ? direct : delegated(source, body, seen || [key]);
+}
+
+/**
+ * A long orientation is usually split again into two named halves, because one
+ * function holding six paragraphs is itself over the 50-line limit. The halves
+ * are joined by an `orientation()` that returns `first().concat(second())`, so
+ * the function whose name the caller knows holds no strings either. Following
+ * the calls, in the order they are joined, is what keeps those halves measured
+ * - without it a third of the curriculum's opening prose reads as absent.
+ */
+function delegated(source, body, seen) {
+  const pattern = /\b([A-Za-z_$][\w$]*)\(\)/g;
+  const out = [];
+  let match = pattern.exec(body);
+
+  while (match) {
+    if (seen.indexOf(match[1]) < 0) {
+      out.push.apply(out, functionProse(source, match[1], seen.concat(match[1])));
+    }
+    match = pattern.exec(body);
+  }
+  return out;
 }
 
 function proseFor(source, key) {

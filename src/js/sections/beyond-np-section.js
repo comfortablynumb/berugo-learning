@@ -86,8 +86,8 @@
   function orientationQbf() {
     return [
       '**A quantified Boolean formula is the same clauses with a quantifier in front of every ' +
-        'variable, and asking whether the sentence is true.** ∃ marks the variables you choose ' +
-        'and ∀ the ones an adversary chooses, in the order the prefix names.',
+        'variable.** The question is whether the sentence is true. ∃ marks the variables you ' +
+        'choose and ∀ the ones an adversary chooses, in the order the prefix names.',
       'With every quantifier existential it is exactly SAT.',
       'With ∀ anywhere it is a different problem, and the demo shows the answer changing while ' +
         'the clauses do not.',
@@ -99,9 +99,9 @@
         'geography are all in this family for the same reason.',
       '**The certificate is what changed, and it is the whole practical difference.** A ' +
         'satisfiable SAT instance has a certificate one line long.',
-      'A true QBF sentence with k universal variables has, in general, no certificate shorter than ' +
-        'a STRATEGY: a function from the opponent’s moves to yours, which takes 2ᵏ entries to ' +
-        'write down.',
+      'A true QBF sentence with k universal variables has, in general, no certificate shorter ' +
+        'than a STRATEGY. That is a function from the opponent’s moves to yours, and it takes 2ᵏ ' +
+        'entries to write down.',
       '"Easy to check" stops being available, and that is why the class is different rather than ' +
         'merely larger.',
       '**Expanding the quantifiers away is correct and does not help.** Conjoining a copy of the ' +
