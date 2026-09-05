@@ -176,12 +176,15 @@
         readAs: 'A sliding window of N bits has 2 to the power N possible contents, and telling them apart ' +
           'exactly needs N bits of state. That is why exact windowed counting cannot be done in less ' +
           'space, and why the approximate scheme exists.',
-        detail: 'The lower bound is an information argument rather than an engineering one: two ' +
-          'different windows that the algorithm cannot tell apart will produce the same answer, and ' +
-          'since every one of the 2^N windows has a potentially different count, the state must be ' +
-          'able to take 2^N values. That is N bits, which is exactly the ring buffer. Every ' +
-          'structure in this section is therefore an approximation by necessity, not by choice, ' +
-          'which is a different situation from a Bloom filter replacing a hash set.',
+        detail: [
+          'The lower bound is an information argument rather than an engineering one.',
+          'Two different windows the algorithm cannot tell apart will produce the same answer, and ' +
+            'every one of the 2^N windows has a potentially different count. So the state must be ' +
+            'able to take 2^N values.',
+          'That is N bits, which is exactly the ring buffer.',
+          'Every structure in this section is therefore an approximation by necessity, not by ' +
+            'choice, which is a different situation from a Bloom filter replacing a hash set.'
+        ],
         example: 'A 20 000-bit window needs 20 000 bits exactly; DGIM answers it in 600.'
       },
       {
@@ -199,40 +202,51 @@
         },
         plain: 'Buckets of size 1, 2, 4, … each stamped with the position of its most recent one.',
         formal: 'at most r buckets of any size, so there are O(log N) buckets',
-        readAs: 'Bucket sizes double as they age and only r of each size are kept, so the whole window is ' +
-          'summarised in a number of buckets that grows like the log of the window length.',
-        detail: 'The bucket sizes double because that is what keeps the count logarithmic, and each ' +
-          'carries the timestamp of its newest member because that is the one that determines when ' +
-          'the whole bucket leaves the window. Only the oldest bucket is ever uncertain — everything ' +
-          'newer is entirely inside — so the estimate counts every bucket fully plus half of the one ' +
-          'straddling the edge, half being the expected position of the boundary within it.',
+        readAs: 'Bucket sizes double as they age and only r of each size are kept. The whole window ' +
+          'is therefore summarised in a number of buckets that grows like the log of the window ' +
+          'length.',
+        detail: [
+          'The bucket sizes double because that is what keeps the count logarithmic.',
+          'Each bucket carries the timestamp of its newest member, because that is the one that ' +
+            'determines when the whole bucket leaves the window.',
+          'Only the oldest bucket is ever uncertain; everything newer is entirely inside.',
+          'So the estimate counts every bucket fully plus half of the one straddling the edge, half ' +
+            'being the expected position of the boundary within it.'
+        ],
         example: '20 buckets for a 20 000-bit window: 600 bits against 20 000, a 33× saving.'
       },
       {
         term: 'The bucket allowance is one geometric dial',
         plain: 'Allowing r buckets per size bounds the relative error by about 1/2r.',
         formal: 'error ≤ (oldest/2) / total, and the newer buckets sum to at least r(2^j − 1)',
-        readAs: 'The only uncertainty is how much of the oldest bucket is still inside the window, so the ' +
-          'error is at most half of it — and because the newer buckets together are guaranteed large, ' +
-          'that half is a small fraction of the answer.',
-        detail: 'The uncertainty is half the oldest bucket, and with r buckets of every smaller size ' +
-          'the certain part is at least r times as large — so the ratio is bounded and shrinks ' +
-          'linearly in r. That gives a single clean knob rather than a family of algorithms: 2 ' +
-          'buckets per size is DGIM at 26.14% worst measured error and 600 bits, 4 gives 12.93% at ' +
-          '1 230, 8 gives 6.38% at 2 280 and 16 gives 2.97% at 4 350. Doubling the memory halves ' +
-          'the error, all the way down.',
+        readAs: 'The only uncertainty is how much of the oldest bucket is still inside the window, ' +
+          'so the error is at most half of it. Because the newer buckets together are guaranteed ' +
+          'large, that half is a small fraction of the answer.',
+        detail: [
+          'The uncertainty is half the oldest bucket, and with r buckets of every smaller size the ' +
+            'certain part is at least r times as large.',
+          'So the ratio is bounded and shrinks linearly in r. That gives a single clean knob rather ' +
+            'than a family of algorithms.',
+          'Two buckets per size is DGIM at 26.14% worst measured error and 600 bits. Four gives ' +
+            '12.93% at 1 230, eight gives 6.38% at 2 280 and sixteen gives 2.97% at 4 350.',
+          'Doubling the memory halves the error, all the way down.'
+        ],
         example: 'r = 2: 26.14% and 600 bits. r = 16: 2.97% and 4 350 bits.'
       },
       {
         term: 'The estimate is a staircase',
         plain: 'It changes only when a bucket expires or a merge moves a boundary.',
         formal: 'the state is piecewise constant between structural events',
-        detail: 'Between the events that change the bucket layout, DGIM\'s answer is frozen while the ' +
-          'true count drifts, so the error is not noise around the truth but a sawtooth that ' +
-          'accumulates and then snaps back. That matters for alerting: a threshold crossing may be ' +
-          'reported late by up to the width of the oldest bucket, which at 20 000 positions is ' +
-          'thousands of items. Averaging consecutive readings does not help, because consecutive ' +
-          'readings are the same number.',
+        detail: [
+          'Between the events that change the bucket layout, DGIM\'s answer is frozen while the ' +
+            'true count drifts.',
+          'The error is therefore not noise around the truth but a sawtooth that accumulates and ' +
+            'then snaps back.',
+          'That matters for alerting: a threshold crossing may be reported late by up to the width ' +
+            'of the oldest bucket, which at 20 000 positions is thousands of items.',
+          'Averaging consecutive readings does not help, because consecutive readings are the same ' +
+            'number.'
+        ],
         example: 'The plotted estimate is flat for long stretches while the exact count moves.'
       },
       {
@@ -242,12 +256,16 @@
         readAs: 'A new key takes over the least-counted slot, inherits that count as its own starting point, ' +
           'and records it as the amount it might be over by. The true count is somewhere between count ' +
           '− error and count.',
-        detail: 'Starting a new key at 1 would let a genuinely heavy key be evicted and then ' +
-          'permanently under-reported. Inheriting the minimum instead makes every counter an upper ' +
-          'bound on its key\'s true frequency, with the inherited part recorded as the slack — so a ' +
-          'reported count of 4 000 with an error of 250 means the truth is between 3 750 and 4 000. ' +
+        detail: [
+          'Starting a new key at 1 would let a genuinely heavy key be evicted and then permanently ' +
+            'under-reported.',
+          'Inheriting the minimum instead makes every counter an upper bound on its key\'s true ' +
+            'frequency, with the inherited part recorded as the slack.',
+          'A reported count of 4 000 with an error of 250 means the truth is between 3 750 and ' +
+            '4 000.',
           'The consequence is a guarantee with no hashing in it at all: any key whose frequency ' +
-          'exceeds N/m must be in the table.',
+            'exceeds N/m must be in the table.'
+        ],
         example: '200 counters over 200 000 items: every key above 1 000 occurrences is guaranteed present.'
       },
       {
@@ -256,12 +274,16 @@
         formal: 'count ≤ truth ≤ count + εN',
         readAs: 'The recorded count never exceeds the truth, and the truth never exceeds it by more than a ' +
           'fixed slice of the stream. Both bounds are hard, not probabilistic.',
-        detail: 'The stream is cut into windows of ⌈1/ε⌉ items, a key first seen in window b carries ' +
-          'a handicap of b − 1, and at each boundary any key whose count plus handicap has not ' +
-          'reached the window number is dropped. A key that keeps arriving survives; one that does ' +
-          'not cannot have been frequent. The direction of the error is the opposite of ' +
-          'space-saving\'s, which makes the pair a neat illustration that "approximate" is not one ' +
-          'property — a system that can tolerate an over-count often cannot tolerate an under-count.',
+        detail: [
+          'The stream is cut into windows of ⌈1/ε⌉ items, and a key first seen in window b carries ' +
+            'a handicap of b − 1.',
+          'At each boundary any key whose count plus handicap has not reached the window number is ' +
+            'dropped.',
+          'A key that keeps arriving survives; one that does not cannot have been frequent.',
+          'The direction of the error is the opposite of space-saving\'s, which makes the pair a ' +
+            'neat illustration that "approximate" is not one property. A system that can tolerate ' +
+            'an over-count often cannot tolerate an under-count.'
+        ],
         example: 'ε = 1/2 000 over 200 000 items: 270 entries kept, and a bound of 100.'
       },
       {
@@ -271,24 +293,30 @@
         readAs: 'Each hit multiplies the stored score by a half raised to (time elapsed over the half-life) ' +
           'and then adds one. Applying it only when the key is touched means no periodic sweep is ' +
           'needed.',
-        detail: 'A decayed counter is cheap — multiply by 2^(−Δt/H) when the key is next touched, ' +
-          'so the cost is per update rather than per tick — and it answers "most frequent lately" ' +
-          'rather than "most frequent". What it does not do is bound anything: a decayed value only ' +
-          'reaches zero in the limit, so every key ever seen still has an entry, and the demo\'s ' +
-          'decayed table holds 21 619 keys in 518 856 bytes against space-saving\'s 8 000. The usable ' +
-          'structure is decay *inside* a bounded counter set.',
+        detail: [
+          'A decayed counter is cheap: multiply by 2^(−Δt/H) when the key is next touched, so the ' +
+            'cost is per update rather than per tick.',
+          'It answers "most frequent lately" rather than "most frequent".',
+          'What it does not do is bound anything. A decayed value only reaches zero in the limit, ' +
+            'so every key ever seen still has an entry.',
+          'The demo\'s decayed table holds 21 619 keys in 518 856 bytes against space-saving\'s ' +
+            '8 000. The usable structure is decay *inside* a bounded counter set.'
+        ],
         example: '518 856 bytes for 21 619 keys, against 8 000 for 200 space-saving counters.'
       },
       {
         term: '"In the last five minutes" is a third thing',
         plain: 'Space-saving counts since the beginning of time; a window needs more than decay.',
         formal: 'windowed top-k = a ring of per-interval sketches, or decay with a chosen half-life',
-        detail: 'The query everybody actually asks combines two structures from this section and gets ' +
-          'neither for free. Decay approximates a window with a half-life, which is cheap and blurs ' +
-          'the boundary; a ring of per-interval sketches gives a real window and multiplies the ' +
-          'memory by the number of intervals, and merging them needs the sketch to be mergeable — ' +
-          'which space-saving only approximately is. Deciding which of those two you meant is the ' +
-          'design work, and it is usually skipped.',
+        detail: [
+          'The query everybody actually asks combines two structures from this section and gets ' +
+            'neither for free.',
+          'Decay approximates a window with a half-life, which is cheap and blurs the boundary.',
+          'A ring of per-interval sketches gives a real window and multiplies the memory by the ' +
+            'number of intervals. Merging them needs the sketch to be mergeable, which ' +
+            'space-saving only approximately is.',
+          'Deciding which of those two you meant is the design work, and it is usually skipped.'
+        ],
         example: 'A ring of 12 five-minute sketches is 12× the memory; decay is 1× and has no boundary.'
       }
     ],

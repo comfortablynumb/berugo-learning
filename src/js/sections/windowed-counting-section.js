@@ -24,54 +24,59 @@
     app.state.subscribe('theme', function () { if (chart) chart.redraw(); });
   }
 
+  function diagram() {
+    return {
+      title: 'Diagram — DGIM buckets merging as the window slides',
+      caption: 'A third bucket of size 1 forces the two oldest to merge into a single bucket of ' +
+        'size 2, which keeps the count of buckets logarithmic in N.',
+      definition: [
+        'flowchart TD',
+        '    A["… 1 1 · · 1 · 1 1"] --> B["buckets, newest first"]',
+        '    B --> B1["size 1 @ t=99"]',
+        '    B --> B2["size 1 @ t=98"]',
+        '    B --> B3["size 2 @ t=95"]',
+        '    B --> B4["size 4 @ t=88"]',
+        '    B --> B5["size 8 @ t=71 (straddles the edge)"]',
+        '    B1 --> N["a new 1 arrives → three of size 1"]',
+        '    N --> M["merge the two oldest → one of size 2"]',
+        '    B5 --> E["estimate = 1+1+2+4 + 8/2 = 12"]'
+      ].join('\n')
+    };
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
       orientation: [
-        '**There is no way to answer "how many in the last N?" exactly without storing the last N, ' +
-          'so the design question is how wrong you are willing to be, and for how much memory.** ' +
-          'Counting the ones in the last N positions of a stream exactly needs Ω(N) bits, because the ' +
-          'algorithm has to be able to tell every one of the 2^N possible windows apart. DGIM gives ' +
-          'up exactness instead: it keeps buckets of sizes 1, 2, 4, … each stamped with the position ' +
-          'of its most recent one, allows at most two buckets of any size, and counts every bucket ' +
+        '**There is no way to answer "how many in the last N?" exactly without storing the last N. ' +
+          'The design question is how wrong you are willing to be, and for how much memory.** ' +
+          'Counting the ones in the last N positions exactly needs Ω(N) bits, because the algorithm ' +
+          'has to tell every one of the 2^N possible windows apart. DGIM gives up exactness ' +
+          'instead. It keeps buckets of sizes 1, 2, 4, … each stamped with the position of its most ' +
+          'recent one, and allows at most two buckets of any size. A query counts every bucket ' +
           'fully inside the window plus half of the one straddling the edge. Twenty buckets, 600 ' +
           'bits, against 20 000 for the exact ring — and a worst measured error of 26.1%.',
         'The bucket allowance is the dial. Allowing four buckets per size halves the error to 12.9% ' +
-          'and doubles the memory to 1 230 bits; sixteen brings it to 3.0% at 4 350. The bound comes ' +
-          'from one place — only the oldest bucket is uncertain, and with r buckets of every smaller ' +
-          'size it can be at most a 1/2r fraction of the total — so the trade is a single geometric ' +
-          'knob rather than a family of algorithms.',
+          'and doubles the memory to 1 230 bits; sixteen brings it to 3.0% at 4 350. The bound ' +
+          'comes from one place. Only the oldest bucket is uncertain, and with r buckets of every ' +
+          'smaller size it can be at most a 1/2r fraction of the total. So the trade is a single ' +
+          'geometric knob rather than a family of algorithms.',
         'The keyed version of the same question is "which keys are hot right now", and space-saving ' +
           'answers it in m counters with no hashing at all. A key that is not monitored takes over ' +
-          'the *smallest* counter and inherits its value as a recorded error, so every reported count ' +
-          'is an upper bound with known slack, and every key whose true frequency exceeds N/m is ' +
-          'guaranteed to be in the table. Lossy counting is the mirror image: it under-estimates, by ' +
-          'at most εN, and it also never misses a frequent key.'
+          'the *smallest* counter and inherits its value as a recorded error. So every reported ' +
+          'count is an upper bound with known slack, and every key whose true frequency exceeds N/m ' +
+          'is guaranteed to be in the table. Lossy counting is the mirror image: it under-estimates, ' +
+          'by at most εN, and it also never misses a frequent key.'
       ],
       demo: { title: 'Interactive demo — a window, its buckets and the hot keys', markup: root.WindowedCountingTemplate.render() },
-      diagram: {
-        title: 'Diagram — DGIM buckets merging as the window slides',
-        caption: 'A third bucket of size 1 forces the two oldest to merge into a single bucket of ' +
-          'size 2, which keeps the count of buckets logarithmic in N.',
-        definition: [
-          'flowchart TD',
-          '    A["… 1 1 · · 1 · 1 1"] --> B["buckets, newest first"]',
-          '    B --> B1["size 1 @ t=99"]',
-          '    B --> B2["size 1 @ t=98"]',
-          '    B --> B3["size 2 @ t=95"]',
-          '    B --> B4["size 4 @ t=88"]',
-          '    B --> B5["size 8 @ t=71 (straddles the edge)"]',
-          '    B1 --> N["a new 1 arrives → three of size 1"]',
-          '    N --> M["merge the two oldest → one of size 2"]',
-          '    B5 --> E["estimate = 1+1+2+4 + 8/2 = 12"]'
-        ].join('\n')
-      },
+      diagram: diagram(),
       insight: '"Top talkers in the last five minutes" is the single most requested streaming query in ' +
         'operations, and it has an exact-space-impossible proof behind it. Space-saving is the answer ' +
-        'to reach for — but note what it does *not* do: it counts since the beginning of time, not ' +
-        'over a window. Getting "in the last five minutes" as well means either decay, which changes ' +
-        'the meaning of the number, or a ring of per-interval sketches, which multiplies the memory ' +
-        'by the number of intervals. Decide which of those you actually meant before choosing.'
+        'to reach for, but note what it does *not* do: it counts since the beginning of time, not ' +
+        'over a window. Getting "in the last five minutes" as well means one of two things. Either ' +
+        'decay, which changes the meaning of the number, or a ring of per-interval sketches, which ' +
+        'multiplies the memory by the number of intervals. Decide which of those you actually ' +
+        'meant before choosing.'
     };
   }
 
