@@ -30,14 +30,18 @@
         readAs: 'Given that you flipped one bit of the input, the chance that any particular output bit flips ' +
           'should be about a half. The vertical bar reads "given that" — everything after it is the ' +
           'condition you are assuming.',
-        detail: 'Avalanche is the practical test for whether a hash mixes. Flip one input bit, ' +
-          'compare the outputs, and every output bit should flip about half the time — because if ' +
-          'some output bit is insensitive to some input bit, then keys differing only there are ' +
-          'partly correlated in the hash, and a table will find them clustering. The measurement is ' +
-          'a grid: 32 input bits by 32 output bits, each cell a flip probability estimated over many ' +
-          'samples. Judging it needs care, since with few samples a cell strays from 0.5 by chance ' +
-          'alone; this platform uses a Bonferroni-corrected z-test rather than a fixed 40-60% band ' +
-          'for exactly that reason.',
+        detail: [
+          'Avalanche is the practical test for whether a hash mixes. Flip one input bit, compare ' +
+            'the outputs, and every output bit should flip about half the time.',
+          'The reason is what happens otherwise. If some output bit is insensitive to some input ' +
+            'bit, then keys differing only there are partly correlated in the hash, and a table ' +
+            'will find them clustering.',
+          'The measurement is a grid: 32 input bits by 32 output bits, each cell a flip ' +
+            'probability estimated over many samples.',
+          'Judging it needs care, since with few samples a cell strays from 0.5 by chance alone. ' +
+            'This platform uses a Bonferroni-corrected z-test rather than a fixed 40-60% band for ' +
+            'exactly that reason.'
+        ],
         example: 'murmur3\'s finaliser holds every cell in 0.42–0.58; one shift and an XOR does not.'
       },
       {
@@ -47,13 +51,17 @@
         readAs: 'Repeatedly fold the high bits down onto the low ones with a shift and an XOR, then multiply ' +
           'by a constant to smear them back up. Each round moves entropy between the two ends; the ' +
           'pattern is shift, mix, shift, mix.',
-        detail: 'The main loop of a hash accumulates bytes cheaply and leaves the state unevenly ' +
-          'mixed — in FNV-1a the last byte is still visible in the low bits. The finaliser fixes that ' +
-          'in a few instructions: an XOR-shift moves high entropy down, a multiply by an odd ' +
-          'constant spreads it back up, and repeating the pair makes every input bit reach every ' +
-          'output bit. This is where a hash earns its avalanche, and it is the part people drop when ' +
-          'they write their own. The trade is that the finaliser is a fixed cost per call, which is ' +
-          'invisible for long keys and dominant for short ones.',
+        detail: [
+          'The main loop of a hash accumulates bytes cheaply and leaves the state unevenly mixed. ' +
+            'In FNV-1a the last byte is still visible in the low bits.',
+          'The finaliser fixes that in a few instructions. An XOR-shift moves high entropy down, a ' +
+            'multiply by an odd constant spreads it back up, and repeating the pair makes every ' +
+            'input bit reach every output bit.',
+          'This is where a hash earns its avalanche, and it is the part people drop when they ' +
+            'write their own.',
+          'The trade is that the finaliser is a fixed cost per call, which is invisible for long ' +
+            'keys and dominant for short ones.'
+        ],
         example: 'FNV-1a without one leaves the low bits correlated with the last byte.'
       },
       {
@@ -70,16 +78,21 @@
         },
         plain: 'A table masks with capacity − 1, so it uses the *low* bits and throws the rest away.',
         formal: 'slot = h & (m − 1)',
-        readAs: 'When the table size m is a power of two, m − 1 is a run of 1 bits, so ANDing against it ' +
-          'keeps the low bits and discards the rest. That is the remainder after dividing by m, in a ' +
-          'single instruction.',
-        detail: 'A power-of-two table computes its slot by masking, which keeps the bottom log₂ m ' +
-          'bits and discards everything else. So the quality of the top 22 bits is irrelevant to ' +
-          'that table, and a hash with excellent high bits and poor low ones will cluster badly ' +
-          'while looking fine in a whole-word test. This is why multiplicative hashes are finished ' +
-          'with an XOR-shift that folds high bits down, and why Java\'s HashMap applies its own ' +
-          'extra spread to hashCode() results before masking — it does not trust that the low bits ' +
-          'of an arbitrary hashCode carry any entropy at all.',
+        readAs: 'When the table size m is a power of two, m − 1 is a run of 1 bits. ANDing against ' +
+          'it keeps the low bits and discards the rest. That is the remainder after dividing by m, ' +
+          'in a single instruction.',
+        detail: [
+          'A power-of-two table computes its slot by masking, which keeps the bottom log₂ m bits ' +
+            'and discards everything else.',
+          'So the quality of the top 22 bits is irrelevant to that table. A hash with excellent ' +
+            'high bits and poor low ones will cluster badly while looking fine in a whole-word ' +
+            'test.',
+          'This is why multiplicative hashes are finished with an XOR-shift that folds high bits ' +
+            'down.',
+          'It is also why Java\'s HashMap applies its own extra spread to hashCode() results ' +
+            'before masking. It does not trust that the low bits of an arbitrary hashCode carry ' +
+            'any entropy at all.'
+        ],
         example: 'A hash whose high bits are excellent and low bits are not is useless to a power-of-two table.'
       },
       {
@@ -89,29 +102,37 @@
         readAs: 'A 32-bit multiply keeps only the bottom 32 bits of the product and throws the rest away — ' +
           '"mod 2³²" is exactly that truncation. Plain * in JavaScript would round instead, losing the ' +
           'low bits the mixing depends on.',
-        detail: 'Multiplying two 32-bit values can produce 64 bits, and a double holds only 53 ' +
-          'exactly, so plain * rounds — and the bits it discards are the low ones, which is exactly ' +
-          'the entropy a mixer is trying to propagate. The failure is silent: the code runs, the ' +
-          'hash looks plausible, and its avalanche is quietly broken. Math.imul performs the ' +
-          'multiplication modulo 2³² the way the hardware does, keeping the low 32 bits, so every ' +
-          'mixing step in this platform is written with it. Substituting * anywhere in a finaliser ' +
-          'measurably degrades the avalanche grid.',
+        detail: [
+          'Multiplying two 32-bit values can produce 64 bits, and a double holds only 53 exactly, ' +
+            'so plain * rounds. The bits it discards are the low ones, which is exactly the ' +
+            'entropy a mixer is trying to propagate.',
+          'The failure is silent. The code runs, the hash looks plausible, and its avalanche is ' +
+            'quietly broken.',
+          'Math.imul performs the multiplication modulo 2³² the way the hardware does, keeping ' +
+            'the low 32 bits, so every mixing step in this platform is written with it.',
+          'Substituting * anywhere in a finaliser measurably degrades the avalanche grid.'
+        ],
         example: 'h * 0x85ebca6b silently loses precision past 2⁵³; Math.imul does not.'
       },
       {
         term: 'Chi-squared uniformity',
         plain: 'Compare observed bucket counts against the uniform expectation; the ratio to the degrees of freedom should be near 1.',
         formal: 'χ² = Σ (observed − expected)² / expected',
-        readAs: 'For each bucket take how far its count sits from what you expected, square it so sign does ' +
-          'not matter, divide by the expected count to keep buckets comparable, and add all of those ' +
-          'up. The symbol is a Greek chi, and the whole thing reads "chi-squared".',
-        detail: 'Avalanche tests the bits; chi-squared tests the distribution actually produced by ' +
-          'your keys. Bucket the hashes, compare each count against the uniform expectation, and ' +
-          'normalise by the degrees of freedom so the statistic reads near 1 for a good hash ' +
-          'regardless of table size. Both tails are informative: well above 1 means clumping, and ' +
-          'far below 1 means the counts are suspiciously even, which happens when the key set is ' +
-          'regular and the hash is close to the identity. Run it on your real keys, since a hash can ' +
-          'be uniform on random input and terrible on sequential ids.',
+        readAs: 'For each bucket take how far its count sits from what you expected, and square it ' +
+          'so sign does not matter. Divide by the expected count to keep buckets comparable, and ' +
+          'add all of those up. The symbol is a Greek chi, and the whole thing reads "chi-squared".',
+        detail: [
+          'Avalanche tests the bits; chi-squared tests the distribution actually produced by your ' +
+            'keys.',
+          'Bucket the hashes and compare each count against the uniform expectation. Normalise by ' +
+            'the degrees of freedom, so the statistic reads near 1 for a good hash regardless of ' +
+            'table size.',
+          'Both tails are informative. Well above 1 means clumping. Far below 1 means the counts ' +
+            'are suspiciously even, which happens when the key set is regular and the hash is ' +
+            'close to the identity.',
+          'Run it on your real keys, since a hash can be uniform on random input and terrible on ' +
+            'sequential ids.'
+        ],
         example: 'Well above 1 means clumping; far below 1 means the key set is suspiciously regular.'
       },
       {
@@ -121,13 +142,17 @@
         readAs: 'XOR gives the same answer whichever way round you feed it, so combining two hashes with it ' +
           'cannot tell {a, b} from {b, a}. That is exactly what you want for a set, and exactly what ' +
           'you must not use for an ordered pair.',
-        detail: 'Combining field hashes with XOR is the obvious thing to write and it destroys ' +
-          'positional information: (a, b) and (b, a) produce the same hash, and any pair of equal ' +
-          'fields hashes to zero. For a composite key of (row, column) or (from, to) that is a ' +
-          'systematic collision generator built into the key type, and it will not show up until the ' +
-          'data happens to contain transposed pairs. The standard fix is an order-dependent ' +
-          'combine — Boost\'s seed ^= h + 0x9e3779b9 + (seed<<6) + (seed>>2), or mixing each field ' +
-          'through the finaliser before folding it in.',
+        detail: [
+          'Combining field hashes with XOR is the obvious thing to write, and it destroys ' +
+            'positional information. The pairs (a, b) and (b, a) produce the same hash, and any ' +
+            'pair of equal fields hashes to zero.',
+          'For a composite key of (row, column) or (from, to) that is a systematic collision ' +
+            'generator built into the key type. It will not show up until the data happens to ' +
+            'contain transposed pairs.',
+          'The standard fix is an order-dependent combine: Boost\'s ' +
+            'seed ^= h + 0x9e3779b9 + (seed<<6) + (seed>>2), or mixing each field through the ' +
+            'finaliser before folding it in.'
+        ],
         example: 'A tuple key of (row, column) collides with (column, row) in half the codebases that hand-roll one.'
       },
       {
@@ -137,26 +162,32 @@
         readAs: 'Two ways to cut a hash down to a table index: keep the low k bits with a mask, or shift the ' +
           'high k bits down into place. They select different halves of the hash, and a weak mixer ' +
           'usually leaves one of those halves much better than the other.',
-        detail: 'Different consumers read different ends of the same 32 bits, so "is this hash good" ' +
-          'is not a well-formed question until you say which end. A power-of-two table masks and ' +
-          'reads the bottom; a Swiss table shifts H1 out of the top; multiply-shift is universal ' +
-          'precisely in its high bits. A hash can therefore pass one test and fail the other by ' +
-          'three orders of magnitude — on sequential keys djb2 scores a healthy 2.84 on its low 9 ' +
-          'bits and 2 536.85 on its top 9. Test the end your table will actually use, and prefer a ' +
-          'finaliser that makes the question moot.',
+        detail: [
+          'Different consumers read different ends of the same 32 bits, so "is this hash good" is ' +
+            'not a well-formed question until you say which end.',
+          'A power-of-two table masks and reads the bottom. A Swiss table shifts H1 out of the ' +
+            'top, and multiply-shift is universal precisely in its high bits.',
+          'A hash can therefore pass one test and fail the other by three orders of magnitude. On ' +
+            'sequential keys djb2 scores a healthy 2.84 on its low 9 bits and 2 536.85 on its ' +
+            'top 9.',
+          'Test the end your table will actually use, and prefer a finaliser that makes the ' +
+            'question moot.'
+        ],
         example: 'On sequential keys djb2 scores 2.84 on its low 9 bits and 2 536.85 on its top 9.'
       },
       {
         term: 'Speed is measured in bytes, not calls',
         plain: 'A hash is charged per byte of key, so key length is part of the cost — and short keys are dominated by the finaliser.',
         formal: 'cost ≈ setup + bytes × per-byte + finalise',
-        detail: 'Hash cost splits into a fixed part — setup and finalisation — and a part ' +
-          'proportional to the key length, and which dominates depends entirely on your keys. For ' +
-          '8-byte keys a murmur-style finaliser is most of the total, so a "faster" hash with a ' +
-          'longer tail is slower in practice; for 1 KB keys the finaliser is noise and the per-byte ' +
-          'loop is everything. This is why hash benchmarks quoted in GB/s are close to useless for a ' +
-          'table of short keys, and why the right comparison is measured at your key length, on your ' +
-          'key distribution.',
+        detail: [
+          'Hash cost splits into a fixed part — setup and finalisation — and a part proportional ' +
+            'to the key length. Which dominates depends entirely on your keys.',
+          'For 8-byte keys a murmur-style finaliser is most of the total, so a "faster" hash with ' +
+            'a longer tail is slower in practice.',
+          'For 1 KB keys the finaliser is noise and the per-byte loop is everything.',
+          'This is why hash benchmarks quoted in GB/s are close to useless for a table of short ' +
+            'keys. The right comparison is measured at your key length, on your key distribution.'
+        ],
         example: 'For 8-byte keys a murmur-style finaliser is most of the work; for 1 KB keys it is noise.'
       }
     ],

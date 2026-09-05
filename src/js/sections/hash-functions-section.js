@@ -40,16 +40,16 @@
         'A hash function for a table has four jobs: be deterministic, spread keys uniformly, change ' +
           'about half the output bits when any input bit changes, and be fast. Only the first is ' +
           'free — the other three trade against each other, and all three are measurable.',
-        'Avalanche is the one people skip. A function can look fine on a histogram and still leave ' +
-          'the low bits correlated with the input, which matters because a table takes the *low* ' +
-          'bits when it masks with capacity − 1. The matrix below shows exactly which bits a ' +
-          'function failed to mix.',
+        'Avalanche is the one people skip. A function can look fine on a histogram and still ' +
+          'leave the low bits correlated with the input. That matters, because a table takes the ' +
+          '*low* bits when it masks with capacity − 1. The matrix below shows exactly which bits ' +
+          'a function failed to mix.',
         'None of this is cryptography. A table hash may be reversible and usually is; the next ' +
           'section is about what that costs you when the keys arrive from a stranger.',
         'One caution about the verdict below: "every cell within 40–60%" is only a criterion once ' +
-          'there are enough samples for a cell to be measured that precisely. At 256 samples a cell ' +
-          'has a 3.1-point standard error and the worst of 1 024 of them lands outside the band by ' +
-          'chance, so the panel tests the deviation in standard errors instead.'
+          'there are enough samples for a cell to be measured that precisely. At 256 samples a ' +
+          'cell has a 3.1-point standard error, and the worst of 1 024 of them lands outside the ' +
+          'band by chance. So the panel tests the deviation in standard errors instead.'
       ],
       demo: { title: 'Interactive demo — avalanche, uniformity and a composite-key bug',
         markup: root.HashFunctionsTemplate.render() },
