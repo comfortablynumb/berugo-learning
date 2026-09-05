@@ -32,16 +32,16 @@
         orientation: [
           'A binary search tree keeps one invariant: everything in a node\'s left subtree is smaller ' +
             'than it, everything in the right subtree is larger. That single rule makes search, ' +
-            'insertion and deletion follow one root-to-leaf path, so all three cost the height of the ' +
-            'tree — and nothing in the rule says anything about what the height will be.',
+            'insertion and deletion follow one root-to-leaf path, so all three cost the height of ' +
+            'the tree. Nothing in the rule says anything about what the height will be.',
           'The height is decided by the insertion order, not by the keys. Random order measures ' +
-            'about 2.2 × log₂ n at the sizes in this demo, rising towards its asymptotic 4.311 × ln n; ' +
-            'sorted order gives exactly n, because every key is larger than the last and the tree ' +
-            'becomes a right spine. That is not an adversarial curiosity: it is what a bulk load from ' +
-            'an ordered export does to an unbalanced index.',
-          'The rotation is the one primitive every balanced family is built from. It changes which ' +
-            'node is on top of a pair while preserving the in-order sequence exactly, which is why it ' +
-            'is safe to apply as often as a balance rule asks for.'
+            'about 2.2 × log₂ n at the sizes in this demo, rising towards its asymptotic ' +
+            '4.311 × ln n. Sorted order gives exactly n, because every key is larger than the ' +
+            'last and the tree becomes a right spine. That is not an adversarial curiosity: it is ' +
+            'what a bulk load from an ordered export does to an unbalanced index.',
+          'The rotation is the one primitive every balanced family is built from. It changes ' +
+            'which node is on top of a pair while preserving the in-order sequence exactly. That ' +
+            'is why it is safe to apply as often as a balance rule asks for.'
         ],
         demo: { title: 'Interactive demo — build it, then rotate it', markup: root.BstRotationsTemplate.render() },
         diagram: {
@@ -64,10 +64,10 @@
             '    before -->|"y.left = x.right; x.right = y"| after'
           ].join('\n')
         },
-        insight: 'Sorted insertion is not a rare adversarial case; it is what happens when you bulk-load ' +
-          'from a sorted export, and it turns your O(log n) index into a linked list. If you must load ' +
-          'sorted data into an unbalanced tree, shuffle it first — or insert the median recursively, ' +
-          'which builds the balanced tree directly.'
+        insight: 'Sorted insertion is not a rare adversarial case. It is what happens when you ' +
+          'bulk-load from a sorted export, and it turns your O(log n) index into a linked list. If ' +
+          'you must load sorted data into an unbalanced tree, shuffle it first — or insert the ' +
+          'median recursively, which builds the balanced tree directly.'
     };
   }
 
