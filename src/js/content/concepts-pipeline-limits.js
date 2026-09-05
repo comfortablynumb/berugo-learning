@@ -295,11 +295,15 @@
         },
         plain: 'The same values in a different order, and the same answer.',
         formal: 'sorted data makes the branch two long runs; shuffled makes it a coin flip',
-        detail: 'The branch is taken the same number of times either way, so nothing about the '
-          + 'work changes. What changes is whether a two-bit counter can learn the pattern, and '
-          + 'a long run of not-taken followed by a long run of taken is the easiest pattern '
-          + 'there is. Reporting mispredicts rather than only time is what separates this '
-          + 'explanation from the half-dozen others a timing difference would admit.',
+        detail: [
+          'The branch is taken the same number of times either way, so nothing about the work '
+            + 'changes.',
+          'What changes is whether a two-bit counter can learn the pattern.',
+          'A long run of not-taken followed by a long run of taken is the easiest pattern there '
+            + 'is.',
+          'Reporting mispredicts rather than only time is what separates this explanation from '
+            + 'the half-dozen others a timing difference would admit.'
+        ],
         example: 'The same 64 values: 4 mispredicts sorted and 34 shuffled, for 503 cycles '
           + 'against 563, computing 6 947 both times.'
       },
@@ -307,11 +311,14 @@
         term: 'Branchless code trades a possible mispredict for a certain cost',
         plain: 'Three extra instructions per element, every element, forever.',
         formal: 'slt produces 0 or 1; subtracting one makes a mask; the AND applies it',
-        detail: 'The branchy loop pays nothing when the predictor is right and pays the penalty '
-          + 'when it is wrong. The branchless loop pays its extra instructions unconditionally, '
-          + 'whether or not there was ever a misprediction to avoid. So the comparison is extra '
-          + 'instructions against mispredict rate times penalty, and it is not a matter of '
-          + 'style.',
+        detail: [
+          'The branchy loop pays nothing when the predictor is right, and pays the penalty when it '
+            + 'is wrong.',
+          'The branchless loop pays its extra instructions unconditionally, whether or not there '
+            + 'was ever a misprediction to avoid.',
+          'So the comparison is extra instructions against mispredict rate times penalty.',
+          'It is not a matter of style.'
+        ],
         example: '424 instructions branchy against 581 branchless, for the same answer over the '
           + 'same data.'
       },
@@ -319,10 +326,13 @@
         term: 'On this machine branchless loses, and that is why it is measured',
         plain: 'A two-cycle penalty is not worth three instructions per element.',
         formal: 'the break-even penalty is about 4.8 cycles here',
-        detail: 'Thirty extra mispredicts at two cycles each is sixty cycles; three extra '
-          + 'instructions across sixty-four elements is nearly two hundred. Below about five '
-          + 'cycles of penalty the branchy version wins even on shuffled data, and above it the '
-          + 'branchless one does. Nothing about the source decides that — the machine does.',
+        detail: [
+          'Thirty extra mispredicts at two cycles each is sixty cycles.',
+          'Three extra instructions across sixty-four elements is nearly two hundred.',
+          'Below about five cycles of penalty the branchy version wins even on shuffled data, and '
+            + 'above it the branchless one does.',
+          'Nothing about the source decides that. The machine does.'
+        ],
         example: 'Branchless takes 654 cycles regardless of order, against 503 sorted and 563 '
           + 'shuffled for the branchy version.'
       },
@@ -330,10 +340,14 @@
         term: 'The same code wins on a different machine',
         plain: 'Scale the penalty and the answer flips.',
         formal: 'at 5 cycles branchless wins; at 20 it wins by a wide margin',
-        detail: 'That is the most useful thing in this section: an optimisation whose '
-          + 'correctness as an optimisation depends on a hardware parameter. Advice of the form '
-          + '"prefer branchless code" is therefore not advice at all unless it names the '
-          + 'penalty and the mispredict rate it assumes, and most of it does not.',
+        detail: [
+          'That is the most useful thing in this section: an optimisation whose correctness as an '
+            + 'optimisation depends on a hardware parameter.',
+          'Advice of the form "prefer branchless code" is therefore not advice at all unless it '
+            + 'names the penalty and the mispredict rate it assumes.',
+          'Most of it does not.',
+          'The same rewrite is a win on one machine and a regression on another.'
+        ],
         example: 'At a 20-cycle penalty the branchy shuffled loop would take 1 175 cycles and '
           + 'the branchless one 672.'
       },
@@ -341,20 +355,26 @@
         term: 'Sorting the data is usually the better fix when it is available',
         plain: 'It makes the branch predictable rather than removing it.',
         formal: 'the loop keeps its early exit and its shorter instruction count',
-        detail: 'Sorting costs its own time, which has to be amortised over enough passes, and '
-          + 'it stops being available the moment the data cannot be reordered — which is most '
-          + 'of the time. But when it is available it is strictly better than going branchless, '
-          + 'because it removes the mispredicts without adding any instructions.',
+        detail: [
+          'Sorting costs its own time, which has to be amortised over enough passes.',
+          'It also stops being available the moment the data cannot be reordered, which is most of '
+            + 'the time.',
+          'But when it is available it is strictly better than going branchless.',
+          'It removes the mispredicts without adding any instructions.'
+        ],
         example: 'Sorted and branchy is 503 cycles; branchless is 654 whatever the order.'
       },
       {
         term: 'Unrolling helps, and not with the branch that is costing you',
         plain: 'It removes loop-control branches, which were predictable anyway.',
         formal: 'fewer instructions and more scheduling freedom, and the same mispredicts',
-        detail: 'The loop-control branch is taken every iteration but one, so any predictor '
-          + 'gets it right; removing it saves instructions rather than mispredicts. Unrolling '
-          + 'is still usually a small win for exactly those other reasons, and expecting it to '
-          + 'fix a data-dependent branch is a misdiagnosis.',
+        detail: [
+          'The loop-control branch is taken every iteration but one, so any predictor gets it '
+            + 'right.',
+          'Removing it saves instructions rather than mispredicts.',
+          'Unrolling is still usually a small win for exactly those other reasons.',
+          'Expecting it to fix a data-dependent branch is a misdiagnosis.'
+        ],
         example: 'The filter loop\'s control branch is predicted correctly on all but the last '
           + 'iteration, in every configuration.'
       },
@@ -362,11 +382,15 @@
         term: 'An indirect call in a hot loop is the expensive shape',
         plain: 'A direction is one bit; a target is a full address.',
         formal: 'a virtual call through a varying pointer is close to unpredictable',
-        detail: 'Direction prediction reaches 98% on ordinary code and indirect target '
-          + 'prediction does not come close, so a polymorphic call in an inner loop is a much '
-          + 'larger cost than a data-dependent branch. That is why devirtualisation is worth so '
-          + 'much to a compiler, why profile-guided optimisation targets it specifically, and '
-          + 'why hot loops in performance-critical code avoid it.',
+        detail: [
+          'Direction prediction reaches 98% on ordinary code, and indirect target prediction does '
+            + 'not come close.',
+          'So a polymorphic call in an inner loop is a much larger cost than a data-dependent '
+            + 'branch.',
+          'That is why devirtualisation is worth so much to a compiler, and why profile-guided '
+            + 'optimisation targets it specifically.',
+          'It is why hot loops in performance-critical code avoid it.'
+        ],
         example: 'The return-address stack is the one indirect case with a clean answer, and it '
           + 'works only because calls and returns nest.'
       },
@@ -374,11 +398,15 @@
         term: 'The measurement is cheap and almost nobody takes it',
         plain: 'Every processor counts mispredicted branches, per address.',
         formal: 'read the counter before rewriting the branch',
-        detail: 'The question "is this branch actually mispredicted" has a direct answer that '
-          + 'any profiler will read out of a hardware counter, and it settles the whole '
-          + 'decision. Guessing instead is what produces branchless rewrites of branches that '
-          + 'were never mispredicted — slower code, harder to read, shipped because the test '
-          + 'data happened to be sorted.',
+        detail: [
+          'The question "is this branch actually mispredicted" has a direct answer that any '
+            + 'profiler will read out of a hardware counter.',
+          'That answer settles the whole decision.',
+          'Guessing instead is what produces branchless rewrites of branches that were never '
+            + 'mispredicted.',
+          'The result is slower code, harder to read, shipped because the test data happened to '
+            + 'be sorted.'
+        ],
         example: 'The demo reports mispredicts alongside cycles for exactly this reason: the '
           + 'timing alone admits a dozen explanations and the counter admits one.'
       }

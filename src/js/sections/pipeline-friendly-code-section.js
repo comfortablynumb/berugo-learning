@@ -60,7 +60,7 @@
       '**The sorted-array result is real, and it is about prediction rather than about '
         + 'memory.** The same values, the same comparison and the same answer: only the order '
         + 'differs. Sorted data makes the branch a long run of not-taken followed by a long '
-        + 'run of taken, which any two-bit counter gets right; shuffled data makes it a coin '
+        + 'run of taken, which any two-bit counter gets right. Shuffled data makes it a coin '
         + 'flip that nothing predicts.',
       '**Measure mispredicts, not just time.** A timing difference has a dozen possible '
         + 'explanations — cache behaviour, memory layout, the compiler having a good day. A '
@@ -68,8 +68,8 @@
         + 'rather than inferred.',
       '**Branchless code trades a possible mispredict for a guaranteed dependency.** The mask '
         + 'form here computes a comparison, turns it into all-ones or all-zeros, and ands it '
-        + 'with the value: three instructions, executed for every element, with no branch to '
-        + 'get wrong. It is insensitive to the data order, which is its whole appeal.',
+        + 'with the value. That is three instructions, executed for every element, with no '
+        + 'branch to get wrong. It is insensitive to the data order, which is its whole appeal.',
       '**On this machine branchless loses, and that is the point of measuring.** A two-cycle '
         + 'penalty times about thirty extra mispredicts is far less than three extra '
         + 'instructions times sixty-four elements. The demo computes the penalty at which the '
@@ -106,14 +106,14 @@
   function insight() {
     return '**Branchless code is a bet that a branch is unpredictable, and losing that bet is '
       + 'silent.** The branchy loop pays nothing when the predictor is right and pays the '
-      + 'penalty when it is wrong; the branchless loop pays its extra instructions every '
+      + 'penalty when it is wrong. The branchless loop pays its extra instructions every '
       + 'single iteration, unconditionally, whether or not there was ever a misprediction to '
       + 'avoid. So the comparison is three extra instructions per element against the '
-      + 'mispredict rate multiplied by the penalty — and on this five-stage machine, with a '
+      + 'mispredict rate multiplied by the penalty. On this five-stage machine, with a '
       + 'two-cycle penalty, the bet loses even on shuffled data. On a deep out-of-order core '
       + 'with a twenty-cycle penalty the same code wins comfortably. Nothing about the source '
-      + 'changed; the machine did. That is why this is the last section of the milestone: '
-      + 'every technique here is conditional on numbers you have to go and measure, and the '
+      + 'changed; the machine did. That is why this is the last section of the milestone. '
+      + 'Every technique here is conditional on numbers you have to go and measure. The '
       + 'ones that matter — mispredict rate and misprediction penalty — are properties of the '
       + 'processor and the data rather than of the code you are looking at. The discipline is '
       + 'not "prefer branchless" or "prefer branchy". It is to know which of the three numbers '
