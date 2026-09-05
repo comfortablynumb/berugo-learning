@@ -159,24 +159,31 @@
         term: 'An ALU is one adder plus a multiplexer, and the sharing is the design',
         plain: 'Build the expensive structure once and select among cheap paths beside it.',
         formal: 'result = mux(op1, adder_output, mux(op0, and_output, xor_output))',
-        detail: 'The wide, slow, expensive structure is the carry chain. AND and XOR are one '
-          + 'gate per bit with no chain at all, so adding them costs almost nothing next to the '
-          + 'adder they sit beside. The pattern — one expensive shared unit, several cheap '
-          + 'paths, a multiplexer to choose — recurs in a floating-point unit sharing a '
-          + 'multiplier between multiply and fused multiply-add, and in any well-factored piece '
-          + 'of software with one hot path and several thin wrappers.',
-        example: 'An 8-bit ALU is 92 gates at depth 47; the ripple adder inside it is 40 gates '
-          + 'at depth 35, so three more operations and four flags cost 52 gates and 12 delays.'
+        detail: [
+          'The wide, slow, expensive structure is the carry chain.',
+          'AND and XOR are one gate per bit with no chain at all, so adding them costs almost '
+            + 'nothing next to the adder they sit beside.',
+          'The pattern is one expensive shared unit, several cheap paths, and a multiplexer to '
+            + 'choose.',
+          'It recurs in a floating-point unit sharing a multiplier between multiply and fused '
+            + 'multiply-add, and in any well-factored piece of software with one hot path and '
+            + 'several thin wrappers.'
+        ],
+        example: 'An 8-bit ALU is 92 gates at depth 47 and the ripple adder inside it is 40 '
+          + 'gates at depth 35. Three more operations and four flags cost 52 gates and 12 delays.'
       },
       {
         term: 'The operation code configures the datapath, not just the output select',
         plain: 'The low bit inverts the second operand and supplies the carry in.',
         formal: 'operand = b xor op0; carry in = op0; so op0 = 1 computes a - b',
-        detail: 'This is the neatest trick in a simple ALU and it is worth seeing once: the '
-          + 'same wire that selects "subtract" also reconfigures the adder to perform it, '
-          + 'because inverting b and adding one is negation. Nothing is spent on decoding, and '
-          + 'the subtract path costs one XOR per bit. The general lesson is that encoding a '
-          + 'control signal well can remove the logic that would otherwise interpret it.',
+        detail: [
+          'This is the neatest trick in a simple ALU and it is worth seeing once.',
+          'The same wire that selects "subtract" also reconfigures the adder to perform it, '
+            + 'because inverting b and adding one is negation.',
+          'Nothing is spent on decoding, and the subtract path costs one XOR per bit.',
+          'The general lesson is that encoding a control signal well can remove the logic that '
+            + 'would otherwise interpret it.'
+        ],
         example: 'Subtract at 8 bits costs 8 XOR gates — one per bit — on top of the adder.'
       },
       {
@@ -197,12 +204,15 @@
         plain: 'Carry means the unsigned result did not fit; overflow means the signed one did not.',
         formal: 'carry = carry out of the top bit; overflow = carry into the top bit xor carry out of it',
         readAs: 'overflow is set when the carry entering the sign bit differs from the carry leaving it.',
-        detail: 'The same addition can set one flag, the other, both or neither, and which one '
-          + 'your program should read depends on a type the hardware never saw. That gap is '
-          + 'where a large share of integer bugs live: C defines unsigned wraparound and leaves '
-          + 'signed overflow undefined, so the compiler may assume it cannot happen, and mixing '
-          + 'the two readings in one expression produces a bug that only appears at the '
-          + 'boundary.',
+        detail: [
+          'The same addition can set one flag, the other, both or neither.',
+          'Which one your program should read depends on a type the hardware never saw.',
+          'That gap is where a large share of integer bugs live. C defines unsigned wraparound '
+            + 'and leaves signed overflow undefined, so the compiler may assume it cannot '
+            + 'happen.',
+          'Mixing the two readings in one expression produces a bug that only appears at the '
+            + 'boundary.'
+        ],
         example: '255 + 1 at 8 bits sets carry and zero; 127 + 1 sets overflow and negative. '
           + 'Neither is an error — they are answers to different questions.'
       },
@@ -211,12 +221,16 @@
         plain: 'Deciding every result bit is 0 needs a tree over the whole word.',
         formal: 'zero = not (r_0 or r_1 or ... or r_(n-1))',
         readAs: 'the zero flag is the negation of the or taken over every bit of the result word.',
-        detail: 'The tree cannot start until the result is final, so the zero flag is later '
-          + 'than the result it describes. That is why a compare-and-branch is sometimes a '
-          + 'cycle longer than an arithmetic instruction, and why some architectures make the '
-          + 'branch read the operands directly rather than a flag. It is also a reminder that a '
-          + 'reduction over a word is not free: the same log-depth tree appears in a population '
-          + 'count, a parity check and a match line.',
+        detail: [
+          'The tree cannot start until the result is final, so the zero flag is later than the '
+            + 'result it describes.',
+          'That is why a compare-and-branch is sometimes a cycle longer than an arithmetic '
+            + 'instruction, and why some architectures make the branch read the operands '
+            + 'directly rather than a flag.',
+          'It is also a reminder that a reduction over a word is not free.',
+          'The same log-depth tree appears in a population count, a parity check and a match '
+            + 'line.'
+        ],
         example: 'The flag logic in the 8-bit ALU is 12 gates of the 92, and the zero tree is '
           + 'the deepest part of it.'
       },
@@ -224,11 +238,15 @@
         term: 'Flags for the logic operations are forced, not inherited',
         plain: 'The adder still runs during an AND; its carry is meaningless, so it is driven low.',
         formal: 'carry_out = adder_carry and (not op1); the same for overflow',
-        detail: 'The adder is not switched off — there is no such thing — its output is simply '
-          + 'not selected, so whatever it computed is still sitting on a wire. Letting that '
-          + 'reach the carry flag would produce a flag that is stale rather than wrong, which is '
-          + 'worse: a wrong value is a bug you can find, and a stale one is a value that '
-          + 'happens to be right most of the time. Two AND gates buy the difference.',
+        detail: [
+          'The adder is not switched off, because there is no such thing. Its output is simply '
+            + 'not selected, so whatever it computed is still sitting on a wire.',
+          'Letting that reach the carry flag would produce a flag that is stale rather than '
+            + 'wrong, which is worse.',
+          'A wrong value is a bug you can find, and a stale one is a value that happens to be '
+            + 'right most of the time.',
+          'Two AND gates buy the difference.'
+        ],
         example: 'AND and XOR on the demo\'s operands both report carry and overflow clear, '
           + 'whatever the adder alongside them computed.'
       },
@@ -236,12 +254,16 @@
         term: 'Condition codes are shared mutable state, with the costs that implies',
         plain: 'Every arithmetic instruction writes them and the next branch reads them.',
         formal: 'an implicit destination register written by most instructions',
-        detail: 'An out-of-order machine must rename the flag register exactly as it renames '
-          + 'general registers, and a branch depends on whichever instruction wrote them last — '
-          + 'a dependency that is invisible in the source. That is why some architectures '
-          + 'dropped flags entirely and made comparison an instruction that writes a general '
-          + 'register: it turns an implicit global into an explicit value, which is the same '
-          + 'refactor a program does when it replaces a module-level variable with a parameter.',
+        detail: [
+          'An out-of-order machine must rename the flag register exactly as it renames general '
+            + 'registers.',
+          'A branch depends on whichever instruction wrote them last, which is a dependency '
+            + 'invisible in the source.',
+          'That is why some architectures dropped flags entirely and made comparison an '
+            + 'instruction that writes a general register.',
+          'It turns an implicit global into an explicit value, which is the same refactor a '
+            + 'program does when it replaces a module-level variable with a parameter.'
+        ],
         example: 'The demo\'s instruction-set table connects each flag to the branch that reads '
           + 'it and the bug that misreading it causes.'
       },
@@ -250,11 +272,15 @@
         plain: 'The result mux sits in front of every result bit.',
         formal: 'k operations need a k:1 select per bit, of depth log2(k)',
         readAs: 'selecting among k operations costs about log-two-of-k gate delays in front of every bit.',
-        detail: 'An ALU with sixteen operations pays for them in depth even when the program '
-          + 'only ever adds, which is why complex operations live in separate functional units '
-          + 'with their own latency rather than being folded into the ALU. The general shape is '
-          + 'familiar from software: a hot function with a large switch pays the dispatch cost '
-          + 'on every call, and splitting the rare cases out makes the common path shorter.',
+        detail: [
+          'An ALU with sixteen operations pays for them in depth even when the program only ever '
+            + 'adds.',
+          'That is why complex operations live in separate functional units with their own '
+            + 'latency, rather than being folded into the ALU.',
+          'The general shape is familiar from software.',
+          'A hot function with a large switch pays the dispatch cost on every call, and splitting '
+            + 'the rare cases out makes the common path shorter.'
+        ],
         example: 'Result multiplexing in the 8-bit ALU is 16 gates — two 2:1 multiplexers per '
           + 'bit — and 2 of the 47 gate delays.'
       },
@@ -263,11 +289,14 @@
         plain: 'Ten inputs is 1 024 combinations of operands and operation.',
         formal: 'a 4-bit ALU has 2^4 x 2^4 x 4 = 1024 cases',
         readAs: 'sixteen values of a, sixteen of b and four operations, which is one thousand and twenty-four cases.',
-        detail: 'The reference is written from the definitions of the operations and the flags '
-          + 'rather than from the circuit, which is what makes agreement mean something. At '
-          + 'eight bits the space is 262 144 and the demo samples it with a fixed seed and '
-          + 'reports the count — which is the honest form of the same claim. "Sampled 300 of '
-          + '262 144, seeded, reproducible" is checkable; "well tested" is not.',
+        detail: [
+          'The reference is written from the definitions of the operations and the flags rather '
+            + 'than from the circuit, which is what makes agreement mean something.',
+          'At eight bits the space is 262 144, so the demo samples it with a fixed seed and '
+            + 'reports the count.',
+          'That is the honest form of the same claim.',
+          '"Sampled 300 of 262 144, seeded, reproducible" is checkable; "well tested" is not.'
+        ],
         example: 'The 4-bit ALU matches the reference on all 1 024 cases; the 8-bit version is '
           + 'sampled 300 times with a stated seed.'
       }
