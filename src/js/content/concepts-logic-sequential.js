@@ -152,12 +152,16 @@
         plain: 'State register, next-state logic, output logic. There is no other shape.',
         formal: 'state\' = next(state, input); output = out(state) or out(state, input)',
         readAs: 'the next state is a function of the state and the input; the output is a function of the state, and for a Mealy machine of the input too.',
-        detail: 'A control unit, a cache controller, a bus interface and a traffic light are the '
-          + 'same circuit with different tables in the middle. Recognising that means a state '
-          + 'machine is never a new kind of design problem — it is a table, and everything else '
-          + 'is mechanical. The clock period is the longest path through the next-state logic '
-          + 'plus the flip-flop overheads, so a machine with deeply nested conditions in one '
-          + 'state is a machine with a slow clock.',
+        detail: [
+          'A control unit, a cache controller, a bus interface and a traffic light are the same '
+            + 'circuit with different tables in the middle.',
+          'Recognising that means a state machine is never a new kind of design problem. It is a '
+            + 'table, and everything else is mechanical.',
+          'The clock period is the longest path through the next-state logic plus the flip-flop '
+            + 'overheads.',
+          'So a machine with deeply nested conditions in one state is a machine with a slow '
+            + 'clock.'
+        ],
         example: 'The demo\'s 1101 detector, binary encoded, is 3 flip-flops and 26 gates with '
           + '11 gate delays of logic between two edges.'
       },
@@ -165,11 +169,14 @@
         term: 'Synthesis from a transition table is mechanical',
         plain: 'Each flip-flop input is a Boolean function of the state bits and the input.',
         formal: 'the next-state function of bit k is a truth table over the state bits and the inputs',
-        detail: 'Those functions come straight out of the table, get minimised by the algorithm '
-          + 'from three sections earlier, and become gates. Nothing about the step requires '
-          + 'judgement, which is exactly why a language can describe the machine and a tool can '
-          + 'build it — and why the interesting decisions are the ones the tool cannot make: '
-          + 'how many states, what encoding, and where the outputs come from.',
+        detail: [
+          'Those functions come straight out of the table, get minimised by the algorithm from '
+            + 'three sections earlier, and become gates.',
+          'Nothing about the step requires judgement, which is exactly why a language can '
+            + 'describe the machine and a tool can build it.',
+          'It is also why the interesting decisions are the ones the tool cannot make.',
+          'Those are how many states, what encoding, and where the outputs come from.'
+        ],
         example: 'The demo synthesises the same five-state machine three ways and checks every '
           + 'one against the transition table over all 256 strings of length 8.'
       },
@@ -190,12 +197,15 @@
         plain: 'Binary is the fewest flip-flops; one-hot is the shallowest decode.',
         formal: 'binary needs ceil(log2 k) bits for k states; one-hot needs k',
         readAs: 'binary encoding needs the ceiling of the base-two logarithm of the number of states.',
-        detail: 'On an FPGA flip-flops come free with every lookup table and logic levels are '
-          + 'the scarce resource, so one-hot usually wins. In an ASIC with hundreds of states a '
-          + 'flip-flop per state is real area, so binary with decoded outputs wins. Gray coding '
-          + 'changes one bit per step where the state order allows it, which matters when '
-          + 'something outside the clock domain samples the state — a counter crossing into '
-          + 'another clock, for instance.',
+        detail: [
+          'On an FPGA flip-flops come free with every lookup table and logic levels are the '
+            + 'scarce resource, so one-hot usually wins.',
+          'In an ASIC with hundreds of states a flip-flop per state is real area, so binary with '
+            + 'decoded outputs wins.',
+          'Gray coding changes one bit per step where the state order allows it.',
+          'That matters when something outside the clock domain samples the state, such as a '
+            + 'counter crossing into another clock.'
+        ],
         example: 'Binary is 3 flip-flops at logic depth 11; one-hot is 5 at depth 7; gray is 3 '
           + 'at depth 7 with 20 gates. All three produce identical output on 256 strings.'
       },
@@ -203,12 +213,15 @@
         term: 'Moore outputs are stable; Mealy outputs are early',
         plain: 'A Moore output depends on the state; a Mealy output depends on the state and the input.',
         formal: 'Moore: out(state). Mealy: out(state, input)',
-        detail: 'A Moore output changes just after the clock edge and is quiet for the rest of '
-          + 'the period, which makes it safe to send anywhere. A Mealy output responds within '
-          + 'the same cycle and inherits every glitch on the input, which makes it the wrong '
-          + 'thing to send to another clock domain, a chip pin, or anything that latches on a '
-          + 'level. Mealy machines often need fewer states, and that is the trade rather than '
-          + 'an argument for either.',
+        detail: [
+          'A Moore output changes just after the clock edge and is quiet for the rest of the '
+            + 'period, which makes it safe to send anywhere.',
+          'A Mealy output responds within the same cycle and inherits every glitch on the input.',
+          'That makes it the wrong thing to send to another clock domain, a chip pin, or anything '
+            + 'that latches on a level.',
+          'Mealy machines often need fewer states, and that is the trade rather than an argument '
+            + 'for either.'
+        ],
         example: 'The demo\'s Moore detector needs a fifth state to be in while it reports; the '
           + 'Mealy version reports on the transition and returns to an earlier state.'
       },
@@ -217,24 +230,30 @@
         plain: 'Clock-to-q plus next-state logic plus setup, all inside one period.',
         formal: 'period >= clock-to-q + logic + setup',
         readAs: 'the period must be at least the flip-flop delay plus the logic plus the setup time.',
-        detail: 'Static timing analysis measures that path structurally, over every input '
-          + 'pattern at once, which is why "the simulation passed" is not a timing argument. '
-          + 'Notice that the input-to-output path a combinational tool reports is not the same '
-          + 'number: a Moore machine whose output is a wire off the register has a one-delay '
-          + 'output path and an eleven-delay register-to-register path, and only the second '
-          + 'sets the clock.',
+        detail: [
+          'Static timing analysis measures that path structurally, over every input pattern at '
+            + 'once, which is why "the simulation passed" is not a timing argument.',
+          'Notice that the input-to-output path a combinational tool reports is not the same '
+            + 'number.',
+          'A Moore machine whose output is a wire off the register has a one-delay output path '
+            + 'and an eleven-delay register-to-register path.',
+          'Only the second sets the clock.'
+        ],
         example: 'The binary machine\'s period is 14: 11 of logic plus 3 of flip-flop overhead.'
       },
       {
         term: 'Splitting a slow state is the standard fix, and it costs a cycle',
         plain: 'Fewer levels of logic per state, more states.',
         formal: 'the same computation across two periods instead of one longer period',
-        detail: 'This is pipelining applied to control rather than to data, and it has the same '
-          + 'shape: throughput improves, latency gets worse, and the overhead per stage puts a '
-          + 'floor under how far it goes. It is also the reason a protocol engine written as '
-          + 'one state with a large conditional expression synthesises badly — the tool cannot '
-          + 'split it for you, because splitting changes the cycle-by-cycle behaviour the '
-          + 'specification pinned down.',
+        detail: [
+          'This is pipelining applied to control rather than to data, and it has the same shape.',
+          'Throughput improves, latency gets worse, and the overhead per stage puts a floor under '
+            + 'how far it goes.',
+          'It is also the reason a protocol engine written as one state with a large conditional '
+            + 'expression synthesises badly.',
+          'The tool cannot split it for you, because splitting changes the cycle-by-cycle '
+            + 'behaviour the specification pinned down.'
+        ],
         example: 'The demo\'s encodings differ by 4 gate delays of logic, which is the same '
           + 'magnitude a state split would buy on this machine.'
       },
@@ -243,12 +262,15 @@
         plain: 'Five states in three bits leaves three patterns the machine should never hold.',
         formal: '2^ceil(log2 k) - k unreachable codes, with no defined transitions',
         readAs: 'the number of unused codes is two to the bit count, minus the number of real states.',
-        detail: 'A glitch, a single-event upset or an incomplete reset can land the register in '
-          + 'one of them, and a machine with no defined transition out can stay there forever. '
-          + 'Safety-critical designs make every unused code jump to reset, which costs gates. '
-          + 'The software analogue is an enum value that arrived from a deserialiser: the type '
-          + 'says it cannot happen, the bits say otherwise, and the honest answer is a default '
-          + 'branch.',
+        detail: [
+          'A glitch, a single-event upset or an incomplete reset can land the register in one of '
+            + 'them.',
+          'A machine with no defined transition out can stay there forever.',
+          'Safety-critical designs make every unused code jump to reset, which costs gates.',
+          'The software analogue is an enum value that arrived from a deserialiser. The type says '
+            + 'it cannot happen, the bits say otherwise, and the honest answer is a default '
+            + 'branch.'
+        ],
         example: 'Binary encoding of the demo\'s five states leaves 3 unused codes; one-hot '
           + 'leaves none of that kind and many patterns with two bits set.'
       },
@@ -256,12 +278,15 @@
         term: 'The netlist is the claim and the transition table is the judge',
         plain: 'Run both on every string and compare symbol by symbol.',
         formal: 'for every input string up to length L, the gate output must equal the table output',
-        detail: 'The abstract machine walks a table; the netlist clocks flip-flops. They share '
-          + 'no code, so agreement is evidence rather than tautology, and disagreement always '
-          + 'means the netlist is wrong. One subtlety decides whether the comparison works at '
-          + 'all: the gate output must be read BEFORE the clock edge, where a downstream '
-          + 'register would sample it. Reading after the edge shifts the whole output by one '
-          + 'cycle and looks like an off-by-one in the machine.',
+        detail: [
+          'The abstract machine walks a table; the netlist clocks flip-flops.',
+          'They share no code, so agreement is evidence rather than tautology, and disagreement '
+            + 'always means the netlist is wrong.',
+          'One subtlety decides whether the comparison works at all. The gate output must be read '
+            + 'BEFORE the clock edge, where a downstream register would sample it.',
+          'Reading after the edge shifts the whole output by one cycle and looks like an '
+            + 'off-by-one in the machine.'
+        ],
         example: 'All three encodings produce 0 mismatches over the 256 strings of length 8.'
       }
     ],
