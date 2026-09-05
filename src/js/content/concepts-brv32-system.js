@@ -23,12 +23,15 @@
         },
         plain: 'The same load and store instructions reach RAM and the console.',
         formal: 'a device is a region of the address space, dispatched on the top bits',
-        detail: 'There is no separate I/O instruction and no flag on the access: the address '
-          + 'decides. That is what makes a wild pointer write able to reboot a machine rather '
-          + 'than merely corrupt data, and it is why the address map is part of the hardware '
-          + 'specification rather than a software convention. It also means the whole apparatus '
-          + 'of pointers, structs and arrays applies to devices, which is convenient and is '
-          + 'exactly why device programming is full of surprises.',
+        detail: [
+          'There is no separate I/O instruction and no flag on the access: the address decides.',
+          'That is what makes a wild pointer write able to reboot a machine rather than merely '
+            + 'corrupt data.',
+          'It is why the address map is part of the hardware specification rather than a software '
+            + 'convention.',
+          'It also means the whole apparatus of pointers, structs and arrays applies to devices, '
+            + 'which is convenient and is exactly why device programming is full of surprises.'
+        ],
         example: 'Writing a byte to 0x20000000 makes a character appear; writing the same byte '
           + 'to 0x10000000 stores it. Same instruction, same syntax.'
       },
@@ -36,13 +39,15 @@
         term: 'A device register is not memory, and none of the differences are visible',
         plain: 'Reading can have a side effect; writing performs an action; order is the protocol.',
         formal: 'a device access is not idempotent, not cacheable and not reorderable',
-        detail: 'Reading the timer twice gives two different values. Writing the console once '
-          + 'prints one character and writing it twice prints two. The order of two writes is '
-          + 'the protocol — data first, then command — so a compiler that reorders them issues '
-          + 'a command with stale data. None of this is expressible in the source, which is why '
-          + 'C has `volatile` and why `volatile` is about observability rather than about '
-          + 'threads: it stops the compiler eliding and reordering accesses, and says nothing '
-          + 'about what other processors see.',
+        detail: [
+          'Reading the timer twice gives two different values, and writing the console once '
+            + 'prints one character where writing it twice prints two.',
+          'The order of two writes is the protocol — data first, then command — so a compiler '
+            + 'that reorders them issues a command with stale data.',
+          'None of this is expressible in the source, which is why C has `volatile`.',
+          'That keyword is about observability rather than about threads. It stops the compiler '
+            + 'eliding and reordering accesses, and says nothing about what other processors see.'
+        ],
         example: 'A polling loop that reads a status register through a cached variable never '
           + 'sees the device change, and the loop never ends.'
       },
@@ -50,14 +55,17 @@
         term: 'Alignment is a requirement, and the fault is the feature',
         plain: 'An access must be a multiple of its width, or it traps.',
         formal: 'a w-byte access requires address mod w = 0; otherwise cause 4 or 6',
-        readAs: 'an access of w bytes needs an address that divides exactly by w, and if it '
-          + 'does not, the machine raises cause 4 for a load or 6 for a store.',
-        detail: 'An aligned access never straddles two words, so the memory interface stays one '
-          + 'access wide and the hardware stays simple. Requiring it means a misaligned access '
-          + 'faults loudly with the offending address in a register, which is enormously better '
-          + 'than the alternative of quietly reading the wrong bytes. The whole matrix is one '
-          + 'modulo test applied uniformly — there are no special cases, which is why it is '
-          + 'cheap enough to do on every access in the machine.',
+        readAs: 'an access of w bytes needs an address that divides exactly by w. If it does '
+          + 'not, the machine raises cause 4 for a load or 6 for a store.',
+        detail: [
+          'An aligned access never straddles two words, so the memory interface stays one access '
+            + 'wide and the hardware stays simple.',
+          'Requiring it means a misaligned access faults loudly with the offending address in a '
+            + 'register.',
+          'That is enormously better than the alternative of quietly reading the wrong bytes.',
+          'The whole matrix is one modulo test applied uniformly. There are no special cases, '
+            + 'which is why it is cheap enough to do on every access in the machine.'
+        ],
         example: 'From 0x10000001: a byte load works, a half word and a word both fault. From '
           + '0x10000002: byte and half word work, the word faults.'
       },
@@ -65,13 +73,17 @@
         term: 'Endianness decides which byte lives at the lowest address',
         plain: 'Little-endian: the low bits are in the first byte.',
         formal: 'byte at address a contributes bits 7:0; the byte at a+1 contributes 15:8',
-        detail: 'The choice is invisible until a program writes a word and reads a byte, and '
-          + 'then it decides the answer — so it has to be part of the architecture rather than '
-          + 'left to the implementation. Little-endian makes a narrowing conversion free, '
-          + 'because the low bytes are already at the start; big-endian makes a hex dump read in '
-          + 'the order you would write the number. Both are defensible, the choice is arbitrary, '
-          + 'and the only real cost is that data crossing between machines needs a stated byte '
-          + 'order — which is why every network protocol specifies one.',
+        detail: [
+          'The choice is invisible until a program writes a word and reads a byte, and then it '
+            + 'decides the answer.',
+          'So it has to be part of the architecture rather than left to the implementation.',
+          'Little-endian makes a narrowing conversion free, because the low bytes are already at '
+            + 'the start. Big-endian makes a hex dump read in the order you would write the '
+            + 'number.',
+          'Both are defensible and the choice is arbitrary. The only real cost is that data '
+            + 'crossing between machines needs a stated byte order, which is why every network '
+            + 'protocol specifies one.'
+        ],
         example: 'Storing 0x12345678 and loading its first byte gives 0x78; the byte at the '
           + 'highest address is 0x12.'
       },
@@ -79,12 +91,16 @@
         term: 'Sign extension is in the opcode, because the hardware cannot infer it',
         plain: 'lb and lbu read the same byte and produce different numbers.',
         formal: 'funct3 encodes width and signedness together, in three bits',
-        detail: 'A byte loaded into a 32-bit register has to become 32 bits somehow, and whether '
-          + 'the upper 24 are copies of the sign bit or zeros depends entirely on what the byte '
-          + 'meant — which the hardware has no way to know. So there are two instructions per '
-          + 'sub-word width, and the compiler picks from the declared type. This is the hardware '
-          + 'root of a whole family of C bugs about char signedness, and the reason a language '
-          + 'that does not commit to one gets different answers on different platforms.',
+        detail: [
+          'A byte loaded into a 32-bit register has to become 32 bits somehow.',
+          'Whether the upper 24 are copies of the sign bit or zeros depends entirely on what the '
+            + 'byte meant, which the hardware has no way to know.',
+          'So there are two instructions per sub-word width, and the compiler picks from the '
+            + 'declared type.',
+          'This is the hardware root of a whole family of C bugs about char signedness. It is '
+            + 'the reason a language that does not commit to one gets different answers on '
+            + 'different platforms.'
+        ],
         example: 'The byte 0x80 loads as -128 through lb and 128 through lbu; the half word '
           + '0xbe80 loads as -16 768 or 48 768.'
       },
@@ -92,12 +108,16 @@
         term: 'A fault is architectural state, not an exception object',
         plain: 'The interface returns the cause and the address instead of throwing.',
         formal: 'a failed access yields { cause, value } and no data',
-        detail: 'The trap handler in the next section reads the cause and the offending address '
-          + 'out of control registers, so both have to survive the failure. Modelling a fault as '
-          + 'a thrown exception loses exactly the information the mechanism exists to carry, and '
-          + 'it hides the fact that the processor keeps running — a fault is not a crash, it is '
-          + 'a redirection. The distinction matters as soon as page faults arrive in M43, where '
-          + 'the handler fixes the problem and re-runs the access.',
+        detail: [
+          'The trap handler in the next section reads the cause and the offending address out of '
+            + 'control registers, so both have to survive the failure.',
+          'Modelling a fault as a thrown exception loses exactly the information the mechanism '
+            + 'exists to carry.',
+          'It also hides the fact that the processor keeps running. A fault is not a crash, it is '
+            + 'a redirection.',
+          'The distinction matters as soon as page faults arrive in M43, where the handler fixes '
+            + 'the problem and re-runs the access.'
+        ],
         example: 'A load from 0x30000000 returns cause 5 with value 0x30000000; the handler can '
           + 'report exactly which pointer was wrong.'
       },
@@ -105,12 +125,16 @@
         term: 'Polling and interrupts trade waste against latency',
         plain: 'Read the status register in a loop, or let the device raise a signal.',
         formal: 'polling costs instructions while idle; an interrupt costs a trap when it fires',
-        detail: 'A polling loop is simple, has predictable latency and burns the processor doing '
-          + 'nothing. An interrupt costs nothing while idle and costs a trap, a handler and a '
-          + 'return when it fires — which is expensive if the device is fast and frequent. Real '
-          + 'systems use both and switch between them under load, which is why high-rate network '
-          + 'drivers disable interrupts and poll once traffic is heavy enough that the interrupt '
-          + 'rate would dominate.',
+        detail: [
+          'A polling loop is simple, has predictable latency and burns the processor doing '
+            + 'nothing.',
+          'An interrupt costs nothing while idle, and costs a trap, a handler and a return when '
+            + 'it fires.',
+          'That is expensive if the device is fast and frequent.',
+          'Real systems use both and switch between them under load. That is why high-rate '
+            + 'network drivers disable interrupts and poll once traffic is heavy enough that the '
+            + 'interrupt rate would dominate.'
+        ],
         example: 'The timer here can be read in a loop or armed to raise an interrupt; the next '
           + 'section takes the interrupt.'
       },
@@ -118,11 +142,13 @@
         term: 'An address map should be small enough to hold in your head',
         plain: 'Four regions here: program, data, console, timer.',
         formal: 'every address outside a mapped region faults rather than aliasing',
-        detail: 'Real address maps are enormous, and every one of them is a table exactly like '
-          + 'this one — which is what a device tree is, and what a memory map in a datasheet is. '
-          + 'The property worth keeping is that unmapped means fault rather than wrap or alias: '
-          + 'a wild pointer that hits nothing produces a diagnosable trap, whereas one that '
-          + 'silently aliases another device is a bug that reproduces once a month.',
+        detail: [
+          'Real address maps are enormous, and every one of them is a table exactly like this one.',
+          'That is what a device tree is, and what a memory map in a datasheet is.',
+          'The property worth keeping is that unmapped means fault rather than wrap or alias.',
+          'A wild pointer that hits nothing produces a diagnosable trap, whereas one that '
+            + 'silently aliases another device is a bug that reproduces once a month.'
+        ],
         example: 'The map is 32 KiB of program space, 4 KiB of RAM, and two devices of 16 bytes '
           + 'each; everything else faults.'
       }

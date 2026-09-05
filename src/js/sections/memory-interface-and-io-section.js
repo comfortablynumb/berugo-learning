@@ -66,7 +66,7 @@
       '**A device register is not memory, and the differences are all invisible in the '
         + 'source.** Reading it can have a side effect, reading it twice can give different '
         + 'answers, and writing it can do something the compiler cannot see. So the compiler '
-        + 'must not cache, reorder, merge or elide these accesses — which is what `volatile` '
+        + 'must not cache, reorder, merge or elide these accesses. That is what `volatile` '
         + 'asks for in C and what a fence asks for at the hardware level.',
       '**Alignment is a requirement here, and the fault is the feature.** An access must be a '
         + 'multiple of its width, or it traps with the offending address in a register. The '
@@ -78,7 +78,7 @@
         + '0x78. The moment a program writes a word and reads a byte the choice becomes '
         + 'visible, which is why it is specified rather than left to the implementation.',
       '**Sign extension is encoded in the opcode, because the hardware cannot infer it.** A '
-        + 'byte loaded into a 32-bit register has to become 32 bits somehow, and whether the '
+        + 'byte loaded into a 32-bit register has to become 32 bits somehow. Whether the '
         + 'top 24 are copies of the sign bit or zeros depends on what the byte meant. Hence lb '
         + 'and lbu: same address, same bytes, different numbers.',
       '**A fault is architectural state, not an exception object.** The interface returns the '
@@ -109,20 +109,20 @@
 
   function insight() {
     return '**"Memory-mapped" is three words that quietly delete the distinction between '
-      + 'storing a value and performing an action, and almost everything difficult about '
-      + 'device programming is the recovery of that distinction by hand.** A write to '
+      + 'storing a value and performing an action.** Almost everything difficult about '
+      + 'device programming is the recovery of that distinction by hand. A write to '
       + '0x10000000 puts a number somewhere; a write to 0x20000000 makes a character appear. '
       + 'The instruction is the same, the syntax is the same, and the compiler has no way to '
-      + 'tell them apart — so it will happily cache the value, hoist the write out of a loop, '
-      + 'merge two writes into one, or reorder them, all of which are correct for memory and '
+      + 'tell them apart. So it will happily cache the value, hoist the write out of a loop, '
+      + 'merge two writes into one, or reorder them. All of those are correct for memory and '
       + 'catastrophic for a device. That is what `volatile` is for, and it is why `volatile` '
-      + 'is not a concurrency primitive: it says "this access is observable", not "this access '
-      + 'is ordered against other threads", and confusing the two has produced a long history '
+      + 'is not a concurrency primitive. It says "this access is observable", not "this access '
+      + 'is ordered against other threads". Confusing the two has produced a long history '
       + 'of drivers that work until the compiler is upgraded. The transferable idea is that '
       + 'when two things with completely different semantics share a syntax, the burden of '
       + 'telling them apart moves to the programmer and stays there forever. It is the same '
       + 'reason an ORM that makes a network round trip look like a field access produces '
-      + 'code with a hundred queries in a loop: making the expensive thing look like the '
+      + 'code with a hundred queries in a loop. Making the expensive thing look like the '
       + 'cheap thing does not make it cheap, it just removes the reminder.';
   }
 
