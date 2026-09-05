@@ -29,6 +29,27 @@
     });
   }
 
+  function diagram() {
+    return {
+      title: 'Diagram — one insert, one new path',
+      caption: 'Inserting a key into version 4 rebuilds only the nodes on the path from the root to the new ' +
+        'leaf. Everything hanging off that path is shared by pointer, which is why the new version costs the ' +
+        'depth rather than the size — and why the old root keeps answering exactly as it did.',
+      definition: [
+        'flowchart TD',
+        '    R4["root · v4"] --> A["A"]',
+        '    R4 --> B["B"]',
+        '    A --> C["C"]',
+        '    A --> D["D"]',
+        '    R5["root\' · v5"] --> A2["A\' (copied)"]',
+        '    R5 --> B',
+        '    A2 --> C',
+        '    A2 --> E["new leaf"]',
+        '    N["B, C and D are the same objects in both versions"] -.-> B'
+      ].join('\n')
+    };
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
@@ -36,47 +57,33 @@
         'A persistent structure keeps every version it has ever had, and the only reason that is affordable is ' +
           'that consecutive versions overlap almost entirely. Inserting into a 344-key tree changes one ' +
           'root-to-leaf path and nothing else, so the new version can point at the old subtrees instead of ' +
-          'copying them. On 400 updates that is 13.12 new nodes per version rather than 344 — 156 720 bytes ' +
-          'for the whole history against the 5 504 000 that copying every version would cost.',
-        'Path copying is the version everyone reaches for first: rebuild the path, share the rest. Fat nodes ' +
-          'refuse to copy anything and instead append a (version, value) pair to the field being changed, so a ' +
-          'write costs 0.86 new nodes and 76 448 bytes. Node copying is Driscoll, Sarnak, Sleator and Tarjan\'s ' +
-          'answer — a fixed number of spare boxes per node, and a copy only when they fill — landing at 5.14 ' +
-          'nodes per update and 126 944 bytes.',
-        'The column that decides between them is the one a space comparison omits. A read on the path-copying ' +
-          'and node-copying trees costs 8.61 probes, exactly what the ephemeral tree costs; on the fat-node ' +
-          'tree it costs 16.66, because every pointer traversal becomes a binary search over that field\'s ' +
-          'history. Fat nodes save 2.05× the memory and cost 1.94× the read, so the answer is a property of ' +
-          'the workload rather than of the structure.'
+          'copying them. On 400 updates that is 13.12 new nodes per version rather than 344. The ' +
+          'whole history costs 156 720 bytes, against the 5 504 000 that copying every version ' +
+          'would.',
+        'Path copying is the version everyone reaches for first: rebuild the path, share the rest. ' +
+          'Fat nodes refuse to copy anything and instead append a (version, value) pair to the ' +
+          'field being changed, so a write costs 0.86 new nodes and 76 448 bytes. Node copying is ' +
+          'Driscoll, Sarnak, Sleator and Tarjan\'s answer: a fixed number of spare boxes per node, ' +
+          'and a copy only when they fill. It lands at 5.14 nodes per update and 126 944 bytes.',
+        'The column that decides between them is the one a space comparison omits. A read on the ' +
+          'path-copying and node-copying trees costs 8.61 probes, exactly what the ephemeral tree ' +
+          'costs. On the fat-node tree it costs 16.66, because every pointer traversal becomes a ' +
+          'binary search over that field\'s history. Fat nodes save 2.05× the memory and cost ' +
+          '1.94× the read, so the answer is a property of the workload rather than of the ' +
+          'structure.'
       ],
       demo: {
         title: 'Interactive demo — three strategies, one history, every version checked',
         markup: root.PersistenceBasicsTemplate.render()
       },
-      diagram: {
-        title: 'Diagram — one insert, one new path',
-        caption: 'Inserting a key into version 4 rebuilds only the nodes on the path from the root to the new ' +
-          'leaf. Everything hanging off that path is shared by pointer, which is why the new version costs the ' +
-          'depth rather than the size — and why the old root keeps answering exactly as it did.',
-        definition: [
-          'flowchart TD',
-          '    R4["root · v4"] --> A["A"]',
-          '    R4 --> B["B"]',
-          '    A --> C["C"]',
-          '    A --> D["D"]',
-          '    R5["root\' · v5"] --> A2["A\' (copied)"]',
-          '    R5 --> B',
-          '    A2 --> C',
-          '    A2 --> E["new leaf"]',
-          '    N["B, C and D are the same objects in both versions"] -.-> B'
-        ].join('\n')
-      },
-      insight: 'The three strategies are not three implementations of one idea; they are three different trades ' +
-        'between write cost, space and read cost, and the demo measures all three. What none of them trade away ' +
-        'is correctness at old versions: the wrong-versions column stays at zero for every strategy and every ' +
-        'setting, and it is the column to watch when a persistence scheme is being hand-rolled. The failure ' +
-        'mode that ends up in production is a structure that shares a node it also mutates, which is invisible ' +
-        'until someone reads a snapshot and gets data that never existed.'
+      diagram: diagram(),
+      insight: 'The three strategies are not three implementations of one idea. They are three ' +
+        'different trades between write cost, space and read cost, and the demo measures all ' +
+        'three. What none of them trade away is correctness at old versions. The wrong-versions ' +
+        'column stays at zero for every strategy and every setting, and it is the column to watch ' +
+        'when a persistence scheme is being hand-rolled. The failure mode that ends up in ' +
+        'production is a structure that shares a node it also mutates. That is invisible until ' +
+        'someone reads a snapshot and gets data that never existed.'
     };
   }
 

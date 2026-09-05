@@ -20,12 +20,16 @@
         },
         plain: 'Immutable means nobody may change it. Persistent means every past version is still there and still answerable.',
         formal: 'partial: query any version, update the latest. full: update any version. confluent: merge two versions.',
-        detail: 'The two words get used interchangeably and they are not the same claim. A frozen array is ' +
-          'immutable and not persistent - update it and the old contents are gone unless you copied them. A ' +
-          'persistent structure keeps the old version *cheaply*, which is a statement about representation ' +
-          'rather than about the API. The distinction matters the moment somebody asks "what did this look like ' +
-          'an hour ago": immutability alone gives you no way to answer, and the three grades of persistence are ' +
-          'exactly how much of that question you can afford.',
+        detail: [
+          'The two words get used interchangeably and they are not the same claim.',
+          'A frozen array is immutable and not persistent: update it and the old contents are gone ' +
+            'unless you copied them.',
+          'A persistent structure keeps the old version *cheaply*, which is a statement about ' +
+            'representation rather than about the API.',
+          'The distinction matters the moment somebody asks "what did this look like an hour ago". ' +
+            'Immutability alone gives you no way to answer, and the three grades of persistence are ' +
+            'exactly how much of that question you can afford.'
+        ],
         example: '400 updates to a 344-key tree: every one of the 400 versions still answers, from 3 918 nodes in total.'
       },
       {
@@ -43,34 +47,48 @@
         },
         plain: 'An update copies only the nodes from the changed leaf up to the root; every subtree off that path is shared.',
         formal: 'O(depth) new nodes per update, and queries cost exactly what the ephemeral structure costs',
-        detail: 'This is the method behind every immutable collection library, and its appeal is that nothing ' +
-          'about the read path changes: the new root points at a mixture of new and old nodes and a query cannot ' +
-          'tell the difference. The cost is the whole path, every time, which is where the folk claim that ' +
-          '"immutable is slow" comes from - and the folk claim is about allocation rather than about ' +
-          'asymptotics, because a path is a logarithm and a copy is a linear scan.',
+        detail: [
+          'This is the method behind every immutable collection library, and its appeal is that ' +
+            'nothing about the read path changes.',
+          'The new root points at a mixture of new and old nodes, and a query cannot tell the ' +
+            'difference.',
+          'The cost is the whole path, every time, which is where the folk claim that "immutable is ' +
+            'slow" comes from.',
+          'That claim is about allocation rather than about asymptotics, because a path is a ' +
+            'logarithm and a copy is a linear scan.'
+        ],
         example: 'Depth 18, and 13.12 nodes allocated per update - one path plus the rotations that rebalanced it.'
       },
       {
         term: 'Fat nodes: never copy, version-stamp instead',
         plain: 'Give each pointer field a list of (version, value) entries and append rather than overwrite.',
         formal: 'O(1) space per change; a query binary-searches a version list at every step',
-        detail: 'This is the cheapest possible thing to do on the write side, and it is not free: the ' +
-          'information has to go somewhere and it goes into the read path. Every pointer traversal becomes a ' +
-          'binary search over that field\'s history, so a query costs O(log n · log versions) instead of ' +
-          'O(log n). It is the right choice when versions vastly outnumber queries, and the wrong one whenever ' +
-          'reads dominate - which is most of the time, which is why path copying is what libraries ship.',
+        detail: [
+          'This is the cheapest possible thing to do on the write side, and it is not free.',
+          'The information has to go somewhere, and it goes into the read path.',
+          'Every pointer traversal becomes a binary search over that field\'s history, so a query ' +
+            'costs O(log n · log versions) instead of O(log n).',
+          'It is the right choice when versions vastly outnumber queries, and the wrong one ' +
+            'whenever reads dominate. Reads dominate most of the time, which is why path copying is ' +
+            'what libraries ship.'
+        ],
         example: '344 node objects for 400 versions - nothing is ever copied - at 3 574 appended field entries.'
       },
       {
         term: 'Node copying: one spare box, and a cascade',
         plain: 'Give each node one extra modification slot. Fill it on the first change; on the second, copy the node and tell the parent.',
         formal: 'O(1) amortised space per update with no query slowdown (Driscoll, Sarnak, Sleator, Tarjan)',
-        detail: 'The point of the spare slot is that most changes fit in it, so most updates allocate nothing ' +
-          'at all. When one does not fit, the node is copied with the box applied and the parent has to be ' +
-          'redirected to the copy - which may fill the parent\'s box, or overflow it and cascade further. The ' +
-          'result is the best of both: a query walks ordinary pointers and the space is constant per update ' +
-          'amortised. The cascade is the part worth measuring rather than believing, because its rarity is the ' +
-          'entire argument.',
+        detail: [
+          'The point of the spare slot is that most changes fit in it, so most updates allocate ' +
+            'nothing at all.',
+          'When one does not fit, the node is copied with the box applied and the parent has to be ' +
+            'redirected to the copy.',
+          'That may fill the parent\'s box, or overflow it and cascade further.',
+          'The result is the best of both: a query walks ordinary pointers, and the space is ' +
+            'constant per update amortised.',
+          'The cascade is the part worth measuring rather than believing, because its rarity is the ' +
+            'entire argument.'
+        ],
         example: '1 861 boxes filled and 1 713 cascades over 400 updates - 5.14 nodes allocated per update against path copying\'s 13.12.'
       },
       {
@@ -80,11 +98,15 @@
         readAs: 'If persistence is working, the total nodes ever allocated is far below the number of ' +
           'versions times the size of each — that is what ≪ means. If it is not far below, every ' +
           'version has quietly been copied whole.',
-        detail: 'Counting allocations flatters the fat-node method, which allocates almost nothing and grows ' +
-          'its existing nodes instead. Counting only the latest version flatters everything, because the latest ' +
-          'version is one tree. The honest number is how many distinct objects the whole history holds, and ' +
-          'comparing it against what copying every version would have cost is the only way to see whether the ' +
-          'structure is sharing or merely deferring.',
+        detail: [
+          'Counting allocations flatters the fat-node method, which allocates almost nothing and ' +
+            'grows its existing nodes instead.',
+          'Counting only the latest version flatters everything, because the latest version is one ' +
+            'tree.',
+          'The honest number is how many distinct objects the whole history holds.',
+          'Comparing that against what copying every version would have cost is the only way to see ' +
+            'whether the structure is sharing or merely deferring.'
+        ],
         example: '400 versions of a 344-key tree: 156 720 bytes by path copying against 5 504 000 for full copies - 35× less.'
       },
       {
@@ -94,33 +116,47 @@
         readAs: 'Three ways to make a structure persistent and what each costs per query. Path copying is the ' +
           'simplest and the one to reach for; fat nodes add a second log because every field read has ' +
           'to search a version list.',
-        detail: 'This is the axis that decides the choice in practice, and it is invisible in a table of space ' +
-          'costs. A structure that is read a thousand times per write wants the cheapest possible query and ' +
-          'will happily pay a path per update; a structure recording an audit log that is almost never read ' +
-          'wants the opposite. Writing the two costs down side by side turns "which method" from a matter of ' +
-          'taste into arithmetic over your own read/write ratio.',
+        detail: [
+          'This is the axis that decides the choice in practice, and it is invisible in a table of ' +
+            'space costs.',
+          'A structure that is read a thousand times per write wants the cheapest possible query, ' +
+            'and will happily pay a path per update.',
+          'A structure recording an audit log that is almost never read wants the opposite.',
+          'Writing the two costs down side by side turns "which method" from a matter of taste into ' +
+            'arithmetic over your own read/write ratio.'
+        ],
         example: 'Fat nodes save 2.05× the memory of path copying and add a binary search to every pointer hop.'
       },
       {
         term: 'A rotation is a structural change like any other',
         plain: 'Rebalancing during a persistent update copies the rotated nodes too, which is why the per-update count exceeds the depth.',
         formal: 'a treap insert is one path plus O(1) expected rotations, each rebuilding two nodes',
-        detail: 'It is tempting to state "path copying costs exactly the depth" and it is not quite true for any ' +
-          'balanced tree, because the rebalancing that keeps the depth logarithmic is itself a set of pointer ' +
-          'changes on that path. The measured figure is a small multiple of the depth rather than the depth, and ' +
-          'quoting the clean version is the kind of small dishonesty that makes a later measurement look like a ' +
-          'bug. Hashed priorities are used here so the shape depends on the key set and not the arrival order.',
+        detail: [
+          'It is tempting to state "path copying costs exactly the depth", and it is not quite true ' +
+            'for any balanced tree.',
+          'The rebalancing that keeps the depth logarithmic is itself a set of pointer changes on ' +
+            'that path.',
+          'The measured figure is a small multiple of the depth rather than the depth. Quoting the ' +
+            'clean version is the kind of small dishonesty that makes a later measurement look ' +
+            'like a bug.',
+          'Hashed priorities are used here so the shape depends on the key set and not the arrival ' +
+            'order.'
+        ],
         example: '13.12 nodes per update at depth 18 - the path, plus the rotations that kept it at 18.'
       },
       {
         term: 'Garbage collection is what turns persistence into MVCC',
         plain: 'A database keeps old versions the same way, and adds a rule for when they may be dropped.',
         formal: 'a version is collectable once no reader can still reach it',
-        detail: 'Snapshot isolation, time-travel queries and copy-on-write filesystems are all this structure ' +
-          'with a reachability rule attached: keep every version, and free the nodes that no live snapshot can ' +
-          'still see. That is why the space accounting here is not academic - it is the thing a database ' +
-          'operator is watching when a long-running transaction stops old versions from being freed and the ' +
-          'table doubles in size. The structure is the easy half; deciding when a version dies is the hard one.',
+        detail: [
+          'Snapshot isolation, time-travel queries and copy-on-write filesystems are all this ' +
+            'structure with a reachability rule attached.',
+          'Keep every version, and free the nodes that no live snapshot can still see.',
+          'That is why the space accounting here is not academic. It is the thing a database ' +
+            'operator is watching when a long-running transaction stops old versions from being ' +
+            'freed and the table doubles in size.',
+          'The structure is the easy half; deciding when a version dies is the hard one.'
+        ],
         example: 'Every version here is retained deliberately; a real system frees them and calls the result MVCC.'
       }
     ],
