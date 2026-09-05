@@ -31,10 +31,10 @@
           'list. Meld concatenates two root lists. Decrease-key cuts the node out and drops it in the ' +
           'root list. All three are O(1) worst case, and the mess is paid for exactly once — by the ' +
           'extract-min that finally consolidates the roots into one tree per degree.',
-        'Cascading cuts are what make the analysis work. When a node loses a second child it is cut ' +
-          'from its parent too, which stops a node of degree d from having fewer than F(d + 2) ' +
-          'descendants — the Fibonacci numbers the structure is named after, and the reason the ' +
-          'maximum degree is bounded by log_φ(n).',
+        'Cascading cuts are what make the analysis work. When a node loses a second child it is ' +
+          'cut from its parent too. That stops a node of degree d from having fewer than ' +
+          'F(d + 2) descendants. Those are the Fibonacci numbers the structure is named after, ' +
+          'and the reason the maximum degree is bounded by log_φ(n).',
         'The bounds are correct and the structure loses anyway. Every node carries a parent, a child, ' +
           'two siblings, a degree and a mark bit, and every consolidation walks an array. The demo ' +
           'below reports comparisons and wall clock for the same Dijkstra run, and the two columns ' +
@@ -55,9 +55,9 @@
         ].join('\n')
       },
       insight: 'Fibonacci heaps are the canonical example of an asymptotic win that loses in ' +
-        'practice. Being able to show the two curves is more persuasive than knowing the bound — and ' +
-        'the honest summary is that the structure was a proof technique first and an implementation ' +
-        'second, which is exactly how Fredman and Tarjan presented it.'
+        'practice. Being able to show the two curves is more persuasive than knowing the bound. ' +
+        'The honest summary is that the structure was a proof technique first and an ' +
+        'implementation second, which is exactly how Fredman and Tarjan presented it.'
     };
   }
 

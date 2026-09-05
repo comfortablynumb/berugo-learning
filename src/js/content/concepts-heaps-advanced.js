@@ -22,12 +22,15 @@
         },
         plain: 'Insert drops a node in a root list. Meld concatenates two lists. Decrease-key cuts and drops. None of them tidies up.',
         formal: 'O(1) worst case for insert, meld and decrease-key',
-        detail: 'The design principle is deferral. Every operation that can avoid restructuring does ' +
-          'avoid it, leaving a root list that may be as long as the number of insertions — and the ' +
-          'mess is paid for exactly once, by the extract-min that finally has to find the minimum ' +
-          'and cannot do it without consolidating. That is the same trade as a lazy hash table ' +
-          'rehash or a deferred garbage collection: the amortised cost is excellent and the ' +
-          'individual expensive operation is real.',
+        detail: [
+          'The design principle is deferral.',
+          'Every operation that can avoid restructuring does avoid it, leaving a root list that ' +
+            'may be as long as the number of insertions.',
+          'The mess is paid for exactly once, by the extract-min that finally has to find the ' +
+            'minimum and cannot do it without consolidating.',
+          'That is the same trade as a lazy hash table rehash or a deferred garbage collection. ' +
+            'The amortised cost is excellent and the individual expensive operation is real.'
+        ],
         example: 'Inserting a million elements does no linking at all; the first extract-min links all of them.'
       },
       {
@@ -37,12 +40,16 @@
         readAs: 'After a consolidation the root list is at most log of n taken to base φ (phi, the golden ' +
           'ratio, about 1.618), plus one. The golden ratio appears because the degree bound comes from ' +
           'a Fibonacci argument.',
-        detail: 'The consolidation walks the root list, and for each root repeatedly links it with ' +
-          'whatever root already occupies its degree slot — which is the binomial carry from M05.4, ' +
-          'done all at once. Afterwards the root list has at most one tree per degree, so its length ' +
-          'is bounded by the maximum degree, which is bounded by log_φ(n). The array has to be sized ' +
-          'from that bound, and getting the bound wrong is the classic implementation bug: too small ' +
-          'and the loop indexes past the end at a size nobody tested.',
+        detail: [
+          'The consolidation walks the root list, and for each root repeatedly links it with ' +
+            'whatever root already occupies its degree slot. That is the binomial carry from ' +
+            'M05.4, done all at once.',
+          'Afterwards the root list has at most one tree per degree, so its length is bounded by ' +
+            'the maximum degree, which is bounded by log_φ(n).',
+          'The array has to be sized from that bound, and getting the bound wrong is the classic ' +
+            'implementation bug. Too small, and the loop indexes past the end at a size nobody ' +
+            'tested.'
+        ],
         example: 'After a pop from a 40 000-node heap the root list held 5 trees with a maximum degree of 15.'
       },
       {
@@ -52,12 +59,15 @@
         readAs: 'The mark on a node is a memory: it has lost one child since it was last made a child of ' +
           'someone. Losing a second one cuts the node loose too, which is what keeps the trees from ' +
           'being shredded.',
-        detail: 'The mark is the bookkeeping that makes the amortised analysis work, and it has one ' +
-          'rule that is easy to break: only a child can be marked, so promoting a node to the root ' +
-          'list must clear it. Miss that in extract-min — where the children of the removed minimum ' +
-          'are all promoted — and you get marked roots, which is silently wrong rather than loudly ' +
-          'broken. This platform hit exactly that bug, and the invariant check that says "a root is ' +
-          'marked" is what caught it.',
+        detail: [
+          'The mark is the bookkeeping that makes the amortised analysis work, and it has one rule ' +
+            'that is easy to break. Only a child can be marked, so promoting a node to the root ' +
+            'list must clear it.',
+          'Miss that in extract-min — where the children of the removed minimum are all promoted — ' +
+            'and you get marked roots, which is silently wrong rather than loudly broken.',
+          'This platform hit exactly that bug, and the invariant check that says "a root is ' +
+            'marked" is what caught it.'
+        ],
         example: 'The children promoted by an extract-min must have their marks cleared, or a later cascade fires against nothing.'
       },
       {
@@ -78,12 +88,15 @@
         readAs: 'A node with d children is guaranteed at least the (d+2)-th Fibonacci number of descendants ' +
           'underneath it. Since Fibonacci numbers grow like φ to the power of d, the degree can never ' +
           'exceed log base φ of n.',
-        detail: 'Without the cascade a node could lose all of its children one at a time and keep a ' +
-          'high degree while holding almost nothing — which would break the degree bound and with it ' +
-          'the analysis. The cascade limits each non-root node to losing one child before it is cut ' +
-          'itself, which forces a degree-d node to retain at least F(d + 2) descendants. That is ' +
-          'where the Fibonacci numbers come from, and where the name does, and it gives the maximum ' +
-          'degree bound of log_φ(n).',
+        detail: [
+          'Without the cascade a node could lose all of its children one at a time and keep a high ' +
+            'degree while holding almost nothing. That would break the degree bound, and with it ' +
+            'the analysis.',
+          'The cascade limits each non-root node to losing one child before it is cut itself, ' +
+            'which forces a degree-d node to retain at least F(d + 2) descendants.',
+          'That is where the Fibonacci numbers come from, and where the name does. It gives the ' +
+            'maximum degree bound of log_φ(n).'
+        ],
         example: 'On the demo Dijkstra run, 7 029 cuts produced 1 569 cascading cuts.'
       },
       {
@@ -93,49 +106,62 @@
         readAs: 'The stored potential is the number of trees in the root list plus twice the number of marked ' +
           'nodes. Cheap operations add to it and the expensive consolidation spends it, which is what ' +
           'makes the amortised bounds come out.',
-        detail: 'The potential counts the mess: one unit per root and two per marked node. An insert ' +
-          'adds a root and so pays one unit of potential on top of its constant work; a decrease-key ' +
-          'that cuts adds a root and clears a mark, which is why the cascade is free in amortised ' +
-          'terms; and an extract-min discharges the accumulated potential by consolidating. The ' +
-          'bounds are correct and the analysis is beautiful, and neither fact says anything about ' +
-          'what the operations cost in nanoseconds.',
+        detail: [
+          'The potential counts the mess: one unit per root and two per marked node.',
+          'An insert adds a root, and so pays one unit of potential on top of its constant work.',
+          'A decrease-key that cuts adds a root and clears a mark, which is why the cascade is ' +
+            'free in amortised terms. An extract-min discharges the accumulated potential by ' +
+            'consolidating.',
+          'The bounds are correct and the analysis is beautiful, and neither fact says anything ' +
+            'about what the operations cost in nanoseconds.'
+        ],
         example: 'Fredman and Tarjan introduced the structure to improve Dijkstra to O(E + V log V), which it does.'
       },
       {
         term: 'The theory–practice gap',
         plain: 'The Fibonacci heap does the fewest comparisons on Dijkstra and finishes last on the clock.',
         formal: 'operation counts confirm the bounds; wall clock contradicts them',
-        detail: 'On a 22 500-node grid the Fibonacci heap performed 258 493 comparisons against a ' +
-          'binary heap\'s 336 961 — the theory is not wrong. It was also the slowest of the four ' +
-          'queues measured. The reason is that comparisons are not what the run spends its time on: ' +
-          'each node carries six fields, every one of them a pointer into scattered memory, and the ' +
-          'consolidation walks a degree array per pop. Being able to show both columns is more ' +
-          'persuasive than knowing either.',
+        detail: [
+          'On a 22 500-node grid the Fibonacci heap performed 258 493 comparisons against a binary ' +
+            'heap\'s 336 961. The theory is not wrong.',
+          'It was also the slowest of the four queues measured.',
+          'The reason is that comparisons are not what the run spends its time on. Each node ' +
+            'carries six fields, every one of them a pointer into scattered memory, and the ' +
+            'consolidation walks a degree array per pop.',
+          'Being able to show both columns is more persuasive than knowing either.'
+        ],
         example: 'Fewest comparisons and slowest wall clock, on the same run, on the same graph.'
       },
       {
         term: 'Where it does win',
         plain: 'Meld is genuinely O(1) — two circular lists spliced with four pointer writes.',
         formal: 'no other family melds in constant time',
-        detail: 'The one bound no competitor matches is the meld. A leftist or binomial heap melds in ' +
-          'O(log n); an array heap cannot meld at all; a Fibonacci heap concatenates two circular ' +
-          'doubly linked lists and compares two minimum pointers, which is four writes and one ' +
-          'comparison regardless of size. If an algorithm melds heaps in a loop — some ' +
-          'minimum-spanning-tree and clustering algorithms do — that is where the structure earns ' +
-          'its place, and the argument is about meld rather than about decrease-key.',
+        detail: [
+          'The one bound no competitor matches is the meld.',
+          'A leftist or binomial heap melds in O(log n), and an array heap cannot meld at all.',
+          'A Fibonacci heap concatenates two circular doubly linked lists and compares two minimum ' +
+            'pointers, which is four writes and one comparison regardless of size.',
+          'If an algorithm melds heaps in a loop — some minimum-spanning-tree and clustering ' +
+            'algorithms do — that is where the structure earns its place. The argument is about ' +
+            'meld rather than about decrease-key.'
+        ],
         example: 'Melding two million-element heaps costs four pointer writes and one comparison.'
       },
       {
         term: 'What to take from it',
         plain: 'It is a proof technique that happens to be implementable, and it is the right way to read the paper.',
         formal: 'an existence result for the bound, not an engineering recommendation',
-        detail: 'Fredman and Tarjan built the structure to prove that Dijkstra could run in ' +
-          'O(E + V log V), and it does. That is a theorem about what is possible, and it was worth ' +
-          'proving whether or not anyone shipped it. The engineering lesson is separate and just as ' +
-          'useful: an amortised bound is a statement about a cost model, and if your cost model ' +
-          'counts comparisons while your machine charges for cache misses, the bound can be right ' +
-          'and the recommendation wrong. The next section is the structure that took the idea and ' +
-          'made it practical.',
+        detail: [
+          'Fredman and Tarjan built the structure to prove that Dijkstra could run in ' +
+            'O(E + V log V), and it does.',
+          'That is a theorem about what is possible, and it was worth proving whether or not ' +
+            'anyone shipped it.',
+          'The engineering lesson is separate and just as useful. An amortised bound is a ' +
+            'statement about a cost model. If your cost model counts comparisons while your ' +
+            'machine charges for cache misses, the bound can be right and the recommendation ' +
+            'wrong.',
+          'The next section is the structure that took the idea and made it practical.'
+        ],
         example: 'Larkin, Sen and Tarjan measured the whole family and concluded the simple structures win.'
       }
     ],
