@@ -312,11 +312,15 @@
         readAs: 'Interleave the bits of the two coordinates — one from x, one from y, alternating — into a ' +
           'single number. That one number sorts nearby points near each other, which is what turns a ' +
           '2-D index into a 1-D one.',
-        detail: 'This is the trick that lets a store with no spatial index at all answer spatial queries: the ' +
-          'curve index becomes the sort key, and a rectangle becomes a set of key ranges, and a range scan is the ' +
-          'one operation every ordered store already does well. It is why DynamoDB, Bigtable and every ' +
-          'geo-partitioned key-value layout in production is Z-order or S2 underneath. The encoding itself is ' +
-          'about ten lines of bit twiddling; everything interesting is in what happens to rectangles.',
+        detail: [
+          'This is the trick that lets a store with no spatial index at all answer spatial queries.',
+          'The curve index becomes the sort key, a rectangle becomes a set of key ranges, and a ' +
+            'range scan is the one operation every ordered store already does well.',
+          'It is why DynamoDB, Bigtable and every geo-partitioned key-value layout in production is ' +
+            'Z-order or S2 underneath.',
+          'The encoding itself is about ten lines of bit twiddling; everything interesting is in ' +
+            'what happens to rectangles.'
+        ],
         example: 'x and y of 16 bits each interleave into one 32-bit code, and the decode is the same shifts run backwards.'
       },
       {
@@ -335,11 +339,16 @@
         formal: 'ranges(rect) = the number of maximal runs of consecutive indices covering it',
         readAs: 'How many separate contiguous stretches of the curve a query rectangle breaks into. Each run ' +
           'is one range scan, so fewer runs means fewer seeks.',
-        detail: 'This is the whole practical problem and it is invisible from the encoding. A 306-cell rectangle ' +
-          'on a 64 × 64 grid decomposes into 45 separate Z-order ranges spanning 772 indices - so an exact answer ' +
-          'means 45 round trips, and one scan of the whole span means reading 772 cells to get 306. Everything ' +
-          'about using curves as a spatial index is negotiating between those two numbers, and the negotiation ' +
-          'is what the "jump-in" trick and every geohash query planner is doing.',
+        detail: [
+          'This is the whole practical problem and it is invisible from the encoding.',
+          'A 306-cell rectangle on a 64 × 64 grid decomposes into 45 separate Z-order ranges ' +
+            'spanning 772 indices.',
+          'So an exact answer means 45 round trips, and one scan of the whole span means reading ' +
+            '772 cells to get 306.',
+          'Everything about using curves as a spatial index is negotiating between those two ' +
+            'numbers. That negotiation is what the "jump-in" trick and every geohash query planner ' +
+            'is doing.'
+        ],
         example: 'The same 18 × 17 rectangle: 45 Morton ranges over a span of 772, or 22 Hilbert ranges over 758.'
       },
       {
@@ -349,34 +358,45 @@
         readAs: 'Merging two nearby ranges into one saves a round trip and costs you everything in the gap ' +
           'between them. The total scanned is what you wanted plus the sum of every gap you decided to ' +
           'swallow.',
-        detail: 'A store that charges per request rather than per row would much rather read a few extra cells ' +
-          'than issue forty scans, so the real query planner picks a range budget and merges cheapest-gap-first ' +
-          'up to it. The cost curve is steep at the low end and flat afterwards, which makes the decision easy ' +
-          'once it is measured: going from four ranges to eight halves the waste, and going from sixteen to ' +
-          'thirty-two barely changes it.',
+        detail: [
+          'A store that charges per request rather than per row would much rather read a few extra ' +
+            'cells than issue forty scans.',
+          'So the real query planner picks a range budget and merges cheapest-gap-first up to it.',
+          'The cost curve is steep at the low end and flat afterwards, which makes the decision ' +
+            'easy once it is measured.',
+          'Going from four ranges to eight halves the waste, and going from sixteen to thirty-two ' +
+            'barely changes it.'
+        ],
         example: 'Hilbert, 306 cells: 4 ranges scan 436 cells (42.5% waste), 8 scan 347 (13.4%), 16 scan 320 (4.6%).'
       },
       {
         term: '"Hilbert has better locality" is false under the obvious metric',
         plain: 'The mean index gap between two neighbouring cells is larger for Hilbert than for Z-order.',
         formal: 'measured at order 6: mean gap 39.05 for Hilbert against 32.50 for Morton',
-        detail: 'The claim gets repeated because Hilbert\'s curve is continuous - it never jumps, where Z-order ' +
-          'crosses the whole grid at every power-of-two boundary - and continuity is the property people picture. ' +
-          'But "how far apart in the index are two adjacent cells" is a different question, and by it Z-order ' +
-          'wins on both the mean and the worst case. This is a good example of a folk claim that survives ' +
-          'because nobody states which metric it is about; the fix is to name the metric the cost model actually ' +
-          'uses.',
+        detail: [
+          'The claim gets repeated because Hilbert\'s curve is continuous: it never jumps, where ' +
+            'Z-order crosses the whole grid at every power-of-two boundary.',
+          'Continuity is the property people picture.',
+          'But "how far apart in the index are two adjacent cells" is a different question, and by ' +
+            'it Z-order wins on both the mean and the worst case.',
+          'This is a good example of a folk claim that survives because nobody states which metric ' +
+            'it is about. The fix is to name the metric the cost model actually uses.'
+        ],
         example: 'Worst neighbour gap: Hilbert 3 413, Morton 1 366. Maximum step along the curve: Hilbert 1, Morton 63.'
       },
       {
         term: 'And true under the metric that decides query cost',
         plain: 'The number that matters is how many contiguous runs a window breaks into, and there Hilbert wins by about two.',
         formal: 'mean ranges for a 16 × 16 window at order 6: 15.68 Hilbert against 29.49 Morton',
-        detail: 'Runs are round trips, and round trips are what a query costs in any real store, so this is the ' +
-          'metric the cost model actually contains. The factor is close to two at every window size measured and ' +
-          'is stable across placements, which is what makes it a usable design rule rather than an anecdote. The ' +
-          'price is that a Hilbert conversion is a loop with a rotation per level, against Morton\'s four shift ' +
-          'and mask steps - so the decision is encode cost against query cost.',
+        detail: [
+          'Runs are round trips, and round trips are what a query costs in any real store, so this ' +
+            'is the metric the cost model actually contains.',
+          'The factor is close to two at every window size measured and is stable across ' +
+            'placements, which is what makes it a usable design rule rather than an anecdote.',
+          'The price is that a Hilbert conversion is a loop with a rotation per level, against ' +
+            'Morton\'s four shift and mask steps.',
+          'So the decision is encode cost against query cost.'
+        ],
         example: 'Cells per range: Hilbert 4.06, 8.14, 16.33 at window sides 4, 8, 16; Morton 2.56, 4.59, 8.68.'
       },
       {
@@ -386,12 +406,16 @@
         readAs: 'A geohash character carries 5 bits, alternating between longitude and latitude. More ' +
           'characters means a smaller cell, and the shared prefix of two geohashes tells you how close ' +
           'they are.',
-        detail: 'The property that makes geohash useful is a direct consequence: because the bits are ' +
-          'interleaved from the most significant end, a prefix of a geohash *is* a bounding box, and truncating ' +
-          'the string is zooming out. That makes "everything near here" a prefix scan in any ordered store, with ' +
-          'no spatial support at all. It also inherits Z-order\'s weakness intact - two points either side of a ' +
-          'major boundary have completely different prefixes, so a correct query has to check the neighbouring ' +
-          'cells too.',
+        detail: [
+          'The property that makes geohash useful is a direct consequence.',
+          'Because the bits are interleaved from the most significant end, a prefix of a geohash ' +
+            '*is* a bounding box, and truncating the string is zooming out.',
+          'That makes "everything near here" a prefix scan in any ordered store, with no spatial ' +
+            'support at all.',
+          'It also inherits Z-order\'s weakness intact: two points either side of a major boundary ' +
+            'have completely different prefixes. A correct query has to check the neighbouring ' +
+            'cells too.'
+        ],
         example: 'The point 51.5007 N, 0.1246 W is gcpuvpmm2; three characters cover 156 km of latitude, five cover 4.9 km, seven cover 153 m.'
       },
       {
@@ -400,22 +424,30 @@
         formal: 'adjacency in space does not imply adjacency in the code; the worst neighbour gap is Θ(grid area)',
         readAs: 'Two points can be side by side on the map and at opposite ends of the curve. The worst gap ' +
           'grows with the whole grid, which is why a range query has to be split into runs at all.',
-        detail: 'The standard fix is to compute the query cell and its eight neighbours and scan all nine ' +
-          'prefixes, which is why every geohash proximity recipe has that step and why leaving it out produces a ' +
-          '"nearby" list that mysteriously omits things across a street. S2 and H3 exist largely to make this ' +
-          'less painful - S2 by using Hilbert order on a projected cube, H3 by using hexagons, whose neighbours ' +
-          'are all edge-adjacent so there is no diagonal case at all.',
+        detail: [
+          'The standard fix is to compute the query cell and its eight neighbours and scan all nine ' +
+            'prefixes.',
+          'That is why every geohash proximity recipe has that step, and why leaving it out ' +
+            'produces a "nearby" list that mysteriously omits things across a street.',
+          'S2 and H3 exist largely to make this less painful.',
+          'S2 uses Hilbert order on a projected cube, and H3 uses hexagons, whose neighbours are ' +
+            'all edge-adjacent so there is no diagonal case at all.'
+        ],
         example: 'Morton\'s worst adjacent-cell gap at order 6 is 1 366 indices - the two cells are neighbours in space and a grid apart in the key.'
       },
       {
         term: 'A curve index is a filter, not an answer',
         plain: 'Scanning the ranges gives a superset; the exact predicate still has to be applied to what comes back.',
         formal: 'cells are a discretisation, so a cell overlapping the query may hold points outside it',
-        detail: 'The curve indexes cells, and a query is a shape, so anything at cell granularity is approximate ' +
-          'by construction - even before any range coalescing. The pipeline is therefore always the same: ' +
-          'decompose the shape into ranges, scan them, then filter exactly. That is the same shape as the ' +
-          'broad-phase/narrow-phase split in 8.9 and the candidate/verify split in an LSH index, and recognising ' +
-          'it is what stops people expecting an index to be exact.',
+        detail: [
+          'The curve indexes cells, and a query is a shape, so anything at cell granularity is ' +
+            'approximate by construction - even before any range coalescing.',
+          'The pipeline is therefore always the same: decompose the shape into ranges, scan them, ' +
+            'then filter exactly.',
+          'That is the same shape as the broad-phase/narrow-phase split in 8.9 and the ' +
+            'candidate/verify split in an LSH index.',
+          'Recognising it is what stops people expecting an index to be exact.'
+        ],
         example: 'Even at zero coalescing the 306 cells of the demo rectangle are cells, not the rectangle: their contents still need testing.'
       }
     ]

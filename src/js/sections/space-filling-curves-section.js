@@ -28,21 +28,22 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'Interleave the bits of two coordinates and you have one integer that mostly preserves nearness. That ' +
-          'is what lets a key-value store with no spatial support serve spatial queries: the curve index ' +
-          'becomes the sort key, a rectangle becomes a set of key ranges, and a range scan is the one operation ' +
-          'every ordered store already does well. DynamoDB, Bigtable, Elasticsearch and Redis geo layouts are ' +
-          'Z-order or S2 underneath.',
-        'The problem is that a rectangle is almost never one contiguous run. An 18 × 17 window of 306 cells on ' +
-          'a 64 × 64 grid decomposes into 45 separate Z-order ranges spanning 772 indices, or 22 Hilbert ranges ' +
-          'spanning 758. So an exact answer means 45 round trips, and one scan of the whole span means reading ' +
-          '772 cells to get 306 — and every real query planner is negotiating between those two numbers with a ' +
-          'range budget.',
-        'The sentence "Hilbert has better locality" is false under the obvious metric and true under the one ' +
-          'that decides query cost. The mean index gap between two cells that are neighbours in space is 39.05 ' +
-          'for Hilbert and 32.50 for Z-order, and the worst is 3 413 against 1 366 — Z-order wins both. But the ' +
-          'number a query pays is contiguous runs per window, and there a 16 × 16 window costs 15.68 Hilbert ' +
-          'ranges against 29.49 Morton ones. Both statements are about locality and they point opposite ways.'
+        'Interleave the bits of two coordinates and you have one integer that mostly preserves ' +
+          'nearness. That is what lets a key-value store with no spatial support serve spatial ' +
+          'queries. The curve index becomes the sort key, a rectangle becomes a set of key ranges, ' +
+          'and a range scan is the one operation every ordered store already does well. DynamoDB, ' +
+          'Bigtable, Elasticsearch and Redis geo layouts are Z-order or S2 underneath.',
+        'The problem is that a rectangle is almost never one contiguous run. An 18 × 17 window of ' +
+          '306 cells on a 64 × 64 grid decomposes into 45 separate Z-order ranges spanning 772 ' +
+          'indices, or 22 Hilbert ranges spanning 758. So an exact answer means 45 round trips, ' +
+          'and one scan of the whole span means reading 772 cells to get 306. Every real query ' +
+          'planner is negotiating between those two numbers with a range budget.',
+        'The sentence "Hilbert has better locality" is false under the obvious metric and true ' +
+          'under the one that decides query cost. The mean index gap between two cells that are ' +
+          'neighbours in space is 39.05 for Hilbert and 32.50 for Z-order. The worst is 3 413 ' +
+          'against 1 366, so Z-order wins both. But the number a query pays is contiguous runs per ' +
+          'window, and there a 16 × 16 window costs 15.68 Hilbert ranges against 29.49 Morton ' +
+          'ones. Both statements are about locality and they point opposite ways.'
       ],
       demo: { title: 'Interactive demo — the curve, the window and the range budget', markup: root.SpaceFillingCurvesTemplate.render() },
       diagram: {
@@ -61,10 +62,10 @@
         ].join('\n')
       },
       insight: 'This is how a key-value store with no spatial index still serves spatial queries, and it is why ' +
-        'geohash, S2 and H3 exist. Two things are worth carrying away. First, the decomposition is the whole ' +
-        'problem: the encoding is ten lines and the range count is what a query costs. Second, when someone ' +
-        'says a curve has "better locality", ask which metric — the two obvious ones disagree here, and only ' +
-        'one of them is in anybody\'s cost model.'
+        'geohash, S2 and H3 exist. Two things are worth carrying away. First, the decomposition is ' +
+        'the whole problem: the encoding is ten lines and the range count is what a query costs. ' +
+        'Second, when someone says a curve has "better locality", ask which metric. The two ' +
+        'obvious ones disagree here, and only one of them is in anybody\'s cost model.'
     };
   }
 
