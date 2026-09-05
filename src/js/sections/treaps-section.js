@@ -40,11 +40,12 @@
           'exactly — for a given set of (key, priority) pairs there is one and only one treap.',
         'That is the whole trick. Since the priorities are random, the shape is the shape a plain ' +
           'BST would have had if the keys had arrived in random order — expected height about ' +
-          '3·log₂ n — and the shape no longer depends on the order they actually arrived in. Sorted ' +
+          '3·log₂ n. The shape no longer depends on the order they actually arrived in. Sorted ' +
           'input, reverse input and shuffled input all produce the same tree.',
         'There is no balance bookkeeping at all: no heights, no colours, no sizes. Everything is ' +
-          'built from two operations, split and merge, which is why a treap is the ordered structure ' +
-          'to reach for when you need range extraction or concatenation and have an afternoon.'
+          'built from two operations, split and merge. That is why a treap is the ordered ' +
+          'structure to reach for when you need range extraction or concatenation and have an ' +
+          'afternoon.'
       ],
       demo: { title: 'Interactive demo — two orders, one shape', markup: root.TreapsTemplate.render() },
       diagram: {

@@ -18,29 +18,37 @@
             '    D --> F["together they pin down exactly one shape"]',
             '    E --> F'
           ].join('\n'),
-          caption: 'The shape is the tree you would have got by inserting the keys in priority order — and since those are random, it is a random binary search tree, whatever order you actually inserted in.'
+          caption: 'The shape is the tree you would have got by inserting the keys in priority order. Since those are random, it is a random binary search tree, whatever order you actually inserted in.'
         },
         plain: 'A search tree by key and a heap by a random priority, in the same nodes.',
         formal: 'key order left-to-right, priority order top-to-bottom',
-        detail: 'Each node carries a key and a priority. The keys obey the search-tree invariant and ' +
-          'the priorities obey the heap invariant, and the surprising part is that both can always ' +
-          'be satisfied at once. Better than that, they can be satisfied in exactly one way: for a ' +
-          'given set of (key, priority) pairs there is a unique treap. That uniqueness is the whole ' +
-          'design, because it means the shape is a function of the data rather than of the history — ' +
-          'and if the priorities are random, the shape is the shape a random insertion order would ' +
-          'have produced.',
+        detail: [
+          'Each node carries a key and a priority. The keys obey the search-tree invariant and the ' +
+            'priorities obey the heap invariant, and the surprising part is that both can always ' +
+            'be satisfied at once.',
+          'Better than that, they can be satisfied in exactly one way: for a given set of ' +
+            '(key, priority) pairs there is a unique treap.',
+          'That uniqueness is the whole design, because it means the shape is a function of the ' +
+            'data rather than of the history.',
+          'And if the priorities are random, the shape is the shape a random insertion order would ' +
+            'have produced.'
+        ],
         example: 'Insert the same 1 000 keys sorted, shuffled and reversed with one seed: all three give height 23 with 623 at the root.'
       },
       {
         term: 'The priority must come from the key',
         plain: 'Draw priorities from a sequence and the shape depends on insertion order again — the one thing a treap is for.',
         formal: 'priority = h(key, seed), not rng.next() at insert time',
-        detail: 'It is tempting to call the random generator when a node is created, and it quietly ' +
-          'breaks the guarantee: the i-th node inserted gets the i-th draw, so the same key set ' +
-          'inserted in a different order gets different priorities and a different tree. Deriving ' +
-          'the priority by hashing the key with a per-structure seed fixes it — the priority is a ' +
-          'property of the key, so the tree is a property of the key set. This platform made exactly ' +
-          'that mistake first, and the demo that claims "three orders, one shape" is what caught it.',
+        detail: [
+          'It is tempting to call the random generator when a node is created, and it quietly ' +
+            'breaks the guarantee.',
+          'The i-th node inserted gets the i-th draw, so the same key set inserted in a different ' +
+            'order gets different priorities and a different tree.',
+          'Deriving the priority by hashing the key with a per-structure seed fixes it. The ' +
+            'priority is then a property of the key, so the tree is a property of the key set.',
+          'This platform made exactly that mistake first, and the demo that claims "three orders, ' +
+            'one shape" is what caught it.'
+        ],
         example: 'With sequence-drawn priorities, sorted and reverse insertion of the same keys produced roots 987 and 14; with key-derived priorities, both give 623.'
       },
       {
@@ -60,75 +68,96 @@
         formal: 'split(t, k) → (L, R), both valid treaps',
         readAs: 'Splitting a treap at key k hands back two treaps — everything below k and everything above — ' +
           'each still a correct treap on its own. The arrow is "produces".',
-        detail: 'Split walks one root-to-leaf path. At each node it decides which side the node ' +
-          'belongs to, keeps that side, and recurses into the child that still straddles the cut. ' +
-          'Both halves come out as valid treaps with no repair needed, because the heap order within ' +
-          'each half was already there. The cost is the path length, so O(log n) expected, and it is ' +
-          'the reason a treap gives you range operations that a plain balanced tree makes you build ' +
-          'by hand.',
+        detail: [
+          'Split walks one root-to-leaf path. At each node it decides which side the node belongs ' +
+            'to, keeps that side, and recurses into the child that still straddles the cut.',
+          'Both halves come out as valid treaps with no repair needed, because the heap order ' +
+            'within each half was already there.',
+          'The cost is the path length, so O(log n) expected. It is the reason a treap gives you ' +
+            'range operations that a plain balanced tree makes you build by hand.'
+        ],
         example: 'Splitting a 1 000-key treap at 500 touched 13 nodes and wrote 24 pointers.'
       },
       {
         term: 'Merge',
         plain: 'Join two treaps when every key in one is below every key in the other. The higher priority wins each root.',
         formal: 'merge(L, R) with max(L) < min(R)',
-        detail: 'Merge is the inverse of split and just as short: compare the two roots, take whichever ' +
-          'has the higher priority as the new root, and recursively merge the remaining piece into ' +
-          'the appropriate child. The precondition matters — every key on the left must be below ' +
-          'every key on the right — and it is what makes merge cheap: no interleaving is needed, ' +
-          'just a walk down the boundary between the two. Insert, delete and range extraction are ' +
-          'all two or three lines once split and merge exist.',
+        detail: [
+          'Merge is the inverse of split and just as short. Compare the two roots, take whichever ' +
+            'has the higher priority as the new root, and recursively merge the remaining piece ' +
+            'into the appropriate child.',
+          'The precondition matters: every key on the left must be below every key on the right.',
+          'That is also what makes merge cheap. No interleaving is needed, just a walk down the ' +
+            'boundary between the two.',
+          'Insert, delete and range extraction are all two or three lines once split and merge ' +
+            'exist.'
+        ],
         example: 'Deletion is one merge: remove the node and merge its two subtrees, which are already split around it.'
       },
       {
         term: 'Expected height',
         plain: 'About 3·log₂ n, with no balance bookkeeping of any kind.',
         formal: 'E[height] ≈ 4.311·ln n, the random-BST result',
-        readAs: 'Because the priorities are random, the shape a treap ends up in is the shape a randomly ' +
-          'built search tree would have: average height about 4.311 times the natural log of n, ' +
-          'regardless of what order the keys arrived in.',
-        detail: 'The height of a treap is the height of a BST built by inserting the keys in a random ' +
-          'order, because that is exactly what the random priorities encode. So the expected height ' +
-          'is the classic 4.311·ln n ≈ 3·log₂ n, and the distribution is tight: measured over 40 ' +
-          'seeds at n = 1 000 the mean height is 22.4 and no seed exceeded 26, against a perfectly ' +
-          'balanced 10. That is worse than AVL and it costs nothing to maintain — no heights, no ' +
-          'colours, no sizes, no rebalancing code at all.',
+        readAs: 'Because the priorities are random, the shape a treap ends up in is the shape a ' +
+          'randomly built search tree would have. The average height is about 4.311 times the ' +
+          'natural log of n, regardless of what order the keys arrived in.',
+        detail: [
+          'The height of a treap is the height of a BST built by inserting the keys in a random ' +
+            'order, because that is exactly what the random priorities encode.',
+          'So the expected height is the classic 4.311·ln n ≈ 3·log₂ n, and the distribution is ' +
+            'tight.',
+          'Measured over 40 seeds at n = 1 000, the mean height is 22.4 and no seed exceeded 26, ' +
+            'against a perfectly balanced 10.',
+          'That is worse than AVL, and it costs nothing to maintain: no heights, no colours, no ' +
+            'sizes, no rebalancing code at all.'
+        ],
         example: 'Over 40 seeds at n = 1 000: mean height 22.4, worst 26, against 3·log₂ n = 29.9.'
       },
       {
         term: 'Randomised, not average-case',
         plain: 'The randomness is yours, not the input\'s, so the bound holds for every key set.',
         formal: 'expectation over the seed, for any fixed input',
-        detail: 'This is the same distinction M01.4 draws between an average-case bound and a ' +
-          'randomised algorithm. A plain BST has a good average case over random insertion orders, ' +
-          'and an adversary who supplies sorted keys defeats it. A treap makes its own randomness, ' +
-          'so there is no input that is bad for it — only an unlucky seed, and the seed is not ' +
-          'something an attacker can see. The guarantee is in expectation rather than worst case, ' +
-          'but it is an expectation nobody else gets to choose.',
+        detail: [
+          'This is the same distinction M01.4 draws between an average-case bound and a randomised ' +
+            'algorithm.',
+          'A plain BST has a good average case over random insertion orders, and an adversary who ' +
+            'supplies sorted keys defeats it.',
+          'A treap makes its own randomness, so there is no input that is bad for it. There is ' +
+            'only an unlucky seed, and the seed is not something an attacker can see.',
+          'The guarantee is in expectation rather than worst case, but it is an expectation nobody ' +
+            'else gets to choose.'
+        ],
         example: 'Sorted input, the case that turns a plain BST into a 1 000-node list, produces exactly the same treap as shuffled input.'
       },
       {
         term: 'Range extraction',
         plain: 'Two splits lift an arbitrary key range out as its own treap; one merge puts the rest back.',
         formal: 'split at lo, split the remainder at hi',
-        detail: 'Because split and merge are cheap and total, whole ranges become first-class ' +
-          'objects: extract [lo, hi] with two splits, do whatever you like to that treap, and merge ' +
-          'it back — or somewhere else. That is the operation an ordered array cannot do without ' +
-          'moving elements and a balanced tree cannot do without special-purpose code. It is also ' +
-          'the basis of the implicit treap, where the "key" is a position rather than a value, which ' +
-          'gives you a rope: split a document, insert text, merge it back, all in logarithmic time.',
+        detail: [
+          'Because split and merge are cheap and total, whole ranges become first-class objects. ' +
+            'Extract [lo, hi] with two splits, do whatever you like to that treap, and merge it ' +
+            'back — or somewhere else.',
+          'That is the operation an ordered array cannot do without moving elements, and a ' +
+            'balanced tree cannot do without special-purpose code.',
+          'It is also the basis of the implicit treap, where the "key" is a position rather than a ' +
+            'value. That gives you a rope: split a document, insert text, merge it back, all in ' +
+            'logarithmic time.'
+        ],
         example: 'Extracting keys 100 through 199 from a 1 000-key treap leaves 900 behind and costs two path walks.'
       },
       {
         term: 'What you give up',
         plain: 'The bound is expected, not worst case, and every node carries a priority.',
         formal: 'O(log n) expected; O(n) possible but vanishingly unlikely',
-        detail: 'A treap can in principle be a spine — it just requires the priorities to arrive in ' +
-          'sorted order, which for n = 1 000 has probability 1/1000!. That is not a risk anyone needs ' +
-          'to manage, but it does mean a treap cannot be used where a hard worst-case bound is ' +
-          'required, such as a real-time system. The concrete costs are more mundane: a priority ' +
-          'field per node, and a tree meaningfully deeper than AVL — 22 against 14 at a thousand ' +
-          'keys — which is the price of writing eighty lines instead of three hundred.',
+        detail: [
+          'A treap can in principle be a spine. It just requires the priorities to arrive in ' +
+            'sorted order, which for n = 1 000 has probability 1/1000!.',
+          'That is not a risk anyone needs to manage, but it does mean a treap cannot be used ' +
+            'where a hard worst-case bound is required, such as a real-time system.',
+          'The concrete costs are more mundane: a priority field per node, and a tree meaningfully ' +
+            'deeper than AVL — 22 against 14 at a thousand keys.',
+          'That is the price of writing eighty lines instead of three hundred.'
+        ],
         example: 'Recursion in split and merge is bounded by the height, which is the O(log n) the structure exists to provide.'
       }
     ],
