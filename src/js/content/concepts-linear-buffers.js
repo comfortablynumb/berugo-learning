@@ -191,13 +191,16 @@
         readAs: 'Allocating from a bump allocator is: round the current top up to the alignment the type ' +
           'needs, hand that address out, and move top past it. No search and no free list — which is ' +
           'why it is a handful of instructions.',
-        detail: 'A bump allocator holds one pointer into a block and serves each request by aligning ' +
-          'it and adding the size — a couple of instructions, no search, no free list, no metadata ' +
-          'per object. Nothing this cheap can support individual freeing, because the allocator ' +
-          'keeps no record of what it handed out, so the entire block is released at once instead. ' +
-          'That fits any workload with a natural lifetime boundary: a per-request arena in a server, ' +
-          'a per-frame arena in a game, a per-compilation-unit arena in a compiler. Within the ' +
-          'lifetime you allocate freely and never think about ownership.',
+        detail: [
+          'A bump allocator holds one pointer into a block, and serves each request by aligning it ' +
+            'and adding the size. A couple of instructions, no search, no free list, no metadata ' +
+            'per object.',
+          'Nothing this cheap can support individual freeing, because the allocator keeps no ' +
+            'record of what it handed out. The entire block is released at once instead.',
+          'That fits any workload with a natural lifetime boundary: a per-request arena in a ' +
+            'server, a per-frame arena in a game, a per-compilation-unit arena in a compiler.',
+          'Within the lifetime you allocate freely and never think about ownership.'
+        ],
         example: 'Per-request arenas in servers and per-frame arenas in games.'
       },
       {
@@ -206,13 +209,16 @@
         formal: 'head → next → next → −1',
         readAs: 'A free list is a chain: the head points at a free slot, that slot holds the index of the ' +
           'next free one, and −1 marks the end. The arrows are "points at".',
-        detail: 'For fixed-size objects, the free slots can store the list that tracks them: each ' +
-          'free slot holds the index of the next free slot, so the bookkeeping lives inside memory ' +
-          'that is by definition not in use and costs zero extra bytes. Allocation pops the head and ' +
-          'freeing pushes onto it, both O(1) with no search and no fragmentation, since every free ' +
-          'slot is interchangeable. This is the core of a slab or object pool, and it is why pooling ' +
-          'same-sized objects is dramatically simpler than general allocation — the hard part of ' +
-          'malloc is variable sizes.',
+        detail: [
+          'For fixed-size objects, the free slots can store the list that tracks them. Each free ' +
+            'slot holds the index of the next free slot, so the bookkeeping lives inside memory ' +
+            'that is by definition not in use. It costs zero extra bytes.',
+          'Allocation pops the head and freeing pushes onto it, both O(1) with no search and no ' +
+            'fragmentation, since every free slot is interchangeable.',
+          'This is the core of a slab or object pool. It is why pooling same-sized objects is ' +
+            'dramatically simpler than general allocation: the hard part of malloc is variable ' +
+            'sizes.'
+        ],
         example: 'O(1) allocate and free for fixed-size objects.'
       },
       {
@@ -231,80 +237,101 @@
         readAs: 'Fragmentation is what fraction of your free space you cannot use in one piece: take the ' +
           'biggest contiguous run, divide by the total free, and subtract from 1. Zero means it is all ' +
           'in one block.',
-        detail: 'A general-purpose allocator hands back blocks of many sizes in an order it does not ' +
-          'control, and over time the free space breaks into pieces separated by live ones. The ' +
-          'total can be large and useless: a heap that is 40% free can fail a 1 KB request because ' +
-          'no single run is that long. This is why an allocation failure is not the same as being ' +
-          'out of memory, and why long-lived processes can degrade for reasons that never show up in ' +
-          'a total-bytes metric. The measure that matters is the largest contiguous run relative to ' +
-          'the free total.',
+        detail: [
+          'A general-purpose allocator hands back blocks of many sizes in an order it does not ' +
+            'control, and over time the free space breaks into pieces separated by live ones.',
+          'The total can be large and useless. A heap that is 40% free can fail a 1 KB request, ' +
+            'because no single run is that long.',
+          'This is why an allocation failure is not the same as being out of memory. It is also ' +
+            'why long-lived processes degrade for reasons that never show up in a total-bytes ' +
+            'metric.',
+          'The measure that matters is the largest contiguous run relative to the free total.'
+        ],
         example: 'A heap 40% free that cannot allocate 1 KB.'
       },
       {
         term: 'Coalescing',
         plain: 'Merging adjacent free blocks on free, which is what keeps fragmentation from growing.',
         formal: 'merge with neighbours if free',
-        detail: 'Without merging, every free leaves a hole exactly the size of the object that was ' +
-          'there, and a workload that frees two neighbours ends up with two small holes instead of ' +
-          'one usable large one — repeat that for a few million operations and the heap is shredded. ' +
-          'Coalescing checks whether the neighbouring blocks are free and merges them on the spot, ' +
-          'which is what keeps the largest free run from collapsing. It needs a way to find the ' +
-          'neighbours, which is what boundary tags are for, and it makes free slightly more ' +
-          'expensive — an unusually clear case of paying a little on every operation to avoid an ' +
-          'unbounded worst case.',
+        detail: [
+          'Without merging, every free leaves a hole exactly the size of the object that was ' +
+            'there. A workload that frees two neighbours ends up with two small holes instead of ' +
+            'one usable large one.',
+          'Repeat that for a few million operations and the heap is shredded.',
+          'Coalescing checks whether the neighbouring blocks are free and merges them on the ' +
+            'spot, which is what keeps the largest free run from collapsing.',
+          'It needs a way to find the neighbours, which is what boundary tags are for, and it ' +
+            'makes free slightly more expensive. It is an unusually clear case of paying a little ' +
+            'on every operation to avoid an unbounded worst case.'
+        ],
         example: 'Without it, a churn workload shreds the heap.'
       },
       {
         term: 'Arena reset',
         plain: 'Freeing everything at once by moving one pointer. The cheapest deallocation there is.',
         formal: 'top ← 0',
-        detail: 'Resetting an arena sets the bump pointer back to the start, and that single ' +
-          'assignment frees every object in it. There is no per-object work, no destructor walk, no ' +
-          'free-list maintenance and no fragmentation, because the block returns to exactly the ' +
-          'state it started in. The cost is that it is all or nothing, so the arena has to match a ' +
-          'real lifetime boundary in the program — end of request, end of frame — and anything that ' +
-          'must outlive it has to be copied out first. Where such a boundary exists, this is both ' +
-          'the fastest deallocation available and the one with the fewest ways to get it wrong.',
+        detail: [
+          'Resetting an arena sets the bump pointer back to the start, and that single assignment ' +
+            'frees every object in it.',
+          'There is no per-object work, no destructor walk, no free-list maintenance and no ' +
+            'fragmentation, because the block returns to exactly the state it started in.',
+          'The cost is that it is all or nothing, so the arena has to match a real lifetime ' +
+            'boundary in the program: end of request, end of frame.',
+          'Anything that must outlive it has to be copied out first. Where such a boundary ' +
+            'exists, this is both the fastest deallocation available and the one with the fewest ' +
+            'ways to get it wrong.'
+        ],
         example: 'End of request: drop all of it, no per-object work.'
       },
       {
         term: 'Internal fragmentation',
         plain: 'The bytes wasted inside a block because the request was rounded up to a size class.',
         formal: 'waste = class size − request size',
-        detail: 'Rounding each request up to the next size class wastes the difference inside the ' +
-          'block, where nothing else can use it — an 88-byte object in a 96-byte class wastes 8 ' +
-          'bytes, or 9%. That sounds like a pure loss and is in fact the good trade: internal waste ' +
-          'is bounded, predictable and computable in advance from the class spacing, whereas ' +
-          'external fragmentation is unbounded and depends on the order of a workload you do not ' +
-          'control. Choosing the classes sets the bound: closer spacing wastes less and needs more ' +
-          'free lists.',
+        detail: [
+          'Rounding each request up to the next size class wastes the difference inside the ' +
+            'block, where nothing else can use it. An 88-byte object in a 96-byte class wastes 8 ' +
+            'bytes, or 9%.',
+          'That sounds like a pure loss and is in fact the good trade. Internal waste is bounded, ' +
+            'predictable and computable in advance from the class spacing.',
+          'External fragmentation, by contrast, is unbounded and depends on the order of a ' +
+            'workload you do not control.',
+          'Choosing the classes sets the bound: closer spacing wastes less and needs more free ' +
+            'lists.'
+        ],
         example: 'An 88-byte object in a 96-byte class wastes 8 bytes — 9%, bounded and known in advance.'
       },
       {
         term: 'Size class',
         plain: 'One free list per size. Every free block fits every request of its class, so external fragmentation cannot happen.',
         formal: 'classes at 16, 32, 48, 64, … bytes',
-        detail: 'Segregating free blocks by size makes allocation a table index followed by a pop, ' +
-          'with no search for a fit, and it eliminates external fragmentation by construction: ' +
-          'within a class every block is the same size, so any free block satisfies any request. ' +
+        detail: [
+          'Segregating free blocks by size makes allocation a table index followed by a pop, with ' +
+            'no search for a fit.',
+          'It also eliminates external fragmentation by construction. Within a class every block ' +
+            'is the same size, so any free block satisfies any request.',
           'Deciding what to do when a class is empty — carve a fresh page for it, or split from a ' +
-          'larger class — is the main design question left. This is the structure behind essentially ' +
-          'every modern allocator, and the trade it makes is the one above: unbounded external waste ' +
-          'exchanged for a bounded internal one.',
+            'larger class — is the main design question left.',
+          'This is the structure behind essentially every modern allocator, and the trade it ' +
+            'makes is the one above: unbounded external waste exchanged for a bounded internal ' +
+            'one.'
+        ],
         example: 'It trades the unbounded external waste of first-fit for a bounded internal one.'
       },
       {
         term: 'Lifetime',
         plain: 'The fact a general-purpose allocator does not have and cannot infer. An arena works because you supply it.',
         formal: 'allocate freely, free everything at once',
-        detail: 'malloc cannot know how long an object will live, so it must handle any interleaving ' +
-          'of allocations and frees and pay the fragmentation that follows. An arena is not a ' +
-          'cleverer algorithm; it is the same problem with one extra input, supplied by you: these ' +
-          'objects all die together. With that fact, allocation becomes a pointer bump and ' +
-          'deallocation becomes a single store, and fragmentation is impossible because nothing is ' +
-          'ever freed individually. The measured version of this in the section is stark — a ' +
-          'per-request arena serves 200 requests with a 1 280-byte peak, where a first-fit heap ' +
-          'fragments and fails at request 122.',
+        detail: [
+          'malloc cannot know how long an object will live, so it must handle any interleaving of ' +
+            'allocations and frees and pay the fragmentation that follows.',
+          'An arena is not a cleverer algorithm. It is the same problem with one extra input, ' +
+            'supplied by you: these objects all die together.',
+          'With that fact, allocation becomes a pointer bump and deallocation becomes a single ' +
+            'store. Fragmentation is impossible, because nothing is ever freed individually.',
+          'The measured version of this in the section is stark. A per-request arena serves 200 ' +
+            'requests with a 1 280-byte peak, where a first-fit heap fragments and fails at ' +
+            'request 122.'
+        ],
         example: 'A per-request arena serves 200 requests with a 1 280-byte peak where first-fit fragments and fails at request 122.'
       }
     ],

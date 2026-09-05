@@ -27,12 +27,12 @@
           'allocator is one addition per allocation and cannot free individual objects. A free list ' +
           'over fixed-size slots is O(1) both ways because the list is threaded through the free ' +
           'blocks themselves. First fit handles any size and pays with fragmentation.',
-        'Fragmentation is the failure this section exists to make visible: the heap has plenty of ' +
-          'free bytes, they are simply not next to each other, and a request that would obviously fit ' +
+        'Fragmentation is the failure this section exists to make visible. The heap has plenty of ' +
+          'free bytes; they are simply not next to each other. A request that would obviously fit ' +
           'in the total fails against every individual hole.',
-        'Pooling is not free either. It trades fragmentation and lifetime bugs — use after return, ' +
-          'stale state in a reused object — for allocation speed, and that is only a good trade when ' +
-          'you measured the allocation cost first.'
+        'Pooling is not free either. It trades fragmentation and lifetime bugs — use after ' +
+          'return, stale state in a reused object — for allocation speed. That is only a good ' +
+          'trade when you measured the allocation cost first.'
       ],
       demo: { title: 'Interactive demo — churn the heap', markup: root.PoolsAndArenasTemplate.render() },
       diagram: {
