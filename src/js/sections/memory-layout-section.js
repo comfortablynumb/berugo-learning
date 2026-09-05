@@ -29,14 +29,14 @@
       sectionId: SECTION_ID,
       orientation: [
         'An array is an address and a stride. Element i lives at base + i × stride, which is why ' +
-          'indexing is one multiply and an add, and why the stride — not the element count — decides ' +
-          'how much memory a scan has to move.',
+          'indexing is one multiply and an add. The stride, not the element count, decides how ' +
+          'much memory a scan has to move.',
         'The stride is rarely the sum of the field sizes. Alignment rules put each field at an ' +
           'address divisible by its own width, and the padding that creates is invisible in the ' +
           'source and very visible in the byte count.',
-        'The layout decision follows: interleave the fields (array of structs) and a query for one ' +
-          'field drags the whole record through the cache; store each field contiguously (struct of ' +
-          'arrays) and it reads only what it needs.'
+        'The layout decision follows. Interleave the fields (array of structs) and a query for ' +
+          'one field drags the whole record through the cache. Store each field contiguously ' +
+          '(struct of arrays) and it reads only what it needs.'
       ],
       demo: { title: 'Interactive demo — bytes needed against bytes touched', markup: root.MemoryLayoutTemplate.render() },
       diagram: {

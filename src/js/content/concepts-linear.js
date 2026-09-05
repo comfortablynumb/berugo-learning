@@ -20,13 +20,17 @@
         readAs: 'The address of element i is where the array starts, plus i lots of the element size. One ' +
           'multiply and one add, whatever i is — which is why an array index costs the same at position ' +
           '0 and at position a million.',
-        detail: 'Stride, not element size, is what indexing multiplies by, and the two differ ' +
-          'whenever padding is involved: a record whose fields add up to 21 bytes but which must be ' +
-          '8-byte aligned has a stride of 24. Every cost that scales with the array scales with the ' +
-          'stride — bytes fetched, lines touched, prefetcher effectiveness — so shrinking it is ' +
-          'usually the cheapest performance win available on a hot scan. It is also the number to ' +
-          'reach for when a traversal is slower than the data volume suggests: multiply the element ' +
-          'count by the stride and compare that against what you thought you were reading.',
+        detail: [
+          'Stride, not element size, is what indexing multiplies by, and the two differ whenever ' +
+            'padding is involved. A record whose fields add up to 21 bytes but which must be ' +
+            '8-byte aligned has a stride of 24.',
+          'Every cost that scales with the array scales with the stride: bytes fetched, lines ' +
+            'touched, prefetcher effectiveness. Shrinking it is usually the cheapest performance ' +
+            'win available on a hot scan.',
+          'It is also the number to reach for when a traversal is slower than the data volume ' +
+            'suggests. Multiply the element count by the stride, and compare that against what ' +
+            'you thought you were reading.'
+        ],
         example: 'A 24-byte record gives a stride of 24, not the 21 bytes its fields use.'
       },
       {
@@ -35,13 +39,16 @@
         formal: 'address mod sizeof(T) = 0',
         readAs: 'An address is correctly aligned when dividing it by the size of the type leaves no remainder ' +
           '— that is what "mod … = 0" says. A 4-byte value belongs at an address divisible by 4.',
-        detail: 'Memory is fetched in aligned blocks, so a value that straddles a boundary needs two ' +
-          'accesses and a merge — on the architectures that allow it at all. Compilers therefore ' +
-          'place each field at an offset divisible by its own width, inserting whatever padding that ' +
-          'requires, and the rule cascades: the record itself is aligned to its widest member so ' +
-          'that element 1 of an array lands correctly too. This is why field order changes a ' +
-          'structure\'s size without changing its contents, and why a typed array in JavaScript ' +
-          'refuses a byte offset that is not a multiple of its element size.',
+        detail: [
+          'Memory is fetched in aligned blocks, so a value that straddles a boundary needs two ' +
+            'accesses and a merge — on the architectures that allow it at all.',
+          'Compilers therefore place each field at an offset divisible by its own width, ' +
+            'inserting whatever padding that requires. The rule cascades: the record itself is ' +
+            'aligned to its widest member, so that element 1 of an array lands correctly too.',
+          'This is why field order changes a structure\'s size without changing its contents. It ' +
+            'is also why a typed array in JavaScript refuses a byte offset that is not a multiple ' +
+            'of its element size.'
+        ],
         example: 'An f64 after a u8 starts at offset 8, not 1.'
       },
       {
@@ -50,13 +57,17 @@
         formal: 'stride − Σ field sizes',
         readAs: 'Padding is the gap: take the space one record actually occupies and subtract the total of ' +
           'the field sizes you asked for. The Σ just means "add all the field sizes up".',
-        detail: 'Padding appears in two places: between fields, to align the next one, and at the end ' +
-          'of the record, to keep the following element aligned. Declaration order decides how much ' +
-          'you get, and the pathological order is small-large-small: {u8, f64, u8} pays 7 bytes of ' +
-          'internal padding and 7 more of tail padding for 10 bytes of data, giving a 24-byte ' +
-          'stride. Sorting the fields by descending alignment packs the small ones together and ' +
-          'brings the same data down to 16 bytes. Nothing about the access pattern changes — the ' +
-          'array is simply a third smaller, and so is the traffic to scan it.',
+        detail: [
+          'Padding appears in two places: between fields, to align the next one, and at the end ' +
+            'of the record, to keep the following element aligned.',
+          'Declaration order decides how much you get, and the pathological order is ' +
+            'small-large-small. A record of {u8, f64, u8} pays 7 bytes of internal padding and 7 ' +
+            'more of tail padding, for 10 bytes of data and a 24-byte stride.',
+          'Sorting the fields by descending alignment packs the small ones together and brings ' +
+            'the same data down to 16 bytes.',
+          'Nothing about the access pattern changes. The array is simply a third smaller, and so ' +
+            'is the traffic to scan it.'
+        ],
         example: '{u8, f64, u8} costs 24 bytes; {f64, u8, u8} costs 16.'
       },
       {
@@ -76,13 +87,16 @@
         readAs: 'Record i runs from i times the stride up to, but not including, the next multiple. The ' +
           'square bracket includes its endpoint and the round bracket excludes it, so consecutive ' +
           'records touch without ever overlapping by a byte.',
-        detail: 'AoS is the layout every language gives you by default, and it is the right one when ' +
-          'the unit of work is a whole record: everything about record i arrives in the same line or ' +
-          'two, so a lookup that reads several fields pays for one fetch. It is the wrong one when ' +
-          'the unit of work is a field, because the cache has no way to fetch only the part you ' +
-          'want — reading one 4-byte field of a 24-byte record drags the other 20 bytes along on ' +
-          'every element. The cost is exactly the ratio of the record to the field you wanted, and ' +
-          'it shows up as memory bandwidth, not as instructions.',
+        detail: [
+          'AoS is the layout every language gives you by default, and it is the right one when ' +
+            'the unit of work is a whole record. Everything about record i arrives in the same ' +
+            'line or two, so a lookup that reads several fields pays for one fetch.',
+          'It is the wrong one when the unit of work is a field, because the cache has no way to ' +
+            'fetch only the part you want. Reading one 4-byte field of a 24-byte record drags the ' +
+            'other 20 bytes along on every element.',
+          'The cost is exactly the ratio of the record to the field you wanted, and it shows up ' +
+            'as memory bandwidth, not as instructions.'
+        ],
         example: 'Reading one field of every record drags all the others through cache.'
       },
       {
@@ -92,13 +106,16 @@
         readAs: 'In a struct-of-arrays layout each field has its own base address, and record i sits i ' +
           'field-widths along from it. So one field of every record is contiguous, rather than every ' +
           'field of one record.',
-        detail: 'SoA transposes the layout: one array per field, indexed in parallel. A scan over a ' +
-          'single field then reads a dense run of bytes, so every byte fetched is used, the ' +
-          'prefetcher sees a unit stride and the loop is trivially vectorisable. The price is paid ' +
-          'by record-at-a-time access, which now touches one line per field and can be several times ' +
-          'slower than AoS for the same work, and by the loss of a natural object to pass around. ' +
-          'Neither layout is better in general — this is the clearest case in the track of a choice ' +
-          'that is decided by the access pattern rather than by the data.',
+        detail: [
+          'SoA transposes the layout: one array per field, indexed in parallel.',
+          'A scan over a single field then reads a dense run of bytes. Every byte fetched is ' +
+            'used, the prefetcher sees a unit stride, and the loop is trivially vectorisable.',
+          'The price is paid by record-at-a-time access, which now touches one line per field and ' +
+            'can be several times slower than AoS for the same work. It also loses the natural ' +
+            'object to pass around.',
+          'Neither layout is better in general. This is the clearest case in the track of a ' +
+            'choice decided by the access pattern rather than by the data.'
+        ],
         example: 'Summing scores reads only the scores column.'
       },
       {
@@ -118,39 +135,50 @@
         readAs: 'Which cache line an address falls in is the address divided by 64, rounded down — the floor ' +
           'bars are that rounding. Every address in the same line shares one number, which is why ' +
           'touching either end of a line costs the same.',
-        detail: 'The line is the unit of transfer between every level of the hierarchy, which means ' +
-          'the cost of a read is decided by which line it falls in rather than by how many bytes you ' +
-          'asked for. Efficiency is therefore the fraction of each fetched line the program actually ' +
-          'uses before it is evicted: a dense int32 scan uses 16 values out of 16, and a strided ' +
-          'access that takes one value per line uses 4 bytes out of 64 and wastes 94% of the ' +
-          'bandwidth it consumed. Both loops execute the same number of instructions, which is why ' +
-          'this cost is invisible in an operation count.',
+        detail: [
+          'The line is the unit of transfer between every level of the hierarchy. The cost of a ' +
+            'read is decided by which line it falls in, rather than by how many bytes you asked ' +
+            'for.',
+          'Efficiency is therefore the fraction of each fetched line the program actually uses ' +
+            'before it is evicted. A dense int32 scan uses 16 values out of 16.',
+          'A strided access that takes one value per line uses 4 bytes out of 64, and wastes 94% ' +
+            'of the bandwidth it consumed.',
+          'Both loops execute the same number of instructions, which is why this cost is ' +
+            'invisible in an operation count.'
+        ],
         example: 'A 4-byte read with a 64-byte stride wastes 94% of each line.'
       },
       {
         term: 'Field reordering',
         plain: 'Declaring the widest fields first removes most padding without changing a single access.',
         formal: 'sort fields by descending alignment',
-        detail: 'Sorting fields from widest to narrowest is close to optimal for padding, because ' +
-          'each field then lands at an offset that is already a multiple of its own alignment and ' +
-          'the narrow ones fill the tail. It is the rare optimisation with no downside at all: no ' +
-          'call site changes, no code changes, the semantics are identical, and the structure gets ' +
-          'smaller — the M02 record drops from a 24-byte stride to 16, a third less traffic for ' +
-          'every scan. The reason it is not automatic is that C and C++ guarantee declaration order ' +
-          'for layout compatibility; languages without that constraint, like Rust, reorder for you.',
+        detail: [
+          'Sorting fields from widest to narrowest is close to optimal for padding. Each field ' +
+            'then lands at an offset that is already a multiple of its own alignment, and the ' +
+            'narrow ones fill the tail.',
+          'It is the rare optimisation with no downside at all: no call site changes, no code ' +
+            'changes, identical semantics, and a smaller structure. The M02 record drops from a ' +
+            '24-byte stride to 16, a third less traffic for every scan.',
+          'The reason it is not automatic is that C and C++ guarantee declaration order for ' +
+            'layout compatibility. Languages without that constraint, like Rust, reorder for you.'
+        ],
         example: 'The M02 record drops from a 24-byte stride to 16 — a third of the traffic, for free.'
       },
       {
         term: 'Hot and cold splitting',
         plain: 'Move the fields a hot loop never reads into a second structure, so the line carries only what the loop uses.',
         formal: 'struct Hot { … } and struct Cold { … } joined by index',
-        detail: 'Reordering removes padding but not unused fields, and the fields a hot loop ignores ' +
-          'cost exactly as much bandwidth as the ones it reads. Splitting the record in two — the ' +
-          'fields the loop touches in one array, everything else in a parallel array joined by ' +
-          'index — packs the hot part densely so each line carries several times more useful ' +
-          'elements. A scan reading one 8-byte field of a 24-byte record wastes two thirds of every ' +
-          'line; splitting recovers that. The cost is a second lookup whenever cold data is needed ' +
-          'and an invariant to maintain: the two arrays must stay the same length and the same order.',
+        detail: [
+          'Reordering removes padding but not unused fields, and the fields a hot loop ignores ' +
+            'cost exactly as much bandwidth as the ones it reads.',
+          'Split the record in two: the fields the loop touches in one array, everything else in ' +
+            'a parallel array joined by index. The hot part is then packed densely, so each line ' +
+            'carries several times more useful elements.',
+          'A scan reading one 8-byte field of a 24-byte record wastes two thirds of every line; ' +
+            'splitting recovers that.',
+          'The cost is a second lookup whenever cold data is needed, and an invariant to ' +
+            'maintain: the two arrays must stay the same length and the same order.'
+        ],
         example: 'A scan that reads one 8-byte field of a 24-byte record wastes two thirds of every line it fetches.'
       }
     ],
