@@ -51,12 +51,12 @@
     return [
       '**Deeper pipelines shorten the clock, and two things push back.** The '
         + 'pipeline-register overhead is paid once per stage whatever the stage contains, so '
-        + 'its share of the period grows; and the branch penalty is measured in stages, so it '
+        + 'its share of the period grows. The branch penalty is measured in stages, so it '
         + 'grows too. Neither divides, and together they turn a monotone gain into a curve '
         + 'with a bottom.',
       '**The overhead share is the honest way to say how deep is too deep.** At three gate '
         + 'delays of overhead against 175 of logic, twenty stages puts the overhead at a '
-        + 'quarter of every cycle — a quarter of the machine spent moving values between '
+        + 'quarter of every cycle. That is a quarter of the machine spent moving values between '
         + 'registers rather than computing anything.',
       '**Our datapath\'s ratio is unusually generous, and the model says so.** 175 gate delays '
         + 'of logic against 3 of overhead is 58 to 1, because the M34 ALU is an unoptimised '
@@ -80,7 +80,7 @@
         + 'depth is uncertain, err deep. The same shape appears in almost every tuning '
         + 'parameter with a diminishing-returns curve.',
       '**The industry ran this experiment in public and paid for it.** The Pentium 4 went to '
-        + 'twenty and then thirty-one stages chasing frequency; the Pentium M, derived from a '
+        + 'twenty and then thirty-one stages chasing frequency. The Pentium M, derived from a '
         + 'much shallower design, beat it on real work at far lower power, and the line that '
         + 'became Core came from the shallow one. Depth settled in the low teens and has '
         + 'stayed there.'
@@ -99,16 +99,16 @@
   }
 
   function insight() {
-    return '**The pipeline-register overhead is the reason no pipeline is infinitely deep, and '
-      + 'the same "cost per stage" argument caps how finely any pipeline can be split — '
-      + 'including every software one.** Cutting work into more stages divides the work and '
+    return '**The pipeline-register overhead is the reason no pipeline is infinitely deep.** '
+      + 'The same "cost per stage" argument caps how finely any pipeline can be split, '
+      + 'including every software one. Cutting work into more stages divides the work and '
       + 'not the per-stage cost, so past some point you are paying more in boundaries than you '
       + 'are saving in stage length. In silicon that boundary is a flip-flop\'s setup and '
-      + 'clock-to-output time; in a software pipeline it is a queue, a serialisation, a '
-      + 'context switch or a network hop, and it is usually far more expensive relative to the '
+      + 'clock-to-output time. In a software pipeline it is a queue, a serialisation, a '
+      + 'context switch or a network hop. It is usually far more expensive relative to the '
       + 'work than three gate delays are. A team that splits a service into twelve microservices '
-      + 'is making exactly this trade, and the arithmetic is exactly this arithmetic: the work '
-      + 'divides, the boundaries multiply, and the branch penalty has an analogue too — every '
+      + 'is making exactly this trade, and the arithmetic is exactly this arithmetic. The work '
+      + 'divides and the boundaries multiply. The branch penalty has an analogue too: every '
       + 'stage between a decision and its consequence is work that has to be thrown away when '
       + 'the decision turns out wrong. The reason the processor version of this question got a '
       + 'clean answer and the software version usually does not is that the processor people '

@@ -159,11 +159,15 @@
         },
         plain: 'The register overhead per stage, and the branch penalty measured in stages.',
         formal: 'period = ceil(logic / k) + overhead; penalty grows with k',
-        detail: 'Cutting the logic into more stages divides only the logic. The flip-flop '
-          + 'overhead is paid once per stage whatever the stage contains, so its share of the '
-          + 'period rises; and the misprediction penalty is the distance from fetch to '
-          + 'resolution measured in stages, so it rises too. Together they turn a monotone gain '
-          + 'into a curve with a bottom, which is why no pipeline is infinitely deep.',
+        detail: [
+          'Cutting the logic into more stages divides only the logic.',
+          'The flip-flop overhead is paid once per stage whatever the stage contains, so its share '
+            + 'of the period rises.',
+          'The misprediction penalty is the distance from fetch to resolution measured in stages, '
+            + 'so it rises too.',
+          'Together they turn a monotone gain into a curve with a bottom, which is why no pipeline '
+            + 'is infinitely deep.'
+        ],
         example: 'At twenty stages the overhead is 25% of every cycle and a mispredict costs '
           + '16 instructions instead of 2.'
       },
@@ -171,12 +175,15 @@
         term: 'The optimum is a property of the workload, not of the machine',
         plain: 'Predictable branches can afford depth; unpredictable ones cannot.',
         formal: 'the penalty enters CPI multiplied by the mispredict rate',
-        detail: 'A program that rarely mispredicts barely notices a longer penalty and enjoys '
-          + 'the shorter clock; a program full of data-dependent branches pays the penalty '
-          + 'constantly and wants a shallow machine. The same silicon is right for one and '
-          + 'wrong for the other, which is the central difficulty of designing a '
-          + 'general-purpose processor and the reason the answer has always been a compromise '
-          + 'rather than an optimum.',
+        detail: [
+          'A program that rarely mispredicts barely notices a longer penalty, and enjoys the '
+            + 'shorter clock.',
+          'A program full of data-dependent branches pays the penalty constantly and wants a '
+            + 'shallow machine.',
+          'The same silicon is right for one and wrong for the other.',
+          'That is the central difficulty of designing a general-purpose processor, and the reason '
+            + 'the answer has always been a compromise rather than an optimum.'
+        ],
         example: 'At a realistic register overhead the branchy workload wants roughly half the '
           + 'depth the predictable one does.'
       },
@@ -184,12 +191,14 @@
         term: 'Our datapath\'s ratio is unusually generous and the model says so',
         plain: '175 gate delays of logic against 3 of overhead is 58 to 1.',
         formal: 'a real stage is nearer ten to one',
-        detail: 'The M34 ALU is an unoptimised ripple-carry design, so the logic term is far '
-          + 'larger relative to the register overhead than any real design\'s — and with that '
-          + 'ratio the model recommends a very deep pipeline, which is a correct consequence of '
-          + 'a datapath nobody would ship. Exposing the overhead as a control rather than '
-          + 'quietly substituting a nicer number is the honest way to present a model whose '
-          + 'defaults come from a toy.',
+        detail: [
+          'The M34 ALU is an unoptimised ripple-carry design, so the logic term is far larger '
+            + 'relative to the register overhead than any real design\'s.',
+          'With that ratio the model recommends a very deep pipeline.',
+          'That is a correct consequence of a datapath nobody would ship.',
+          'Exposing the overhead as a control, rather than quietly substituting a nicer number, is '
+            + 'the honest way to present a model whose defaults come from a toy.'
+        ],
         example: 'Raising the overhead from 3 to 17 gate delays moves the fastest depth from 35 '
           + 'stages to 18 on the branchy workload.'
       },
@@ -197,11 +206,13 @@
         term: 'Performance alone recommends a deeper pipeline than anybody built',
         plain: 'That is the historical result, not a flaw in the model.',
         formal: 'time is minimised well past the depth any shipped machine used',
-        detail: 'What stopped depth was power rather than instructions per cycle, and the '
-          + 'literature reports the power-aware optimum at roughly half the performance one. '
-          + 'A model that only reported time would recommend the Pentium 4 and stop there; '
-          + 'reporting both is what makes it match what the industry actually did after paying '
-          + 'to find out.',
+        detail: [
+          'What stopped depth was power rather than instructions per cycle.',
+          'The literature reports the power-aware optimum at roughly half the performance one.',
+          'A model that only reported time would recommend the Pentium 4 and stop there.',
+          'Reporting both is what makes it match what the industry actually did after paying to '
+            + 'find out.'
+        ],
         example: 'On the branchy workload the fastest depth is 35 stages and the most efficient '
           + 'is 18.'
       },
@@ -209,11 +220,15 @@
         term: 'Performance per watt on its own is a degenerate metric',
         plain: 'It is maximised by an arbitrarily slow machine.',
         formal: 'power falls faster than speed does, so the ratio rewards doing nothing',
-        detail: 'That is why the pipeline-depth literature uses performance cubed per watt '
-          + 'rather than something simpler: cubing the performance term stops the metric '
-          + 'preferring a machine that is slow and cheap over one that is fast and expensive. '
-          + 'It is a good reminder that a ratio of two quantities needs its degenerate cases '
-          + 'checked before it is used to decide anything.',
+        detail: [
+          'That is why the pipeline-depth literature uses performance cubed per watt rather than '
+            + 'something simpler.',
+          'Cubing the performance term stops the metric preferring a machine that is slow and '
+            + 'cheap over one that is fast and expensive.',
+          'It is a good reminder that a ratio of two quantities needs its degenerate cases '
+            + 'checked.',
+          'That check comes before the ratio is used to decide anything.'
+        ],
         example: 'Reported as performance per watt, every curve in this model peaks at one '
           + 'stage, which is not a result about pipelining.'
       },
@@ -221,11 +236,13 @@
         term: 'The curve is steep on the left and flat on the right',
         plain: 'Undershooting the optimum costs far more than overshooting it.',
         formal: 'time falls by an order of magnitude in the first few stages and climbs slowly after the bottom',
-        detail: 'That asymmetry is useful whenever the right depth is uncertain: err deep. The '
-          + 'same shape appears in almost every tuning parameter with diminishing returns — '
-          + 'batch sizes, cache sizes, thread counts — and the practical consequence is the '
-          + 'same, which is that the cost of being conservative is usually larger than the cost '
-          + 'of being aggressive.',
+        detail: [
+          'That asymmetry is useful whenever the right depth is uncertain: err deep.',
+          'The same shape appears in almost every tuning parameter with diminishing returns, '
+            + 'including batch sizes, cache sizes and thread counts.',
+          'The practical consequence is the same everywhere.',
+          'The cost of being conservative is usually larger than the cost of being aggressive.'
+        ],
         example: 'From one stage to five, the model\'s time falls from 220 275 to 51 300; from '
           + 'the optimum to the end of the range it rises by less than 5%.'
       },
@@ -233,10 +250,12 @@
         term: 'Superpipelining trades frequency against instructions per cycle',
         plain: 'A faster clock and a worse CPI, and only the product decides.',
         formal: 'the same three-term equation as M34.6, applied to depth',
-        detail: 'Every argument in this section is the performance equation again. What changes '
-          + 'with depth is that two of its terms move in opposite directions at once, which is '
-          + 'exactly the situation in which quoting one of them is most misleading — and '
-          + 'frequency is the one that fits on a box.',
+        detail: [
+          'Every argument in this section is the performance equation again.',
+          'What changes with depth is that two of its terms move in opposite directions at once.',
+          'That is exactly the situation in which quoting one of them is most misleading.',
+          'Frequency is the one that fits on a box.'
+        ],
         example: 'The Pentium 4 raised frequency and lost on real work to a design running at '
           + 'two thirds the clock.'
       },
@@ -244,11 +263,14 @@
         term: 'The overhead-per-stage argument caps every pipeline, including software ones',
         plain: 'Work divides; boundaries multiply.',
         formal: 'past some depth, more is paid in boundaries than is saved in stage length',
-        detail: 'In silicon the boundary is a flip-flop\'s setup and clock-to-output time; in a '
-          + 'software pipeline it is a queue, a serialisation, a context switch or a network '
-          + 'hop, and it is usually far more expensive relative to the work than three gate '
-          + 'delays are. A team splitting a service into twelve is making exactly this trade, '
-          + 'and the difference is that the processor people measured the boundary cost first.',
+        detail: [
+          'In silicon the boundary is a flip-flop\'s setup and clock-to-output time.',
+          'In a software pipeline it is a queue, a serialisation, a context switch or a network '
+            + 'hop.',
+          'It is usually far more expensive relative to the work than three gate delays are.',
+          'A team splitting a service into twelve is making exactly this trade. The difference is '
+            + 'that the processor people measured the boundary cost first.'
+        ],
         example: 'The branch penalty has a software analogue too: every stage between a '
           + 'decision and its consequence is work thrown away when the decision was wrong.'
       }
