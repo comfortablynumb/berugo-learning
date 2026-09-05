@@ -13,11 +13,14 @@
         readAs: 'The structure uses the theoretical minimum number of bits, plus an overhead that becomes a ' +
           'vanishing fraction of it as the data grows — that is what little-o means here. Not "small ' +
           'overhead": overhead that disappears relative to the data.',
-        detail: 'The definition is precise and it is worth holding onto, because "compressed" and "succinct" ' +
-          'are different promises. A compressed structure is small and has to be decompressed to be used; a ' +
-          'succinct one is small *and* supports its operations directly on the small form. The o(Z) is the ' +
-          'index, and it is not zero - claiming a succinct structure has no overhead is the most common way to ' +
-          'misrepresent one.',
+        detail: [
+          'The definition is precise and it is worth holding onto, because "compressed" and ' +
+            '"succinct" are different promises.',
+          'A compressed structure is small and has to be decompressed to be used.',
+          'A succinct one is small *and* supports its operations directly on the small form.',
+          'The o(Z) is the index, and it is not zero. Claiming a succinct structure has no overhead ' +
+            'is the most common way to misrepresent one.'
+        ],
         example: 'A 65 536-bit vector costs 8 192 bytes of data and 646 bytes of index: 7.9% overhead.'
       },
       {
@@ -37,33 +40,47 @@
         readAs: 'Counting the 1 bits before position i is three lookups added together: a coarse total, a ' +
           'finer one within it, and a single popcount for the last word. Constant time, and the tables ' +
           'are what the extra bits are spent on.',
-        detail: 'The two levels exist to keep both tables small: absolute counts every 2 048 bits are 32 bits ' +
-          'each and cost 1.6%, and relative counts every 256 bits fit in 16 bits and cost 6.3%. One level ' +
-          'alone forces a choice between a huge table and a long scan; two levels make the total under 8% with ' +
-          'no loop at all. The tables are the reason it is constant time, and the section reports their size ' +
-          'rather than mentioning only the answer.',
+        detail: [
+          'The two levels exist to keep both tables small.',
+          'Absolute counts every 2 048 bits are 32 bits each and cost 1.6%. Relative counts every ' +
+            '256 bits fit in 16 bits and cost 6.3%.',
+          'One level alone forces a choice between a huge table and a long scan; two levels make ' +
+            'the total under 8% with no loop at all.',
+          'The tables are the reason it is constant time, and the section reports their size rather ' +
+            'than mentioning only the answer.'
+        ],
         example: '3.0 table lookups and 3.5 word popcounts per query, whatever the vector length.'
       },
       {
         term: 'Select has no such trick',
         plain: 'Finding the k-th one is a search, not an index computation.',
         formal: 'binary search over the block table, then a bounded scan inside one block',
-        detail: 'Rank is a function of a position and the tables are indexed by position, so the lookup is ' +
-          'arithmetic. Select asks the inverse question and the tables are not indexed by count, so something ' +
-          'has to search. A binary search over blocks is O(log n) and bounds the final scan to one block; ' +
-          'sampling every k-th one bit instead turns it into a bounded walk. Both are implemented here, and ' +
-          'the honest summary is that select is the expensive primitive.',
+        detail: [
+          'Rank is a function of a position and the tables are indexed by position, so the lookup ' +
+            'is arithmetic.',
+          'Select asks the inverse question and the tables are not indexed by count, so something ' +
+            'has to search.',
+          'A binary search over blocks is O(log n) and bounds the final scan to one block. Sampling ' +
+            'every k-th one bit instead turns it into a bounded walk.',
+          'Both are implemented here, and the honest summary is that select is the expensive ' +
+            'primitive.'
+        ],
         example: '8.0 binary-search steps per select on 65 536 bits, 12.0 on a million.'
       },
       {
         term: 'The seams are where index arithmetic breaks',
         plain: 'A rank at a position that is exactly a block or superblock boundary is the case that gets written wrong.',
         formal: 'both tables carry a sentinel entry, and a query at the very end can index both',
-        detail: 'This is not a hypothetical: the implementation here initially double-counted a rank at the end ' +
-          'of a vector whose length was an exact multiple of the block size, because the sentinel holding the ' +
-          'final superblock total and the sentinel holding that superblock\'s relative total were added ' +
-          'together. Every value in the vector was correct; only the total was wrong. All-zero, all-one, ' +
-          'single-bit and boundary-aligned inputs belong in the test suite for exactly this reason.',
+        detail: [
+          'This is not a hypothetical.',
+          'The implementation here initially double-counted a rank at the end of a vector whose ' +
+            'length was an exact multiple of the block size.',
+          'The sentinel holding the final superblock total and the sentinel holding that ' +
+            'superblock\'s relative total were added together.',
+          'Every value in the vector was correct; only the total was wrong.',
+          'All-zero, all-one, single-bit and boundary-aligned inputs belong in the test suite for ' +
+            'exactly this reason.'
+        ],
         example: 'rank1(4096) on 4 096 ones returned 6 144 until the boundary case was handled.'
       },
       {
@@ -72,11 +89,14 @@
         formal: 'positions cost 32m bits; the vector costs n(1 + overhead)',
         readAs: 'Storing m positions outright costs 32 bits each; storing a bit per slot costs a bit per slot ' +
           'plus the index overhead. Which is cheaper depends entirely on how dense the set is.',
-        detail: 'The crossover is real and the section refuses to hide it. At 50% density a bit vector with its ' +
-          'index is nearly fifteen times smaller than a list of positions, and at 2% density the list of ' +
-          'positions is smaller. "Succinct" is a claim relative to a model, and the model here is a dense bit ' +
-          'string - so choosing the representation means knowing the density, which is the same lesson the ' +
-          'sparse-versus-dense choice teaches in 9.9.',
+        detail: [
+          'The crossover is real and the section refuses to hide it.',
+          'At 50% density a bit vector with its index is nearly fifteen times smaller than a list ' +
+            'of positions. At 2% density the list of positions is smaller.',
+          '"Succinct" is a claim relative to a model, and the model here is a dense bit string.',
+          'So choosing the representation means knowing the density, which is the same lesson the ' +
+            'sparse-versus-dense choice teaches in 9.9.'
+        ],
         example: '65 536 bits at 50%: 8 838 bytes against 130 332 for positions. At 2%: 8 838 against 4 984.'
       },
       {
@@ -86,31 +106,41 @@
         readAs: 'Elias-Fano needs about 2 bits per element plus the log of how sparse the set is. The ' +
           'universe can be enormous — what costs you is the ratio of universe to elements, not the ' +
           'universe itself.',
-        detail: 'The high-bit vector holds exactly n ones and at most n zeros, so it is 2n bits however large ' +
-          'the universe is - which is why the cost depends on u/n rather than on u. Recovering a value is one ' +
-          '`select1` on that vector plus a read of the packed low bits, so the structure is random access ' +
-          'rather than a stream. It is what an inverted index actually stores its posting lists in.',
+        detail: [
+          'The high-bit vector holds exactly n ones and at most n zeros, so it is 2n bits however ' +
+            'large the universe is.',
+          'That is why the cost depends on u/n rather than on u.',
+          'Recovering a value is one `select1` on that vector plus a read of the packed low bits, ' +
+            'so the structure is random access rather than a stream.',
+          'It is what an inverted index actually stores its posting lists in.'
+        ],
         example: '5 000 increasing values under a million: 9.5686 bits each against a bound of 9.6496, and 3.34× smaller than 32-bit integers.'
       },
       {
         term: 'Rank and select are the primitives everything else is built from',
         plain: 'Once these two are fast, trees, tries and sequences all become bit strings.',
         formal: 'LOUDS navigation, wavelet trees and FM-indexes are all rank/select over bit vectors',
-        detail: 'This is the reason the section comes before the structures that use it. A succinct tree is not ' +
-          'a clever tree encoding plus a clever navigation algorithm - it is a bit string plus rank and ' +
-          'select, and the navigation is two calls. The same is true of a wavelet tree and of the FM-index in ' +
-          'M06. Getting these two right and knowing what they cost is most of the work in the whole field.',
+        detail: [
+          'This is the reason the section comes before the structures that use it.',
+          'A succinct tree is not a clever tree encoding plus a clever navigation algorithm.',
+          'It is a bit string plus rank and select, and the navigation is two calls.',
+          'The same is true of a wavelet tree and of the FM-index in M06. Getting these two right ' +
+            'and knowing what they cost is most of the work in the whole field.'
+        ],
         example: 'Every operation in 9.8 is one or two calls to the functions in this section.'
       },
       {
         term: 'Broadword popcount, and why it is a loop-free line',
         plain: 'Count the set bits of a 32-bit word with five shifts, four masks and a multiply.',
         formal: 'the SWAR trick: sum bits pairwise, then in nibbles, then in bytes, then multiply to sum the bytes',
-        detail: 'Writing it out matters because the whole constant-time claim rests on the last step being a ' +
-          'fixed number of instructions rather than a loop over bits. The multiply-by-0x01010101 trick sums ' +
-          'the four byte counts into the top byte in one operation, which is the step people usually skip when ' +
-          'reimplementing from memory. On real hardware this is one instruction and the algorithm is designed ' +
-          'around that fact.',
+        detail: [
+          'Writing it out matters because the whole constant-time claim rests on the last step ' +
+            'being a fixed number of instructions rather than a loop over bits.',
+          'The multiply-by-0x01010101 trick sums the four byte counts into the top byte in one ' +
+            'operation.',
+          'That is the step people usually skip when reimplementing from memory.',
+          'On real hardware this is one instruction, and the algorithm is designed around that fact.'
+        ],
         example: 'Five shifts and one multiply per word; a rank query does 3.5 of them.'
       }
     ],

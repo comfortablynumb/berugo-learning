@@ -29,21 +29,23 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'rank₁(i) counts the set bits before position i and select₁(k) finds the k-th set bit, and almost every ' +
-          'succinct structure is built out of those two. Both are answered from a two-level index — a cumulative ' +
-          'count per 2 048-bit superblock and a relative count per 256-bit block — which costs 646 bytes on a ' +
-          '65 536-bit vector, 7.9% on top of the 8 192 bytes of data, and answers rank in 3.0 index lookups ' +
-          'plus 3.5 word popcounts however long the vector is.',
-        'select is the harder of the two because there is no direct arithmetic from k to a position. Binary ' +
-          'searching the same index costs 8.0 steps on 65 536 bits and 12.0 on 1 048 576 — logarithmic in the ' +
-          'vector rather than constant, which is the honest version of the O(1) that theory promises with a ' +
-          'more elaborate index nobody ships.',
-        'The comparison that matters is against simply storing the positions. At 50% density the positions ' +
-          'array is 130 332 bytes against 8 838 for the vector and its index, 14.7× worse; at 2% density it is ' +
-          '4 984 against 8 838 and it *wins*. A bit vector is the right representation for a dense set and the ' +
-          'wrong one for a sparse set, and the crossover is arithmetic rather than a matter of taste. For ' +
-          'monotone sequences Elias-Fano splits the difference: 9.5686 bits per value against its own ' +
-          '9.6496-bit lower bound, 3.34× smaller than 32-bit integers, still randomly accessible.'
+        'rank₁(i) counts the set bits before position i and select₁(k) finds the k-th set bit, and ' +
+          'almost every succinct structure is built out of those two. Both are answered from a ' +
+          'two-level index: a cumulative count per 2 048-bit superblock and a relative count per ' +
+          '256-bit block. That index costs 646 bytes on a 65 536-bit vector, 7.9% on top of the ' +
+          '8 192 bytes of data. It answers rank in 3.0 index lookups plus 3.5 word popcounts, ' +
+          'however long the vector is.',
+        'The select side is the harder of the two, because there is no direct arithmetic from k to ' +
+          'a position. Binary searching the same index costs 8.0 steps on 65 536 bits and 12.0 on ' +
+          '1 048 576. That is logarithmic in the vector rather than constant, which is the honest ' +
+          'version of the O(1) that theory promises with a more elaborate index nobody ships.',
+        'The comparison that matters is against simply storing the positions. At 50% density the ' +
+          'positions array is 130 332 bytes against 8 838 for the vector and its index, 14.7× ' +
+          'worse. At 2% density it is 4 984 against 8 838 and it *wins*. A bit vector is the right ' +
+          'representation for a dense set and the wrong one for a sparse set, and the crossover is ' +
+          'arithmetic rather than a matter of taste. For monotone sequences Elias-Fano splits the ' +
+          'difference: 9.5686 bits per value against its own 9.6496-bit lower bound, 3.34× smaller ' +
+          'than 32-bit integers, still randomly accessible.'
       ],
       demo: {
         title: 'Interactive demo — the index, the queries it answers, and where it stops being worth it',
@@ -68,9 +70,9 @@
       insight: 'The word "succinct" has a technical meaning — the information-theoretic minimum plus a lower-order ' +
         'term — and the lower-order term is where the engineering lives. Here it is 7.9%, which buys rank in ' +
         'constant time and select in a binary search, and the design question is always what that percentage ' +
-        'is being spent on. The trap is measuring it against nothing: a structure can be 2% overhead and still ' +
-        'be the wrong choice, because the representation it is 2% on top of was itself 16× larger than the ' +
-        'alternative you did not consider.'
+        'is being spent on. The trap is measuring it against nothing. A structure can be 2% ' +
+        'overhead and still be the wrong choice. The representation it is 2% on top of may itself ' +
+        'be 16× larger than the alternative you did not consider.'
     };
   }
 
