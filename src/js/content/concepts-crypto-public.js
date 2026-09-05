@@ -10,12 +10,14 @@
         term: 'Two assumptions carry everything',
         plain: 'Factoring is hard, and taking a logarithm in a group is hard.',
         formal: 'RSA rests on integer factorisation; Diffie–Hellman, ECDH and ECDSA rest on the discrete logarithm',
-        detail: 'Neither has been proved hard, and both are believed hard because a great deal of ' +
-          'attention has failed to make them easy. That is a different kind of foundation from ' +
-          'the symmetric primitives, which rest on the same absence of a break but with far less ' +
-          'structure for an attacker to exploit. It also means public-key security levels move ' +
-          'when algorithms improve: the recommended RSA size has risen repeatedly without RSA ' +
-          'ever being "broken".',
+        detail: [
+          'Neither problem has been proved hard. Both are believed hard because a great deal of ' +
+            'attention has failed to make them easy.',
+          'That is a weaker foundation than the symmetric primitives rest on. Those also lack a ' +
+            'proof, but they give an attacker far less structure to work with.',
+          'It also means public-key security levels move when algorithms improve. The recommended ' +
+            'RSA size has risen repeatedly without RSA ever being broken.'
+        ],
         example: 'The demo runs a brute-force discrete log against four moduli and reports the ' +
           'step count each time.'
       },
@@ -33,14 +35,17 @@
         },
         plain: 'Both sides exponentiate the other’s public value with their own private one.',
         formal: 'Alice computes B^a mod p and Bob computes A^b mod p, and both equal g^(ab) mod p',
-        readAs: 'Alice raises the value Bob sent to her secret exponent and Bob raises the value ' +
-          'Alice sent to his, and because exponentiation commutes both arrive at the generator ' +
+        readAs: 'Alice raises the value Bob sent to her secret exponent, and Bob raises the value ' +
+          'Alice sent to his. Because exponentiation commutes, both arrive at the generator ' +
           'raised to the product of the two secrets.',
-        detail: 'The eavesdropper holds the group, the generator and both public values — almost ' +
-          'everything — and what they lack is either private exponent, whose only known route is ' +
-          'the discrete logarithm. Note what the exchange does not provide: there is no ' +
-          'authentication anywhere in it, so an active attacker who runs two exchanges in the ' +
-          'middle reads everything. It is a key agreement, not a protocol.',
+        detail: [
+          'The eavesdropper holds the group, the generator and both public values — almost ' +
+            'everything. What they lack is either private exponent, and the only known route to ' +
+            'one is the discrete logarithm.',
+          'Note what the exchange does not provide. There is no authentication anywhere in it, so ' +
+            'an active attacker who runs two exchanges in the middle reads everything.',
+          'It is a key agreement, not a protocol.'
+        ],
         example: 'At modulus 104 729 the demo shows both sides reaching 42 864 with nothing of ' +
           'that value on the wire.'
       },
@@ -48,12 +53,16 @@
         term: 'The parameter size IS the security, measured',
         plain: 'The same attacker, the same code, one number changed.',
         formal: 'brute-force discrete log costs O(p) steps, so the modulus size is the only thing standing between the attacker and the secret',
-        detail: 'This is worth seeing as a measurement rather than a rule of thumb, because it ' +
-          'shows the protocol is not stronger at one size than another — it is the same protocol, ' +
-          'and only the search length differs. Real parameters are chosen so the best KNOWN ' +
-          'search is out of reach for the lifetime of the data, which is why recommended sizes ' +
-          'rise over time without any protocol changing, and why index calculus rather than this ' +
-          'naive loop sets the finite-field numbers.',
+        detail: [
+          'This is worth seeing as a measurement rather than a rule of thumb. It shows the ' +
+            'protocol is not stronger at one size than another — it is the same protocol, and ' +
+            'only the search length differs.',
+          'Real parameters are chosen so the best KNOWN search is out of reach for the lifetime ' +
+            'of the data. That is why recommended sizes rise over time without any protocol ' +
+            'changing.',
+          'For finite fields the recommended numbers come from index calculus, not from a naive ' +
+            'loop like this one.'
+        ],
         example: 'The demo breaks 13 bits in 872 steps, 21 bits in 142 969, and gives up on ' +
           '31 bits after 2 000 000.'
       },
@@ -62,13 +71,16 @@
         plain: 'Multiply a ciphertext by s to the e, and the decryption comes back multiplied by s.',
         formal: '(m·s)^e ≡ m^e · s^e (mod n), so an oracle that decrypts anything but c still yields m',
         readAs: 'The encryption of a message times a blinding value equals the encryption of the ' +
-          'message times the encryption of the blinding value, so an attacker can disguise a ' +
+          'message times the encryption of the blinding value. So an attacker can disguise a ' +
           'ciphertext, get it decrypted, and divide the blinding out afterwards.',
-        detail: 'The attacker takes a ciphertext they are not allowed to submit, blinds it into ' +
-          'one that looks unrelated, sends that, and divides the answer by the blinding factor. ' +
-          'One query, no key, and the plaintext. The homomorphic property is a feature in some ' +
-          'settings and a complete break here, which is what "textbook RSA" means as a criticism: ' +
-          'the mathematics without the padding that makes it usable.',
+        detail: [
+          'The attacker takes a ciphertext they are not allowed to submit and blinds it into one ' +
+            'that looks unrelated. They send that, then divide the answer by the blinding factor. ' +
+            'One query, no key, and the plaintext.',
+          'The homomorphic property is a feature in some settings and a complete break here. That ' +
+            'is what "textbook RSA" means as a criticism: the mathematics without the padding ' +
+            'that makes it usable.'
+        ],
         example: 'With blinding factor 3 the demo submits a blinded ciphertext, gets 126 back, ' +
           'and divides to recover the plaintext 42.'
       },
@@ -76,12 +88,15 @@
         term: 'OAEP and PSS are not decoration',
         plain: 'Padding destroys the structure the attack needs and adds randomness.',
         formal: 'OAEP for encryption and PSS for signatures make the padded message unpredictable and non-multiplicative',
-        detail: 'A blinded ciphertext decrypts to something that will not have the required ' +
-          'padding structure, so the oracle rejects it and the attack loses its query. The ' +
-          'randomness matters separately: without it, equal plaintexts give equal ciphertexts, so ' +
-          'an attacker who can guess a short message simply encrypts every candidate and ' +
-          'compares. Any RSA implementation that lets you encrypt a raw integer is offering you ' +
-          'the broken version.',
+        detail: [
+          'A blinded ciphertext decrypts to something without the required padding structure. The ' +
+            'oracle rejects it, and the attack loses its query.',
+          'The randomness matters separately. Without it, equal plaintexts give equal ' +
+            'ciphertexts, so an attacker who can guess a short message encrypts every candidate ' +
+            'and compares.',
+          'Any RSA implementation that lets you encrypt a raw integer is offering you the broken ' +
+            'version.'
+        ],
         example: 'The demo’s RSA table runs the attack that OAEP removes, step by step with the ' +
           'arithmetic shown.'
       },
@@ -89,12 +104,14 @@
         term: 'Curves get the same strength from far smaller keys',
         plain: '128-bit security is a 3 072-bit RSA modulus and a 256-bit curve.',
         formal: 'the best attack on a well-chosen curve is square-root in the group order; factoring has subexponential methods',
-        detail: 'The asymmetry comes from the algorithms available, not from the design quality ' +
-          'of either family, and it widens with the security level: at 256-bit security RSA needs ' +
-          '15 360 bits and a curve needs 512. That is why nobody deploys RSA at high levels and ' +
-          'everybody deploys curves, and why treating key length as a strength comparison across ' +
-          'families is a mistake — "2 048-bit RSA" and "256-bit ECC" are not commensurable ' +
-          'numbers.',
+        detail: [
+          'The asymmetry comes from the algorithms available, not from the design quality of ' +
+            'either family. It widens with the security level: at 256-bit security RSA needs ' +
+            '15 360 bits and a curve needs 512.',
+          'That is why nobody deploys RSA at high levels and everybody deploys curves.',
+          'Treating key length as a strength comparison across families is a mistake. ' +
+            '"2 048-bit RSA" and "256-bit ECC" are not commensurable numbers.'
+        ],
         example: 'The demo tabulates five security levels with the RSA, finite-field and curve ' +
           'sizes for each.'
       },
@@ -103,13 +120,15 @@
         plain: 'Adding a point to itself k times is easy; recovering k is not.',
         formal: 'the chord-and-tangent law makes points a group; k·G is cheap by double-and-add and k is hard to recover',
         readAs: 'The line through two points on the curve meets it in a third, and reflecting ' +
-          'that third point defines addition, so multiplying a point by a whole number means ' +
-          'repeated addition — fast forwards, and with no known fast inverse.',
-        detail: 'ECDH is exactly Diffie–Hellman with this group substituted for integers modulo a ' +
-          'prime, which is why the protocol description is unchanged and only the arithmetic ' +
-          'differs. Curve choice matters enormously: a curve with a small subgroup, a composite ' +
-          'order or a bad generator gives up secrets that a well-chosen curve does not, which is ' +
-          'the reason modern practice fixes the curve rather than negotiating it.',
+          'that third point defines addition. Multiplying a point by a whole number is then ' +
+          'repeated addition — fast forwards, with no known fast inverse.',
+        detail: [
+          'ECDH is exactly Diffie–Hellman with this group substituted for the integers modulo a ' +
+            'prime. The protocol description is unchanged; only the arithmetic differs.',
+          'Curve choice matters enormously. A curve with a small subgroup, a composite order or a ' +
+            'bad generator gives up secrets that a well-chosen curve does not.',
+          'That is the reason modern practice fixes the curve rather than negotiating it.'
+        ],
         example: 'The section’s demo curve has a generator of prime order 3 359, chosen so that ' +
           'every nonce has an inverse.'
       },
@@ -117,12 +136,15 @@
         term: 'X25519 and Ed25519 removed the dials',
         plain: 'The failures were parameters, so the response was to have none.',
         formal: 'a fixed curve, mandatory clamping and no invalid-point cases: there is nothing left to configure wrongly',
-        detail: 'Twenty years of RSA and classical-curve incidents were overwhelmingly padding ' +
-          'and parameter failures — Bleichenbacher oracles, shared moduli from bad key ' +
-          'generation, small exponents on unpadded messages, 512-bit export keys still being ' +
-          'accepted, invalid-point attacks on unvalidated inputs. The industry\'s answer was not ' +
-          'better advice about parameters but primitives that do not expose any, which is the ' +
-          'same move that produced AEAD and Argon2\'s single-call interface.',
+        detail: [
+          'Twenty years of RSA and classical-curve incidents were overwhelmingly padding and ' +
+            'parameter failures. Bleichenbacher oracles, shared moduli from bad key generation, ' +
+            'small exponents on unpadded messages, 512-bit export keys still accepted, ' +
+            'invalid-point attacks on unvalidated inputs.',
+          'The industry\'s answer was not better advice about parameters but primitives that do ' +
+            'not expose any. It is the same move that produced AEAD and Argon2\'s single-call ' +
+            'interface.'
+        ],
         example: 'The section’s insight names this as the transferable lesson: when a parameter ' +
           'can be wrong, eventually it will be.'
       }

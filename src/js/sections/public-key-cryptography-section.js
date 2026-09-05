@@ -68,7 +68,7 @@
         'land on the same number. The eavesdropper sees the modulus, the generator and both ' +
         'public values, and that is genuinely not enough — at a large enough size.',
       '**"At a large enough size" is the whole sentence, and the demo measures where it stops ' +
-        'being true.** The same brute-force discrete log runs against four moduli: it wins in ' +
+        'being true.** The same brute-force discrete log runs against four moduli. It wins in ' +
         'under a thousand steps at 13 bits, takes over a hundred thousand at 21, and gives up ' +
         'at 31. Nothing about the protocol changed — only the parameter.',
       '**RSA encryption without padding is broken, and one query proves it.** RSA is ' +
@@ -80,8 +80,8 @@
         'plaintexts do not give equal ciphertexts. Textbook RSA has neither property, and ' +
         '"textbook" in an implementation means exactly this.',
       '**Elliptic curves get the same security from far smaller keys.** The best attack on a ' +
-        'well-chosen curve is square-root in the group order, while factoring has index-calculus ' +
-        'methods that are subexponential — so 128-bit security is a 256-bit curve and a ' +
+        'well-chosen curve is square-root in the group order. Factoring has index-calculus ' +
+        'methods that are subexponential. So 128-bit security is a 256-bit curve and a ' +
         '3 072-bit RSA modulus, and the gap widens as the level rises.',
       '**X25519 and Ed25519 exist because parameters were the failure, not the mathematics.** ' +
         'They fix the curve, forbid the invalid-point and small-subgroup cases by construction, ' +
@@ -99,15 +99,15 @@
         markup: root.PublicKeyTemplate.render()
       },
       diagram: diagram(),
-      insight: '**RSA\'s failure modes are almost all padding and parameter failures. The maths ' +
-        'is fine; the deployments were not, which is why modern protocols moved to X25519 and ' +
-        'Ed25519 with no parameter choices to get wrong.** Look at what the demo actually breaks: ' +
-        'not the factoring assumption, but a missing padding scheme and a modulus somebody chose ' +
-        'too small. That is the pattern across twenty years of RSA incidents — Bleichenbacher ' +
-        'padding oracles, shared moduli from bad key generation, small public exponents applied ' +
-        'to unpadded messages, and 512-bit export keys still being accepted. The industry\'s ' +
-        'answer was not better RSA advice, it was primitives with no dials on them, and that is ' +
-        'the transferable lesson: when a parameter can be wrong, eventually it will be.'
+      insight: '**RSA\'s failure modes are almost all padding and parameter failures.** The maths ' +
+        'is fine; the deployments were not. That is why modern protocols moved to X25519 and ' +
+        'Ed25519, which have no parameter choices to get wrong. Look at what the demo actually ' +
+        'breaks: not the factoring assumption, but a missing padding scheme and a modulus ' +
+        'somebody chose too small. That is the pattern across twenty years of RSA incidents. ' +
+        'Bleichenbacher padding oracles, shared moduli from bad key generation, small public ' +
+        'exponents on unpadded messages, 512-bit export keys still being accepted. The ' +
+        'industry\'s answer was not better RSA advice, it was primitives with no dials on them. ' +
+        'The transferable lesson: when a parameter can be wrong, eventually it will be.'
     };
   }
 
