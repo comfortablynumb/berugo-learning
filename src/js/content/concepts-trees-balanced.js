@@ -174,13 +174,16 @@
         term: 'The five rules',
         plain: 'Nodes are red or black; the root is black; null children count black; no red node has a red child; every root-to-leaf path has the same number of black nodes.',
         formal: 'colour; black root; black leaves; no red-red; equal black height',
-        detail: 'Only the last two rules do any work. "No red node has a red child" caps how many ' +
-          'red nodes a path can contain — at most every other one. "Every path has the same black ' +
-          'count" pins the black nodes exactly. Together they say the longest path is at most twice ' +
-          'the shortest, which is the height bound. The first three are bookkeeping that make the ' +
-          'other two well defined. Checking them is the only way to be sure an implementation is ' +
-          'right, and the black-height rule is the one that catches real bugs: it fails on paths a ' +
-          'test suite would otherwise never compare.',
+        detail: [
+          'Only the last two rules do any work.',
+          '"No red node has a red child" caps how many red nodes a path can contain — at most ' +
+            'every other one. "Every path has the same black count" pins the black nodes exactly.',
+          'Together they say the longest path is at most twice the shortest, which is the height ' +
+            'bound. The first three are bookkeeping that make the other two well defined.',
+          'Checking them is the only way to be sure an implementation is right, and the ' +
+            'black-height rule is the one that catches real bugs. It fails on paths a test suite ' +
+            'would otherwise never compare.'
+        ],
         example: 'A fixup that leaves one path with three black nodes and another with four is broken, however plausible the tree looks.'
       },
       {
@@ -197,12 +200,16 @@
         },
         plain: 'The number of black nodes on any path from a node down to a leaf. Every path gives the same answer.',
         formal: 'bh(node), identical on every descending path',
-        detail: 'Black height is the quantity the structure actually balances — the tree is exactly ' +
-          'balanced in black nodes and only approximately balanced in total nodes. A subtree of ' +
-          'black height b holds at least 2^b − 1 nodes, which is where the bound comes from: with n ' +
-          'nodes, b is at least log₂(n + 1), and since at most half the nodes on a path are red the ' +
-          'height is at most 2b. It is also the height of the equivalent 2-3-4 tree, which is the ' +
-          'cleanest way to see why the rules were chosen.',
+        detail: [
+          'Black height is the quantity the structure actually balances. The tree is exactly ' +
+            'balanced in black nodes and only approximately balanced in total nodes.',
+          'A subtree of black height b holds at least 2^b − 1 nodes, which is where the bound ' +
+            'comes from.',
+          'With n nodes, b is at least log₂(n + 1). And since at most half the nodes on a path are ' +
+            'red, the height is at most 2b.',
+          'It is also the height of the equivalent 2-3-4 tree, which is the cleanest way to see ' +
+            'why the rules were chosen.'
+        ],
         example: 'A 10 000-key tree measured black height 8 and height 16 — exactly the factor-of-two relationship.'
       },
       {
@@ -219,13 +226,17 @@
         },
         plain: 'A black node with its red children is one node of a 2-3-4 tree. Red is not a node, it is a second key.',
         formal: 'black alone = 2-node; one red child = 3-node; two red children = 4-node',
-        detail: 'This mapping is what makes the colour rules stop being arbitrary. A 2-3-4 tree keeps ' +
-          'all its leaves at the same depth by storing one, two or three keys per node; a red-black ' +
-          'tree stores the same thing in a binary tree, using red edges to glue the extra keys onto ' +
-          'their black parent. Every rule then has a translation: no red-red is "a node holds at ' +
-          'most three keys", equal black height is "all leaves are at the same depth", and the ' +
-          'insert fixup cases are node splits. A measured 10 000-key tree formed 5 164 such nodes: ' +
-          '31.9% 2-nodes, 42.6% 3-nodes and 25.5% 4-nodes.',
+        detail: [
+          'This mapping is what makes the colour rules stop being arbitrary.',
+          'A 2-3-4 tree keeps all its leaves at the same depth by storing one, two or three keys ' +
+            'per node. A red-black tree stores the same thing in a binary tree, using red edges to ' +
+            'glue the extra keys onto their black parent.',
+          'Every rule then has a translation. No red-red is "a node holds at most three keys", ' +
+            'equal black height is "all leaves are at the same depth", and the insert fixup cases ' +
+            'are node splits.',
+          'A measured 10 000-key tree formed 5 164 such nodes: 31.9% 2-nodes, 42.6% 3-nodes and ' +
+            '25.5% 4-nodes.'
+        ],
         example: 'The 2-3-4 tree that a red-black tree encodes has height equal to its black height.'
       },
       {
@@ -234,38 +245,47 @@
         formal: 'red uncle ⇒ recolour and move up two levels',
         readAs: 'When the new node\'s uncle is red, no rotation is needed: recolour the parent and uncle ' +
           'black, the grandparent red, and carry the problem up two levels to fix there.',
-        detail: 'The insert fixup has two shapes. When the new node\'s uncle is red, the fix is three ' +
-          'colour changes and the problem moves two levels up — no rotation, no pointer written. ' +
-          'When the uncle is black, one or two rotations end the fixup for good. Since the recolour ' +
-          'case is much more common, the bulk of the work is colour changes: a 10 000-key build ' +
-          'measured 33 239 recolourings against 5 763 rotations. That matters because a recolour is ' +
-          'a byte in a node the code has already loaded, and a rotation is three pointer writes that ' +
-          'invalidate other things.',
+        detail: [
+          'The insert fixup has two shapes.',
+          'When the new node\'s uncle is red, the fix is three colour changes and the problem ' +
+            'moves two levels up: no rotation, no pointer written.',
+          'When the uncle is black, one or two rotations end the fixup for good.',
+          'Since the recolour case is much more common, the bulk of the work is colour changes. A ' +
+            '10 000-key build measured 33 239 recolourings against 5 763 rotations.',
+          'That matters because a recolour is a byte in a node the code has already loaded, and a ' +
+            'rotation is three pointer writes that invalidate other things.'
+        ],
         example: 'Building a 10 000-key tree: 33 239 recolourings and 5 763 rotations, about six to one.'
       },
       {
         term: 'The insert fixup',
         plain: 'Insert red, then fix red-red violations upward: recolour when the uncle is red, rotate when it is black.',
         formal: 'at most 2 rotations per insertion',
-        detail: 'A new node is coloured red because a black one would immediately break the ' +
-          'black-height rule on its own path, while a red one only risks the red-red rule — a local, ' +
-          'repairable problem. The fixup walks up while the parent is red. The red-uncle case ' +
-          'repaints and continues; the black-uncle case rotates once (outer) or twice (inner) and ' +
-          'stops. So the loop can run O(log n) times but rotates at most twice in total, which is ' +
-          'the bound that matters for a structure other code holds pointers into.',
+        detail: [
+          'A new node is coloured red because a black one would immediately break the black-height ' +
+            'rule on its own path. A red one only risks the red-red rule, which is a local, ' +
+            'repairable problem.',
+          'The fixup walks up while the parent is red. The red-uncle case repaints and continues; ' +
+            'the black-uncle case rotates once (outer) or twice (inner) and stops.',
+          'So the loop can run O(log n) times but rotates at most twice in total, which is the ' +
+            'bound that matters for a structure other code holds pointers into.'
+        ],
         example: 'The loop may recolour its way to the root, and still perform no more than two rotations on the way.'
       },
       {
         term: 'Deletion and double black',
         plain: 'Removing a black node leaves a path one black short. The fixup pushes that deficit up or borrows from a sibling.',
         formal: 'at most 3 rotations per deletion',
-        detail: 'Deleting a red node changes nothing — no path loses a black. Deleting a black one ' +
-          'does, and the standard treatment gives the child an imaginary extra black ("double ' +
-          'black") that has to be discharged. The sibling decides how: if it can spare a red child ' +
-          'the deficit is fixed with a rotation and recolouring; if it cannot, the sibling is painted ' +
-          'red and the deficit moves up a level. Written without a sentinel the fixup must carry the ' +
-          '(node, parent) pair explicitly, because the node being fixed can be null and a null has ' +
-          'no parent to ask.',
+        detail: [
+          'Deleting a red node changes nothing: no path loses a black.',
+          'Deleting a black one does, and the standard treatment gives the child an imaginary ' +
+            'extra black ("double black") that has to be discharged.',
+          'The sibling decides how. If it can spare a red child, the deficit is fixed with a ' +
+            'rotation and recolouring. If it cannot, the sibling is painted red and the deficit ' +
+            'moves up a level.',
+          'Written without a sentinel, the fixup must carry the (node, parent) pair explicitly, ' +
+            'because the node being fixed can be null and a null has no parent to ask.'
+        ],
         example: 'The deficit can travel to the root, where it simply disappears — the root is allowed to lose a black.'
       },
       {
@@ -274,25 +294,32 @@
         formal: 'insert ≤ 2 rotations, delete ≤ 3',
         readAs: 'However large the tree, a single insert never needs more than two rotations and a delete ' +
           'never more than three. The recolouring may travel to the root; the structural work does not.',
-        detail: 'std::map, java.util.TreeMap, the Linux kernel scheduler and most ordered maps are ' +
-          'red-black, and the reason is the write path rather than the read path. Red-black bounds ' +
-          'the structural change per update by a constant on both operations, while AVL bounds only ' +
-          'insertion and can rebalance at every level on a delete. Libraries delete. The cost is a ' +
-          'tree up to 44% taller than AVL in the worst case, which on measured workloads shows up as ' +
-          'a percent or so of extra comparisons.',
+        detail: [
+          'std::map, java.util.TreeMap, the Linux kernel scheduler and most ordered maps are ' +
+            'red-black, and the reason is the write path rather than the read path.',
+          'Red-black bounds the structural change per update by a constant on both operations. AVL ' +
+            'bounds only insertion, and can rebalance at every level on a delete.',
+          'Libraries delete.',
+          'The cost is a tree up to 44% taller than AVL in the worst case, which on measured ' +
+            'workloads shows up as a percent or so of extra comparisons.'
+        ],
         example: 'On the same 20 000-operation stream red-black did 3 613 rotations against AVL\'s 4 434, and 0.85% more comparisons.'
       },
       {
         term: 'Left-leaning as a simplification',
         plain: 'Force every red link to lean left and the number of cases collapses — at the cost of more rotations.',
         formal: 'LLRB: red links are left children only',
-        detail: 'Sedgewick\'s left-leaning variant adds one rule — a red link may only be a left ' +
-          'child — which removes the mirror-image half of every case and makes the code short enough ' +
-          'to fit on a slide. It encodes 2-3 trees rather than 2-3-4 trees, which is why the ' +
-          'implementation is symmetric and small. The trade is real: the extra rule has to be ' +
-          'maintained, so LLRB performs more rotations than the classical form, and the deletion ' +
-          'code is famously harder to follow despite the simpler insertion. Standard libraries kept ' +
-          'the classical version.',
+        detail: [
+          'Sedgewick\'s left-leaning variant adds one rule: a red link may only be a left child. ' +
+            'That removes the mirror-image half of every case, and makes the code short enough to ' +
+            'fit on a slide.',
+          'It encodes 2-3 trees rather than 2-3-4 trees, which is why the implementation is ' +
+            'symmetric and small.',
+          'The trade is real. The extra rule has to be maintained, so LLRB performs more rotations ' +
+            'than the classical form, and the deletion code is famously harder to follow despite ' +
+            'the simpler insertion.',
+          'Standard libraries kept the classical version.'
+        ],
         example: 'LLRB insertion is about twenty lines; its deletion is not, which is why the classical form survives in libraries.'
       }
     ]

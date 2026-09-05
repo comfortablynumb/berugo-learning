@@ -28,18 +28,19 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'Five rules: every node is red or black, the root is black, a null child counts as black, a ' +
-          'red node has no red child, and every path from a node down to a leaf passes the same ' +
-          'number of black nodes. The last one is the load-bearing rule — it makes the shortest and ' +
-          'longest paths differ by at most a factor of two, so the height is under 2·log₂(n + 1).',
-        'The rules stop looking arbitrary once you see what they encode. A black node together with ' +
-          'its red children is one node of a 2-3-4 tree: black alone is a 2-node, black with one red ' +
-          'child is a 3-node, black with two is a 4-node. Red-black is a 2-3-4 tree stored in a ' +
-          'binary tree, and the colours are the glue.',
-        'Libraries chose this family over AVL, which is shallower. The reason is on the write side ' +
-          'and it is visible in the table below: red-black bounds the rotations per update at two ' +
-          'for insertion and three for deletion, and does most of its work by recolouring, which ' +
-          'costs no pointer writes at all.'
+        'Five rules. Every node is red or black, the root is black, and a null child counts as ' +
+          'black. A red node has no red child, and every path from a node down to a leaf passes ' +
+          'the same number of black nodes. That last one is the load-bearing rule. It makes the ' +
+          'shortest and longest paths differ by at most a factor of two, so the height is under ' +
+          '2·log₂(n + 1).',
+        'The rules stop looking arbitrary once you see what they encode. A black node together ' +
+          'with its red children is one node of a 2-3-4 tree. Black alone is a 2-node, black with ' +
+          'one red child is a 3-node, and black with two is a 4-node. Red-black is a 2-3-4 tree ' +
+          'stored in a binary tree, and the colours are the glue.',
+        'Libraries chose this family over AVL, which is shallower. The reason is on the write ' +
+          'side, and it is visible in the table below. Red-black bounds the rotations per update ' +
+          'at two for insertion and three for deletion, and does most of its work by recolouring, ' +
+          'which costs no pointer writes at all.'
       ],
       demo: { title: 'Interactive demo — the colours, the 2-3-4 reading, and the bill', markup: root.RedBlackTreesTemplate.render() },
       diagram: {
@@ -58,8 +59,9 @@
         ].join('\n')
       },
       insight: 'Red-black wins in libraries because the deletion cost is bounded by O(1) rotations, ' +
-        'and libraries delete. AVL gives a shallower tree and pays for it with rebalancing that can ' +
-        'run the whole way up on every removal — which is the right trade only when reads dominate.'
+        'and libraries delete. AVL gives a shallower tree and pays for it with rebalancing that ' +
+        'can run the whole way up on every removal. That is the right trade only when reads ' +
+        'dominate.'
     };
   }
 
