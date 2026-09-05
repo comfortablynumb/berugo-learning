@@ -62,14 +62,14 @@
         + 'one. That is why the resolution point is worth moving, and why a deeper pipeline '
         + 'makes every mistake more expensive.',
       '**Squashing has to be total.** A flushed instruction must leave no register written, no '
-        + 'memory changed and no exception raised. In this machine that is easy because only '
-        + 'write-back commits anything, and everything younger than the branch is still short '
-        + 'of it — which is the same property that makes precise exceptions work in 35.7.',
+        + 'memory changed and no exception raised. In this machine that is easy, because only '
+        + 'write-back commits anything and everything younger than the branch is still short '
+        + 'of it. That is the same property that makes precise exceptions work in 35.7.',
       '**Early resolution is not free.** Comparing the operands in decode needs a comparator '
-        + 'there, its own forwarding paths, and a stall whenever an operand is still being '
-        + 'computed by the instruction directly ahead — because at that moment the value does '
-        + 'not exist anywhere to forward from. The demo counts those stalls rather than hiding '
-        + 'them.',
+        + 'there and its own forwarding paths. It also needs a stall whenever an operand is '
+        + 'still being computed by the instruction directly ahead, because at that moment the '
+        + 'value does not exist anywhere to forward from. The demo counts those stalls rather '
+        + 'than hiding them.',
       '**Static prediction is nearly free and surprisingly good.** "Backward branches are '
         + 'taken" costs one comparison and captures the fact that a loop branch goes backwards '
         + 'and usually loops. It is the baseline every dynamic predictor has to beat by enough '
@@ -106,17 +106,17 @@
       + 'self-defeating part of the whole idea and the reason branch prediction became a '
       + 'research field.** The penalty is measured in stages, so the same design change that '
       + 'shortened the clock lengthened the cost of every misprediction in proportion. At five '
-      + 'stages a mistake costs two instructions and a mediocre predictor is fine; at twenty '
-      + 'stages it costs fifteen or more, and a predictor that is wrong 5% of the time is '
+      + 'stages a mistake costs two instructions and a mediocre predictor is fine. At twenty '
+      + 'stages it costs fifteen or more. A predictor that is wrong 5% of the time is then '
       + 'spending a large fraction of the machine on work that gets thrown away. Everything in '
       + 'the next two sections exists because of that multiplication. The transferable shape '
       + 'is that speculation is only as good as the cost of being wrong, and that cost is '
       + 'usually set by a decision made somewhere else entirely. Prefetching a page, warming a '
-      + 'cache, optimistically locking a row, speculatively executing a branch of a workflow — '
-      + 'all of them are the same bet, and in every case the interesting number is not the hit '
-      + 'rate but the hit rate multiplied by what a miss costs. A system that made the '
+      + 'cache, optimistically locking a row, speculatively executing a branch of a workflow: '
+      + 'all of them are the same bet. In every case the interesting number is not the hit '
+      + 'rate, but the hit rate multiplied by what a miss costs. A system that made the '
       + 'speculation cheaper to recover from would have been a better investment than one that '
-      + 'made the guess slightly more accurate, and that is a comparison almost nobody makes.';
+      + 'made the guess slightly more accurate. That is a comparison almost nobody makes.';
   }
 
   function render(app) {

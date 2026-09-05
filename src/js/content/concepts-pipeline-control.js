@@ -22,10 +22,14 @@
         },
         plain: 'The branch is in flight and its direction is not known yet.',
         formal: 'the penalty is the number of stages between fetch and resolution',
-        detail: 'Fetch cannot simply wait, because waiting costs the penalty on every branch '
-          + 'rather than only on the mispredicted ones. So it guesses and the machine keeps a '
-          + 'way to undo. That is speculation in its simplest form, and the whole of branch '
-          + 'prediction is an effort to make the guess better rather than to avoid guessing.',
+        detail: [
+          'Fetch cannot simply wait, because waiting costs the penalty on every branch rather '
+            + 'than only on the mispredicted ones.',
+          'So it guesses, and the machine keeps a way to undo.',
+          'That is speculation in its simplest form.',
+          'The whole of branch prediction is an effort to make the guess better rather than to '
+            + 'avoid guessing.'
+        ],
         example: 'On the sum loop with no prediction at all, 22 of 70 cycles — 31% — are '
           + 'instructions fetched down a path that turned out to be wrong.'
       },
@@ -33,12 +37,15 @@
         term: 'Squashing has to be total, and that is what makes guessing safe',
         plain: 'A flushed instruction leaves no register written and no memory changed.',
         formal: 'nothing before write-back commits any architectural state',
-        detail: 'The property that makes speculation possible is not the prediction; it is the '
-          + 'ability to undo. In this machine that is easy, because only write-back commits '
-          + 'anything and every instruction younger than the branch is still short of it. The '
-          + 'same property is what precise exceptions need in 35.7, which is why branch '
-          + 'recovery and exception recovery are the same machinery — and why a machine that '
-          + 'has one gets the other nearly free.',
+        detail: [
+          'The property that makes speculation possible is not the prediction. It is the ability '
+            + 'to undo.',
+          'In this machine that is easy, because only write-back commits anything and every '
+            + 'instruction younger than the branch is still short of it.',
+          'The same property is what precise exceptions need in 35.7.',
+          'That is why branch recovery and exception recovery are the same machinery, and why a '
+            + 'machine that has one gets the other nearly free.'
+        ],
         example: 'In the stage diagram the squashed rows simply stop; there is no undo step to '
           + 'perform because nothing had been done.'
       },
@@ -46,12 +53,15 @@
         term: 'Resolving earlier halves the penalty and is not free',
         plain: 'A comparator in decode, and a stall when the operand is not ready.',
         formal: 'decode resolution costs one flushed instruction instead of two',
-        detail: 'The branch\'s operands have to be compared wherever it resolves, so early '
-          + 'resolution needs a comparator in decode and its own forwarding paths — and a stall '
-          + 'whenever an operand is still being computed by the instruction directly ahead, '
-          + 'because at that moment the value does not exist anywhere to forward from. Whether '
-          + 'the trade pays depends on how often a branch reads a register written just before '
-          + 'it, which is a property of the code.',
+        detail: [
+          'The branch\'s operands have to be compared wherever it resolves, so early resolution '
+            + 'needs a comparator in decode and its own forwarding paths.',
+          'It also needs a stall whenever an operand is still being computed by the instruction '
+            + 'directly ahead.',
+          'At that moment the value does not exist anywhere to forward from.',
+          'Whether the trade pays depends on how often a branch reads a register written just '
+            + 'before it, which is a property of the code.'
+        ],
         example: 'On the sum loop, decode resolution takes 69 cycles against 70; on the '
           + 'factorial it takes 205 against 197, because the branches there depend on the '
           + 'instruction immediately before them.'
@@ -60,11 +70,15 @@
         term: 'Static prediction is nearly free and is the baseline to beat',
         plain: '"Backward branches are taken" is one comparison.',
         formal: 'a backward branch is a loop, and a loop usually loops',
-        detail: 'It costs a sign test on the immediate and no state at all, and on loop-shaped '
-          + 'code it captures most of the available benefit. Every dynamic predictor has to '
-          + 'beat it by enough to justify a table and the area for it, which is a much higher '
-          + 'bar than beating "always not taken". Quoting a dynamic predictor\'s accuracy '
-          + 'without the static baseline beside it is how a table gets justified for nothing.',
+        detail: [
+          'It costs a sign test on the immediate and no state at all, and on loop-shaped code it '
+            + 'captures most of the available benefit.',
+          'Every dynamic predictor has to beat it by enough to justify a table and the area for '
+            + 'it.',
+          'That is a much higher bar than beating "always not taken".',
+          'Quoting a dynamic predictor\'s accuracy without the static baseline beside it is how a '
+            + 'table gets justified for nothing.'
+        ],
         example: 'On the loop fixture: never-taken 10.0%, backward-taken 90.0%, and a two-bit '
           + 'counter 88.0% — the static scheme wins.'
       },
@@ -72,12 +86,15 @@
         term: 'A direction is useless without a target',
         plain: 'Knowing a branch is taken does not tell fetch where to go.',
         formal: 'the target is in the instruction, which has not been decoded yet',
-        detail: 'A branch target buffer remembers where this address went when it was last '
-          + 'taken, so a "taken" prediction has somewhere to send the fetch. It is a cache, it '
-          + 'can miss, and a miss costs exactly what a wrong direction costs. It also handles '
-          + 'unconditional jumps, which have no direction to predict and still redirect fetch — '
-          + 'on this machine a jump with no target buffer costs a full redirect every time it '
-          + 'executes.',
+        detail: [
+          'A branch target buffer remembers where this address went when it was last taken, so a '
+            + '"taken" prediction has somewhere to send the fetch.',
+          'It is a cache, it can miss, and a miss costs exactly what a wrong direction costs.',
+          'It also handles unconditional jumps, which have no direction to predict and still '
+            + 'redirect fetch.',
+          'On this machine a jump with no target buffer costs a full redirect every time it '
+            + 'executes.'
+        ],
         example: 'With no predictor at all the sum loop pays 11 redirects; with a predictor and '
           + 'a target buffer it pays 2.'
       },
@@ -85,11 +102,15 @@
         term: 'Delayed branches encoded a pipeline depth into an instruction set',
         plain: 'The instruction after a branch executes regardless.',
         formal: 'the delay slot is architectural, so every implementation must honour it',
-        detail: 'It works perfectly at the depth it was designed for and becomes a liability at '
-          + 'every other, because the number of slots is fixed in the contract while the '
-          + 'pipeline that motivated it changes every generation. MIPS and SPARC both did it '
-          + 'and both regretted it. It is the M34 lesson about instruction sets — a decision in '
-          + 'the contract is permanent — meeting the M35 lesson about depth.',
+        detail: [
+          'It works perfectly at the depth it was designed for and becomes a liability at every '
+            + 'other.',
+          'The number of slots is fixed in the contract, while the pipeline that motivated it '
+            + 'changes every generation.',
+          'MIPS and SPARC both did it and both regretted it.',
+          'It is the M34 lesson about instruction sets — a decision in the contract is permanent '
+            + '— meeting the M35 lesson about depth.'
+        ],
         example: 'RISC-V has no delay slot, deliberately, and this machine pays two flushed '
           + 'instructions instead.'
       },
@@ -97,11 +118,14 @@
         term: 'The penalty is the multiplier on every prediction miss',
         plain: 'Accuracy only matters multiplied by what a mistake costs.',
         formal: 'cost per instruction = branch rate x mispredict rate x penalty',
-        detail: 'A two-cycle penalty makes a mediocre predictor tolerable and a twenty-cycle '
-          + 'penalty makes an excellent one expensive. That multiplication is why prediction '
-          + 'accuracy became worth an enormous amount of silicon exactly when pipelines got '
-          + 'deep: the same design change that shortened the clock made every mistake more '
-          + 'expensive in proportion.',
+        detail: [
+          'A two-cycle penalty makes a mediocre predictor tolerable.',
+          'A twenty-cycle penalty makes an excellent one expensive.',
+          'That multiplication is why prediction accuracy became worth an enormous amount of '
+            + 'silicon exactly when pipelines got deep.',
+          'The same design change that shortened the clock made every mistake more expensive in '
+            + 'proportion.'
+        ],
         example: 'At a branch every five instructions and a 5% miss rate, the cost per '
           + 'instruction grows from 0.010 cycles at five stages to 0.070 at twenty.'
       },
@@ -109,12 +133,15 @@
         term: 'Speculation is worth exactly the hit rate times the cost of a miss',
         plain: 'And the cost of a miss is usually decided somewhere else.',
         formal: 'a better recovery path can be worth more than a better predictor',
-        detail: 'Prefetching a page, warming a cache, optimistically locking a row, '
-          + 'speculatively running a branch of a workflow — all of them are this bet. In every '
-          + 'case the interesting number is not the hit rate but the hit rate multiplied by '
-          + 'what a miss costs, and a system that made the miss cheaper to recover from is '
-          + 'often a better investment than one that made the guess slightly more accurate. '
-          + 'That comparison is almost never made.',
+        detail: [
+          'Prefetching a page, warming a cache, optimistically locking a row, speculatively '
+            + 'running a branch of a workflow: all of them are this bet.',
+          'In every case the interesting number is not the hit rate, but the hit rate multiplied '
+            + 'by what a miss costs.',
+          'A system that made the miss cheaper to recover from is often a better investment than '
+            + 'one that made the guess slightly more accurate.',
+          'That comparison is almost never made.'
+        ],
         example: 'Moving branch resolution from execute to decode halves the miss cost without '
           + 'improving the prediction at all.'
       }
