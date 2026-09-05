@@ -198,13 +198,16 @@
         },
         plain: 'Length is what you stored; capacity is what was allocated. The gap is the growth headroom.',
         formal: 'length ≤ capacity',
-        detail: 'A dynamic array is a fixed allocation plus a count of how much of it is in use, and ' +
-          'nearly everything interesting is in the gap between the two. The gap is what makes ' +
-          'appends cheap — there is somewhere to write without asking the allocator — and it is also ' +
-          'memory you are holding and not using, typically up to half the allocation with a doubling ' +
-          'policy. Keeping the distinction sharp matters because the two numbers answer different ' +
-          'questions: length decides iteration and bounds checks, capacity decides how much memory ' +
-          'the process is actually holding and when the next copy happens.',
+        detail: [
+          'A dynamic array is a fixed allocation plus a count of how much of it is in use. Nearly ' +
+            'everything interesting is in the gap between the two.',
+          'The gap is what makes appends cheap, because there is somewhere to write without ' +
+            'asking the allocator. It is also memory you are holding and not using, typically up ' +
+            'to half the allocation with a doubling policy.',
+          'Keeping the distinction sharp matters because the two numbers answer different ' +
+            'questions. Length decides iteration and bounds checks; capacity decides how much ' +
+            'memory the process is actually holding, and when the next copy happens.'
+        ],
         example: 'A 1000-element array with factor 2 typically holds 1024 slots.'
       },
       {
@@ -213,27 +216,34 @@
         formal: 'capacity ← ⌈capacity · r⌉',
         readAs: 'On a grow, the new capacity is the old one multiplied by the growth factor r and rounded up ' +
           'to a whole number. The left arrow is assignment — plain `=` in JavaScript.',
-        detail: 'The factor trades copying against waste, and both sides are geometric. A larger ' +
-          'factor means fewer reallocations and more slack; a smaller one means the reverse. Total ' +
-          'copying over n pushes is about n/(r − 1) elements, so doubling copies roughly n and 1.5× ' +
-          'copies roughly 2n — a real difference, but a constant factor either way, which is why ' +
-          'both are defensible. The subtler argument is about allocator reuse: with r = 2 the sum of ' +
-          'every previously freed block is always one element short of the next request, so those ' +
-          'blocks can never be recycled, while any factor below the golden ratio eventually lets the ' +
-          'allocator reuse them.',
+        detail: [
+          'The factor trades copying against waste, and both sides are geometric. A larger factor ' +
+            'means fewer reallocations and more slack; a smaller one means the reverse.',
+          'Total copying over n pushes is about n/(r − 1) elements, so doubling copies roughly n ' +
+            'and 1.5× copies roughly 2n. That is a real difference, but a constant factor either ' +
+            'way, which is why both are defensible.',
+          'The subtler argument is about allocator reuse. With r = 2 the sum of every previously ' +
+            'freed block is always one element short of the next request, so those blocks can ' +
+            'never be recycled.',
+          'Any factor below the golden ratio eventually lets the allocator reuse them.'
+        ],
         example: 'r = 2 copies about n elements over n pushes; r = 1.5 copies about 2n.'
       },
       {
         term: 'Reallocation',
         plain: 'Allocate, copy everything, free. The one operation that is not O(1).',
         formal: 'cost = current length',
-        detail: 'When the array fills, a new block is allocated, every existing element is copied and ' +
-          'the old block is released — work proportional to the current length, in one operation. ' +
-          'Amortised analysis is what makes this acceptable on average, but the individual event is ' +
-          'real and it lands unpredictably: growing at a million elements copies a million elements ' +
-          'inside a single push, which is a latency spike rather than a slow average. It is also ' +
-          'where the memory high-water mark lives, since old and new blocks are briefly alive ' +
-          'together — a doubling array momentarily needs three times the payload it ends up holding.',
+        detail: [
+          'When the array fills, a new block is allocated, every existing element is copied and ' +
+            'the old block is released. That is work proportional to the current length, in one ' +
+            'operation.',
+          'Amortised analysis is what makes this acceptable on average, but the individual event ' +
+            'is real and it lands unpredictably. Growing at a million elements copies a million ' +
+            'elements inside a single push, which is a latency spike rather than a slow average.',
+          'It is also where the memory high-water mark lives, since old and new blocks are ' +
+            'briefly alive together. A doubling array momentarily needs three times the payload ' +
+            'it ends up holding.'
+        ],
         example: 'Growing at 1M elements copies 1M elements in one push.'
       },
       {
@@ -243,27 +253,34 @@
         readAs: 'Inserting at position p in an array of n items shifts everything after p along by one, so ' +
           'the number of elements moved is n minus p. At the front that is all of them; at the end it ' +
           'is none.',
-        detail: 'Contiguity is what makes indexing free, and the price is that inserting anywhere but ' +
-          'the end has to make room by moving everything after it. Position decides the cost ' +
-          'completely: appending moves nothing, inserting in the middle moves n/2 elements and ' +
-          'inserting at the front moves all n. The same holds for removal. This is the cost that ' +
-          'hides behind a uniform API — insert and push look alike and differ by a factor of n — and ' +
-          'it is why front-insertion into a large array is one of the most common accidental ' +
-          'quadratic loops in production code.',
+        detail: [
+          'Contiguity is what makes indexing free, and the price is that inserting anywhere but ' +
+            'the end has to make room by moving everything after it.',
+          'Position decides the cost completely. Appending moves nothing, inserting in the middle ' +
+            'moves n/2 elements and inserting at the front moves all n. The same holds for ' +
+            'removal.',
+          'This is the cost that hides behind a uniform API: insert and push look alike and ' +
+            'differ by a factor of n.',
+          'It is why front-insertion into a large array is one of the most common accidental ' +
+            'quadratic loops in production code.'
+        ],
         example: 'Front insertion into 100k elements moves 100k every time.'
       },
       {
         term: 'Small-buffer optimisation',
         plain: 'Keep a few elements inline in the object so short arrays never allocate.',
         formal: 'inline capacity k, heap beyond it',
-        detail: 'Most collections in real programs are tiny, and for those the allocation dominates ' +
-          'everything else the container does. A small-buffer optimisation reserves room for k ' +
-          'elements inside the object itself, so a short array costs no allocation, no pointer ' +
-          'indirection and no separate cache line, spilling to the heap only when it outgrows the ' +
-          'inline capacity. The costs are that the object grows for everyone, that moving it must ' +
-          'branch on whether the data is inline or out, and that references into an inline buffer ' +
-          'are invalidated by the move — which is why languages that guarantee stable addresses ' +
-          'cannot offer it.',
+        detail: [
+          'Most collections in real programs are tiny, and for those the allocation dominates ' +
+            'everything else the container does.',
+          'A small-buffer optimisation reserves room for k elements inside the object itself. A ' +
+            'short array then costs no allocation, no pointer indirection and no separate cache ' +
+            'line, spilling to the heap only when it outgrows the inline capacity.',
+          'The costs are that the object grows for everyone, and that moving it must branch on ' +
+            'whether the data is inline or out.',
+          'References into an inline buffer are also invalidated by the move, which is why ' +
+            'languages that guarantee stable addresses cannot offer it.'
+        ],
         example: 'Most strings in a compiler are under 16 characters.'
       },
       {
@@ -273,27 +290,35 @@
         readAs: 'To remove element i without shifting anything, copy the last element over it and shorten the ' +
           'array by one. It costs two operations instead of n — and it changes the order, which is the ' +
           'whole trade.',
-        detail: 'If the order of the array does not carry meaning, removal does not need to shift ' +
-          'anything: move the last element into the hole and shorten the array. That converts a ' +
-          'Θ(n) operation into two writes, and the difference is not academic — 100 000 removals ' +
-          'from a million-element array cost 100 000 moves instead of about 5 × 10¹⁰. The condition ' +
-          'is the whole story, though: any index held elsewhere into the moved element is now wrong, ' +
-          'and any sorted or insertion-ordered invariant is gone. Structures that use it, like ' +
-          'entity lists in game engines, generally pair it with an index that gets patched on the ' +
-          'move.',
+        detail: [
+          'If the order of the array does not carry meaning, removal does not need to shift ' +
+            'anything. Move the last element into the hole and shorten the array.',
+          'That converts a Θ(n) operation into two writes, and the difference is not academic. ' +
+            'Removing 100 000 elements from a million-element array costs 100 000 moves instead ' +
+            'of about 5 × 10¹⁰.',
+          'The condition is the whole story, though. Any index held elsewhere into the moved ' +
+            'element is now wrong, and any sorted or insertion-ordered invariant is gone.',
+          'Structures that use it, like entity lists in game engines, generally pair it with an ' +
+            'index that gets patched on the move.'
+        ],
         example: '100 000 removals from a million-element array: 100 000 moves instead of 5 × 10¹⁰.'
       },
       {
         term: 'Reserve',
         plain: 'Ask for the capacity up front when the size is known. It removes every reallocation, not most of them.',
         formal: 'reserve(n) before the loop',
-        detail: 'Growth exists because the final size is unknown, so when you do know it — a query ' +
-          'that reports its row count, a file whose length you can stat, a map over a collection of ' +
-          'known length — reserving turns the whole geometric series of copies into a single ' +
-          'allocation. Pushing a million known elements does about twenty reallocations without it ' +
-          'and none with it, and it also removes the transient double-allocation peak and any ' +
-          'reference invalidation along the way. It is one of the highest-value single-line changes ' +
-          'in hot code, and it is safe: reserving does not change length, only capacity.',
+        detail: [
+          'Growth exists because the final size is unknown. Sometimes you do know it: a query ' +
+            'that reports its row count, a file whose length you can stat, a map over a ' +
+            'collection of known length.',
+          'Reserving then turns the whole geometric series of copies into a single allocation. ' +
+            'Pushing a million known elements does about twenty reallocations without it and none ' +
+            'with it.',
+          'It also removes the transient double-allocation peak and any reference invalidation ' +
+            'along the way.',
+          'It is one of the highest-value single-line changes in hot code, and it is safe: ' +
+            'reserving does not change length, only capacity.'
+        ],
         example: 'Pushing a million known elements does 20 reallocations without it and none with it.'
       },
       {
@@ -310,14 +335,17 @@
         },
         plain: 'A reallocation moves the whole array, so every pointer, index-held reference and iterator into it is stale.',
         formal: 'growth invalidates references, not indices',
-        detail: 'Growth allocates a new block and copies, which means every element has a new ' +
-          'address and anything remembering the old one is now pointing at freed memory. Indices ' +
-          'survive, because they are relative to the base; pointers, iterators and slices do not. ' +
+        detail: [
+          'Growth allocates a new block and copies, which means every element has a new address. ' +
+            'Anything remembering the old one is now pointing at freed memory.',
+          'Indices survive, because they are relative to the base; pointers, iterators and slices ' +
+            'do not.',
           'This is why languages with real references make it a type-system matter, and why in ' +
-          'C++ it is a documented per-operation contract rather than an implementation detail. When ' +
-          'addresses genuinely have to outlive the container — an LRU list whose hash map points at ' +
-          'nodes, an object graph — the answer is a structure that does not move its elements: an ' +
-          'intrusive list, a stable arena, or a deque of fixed blocks.',
+            'C++ it is a documented per-operation contract rather than an implementation detail.',
+          'Sometimes addresses genuinely have to outlive the container — an LRU list whose hash ' +
+            'map points at nodes, an object graph. The answer is then a structure that does not ' +
+            'move its elements: an intrusive list, a stable arena, or a deque of fixed blocks.'
+        ],
         example: 'This is why an intrusive list or a stable arena is used when addresses have to outlive the container.'
       }
     ],

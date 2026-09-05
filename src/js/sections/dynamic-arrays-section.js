@@ -25,9 +25,9 @@
     root.jQuery('#' + SECTION_ID + '-content').html(app.shell.render({
       sectionId: SECTION_ID,
       orientation: [
-        'A dynamic array is a fixed array plus a policy for what to do when it fills. The policy is ' +
-          'one number — the growth factor — and it decides how many bytes get copied over the life of ' +
-          'the array and how much capacity sits unused at the end.',
+        'A dynamic array is a fixed array plus a policy for what to do when it fills. The policy ' +
+          'is one number: the growth factor. It decides how many bytes get copied over the life ' +
+          'of the array, and how much capacity sits unused at the end.',
         'Insertion position is the other cost. Appending writes one element; inserting at the front ' +
           'moves every element after it. Both are "insert" in the API and they differ by a factor of n.',
         'Everything below is counted, not estimated: the memory model records every byte the copy ' +
@@ -46,9 +46,9 @@
           '    D["insert at position p<br/>move n − p elements"] --> E["front insert = move n<br/>append = move 0"]'
         ].join('\n')
       },
-      insight: 'The growth factor is an allocator argument, not a speed one: with factor 2 the sum of ' +
-        'every previously freed block is always one short of the next request, so the allocator can ' +
-        'never reuse them. Factors below the golden ratio eventually can.'
+      insight: 'The growth factor is an allocator argument, not a speed one. With factor 2 the ' +
+        'sum of every previously freed block is always one short of the next request, so the ' +
+        'allocator can never reuse them. Factors below the golden ratio eventually can.'
     }));
 
     app.shell.mount({ sectionId: SECTION_ID, app: app });
