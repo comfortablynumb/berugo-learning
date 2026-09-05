@@ -167,11 +167,15 @@
         },
         plain: 'Not a missing value — a missing resource.',
         formal: 'the fetch stage cannot read while the memory stage is using the only port',
-        detail: 'This is the easiest hazard to reason about and the most expensive to remove, '
-          + 'because the removal is more hardware rather than more wiring. It is also the one '
-          + 'that is entirely a property of the design rather than of the program: the same '
-          + 'instructions on a machine with two memory ports have no structural hazard at all, '
-          + 'which is not true of a data or control hazard.',
+        detail: [
+          'This is the easiest hazard to reason about and the most expensive to remove, because '
+            + 'the removal is more hardware rather than more wiring.',
+          'It is also the one that is entirely a property of the design rather than of the '
+            + 'program.',
+          'The same instructions on a machine with two memory ports have no structural hazard at '
+            + 'all.',
+          'That is not true of a data or control hazard.'
+        ],
         example: 'On the factorial, one memory costs 16 cycles of 161 — about 10% — and two '
           + 'memories cost a whole extra memory.'
       },
@@ -179,11 +183,14 @@
         term: 'The older instruction wins, and that rule is not optional',
         plain: 'Priority goes to whichever instruction is further down the pipeline.',
         formal: 'an in-order machine that lets a younger instruction finish first is not in-order',
-        detail: 'Giving the port to the fetch stage instead would let a younger instruction '
-          + 'proceed while an older one waited, which breaks the ordering the whole machine '
-          + 'depends on — and which the precise-exception guarantee of 35.7 is built from. Every '
-          + 'arbiter in every system needs a rule like this and most of them state it far less '
-          + 'clearly than a pipeline does.',
+        detail: [
+          'Giving the port to the fetch stage instead would let a younger instruction proceed '
+            + 'while an older one waited.',
+          'That breaks the ordering the whole machine depends on, and which the precise-exception '
+            + 'guarantee of 35.7 is built from.',
+          'Every arbiter in every system needs a rule like this.',
+          'Most of them state it far less clearly than a pipeline does.'
+        ],
         example: 'The fetch stage is the one that stalls, always, and the bubble it creates '
           + 'travels down behind the instruction that took the port.'
       },
@@ -191,12 +198,16 @@
         term: 'There are exactly three resolutions, and a fourth that looks like cheating',
         plain: 'Duplicate the resource, pipeline it, stall for it — or split it in time.',
         formal: 'area, complexity or cycles: something is always paid',
-        detail: 'Duplicating costs a whole second copy. Pipelining the resource lets it accept '
-          + 'a request per cycle even though each takes several, at the cost of latency and '
-          + 'real design work. Stalling costs cycles and is free to build. The fourth is what a '
-          + 'register file actually does: write in one half of the cycle and read in the other, '
-          + 'which gets three ports of work out of fewer at the cost of timing margin. Which '
-          + 'one is right depends entirely on how often the conflict happens.',
+        detail: [
+          'Duplicating costs a whole second copy.',
+          'Pipelining the resource lets it accept a request per cycle even though each takes '
+            + 'several, at the cost of latency and real design work.',
+          'Stalling costs cycles and is free to build.',
+          'The fourth is what a register file actually does: write in one half of the cycle and '
+            + 'read in the other. That gets three ports of work out of fewer, at the cost of '
+            + 'timing margin.',
+          'Which one is right depends entirely on how often the conflict happens.'
+        ],
         example: 'Multipliers are pipelined and dividers are not, because divisions are rare '
           + 'enough that stalling for them is cheaper than the hardware would be.'
       },
@@ -204,12 +215,14 @@
         term: 'The Harvard split is this fix applied where it is affordable',
         plain: 'Separate instruction and data caches over one unified memory below.',
         formal: 'the conflict is frequent at the first level and rare below it',
-        detail: 'The M34 single-cycle machine had separate instruction and data memories '
-          + 'because it had no choice — it fetches and accesses data in the same cycle. Real '
-          + 'machines make that split real at the first cache level, where the conflict happens '
-          + 'every few cycles, and drop it below, where it happens rarely enough that one port '
-          + 'is fine. That is the general principle: duplicate where the contention is, not '
-          + 'everywhere.',
+        detail: [
+          'The M34 single-cycle machine had separate instruction and data memories because it had '
+            + 'no choice. It fetches and accesses data in the same cycle.',
+          'Real machines make that split real at the first cache level, where the conflict '
+            + 'happens every few cycles.',
+          'They drop it below, where it happens rarely enough that one port is fine.',
+          'That is the general principle: duplicate where the contention is, not everywhere.'
+        ],
         example: 'M37 builds the caches that make this split real; the split at the top is why '
           + 'self-modifying code needs an explicit instruction-cache flush.'
       },
@@ -217,11 +230,15 @@
         term: 'The cost is a property of the workload, not of the machine',
         plain: 'A program that never touches memory pays nothing for sharing the port.',
         formal: 'the stall count tracks the count of memory instructions, not the program length',
-        detail: 'That is what makes the duplicate-or-stall decision a measurement rather than '
-          + 'an opinion: two programs on the same machine can disagree completely about whether '
-          + 'the second port was worth building. It also means a benchmark chosen to justify '
-          + 'the hardware will justify it, which is why the demo runs four programs including '
-          + 'one with no memory instructions at all.',
+        detail: [
+          'That is what makes the duplicate-or-stall decision a measurement rather than an '
+            + 'opinion.',
+          'Two programs on the same machine can disagree completely about whether the second port '
+            + 'was worth building.',
+          'It also means a benchmark chosen to justify the hardware will justify it.',
+          'That is why the demo runs four programs, including one with no memory instructions at '
+            + 'all.'
+        ],
         example: 'The sum loop has 0 memory instructions and pays 0 cycles; the factorial has '
           + '19 and pays 16.'
       },
@@ -229,11 +246,14 @@
         term: 'A multi-cycle functional unit is the same hazard in slower motion',
         plain: 'An unpipelined divider blocks every later division.',
         formal: 'a unit with a latency of n and no pipelining accepts one request every n cycles',
-        detail: 'The conflict is the same shape — one resource, several claimants — but it '
-          + 'lasts for many cycles instead of one, so the stall it produces is much larger and '
-          + 'much rarer. That combination is exactly what makes stalling the right answer: the '
-          + 'expected cost is the frequency times the duration, and a rare long stall can be '
-          + 'cheaper than a permanent doubling of area.',
+        detail: [
+          'The conflict is the same shape: one resource, several claimants.',
+          'But it lasts for many cycles instead of one, so the stall it produces is much larger '
+            + 'and much rarer.',
+          'That combination is exactly what makes stalling the right answer.',
+          'The expected cost is the frequency times the duration, and a rare long stall can be '
+            + 'cheaper than a permanent doubling of area.'
+        ],
         example: 'Integer divide is typically 20 to 40 cycles and unpipelined on real machines; '
           + 'multiply is 3 to 5 cycles and fully pipelined.'
       },
@@ -241,11 +261,14 @@
         term: 'This is a queueing problem, and it has a whole milestone later',
         plain: 'A resource, a stream of requests, a service time, and how many servers to build.',
         formal: 'arrival rate against service rate — the same question M58 answers with maths',
-        detail: 'The pipeline version has an advantage the software version almost never has: '
-          + 'the contention is counted for you, the stalls are visible, and the cost of the fix '
-          + 'is known in advance. Connection pools, thread pools, service replicas and topic '
-          + 'partitions are all the same decision, and almost all of them are made by intuition '
-          + 'because nobody measured the queue.',
+        detail: [
+          'The pipeline version has an advantage the software version almost never has.',
+          'The contention is counted for you, the stalls are visible, and the cost of the fix is '
+            + 'known in advance.',
+          'Connection pools, thread pools, service replicas and topic partitions are all the same '
+            + 'decision.',
+          'Almost all of them are made by intuition, because nobody measured the queue.'
+        ],
         example: 'The same "duplicate or wait" question, with the same arrival-rate and '
           + 'service-time inputs, at four completely different scales.'
       },
@@ -253,11 +276,14 @@
         term: 'A structural stall is invisible in the answer and visible in the cycle count',
         plain: 'The program computes exactly the same thing, more slowly.',
         formal: 'no architectural state depends on whether the port was shared',
-        detail: 'That is what makes it a performance problem rather than a correctness one, and '
-          + 'it is why it can survive in a design for a long time. Nothing fails; a benchmark '
-          + 'is a few per cent slower than the model predicted, and the model was probably '
-          + 'wrong about something else too. Attributing the cycles is the only way it becomes '
-          + 'visible, which is why the demo\'s attribution table has a row for it.',
+        detail: [
+          'That is what makes it a performance problem rather than a correctness one, and it is '
+            + 'why it can survive in a design for a long time.',
+          'Nothing fails. A benchmark is a few per cent slower than the model predicted, and the '
+            + 'model was probably wrong about something else too.',
+          'Attributing the cycles is the only way it becomes visible.',
+          'That is why the demo\'s attribution table has a row for it.'
+        ],
         example: 'The array-maximum program computes 37 with one memory and with two; only the '
           + 'cycle count moves, from 65 to 62.'
       }

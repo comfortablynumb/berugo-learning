@@ -62,8 +62,8 @@
         + 'one port they cannot both happen, so fetch waits and a bubble enters the pipeline '
         + 'behind it.',
       '**The older instruction always wins.** Priority goes to the instruction further down '
-        + 'the pipeline, because letting the younger one proceed would mean it finished first, '
-        + 'and an in-order machine that retires out of order is not an in-order machine. That '
+        + 'the pipeline, because letting the younger one proceed would mean it finished first. '
+        + 'An in-order machine that retires out of order is not an in-order machine. That '
         + 'rule is the same one every arbiter in every system needs and rarely states.',
       '**There are exactly three resolutions: duplicate the resource, pipeline it, or '
         + 'stall.** Duplicating costs area and power; pipelining the resource costs latency '
@@ -80,7 +80,7 @@
         + 'resource rather than duplicating it.',
       '**A multi-cycle functional unit creates the hazard too.** A divider that takes twenty '
         + 'cycles and is not pipelined blocks every later division, and the stall count '
-        + 'depends on how often divisions occur — which is why nobody pipelines a divider and '
+        + 'depends on how often divisions occur. That is why nobody pipelines a divider and '
         + 'everybody pipelines a multiplier.',
       '**This is a queueing problem, and M58 will say so with the maths.** A resource, a '
         + 'stream of requests, a service time and a decision about how many servers to build. '
@@ -101,20 +101,20 @@
   }
 
   function insight() {
-    return '**Every structural hazard is the same question — build another one, or wait for '
-      + 'the one you have — and the answer is always a measurement rather than a principle.** '
-      + 'A second memory port removes every one of these stalls and costs an entire memory; '
-      + 'on a program with no loads at all it buys nothing, and on a load in every iteration '
+    return '**Every structural hazard is the same question: build another one, or wait for '
+      + 'the one you have.** The answer is always a measurement rather than a principle. '
+      + 'A second memory port removes every one of these stalls and costs an entire memory. '
+      + 'On a program with no loads at all it buys nothing, and on a load in every iteration '
       + 'it buys a stall per iteration. Nothing about the architecture tells you which case '
       + 'you are in, so the only way to decide is to count. That is a habit worth carrying '
       + 'well beyond processors, because the same decision arrives constantly in software with '
       + 'much worse instrumentation attached to it. How many connections in the pool, how many '
       + 'threads in the executor, how many replicas of the service, how many partitions of the '
-      + 'topic — every one is "duplicate the resource or queue for it", and every one is '
+      + 'topic? Every one is "duplicate the resource or queue for it", and every one is '
       + 'routinely decided by intuition. The processor version has an advantage the software '
       + 'version rarely has: the contention is visible, the stalls are counted, and the cost '
       + 'of the fix is known in advance. When you can measure the queue and price the server, '
-      + 'the decision stops being architecture and becomes arithmetic — and if you cannot '
+      + 'the decision stops being architecture and becomes arithmetic. If you cannot '
       + 'measure it, that is the first thing to fix rather than a reason to guess.';
   }
 
