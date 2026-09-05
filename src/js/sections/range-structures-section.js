@@ -55,21 +55,23 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'Six structures over one array, and the choice between them is decided by two questions: does the ' +
-          'operation have an inverse, and does the array change? Prefix sums answer a query in 2.00 array slots ' +
-          'and pay 4 088.88 for a point update. A Fenwick tree — one array of n + 1 numbers, no children, no ' +
-          'padding — costs 7.49 slots per update and 13.01 per query at 8 192 elements, which is exactly ' +
-          'log₂ 8 192 for the query.',
-        'A segment tree does the same job for any monoid and the constant is the price: 14.00 slots per update ' +
-          'and 44.90 per query, at 32 bytes per element against a Fenwick tree\'s 8. Neither figure is visible ' +
-          'in "both are O(log n)", and the ratio holds across the whole size sweep. Sqrt decomposition loses to ' +
-          'both — 91.00 and 118.40 — and is the one people actually write under time pressure, because changing ' +
-          'what it aggregates is two lines.',
-        'The structure\'s central idea is the canonical decomposition: any interval, however awkward, is the ' +
-          'disjoint union of at most 2 log n stored nodes. [1234, 6789] of 8 192 is 12 of them, arranged as two ' +
-          'staircases climbing out of the endpoints. Seeing the staircase is what makes lazy propagation ' +
-          'obvious — a pending range update applies to whole canonical nodes, so it can wait at the node it ' +
-          'covers until somebody descends past it.'
+        'Six structures over one array, and the choice between them is decided by two questions. ' +
+          'Does the operation have an inverse, and does the array change? Prefix sums answer a ' +
+          'query in 2.00 array slots and pay 4 088.88 for a point update. A Fenwick tree is one ' +
+          'array of n + 1 numbers, with no children and no padding. At 8 192 elements it costs ' +
+          '7.49 slots per update and 13.01 per query, which is exactly log₂ 8 192 for the query.',
+        'A segment tree does the same job for any monoid, and the constant is the price. It costs ' +
+          '14.00 slots per update and 44.90 per query, at 32 bytes per element against a Fenwick ' +
+          'tree\'s 8. Neither figure is visible in "both are O(log n)", and the ratio holds across ' +
+          'the whole size sweep. Sqrt decomposition loses to both — 91.00 and 118.40 — and is the ' +
+          'one people actually write under time pressure, because changing what it aggregates is ' +
+          'two lines.',
+        'The structure\'s central idea is the canonical decomposition. Any interval, however ' +
+          'awkward, is the disjoint union of at most 2 log n stored nodes. The interval ' +
+          '[1234, 6789] of 8 192 is 12 of them, arranged as two staircases climbing out of the ' +
+          'endpoints. Seeing the staircase is what makes lazy propagation obvious. A pending range ' +
+          'update applies to whole canonical nodes, so it can wait at the node it covers until ' +
+          'somebody descends past it.'
       ],
       demo: { title: 'Interactive demo — four structures, one operation stream', markup: root.RangeStructuresTemplate.render() },
       diagram: diagram(),

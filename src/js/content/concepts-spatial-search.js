@@ -21,11 +21,15 @@
         },
         plain: 'Precompute every prefix and a range sum is two reads; but one changed element invalidates every prefix after it.',
         formal: 'query O(1), point update O(n)',
-        detail: 'This is the right structure far more often than people admit - analytics tables that are ' +
-          'rebuilt nightly and read all day want exactly this and nothing more. It is also the baseline that ' +
-          'makes the rest of the file legible: every structure below is buying update cost with query cost, and ' +
-          'the exchange rate is the whole subject. Measuring it rather than assuming it is worth doing, because ' +
-          'the O(n) update is not a small n in practice.',
+        detail: [
+          'This is the right structure far more often than people admit. Analytics tables that are ' +
+            'rebuilt nightly and read all day want exactly this and nothing more.',
+          'It is also the baseline that makes the rest of the file legible.',
+          'Every structure below is buying update cost with query cost, and the exchange rate is ' +
+            'the whole subject.',
+          'Measuring it rather than assuming it is worth doing, because the O(n) update is not a ' +
+            'small n in practice.'
+        ],
         example: 'n = 8 192: 4 088.88 array slots touched per update and exactly 2.00 per query.'
       },
       {
@@ -35,23 +39,31 @@
         readAs: 'i & −i isolates the lowest set bit of i. Adding it walks up the tree of responsibilities ' +
           'when updating; subtracting it walks down the chain of partial sums when querying. Two lines, ' +
           'and the whole Fenwick tree.',
-        detail: 'There are no children, no padding to a power of two and no recursion: a Fenwick tree over n ' +
-          'values is n+1 numbers, which is half a segment tree\'s array and a quarter of its allocation. The ' +
-          'lowest-set-bit expression is doing double duty - it is the length of the range a slot covers and the ' +
-          'offset to the next slot to touch - which is why the code is four lines and why it is genuinely hard to ' +
-          'read the first time. The restriction is that it needs an inverse: a range is one prefix minus another, ' +
-          'so there is no Fenwick tree for min.',
+        detail: [
+          'There are no children, no padding to a power of two and no recursion.',
+          'A Fenwick tree over n values is n+1 numbers, which is half a segment tree\'s array and a ' +
+            'quarter of its allocation.',
+          'The lowest-set-bit expression is doing double duty: it is the length of the range a slot ' +
+            'covers, and the offset to the next slot to touch.',
+          'That is why the code is four lines, and why it is genuinely hard to read the first time.',
+          'The restriction is that it needs an inverse. A range is one prefix minus another, so ' +
+            'there is no Fenwick tree for min.'
+        ],
         example: 'n = 8 192: 7.49 slots per update and 13.01 per query, at 8 bytes per element. log₂ 8 192 = 13.'
       },
       {
         term: 'Segment trees generalise to any monoid',
         plain: 'Store a combined value per node; anything associative with an identity works - min, max, gcd, matrices.',
         formal: 'node = combine(left, right); a query is the combination of at most 2 log n stored nodes',
-        detail: 'The generalisation is the point and the constant is the price: a segment tree touches about four ' +
-          'times as many array slots as a Fenwick tree for the same query, and costs four times the memory ' +
-          'because the array is padded to 4n. Neither number is visible in "both are O(log n)", and both are ' +
-          'decisive when the operation *does* have an inverse. The ten-second decision is: does my operation have ' +
-          'an inverse, and do I need range updates.',
+        detail: [
+          'The generalisation is the point and the constant is the price.',
+          'A segment tree touches about four times as many array slots as a Fenwick tree for the ' +
+            'same query. It also costs four times the memory, because the array is padded to 4n.',
+          'Neither number is visible in "both are O(log n)", and both are decisive when the ' +
+            'operation *does* have an inverse.',
+          'The ten-second decision is: does my operation have an inverse, and do I need range ' +
+            'updates.'
+        ],
         example: 'n = 8 192: 14.00 slots per update and 44.90 per query, at 32 bytes per element against Fenwick\'s 8.'
       },
       {
@@ -60,22 +72,31 @@
         formal: '|decomposition(l, r)| ≤ 2⌈log₂ n⌉',
         readAs: 'Any range breaks into at most about 2 log n stored nodes — the bars are "how many". That is ' +
           'why a range query costs log n rather than the length of the range.',
-        detail: 'This is the structure\'s whole idea and it is worth looking at once as a list of ranges rather ' +
-          'than as a proof. The nodes come in two staircases - one climbing out of the left endpoint by powers of ' +
-          'two and one descending into the right - and the bound is two per level because at most one node per ' +
-          'level can be partially covered on each side. Seeing the staircase is also what makes lazy propagation ' +
-          'obvious: a pending update applies to whole canonical nodes, so it can wait at the node it covers.',
+        detail: [
+          'This is the structure\'s whole idea, and it is worth looking at once as a list of ranges ' +
+            'rather than as a proof.',
+          'The nodes come in two staircases: one climbing out of the left endpoint by powers of ' +
+            'two, and one descending into the right.',
+          'The bound is two per level, because at most one node per level can be partially covered ' +
+            'on each side.',
+          'Seeing the staircase is also what makes lazy propagation obvious. A pending update ' +
+            'applies to whole canonical nodes, so it can wait at the node it covers.'
+        ],
         example: 'The interval [1234, 6789] of 8 192 decomposes into 12 nodes: 1234-1235, 1236-1239, 1240-1247, … 2048-4095, 4096-6143, … 6788-6789.'
       },
       {
         term: 'Lazy propagation, and the convention that decides correctness',
         plain: 'A pending range update sits at the node it covers and is pushed to children only when someone descends.',
         formal: 'tree[node] is already correct for its subtree; lazy[node] is owed to the children',
-        detail: 'Getting the convention backwards - storing a value that still needs its own pending update ' +
-          'applied - produces a structure that is right whenever a query range happens to align with a node ' +
-          'boundary, which is most hand-picked examples and none of a hundred thousand random ones. That is the ' +
-          'single most common bug in this file, it never throws, and the only thing that finds it is a brute ' +
-          'replay of the same operations on a plain array.',
+        detail: [
+          'Getting the convention backwards means storing a value that still needs its own pending ' +
+            'update applied.',
+          'That produces a structure which is right whenever a query range happens to align with a ' +
+            'node boundary.',
+          'Most hand-picked examples do align, and none of a hundred thousand random ones do.',
+          'It is the single most common bug in this file, and it never throws. The only thing that ' +
+            'finds it is a brute replay of the same operations on a plain array.'
+        ],
         example: '100 000 mixed range-add and range-min operations over 8 192 values: 0 mismatches, 44.99 slots per operation.'
       },
       {
@@ -85,11 +106,15 @@
         readAs: 'Cover the range with two power-of-two blocks that overlap in the middle. Overlap is fine ' +
           'because min and max do not care about double-counting, which is exactly why sparse tables ' +
           'work for those and not for sums.',
-        detail: 'Overlapping is only legal because the operation is idempotent - min(a, a) = a - which is exactly ' +
-          'why there is no sparse table for sums, and why the module refuses a sum monoid instead of returning ' +
-          'wrong answers. The price is O(n log n) memory and no updates at all: the table is built once from a ' +
-          'static array. For a read-only array of static minima it is unbeatable, and for anything that changes ' +
-          'it is not in the running.',
+        detail: [
+          'Overlapping is only legal because the operation is idempotent - min(a, a) = a.',
+          'That is exactly why there is no sparse table for sums, and why the module refuses a sum ' +
+            'monoid instead of returning wrong answers.',
+          'The price is O(n log n) memory and no updates at all: the table is built once from a ' +
+            'static array.',
+          'For a read-only array of static minima it is unbeatable, and for anything that changes ' +
+            'it is not in the running.'
+        ],
         example: 'n = 8 192: exactly 2.00 slots per query against the segment tree\'s 44.94, at 3.00× the memory.'
       },
       {
@@ -98,23 +123,28 @@
         formal: 'update O(√n), query O(√n)',
         readAs: 'Both operations cost the square root of n, which is worse than a segment tree\'s log n on ' +
           'paper. It is written far more often because it is twenty lines and hard to get wrong.',
-        detail: 'It loses to every tree here and it is the one people reach for under time pressure, because ' +
-          'changing what it aggregates is two lines and there is no index arithmetic to get wrong. It is also the ' +
-          'only structure in the file that extends painlessly to queries no monoid can express - "the k-th ' +
-          'smallest in this range", "how many distinct values" - by keeping whatever per-block summary the ' +
-          'question needs. Knowing when a worse asymptotic is the right engineering answer is part of the ' +
-          'material.',
+        detail: [
+          'It loses to every tree here, and it is the one people reach for under time pressure.',
+          'Changing what it aggregates is two lines, and there is no index arithmetic to get wrong.',
+          'It is also the only structure in the file that extends painlessly to queries no monoid ' +
+            'can express - "the k-th smallest in this range", "how many distinct values". It keeps ' +
+            'whatever per-block summary the question needs.',
+          'Knowing when a worse asymptotic is the right engineering answer is part of the material.'
+        ],
         example: 'n = 8 192: 91.00 slots per update and 118.40 per query, against Fenwick\'s 7.49 and 13.01. √8 192 = 90.5.'
       },
       {
         term: 'Order statistics need a merge-sort tree',
         plain: '"How many values below x in this range" is not a monoid, because the answer for a union is not a function of the halves\' answers.',
         formal: 'store each node\'s range sorted; a query binary-searches inside each canonical node',
-        detail: 'The impossibility is worth being precise about: combining two counts requires knowing x at ' +
-          'combine time, and a monoid\'s combine sees only the two stored values. Storing the sorted range ' +
-          'instead makes the query O(log² n) - the canonical decomposition, then a binary search in each node - ' +
-          'and costs O(n log n) memory because every level stores a full copy of the data. That is the price of ' +
-          'a question the cheaper structures cannot ask.',
+        detail: [
+          'The impossibility is worth being precise about: combining two counts requires knowing x ' +
+            'at combine time, and a monoid\'s combine sees only the two stored values.',
+          'Storing the sorted range instead makes the query O(log² n) - the canonical ' +
+            'decomposition, then a binary search in each node.',
+          'It costs O(n log n) memory, because every level stores a full copy of the data.',
+          'That is the price of a question the cheaper structures cannot ask.'
+        ],
         example: 'n = 8 192: 44.85 nodes and 57.78 comparisons per query, at 112 bytes per element against Fenwick\'s 8.'
       }
     ],
