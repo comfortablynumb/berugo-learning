@@ -97,10 +97,10 @@
         markup: root.ConstantTimeTemplate.render()
       },
       diagram: diagram(),
-      insight: '**`===` on a token is a remote timing oracle. Over a network the signal is small, ' +
-        'but it is statistically recoverable, and the fix costs one function.** The reason this ' +
-        'one is worth internalising is the asymmetry: the attacker\'s cost is a constant factor ' +
-        'in measurements, while the defender\'s cost is a single call to a comparison that ' +
+      insight: '**`===` on a token is a remote timing oracle.** Over a network the signal is ' +
+        'small, but it is statistically recoverable, and the fix costs one function. The reason ' +
+        'this one is worth internalising is the asymmetry. The attacker\'s cost is a constant ' +
+        'factor in measurements; the defender\'s cost is a single call to a comparison that ' +
         'already exists in every crypto library. There is no performance argument for the early ' +
         'exit — comparing 32 bytes unconditionally is nothing — and no situation where the ' +
         'variable-time version is worth its risk. It survives in code because `a === b` is what ' +

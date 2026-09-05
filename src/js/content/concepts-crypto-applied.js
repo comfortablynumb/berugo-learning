@@ -10,12 +10,14 @@
         term: 'Two rules cover almost everything',
         plain: 'Do not branch on a secret; do not index memory with a secret.',
         formal: 'a secret-dependent branch leaks through time and prediction; a secret-dependent address leaks through the cache',
-        detail: 'Every constant-time pattern is one of those two rules applied. The first is ' +
-          'observable from anywhere, including across a network, because a branch changes how ' +
-          'long the code runs. The second is observable to anything sharing the cache, which on a ' +
-          'multi-tenant machine is a stranger. Stating them as rules rather than as a list of ' +
-          'patterns is what makes them usable in review: the question becomes whether ' +
-          'anything secret reaches a condition or an index.',
+        detail: [
+          'Every constant-time pattern is one of those two rules applied.',
+          'The first is observable from anywhere, including across a network, because a branch ' +
+            'changes how long the code runs. The second is observable to anything sharing the ' +
+            'cache, which on a multi-tenant machine is a stranger.',
+          'Stating them as rules rather than as a list of patterns is what makes them usable in ' +
+            'review. The question becomes whether anything secret reaches a condition or an index.'
+        ],
         example: 'The demo’s pattern table gives six replacements, and every one removes a branch ' +
           'or a secret-derived index.'
       },
@@ -36,11 +38,13 @@
         readAs: 'The time taken is proportional to how many leading bytes match, so an attacker ' +
           'who averages enough measurements can tell a guess with a correct prefix from one ' +
           'without.',
-        detail: 'The signal is one loop iteration, which is tiny, and that is not a defence — ' +
-          'averaging suppresses noise as the square root of the sample count, so an attacker on a ' +
-          'noisy link pays more measurements and is not stopped. The 2003 remote-timing work ' +
-          'against OpenSSL settled the question of whether network noise protects you: it does ' +
-          'not, it just sets a price.',
+        detail: [
+          'The signal is one loop iteration, which is tiny. That is not a defence.',
+          'Averaging suppresses noise as the square root of the sample count, so an attacker on a ' +
+            'noisy link pays more measurements and is not stopped.',
+          'The 2003 remote-timing work against OpenSSL settled the question of whether network ' +
+            'noise protects you. It does not; it just sets a price.'
+        ],
         example: 'The demo separates a right first byte from a wrong one by 4.5029 standard ' +
           'deviations at moderate noise.'
       },
@@ -48,11 +52,14 @@
         term: 'It collapses an exponential search into a linear one',
         plain: 'Byte at a time instead of the whole token at once.',
         formal: 'guessing a 4-byte token blind costs 2³² attempts; byte-at-a-time costs 4 × 256 = 1 024',
-        detail: 'That is the actual damage, and it is not "somewhat easier" — it is the whole ' +
-          'security of the token. The same collapse applies at any length, so a 32-byte session ' +
-          'token that would take 2²⁵⁶ guesses to forge takes 8 192, which is a few seconds of ' +
-          'requests. The length of the secret stops mattering once the comparison leaks where the ' +
-          'first difference is.',
+        detail: [
+          'That is the actual damage, and it is not "somewhat easier" — it is the whole security ' +
+            'of the token.',
+          'The same collapse applies at any length. A 32-byte session token that would take 2²⁵⁶ ' +
+            'guesses to forge takes 8 192, which is a few seconds of requests.',
+          'The length of the secret stops mattering once the comparison leaks where the first ' +
+            'difference is.'
+        ],
         example: 'The demo reports 1 024 guesses against a brute-force space of 4.295 × 10⁹, ' +
           'using 40 960 individual timings.'
       },
@@ -61,13 +68,15 @@
         plain: 'More noise, more averaging, same outcome.',
         formal: 'the standard error of a mean falls as 1/√n, so quadrupling samples halves the effective noise',
         readAs: 'The uncertainty in an average shrinks with the square root of how many ' +
-          'measurements it contains, so four times as many samples makes the noise half as large ' +
+          'measurements it contains. Four times as many samples makes the noise half as large ' +
           'relative to the signal.',
-        detail: 'This is why "the signal is too small over the internet" has never been a ' +
-          'defence: it converts a security property into a budget. The sweep makes the exchange ' +
-          'rate visible — at low noise ten samples per guess suffice, and each step up in noise ' +
-          'demands roughly a quadrupling to keep the same confidence. An attacker who can make ' +
-          'requests can always pay.',
+        detail: [
+          'This is why "the signal is too small over the internet" has never been a defence. It ' +
+            'converts a security property into a budget.',
+          'The sweep makes the exchange rate visible. At low noise ten samples per guess suffice, ' +
+            'and each step up in noise demands roughly a quadrupling to keep the same confidence.',
+          'An attacker who can make requests can always pay.'
+        ],
         example: 'The demo recovers the token at every sample count at low noise, needs 80 at ' +
           'internet noise, and 320 at congested-internet noise.'
       },
@@ -75,11 +84,14 @@
         term: 'The constant-time version is measured, not asserted',
         plain: 'Report the separation, not the intention.',
         formal: 'a constant-time comparison should show right-byte and wrong-byte timings separated by well under one deviation',
-        detail: 'Writing branchless source is not the same as running branchless code, so the ' +
-          'only check that survives a compiler upgrade is a measurement. Reporting the separation ' +
-          'in standard deviations gives a number that can be regression-tested, and the ' +
-          'difference between a leaking and a non-leaking implementation is stark rather than ' +
-          'marginal — several deviations against a fraction of one.',
+        detail: [
+          'Writing branchless source is not the same as running branchless code, so the only ' +
+            'check that survives a compiler upgrade is a measurement.',
+          'Reporting the separation in standard deviations gives a number that can be ' +
+            'regression-tested.',
+          'The difference between a leaking and a non-leaking implementation is stark rather than ' +
+            'marginal: several deviations against a fraction of one.'
+        ],
         example: 'The demo reports 4.5029 σ for the early-exit comparison and 0.0885 σ for the ' +
           'masked one, under identical conditions.'
       },
@@ -87,11 +99,14 @@
         term: 'The constant-time version is slower, and that is the whole cost',
         plain: 'It always compares every byte.',
         formal: 'the branchless comparison performs the full length of work on every call, including calls that would have exited on byte one',
-        detail: 'There is no performance argument for the early exit in this setting: comparing ' +
-          '32 bytes unconditionally is nothing next to the request that carried them. The reason ' +
-          'the variable-time version survives in code is that `a === b` is what everyone types, ' +
-          'not that anyone chose it for speed — which is exactly why it belongs on a review ' +
-          'checklist rather than in a performance discussion.',
+        detail: [
+          'There is no performance argument for the early exit in this setting. Comparing 32 ' +
+            'bytes unconditionally is nothing next to the request that carried them.',
+          'The variable-time version survives in code because `a === b` is what everyone types, ' +
+            'not because anyone chose it for speed.',
+          'That is exactly why it belongs on a review checklist rather than in a performance ' +
+            'discussion.'
+        ],
         example: 'The demo’s profile table shows the branchless row with a higher absolute mean ' +
           'than the early-exit row on both inputs.'
       },
@@ -99,12 +114,15 @@
         term: 'Table lookups leak through the cache with no branches at all',
         plain: 'Which cache line you fetch depends on the secret index.',
         formal: 'a secret-derived index into an S-box reveals its high bits through cache-timing measurement',
-        detail: 'The original cache-timing attacks on AES exploited exactly this: table-driven ' +
-          'implementations index an S-box with key-derived values, and an attacker sharing the ' +
-          'cache learns which lines were touched. The fixes are structural — bit-sliced ' +
-          'implementations that use no tables, hardware AES instructions that keep the S-box off ' +
-          'the data cache, or scanning the whole table with masks so every line is touched every ' +
-          'time.',
+        detail: [
+          'The original cache-timing attacks on AES exploited exactly this. Table-driven ' +
+            'implementations index an S-box with key-derived values, and an attacker sharing the ' +
+            'cache learns which lines were touched.',
+          'The fixes are structural. Bit-sliced implementations use no tables at all, and ' +
+            'hardware AES instructions keep the S-box off the data cache.',
+          'A third option is scanning the whole table with masks, so every line is touched every ' +
+            'time.'
+        ],
         example: 'The demo’s channel table lists cache timing with its requirement — code running ' +
           'on the same machine — and its three defences.'
       },
@@ -112,11 +130,14 @@
         term: 'A compiler will happily reintroduce the branch',
         plain: 'Branchless source is not branchless code.',
         formal: 'optimisers recognise select patterns and lower them to conditional jumps, so source-level discipline is not a guarantee',
-        detail: 'Real implementations use volatile barriers, hand-written assembly, or ' +
-          'verification tools that inspect the emitted instructions — and then measure, because ' +
-          'the next compiler version may make a different choice. This is also why JavaScript ' +
-          'cannot offer the guarantee at all: the JIT, the garbage collector and the engine\'s ' +
-          'internal value representations all vary with data in ways the source cannot control.',
+        detail: [
+          'Real implementations use volatile barriers, hand-written assembly, or verification ' +
+            'tools that inspect the emitted instructions. Then they measure, because the next ' +
+            'compiler version may make a different choice.',
+          'This is also why JavaScript cannot offer the guarantee at all. The JIT, the garbage ' +
+            'collector and the engine\'s internal value representations all vary with data in ' +
+            'ways the source cannot control.'
+        ],
         example: 'The section states this in its orientation and marks the whole milestone’s code ' +
           'as unsuitable for real data on exactly these grounds.'
       }
