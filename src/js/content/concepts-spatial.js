@@ -324,15 +324,19 @@
         term: 'Alternating splits at data points',
         plain: 'Split on x, then y, then x again, each time at the median of the points in that node.',
         formal: 'axis = depth mod d; the split value is a coordinate of an actual point',
-        readAs: 'Cycle through the axes as you descend — the remainder of the depth divided by the number of ' +
-          'dimensions — and split on a real point\'s coordinate rather than a midpoint, so the tree ' +
-          'stays balanced on the data you actually have.',
-        detail: 'Splitting at the median rather than at the middle of the box is what makes the tree balanced on ' +
-          'any distribution, which is precisely what a quadtree cannot promise. The cost is that a node has to ' +
-          'store its split value - the geometry is no longer implied by the path - and that the tree cannot be ' +
-          'rebalanced cheaply after an update, because moving a split moves every point that was classified by ' +
-          'it. Balanced-and-static against unbalanced-and-dynamic is the trade against a quadtree, and it is why ' +
-          'both survive.',
+        readAs: 'Cycle through the axes as you descend — the remainder of the depth divided by the ' +
+          'number of dimensions. Split on a real point\'s coordinate rather than a midpoint, so ' +
+          'the tree stays balanced on the data you actually have.',
+        detail: [
+          'Splitting at the median rather than at the middle of the box is what makes the tree ' +
+            'balanced on any distribution, which is precisely what a quadtree cannot promise.',
+          'The cost is that a node has to store its split value, because the geometry is no longer ' +
+            'implied by the path.',
+          'The tree also cannot be rebalanced cheaply after an update, because moving a split moves ' +
+            'every point that was classified by it.',
+          'Balanced-and-static against unbalanced-and-dynamic is the trade against a quadtree, and ' +
+            'it is why both survive.'
+        ],
         example: '20 000 points, leaf size 8: 8 191 nodes at depth 12 exactly, built with 720 512 comparisons.'
       },
       {
@@ -352,12 +356,16 @@
         readAs: 'Search the side the query falls on first, then check whether the splitting plane is closer ' +
           'than the best point found so far. The bars are absolute distance. If it is not, the entire ' +
           'far subtree can be skipped.',
-        detail: 'The nearest neighbour is frequently on the other side of a plane the query is close to, so the ' +
-          'descent alone is a heuristic with no bound at all. Deleting the backtrack does not produce a crash or ' +
-          'an empty result: it produces a plausible point at a plausible distance, on every query, and nothing ' +
-          'downstream can tell. That is why the only acceptable test for this code is agreement with brute force ' +
-          'over thousands of randomised queries - a handful of hand-checked examples pass with the backtrack ' +
-          'removed.',
+        detail: [
+          'The nearest neighbour is frequently on the other side of a plane the query is close to, ' +
+            'so the descent alone is a heuristic with no bound at all.',
+          'Deleting the backtrack does not produce a crash or an empty result. It produces a ' +
+            'plausible point at a plausible distance, on every query, and nothing downstream can ' +
+            'tell.',
+          'That is why the only acceptable test for this code is agreement with brute force over ' +
+            'thousands of randomised queries.',
+          'A handful of hand-checked examples pass with the backtrack removed.'
+        ],
         example: 'A correct nearest query over 20 000 points visits 51.50 nodes and prunes 23.97; the descent alone visits 12.'
       },
       {
@@ -367,12 +375,15 @@
         readAs: 'Two ways to bound how close a subtree could possibly be. The plane distance uses only the ' +
           'splitting axis; the box distance adds up the shortfall on every axis, which is tighter and ' +
           'prunes more.',
-        detail: 'The plane bound is the textbook one and costs a subtraction; the box bound costs a few more ' +
-          'operations and is never weaker, because the subtree\'s points lie inside the box and the box lies ' +
-          'beyond the plane. The difference is much larger than the extra arithmetic, which makes this one of the ' +
-          'few places where the obvious micro-optimisation is the wrong way round. Storing the box also costs ' +
-          'memory per node, so the trade is real - but it is memory against a factor of three, not against a few ' +
-          'percent.',
+        detail: [
+          'The plane bound is the textbook one and costs a subtraction.',
+          'The box bound costs a few more operations and is never weaker, because the subtree\'s ' +
+            'points lie inside the box and the box lies beyond the plane.',
+          'The difference is much larger than the extra arithmetic, which makes this one of the few ' +
+            'places where the obvious micro-optimisation is the wrong way round.',
+          'Storing the box also costs memory per node, so the trade is real - but it is memory ' +
+            'against a factor of three, not against a few percent.'
+        ],
         example: 'Clustered, 20 000 points: the plane bound costs 69.28 distance computations per query, the box bound 19.77.'
       },
       {
@@ -381,35 +392,47 @@
         formal: 'prune when bound ≥ best[k−1], with best[k−1] = ∞ while |best| < k',
         readAs: 'Skip a subtree once it cannot beat the worst of the k answers you are holding. Until you ' +
           'have k of them that worst answer counts as infinity, so nothing is pruned at all.',
-        detail: 'The infinite bound is not a special case bolted on: until k candidates exist there is nothing to ' +
-          'prune against, and a search that prunes early there returns fewer than k answers. Keeping the set ' +
-          'sorted rather than in a heap is worth it below a few dozen neighbours, because the bound is then a ' +
-          'single array read at a known index and the insert is a short memmove. Above that the heap wins, and ' +
-          'the crossover is worth measuring rather than guessing.',
+        detail: [
+          'The infinite bound is not a special case bolted on. Until k candidates exist there is ' +
+            'nothing to prune against, and a search that prunes early there returns fewer than k ' +
+            'answers.',
+          'Keeping the set sorted rather than in a heap is worth it below a few dozen neighbours.',
+          'The bound is then a single array read at a known index, and the insert is a short ' +
+            'memmove.',
+          'Above that the heap wins, and the crossover is worth measuring rather than guessing.'
+        ],
         example: 'k = 10 costs 149.49 distance computations per query against 69.28 for k = 1 - 2.2×, not 10×.'
       },
       {
         term: 'Deletion is a tombstone and a rebuild',
         plain: 'Removing a point properly means finding a replacement along the same axis; every real implementation marks it instead.',
         formal: 'a proper delete is O(n^(1−1/d)) and rebalances nothing',
-        readAs: 'Removing a point costs n to the power (1 − 1/d) — in 2 dimensions about √n, and worse as ' +
-          'dimensions rise — and leaves the tree no better balanced than it found it.',
-        detail: 'Marking is cheap and correct - a marked point is skipped when scoring - but it does not make the ' +
-          'tree smaller, so the traversal still walks past the tombstones and the leaves stay as full as they ' +
-          'were. That cost is invisible in the answers and visible in the counters, which is exactly why the ' +
-          'counter exists. The production pattern is to mark on delete and rebuild when the tombstone fraction ' +
-          'passes a threshold, the same policy an LSM tree uses for the same reason.',
+        readAs: 'Removing a point costs n to the power (1 − 1/d) — in 2 dimensions about √n, and ' +
+          'worse as dimensions rise. It also leaves the tree no better balanced than it found it.',
+        detail: [
+          'Marking is cheap and correct - a marked point is skipped when scoring - but it does not ' +
+            'make the tree smaller.',
+          'The traversal still walks past the tombstones, and the leaves stay as full as they were.',
+          'That cost is invisible in the answers and visible in the counters, which is exactly why ' +
+            'the counter exists.',
+          'The production pattern is to mark on delete and rebuild when the tombstone fraction ' +
+            'passes a threshold, the same policy an LSM tree uses for the same reason.'
+        ],
         example: 'Deleting half of 20 000 points leaves every answer correct and every query still walking the tombstones.'
       },
       {
         term: 'Degenerate inputs are the ones to test',
         plain: 'All points on a line, or all at one location, are the inputs that break naive implementations.',
         formal: 'collinear data makes one axis useless; coincident data makes the median split empty',
-        detail: 'Collinear points make every split on the wasted axis a no-op, so the tree does half as much ' +
-          'useful work per level and the pruning bound is zero on alternate levels. Coincident points make the ' +
-          'median equal to the minimum and the maximum at once, which is where an implementation that partitions ' +
-          'strictly puts every point on one side and recurses forever. Both are cheap to generate and both belong ' +
-          'in the test suite; neither is exotic in real coordinate data.',
+        detail: [
+          'Collinear points make every split on the wasted axis a no-op. The tree does half as much ' +
+            'useful work per level, and the pruning bound is zero on alternate levels.',
+          'Coincident points make the median equal to the minimum and the maximum at once.',
+          'That is where an implementation that partitions strictly puts every point on one side ' +
+            'and recurses forever.',
+          'Both are cheap to generate and both belong in the test suite; neither is exotic in real ' +
+            'coordinate data.'
+        ],
         example: 'The invariant check runs against 1 000 collinear and 1 000 coincident points on every build.'
       },
       {
@@ -420,22 +443,31 @@
           'radius that seems small still reaches into nearly every branch. That is the curse of ' +
           'dimensionality in one line, and it is why exact nearest-neighbour search degrades to a full ' +
           'scan.',
-        detail: 'This is not a slow degradation with a useful middle: the fraction of the data a k-d tree touches ' +
-          'goes from a third of a percent at two dimensions to essentially all of it by sixteen, on the same ' +
-          'point count. Past that the tree is a linear scan with pointer chasing added, which is strictly worse ' +
-          'than the scan it replaced. The practical rule that follows is worth stating plainly: above about ten ' +
-          'dimensions, stop looking for an exact index and start choosing a recall target.',
+        detail: [
+          'This is not a slow degradation with a useful middle.',
+          'The fraction of the data a k-d tree touches goes from a third of a percent at two ' +
+            'dimensions to essentially all of it by sixteen.',
+          'Past that the tree is a linear scan with pointer chasing added, which is strictly worse ' +
+            'than the scan it replaced.',
+          'The practical rule that follows is worth stating plainly: above about ten dimensions, ' +
+            'stop looking for an exact index and start choosing a recall target.'
+        ],
         example: '4 000 points, one nearest query: 0.3% of the data touched at 2 dimensions, 16.1% at 8, 99.5% at 16, 100% at 32.'
       },
       {
         term: 'Bulk build, never incremental',
         plain: 'Build from the whole point set with median selection; inserting one at a time gives an unbalanced tree.',
         formal: 'quickselect per level makes the build O(n log n) with no sorting',
-        detail: 'An incremental k-d tree has the same failure mode as an unbalanced BST - sorted input builds a ' +
-          'path - and there is no cheap rotation to fix it, because a rotation would change which axis classifies ' +
-          'which points. Quickselect gives the median in linear expected time per level, so the whole build is ' +
-          'O(n log n) without ever sorting the array; the counter matters because a build that sorts at every ' +
-          'level is O(n log² n) and it is not obvious from reading the code which one you wrote.',
+        detail: [
+          'An incremental k-d tree has the same failure mode as an unbalanced BST: sorted input ' +
+            'builds a path.',
+          'There is no cheap rotation to fix it, because a rotation would change which axis ' +
+            'classifies which points.',
+          'Quickselect gives the median in linear expected time per level, so the whole build is ' +
+            'O(n log n) without ever sorting the array.',
+          'The counter matters because a build that sorts at every level is O(n log² n), and it is ' +
+            'not obvious from reading the code which one you wrote.'
+        ],
         example: '20 000 points build in 720 512 comparisons - about 36 per point, or 3 per level of the 12.'
       }
     ]

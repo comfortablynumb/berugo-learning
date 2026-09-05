@@ -36,20 +36,22 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'A k-d tree splits at a *data point* rather than at the middle of a box, alternating axes as it ' +
-          'descends. Choosing the median is what makes it balanced on any distribution — 20 000 clustered ' +
-          'points at leaf size 8 build 8 191 nodes at depth exactly 12, from 720 512 comparisons — and it is ' +
-          'also why the tree cannot be rebalanced cheaply afterwards: moving a split moves every point that ' +
-          'split classified.',
-        'The descent finds a candidate and the backtrack makes it correct. Walking to the leaf the query falls ' +
-          'in costs 4.87 distance computations and returns a point on every query; it is wrong on 60.2% of ' +
-          'them, and reports a mean neighbour distance of 60.272 where the truth is 42.701. Nothing about the ' +
-          'output looks broken. Adding the backtrack — re-examining the far side of every split whose plane is ' +
-          'closer than the best distance so far — costs 69.28 distance computations and is never wrong.',
-        'Which bound the backtrack uses is a free 3.5×. The splitting plane is the textbook test and costs one ' +
-          'subtraction; the distance to the far subtree\'s bounding box is never weaker, because the subtree ' +
-          'lies inside the box and the box lies beyond the plane. Measured on the same 500 queries: 69.28 ' +
-          'distance computations with the plane and 19.77 with the box, for identical answers.'
+        'A k-d tree splits at a *data point* rather than at the middle of a box, alternating axes ' +
+          'as it descends. Choosing the median is what makes it balanced on any distribution. At ' +
+          'leaf size 8, 20 000 clustered points build 8 191 nodes at depth exactly 12, from ' +
+          '720 512 comparisons. It is also why the tree cannot be rebalanced cheaply afterwards, ' +
+          'because moving a split moves every point that split classified.',
+        'The descent finds a candidate and the backtrack makes it correct. Walking to the leaf the ' +
+          'query falls in costs 4.87 distance computations and returns a point on every query. It ' +
+          'is wrong on 60.2% of them, and reports a mean neighbour distance of 60.272 where the ' +
+          'truth is 42.701. Nothing about the output looks broken. Adding the backtrack — ' +
+          're-examining the far side of every split whose plane is closer than the best distance ' +
+          'so far — costs 69.28 distance computations and is never wrong.',
+        'Which bound the backtrack uses is a free 3.5×. The splitting plane is the textbook test ' +
+          'and costs one subtraction. The distance to the far subtree\'s bounding box is never ' +
+          'weaker, because the subtree lies inside the box and the box lies beyond the plane. ' +
+          'Measured on the same 500 queries: 69.28 distance computations with the plane and 19.77 ' +
+          'with the box, for identical answers.'
       ],
       demo: { title: 'Interactive demo — the planes, the backtrack and the dimension wall', markup: root.KdTreesTemplate.render() },
       diagram: {
@@ -67,11 +69,11 @@
           '    LL --> Leaf["… depth 12 · leaf of ≤ 8 points"]'
         ].join('\n')
       },
-      insight: 'The descent finds a good candidate; the backtrack is what makes it correct. Nearly every buggy ' +
-        'k-d tree returns a plausible wrong answer — a nearby point, at a believable distance, on every single ' +
-        'query — so no smoke test and no eyeball ever catches it. The only acceptable check is agreement with ' +
-        'brute force over thousands of randomised queries, and it belongs in the test suite rather than in a ' +
-        'review comment.'
+      insight: 'The descent finds a good candidate; the backtrack is what makes it correct. Nearly ' +
+        'every buggy k-d tree returns a plausible wrong answer — a nearby point, at a believable ' +
+        'distance, on every single query. No smoke test and no eyeball ever catches it. The only ' +
+        'acceptable check is agreement with brute force over thousands of randomised queries, and ' +
+        'it belongs in the test suite rather than in a review comment.'
     };
   }
 
