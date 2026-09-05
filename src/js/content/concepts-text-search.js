@@ -22,13 +22,17 @@
         formal: 'bwt[i] = T[(sa[i] − 1) mod n]',
         readAs: 'Row i of the transform is the character just before the i-th smallest suffix, wrapping round ' +
           'to the end of the text when that suffix starts at position 0. The mod is that wrap-around.',
-        detail: 'That is the definition, and no implementation uses it — building the matrix costs ' +
-          'n² characters. The suffix array gives the same column directly: row i of the sorted ' +
-          'rotation matrix is the suffix starting at sa[i], so its last character is the one just ' +
-          'before that suffix. Which means the transform is a by-product of a structure you were ' +
-          'probably building anyway, computed in one pass over the array. Showing the matrix and ' +
-          'then discarding it is the point: the definition and the implementation are different ' +
-          'objects.',
+        detail: [
+          'That is the definition, and no implementation uses it — building the matrix costs n² ' +
+            'characters.',
+          'The suffix array gives the same column directly. Row i of the sorted rotation matrix is ' +
+            'the suffix starting at sa[i], so its last character is the one just before that ' +
+            'suffix.',
+          'Which means the transform is a by-product of a structure you were probably building ' +
+            'anyway, computed in one pass over the array.',
+          'Showing the matrix and then discarding it is the point: the definition and the ' +
+            'implementation are different objects.'
+        ],
         example: 'mississippi transforms to ipssm␀pissii — 11 characters, one pass over the array.'
       },
       {
@@ -38,39 +42,50 @@
         readAs: 'To step backwards one character: take the character in this row, look up where its block of ' +
           'rows begins, and add how many times that character has appeared above. It lands you on the ' +
           'row for the previous position, which is the whole trick of the index.',
-        detail: 'This is why a transform that looks destructive is reversible. Rotations beginning ' +
-          'with the same character sort together, and among those the order is decided by what ' +
-          'follows — which is exactly the order in which those characters appear in the last column ' +
-          'of the rows they came from. So the k-th "i" in the last column and the k-th "i" in the ' +
-          'first column are the same occurrence, and the first column never has to be stored: it is ' +
-          'just the sorted characters, summarised by a count table of alphabet size.',
+        detail: [
+          'This is why a transform that looks destructive is reversible.',
+          'Rotations beginning with the same character sort together, and among those the order is ' +
+            'decided by what follows. That is exactly the order in which those characters appear ' +
+            'in the last column of the rows they came from.',
+          'So the k-th "i" in the last column and the k-th "i" in the first column are the same ' +
+            'occurrence.',
+          'The first column never has to be stored: it is just the sorted characters, summarised ' +
+            'by a count table of alphabet size.'
+        ],
         example: 'C[c] + rank(c, row) is two lookups, and it is the entire inverse.'
       },
       {
         term: 'Inverting without the matrix',
         plain: 'Start at the sentinel\'s row and follow LF backwards, one character per step.',
         formal: 'n LF steps, O(1) memory beyond the index',
-        detail: 'Row 0 of the sorted matrix is the rotation beginning with the sentinel, so its last ' +
-          'character is the text\'s last character. Each LF step moves to the row holding the ' +
-          'rotation one character earlier, so reading the last column at each row recovers the text ' +
-          'from the end. The step order matters: read first, then follow. Following first drops the ' +
-          'final character and shifts everything by one, which is the off-by-one that makes the ' +
-          'round-trip fail on every input and is invisible on none.',
+        detail: [
+          'Row 0 of the sorted matrix is the rotation beginning with the sentinel, so its last ' +
+            'character is the text\'s last character.',
+          'Each LF step moves to the row holding the rotation one character earlier, so reading ' +
+            'the last column at each row recovers the text from the end.',
+          'The step order matters: read first, then follow.',
+          'Following first drops the final character and shifts everything by one. That is the ' +
+            'off-by-one that makes the round-trip fail on every input and is invisible on none.'
+        ],
         example: 'mississippi round-trips in 11 LF steps and zero rotation rows.'
       },
       {
         term: 'Runs are where the compression comes from',
         plain: 'The transform groups equal characters, and repetitive text groups hardest.',
         formal: 'runs(bwt) ≪ n for structured text; ≈ n for random text',
-        readAs: 'On real text the transform collapses into far fewer runs of repeated characters than there ' +
-          'are characters — the ≪ is "much less than" — which is what makes it compressible. On random ' +
-          'data it does not, and the index gives you nothing.',
-        detail: 'Rotations that begin the same way sort together, so the characters that preceded ' +
-          'those contexts land next to one another. In English "he" is usually preceded by "t", so ' +
-          'the block of rows beginning "he" contributes a run of t\'s. That is the entire ' +
-          'compression argument, and it is a property of the text rather than of the coder: log ' +
-          'lines give one run per 16 characters, DNA one per 4, and random 26-letter text one per ' +
-          '1.0 — the transform does nothing for data that has no structure to expose.',
+        readAs: 'On real text the transform collapses into far fewer runs of repeated characters ' +
+          'than there are characters — the ≪ is "much less than". That is what makes it ' +
+          'compressible. On random data it does not, and the index gives you nothing.',
+        detail: [
+          'Rotations that begin the same way sort together, so the characters that preceded those ' +
+            'contexts land next to one another.',
+          'In English "he" is usually preceded by "t", so the block of rows beginning "he" ' +
+            'contributes a run of t\'s.',
+          'That is the entire compression argument, and it is a property of the text rather than ' +
+            'of the coder.',
+          'Log lines give one run per 16 characters, DNA one per 4, and random 26-letter text one ' +
+            'per 1.0. The transform does nothing for data that has no structure to expose.'
+        ],
         example: 'logs: 304 runs over 4 951 characters. Random text: 3 855 over 4 000.'
       },
       {
@@ -80,12 +95,17 @@
         readAs: 'Extending a search by one character to the left narrows the row range: both ends are ' +
           'remapped by the same rule, so the range either shrinks or becomes empty. Empty means the ' +
           'pattern is not in the text.',
-        detail: 'The range being maintained is the set of rows whose suffix begins with the part of ' +
-          'the pattern read so far. Prepending a character to that pattern maps the range through ' +
-          'LF, which is two rank queries and two table lookups — independent of the text length and ' +
-          'independent of how many occurrences there are. That is the property that makes an ' +
-          'FM-index a self-index rather than a compression scheme: the count comes out of the ' +
-          'compressed representation directly, with no decompression at any point.',
+        detail: [
+          'The range being maintained is the set of rows whose suffix begins with the part of the ' +
+            'pattern read so far.',
+          'Prepending a character to that pattern maps the range through LF, which is two rank ' +
+            'queries and two table lookups.',
+          'That is independent of the text length, and independent of how many occurrences there ' +
+            'are.',
+          'It is the property that makes an FM-index a self-index rather than a compression ' +
+            'scheme: the count comes out of the compressed representation directly, with no ' +
+            'decompression at any point.'
+        ],
         example: '"issi" is four steps and eight rank queries, over a text of any size.'
       },
       {
@@ -95,36 +115,44 @@
         readAs: 'How many times character c appears in the rows above row i, not counting row i itself — the ' +
           'round bracket at the end excludes it. Answering this quickly is what the checkpoints are ' +
           'for.',
-        detail: 'A rank query answered by scanning is O(n) and costs no space; answered from a full ' +
-          'table it is O(1) and costs |Σ|·n integers. The practical answer is checkpoints every B ' +
-          'positions plus a short scan, which is O(B) time and |Σ|·n/B space — one dial with the ' +
-          'two extremes at its ends. Every FM-index exposes that dial, and choosing it is the ' +
-          'entire engineering of the structure; the algorithms above do not change at all as it ' +
-          'moves.',
+        detail: [
+          'A rank query answered by scanning is O(n) and costs no space. Answered from a full ' +
+            'table it is O(1) and costs |Σ|·n integers.',
+          'The practical answer is checkpoints every B positions plus a short scan. That is O(B) ' +
+            'time and |Σ|·n/B space: one dial with the two extremes at its ends.',
+          'Every FM-index exposes that dial, and choosing it is the entire engineering of the ' +
+            'structure. The algorithms above do not change at all as it moves.'
+        ],
         example: 'DNA 4 000: checkpoints every 8 cost 10 020 bytes; every 128 cost 640.'
       },
       {
         term: 'Locating costs more than counting',
         plain: 'Counting is free; reporting positions needs a sampled suffix array.',
         formal: 'locate(row) = walk LF until a sampled row, then add the steps',
-        detail: 'Backward search gives a range of rows, and a row is not a position — recovering the ' +
-          'position means walking LF until a row whose position was sampled. So counting ' +
-          'occurrences is O(m) and locating them is O(m + occ · sampleRate), and the sample rate is ' +
-          'a second space/time dial. This is why "how many" and "where" have genuinely different ' +
-          'costs in a self-index, which is unlike every other index in this milestone and worth ' +
-          'knowing before promising a query plan.',
+        detail: [
+          'Backward search gives a range of rows, and a row is not a position. Recovering the ' +
+            'position means walking LF until a row whose position was sampled.',
+          'So counting occurrences is O(m) and locating them is O(m + occ · sampleRate), and the ' +
+            'sample rate is a second space/time dial.',
+          'This is why "how many" and "where" have genuinely different costs in a self-index.',
+          'That is unlike every other index in this milestone, and worth knowing before promising ' +
+            'a query plan.'
+        ],
         example: 'sampling every 16th position costs n/16 integers and bounds the walk at 16 steps.'
       },
       {
         term: 'The index is the compressed text',
         plain: 'The structure replaces the text rather than accompanying it.',
         formal: 'bwt + checkpoints + samples, and the original is recoverable',
-        detail: 'A suffix array is 4 bytes per character *plus* the text. An FM-index holds the ' +
-          'transformed text, which is the same length and more compressible, plus two sampled ' +
-          'structures whose size you choose — and the original text is recoverable from it, so ' +
-          'nothing else needs storing. Measured on DNA that is 1.9 bytes per character against the ' +
-          'suffix array\'s 9, which is the difference between a genome fitting in memory and not. ' +
-          'That is the whole reason read aligners are built on this rather than on a suffix array.',
+        detail: [
+          'A suffix array is 4 bytes per character *plus* the text.',
+          'An FM-index holds the transformed text, which is the same length and more compressible, ' +
+            'plus two sampled structures whose size you choose.',
+          'The original text is recoverable from it, so nothing else needs storing.',
+          'Measured on DNA that is 1.9 bytes per character against the suffix array\'s 9, which is ' +
+            'the difference between a genome fitting in memory and not. That is the whole reason ' +
+            'read aligners are built on this rather than on a suffix array.'
+        ],
         example: 'DNA 4 000: 1.88 bytes per character against a suffix array plus LCP at 9.'
       }
     ],

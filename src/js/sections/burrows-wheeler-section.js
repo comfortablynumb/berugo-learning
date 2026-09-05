@@ -32,21 +32,21 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'The transform sorts every rotation of the text and takes the last column. It looks like a ' +
-          'destructive operation and it is not: the i-th occurrence of a character in the last ' +
-          'column is the same occurrence as the i-th in the first column, and the first column is ' +
-          'just the sorted characters. That correspondence — the LF mapping — walks the original ' +
-          'text backwards one character per step, so the transform inverts from a count table and ' +
-          'a rank structure, without the matrix that defined it.',
+        'The transform sorts every rotation of the text and takes the last column. It looks like ' +
+          'a destructive operation and it is not. The i-th occurrence of a character in the last ' +
+          'column is the same occurrence as the i-th in the first column. And the first column is ' +
+          'just the sorted characters. That correspondence is the LF mapping. It walks the ' +
+          'original text backwards one character per step, so the transform inverts from a count ' +
+          'table and a rank structure, without the matrix that defined it.',
         'It also groups equal characters, because rotations that begin the same way sort together ' +
-          'and so their preceding characters land adjacently. That is why the last column runs: ' +
-          'log lines here transform into a few hundred runs where random text of the same length ' +
+          'and so their preceding characters land adjacently. That is why the last column runs. ' +
+          'Log lines here transform into a few hundred runs where random text of the same length ' +
           'gives almost none, and run-length coding is what turns that into compression.',
         'The FM-index is the same machinery used as a search index. Backward search reads the ' +
           'pattern right to left, maintaining the suffix-array range of rows prefixed by what it ' +
-          'has read: two rank queries per character, so counting occurrences is O(m) and does not ' +
-          'depend on the text length. The index *is* the compressed text — which is how a read ' +
-          'aligner searches a 3-gigabase genome in a couple of gigabytes.'
+          'has read. That is two rank queries per character, so counting occurrences is O(m) and ' +
+          'does not depend on the text length. The index *is* the compressed text — which is how ' +
+          'a read aligner searches a 3-gigabase genome in a couple of gigabytes.'
       ],
       demo: {
         title: 'Interactive demo — the transform, the inverse and backward search',
