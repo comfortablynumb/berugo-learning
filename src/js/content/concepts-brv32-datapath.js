@@ -331,12 +331,15 @@
         },
         plain: 'Only the product compares two machines; no single factor does.',
         formal: 'time = instructions x cycles per instruction x clock period',
-        detail: 'A machine with a shorter clock and a higher CPI can be slower, and a machine '
-          + 'with fewer instructions and a longer clock can be slower too. Every real design '
-          + 'change moves at least two of the three, which is why the equation has to be '
-          + 'evaluated rather than reasoned around. It is also the most transferable idea in '
-          + 'the architecture track, because the same three factors appear whenever work is '
-          + 'decomposed into steps: how many units, how many steps each, how long a step.',
+        detail: [
+          'A machine with a shorter clock and a higher CPI can be slower, and a machine with '
+            + 'fewer instructions and a longer clock can be slower too.',
+          'Every real design change moves at least two of the three, which is why the equation '
+            + 'has to be evaluated rather than reasoned around.',
+          'It is also the most transferable idea in the architecture track.',
+          'The same three factors appear whenever work is decomposed into steps: how many units, '
+            + 'how many steps each, how long a step.'
+        ],
         example: 'The multi-cycle machine here has a 15% shorter clock and takes 3.7 times the '
           + 'cycles, which is a 3.1-times loss on the sum program.'
       },
@@ -344,11 +347,15 @@
         term: 'A multi-cycle machine cuts the datapath into stages and pays in cycles',
         plain: 'A register between two stages means only one of them has to fit in a cycle.',
         formal: 'the period is the longest stage plus the flip-flop overhead, not the longest path',
-        detail: 'Putting a register between two blocks means a signal only crosses one of them '
-          + 'per clock, so the period is set by the worst stage rather than by the whole path. '
-          + 'The instruction now takes several cycles, and the components can be shared between '
-          + 'stages because they are busy at different times — which is the historical reason '
-          + 'these machines existed, back when transistors were scarcer than clock cycles.',
+        detail: [
+          'Putting a register between two blocks means a signal only crosses one of them per '
+            + 'clock.',
+          'The period is then set by the worst stage rather than by the whole path.',
+          'The instruction now takes several cycles, and the components can be shared between '
+            + 'stages because they are busy at different times.',
+          'That is the historical reason these machines existed, back when transistors were '
+            + 'scarcer than clock cycles.'
+        ],
         example: 'Three stages measured here: decode at 16 gate delays, execute at 148 and '
           + 'address at 130, so the period is 148 + 3 = 151 against the single-cycle 178.'
       },
@@ -356,11 +363,15 @@
         term: 'CPI is a property of the machine and the program together',
         plain: 'Different instruction classes visit different numbers of stages.',
         formal: 'CPI is the class mix, weighted by the cycles each class needs',
-        detail: 'A load walks all five stages; a store needs no write-back; a branch is finished '
-          + 'once the ALU has compared. So the CPI of a program is decided by what it actually '
-          + 'executed, not by the machine alone, and quoting a CPI without naming the workload '
-          + 'says nothing. The demo counts the mix by running the program rather than taking it '
-          + 'from a table, which is the only way the number means anything.',
+        detail: [
+          'A load walks all five stages, a store needs no write-back, and a branch is finished '
+            + 'once the ALU has compared.',
+          'So the CPI of a program is decided by what it actually executed, not by the machine '
+            + 'alone.',
+          'Quoting a CPI without naming the workload says nothing.',
+          'The demo counts the mix by running the program rather than taking it from a table, '
+            + 'which is the only way the number means anything.'
+        ],
         example: 'The sum loop is 50% arithmetic, 25% branches and 23% jumps, giving CPI 3.70; '
           + 'the console program reaches 3.96 on the same machine.'
       },
@@ -368,12 +379,15 @@
         term: 'The gain is bounded by the worst stage, and an unbalanced split gains nothing',
         plain: 'Cutting a path helps only in proportion to how evenly it divides.',
         formal: 'a stage holding 148 of 175 gate delays leaves 27 to save',
-        detail: 'This datapath has one stage holding almost the whole critical path, so cutting '
-          + 'it into stages shortens the clock by 15% and multiplies the cycles by nearly four. '
-          + 'That is not a failure of the multi-cycle idea; it is what the idea does when the '
-          + 'work does not divide. The same shape appears in every software pipeline: adding '
-          + 'stages around a bottleneck adds per-stage overhead to a critical path that did not '
-          + 'get shorter.',
+        detail: [
+          'This datapath has one stage holding almost the whole critical path.',
+          'Cutting it into stages shortens the clock by 15% and multiplies the cycles by nearly '
+            + 'four.',
+          'That is not a failure of the multi-cycle idea; it is what the idea does when the work '
+            + 'does not divide.',
+          'The same shape appears in every software pipeline. Adding stages around a bottleneck '
+            + 'adds per-stage overhead to a critical path that did not get shorter.'
+        ],
         example: 'The measured verdict is single-cycle by 3.1 to 3.4 times on all five sample '
           + 'programs, and the margin barely moves with the instruction mix.'
       },
@@ -381,11 +395,14 @@
         term: 'A negative result is worth much more with a break-even number attached',
         plain: 'Say what would have to change, not just that it did not work.',
         formal: 'multi-cycle wins here once the stage period drops below 48 gate delays',
-        detail: '"Multi-cycle loses" is an observation that ends a conversation. "Multi-cycle '
-          + 'wins once the slowest stage is under 45 gate delays" is a specification somebody '
-          + 'can aim at, derived from the same measurements by rearranging the equation. '
-          + 'Producing that number costs one division and turns a rejected design into a '
-          + 'condition on the adder, which is where the work would actually have to happen.',
+        detail: [
+          '"Multi-cycle loses" is an observation that ends a conversation.',
+          '"Multi-cycle wins once the slowest stage is under 45 gate delays" is a specification '
+            + 'somebody can aim at.',
+          'It is derived from the same measurements by rearranging the equation.',
+          'Producing that number costs one division, and turns a rejected design into a condition '
+            + 'on the adder — which is where the work would actually have to happen.'
+        ],
         example: 'The execute stage would have to fall from 148 gate delays to 45 — a '
           + 'carry-lookahead adder from M33.6 gets part of the way and not all of it.'
       },
@@ -393,11 +410,14 @@
         term: 'The flip-flop overhead is paid per cycle, so more cycles means more overhead',
         plain: 'Every stage boundary costs clock-to-q and setup, whatever it contains.',
         formal: '3 gate delays per cycle, times CPI cycles, rather than once per instruction',
-        detail: 'A single-cycle machine pays the overhead once per instruction. A machine with a '
-          + 'CPI of 3.7 pays it 3.7 times per instruction, which is a real cost even though the '
-          + 'per-cycle figure looks tiny. It is also what puts a floor under pipelining depth: '
-          + 'the overhead does not divide, so cutting the logic into more and more stages drives '
-          + 'the overhead\'s share of the period towards one.',
+        detail: [
+          'A single-cycle machine pays the overhead once per instruction.',
+          'A machine with a CPI of 3.7 pays it 3.7 times per instruction, which is a real cost '
+            + 'even though the per-cycle figure looks tiny.',
+          'It is also what puts a floor under pipelining depth.',
+          'The overhead does not divide, so cutting the logic into more and more stages drives '
+            + 'the overhead\'s share of the period towards one.'
+        ],
         example: 'At 3 delays of overhead and a CPI of 3.70, the multi-cycle machine spends 11 '
           + 'gate delays per instruction on flip-flops against the single-cycle machine\'s 3.'
       },
@@ -405,12 +425,16 @@
         term: 'Sharing hardware between stages was the point, and the trade has inverted',
         plain: 'One memory can serve fetch and data access if they happen in different cycles.',
         formal: 'stages that are busy at different times can use the same block',
-        detail: 'A single-cycle machine needs separate instruction and data memories because it '
-          + 'must access both in one cycle. A multi-cycle machine can use one, because fetch and '
-          + 'memory access are different cycles — and the same applies to adders, which can '
-          + 'compute the next program counter in one cycle and an address in another. That was '
-          + 'a decisive argument when transistors were the scarce resource. It is not one now, '
-          + 'which is why the design is taught and not built.',
+        detail: [
+          'A single-cycle machine needs separate instruction and data memories, because it must '
+            + 'access both in one cycle.',
+          'A multi-cycle machine can use one, because fetch and memory access are different '
+            + 'cycles.',
+          'The same applies to adders, which can compute the next program counter in one cycle '
+            + 'and an address in another.',
+          'That was a decisive argument when transistors were the scarce resource. It is not one '
+            + 'now, which is why the design is taught and not built.'
+        ],
         example: 'The single-cycle machine here has a Harvard split precisely because it cannot '
           + 'share; M37 makes that split real with separate first-level caches.'
       },
@@ -418,12 +442,15 @@
         term: 'Pipelining is the design that takes the short clock without paying the cycles',
         plain: 'Overlap the stages instead of serialising them.',
         formal: 'one instruction finishes per cycle at the stage period, in the ideal case',
-        detail: 'Multi-cycle shortens the period and multiplies the cycles; pipelining shortens '
-          + 'the period and keeps a throughput of one instruction per cycle by having several '
-          + 'instructions in flight at once. That is strictly better on this arithmetic, and it '
-          + 'costs the hazards, forwarding and misprediction penalties that M35 spends a '
-          + 'milestone on. The measurement here is what makes that cost worth paying rather '
-          + 'than a technique to memorise.',
+        detail: [
+          'Multi-cycle shortens the period and multiplies the cycles.',
+          'Pipelining shortens the period and keeps a throughput of one instruction per cycle, by '
+            + 'having several instructions in flight at once.',
+          'That is strictly better on this arithmetic, and it costs the hazards, forwarding and '
+            + 'misprediction penalties that M35 spends a milestone on.',
+          'The measurement here is what makes that cost worth paying rather than a technique to '
+            + 'memorise.'
+        ],
         example: 'At the same 151-delay stage period, an ideal pipeline would run the sum '
           + 'program in about 44 x 151 gate delays rather than 163 x 151.'
       }

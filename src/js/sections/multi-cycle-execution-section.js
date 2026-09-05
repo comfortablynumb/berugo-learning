@@ -70,7 +70,7 @@
         + 'false.',
       '**Multi-cycle execution shortens the clock by cutting the datapath into stages.** A '
         + 'register between two stages means the signal only has to cross one of them per '
-        + 'cycle, so the period is set by the longest stage rather than by the whole path. '
+        + 'cycle. The period is then set by the longest stage rather than by the whole path. '
         + 'The instruction now takes several cycles, and the components can be shared between '
         + 'stages because they are used at different times.',
       '**CPI is measured, not assumed.** Each instruction class visits a different set of '
@@ -117,19 +117,19 @@
   function insight() {
     return '**A design that lowers the clock period and raises the cycle count has not made '
       + 'anything faster until somebody multiplies.** The multi-cycle machine on this page is '
-      + 'a textbook design applied to a real datapath, and it loses by more than three times '
-      + '— not because the idea is wrong but because this datapath has one stage holding 148 '
+      + 'a textbook design applied to a real datapath, and it loses by more than three times. '
+      + 'That is not because the idea is wrong. This datapath has one stage holding 148 '
       + 'of its 175 gate delays, so cutting it into stages buys almost nothing and costs '
       + 'nearly four cycles per instruction. The same shape appears every time a system is '
-      + 'decomposed: splitting a slow operation into steps helps only in proportion to how '
-      + 'evenly the work divides, and an unbalanced split makes things worse by adding '
+      + 'decomposed. Splitting a slow operation into steps helps only in proportion to how '
+      + 'evenly the work divides. An unbalanced split makes things worse, by adding '
       + 'per-step overhead to a critical path that did not get shorter. This is why the '
-      + 'performance equation is worth internalising as a habit rather than a formula. When '
-      + 'somebody proposes breaking a service into stages, a queue between two components, or '
-      + 'a batch into smaller batches, the question is always the same three factors: how many '
+      + 'performance equation is worth internalising as a habit rather than a formula. '
+      + 'Somebody proposes breaking a service into stages, a queue between two components, or '
+      + 'a batch into smaller batches. The question is always the same three factors: how many '
       + 'units of work, how many steps each, how long a step. Improving one while quietly '
       + 'worsening another is the most common way an optimisation turns out to be a '
-      + 'regression, and it is invisible unless you insist on the product rather than the '
+      + 'regression. It is invisible unless you insist on the product rather than the '
       + 'factor.';
   }
 
