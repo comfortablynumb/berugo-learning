@@ -158,11 +158,15 @@
         term: 'Digits at the ends, a tree in the middle',
         plain: 'Each spine level holds one to four elements at each end and a finger tree of 2-3 nodes between them.',
         formal: 'Deep(prefix : Digit, middle : FingerTree of Node, suffix : Digit)',
-        detail: 'The digits are the reason both ends are cheap: a push or a pop normally just grows or shrinks ' +
-          'a small array, and only touches the level below when a digit overflows past four or empties. Because ' +
-          'each level holds 2-3 nodes of the level beneath, the number of elements per spine level grows ' +
-          'geometrically, so the deeper levels are disturbed exponentially less often. That is the whole ' +
-          'amortisation argument, and it is visible in the shape of a built tree.',
+        detail: [
+          'The digits are the reason both ends are cheap.',
+          'A push or a pop normally just grows or shrinks a small array, and only touches the level ' +
+            'below when a digit overflows past four or empties.',
+          'Because each level holds 2-3 nodes of the level beneath, the number of elements per ' +
+            'spine level grows geometrically, so the deeper levels are disturbed exponentially ' +
+            'less often.',
+          'That is the whole amortisation argument, and it is visible in the shape of a built tree.'
+        ],
         example: '3 000 elements sit in a spine 7 levels deep holding 26 elements in its digits; the rest are in 2-3 nodes.'
       },
       {
@@ -181,55 +185,74 @@
         },
         plain: 'Cache the product of everything below each node, and a predicate on that cache answers a family of queries.',
         formal: 'measure(node) = combine(measure(children)); split walks down using only the cache',
-        detail: 'This is the part to take away even if you never write a finger tree. The structure does not ' +
-          'know what a size, a priority or an interval is - it knows how to combine two measures and how to ' +
-          'find the point where a running product first satisfies a predicate. Choosing the measure chooses the ' +
-          'query, and one implementation then serves four data structures. The same trick makes a segment tree ' +
-          'generic in M08.7; here it also makes split and concat work.',
+        detail: [
+          'This is the part to take away even if you never write a finger tree.',
+          'The structure does not know what a size, a priority or an interval is.',
+          'It knows how to combine two measures, and how to find the point where a running product ' +
+            'first satisfies a predicate.',
+          'Choosing the measure chooses the query, and one implementation then serves four data ' +
+            'structures.',
+          'The same trick makes a segment tree generic in M08.7; here it also makes split and ' +
+            'concat work.'
+        ],
         example: 'The same 1 000 items measure 1 000 under size, 49 956 under sum, 999 under max priority and 499 under max end.'
       },
       {
         term: 'Split is a descent, not a scan',
         plain: 'Find where a running measure first crosses a predicate by reading cached measures at each node.',
         formal: 'split(t, p) = (before, from) with concat(before, from) = t',
-        detail: 'At each level the walk asks three questions - does the predicate turn inside the prefix, the ' +
-          'middle, or the suffix - and each is answered by one cached measure and a combine. Nothing looks at an ' +
-          'individual element until the very last step inside a digit. That is why split is O(log n) rather ' +
-          'than O(n), and why the reconstruction property is the right test: concatenating the two halves must ' +
-          'give back exactly the original.',
+        detail: [
+          'At each level the walk asks three questions. Does the predicate turn inside the prefix, ' +
+            'the middle, or the suffix?',
+          'Each is answered by one cached measure and a combine.',
+          'Nothing looks at an individual element until the very last step inside a digit.',
+          'That is why split is O(log n) rather than O(n), and why the reconstruction property is ' +
+            'the right test: concatenating the two halves must give back exactly the original.'
+        ],
         example: 'Splitting a 3 000-element sequence in half visits 14 nodes; putting it back allocates 20.'
       },
       {
         term: 'One structure, four data structures',
         plain: 'Size gives a sequence, max gives a priority queue, a key gives an ordered set, a max end gives an interval map.',
         formal: 'the code is identical; only `identity`, `combine` and `measure` change',
-        detail: 'A priority queue falls out by measuring each element by its priority under max: the root\'s ' +
-          'measure is the largest priority in the whole sequence, and splitting on "measure ≥ that" lands ' +
-          'exactly on the element holding it. An interval map falls out by measuring the maximum interval end. ' +
-          'Neither needs a line of new structural code, which is the strongest possible demonstration that the ' +
-          'annotation and not the tree is where the generality lives.',
+        detail: [
+          'A priority queue falls out by measuring each element by its priority under max.',
+          'The root\'s measure is the largest priority in the whole sequence, and splitting on ' +
+            '"measure ≥ that" lands exactly on the element holding it.',
+          'An interval map falls out by measuring the maximum interval end.',
+          'Neither needs a line of new structural code, which is the strongest possible ' +
+            'demonstration that the annotation and not the tree is where the generality lives.'
+        ],
         example: '400 items pushed in arrival order and popped by split come out in exactly descending priority.'
       },
       {
         term: 'Concatenation is the operation nothing else offers cheaply',
         plain: 'Two finger trees join in O(log(min)) by merging their facing digits into 2-3 nodes.',
         formal: 'append(left, middle, right) recurses down both spines at once',
-        detail: 'Balanced search trees concatenate awkwardly and arrays concatenate linearly, so a structure ' +
-          'that does it in a logarithm of the smaller side is genuinely unusual - and it is what makes finger ' +
-          'trees the standard implementation of a functional sequence with `++`. The subtlety is that the ' +
-          'middle elements have to be folded onto the correct side: prepending them onto the right-hand tree is ' +
-          'a right fold, and doing it as a left fold silently reverses a run.',
+        detail: [
+          'Balanced search trees concatenate awkwardly and arrays concatenate linearly, so a ' +
+            'structure that does it in a logarithm of the smaller side is genuinely unusual.',
+          'It is what makes finger trees the standard implementation of a functional sequence with ' +
+            '`++`.',
+          'The subtlety is that the middle elements have to be folded onto the correct side.',
+          'Prepending them onto the right-hand tree is a right fold, and doing it as a left fold ' +
+            'silently reverses a run.'
+        ],
         example: 'Two independently built trees of 700 and 900 elements join with their order intact.'
       },
       {
         term: 'The cost of the generality',
         plain: 'Every node carries a cached measure, and every rebuild recomputes it.',
         formal: 'one extra field per node plus one combine per structural change',
-        detail: 'Nothing here is free. A finger tree is bigger than a cons list, its constants are larger than ' +
-          'a plain deque\'s, and the measure has to be recomputed whenever a node is rebuilt - which is what ' +
-          'the amortisation is already paying for. Reaching for one when a deque would do is the classic ' +
-          'mistake; reaching for one when you need a sequence that also answers a positional or priority query ' +
-          'is exactly right.',
+        detail: [
+          'Nothing here is free.',
+          'A finger tree is bigger than a cons list, and its constants are larger than a plain ' +
+            'deque\'s.',
+          'The measure also has to be recomputed whenever a node is rebuilt, which is what the ' +
+            'amortisation is already paying for.',
+          'Reaching for one when a deque would do is the classic mistake. Reaching for one when you ' +
+            'need a sequence that also answers a positional or priority query is exactly right.'
+        ],
         example: '3 000 elements build a 7-level spine; a plain cons list would be 3 000 cells and answer none of the queries.'
       },
       {
@@ -239,22 +262,28 @@
         readAs: 'The two rules a measurement must obey: brackets do not matter, and there is an identity ' +
           'element that changes nothing. Any operation with those two properties can be cached in a ' +
           'finger tree — which is why the same code counts, sums and takes maxima.',
-        detail: 'The whole structure rests on being able to combine a node\'s cached measure with its ' +
-          'neighbours\' in any grouping, because the grouping is whatever the tree happens to be. A ' +
-          'non-associative measure gives answers that depend on the shape rather than on the contents, which ' +
-          'means they change when an unrelated insertion rebalances something. Subtraction and average are the ' +
-          'two that people try and that do not work.',
+        detail: [
+          'The whole structure rests on being able to combine a node\'s cached measure with its ' +
+            'neighbours\' in any grouping, because the grouping is whatever the tree happens to be.',
+          'A non-associative measure gives answers that depend on the shape rather than on the ' +
+            'contents.',
+          'Those answers change when an unrelated insertion rebalances something.',
+          'Subtraction and average are the two that people try and that do not work.'
+        ],
         example: 'Max, min, sum, gcd and "rightmost" are monoids; difference and mean are not.'
       },
       {
         term: 'Where it actually appears',
         plain: 'Haskell\'s Data.Sequence, Scala\'s finger-tree-backed collections, and interval indexes in editors.',
         formal: 'the canonical reference is Hinze and Paterson (2006)',
-        detail: 'The most common real use is the one that looks least like a finger tree: a text editor that ' +
-          'needs to index by character offset *and* by line number keeps one sequence annotated with a measure ' +
-          'carrying both, and answers "line 400" and "character 9 512" with the same split. That is the pattern ' +
-          'to recognise - not the tree, but the moment when two different indexes over the same sequence are ' +
-          'wanted at once.',
+        detail: [
+          'The most common real use is the one that looks least like a finger tree.',
+          'A text editor that needs to index by character offset *and* by line number keeps one ' +
+            'sequence annotated with a measure carrying both.',
+          'It answers "line 400" and "character 9 512" with the same split.',
+          'That is the pattern to recognise: not the tree, but the moment when two different ' +
+            'indexes over the same sequence are wanted at once.'
+        ],
         example: 'A measure of (characters, newlines) answers both "go to offset" and "go to line" from one structure.'
       }
     ],

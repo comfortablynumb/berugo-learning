@@ -25,54 +25,62 @@
     });
   }
 
+  function diagram() {
+    return {
+      title: 'Diagram — digits, spine and the annotated descent',
+      caption: 'The digits at each end make both ends cheap; the annotation at each node makes the middle ' +
+        'reachable. A split reads three cached measures per level — prefix, middle, suffix — and never looks ' +
+        'at an element until the final digit.',
+      definition: [
+        'flowchart TD',
+        '    D["Deep · measure 3 000"] --> L["left digit · 1–4 elements"]',
+        '    D --> M["middle: Deep of 2-3 nodes · measure 2 974"]',
+        '    D --> R["right digit · 1–4 elements"]',
+        '    M --> L2["left digit"]',
+        '    M --> M2["middle · measure 2 900"]',
+        '    M --> R2["right digit"]',
+        '    S{"running measure > target?"} -.-> L',
+        '    S -.-> M',
+        '    S -.-> R'
+      ].join('\n')
+    };
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'A finger tree keeps a small digit — one to four elements — at each end of every level, with the rest ' +
-          'of the sequence as a tree of the level below. Both ends are therefore a constant hop away, so push ' +
-          'and pop at either end are O(1) amortised, and the depth is logarithmic, so anything that has to ' +
-          'reach the middle is O(log n). On 3 000 elements the spine is 7 levels holding 26 elements in its ' +
-          'digits, and everything else is in the middle.',
-        'What turns that into a general structure is the annotation. Every node caches the product of its ' +
-          'subtree under a monoid you supply, and every query is a descent guided by that cached value. Change ' +
-          'the monoid and the same code becomes a different structure: over the same 1 000 items the root ' +
-          'reports 1 000 for size, 49 956 for the sum of values, 999 for the maximum priority and 499 for the ' +
-          'largest interval end — with the identical spine in all four.',
-        'The operations that are hard elsewhere follow from the annotation. Splitting a 3 000-element sequence ' +
-          'at any position visits 14 nodes, because the descent compares the running product against the ' +
-          'predicate instead of counting elements, and putting the two halves back together allocates 20. A ' +
-          'cons list does either in O(n) and an array does the split in O(1) and the push-front in O(n) — the ' +
-          'finger tree is the one that does all four in logarithmic time or better.'
+        'A finger tree keeps a small digit — one to four elements — at each end of every level. ' +
+          'The rest of the sequence is a tree of the level below. Both ends are therefore a ' +
+          'constant hop away, so push and pop at either end are O(1) amortised. The depth is ' +
+          'logarithmic, so anything that has to reach the middle is O(log n). On 3 000 elements ' +
+          'the spine is 7 levels holding 26 elements in its digits, and everything else is in the ' +
+          'middle.',
+        'What turns that into a general structure is the annotation. Every node caches the product ' +
+          'of its subtree under a monoid you supply, and every query is a descent guided by that ' +
+          'cached value. Change the monoid and the same code becomes a different structure. Over ' +
+          'the same 1 000 items the root reports 1 000 for size and 49 956 for the sum of values. ' +
+          'It reports 999 for the maximum priority and 499 for the largest interval end, with the ' +
+          'identical spine in all four.',
+        'The operations that are hard elsewhere follow from the annotation. Splitting a ' +
+          '3 000-element sequence at any position visits 14 nodes, because the descent compares ' +
+          'the running product against the predicate instead of counting elements. Putting the two ' +
+          'halves back together allocates 20. A cons list does either in O(n), and an array does ' +
+          'the split in O(1) and the push-front in O(n). The finger tree is the one that does all ' +
+          'four in logarithmic time or better.'
       ],
       demo: {
         title: 'Interactive demo — one structure, four monoids, and a split that is a descent',
         markup: root.FingerTreesTemplate.render()
       },
-      diagram: {
-        title: 'Diagram — digits, spine and the annotated descent',
-        caption: 'The digits at each end make both ends cheap; the annotation at each node makes the middle ' +
-          'reachable. A split reads three cached measures per level — prefix, middle, suffix — and never looks ' +
-          'at an element until the final digit.',
-        definition: [
-          'flowchart TD',
-          '    D["Deep · measure 3 000"] --> L["left digit · 1–4 elements"]',
-          '    D --> M["middle: Deep of 2-3 nodes · measure 2 974"]',
-          '    D --> R["right digit · 1–4 elements"]',
-          '    M --> L2["left digit"]',
-          '    M --> M2["middle · measure 2 900"]',
-          '    M --> R2["right digit"]',
-          '    S{"running measure > target?"} -.-> L',
-          '    S -.-> M',
-          '    S -.-> R'
-        ].join('\n')
-      },
-      insight: 'The monoid is the transferable idea, not the tree. Any balanced structure that caches an ' +
-        'associative summary of each subtree can answer "find the first prefix whose summary crosses this ' +
-        'threshold" in a descent, and that single query shape covers indexing, priority selection, interval ' +
-        'search and running totals. The two conditions are real, though: the operation must be genuinely ' +
-        'associative and the identity must be genuinely neutral, or the cached measure and the recomputed one ' +
-        'disagree in a way that surfaces as an off-by-one in some rebalancing nobody wants to debug.'
+      diagram: diagram(),
+      insight: 'The monoid is the transferable idea, not the tree. Any balanced structure that ' +
+        'caches an associative summary of each subtree can answer "find the first prefix whose ' +
+        'summary crosses this threshold" in a descent. That single query shape covers indexing, ' +
+        'priority selection, interval search and running totals. The two conditions are real, ' +
+        'though. The operation must be genuinely associative and the identity must be genuinely ' +
+        'neutral. Otherwise the cached measure and the recomputed one disagree, and the ' +
+        'disagreement surfaces as an off-by-one in some rebalancing nobody wants to debug.'
     };
   }
 
