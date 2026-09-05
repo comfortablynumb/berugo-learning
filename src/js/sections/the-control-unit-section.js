@@ -98,10 +98,10 @@
         + 'with every write signal low, because "it probably does nothing" is not a '
         + 'specification.',
       '**Forcing a signal is the fastest way to learn what it does.** A control unit is hard to '
-        + 'reason about from its truth table and easy to understand from its failures: '
-        + 'regWrite stuck low makes every program compute zero, branch stuck low makes every '
-        + 'loop run forever, memWrite stuck high turns the first instruction into a store to a '
-        + 'nonsense address.'
+        + 'reason about from its truth table and easy to understand from its failures. '
+        + 'regWrite stuck low makes every program compute zero. Branch stuck low makes every '
+        + 'loop run forever, and memWrite stuck high turns the first instruction into a store to '
+        + 'a nonsense address.'
     ];
   }
 
@@ -121,17 +121,18 @@
       + 'property has shaped the industry more than any argument about instruction counts.** A '
       + 'hardwired control unit is faster and smaller and completely fixed: what it does is '
       + 'etched. A microcoded one is a memory full of control vectors, so the behaviour of an '
-      + 'instruction can be changed by loading different contents — which is what a microcode '
+      + 'instruction can be changed by loading different contents. That is what a microcode '
       + 'update is, and why the mitigations for Spectre and Meltdown could reach processors '
       + 'that were already in machines. It is also why the RISC-versus-CISC argument ended '
-      + 'where it did: x86 kept a complex instruction set as its interface, put a decoder in '
-      + 'front that translates to simple internal operations, and ran those on a core that '
+      + 'where it did. The x86 architecture kept a complex instruction set as its interface, and '
+      + 'put a decoder in front that translates to simple internal operations. Those run on a '
+      + 'core that '
       + 'looks like the machines that were supposed to replace it. The interface was worth more '
       + 'than the implementation, so they changed the implementation. The transferable idea is '
       + 'about where to put a table. Any behaviour expressed as data can be changed at run '
       + 'time, versioned, tested independently and shipped separately; the same behaviour '
-      + 'expressed as code cannot. A control unit is exactly that choice — logic or a lookup — '
-      + 'and every configuration file, feature flag and rules engine you have ever written is '
+      + 'expressed as code cannot. A control unit is exactly that choice, logic or a lookup. '
+      + 'Every configuration file, feature flag and rules engine you have ever written is '
       + 'the same decision at a different scale.';
   }
 

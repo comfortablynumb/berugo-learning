@@ -186,12 +186,15 @@
         },
         plain: 'Decode the opcode, then OR together the opcodes that want each signal.',
         formal: 'the gate decoder matches the control table on all 42 instructions',
-        detail: 'The AND terms are a decoder — the block from M33.3 — and each control signal is '
-          + 'the OR of the opcodes that assert it. Because most signals are zero for most '
-          + 'instructions, each OR has only two or three inputs, and the whole control unit is '
-          + '103 gates against the ALU\'s 869. That sparseness is the reason a wide processor '
-          + 'can afford four copies of its decoder, and the reason decode is not on anybody\'s '
-          + 'critical path in a RISC design.',
+        detail: [
+          'The AND terms are a decoder, the block from M33.3, and each control signal is the OR '
+            + 'of the opcodes that assert it.',
+          'Because most signals are zero for most instructions, each OR has only two or three '
+            + 'inputs.',
+          'The whole control unit is 103 gates against the ALU\'s 869.',
+          'That sparseness is the reason a wide processor can afford four copies of its decoder, '
+            + 'and the reason decode is not on anybody\'s critical path in a RISC design.'
+        ],
         example: 'Only jalr asserts as many as four of the seven boolean signals; most opcodes '
           + 'assert two, and op, branch and lui assert one.'
       },
@@ -199,12 +202,14 @@
         term: 'Read the control table down the columns, not across the rows',
         plain: 'A column is a gate; a row is just an instruction.',
         formal: 'signal = OR over the opcodes whose row has a 1 in that column',
-        detail: 'Reading across a row tells you what one instruction does, which you already '
-          + 'knew. Reading down a column tells you what the hardware is: memWrite is asserted by '
-          + 'exactly one opcode, so it is a wire from one AND term; regWrite is asserted by seven, '
-          + 'so it is a seven-input OR. The table is not documentation of the decoder, it is the '
-          + 'decoder, and being able to flip between the two readings is the skill the section '
-          + 'is for.',
+        detail: [
+          'Reading across a row tells you what one instruction does, which you already knew.',
+          'Reading down a column tells you what the hardware is.',
+          'memWrite is asserted by exactly one opcode, so it is a wire from one AND term. '
+            + 'regWrite is asserted by seven, so it is a seven-input OR.',
+          'The table is not documentation of the decoder, it is the decoder, and being able to '
+            + 'flip between the two readings is the skill the section is for.'
+        ],
         example: 'memWrite has a single 1 in the whole column — the store row — so the store '
           + 'signal needs no OR gate at all.'
       },
@@ -212,13 +217,17 @@
         term: 'Forcing one signal is the fastest way to learn what it does',
         plain: 'Stick a wire and watch three real programs fail differently.',
         formal: 'regWrite low turns 55 into 0; branch low never terminates; memWrite high faults after 1 instruction',
-        detail: 'Each forced signal produces a distinct and instructive failure. With regWrite '
-          + 'low, no register is ever written, so every value stays zero and the first '
-          + 'branch-if-zero is taken immediately. With branch low, no conditional branch is ever '
-          + 'taken and every loop runs until the budget stops it. With memWrite high, every '
-          + 'instruction stores to whatever the ALU computed and the first address outside '
-          + 'memory faults. The variety is the lesson: "the control unit is wrong" produces '
-          + 'symptoms that look like completely different bugs.',
+        detail: [
+          'Each forced signal produces a distinct and instructive failure.',
+          'With regWrite low, no register is ever written, so every value stays zero and the first '
+            + 'branch-if-zero is taken immediately.',
+          'With branch low, no conditional branch is ever taken and every loop runs until the '
+            + 'budget stops it.',
+          'With memWrite high, every instruction stores to whatever the ALU computed, and the '
+            + 'first address outside memory faults.',
+          'The variety is the lesson. "The control unit is wrong" produces symptoms that look '
+            + 'like completely different bugs.'
+        ],
         example: 'aluSrc forced high gives 0 on one program, 59 049 235 on another and a '
           + 'non-terminating run on the third — one stuck wire, three unrelated-looking failures.'
       },
@@ -226,12 +235,15 @@
         term: 'Hardwired against microcoded is a trade of size against changeability',
         plain: 'Logic is small and permanent; a ROM is large and reloadable.',
         formal: 'hardwired: 103 gates, 24 gate delays. microcoded: a ROM of one vector per opcode per step',
-        detail: 'A microcoded control unit replaces the OR array with a memory: the opcode '
-          + 'addresses a ROM whose contents are the control vectors, and a counter walks several '
-          + 'of them for one instruction. That is slower and much larger, and it can be changed '
-          + 'after the chip is manufactured. Which is why complex instruction sets and microcode '
-          + 'grew up together, and why RISC machines hardwire: a small decoder is cheap enough '
-          + 'to duplicate four times for a wide machine, and a ROM is not.',
+        detail: [
+          'A microcoded control unit replaces the OR array with a memory.',
+          'The opcode addresses a ROM whose contents are the control vectors, and a counter walks '
+            + 'several of them for one instruction.',
+          'That is slower and much larger, and it can be changed after the chip is manufactured.',
+          'That is why complex instruction sets and microcode grew up together, and why RISC '
+            + 'machines hardwire. A small decoder is cheap enough to duplicate four times for a '
+            + 'wide machine, and a ROM is not.'
+        ],
         example: 'Every microcode update ever shipped — including the Spectre mitigations — is '
           + 'literally rewriting the contents of that ROM on a machine that is otherwise '
           + 'hardwired.'
@@ -240,12 +252,15 @@
         term: 'An undefined opcode must produce no writes, and that has to be checked',
         plain: 'The default for every write signal is off.',
         formal: 'every opcode value outside the table leaves regWrite and memWrite low',
-        detail: 'An instruction the decoder does not recognise has to trap, not corrupt state. '
-          + 'Building the decoder as an OR of the opcodes that want a signal gives that for free '
-          + '— an unmatched opcode matches no AND term, so no OR fires — but "for free" is a '
-          + 'claim, and the section checks it over all 128 opcode values on every render. A '
-          + 'safety property that follows from the structure is still worth testing, because the '
-          + 'structure can be changed by somebody who did not know it was load-bearing.',
+        detail: [
+          'An instruction the decoder does not recognise has to trap, not corrupt state.',
+          'Building the decoder as an OR of the opcodes that want a signal gives that for free: an '
+            + 'unmatched opcode matches no AND term, so no OR fires.',
+          'But "for free" is a claim, and the section checks it over all 128 opcode values on '
+            + 'every render.',
+          'A safety property that follows from the structure is still worth testing, because the '
+            + 'structure can be changed by somebody who did not know it was load-bearing.'
+        ],
         example: 'All 128 opcode values are driven through the decoder; every one outside the '
           + 'table leaves both write signals low.'
       },
@@ -253,12 +268,15 @@
         term: 'A don\'t-care is a decision about who gets blamed later',
         plain: 'Leave unused signals at zero rather than minimising them away.',
         formal: 'a signal that does not matter for an instruction is still given a defined value',
-        detail: 'Minimising with don\'t-cares produces smaller logic and a decoder whose output '
-          + 'for those cases is whatever the minimiser found convenient. That is fine until '
-          + 'somebody reads the signal in a context where it does matter — a new instruction, a '
-          + 'debug port, a pipeline stage that forwards it — and then the bug has no author. '
-          + 'Defining the value costs a few gates and makes the design explainable, which is '
-          + 'usually the better trade for anything a person has to reason about later.',
+        detail: [
+          'Minimising with don\'t-cares produces smaller logic, and a decoder whose output for '
+            + 'those cases is whatever the minimiser found convenient.',
+          'That is fine until somebody reads the signal in a context where it does matter: a new '
+            + 'instruction, a debug port, a pipeline stage that forwards it.',
+          'Then the bug has no author.',
+          'Defining the value costs a few gates and makes the design explainable, which is usually '
+            + 'the better trade for anything a person has to reason about later.'
+        ],
         example: 'The write-back source for a store is set to the ALU result, which nothing '
           + 'reads, rather than left free for the minimiser.'
       },
@@ -266,12 +284,15 @@
         term: 'Two decoders that disagree are how a reserved encoding becomes a security bug',
         plain: 'The instruction decoder and the ALU decoder must agree on what is legal.',
         formal: 'a funct3 with no meaning for its opcode: the ALU decoder still produces a code, the instruction decoder rejects the word',
-        detail: 'When one part of a machine accepts an encoding that another part rejects, the '
-          + 'gap between them is where undefined behaviour lives — and undefined behaviour in a '
-          + 'processor has historically meant an undocumented instruction, a privilege check '
-          + 'that was skipped, or a state that no software knows how to save. The fix is that '
-          + 'exactly one component decides legality and the rest follow it. The same discipline '
-          + 'applies to any system with two parsers, which is why HTTP request smuggling exists.',
+        detail: [
+          'When one part of a machine accepts an encoding that another part rejects, the gap '
+            + 'between them is where undefined behaviour lives.',
+          'Undefined behaviour in a processor has historically meant an undocumented instruction, '
+            + 'a privilege check that was skipped, or a state that no software knows how to save.',
+          'The fix is that exactly one component decides legality and the rest follow it.',
+          'The same discipline applies to any system with two parsers, which is why HTTP request '
+            + 'smuggling exists.'
+        ],
         example: 'The instruction decoder is the authority here; the ALU decoder\'s output for a '
           + 'rejected word is never used.'
       },
@@ -279,12 +300,16 @@
         term: 'Structural safety beats a check that can be forgotten',
         plain: 'x0 cannot be written because the write enable for row zero does not exist.',
         formal: 'the register file has no write-enable wire for register 0',
-        detail: 'The alternative is a comparison against zero somewhere in the write-back path, '
-          + 'which works and can be removed by a refactor, bypassed by a new write port, or '
-          + 'forgotten in the pipelined version. Making the wire absent means the property holds '
-          + 'in every future implementation without anybody having to remember it. Preferring '
-          + 'structure over checks is one of the most transferable ideas in this milestone: the '
-          + 'software equivalent is a type that cannot represent the invalid state.',
+        detail: [
+          'The alternative is a comparison against zero somewhere in the write-back path.',
+          'That works, and it can be removed by a refactor, bypassed by a new write port, or '
+            + 'forgotten in the pipelined version.',
+          'Making the wire absent means the property holds in every future implementation without '
+            + 'anybody having to remember it.',
+          'Preferring structure over checks is one of the most transferable ideas in this '
+            + 'milestone. The software equivalent is a type that cannot represent the invalid '
+            + 'state.'
+        ],
         example: 'No instruction, correct or corrupted, can change x0 in this machine — not '
           + 'because it is checked but because there is nothing to change it with.'
       }
