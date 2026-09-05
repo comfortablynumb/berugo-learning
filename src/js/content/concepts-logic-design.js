@@ -23,12 +23,15 @@
         },
         plain: 'Measure every start-to-end path structurally and report the worst.',
         formal: 'start points are inputs and flip-flop outputs; end points are outputs and flip-flop data inputs',
-        detail: 'Walking paths covers every possible input pattern at once, which simulation '
-          + 'cannot do and which is why every real flow is built on it. It is also why a '
-          + 'passing simulation is not a timing argument: the vectors you drove may simply not '
-          + 'have exercised the worst path. The cost of that generality is pessimism — some '
-          + 'reported paths are logically impossible — and finding those false paths is a real '
-          + 'part of closing timing.',
+        detail: [
+          'Walking paths covers every possible input pattern at once, which simulation cannot do '
+            + 'and which is why every real flow is built on it.',
+          'It is also why a passing simulation is not a timing argument. The vectors you drove '
+            + 'may simply not have exercised the worst path.',
+          'The cost of that generality is pessimism: some reported paths are logically '
+            + 'impossible.',
+          'Finding those false paths is a real part of closing timing.'
+        ],
         example: 'The 8-bit ripple adder reports a 35-delay input-to-output path, which is the '
           + 'worst over all 131 072 operand combinations rather than the one measured.'
       },
@@ -37,11 +40,14 @@
         plain: 'The flip-flop overhead is paid every stage, whatever the logic does.',
         formal: 'period >= clockToQ + logic + setup',
         readAs: 'the clock period must cover the flip-flop delay, then the logic, then the setup time.',
-        detail: 'That fixed overhead is what puts a floor under pipelining. Cutting the logic '
-          + 'in half halves only the middle term, so the speed-up is less than two, and doing '
-          + 'it repeatedly drives the overhead\'s share of the period towards one. The demo '
-          + 'prints that share per stage count, which turns "pipelining has diminishing '
-          + 'returns" from a slogan into a number you can point at.',
+        detail: [
+          'That fixed overhead is what puts a floor under pipelining.',
+          'Cutting the logic in half halves only the middle term, so the speed-up is less than '
+            + 'two.',
+          'Doing it repeatedly drives the overhead\'s share of the period towards one.',
+          'The demo prints that share per stage count, which turns "pipelining has diminishing '
+            + 'returns" from a slogan into a number you can point at.'
+        ],
         example: 'For the ripple adder: 35 of logic and 3 of overhead gives a period of 38, so '
           + 'the overhead is 8% at one stage and 25% at four.'
       },
@@ -49,12 +55,17 @@
         term: 'There are four classes of path and each is a different contract',
         plain: 'Register to register, input to register, register to output, input to output.',
         formal: 'only register-to-register sets your own clock period',
-        detail: 'The other three are agreements with whatever is on the other side of the chip '
-          + 'boundary: an input setup requirement you impose on your driver, an output delay '
-          + 'you impose on your consumer, and a pure combinational delay budgeted by the system '
-          + 'around you. Confusing them produces a design that meets timing internally and '
-          + 'fails at the interface, which is the hardware version of a service that is fast '
-          + 'until you measure it from the client.',
+        detail: [
+          'The other three are agreements with whatever is on the other side of the chip '
+            + 'boundary.',
+          'They are an input setup requirement you impose on your driver, an output delay you '
+            + 'impose on your consumer, and a pure combinational delay budgeted by the system '
+            + 'around you.',
+          'Confusing them produces a design that meets timing internally and fails at the '
+            + 'interface.',
+          'That is the hardware version of a service that is fast until you measure it from the '
+            + 'client.'
+        ],
         example: 'The demo\'s adders have only an input-to-output path and no clock of their '
           + 'own; the state machine has all four.'
       },
@@ -62,12 +73,15 @@
         term: 'Slack is the number a timing report exists to produce',
         plain: 'Target period minus required period: positive is headroom, negative does not run.',
         formal: 'slack = target - (clockToQ + logic + setup)',
-        detail: 'Every optimisation in a synthesis tool is aimed at the most negative slack, '
-          + 'and every other path is ignored until that one is fixed — which is why timing '
-          + 'closure feels like whack-a-mole: fixing the worst path promotes the next one. The '
-          + 'discipline of optimising exactly the binding constraint and nothing else transfers '
-          + 'directly to performance work in software, where the equivalent mistake is '
-          + 'optimising the function that is easiest to optimise.',
+        detail: [
+          'Every optimisation in a synthesis tool is aimed at the most negative slack, and every '
+            + 'other path is ignored until that one is fixed.',
+          'That is why timing closure feels like whack-a-mole: fixing the worst path promotes the '
+            + 'next one.',
+          'The discipline of optimising exactly the binding constraint and nothing else transfers '
+            + 'directly to performance work in software.',
+          'The equivalent mistake there is optimising the function that is easiest to optimise.'
+        ],
         example: 'The demo reports the ripple adder at a period of 38 against a target of 30: '
           + 'slack of −8, which is a design that does not run at that speed.'
       },
@@ -75,11 +89,14 @@
         term: 'Hold violations are fixed by adding delay, and by nothing else',
         plain: 'A path too FAST overwrites the value being captured.',
         formal: 'shortest path from launch to capture must exceed the hold time',
-        detail: 'Slowing the clock moves both edges together, so it changes nothing. Skew makes '
-          + 'it worse in one direction and better in the other, which is why clock trees are '
-          + 'the most carefully engineered wiring on a chip. The only fix is to insert buffers '
-          + 'whose sole purpose is to be slow — a construction that looks like a mistake to '
-          + 'anybody who has not met the constraint, and is mandatory once you have.',
+        detail: [
+          'Slowing the clock moves both edges together, so it changes nothing.',
+          'Skew makes it worse in one direction and better in the other, which is why clock trees '
+            + 'are the most carefully engineered wiring on a chip.',
+          'The only fix is to insert buffers whose sole purpose is to be slow.',
+          'That construction looks like a mistake to anybody who has not met the constraint, and '
+            + 'is mandatory once you have.'
+        ],
         example: 'The demo\'s findings table pairs each symptom with the fix and, more usefully, '
           + 'with the fix that does not work.'
       },
@@ -88,11 +105,13 @@
         plain: 'Divide the logic by k, add the overhead k times.',
         formal: 'period_k = ceil(logic / k) + overhead; speed-up ceiling = (logic + overhead) / overhead',
         readAs: 'the best possible speed-up is the whole delay divided by the per-stage overhead.',
-        detail: 'The ceiling is reached only at infinitely many stages and is approached slowly, '
-          + 'while latency gets worse the whole way down — which is the cost nobody advertises. '
-          + 'In a processor there is a second cost that is not in this arithmetic: every extra '
-          + 'stage lengthens the branch misprediction penalty, which is why pipeline depths '
-          + 'peaked and then came back down.',
+        detail: [
+          'The ceiling is reached only at infinitely many stages, and is approached slowly.',
+          'Latency gets worse the whole way down, which is the cost nobody advertises.',
+          'In a processor there is a second cost that is not in this arithmetic.',
+          'Every extra stage lengthens the branch misprediction penalty, which is why pipeline '
+            + 'depths peaked and then came back down.'
+        ],
         example: 'Cutting 35 gate delays into 2 stages gives a period of 21 and a speed-up of '
           + '1.81; 6 stages gives 4.22; the ceiling is 12.67.'
       },
@@ -101,12 +120,14 @@
         plain: 'A wire that changes three times before settling cost three times one that changed once.',
         formal: 'dynamic power is proportional to activity x capacitance x voltage^2 x frequency',
         readAs: 'power grows with how often wires switch, with capacitance, with the square of the voltage and with frequency.',
-        detail: 'The demo counts every wire change over a set of seeded transitions and reports '
-          + 'how many were glitches, which makes the hazard from the minimisation section '
-          + 'reappear as a power bill. It also shows the measurement depending entirely on how '
-          + 'the inputs are driven: a uniform walk of the low bits measures almost no glitching '
-          + 'because consecutive vectors differ in one bit, and a glitch needs several inputs '
-          + 'moving at once.',
+        detail: [
+          'The demo counts every wire change over a set of seeded transitions and reports how '
+            + 'many were glitches.',
+          'That makes the hazard from the minimisation section reappear as a power bill.',
+          'It also shows the measurement depending entirely on how the inputs are driven.',
+          'A uniform walk of the low bits measures almost no glitching, because consecutive '
+            + 'vectors differ in one bit and a glitch needs several inputs moving at once.'
+        ],
         example: 'Over 32 seeded transitions the 8-bit ALU wastes 41.1% of its switching on '
           + 'glitches — 1 296 of 3 157 wire changes.'
       },
@@ -115,12 +136,15 @@
         plain: 'Two cores at half the frequency and a lower voltage beat one core at full speed.',
         formal: 'P = a x V^2 x f, so halving f and V gives a quarter of the dynamic power per core',
         readAs: 'power is switching activity times the voltage squared times the clock frequency.',
-        detail: 'Two cores at half frequency do the same total work as one at full, and the '
-          + 'lower frequency permits a lower voltage — and the square makes that a large win. '
-          + 'The proviso is that the work must divide, which is the whole of parallel '
-          + 'programming and why Amdahl\'s law stopped being academic around 2005. Leakage '
-          + 'scales with voltage alone and does not shrink the same way, which is why the '
-          + 'strategy has limits.',
+        detail: [
+          'Two cores at half frequency do the same total work as one at full, and the lower '
+            + 'frequency permits a lower voltage.',
+          'The square makes that a large win.',
+          'The proviso is that the work must divide, which is the whole of parallel programming '
+            + 'and why Amdahl\'s law stopped being academic around 2005.',
+          'Leakage scales with voltage alone and does not shrink the same way, which is why the '
+            + 'strategy has limits.'
+        ],
         example: 'The demo\'s comparison: two cores at half frequency use about 29% of the '
           + 'power of one core at full speed for the same throughput.'
       }

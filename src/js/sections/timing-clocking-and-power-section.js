@@ -56,8 +56,9 @@
   function orientation() {
     return [
       '**Static timing analysis walks paths, it does not simulate.** Every path from a start '
-        + 'point — an input or a flip-flop output — to an end point — an output or a flip-flop '
-        + 'data input — is measured, and the worst one is reported. This covers every possible '
+        + 'point to an end point is measured, and the worst one is reported. A start point is '
+        + 'an input or a flip-flop output; an end point is an output or a flip-flop data input. '
+        + 'This covers every possible '
         + 'input pattern at once, which is why it is what tools actually do and why simulation '
         + 'is not a substitute for it.',
       '**The clock period is clock-to-q, plus the logic, plus setup — and only the middle term '
@@ -90,7 +91,7 @@
         + 'switching.',
       '**Power goes as voltage squared, which is why the industry stopped raising frequency.** '
         + 'Two cores at half the frequency do the same work as one at full, and the lower '
-        + 'frequency allows a lower voltage — and the square makes that a large win. The '
+        + 'frequency allows a lower voltage. The square makes that a large win. The '
         + 'demo\'s power table is that comparison, and it is the whole reason your laptop has '
         + 'eight cores rather than one very fast one.'
     ];
@@ -109,22 +110,22 @@
 
   function insight() {
     return '**The clock period is a budget, and every architectural decision in a processor is '
-      + 'an argument about how to spend it.** Everything that has to happen between two '
-      + 'flip-flops — read a register, add, check a condition, select a result — is charged '
-      + 'against one period, and the period is set by the worst case over every input the '
+      + 'an argument about how to spend it.** Read a register, add, check a condition, select a '
+      + 'result: everything that has to happen between two flip-flops is charged '
+      + 'against one period. The period is set by the worst case over every input the '
       + 'circuit might ever see. That is why deeper pipelines were the answer for a decade '
-      + '(smaller budget per stage, more stages) and why they stopped being the answer: the '
+      + '(smaller budget per stage, more stages) and why they stopped being the answer. The '
       + 'per-stage overhead is fixed, so the speed-up saturates, and every extra stage costs a '
       + 'cycle of branch misprediction penalty. The power half of the story is the one that '
       + 'ended the frequency race outright. Dynamic power goes as the square of the voltage, '
-      + 'and a lower clock frequency permits a lower voltage — so two cores at half speed use '
+      + 'and a lower clock frequency permits a lower voltage. So two cores at half speed use '
       + 'dramatically less power than one core at full speed for the same throughput, provided '
-      + 'the work can be split. That proviso is the whole of parallel programming, and it is '
+      + 'the work can be split. That proviso is the whole of parallel programming. It is '
       + 'why Amdahl\'s law stopped being an academic curiosity around 2005 and became the thing '
       + 'that determines whether your software gets faster. The last thing to take away is '
       + 'smaller and sharper: glitches cost energy. A circuit that computes the right answer '
       + 'after wobbling three times has burned three times the switching energy of one that '
-      + 'settled directly, which is why the redundant term that removed a hazard two sections '
+      + 'settled directly. That is why the redundant term that removed a hazard two sections '
       + 'ago also removed a power cost — the same fix, measured in a different unit.';
   }
 
