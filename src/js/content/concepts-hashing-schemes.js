@@ -195,27 +195,35 @@
         readAs: 'Each control byte is either one of two special markers — 0x80 for empty, 0xFE for deleted — ' +
           'or any value from 0 to 0x7F standing for a live entry. The ∪ joins the two possibilities ' +
           'into one set of allowed values.',
-        detail: 'A Swiss table keeps a one-byte summary of each slot in a separate array: the top bit ' +
-          'distinguishes the special states — empty and deleted — from an occupied slot, whose ' +
-          'remaining seven bits hold a tag taken from the key\'s hash. Because the summaries are ' +
-          'dense and separate from the entries, a probe can examine many slots per cache line: a ' +
-          'group is 16 control bytes, and a 64-byte line holds four groups, so one fetch covers the ' +
-          'metadata for 64 slots. The entries array is only touched once a tag matches.',
+        detail: [
+          'A Swiss table keeps a one-byte summary of each slot in a separate array. The top bit ' +
+            'distinguishes the special states — empty and deleted — from an occupied slot, whose ' +
+            'remaining seven bits hold a tag taken from the key\'s hash.',
+          'Because the summaries are dense and separate from the entries, a probe can examine many ' +
+            'slots per cache line.',
+          'A group is 16 control bytes, and a 64-byte line holds four groups, so one fetch covers ' +
+            'the metadata for 64 slots.',
+          'The entries array is only touched once a tag matches.'
+        ],
         example: 'A group is 16 control bytes; a 64-byte line holds four groups, so one fetch covers 64 slots.'
       },
       {
         term: 'H1 and H2',
         plain: 'The hash is split: high bits choose the group, the low 7 bits become the tag.',
         formal: 'H1 = h >> 7, H2 = h & 0x7F',
-        readAs: 'Split the hash in two: shift it right by 7 to get the part that picks the group, and keep ' +
-          'the bottom 7 bits as the tag stored in the control byte. One hash, two independent jobs.',
-        detail: 'The design uses the hash twice, and it uses different parts for the two jobs so they ' +
-          'stay independent: the upper bits select which group to probe, and the low seven become ' +
-          'the tag stored in the control byte. If those two parts were correlated, keys landing in ' +
-          'the same group would also tend to share a tag, and the tag would stop filtering. That is ' +
-          'why the quality demanded of the hash here is higher than for a plain masked table — both ' +
-          'ends of the word have to be well mixed, which is precisely what the hash-functions ' +
-          'section is about.',
+        readAs: 'Split the hash in two. Shift it right by 7 to get the part that picks the group, ' +
+          'and keep the bottom 7 bits as the tag stored in the control byte. One hash, two ' +
+          'independent jobs.',
+        detail: [
+          'The design uses the hash twice, and it uses different parts for the two jobs so they ' +
+            'stay independent. The upper bits select which group to probe, and the low seven ' +
+            'become the tag stored in the control byte.',
+          'If those two parts were correlated, keys landing in the same group would also tend to ' +
+            'share a tag, and the tag would stop filtering.',
+          'That is why the quality demanded of the hash here is higher than for a plain masked ' +
+            'table. Both ends of the word have to be well mixed, which is precisely what the ' +
+            'hash-functions section is about.'
+        ],
         example: 'Both halves must be well mixed, which is why 3.1 comes first.'
       },
       {
@@ -232,13 +240,17 @@
         },
         plain: 'Compare the tag against all 16 control bytes at once and get a bitmask of candidates.',
         formal: '_mm_cmpeq_epi8 then movemask',
-        detail: 'The tag is broadcast across a 16-byte SIMD register and compared against a whole ' +
-          'group of control bytes in one instruction, and the result is condensed into a 16-bit mask ' +
-          'whose set bits are the candidate slots. Iterating the mask visits only those, so a lookup ' +
-          'typically performs one key comparison after one metadata fetch. This is the mechanism ' +
-          'that lets the table run at 87.5% load: the expensive part of a probe is examining slots, ' +
-          'and sixteen of them are examined at once. The implementation here uses a byte loop with ' +
-          'the same structure, since JavaScript has no SIMD.',
+        detail: [
+          'The tag is broadcast across a 16-byte SIMD register and compared against a whole group ' +
+            'of control bytes in one instruction. The result is condensed into a 16-bit mask whose ' +
+            'set bits are the candidate slots.',
+          'Iterating the mask visits only those, so a lookup typically performs one key comparison ' +
+            'after one metadata fetch.',
+          'This is the mechanism that lets the table run at 87.5% load. The expensive part of a ' +
+            'probe is examining slots, and sixteen of them are examined at once.',
+          'The implementation here uses a byte loop with the same structure, since JavaScript has ' +
+            'no SIMD.'
+        ],
         example: 'One SSE2 instruction over a 16-byte group in C++; a byte loop here, same structure.'
       },
       {
@@ -247,13 +259,16 @@
         formal: 'P = 1/128 ≈ 0.008',
         readAs: 'Two different keys share a 7-bit tag about once in every 128 tries, so roughly 0.8% of ' +
           'candidate matches are false and need a full key comparison to reject.',
-        detail: 'Seven bits cannot identify a key, so two distinct keys in the same group share a tag ' +
-          'about one time in 128, and the table pays a full key comparison to discover the mismatch. ' +
-          'That is the entire error budget of the design, and it is well spent: 0.8% of probes cost ' +
-          'an extra comparison, in exchange for rejecting the other 99.2% without touching the ' +
-          'entries array at all. It is the same trade a Bloom filter makes — a small, quantified ' +
-          'false-positive rate bought with very little metadata — and the tag is never allowed to ' +
-          'decide equality on its own.',
+        detail: [
+          'Seven bits cannot identify a key, so two distinct keys in the same group share a tag ' +
+            'about one time in 128. The table pays a full key comparison to discover the mismatch.',
+          'That is the entire error budget of the design, and it is well spent. Only 0.8% of ' +
+            'probes cost an extra comparison, and the other 99.2% are rejected without touching ' +
+            'the entries array at all.',
+          'It is the same trade a Bloom filter makes: a small, quantified false-positive rate ' +
+            'bought with very little metadata.',
+          'The tag is never allowed to decide equality on its own.'
+        ],
         example: 'That is the entire error budget of the design.'
       },
       {
@@ -262,51 +277,63 @@
         formal: 'grow at α > 0.875',
         readAs: 'Resize once the table is more than seven-eighths full. Higher than most open-addressing ' +
           'schemes dare, and the SIMD group scan is what makes it affordable.',
-        detail: 'A conventional open-addressed table is deep into the 1/(1 − α) wall at 87.5% load, ' +
-          'averaging four probes and walking long runs. A Swiss table is not, because its unit of ' +
-          'work is a group rather than a slot: a run of occupied slots is scanned sixteen at a time, ' +
-          'so the same occupancy costs a fraction of the memory traffic. That is what allows Abseil ' +
-          'to set the growth threshold at 7/8, which means fewer resizes and roughly a third less ' +
-          'memory for the same key count than a table growing at 0.5 or 0.75.',
+        detail: [
+          'A conventional open-addressed table is deep into the 1/(1 − α) wall at 87.5% load, ' +
+            'averaging four probes and walking long runs.',
+          'A Swiss table is not, because its unit of work is a group rather than a slot. A run of ' +
+            'occupied slots is scanned sixteen at a time, so the same occupancy costs a fraction ' +
+            'of the memory traffic.',
+          'That is what allows Abseil to set the growth threshold at 7/8. It means fewer resizes, ' +
+            'and roughly a third less memory for the same key count than a table growing at 0.5 ' +
+            'or 0.75.'
+        ],
         example: 'Abseil\'s choice; a plain open-addressed table would be suffering at that load.'
       },
       {
         term: 'Metadata separation',
         plain: 'Keeping tags apart from entries means a rejected group never touches the (large) slot array.',
         formal: 'ctrl array: 1 byte/slot',
-        detail: 'The point of holding control bytes in their own array is that failure is cheap. A ' +
-          'group that contains no matching tag is rejected without reading a single entry, so the ' +
-          'large slot array — potentially dozens of bytes per entry — is touched only when the ' +
-          'metadata says it is worth touching. The control array is small enough to stay resident: ' +
-          'a 4 096-slot table needs 4 KB of it. The cost is one extra indirection and the need to ' +
-          'keep the two arrays consistent, which is straightforward because they are indexed ' +
-          'identically.',
+        detail: [
+          'The point of holding control bytes in their own array is that failure is cheap.',
+          'A group that contains no matching tag is rejected without reading a single entry. The ' +
+            'large slot array — potentially dozens of bytes per entry — is touched only when the ' +
+            'metadata says it is worth touching.',
+          'The control array is small enough to stay resident: a 4 096-slot table needs 4 KB of it.',
+          'The cost is one extra indirection and the need to keep the two arrays consistent, which ' +
+            'is straightforward because they are indexed identically.'
+        ],
         example: 'A 4 096-slot table has a 4 KB control array — usually resident.'
       },
       {
         term: 'DELETED means keep going',
         plain: 'A deleted slot must not read as empty: a probe stops at the first empty lane, and a key inserted past this group is only reachable through it.',
         formal: 'EMPTY = 0x80 stops the probe; DELETED = 0xFE does not',
-        detail: 'The two special control values look similar and mean opposite things to a probe. ' +
-          'EMPTY terminates the search, because a key that hashed here would have been placed here; ' +
+        detail: [
+          'The two special control values look similar and mean opposite things to a probe.',
+          'EMPTY terminates the search, because a key that hashed here would have been placed here.',
           'DELETED does not, because a key may have been inserted past this slot while it was ' +
-          'occupied and is reachable only by continuing through it. Collapsing the two states loses ' +
-          'keys. The price is the familiar tombstone problem in group form: 700 deletions leave 700 ' +
-          'DELETED bytes that still cost probe work, with lookups touching 1.051 groups instead of ' +
-          'the ideal 1.',
+            'occupied, and is reachable only by continuing through it. Collapsing the two states ' +
+            'loses keys.',
+          'The price is the familiar tombstone problem in group form. Seven hundred deletions ' +
+            'leave 700 DELETED bytes that still cost probe work, with lookups touching 1.051 ' +
+            'groups instead of the ideal 1.'
+        ],
         example: '700 deletions leave 700 DELETED bytes, and lookups still touch 1.051 groups.'
       },
       {
         term: 'Rehash in place',
         plain: 'Deletions raise occupancy without raising the live count, so the growth trigger fires on a table that is half empty. The fix is to rebuild at the same capacity.',
         formal: 'grow when (live + deleted)/slots > maxLoad',
-        detail: 'Because tombstones count towards the probing load, a delete-heavy workload can drive ' +
-          '(live + deleted)/slots past the growth threshold while the live load is only 0.34 — and ' +
-          'doubling the table then wastes memory to solve a problem that is not about capacity at ' +
-          'all. The correct response is to rebuild at the same capacity, which drops every tombstone ' +
-          'and restores probe lengths for the cost of one rehash. Distinguishing "too many entries" ' +
-          'from "too many tombstones" before resizing is what keeps a long-lived table from growing ' +
-          'without bound.',
+        detail: [
+          'Because tombstones count towards the probing load, a delete-heavy workload can drive ' +
+            '(live + deleted)/slots past the growth threshold while the live load is only 0.34.',
+          'Doubling the table then wastes memory to solve a problem that is not about capacity at ' +
+            'all.',
+          'The correct response is to rebuild at the same capacity, which drops every tombstone ' +
+            'and restores probe lengths for the cost of one rehash.',
+          'Distinguishing "too many entries" from "too many tombstones" before resizing is what ' +
+            'keeps a long-lived table from growing without bound.'
+        ],
         example: 'A delete-heavy workload would otherwise double a table whose live load is 0.34.'
       }
     ],

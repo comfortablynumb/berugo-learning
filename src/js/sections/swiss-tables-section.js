@@ -29,8 +29,8 @@
           'its tag against all 16 control bytes at once and only touches the slots whose tag matched.',
         'Two consequences follow. A group is 16 control bytes and a cache line is 64, so one fetch ' +
           'brings in the metadata for sixty-four slots. And a tag mismatch rejects a slot without ' +
-          'reading the key at all, so the expensive comparison happens about once per lookup even ' +
-          'at a load factor where linear probing is walking long runs.',
+          'reading the key at all. The expensive comparison then happens about once per lookup, ' +
+          'even at a load factor where linear probing is walking long runs.',
         'The 7-bit tag collides once in 128, so a false match costs one real key comparison. That is ' +
           'the entire error budget, and it is why the design tolerates a 7/8 load factor.'
       ],
