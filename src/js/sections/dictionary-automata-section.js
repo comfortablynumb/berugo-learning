@@ -32,23 +32,23 @@
       sectionId: SECTION_ID,
       orientation: [
         'A ternary search tree is a binary search tree whose comparison is on one character, with a ' +
-          'third "equal" child that advances to the next one. Three pointers per node however large ' +
-          'the alphabet, so no per-symbol waste and no hashing — but a search now compares ' +
+          'third "equal" child that advances to the next one. Three pointers per node however ' +
+          'large the alphabet, so no per-symbol waste and no hashing. But a search now compares ' +
           'characters instead of indexing them, and the tree inherits a BST\'s sensitivity to ' +
           'insertion order. Sorted input builds a right spine at every level: height 34 over the ' +
           'word list, against 18 for a median-order build of the same words.',
-        'A DAWG goes the other way. A trie merges keys that start the same; a DAWG also merges keys ' +
-          'that *end* the same, so "walking", "talking" and "running" share one copy of "ing". Over ' +
-          '883 English words that is 721 states against the trie\'s 2 562, and lookup is still one ' +
-          'step per character — the graph is a compressed dictionary you can query without ' +
-          'decompressing.',
-        'The construction is the interesting part. Keys arrive in sorted order, which guarantees a ' +
-          'branch that has been left behind can never be extended, so it can be minimised ' +
-          'immediately: a register maps a state\'s signature to a canonical state, and any state ' +
+        'A DAWG goes the other way. A trie merges keys that start the same; a DAWG also merges ' +
+          'keys that *end* the same, so "walking", "talking" and "running" share one copy of ' +
+          '"ing". Over 883 English words that is 721 states against the trie\'s 2 562, and lookup ' +
+          'is still one step per character. The graph is a compressed dictionary you can query ' +
+          'without decompressing.',
+        'The construction is the interesting part. Keys arrive in sorted order, which guarantees ' +
+          'a branch that has been left behind can never be extended, so it can be minimised ' +
+          'immediately. A register maps a state\'s signature to a canonical state, and any state ' +
           'whose signature is already registered is replaced by it. Sorted input is a correctness ' +
-          'requirement, not a convenience — insert out of order and a state that was already merged ' +
-          'acquires a new edge, and every parent pointing at it silently gains a word nobody ' +
-          'inserted.'
+          'requirement, not a convenience. Insert out of order and a state that was already ' +
+          'merged acquires a new edge, and every parent pointing at it silently gains a word ' +
+          'nobody inserted.'
       ],
       demo: {
         title: 'Interactive demo — minimisation, insertion order and a fuzzy lookup',

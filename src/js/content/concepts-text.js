@@ -339,13 +339,15 @@
         formal: 'node = { symbol, terminal, lo, eq, hi }',
         readAs: 'A ternary trie node holds one character and three pointers: go to lo if the query character ' +
           'is smaller, hi if larger, and eq to advance to the next character. Only eq consumes input.',
-        detail: 'The ternary search tree is the compromise between a map node and an array node: no ' +
-          'per-symbol slot, no hash per step, a fixed three pointers per node. A search compares ' +
-          'the current query character against the node symbol and goes left, right or — on a match ' +
-          '— down and forward to the next query character. That makes the cost length plus a ' +
-          'binary-search-like term per level, so it is more comparisons than a trie and less memory ' +
-          'than an array trie, and which side of that trade wins depends entirely on the alphabet ' +
-          'size.',
+        detail: [
+          'The ternary search tree is the compromise between a map node and an array node: no ' +
+            'per-symbol slot, no hash per step, a fixed three pointers per node.',
+          'A search compares the current query character against the node symbol and goes left, ' +
+            'right or — on a match — down and forward to the next query character.',
+          'That makes the cost length plus a binary-search-like term per level.',
+          'So it is more comparisons than a trie and less memory than an array trie, and which ' +
+            'side of that trade wins depends entirely on the alphabet size.'
+        ],
         example: 'over 883 words it costs 118.9 bytes per key and 21.3 comparisons per lookup.'
       },
       {
@@ -355,24 +357,31 @@
         readAs: 'Inserting keys in sorted order sends every one down the same side, so the ternary trie ' +
           'degenerates into a list at each character position. Shuffle or use the median character ' +
           'instead.',
-        detail: 'This is the inherited defect and it is easy to walk into, because a dictionary is ' +
-          'usually already sorted. Inserting the word list in order gives height 34; inserting the ' +
-          'same words by recursive median selection gives 18, and the lookup cost falls from 36.2 ' +
-          'comparisons to 21.3. Nothing about the key set changed. A real build either shuffles or ' +
-          'inserts by median, and an implementation that does neither is a linked list wearing a ' +
-          'tree\'s interface — the same failure a plain BST has, for the same reason.',
+        detail: [
+          'This is the inherited defect and it is easy to walk into, because a dictionary is ' +
+            'usually already sorted.',
+          'Inserting the word list in order gives height 34. Inserting the same words by recursive ' +
+            'median selection gives 18, and the lookup cost falls from 36.2 comparisons to 21.3.',
+          'Nothing about the key set changed.',
+          'A real build either shuffles or inserts by median. An implementation that does neither ' +
+            'is a linked list wearing a tree\'s interface — the same failure a plain BST has, for ' +
+            'the same reason.'
+        ],
         example: 'height 34 from sorted input against 18 from median order, over the same 883 words.'
       },
       {
         term: 'Near-neighbour search by pruning',
         plain: 'At each node the remaining edit budget decides which of the three children can still match.',
         formal: 'visit lo/hi only while budget > 0; charge eq by whether the symbols match',
-        detail: 'This is the query that justifies the structure. Because the tree is ordered on ' +
-          'symbols, a node with the budget exhausted can only be matched by its `eq` child, and the ' +
-          'other two subtrees are skipped without a comparison. A distance-1 query over 883 words ' +
-          'visits 106 nodes of 2 561 — four percent of the tree — and returns exactly the right ' +
-          'answer. A hash table cannot answer this at all and a plain trie can only answer it by ' +
-          'walking every branch, because it has no ordering to prune on.',
+        detail: [
+          'This is the query that justifies the structure.',
+          'Because the tree is ordered on symbols, a node with the budget exhausted can only be ' +
+            'matched by its `eq` child. The other two subtrees are skipped without a comparison.',
+          'A distance-1 query over 883 words visits 106 nodes of 2 561 — four percent of the ' +
+            'tree — and returns exactly the right answer.',
+          'A hash table cannot answer this at all, and a plain trie can only answer it by walking ' +
+            'every branch, because it has no ordering to prune on.'
+        ],
         example: 'within 1 substitution of "cat": can, car, cat, cut, eat, hat — 106 nodes visited.'
       },
       {
@@ -382,40 +391,50 @@
         readAs: 'A DAWG has one state per group of positions that have the same set of continuations. Two ' +
           'prefixes that can be completed in identical ways are the same state, which is what lets the ' +
           'structure share the tails of words.',
-        detail: 'A trie merges "walking" and "talking" up to the point they differ and then keeps two ' +
-          'separate copies of "king". A DAWG notices that the two subtrees accept the same language ' +
-          'and makes them one state. That turns the tree into a DAG, and over an English word list ' +
-          'it collapses 2 562 nodes into 721 — because English morphology means a few thousand ' +
-          'words share a few dozen endings. Lookup does not change at all: it is still one ' +
-          'transition per character, so this is compression you query without decompressing.',
+        detail: [
+          'A trie merges "walking" and "talking" up to the point they differ, and then keeps two ' +
+            'separate copies of "king".',
+          'A DAWG notices that the two subtrees accept the same language and makes them one state.',
+          'That turns the tree into a DAG, and over an English word list it collapses 2 562 nodes ' +
+            'into 721. English morphology means a few thousand words share a few dozen endings.',
+          'Lookup does not change at all. It is still one transition per character, so this is ' +
+            'compression you query without decompressing.'
+        ],
         example: '721 states against the trie\'s 2 562 nodes — 3.55× fewer, 3.22× fewer bytes.'
       },
       {
         term: 'The register',
         plain: 'A map from a state\'s signature to the canonical state with that signature.',
         formal: 'signature(s) = terminal(s) ⧺ sorted (symbol, id(target)) pairs',
-        detail: 'Minimisation is a hash lookup: two states are the same state exactly when they ' +
-          'accept the same language, and for a deterministic acyclic automaton that is decidable ' +
-          'from the terminal flag plus the identities of the targets. So the algorithm keeps a map ' +
-          'keyed on that signature, and any newly finished state whose signature is already present ' +
-          'is discarded and its parent repointed. The signature includes target *identities*, not ' +
-          'target contents, which is why minimisation must run bottom-up — a signature is only ' +
-          'stable once nothing below it can still change.',
+        detail: [
+          'Minimisation is a hash lookup. Two states are the same state exactly when they accept ' +
+            'the same language. For a deterministic acyclic automaton that is decidable from the ' +
+            'terminal flag plus the identities of the targets.',
+          'So the algorithm keeps a map keyed on that signature, and any newly finished state ' +
+            'whose signature is already present is discarded and its parent repointed.',
+          'The signature includes target *identities*, not target contents, which is why ' +
+            'minimisation must run bottom-up. A signature is only stable once nothing below it can ' +
+            'still change.'
+        ],
         example: '883 words produce 720 distinct signatures and 1 841 merges.'
       },
       {
         term: 'Sorted input is a correctness requirement',
         plain: 'Keys must arrive in order, or a merged state can silently gain a word nobody inserted.',
         formal: 'sorted arrival ⇒ a left-behind branch can never be extended',
-        readAs: 'When keys arrive in order, any branch you have moved past can never receive another key — ' +
-          'which is exactly what lets it be frozen and shared immediately, rather than at the end.',
-        detail: 'The incremental algorithm minimises a branch the moment it is left behind, which is ' +
-          'only safe because sorted arrival guarantees no later key will extend it. Break that and ' +
-          'the failure is invisible: a state that was merged into a canonical one acquires a new ' +
-          'edge, and every parent that was repointed at it now accepts a word that was never ' +
-          'inserted. The automaton is still deterministic, still acyclic, still passes "does it ' +
-          'accept everything I put in" — and accepts a superset. Rejecting unsorted input is ' +
-          'cheaper than any test that would catch this.',
+        readAs: 'When keys arrive in order, any branch you have moved past can never receive ' +
+          'another key. That is exactly what lets it be frozen and shared immediately, rather ' +
+          'than at the end.',
+        detail: [
+          'The incremental algorithm minimises a branch the moment it is left behind, which is ' +
+            'only safe because sorted arrival guarantees no later key will extend it.',
+          'Break that and the failure is invisible. A state that was merged into a canonical one ' +
+            'acquires a new edge, and every parent that was repointed at it now accepts a word ' +
+            'that was never inserted.',
+          'The automaton is still deterministic, still acyclic, still passes "does it accept ' +
+            'everything I put in" — and accepts a superset.',
+          'Rejecting unsorted input is cheaper than any test that would catch this.'
+        ],
         example: 'the builder throws on an out-of-order key rather than producing a superset.'
       },
       {
@@ -425,25 +444,31 @@
         readAs: 'How many words pass through a state is a total over every path that reaches it, so you ' +
           'cannot read it off the state itself. That is the difference between a trie, where each node ' +
           'has one parent, and a DAWG, where it may have many.',
-        detail: 'In a trie every node is reached by exactly one string, so a traversal can carry the ' +
-          'spelling and a visited-set on nodes is harmless. In a DAWG a state is reached by many ' +
-          'strings — that is the compression — so marking a state visited drops every word that ' +
-          'would have reached it by another route. This is the enumeration bug that follows ' +
-          'immediately from the structure, and it shows up as a `keys()` that returns fewer words ' +
-          'than were inserted while every individual lookup still succeeds.',
+        detail: [
+          'In a trie every node is reached by exactly one string, so a traversal can carry the ' +
+            'spelling and a visited-set on nodes is harmless.',
+          'In a DAWG a state is reached by many strings; that is the compression. Marking a state ' +
+            'visited therefore drops every word that would have reached it by another route.',
+          'This is the enumeration bug that follows immediately from the structure.',
+          'It shows up as a `keys()` that returns fewer words than were inserted, while every ' +
+            'individual lookup still succeeds.'
+        ],
         example: 'the walk carries (state, spelling) pairs, so one state can yield many words.'
       },
       {
         term: 'The lookup cost does not change',
         plain: 'Sharing suffixes compresses the graph and leaves the walk at one step per character.',
         formal: 'lookup = |query| transitions, in trie and DAWG alike',
-        detail: 'This is what makes a DAWG the right way to ship a dictionary rather than an ' +
-          'interesting curiosity. Compression schemes usually charge for decompression at query ' +
-          'time; here the compressed form is the query structure. Measured over the same word list ' +
-          'both the trie and the DAWG do 5.04 character steps per lookup, and the DAWG does it in ' +
-          '28.8 bytes per key against 92.8. That is why spell checkers ship word lists as automata ' +
-          'and why the technique survives into finite-state transducers, which add an output tape ' +
-          'to the same idea.',
+        detail: [
+          'This is what makes a DAWG the right way to ship a dictionary rather than an interesting ' +
+            'curiosity.',
+          'Compression schemes usually charge for decompression at query time. Here the compressed ' +
+            'form is the query structure.',
+          'Measured over the same word list both the trie and the DAWG do 5.04 character steps per ' +
+            'lookup, and the DAWG does it in 28.8 bytes per key against 92.8.',
+          'That is why spell checkers ship word lists as automata, and why the technique survives ' +
+            'into finite-state transducers, which add an output tape to the same idea.'
+        ],
         example: '5.04 steps per lookup in both, at 28.8 bytes per key against 92.8.'
       }
     ]
