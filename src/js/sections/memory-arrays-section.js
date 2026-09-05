@@ -71,7 +71,7 @@
       '**A register file is an array of registers plus the logic to address it, and which half '
         + 'dominates depends on what a cell costs.** Built from flip-flops, as the demo builds '
         + 'it, a stored bit is about thirteen gates and the access logic is a fraction of the '
-        + 'total — the measured share climbs from roughly a tenth at two registers to nearly a '
+        + 'total. The measured share climbs from roughly a tenth at two registers to nearly a '
         + 'fifth at eight. Swap the flip-flops for six-transistor SRAM cells, which is what a '
         + 'real array does, and the same access logic becomes the dominant cost.',
       '**Writing is a decoder and reading is a multiplexer, which is the duality from the blocks '
@@ -93,7 +93,7 @@
         + 'measured in hundreds of bits, a cache in millions, and they are built from different '
         + 'cells.',
       '**DRAM trades transistors for refresh.** One transistor and one capacitor per bit is the '
-        + 'densest thing anybody has built, and the price is that the charge leaks: the array '
+        + 'densest thing anybody has built, and the price is that the charge leaks. The array '
         + 'has to be read and rewritten thousands of times a second, and a read destroys the row '
         + 'it touched. Everything odd about DRAM timing follows from those two facts.',
       '**The array is a grid, so a memory access is a row and then a column.** Activating a row '
@@ -120,25 +120,25 @@
   }
 
   function insight() {
-    return '**The register file is where the memory hierarchy starts, and the asymmetry that '
+    return '**The register file is where the memory hierarchy starts.** The asymmetry that '
       + 'shapes the whole hierarchy is visible in this one block: capacity is the cheap '
-      + 'dimension and concurrent access is the expensive one.** Doubling the number of '
-      + 'registers costs flip-flops in proportion and adds one level to each read tree; adding '
+      + 'dimension and concurrent access is the expensive one. Doubling the number of '
+      + 'registers costs flip-flops in proportion and adds one level to each read tree. Adding '
       + 'a port costs a whole multiplexer tree per bit and touches nothing else. That asymmetry '
       + 'propagates all the way up. A cache is '
-      + 'banked rather than multiported because ports are what cost; a DRAM has one row buffer '
-      + 'and gets its bandwidth from bursting along it; a database index is cheap to read and '
+      + 'banked rather than multiported because ports are what cost. A DRAM has one row buffer '
+      + 'and gets its bandwidth from bursting along it. A database index is cheap to read and '
       + 'expensive to keep sorted under concurrent writers. In every case the capacity is the '
-      + 'easy dimension and the concurrent-access dimension is the hard one, which is why '
+      + 'easy dimension and the concurrent-access dimension is the hard one. That is why '
       + '"just add more memory" works and "just add more parallel readers" does not. The second '
       + 'thing worth carrying is the read-during-write question, because it is the hardware '
-      + 'version of a race condition and it has the same three possible answers: you get the '
+      + 'version of a race condition. It has the same three possible answers: you get the '
       + 'old value, you get the new value, or the design forbids the situation. Hardware picks '
       + 'one and documents it. A pipeline that reads the register file in the same cycle a '
       + 'previous instruction writes it needs a forwarding path precisely because the answer is '
-      + '"the old value", and that forwarding path is one of the most bug-prone parts of a '
-      + 'simple processor — for exactly the reason concurrent code is bug-prone, which is that '
-      + 'the correct behaviour depends on a timing relationship that is invisible in the source.';
+      + '"the old value". That forwarding path is one of the most bug-prone parts of a '
+      + 'simple processor, for exactly the reason concurrent code is bug-prone. The correct '
+      + 'behaviour depends on a timing relationship that is invisible in the source.';
   }
 
   function render(app) {

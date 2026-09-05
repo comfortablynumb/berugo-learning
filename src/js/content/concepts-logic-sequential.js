@@ -295,11 +295,15 @@
         term: 'A memory is a decoder, some storage and a multiplexer',
         plain: 'Writing decodes an address into an enable; reading selects with a tree.',
         formal: 'write: enable_i = (address = i) and write_enable. read: out = mux(address, cells)',
-        detail: 'Both blocks were measured two sections ago, which is the point: a memory is '
-          + 'not a new kind of circuit. It is the decoder and the multiplexer arranged around '
-          + 'some cells, and its cost curves are theirs. Once that is clear, every memory '
-          + 'structure in a machine — a cache, a TLB, a branch predictor table, a register file '
-          + '— is the same picture with different numbers.',
+        detail: [
+          'Both blocks were measured two sections ago, which is the point. A memory is not a new '
+            + 'kind of circuit.',
+          'It is the decoder and the multiplexer arranged around some cells, and its cost curves '
+            + 'are theirs.',
+          'Once that is clear, every memory structure in a machine is the same picture with '
+            + 'different numbers.',
+          'That covers a cache, a TLB, a branch predictor table and a register file.'
+        ],
         example: 'A 4-by-4-bit register file is 244 gates, of which 36 are decode and read '
           + 'multiplexing and the rest are the 16 storage cells.'
       },
@@ -307,25 +311,31 @@
         term: 'Capacity is the cheap dimension and ports are the expensive one',
         plain: 'Doubling the registers adds cells; adding a read port duplicates every read tree.',
         formal: 'gates grow with capacity, and with capacity x width x ports',
-        detail: 'That asymmetry is why a three-operand instruction set needs two read ports and '
-          + 'one write port, why a third read port for a fused multiply-add is a real '
-          + 'architectural decision, and why a wide out-of-order machine spends an enormous '
-          + 'share of its area on the register file and its bypass network. It also explains '
-          + 'banking: splitting the array and accepting occasional conflicts is cheaper than '
-          + 'building ports that never conflict.',
+        detail: [
+          'That asymmetry is why a three-operand instruction set needs two read ports and one '
+            + 'write port.',
+          'It is why a third read port for a fused multiply-add is a real architectural decision.',
+          'It is why a wide out-of-order machine spends an enormous share of its area on the '
+            + 'register file and its bypass network.',
+          'It also explains banking. Splitting the array and accepting occasional conflicts is '
+            + 'cheaper than building ports that never conflict.'
+        ],
         example: 'From 2 to 8 registers at the same width, access logic goes from 10% of the '
-          + 'gates to 18% — and a third read port would roughly double the read side.'
+          + 'gates to 18%. A third read port would roughly double the read side.'
       },
       {
         term: 'Which half dominates depends on what a cell costs',
         plain: 'A flip-flop bit is about thirteen gates; an SRAM cell is six transistors.',
         formal: 'flip-flop about 20 transistors per bit; SRAM 6; DRAM 1 plus a capacitor',
-        detail: 'Built from flip-flops, as the demo builds it, the cells dominate and the '
-          + 'access logic is a fifth of the total at most. Swap in six-transistor SRAM cells — '
-          + 'which is what a real array does, at the price of needing sense amplifiers and a '
-          + 'special layout — and the same access logic becomes the larger half. The general '
-          + 'point is that "storage is cheap, access is expensive" is a claim about a '
-          + 'technology, not a law.',
+        detail: [
+          'Built from flip-flops, as the demo builds it, the cells dominate and the access logic '
+            + 'is a fifth of the total at most.',
+          'Swap in six-transistor SRAM cells and the same access logic becomes the larger half.',
+          'That is what a real array does, at the price of needing sense amplifiers and a special '
+            + 'layout.',
+          'The general point is that "storage is cheap, access is expensive" is a claim about a '
+            + 'technology, not a law.'
+        ],
         example: 'The demo measures 15.3 gates per stored bit in a 4-by-4 file, of which about '
           + '13 per bit is the flip-flop and its recirculating multiplexer.'
       },
@@ -333,11 +343,14 @@
         term: 'SRAM is six transistors and no refresh',
         plain: 'Two cross-coupled inverters and two access transistors.',
         formal: 'a bistable pair driven onto bit lines through pass transistors, read by sense amplifiers',
-        detail: 'It is the same bistable cell as the latch at the start of this milestone, '
-          + 'built as compactly as a process allows and read differentially so that a small '
-          + 'voltage difference is enough. Being static, it needs no refresh and holds while '
-          + 'powered. Being six transistors rather than one, it is expensive per bit — which is '
-          + 'exactly why caches are measured in megabytes and main memory in gigabytes.',
+        detail: [
+          'It is the same bistable cell as the latch at the start of this milestone.',
+          'It is built as compactly as a process allows, and read differentially so that a small '
+            + 'voltage difference is enough.',
+          'Being static, it needs no refresh and holds while powered.',
+          'Being six transistors rather than one, it is expensive per bit. That is exactly why '
+            + 'caches are measured in megabytes and main memory in gigabytes.'
+        ],
         example: 'Six transistors against about twenty for a flip-flop is the factor of three '
           + 'that separates a register file from a cache.'
       },
@@ -345,11 +358,13 @@
         term: 'DRAM trades transistors for refresh, and everything odd follows from that',
         plain: 'One transistor and one capacitor per bit, and the charge leaks.',
         formal: 'a read discharges the cell, so every read is followed by a write-back; rows must be refreshed periodically',
-        detail: 'Reading destroys the row, so the sense amplifiers rewrite it; charge leaks, so '
-          + 'the whole array is read and rewritten thousands of times a second. Every strange '
-          + 'thing about DRAM timing — row activation, precharge, the row buffer, refresh '
-          + 'stalls — is a consequence of those two facts, and so is the density that makes it '
-          + 'main memory.',
+        detail: [
+          'Reading destroys the row, so the sense amplifiers rewrite it.',
+          'Charge leaks, so the whole array is read and rewritten thousands of times a second.',
+          'Every strange thing about DRAM timing is a consequence of those two facts: row '
+            + 'activation, precharge, the row buffer, refresh stalls.',
+          'So is the density that makes it main memory.'
+        ],
         example: 'One transistor per bit against six for SRAM is the factor that decides which '
           + 'level of the hierarchy each technology occupies.'
       },
@@ -357,11 +372,13 @@
         term: 'The array is a grid, so an access is a row and then a column',
         plain: 'Activating a row brings a whole page into the sense amplifiers; columns are then cheap.',
         formal: 'row activation is the expensive step; subsequent column accesses in the same row are not',
-        detail: 'This is where the memory hierarchy\'s locality assumption physically comes '
-          + 'from. A sequential access pattern is not merely cache-friendly; one level further '
-          + 'down it is row-buffer-friendly, and a random pattern pays a row activation per '
-          + 'access. It is also why memory controllers reorder requests: grouping accesses to '
-          + 'the same row is worth more than servicing them in order.',
+        detail: [
+          'This is where the memory hierarchy\'s locality assumption physically comes from.',
+          'A sequential access pattern is not merely cache-friendly. One level further down it is '
+            + 'row-buffer-friendly, and a random pattern pays a row activation per access.',
+          'It is also why memory controllers reorder requests.',
+          'Grouping accesses to the same row is worth more than servicing them in order.'
+        ],
         example: 'The demo\'s technology table sets the transistor costs side by side, which is '
           + 'what makes the hierarchy\'s levels predictable rather than arbitrary.'
       },
@@ -369,12 +386,15 @@
         term: 'Content-addressable memory inverts the interface and pays for it',
         plain: 'Compare the search key against every entry at once.',
         formal: 'a comparator per entry, all switching on every lookup',
-        detail: 'A CAM is what a fully associative cache and a TLB are built from, and its cost '
-          + 'is a comparator per entry plus the power to run them all simultaneously. That is '
-          + 'why associativity is a small number rather than a large one, and why a set-'
-          + 'associative cache — a decoder to pick a set, then a few comparators — is the '
-          + 'design that actually ships. Choosing between "index by address" and "search by '
-          + 'value" is a cost decision, not a semantic one.',
+        detail: [
+          'A CAM is what a fully associative cache and a TLB are built from.',
+          'Its cost is a comparator per entry, plus the power to run them all simultaneously.',
+          'That is why associativity is a small number rather than a large one. It is why a '
+            + 'set-associative cache is the design that actually ships: a decoder to pick a set, '
+            + 'then a few comparators.',
+          'Choosing between "index by address" and "search by value" is a cost decision, not a '
+            + 'semantic one.'
+        ],
         example: 'The demo\'s port table places CAM beside the multiplexer-based read port, '
           + 'where its per-entry comparator cost is visible.'
       },
@@ -382,11 +402,14 @@
         term: 'The reference is a variable, and the gates must agree with it',
         plain: 'One JavaScript array models the file; the netlist must match it every cycle.',
         formal: 'write on the edge, and a read in the same cycle returns the value stored before it',
-        detail: 'The model is four lines and shares nothing with the netlist, which is what '
-          + 'makes agreement informative. It also forces the read-during-write decision to be '
-          + 'stated: this model returns the old value, so the before-edge reading matches and '
-          + 'the after-edge reading does not. A model that fudged that would hide the very '
-          + 'question the section exists to raise.',
+        detail: [
+          'The model is four lines and shares nothing with the netlist, which is what makes '
+            + 'agreement informative.',
+          'It also forces the read-during-write decision to be stated.',
+          'This model returns the old value, so the before-edge reading matches and the '
+            + 'after-edge reading does not.',
+          'A model that fudged that would hide the very question the section exists to raise.'
+        ],
         example: 'Six clocked cycles, 6 of 6 matching the reference on the before-edge reading '
           + 'and 3 of 6 differing between the two readings.'
       }
