@@ -29,14 +29,15 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'A B-tree is not "a tree that is wide". It is a tree whose node is exactly one unit of I/O, ' +
-          'so the branching factor is a consequence of the page size and the key size rather than a ' +
-          'choice: a 4 KB page holding 8-byte keys and 8-byte pointers fits 256 children, and that ' +
-          'is the order.',
-        'The B+ variant puts every value in a leaf, keeps only separators in the internal nodes, and ' +
-          'chains the leaves together. That is what makes it the database index: a point lookup ' +
-          'costs log_B(n) page reads — three for a million keys on a 4 KB page — and a range scan ' +
-          'costs one descent plus a walk along the leaf chain, touching no internal page at all.',
+        'A B-tree is not "a tree that is wide". It is a tree whose node is exactly one unit of ' +
+          'I/O. The branching factor is therefore a consequence of the page size and the key ' +
+          'size, rather than a choice. A 4 KB page holding 8-byte keys and 8-byte pointers fits ' +
+          '256 children, and that is the order.',
+        'The B+ variant puts every value in a leaf, keeps only separators in the internal nodes, ' +
+          'and chains the leaves together. That is what makes it the database index. A point ' +
+          'lookup costs log_B(n) page reads — three for a million keys on a 4 KB page. A range ' +
+          'scan costs one descent plus a walk along the leaf chain, touching no internal page at ' +
+          'all.',
         'The measured reads below are compared against two predictions. The textbook log_B(n) ' +
           'assumes full pages; real pages are not full, and after a sequential load they are about ' +
           'half full, which costs a whole extra level. The second prediction uses the measured fill ' +
@@ -56,11 +57,11 @@
           '    L3 -->|"next"| L4["…"]'
         ].join('\n')
       },
-      insight: 'B-trees are not "trees that are wide", they are trees whose node size equals the unit ' +
-        'of I/O. Change the storage medium and the right order changes with it — and if you load an ' +
-        'index sequentially, every page splits down the middle and the whole structure settles at ' +
-        'half occupancy, which is a level you did not have to pay for. Bulk loading builds the leaves ' +
-        'full instead.'
+      insight: 'B-trees are not "trees that are wide", they are trees whose node size equals the ' +
+        'unit of I/O. Change the storage medium and the right order changes with it. And if you ' +
+        'load an index sequentially, every page splits down the middle and the whole structure ' +
+        'settles at half occupancy. That is a level you did not have to pay for. Bulk loading ' +
+        'builds the leaves full instead.'
     };
   }
 

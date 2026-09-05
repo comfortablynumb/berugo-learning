@@ -23,12 +23,16 @@
         readAs: 'How many children fit in a node: the page size plus one key\'s worth, divided by the space a ' +
           'key-and-pointer pair takes, rounded down. It is a question about bytes per disk page, not ' +
           'about the algorithm.',
-        detail: 'This is the sentence the whole family follows from. A read from disk or from a page ' +
-          'cache costs the same whether you use one byte of the page or all of it, so the node is ' +
-          'sized to the page and filled with as many children as fit. Each child costs a pointer and ' +
-          'all but one costs a separator key, which gives the formula directly: a 4 KB page with ' +
-          '8-byte keys and 8-byte pointers holds 256 children. Change the page size or the key size ' +
-          'and the order changes with it — it was never a tuning knob.',
+        detail: [
+          'This is the sentence the whole family follows from.',
+          'A read from disk or from a page cache costs the same whether you use one byte of the ' +
+            'page or all of it. The node is therefore sized to the page, and filled with as many ' +
+            'children as fit.',
+          'Each child costs a pointer and all but one costs a separator key, which gives the ' +
+            'formula directly. A 4 KB page with 8-byte keys and 8-byte pointers holds 256 children.',
+          'Change the page size or the key size and the order changes with it. It was never a ' +
+            'tuning knob.'
+        ],
         example: 'A 4 KB page holds 256 children; a 512-byte sector holds 32; a 16 KB InnoDB page holds 1 024.'
       },
       {
@@ -38,12 +42,15 @@
         readAs: 'The depth is log of n taken to base B — how many times you multiply the branching factor B ' +
           'by itself to reach n — rounded up. With B in the hundreds, a few levels cover millions of ' +
           'rows.',
-        detail: 'Raising the branching factor from 2 to 256 divides the height by log₂ 256 = 8, and ' +
-          'since every level is a separate I/O that is the entire performance argument. A million ' +
-          'keys in a binary tree is 20 levels and 20 page reads; the same keys in a 256-way B+ tree ' +
-          'is 3. Note how flat the return is beyond that: going from a 4 KB page to a 16 KB page ' +
-          'quadruples the order and often does not remove a single level, because the height only ' +
-          'falls with the log of the ratio.',
+        detail: [
+          'Raising the branching factor from 2 to 256 divides the height by log₂ 256 = 8, and ' +
+            'since every level is a separate I/O that is the entire performance argument.',
+          'A million keys in a binary tree is 20 levels and 20 page reads. The same keys in a ' +
+            '256-way B+ tree is 3.',
+          'Note how flat the return is beyond that. Going from a 4 KB page to a 16 KB page ' +
+            'quadruples the order and often does not remove a single level. The height only falls ' +
+            'with the log of the ratio.'
+        ],
         example: 'A million keys: 3 page reads at a 4 KB page, 5 at a 512-byte page, 3 again at 16 KB.'
       },
       {
@@ -59,75 +66,97 @@
         },
         plain: 'A B+ tree keeps every value in a leaf and only separators above, and chains the leaves.',
         formal: 'internal nodes hold keys, leaves hold key-value pairs and a next pointer',
-        detail: 'A plain B-tree stores values alongside keys at every level, so an internal node ' +
-          'holds fewer children for the same page — and a range scan has to walk back up and down ' +
-          'the tree. The B+ variant moves every value to the leaves, which makes internal nodes pure ' +
-          'index and therefore wider, and links the leaves into a list. Both changes serve the same ' +
-          'workload: a database that answers "give me the rows between these two keys" reads one ' +
-          'descent and then walks a linked list of pages.',
+        detail: [
+          'A plain B-tree stores values alongside keys at every level, so an internal node holds ' +
+            'fewer children for the same page. A range scan also has to walk back up and down the ' +
+            'tree.',
+          'The B+ variant moves every value to the leaves, which makes internal nodes pure index ' +
+            'and therefore wider, and links the leaves into a list.',
+          'Both changes serve the same workload. A database that answers "give me the rows between ' +
+            'these two keys" reads one descent and then walks a linked list of pages.'
+        ],
         example: 'Scanning 10 000 consecutive keys costs 81 page reads: 3 for the descent, 78 leaf pages, and nothing else.'
       },
       {
         term: 'Split and promote',
         plain: 'A full page splits in half; a leaf copies its separator up, an internal node moves it up.',
         formal: 'leaf: copy the first key of the right half; internal: promote the median',
-        detail: 'When a page overflows it splits into two half-full pages and the parent gains a ' +
-          'separator. The two cases differ in one detail that matters: a leaf split *copies* the ' +
-          'first key of the right half upward, because that key is data and has to stay in a leaf, ' +
-          'while an internal split *moves* its median up, because a separator is not data and does ' +
-          'not need to exist twice. Getting that backwards produces a tree that answers correctly ' +
-          'and slowly loses keys on deletion.',
+        detail: [
+          'When a page overflows it splits into two half-full pages, and the parent gains a ' +
+            'separator.',
+          'The two cases differ in one detail that matters. A leaf split *copies* the first key of ' +
+            'the right half upward, because that key is data and has to stay in a leaf.',
+          'An internal split *moves* its median up, because a separator is not data and does not ' +
+            'need to exist twice.',
+          'Getting that backwards produces a tree that answers correctly and slowly loses keys on ' +
+            'deletion.'
+        ],
         example: 'The root gains a level only when the split reaches it — which is the only way a B-tree grows.'
       },
       {
         term: 'Fill factor',
         plain: 'Pages are not full. Sequential insertion leaves them about half full; random insertion settles near ln 2.',
         formal: 'measured fill: 0.502 sequential, 0.686 random',
-        detail: 'Every split leaves two half-full pages, and whether they fill up again depends ' +
-          'entirely on the insertion order. A sequential load always inserts at the right edge, so ' +
-          'the left half of every split is never touched again and the tree settles at about 50%. ' +
+        detail: [
+          'Every split leaves two half-full pages, and whether they fill up again depends entirely ' +
+            'on the insertion order.',
+          'A sequential load always inserts at the right edge, so the left half of every split is ' +
+            'never touched again and the tree settles at about 50%.',
           'Random insertion refills the halves and converges on ln 2 ≈ 69.3% — the classic result, ' +
-          'measured here at 68.6%. That difference is worth an entire level of the tree, which is ' +
-          'why the honest read prediction uses order × fill rather than order.',
+            'measured here at 68.6%.',
+          'That difference is worth an entire level of the tree, which is why the honest read ' +
+            'prediction uses order × fill rather than order.'
+        ],
         example: 'A million keys loaded sequentially onto 512-byte pages costs 5 reads per lookup; log_B(n) predicts 4.'
       },
       {
         term: 'Bulk loading',
         plain: 'Build the leaves full from sorted input and construct the levels above them, instead of inserting one at a time.',
         formal: 'sort, fill leaves to capacity, build the index bottom-up',
-        detail: 'Since a sequential insert load is exactly the case that leaves pages half full, a ' +
-          'database that knows it is loading sorted data does not insert at all. It fills each leaf ' +
-          'to whatever fill factor was asked for, links them, and builds the internal levels ' +
-          'upwards — one pass, no splits, no rebalancing, and a tree that is as short and as dense as ' +
-          'the fill factor allows. The fill factor is left below 100% deliberately, so later ' +
-          'insertions have somewhere to go without splitting immediately.',
+        detail: [
+          'Since a sequential insert load is exactly the case that leaves pages half full, a ' +
+            'database that knows it is loading sorted data does not insert at all.',
+          'It fills each leaf to whatever fill factor was asked for, links them, and builds the ' +
+            'internal levels upwards. One pass, no splits, no rebalancing, and a tree that is as ' +
+            'short and as dense as the fill factor allows.',
+          'The fill factor is left below 100% deliberately, so later insertions have somewhere to ' +
+            'go without splitting immediately.'
+        ],
         example: 'This is what CREATE INDEX does, and why building an index is far faster than inserting the same rows.'
       },
       {
         term: 'The range scan',
         plain: 'One descent, then the leaf chain. No internal page is read twice, and the cost is per page rather than per row.',
         formal: 'reads = height + ⌈rows / rows-per-leaf⌉',
-        readAs: 'A range scan costs one descent down the tree, plus one read per leaf the range spans: the ' +
-          'number of rows wanted divided by how many fit in a leaf, rounded up.',
-        detail: 'This is the operation B+ trees are shaped for and the reason they beat hash indexes ' +
-          'for anything ordered. Descend once to the first key, then follow the leaf pointers: no ' +
-          'internal page is touched again and each page read yields a whole leaf-full of rows. The ' +
-          'measured shape is exactly the formula — 10 rows cost 3 reads, all descent; 10 000 rows ' +
-          'cost 81, almost all leaf. The corollary matters more: fetching those same 10 000 rows by ' +
-          'a separate index lookup each costs 30 000 reads.',
+        readAs: 'A range scan costs one descent down the tree, plus one read per leaf the range ' +
+          'spans. That second part is the number of rows wanted divided by how many fit in a leaf, ' +
+          'rounded up.',
+        detail: [
+          'This is the operation B+ trees are shaped for, and the reason they beat hash indexes ' +
+            'for anything ordered.',
+          'Descend once to the first key, then follow the leaf pointers. No internal page is ' +
+            'touched again, and each page read yields a whole leaf-full of rows.',
+          'The measured shape is exactly the formula: 10 rows cost 3 reads, all descent; 10 000 ' +
+            'rows cost 81, almost all leaf.',
+          'The corollary matters more. Fetching those same 10 000 rows by a separate index lookup ' +
+            'each costs 30 000 reads.'
+        ],
         example: 'Scanning 10 keys costs 3 reads, 1 000 costs 10 and 10 000 costs 81 — the descent is paid once.'
       },
       {
         term: 'Prefix compression and key size',
         plain: 'Keys occupy the page, so shrinking them raises the order and can remove a level.',
         formal: 'order = (page + key)/(key + pointer): the key is in both terms',
-        detail: 'Because the key appears in both the numerator and the denominator of the order, key ' +
-          'size has a direct and non-obvious effect on the height of the whole index. Going from ' +
-          '8-byte to 64-byte keys on a 4 KB page drops the order from 256 to 57, which is a level at ' +
-          'a million keys — an extra I/O on every lookup, from the choice of a wider key type. This ' +
-          'is why real implementations compress: prefix compression stores each separator as its ' +
-          'difference from the previous one, and suffix truncation keeps only enough of a separator ' +
-          'to distinguish the two children.',
+        detail: [
+          'Because the key appears in both the numerator and the denominator of the order, key ' +
+            'size has a direct and non-obvious effect on the height of the whole index.',
+          'Going from 8-byte to 64-byte keys on a 4 KB page drops the order from 256 to 57, which ' +
+            'is a level at a million keys. That is an extra I/O on every lookup, from the choice ' +
+            'of a wider key type.',
+          'This is why real implementations compress. Prefix compression stores each separator as ' +
+            'its difference from the previous one, and suffix truncation keeps only enough of a ' +
+            'separator to distinguish the two children.'
+        ],
         example: 'Switching from an 8-byte integer key to a 64-byte string key adds a whole level of I/O per lookup.'
       }
     ],
