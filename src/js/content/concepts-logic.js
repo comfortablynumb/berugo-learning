@@ -11,12 +11,17 @@
         plain: 'n inputs give 2 to the n rows, and any assignment of 0 and 1 to those rows is a function.',
         formal: 'a function from {0,1}^n to {0,1}, of which there are 2^(2^n)',
         readAs: 'a function taking n bits to one bit, and there are two to the power of two to the n of them.',
-        detail: 'The distinction between the table and the circuit is the one that makes the '
-          + 'rest of the milestone possible. The table is what the thing must compute and it is '
-          + 'unique; the circuit is how, and there are many. The demo derives the table by '
-          + 'running the circuit rather than the other way round, which is the right direction: '
-          + 'the circuit is the claim and the table is the evidence. Two circuits with the same '
-          + 'table are interchangeable in function and can differ by a factor of five in area.',
+        detail: [
+          'The distinction between the table and the circuit is the one that makes the rest of '
+            + 'the milestone possible.',
+          'The table is what the thing must compute and it is unique. The circuit is how, and '
+            + 'there are many.',
+          'The demo derives the table by running the circuit rather than the other way round, '
+            + 'which is the right direction. The circuit is the claim and the table is the '
+            + 'evidence.',
+          'Two circuits with the same table are interchangeable in function and can differ by a '
+            + 'factor of five in area.'
+        ],
         example: 'The exclusive-or of two inputs is 1 on rows 1 and 2 of its four-row table, and '
           + 'the demo reads that off by evaluating the netlist eight times.'
       },
@@ -25,12 +30,15 @@
         plain: 'One AND term per row where the output is 1, all ORed together.',
         formal: 'f = OR over the minterms m where f(m) = 1 of AND over the inputs in the polarity m has',
         readAs: 'or together one and-term for every row whose output is one, each term naming every input.',
-        detail: 'This is the mechanical proof that AND, OR and NOT can express anything: given '
-          + 'any table you can write the expression down without thinking. It is also always '
-          + 'larger than it needs to be, because it never notices that two rows differing in '
-          + 'one variable can be merged. That gap between "always available" and "never '
-          + 'minimal" is exactly the space the next section works in, and it is why synthesis '
-          + 'is a real subject rather than a transcription exercise.',
+        detail: [
+          'This is the mechanical proof that AND, OR and NOT can express anything: given any '
+            + 'table you can write the expression down without thinking.',
+          'It is also always larger than it needs to be, because it never notices that two rows '
+            + 'differing in one variable can be merged.',
+          'That gap between "always available" and "never minimal" is exactly the space the next '
+            + 'section works in.',
+          'It is why synthesis is a real subject rather than a transcription exercise.'
+        ],
         example: 'The classic four-variable function has 10 minterms: canonically 40 literals '
           + 'and 43 gates, against 7 literals and 10 gates after minimisation.'
       },
@@ -58,12 +66,15 @@
         plain: 'Tie a NAND\'s inputs together and it is an inverter; everything follows.',
         formal: 'not a = a NAND a; a and b = not (a NAND b); a or b = (not a) NAND (not b)',
         readAs: 'not a is a nand-ed with itself; and is a nand followed by an inverter; or is a nand over two inverted inputs.',
-        detail: 'Functional completeness matters because a fabrication process wants to build '
-          + 'one thing well rather than five things adequately, and because the inverting gates '
-          + 'are the cheap ones in static CMOS. The price is visible: the demo measures '
-          + 'exclusive-or as one library cell at 12 transistors and depth 3, and as four NANDs '
-          + 'at 16 transistors and depth 3. Completeness says the second is possible; the '
-          + 'numbers say why a library ships the first.',
+        detail: [
+          'Functional completeness matters because a fabrication process wants to build one thing '
+            + 'well rather than five things adequately.',
+          'It also matters because the inverting gates are the cheap ones in static CMOS.',
+          'The price is visible. The demo measures exclusive-or as one library cell at 12 '
+            + 'transistors and depth 3, and as four NANDs at 16 transistors and depth 3.',
+          'Completeness says the second is possible; the numbers say why a library ships the '
+            + 'first.'
+        ],
         example: 'NOT costs 1 NAND, AND 2, OR 3 and XOR 4 — 4, 8, 12 and 16 transistors '
           + 'respectively, all measured from the netlist.'
       },
@@ -72,12 +83,15 @@
         plain: 'Not (a and b) is (not a) or (not b), and the same the other way round.',
         formal: 'not (a and b) = (not a) or (not b); not (a or b) = (not a) and (not b)',
         readAs: 'the negation of a conjunction is the disjunction of the negations, and the same the other way round.',
-        detail: 'The reason to care is physical rather than logical. In static CMOS a NAND or '
-          + 'NOR is one pull-up network and one pull-down network — four transistors — while an '
-          + 'AND or OR is that plus an inverter, so six. De Morgan lets a synthesis tool rewrite '
-          + 'any AND-OR structure into NANDs or NORs and take that saving everywhere, which is '
-          + 'why a synthesised netlist is full of inverting gates even when the source described '
-          + 'nothing but ANDs and ORs.',
+        detail: [
+          'The reason to care is physical rather than logical.',
+          'In static CMOS a NAND or NOR is one pull-up network and one pull-down network, four '
+            + 'transistors. An AND or OR is that plus an inverter, so six.',
+          'De Morgan lets a synthesis tool rewrite any AND-OR structure into NANDs or NORs and '
+            + 'take that saving everywhere.',
+          'That is why a synthesised netlist is full of inverting gates even when the source '
+            + 'described nothing but ANDs and ORs.'
+        ],
         example: 'The demo\'s cost table: NAND and NOR at 4 transistors, AND and OR at 6, '
           + 'inverter at 2, exclusive-or at 12.'
       },
@@ -85,12 +99,15 @@
         term: 'Depth is latency and width is area, and they move in opposite directions',
         plain: 'The same function can be a shallow wide circuit or a deep narrow one.',
         formal: 'depth = the longest chain of gates from any input to any output',
-        detail: 'Every construction in this milestone is a position on that line. The '
-          + 'multiplexer tree against the flat form, the ripple adder against carry lookahead, '
-          + 'binary state encoding against one-hot: in each pair the shallower circuit is '
-          + 'larger. Neither is better without a target, which is why a synthesis tool is given '
-          + 'a clock period and an area budget rather than being asked for the best circuit. '
-          + 'The instruction latency table in a processor manual is this trade, tabulated.',
+        detail: [
+          'Every construction in this milestone is a position on that line.',
+          'The multiplexer tree against the flat form, the ripple adder against carry lookahead, '
+            + 'binary state encoding against one-hot: in each pair the shallower circuit is '
+            + 'larger.',
+          'Neither is better without a target, which is why a synthesis tool is given a clock '
+            + 'period and an area budget rather than being asked for the best circuit.',
+          'The instruction latency table in a processor manual is this trade, tabulated.'
+        ],
         example: 'Majority of three is 5 gates at depth 6; the same three inputs through a '
           + 'multiplexer cell are 1 gate at depth 3.'
       },
@@ -98,12 +115,15 @@
         term: 'A truth table and a waveform answer different questions',
         plain: 'The table says what it computes; the simulation says what it does on the way there.',
         formal: 'a circuit correct on every row of its table may still leave and return to that value during a transition',
-        detail: 'The demo runs two evaluators over every row: a zero-delay reference that walks '
-          + 'the netlist topologically, and an event-driven simulation with a delay per gate. '
-          + 'They must agree on the value, and they say different things about time. The '
-          + '`hazard` circuit is the point: correct on all eight rows and its output still dips '
-          + 'during one input change. Everything about glitches, setup times and metastability '
-          + 'lives in the gap between those two answers.',
+        detail: [
+          'The demo runs two evaluators over every row: a zero-delay reference that walks the '
+            + 'netlist topologically, and an event-driven simulation with a delay per gate.',
+          'They must agree on the value, and they say different things about time.',
+          'The `hazard` circuit is the point. It is correct on all eight rows and its output '
+            + 'still dips during one input change.',
+          'Everything about glitches, setup times and metastability lives in the gap between '
+            + 'those two answers.'
+        ],
         example: 'All 8 rows of the hazard circuit agree between the two evaluators, and its '
           + 'settling time is 5 gate delays — the dip happens inside those 5.'
       },
@@ -111,12 +131,15 @@
         term: 'Fan-in and fan-out are the physical limits behind every gate count',
         plain: 'A gate with many inputs is slow; a gate driving many loads is slow.',
         formal: 'delay grows with the series transistors on the inputs and with the capacitance on the output',
-        detail: 'This is why every number in this milestone assumes two-input gates. A real '
-          + 'library stops at three or four inputs because the transistors are in series and '
-          + 'each one adds resistance, and it inserts buffers when one gate drives many others '
-          + 'because charging that capacitance takes time. An eight-input AND in a diagram is a '
-          + 'tree of two-input ANDs in the silicon, and that tree is where the extra logarithm '
-          + 'of depth in the measured numbers comes from.',
+        detail: [
+          'This is why every number in this milestone assumes two-input gates.',
+          'A real library stops at three or four inputs, because the transistors are in series '
+            + 'and each one adds resistance.',
+          'It also inserts buffers when one gate drives many others, because charging that '
+            + 'capacitance takes time.',
+          'An eight-input AND in a diagram is a tree of two-input ANDs in the silicon. That tree '
+            + 'is where the extra logarithm of depth in the measured numbers comes from.'
+        ],
         example: 'The flat 16:1 multiplexer is depth 17 rather than the constant depth the '
           + 'textbook promises, because its wide AND and OR terms are trees.'
       },
@@ -124,12 +147,15 @@
         term: 'A gate is transistors, and the count is the area',
         plain: 'Inverter 2, NAND or NOR 4, AND or OR 6, exclusive-or 12.',
         formal: 'static CMOS: one pull-up network and one pull-down network, complementary',
-        detail: 'Counting transistors rather than gates is what makes different gate types '
-          + 'comparable, and it explains the shape of every cost table that follows. An AND is '
-          + 'a NAND plus an inverter, which is why the inverting gates dominate a synthesised '
-          + 'netlist. An exclusive-or is three times an inverter-pair, which is why XOR-heavy '
-          + 'logic — parity, error correction, cryptography — is expensive in a way that is '
-          + 'invisible if you count gates and obvious if you count transistors.',
+        detail: [
+          'Counting transistors rather than gates is what makes different gate types comparable, '
+            + 'and it explains the shape of every cost table that follows.',
+          'An AND is a NAND plus an inverter, which is why the inverting gates dominate a '
+            + 'synthesised netlist.',
+          'An exclusive-or is three times an inverter-pair.',
+          'That is why XOR-heavy logic — parity, error correction, cryptography — is expensive in '
+            + 'a way that is invisible if you count gates and obvious if you count transistors.'
+        ],
         example: 'The four-NAND exclusive-or is 16 transistors against 12 for the library cell, '
           + 'so functional completeness costs 33% here.'
       }

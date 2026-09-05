@@ -54,7 +54,7 @@
   function orientation() {
     return [
       '**A Boolean function is a table, and everything else is an implementation of it.** Two '
-        + 'inputs give four rows, three give eight, n give 2 to the n — and any assignment of '
+        + 'inputs give four rows, three give eight, n give 2 to the n. Any assignment of '
         + 'zeros and ones to those rows is a function somebody could want. The demo derives '
         + 'the table by running the circuit, which is the right direction: the circuit is the '
         + 'claim and the table is what it actually does.',
@@ -64,13 +64,13 @@
         + 'and it exists for every function — which is what makes AND, OR and NOT functionally '
         + 'complete.',
       '**NAND alone is functionally complete, and the demo builds the proof.** A NAND with its '
-        + 'inputs tied together is an inverter; NAND followed by that inverter is AND; and '
-        + 'inverting both inputs before a NAND gives OR, which is De Morgan\'s law as a '
+        + 'inputs tied together is an inverter, and NAND followed by that inverter is AND. '
+        + 'Inverting both inputs before a NAND gives OR, which is De Morgan\'s law as a '
         + 'circuit. So a chip can be built from one gate type, and the cost of doing it is '
         + 'visible in the table.',
       '**De Morgan\'s laws are the reason inverting gates dominate.** Not (a and b) is (not a) '
-        + 'or (not b), and not (a or b) is (not a) and (not b) — so any AND-OR structure can be '
-        + 'rewritten into NANDs or NORs. In static CMOS the inverting gates are the cheap ones, '
+        + 'or (not b). Likewise not (a or b) is (not a) and (not b), so any AND-OR structure '
+        + 'can be rewritten into NANDs or NORs. In static CMOS the inverting gates are the cheap ones, '
         + 'so that rewrite is not a curiosity, it is what the synthesis tool does.',
       '**A gate is transistors, and the count is the area.** An inverter is 2, a NAND or NOR is '
         + '4, an AND or OR is 6 because it is an inverting gate plus an inverter, and an XOR is '
@@ -88,9 +88,9 @@
         + 'two-input ANDs in the silicon.',
       '**The truth table and the waveform are two different answers, and both are needed.** The '
         + 'table says what the circuit computes and the simulation says what it does on the way '
-        + 'there. The `hazard` circuit in the demo is correct on all eight rows of its table and '
-        + 'its output still dips during one input change — which the next section fixes and the '
-        + 'sequential sections explain why you can usually ignore.'
+        + 'there. The `hazard` circuit in the demo is correct on all eight rows of its table, '
+        + 'and its output still dips during one input change. The next section fixes that, and '
+        + 'the sequential sections explain why you can usually ignore it.'
     ];
   }
 
@@ -104,16 +104,16 @@
       insight: '**Everything above this section is an abstraction over "a gate takes time and '
         + 'area", and the two numbers move in opposite directions.** That is the sentence to '
         + 'carry into the rest of the milestone, because every construction from here on is a '
-        + 'choice between them: the flat multiplexer against the tree, the lookahead adder '
+        + 'choice between them. The flat multiplexer against the tree, the lookahead adder '
         + 'against the ripple, one-hot state encoding against binary. None of those is better; '
         + 'each is a position on a line whose ends are "fast and enormous" and "small and '
         + 'slow". The practical payoff for somebody who writes software is in reading '
-        + 'instruction latency tables. When the manual says a 64-bit add is one cycle, a '
-        + 'variable shift is one cycle, a multiply is three and a divide is twenty, those are '
+        + 'instruction latency tables. The manual says a 64-bit add is one cycle, a variable '
+        + 'shift is one cycle, a multiply is three and a divide is twenty. Those numbers are '
         + 'not arbitrary: they are gate depths. The add and the shift are log-depth networks, '
         + 'the multiply is an array of adders, and the divide is a sequence of subtractions '
         + 'that cannot be parallelised the same way. Knowing that turns the table from a list '
-        + 'of magic numbers into something you can predict — and it is why "avoid division in a '
+        + 'of magic numbers into something you can predict. It is why "avoid division in a '
         + 'hot loop" is durable advice while most micro-optimisation folklore is not.'
     };
   }
