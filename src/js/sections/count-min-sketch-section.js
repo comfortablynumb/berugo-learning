@@ -32,23 +32,23 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'A count-min sketch is a d×w matrix of counters and d hash functions. An increment adds to one ' +
-          'cell in every row; a query reads those d cells and takes the smallest. Every cell the key ' +
-          'touches holds its true count plus whatever other keys landed there, so the minimum is the ' +
-          'least-contaminated of d estimates — and it is never below the truth, because contamination ' +
-          'only ever adds.',
-        'The guarantee is stated for w = ⌈e/ε⌉ and d = ⌈ln(1/δ)⌉: the estimate exceeds the truth by ' +
-          'more than ε·N with probability at most δ. At w = 512 and d = 5 over a 200 000-item Zipf ' +
-          'stream that bound is 1 062, and the worst error measured over all 21 619 distinct keys is ' +
-          '363 — comfortably inside it, with zero keys under-counted. Conservative update, which ' +
-          'raises only the cells currently at the minimum, cuts the mean absolute error from 97.9 to ' +
-          '54.2 and keeps the never-under property.',
-        'Count-sketch changes one thing: each row also has a ±1 hash, the update is multiplied by it, ' +
-          'and the query takes the median rather than the minimum. Collisions now cancel in ' +
+        'A count-min sketch is a d×w matrix of counters and d hash functions. An increment adds to ' +
+          'one cell in every row; a query reads those d cells and takes the smallest. Every cell ' +
+          'the key touches holds its true count plus whatever other keys landed there. So the ' +
+          'minimum is the least-contaminated of d estimates, and it is never below the truth, ' +
+          'because contamination only ever adds.',
+        'The guarantee is stated for w = ⌈e/ε⌉ and d = ⌈ln(1/δ)⌉: the estimate exceeds the truth ' +
+          'by more than ε·N with probability at most δ. At w = 512 and d = 5 over a 200 000-item ' +
+          'Zipf stream that bound is 1 062. The worst error measured over all 21 619 distinct keys ' +
+          'is 363 — comfortably inside it, with zero keys under-counted. Conservative update, ' +
+          'which raises only the cells currently at the minimum, cuts the mean absolute error from ' +
+          '97.9 to 54.2 and keeps the never-under property.',
+        'Count-sketch changes one thing: each row also has a ±1 hash, the update is multiplied by ' +
+          'it, and the query takes the median rather than the minimum. Collisions now cancel in ' +
           'expectation instead of accumulating, so the estimator is unbiased and its mean absolute ' +
-          'error is lower again — 32.1 here. It also under-counts 10 727 of the 21 619 keys, which is ' +
-          'not a bug and is exactly the property that makes it unusable where count-min was chosen ' +
-          'for its one-sidedness.'
+          'error is lower again — 32.1 here. It also under-counts 10 727 of the 21 619 keys. That ' +
+          'is not a bug, and it is exactly the property that makes it unusable where count-min was ' +
+          'chosen for its one-sidedness.'
       ],
       demo: { title: 'Interactive demo — the scatter, the bound and the heavy hitters', markup: root.CountMinSketchTemplate.render() },
       diagram: {
@@ -70,10 +70,10 @@
         ].join('\n')
       },
       insight: 'Count-min never under-counts, so it is safe for rate limiting and unsafe for billing. ' +
-        'Knowing which direction the error points is the whole design decision — and it survives the ' +
+        'Knowing which direction the error points is the whole design decision. It survives the ' +
         'switch to count-sketch only if somebody notices that "more accurate on average" bought ' +
-        'accuracy by giving up the direction. Write down which way the error may go before choosing ' +
-        'the sketch, not after.'
+        'accuracy by giving up the direction. Write down which way the error may go before ' +
+        'choosing the sketch, not after.'
     };
   }
 

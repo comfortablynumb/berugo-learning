@@ -165,11 +165,14 @@
         formal: 'est(x) = min_i C[i][h_i(x)]',
         readAs: 'Look up the key in every row and take the smallest count you find. Every row over-counts ' +
           'because of collisions, so the smallest is the closest to the truth.',
-        detail: 'Every cell holds the true count of the keys that hash to it, so each of the d cells a ' +
-          'key touches is its true count plus contamination from other keys. Taking the minimum picks ' +
-          'the least contaminated of d estimates, and because contamination is never negative, the ' +
-          'answer can only be too high. The structure has no keys in it at all — which is what bounds ' +
-          'the memory, and also why it cannot enumerate anything.',
+        detail: [
+          'Every cell holds the true count of the keys that hash to it. So each of the d cells a ' +
+            'key touches is its true count plus contamination from other keys.',
+          'Taking the minimum picks the least contaminated of d estimates, and because ' +
+            'contamination is never negative, the answer can only be too high.',
+          'The structure has no keys in it at all. That is what bounds the memory, and also why it ' +
+            'cannot enumerate anything.'
+        ],
         example: 'w = 512, d = 5 is 20 480 bytes and answers for any number of distinct keys.'
       },
       {
@@ -186,15 +189,19 @@
         },
         plain: 'Count-min never under-counts. That makes it safe for some uses and unsafe for others.',
         formal: 'est(x) ≥ f(x) always; est(x) ≤ f(x) + εN with probability 1 − δ',
-        readAs: 'The estimate is never below the real frequency — collisions can only add — and with ' +
+        readAs: 'The estimate is never below the real frequency — collisions can only add. With ' +
           'probability 1 − δ it is no more than εN above it, where N is the total stream length. ' +
           'Overcounting is guaranteed; undercounting is impossible.',
-        detail: 'Knowing the direction of the error is worth more than knowing its size. An estimate ' +
-          'that is never low is safe wherever over-counting is conservative — rate limiting, load ' +
-          'shedding, alerting — and unsafe wherever the number turns into money or a quota, because ' +
-          'the customer is charged for traffic that did not happen. Count-sketch has a lower mean ' +
-          'error and gives this up entirely: on the same stream it under-counts 10 727 of 21 619 ' +
-          'keys, which is not a defect and is a completely different contract.',
+        detail: [
+          'Knowing the direction of the error is worth more than knowing its size.',
+          'An estimate that is never low is safe wherever over-counting is conservative — rate ' +
+            'limiting, load shedding, alerting.',
+          'It is unsafe wherever the number turns into money or a quota, because the customer is ' +
+            'charged for traffic that did not happen.',
+          'Count-sketch has a lower mean error and gives this up entirely. On the same stream it ' +
+            'under-counts 10 727 of 21 619 keys, which is not a defect and is a completely ' +
+            'different contract.'
+        ],
         example: '0 keys under-counted by count-min; 10 727 of 21 619 by count-sketch.'
       },
       {
@@ -204,27 +211,31 @@
         readAs: 'The table is e (2.718…) divided by your error tolerance wide, and the natural log of one ' +
           'over your failure probability deep. Width buys accuracy, depth buys confidence, and they are ' +
           'independent dials.',
-        detail: 'The two parameters are independent and they are bought in different currencies. Width ' +
-          'is linear in memory and linear in accuracy: doubling w halves the additive error. Depth is ' +
-          'linear in memory and *logarithmic* in the failure probability, so going from d = 5 to ' +
-          'd = 10 takes δ from 0.7% to 0.005% for twice the memory. A sketch with a large d and a ' +
-          'small w is a common mistake: it is very confident about a bound that is far too wide to ' +
-          'be useful.',
+        detail: [
+          'The two parameters are independent and they are bought in different currencies.',
+          'Width is linear in memory and linear in accuracy: doubling w halves the additive error.',
+          'Depth is linear in memory and *logarithmic* in the failure probability. Going from ' +
+            'd = 5 to d = 10 takes δ from 0.7% to 0.005% for twice the memory.',
+          'A sketch with a large d and a small w is a common mistake. It is very confident about a ' +
+            'bound that is far too wide to be useful.'
+        ],
         example: 'ε = 0.001, δ = 0.01 gives w = 2 719, d = 5 — 13 595 cells.'
       },
       {
         term: 'The bound is additive, so it hurts the small keys',
         plain: 'ε·N is the same number for a key seen ten times and one seen a hundred thousand times.',
         formal: 'absolute error ≤ εN, so relative error ≤ εN / f(x)',
-        readAs: 'The error is a fixed slice of the whole stream, not a fraction of the item\'s own count. For ' +
-          'a heavy hitter that is tiny; for a rare item it can be larger than the true count, which is ' +
-          'why the sketch answers about heavy hitters and nothing else.',
-        detail: 'At w = 512 over a 200 000-item stream the bound is 1 062, which is a rounding error ' +
-          'for the heaviest key and a hundredfold over-count for a key seen ten times. This is why a ' +
-          'count-min sketch is a heavy-hitter structure rather than a frequency table: the estimates ' +
-          'it gives for the head of the distribution are excellent and the ones for the tail are ' +
-          'meaningless, and a scatter of estimate against truth on a log axis shows the cloud fanning ' +
-          'out to the left.',
+        readAs: 'The error is a fixed slice of the whole stream, not a fraction of the item\'s own ' +
+          'count. For a heavy hitter that is tiny. For a rare item it can be larger than the true ' +
+          'count, which is why the sketch answers about heavy hitters and nothing else.',
+        detail: [
+          'At w = 512 over a 200 000-item stream the bound is 1 062. That is a rounding error for ' +
+            'the heaviest key and a hundredfold over-count for a key seen ten times.',
+          'This is why a count-min sketch is a heavy-hitter structure rather than a frequency table.',
+          'The estimates it gives for the head of the distribution are excellent and the ones for ' +
+            'the tail are meaningless.',
+          'A scatter of estimate against truth on a log axis shows the cloud fanning out to the left.'
+        ],
         example: 'Bound 1 062 over a 200 000-item stream: 1.5% of the top key, 100× a rare one.'
       },
       {
@@ -234,12 +245,15 @@
         readAs: 'Conservative update: work out what the estimate would become, then raise each counter only ' +
           'as far as that. Counters that were already higher are left alone, so less error is injected ' +
           '— at the cost of no longer being able to delete.',
-        detail: 'A cell that is already above the key\'s current estimate is above it because of some ' +
-          'other key, and raising it further only pollutes that other key\'s answer. Skipping those ' +
-          'writes cannot break the never-under guarantee — every cell is still at least the true ' +
-          'count of what hashed into it — and it measurably tightens the whole distribution: mean ' +
-          'absolute error falls from 97.9 to 54.2 and the worst from 363 to 261 on the same stream ' +
-          'and matrix. The cost is that conservative sketches no longer merge by addition.',
+        detail: [
+          'A cell that is already above the key\'s current estimate is above it because of some ' +
+            'other key, and raising it further only pollutes that other key\'s answer.',
+          'Skipping those writes cannot break the never-under guarantee, because every cell is ' +
+            'still at least the true count of what hashed into it.',
+          'It measurably tightens the whole distribution: mean absolute error falls from 97.9 to ' +
+            '54.2 and the worst from 363 to 261 on the same stream and matrix.',
+          'The cost is that conservative sketches no longer merge by addition.'
+        ],
         example: 'Mean absolute error 97.9 → 54.2, at identical w, d and stream.'
       },
       {
@@ -249,38 +263,48 @@
         readAs: 'Each row is multiplied by a random ±1 sign before being read, so collisions cancel instead ' +
           'of accumulating, and the median across rows discards the rows that went badly. That is what ' +
           'lets the count-sketch estimate be too low as well as too high.',
-        detail: 'With a sign attached, a colliding key adds to a cell as often as it subtracts, so ' +
-          'collisions cancel in expectation rather than accumulating. The estimator is unbiased and ' +
-          'its error is bounded relative to ‖f‖₂ rather than ‖f‖₁, which is much tighter on a ' +
-          'heavy-tailed stream — mean absolute error 32.1 against count-min\'s 97.9 at the same size. ' +
-          'The depth must be odd: a median over an even count averages the two middle rows, mixing a ' +
-          'good row with a bad one instead of choosing between them.',
+        detail: [
+          'With a sign attached, a colliding key adds to a cell as often as it subtracts, so ' +
+            'collisions cancel in expectation rather than accumulating.',
+          'The estimator is unbiased and its error is bounded relative to ‖f‖₂ rather than ‖f‖₁, ' +
+            'which is much tighter on a heavy-tailed stream.',
+          'Mean absolute error is 32.1 against count-min\'s 97.9 at the same size.',
+          'The depth must be odd. A median over an even count averages the two middle rows, mixing ' +
+            'a good row with a bad one instead of choosing between them.'
+        ],
         example: 'Mean absolute error 32.1 against 97.9, and 10 727 keys read low.'
       },
       {
         term: 'The rows must be genuinely independent',
         plain: 'Deriving the d row hashes from two by a linear rule breaks the guarantee.',
         formal: 'h_i = finalise(h₁ + i·h₂ + i²), not h₁ + i·h₂',
-        readAs: 'Double hashing needs a final mixing step, or the rows are linearly related and their errors ' +
-          'stop being independent — at which point taking the minimum across rows buys you nothing.',
-        detail: 'Two hashes are enough for a Bloom filter, whose error analysis does not need ' +
-          'independence between probes. A count-min sketch does: the whole argument is that a key is ' +
-          'unlucky in one row independently of the others. With the raw linear rule, two keys whose ' +
-          'h₁ and h₂ both agree modulo w collide in *every* row at once, which happens about once per ' +
-          'w² pairs — and on a 21 619-key stream that put count-sketch\'s worst error at 6 939 against ' +
-          'a stated bound of 2 808. Avalanching each row\'s value first restores it.',
+        readAs: 'Double hashing needs a final mixing step. Without it the rows are linearly related ' +
+          'and their errors stop being independent, at which point taking the minimum across rows ' +
+          'buys you nothing.',
+        detail: [
+          'Two hashes are enough for a Bloom filter, whose error analysis does not need ' +
+            'independence between probes.',
+          'A count-min sketch does need it: the whole argument is that a key is unlucky in one row ' +
+            'independently of the others.',
+          'With the raw linear rule, two keys whose h₁ and h₂ both agree modulo w collide in ' +
+            '*every* row at once, which happens about once per w² pairs.',
+          'On a 21 619-key stream that put count-sketch\'s worst error at 6 939 against a stated ' +
+            'bound of 2 808. Avalanching each row\'s value first restores it.'
+        ],
         example: 'Worst count-sketch error 6 939 → 879 after mixing each row value.'
       },
       {
         term: 'Heavy hitters need a heap as well',
         plain: 'The sketch can score a key you name; it cannot tell you which keys are heavy.',
         formal: 'top-k = a candidate set maintained alongside, not derived from the matrix',
-        detail: 'There are no keys in the matrix, so there is nothing to enumerate. A heavy-hitter ' +
-          'query needs a candidate structure kept beside the sketch — typically a heap of keys whose ' +
-          'estimate crossed the threshold — and that structure\'s memory grows with the number of ' +
-          'answers rather than staying fixed. Pretending the sketch does it alone is the usual ' +
-          'overclaim, and it matters because space-saving solves the same problem in less memory ' +
-          'with no hashing at all.',
+        detail: [
+          'There are no keys in the matrix, so there is nothing to enumerate.',
+          'A heavy-hitter query needs a candidate structure kept beside the sketch — typically a ' +
+            'heap of keys whose estimate crossed the threshold.',
+          'That structure\'s memory grows with the number of answers rather than staying fixed.',
+          'Pretending the sketch does it alone is the usual overclaim, and it matters because ' +
+            'space-saving solves the same problem in less memory with no hashing at all.'
+        ],
         example: 'Count-min plus heap: 17 408 bytes. Space-saving alone: 16 000, for the same answer.'
       }
     ],
