@@ -24,13 +24,17 @@
         },
         plain: 'The instruction set is the only thing software is allowed to depend on.',
         formal: 'architecture is what a program can observe; microarchitecture is how it was done',
-        detail: 'Everything above the line — compilers, operating systems, shipped binaries — '
-          + 'depends on the meaning of the bits, and everything below it is free to change. That '
-          + 'split is why a program from 1995 still runs, and why a mistake in the contract is '
-          + 'permanent: an implementation can be replaced next year, but a defined instruction '
-          + 'has to keep behaving the same way for as long as anyone runs old code. The '
-          + 'discipline that follows is worth carrying into software design, because an API is '
-          + 'the same object with a shorter lifetime.',
+        detail: [
+          'Everything above the line depends on the meaning of the bits: compilers, operating '
+            + 'systems, shipped binaries.',
+          'Everything below it is free to change.',
+          'That split is why a program from 1995 still runs, and why a mistake in the contract is '
+            + 'permanent.',
+          'An implementation can be replaced next year, but a defined instruction has to keep '
+            + 'behaving the same way for as long as anyone runs old code.',
+          'The discipline that follows is worth carrying into software design, because an API is '
+            + 'the same object with a shorter lifetime.'
+        ],
         example: 'This milestone builds one implementation of BRV32; M35 builds a pipelined one '
           + 'from the same 42 instructions, and the programs do not change.'
       },
@@ -38,26 +42,33 @@
         term: 'Where the operands live is the first decision, and it sets the code size',
         plain: 'Stack, accumulator or registers: how an instruction names what it works on.',
         formal: 'a stack instruction names nothing, an accumulator one names one, a register one names three',
-        detail: 'A stack machine takes its operands from the top of the stack and leaves the '
-          + 'result there, so an instruction is little more than an opcode and the code is very '
-          + 'dense. An accumulator machine has one implied destination and names one source. A '
-          + 'register machine names all three, which costs bits in every single instruction and '
-          + 'buys the freedom to leave values where they are — no shuffling, no reloading, and '
-          + 'an optimiser with somewhere to allocate to. Every later decision in the instruction '
-          + 'set is downstream of this one.',
-        example: 'The same expression (a + b) times two minus c: 7 instructions in 7 bytes on '
-          + 'the stack machine, 4 in 8 on the accumulator, 3 in 12 on the register machine.'
+        detail: [
+          'A stack machine takes its operands from the top of the stack and leaves the result '
+            + 'there. An instruction is then little more than an opcode, and the code is very '
+            + 'dense.',
+          'An accumulator machine has one implied destination and names one source.',
+          'A register machine names all three, which costs bits in every single instruction and '
+            + 'buys the freedom to leave values where they are.',
+          'That means no shuffling, no reloading, and an optimiser with somewhere to allocate to.',
+          'Every later decision in the instruction set is downstream of this one.'
+        ],
+        example: 'The same expression (a + b) times two minus c. Stack machine: 7 instructions '
+          + 'in 7 bytes. Accumulator: 4 in 8. Register machine: 3 in 12.'
       },
       {
         term: 'Instruction count and code size move in opposite directions',
         plain: 'The densest encoding executes the most instructions.',
         formal: 'bytes per instruction times instructions is the number that matters, and neither factor alone',
-        detail: 'The stack program is the smallest in bytes and the largest in instruction count; '
-          + 'the register program is the reverse. Which one hurts depends on what the machine is '
-          + 'short of: a processor starved of fetch bandwidth or instruction cache wants small '
-          + 'code, and one starved of execution slots wants few instructions. Quoting either '
-          + 'number alone is how instruction-set arguments go wrong, and it is the same error as '
-          + 'comparing two services on requests per second without saying what a request is.',
+        detail: [
+          'The stack program is the smallest in bytes and the largest in instruction count; the '
+            + 'register program is the reverse.',
+          'Which one hurts depends on what the machine is short of.',
+          'A processor starved of fetch bandwidth or instruction cache wants small code, and one '
+            + 'starved of execution slots wants few instructions.',
+          'Quoting either number alone is how instruction-set arguments go wrong. It is the same '
+            + 'error as comparing two services on requests per second without saying what a '
+            + 'request is.'
+        ],
         example: 'Stack: 7 instructions, 7 bytes. Register: 3 instructions, 12 bytes. Both '
           + 'compute 20, which is what makes the comparison mean anything.'
       },
@@ -67,26 +78,33 @@
         formal: 'immediate bits = width - opcode bits - operands x ceil(log2(registers))',
         readAs: 'the immediate gets the width minus the opcode minus, for each operand, the '
           + 'number of bits it takes to name a register.',
-        detail: 'A register field costs the base-two logarithm of the register count, rounded '
-          + 'up, and it is paid once per operand in every instruction that has them. At 32 bits '
-          + 'there is room for three five-bit registers and a twelve-bit immediate; at 16 bits '
-          + 'the arithmetic turns brutal. This is the calculation behind every compressed '
-          + 'instruction set, and the reason those extensions restrict which registers a short '
-          + 'instruction may name — the field is simply not there.',
-        example: 'At 16 bits: 8 registers and 2 operands leave 5 immediate bits (-16 to 15); 32 '
-          + 'registers and 3 operands leave -4, which means the instruction does not fit at all.'
+        detail: [
+          'A register field costs the base-two logarithm of the register count, rounded up, and '
+            + 'it is paid once per operand in every instruction that has them.',
+          'At 32 bits there is room for three five-bit registers and a twelve-bit immediate. At '
+            + '16 bits the arithmetic turns brutal.',
+          'This is the calculation behind every compressed instruction set.',
+          'It is also the reason those extensions restrict which registers a short instruction '
+            + 'may name: the field is simply not there.'
+        ],
+        example: 'At 16 bits, 8 registers and 2 operands leave 5 immediate bits, so -16 to 15. '
+          + 'With 32 registers and 3 operands the budget is -4, so the instruction does not fit.'
       },
       {
         term: 'RISC versus CISC is now an argument about the decoder, not the instructions',
         plain: 'Variable-width encodings are denser and much harder to decode in parallel.',
         formal: 'a fixed-width decoder knows where the next instruction starts before it decodes this one',
-        detail: 'With a fixed width, the address of the next instruction is the current one plus '
-          + 'four, so a machine can start decoding sixteen instructions at once. With a variable '
-          + 'width, the end of an instruction is only known after decoding it, so wide fetch '
-          + 'needs either a serial scan, a predictor, or a cache of already-decoded operations. '
-          + 'Modern x86 implementations pay for all three, and internally translate into '
-          + 'fixed-width micro-operations — which is the RISC argument winning underneath a CISC '
-          + 'contract rather than in place of it.',
+        detail: [
+          'With a fixed width, the address of the next instruction is the current one plus four, '
+            + 'so a machine can start decoding sixteen instructions at once.',
+          'With a variable width, the end of an instruction is only known after decoding it.',
+          'Wide fetch then needs either a serial scan, a predictor, or a cache of already-decoded '
+            + 'operations.',
+          'Modern x86 implementations pay for all three, and internally translate into '
+            + 'fixed-width micro-operations.',
+          'That is the RISC argument winning underneath a CISC contract rather than in place of '
+            + 'it.'
+        ],
         example: 'Fixed width also buys alignment: every BRV32 instruction is four bytes at a '
           + 'four-byte boundary, so the fetch never straddles a cache line.'
       },
@@ -94,13 +112,16 @@
         term: 'Orthogonality is what makes a compiler back end possible',
         plain: 'Any operation with any register, without special cases.',
         formal: 'if an operation exists it should accept every operand the format allows',
-        detail: 'A non-orthogonal instruction set — this operation only on that register, this '
-          + 'addressing mode only for that opcode — pushes every exception into the register '
-          + 'allocator and the instruction selector, where it becomes a permanent tax on '
-          + 'compiler quality and a source of bugs nobody can test out. x86 carries decades of '
-          + 'these from its accumulator ancestry. The general lesson is that a special case in '
-          + 'an interface is paid for by every caller for as long as the interface exists, which '
-          + 'is a long time.',
+        detail: [
+          'A non-orthogonal instruction set says this operation only on that register, or this '
+            + 'addressing mode only for that opcode.',
+          'It pushes every exception into the register allocator and the instruction selector, '
+            + 'where it becomes a permanent tax on compiler quality and a source of bugs nobody '
+            + 'can test out.',
+          'The x86 instruction set carries decades of these from its accumulator ancestry.',
+          'The general lesson is that a special case in an interface is paid for by every caller '
+            + 'for as long as the interface exists, which is a long time.'
+        ],
         example: 'In BRV32 every R-format instruction accepts any three of the 32 registers, so '
           + 'the allocator never has to reserve one for a shift count or a multiply result.'
       },
@@ -108,13 +129,17 @@
         term: 'A hardwired zero register is the cheapest instruction-set decision there is',
         plain: 'One register that always reads zero and discards writes.',
         formal: 'x0 turns general instructions into special ones at no encoding cost',
-        detail: 'Move becomes add-with-zero, load-immediate becomes add-immediate-to-zero, '
-          + 'compare-with-zero becomes an ordinary branch, and discarding a result becomes '
-          + 'writing to x0 — so a jump-and-link that throws away the link register is just a '
-          + 'jump. None of those needed an opcode, a format or a gate. The cost is one register '
-          + 'out of thirty-two and a write-enable that is never asserted for row zero, which '
-          + 'also means "an instruction cannot corrupt x0" is structural rather than a check '
-          + 'somebody might forget.',
+        detail: [
+          'Move becomes add-with-zero, load-immediate becomes add-immediate-to-zero, and '
+            + 'compare-with-zero becomes an ordinary branch.',
+          'Discarding a result becomes writing to x0, so a jump-and-link that throws away the '
+            + 'link register is just a jump.',
+          'None of those needed an opcode, a format or a gate.',
+          'The cost is one register out of thirty-two and a write-enable that is never asserted '
+            + 'for row zero.',
+          'That also makes "an instruction cannot corrupt x0" structural rather than a check '
+            + 'somebody might forget.'
+        ],
         example: 'The assembly section lists six idioms that appear constantly in compiler '
           + 'output, and four of them are x0 doing this.'
       },
@@ -122,12 +147,15 @@
         term: 'Addressing modes fold work into the instruction, and every mode is permanent',
         plain: 'How an instruction computes the address it touches.',
         formal: 'BRV32 has exactly one mode: a register plus a signed 12-bit offset',
-        detail: 'A scaled-index mode folds a multiply and two adds into one instruction, which '
-          + 'is denser and saves instruction slots — and it is then a special case in every '
-          + 'implementation of that instruction set forever, including the pipeline, the '
-          + 'scheduler and the exception logic. Keeping one mode means address arithmetic is '
-          + 'ordinary arithmetic that the compiler can hoist, common-subexpression and schedule '
-          + 'like anything else, which is exactly what modern compilers want to do anyway.',
+        detail: [
+          'A scaled-index mode folds a multiply and two adds into one instruction, which is '
+            + 'denser and saves instruction slots.',
+          'It is then a special case in every implementation of that instruction set forever, '
+            + 'including the pipeline, the scheduler and the exception logic.',
+          'Keeping one mode means address arithmetic is ordinary arithmetic.',
+          'The compiler can hoist it, common-subexpression it and schedule it like anything else, '
+            + 'which is exactly what modern compilers want to do anyway.'
+        ],
         example: 'Array indexing in BRV32 is a shift and an add before the load, which the '
           + 'assembly section shows as the slli-then-add idiom.'
       }

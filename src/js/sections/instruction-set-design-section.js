@@ -66,10 +66,10 @@
         + 'reload, and a register allocator that can decide. The demo measures both sides on '
         + 'the same expression.',
       '**Fixed width buys trivial decode and costs code density.** Every BRV32 instruction is '
-        + 'four bytes, so the address of the next one is always the current one plus four, and '
-        + 'a decoder can look at every field of every instruction simultaneously. A '
-        + 'variable-width encoding is denser and its decoder must find where the instruction '
-        + 'ends before it can know what it is — which is the single biggest difference between '
+        + 'four bytes, so the address of the next one is always the current one plus four. A '
+        + 'decoder can therefore look at every field of every instruction simultaneously. A '
+        + 'variable-width encoding is denser, and its decoder must find where the instruction '
+        + 'ends before it can know what it is. That is the single biggest difference between '
         + 'reading ARM64 and reading x86-64.',
       '**RISC and CISC is a real argument and mostly a settled one.** Complex instructions were '
         + 'worth having when code came off a slow disk into a small memory and a microcoded '
@@ -78,8 +78,8 @@
         + 'operations, which is a RISC core wearing a CISC interface.',
       '**Orthogonality is what makes a compiler\'s job possible.** If every operation works with '
         + 'every addressing mode and every register, the code generator can choose freely. '
-        + 'Special cases — this instruction only writes that register, this mode only works '
-        + 'with that operation — turn instruction selection into a search, and they are the '
+        + 'Special cases turn instruction selection into a search: this instruction only '
+        + 'writes that register, this mode only works with that operation. They are the '
         + 'reason older instruction sets are harder to target than their instruction counts '
         + 'suggest.',
       '**Addressing modes are a compression scheme for address arithmetic.** Base plus offset, '
@@ -89,7 +89,7 @@
         + 'regular.',
       '**The encoding budget is arithmetic, and the demo does it.** Width, minus opcode bits, '
         + 'minus register fields, leaves the immediate. At sixteen bits with thirty-two '
-        + 'registers and two operands there is one bit left, which is why small instruction '
+        + 'registers and two operands there is one bit left. That is why small instruction '
         + 'sets have small register files, and why RISC-V\'s compressed extension pairs '
         + 'sixteen-bit encodings with a restricted set of registers.',
       '**The ISA constrains the microarchitecture, permanently.** Condition codes serialise '
@@ -115,19 +115,20 @@
     return '**An instruction set is the most expensive interface in computing, because it is '
       + 'the one you cannot change once anybody has shipped a binary against it.** Everything '
       + 'else in this course can be rewritten: a compiler pass, a cache policy, an operating '
-      + 'system. An ISA is a promise to every program ever compiled for it, which is why x86 '
-      + 'still decodes instructions designed in 1978 and why the interesting engineering '
+      + 'system. An ISA is a promise to every program ever compiled for it. That is why x86 '
+      + 'still decodes instructions designed in 1978, and why the interesting engineering '
       + 'happens behind the interface rather than in it. That framing explains the two design '
       + 'moves that actually matter. The first is to keep the interface small and regular, '
-      + 'because every irregularity is a special case in every future implementation — RISC-V '
+      + 'because every irregularity is a special case in every future implementation. RISC-V '
       + 'has no condition codes precisely so that no future out-of-order implementation has to '
       + 'rename them. The second is to hide the implementation completely, which is what µop '
-      + 'translation does: x86 kept its interface and replaced everything behind it, and the '
+      + 'translation does. The x86 architecture kept its interface and replaced everything '
+      + 'behind it, and the '
       + 'result runs faster than the RISC machines that were supposed to replace it. The '
       + 'density measurement in this demo is worth carrying too. Stack code is the smallest and '
       + 'takes the most instructions; register code is the largest and takes the fewest. Which '
       + 'one wins depends entirely on whether you are short of instruction-fetch bandwidth or '
-      + 'of execution slots — and that is a question about the machine you are building, not '
+      + 'of execution slots. That is a question about the machine you are building, not '
       + 'about the elegance of the encoding.';
   }
 
