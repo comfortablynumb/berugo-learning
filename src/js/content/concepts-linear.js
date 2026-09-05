@@ -530,13 +530,17 @@
         term: 'Stack frame',
         plain: 'The block a call pushes: return address, saved registers and locals.',
         formal: 'frame size fixed per function',
-        detail: 'A call allocates a frame by subtracting from the stack pointer, and that frame holds ' +
-          'the return address, whichever registers the callee must preserve, the local variables ' +
-          'that could not stay in registers, and any padding the ABI requires. The size is fixed per ' +
-          'function at compile time, so it can be reasoned about statically — about 96 bytes for a ' +
-          'small function with a few locals is a reasonable working figure. Allocation and ' +
-          'deallocation are a single arithmetic instruction each, which is why stack memory is ' +
-          'effectively free and why the total is the only thing worth worrying about.',
+        detail: [
+          'A call allocates a frame by subtracting from the stack pointer. That frame holds the ' +
+            'return address, whichever registers the callee must preserve, the local variables ' +
+            'that could not stay in registers, and any padding the ABI requires.',
+          'The size is fixed per function at compile time, so it can be reasoned about ' +
+            'statically. About 96 bytes for a small function with a few locals is a reasonable ' +
+            'working figure.',
+          'Allocation and deallocation are a single arithmetic instruction each, which is why ' +
+            'stack memory is effectively free and why the total is the only thing worth worrying ' +
+            'about.'
+        ],
         example: 'About 96 bytes for a small function with a few locals.'
       },
       {
@@ -552,26 +556,33 @@
         },
         plain: 'How many frames are live at once. It is memory, on a region you did not size.',
         formal: 'peak frames × frame size',
-        detail: 'Depth is the number of frames simultaneously alive, and multiplying it by the frame ' +
-          'size gives a real memory figure — depth 10 000 at 96 bytes is roughly 1 MB. The reason ' +
-          'this deserves separate attention from heap use is that the stack was sized once, when the ' +
-          'thread was created, and cannot grow. So the relevant question about a recursive algorithm ' +
-          'is not whether it recurses but what bounds its depth: a balanced tree bounds it at ' +
-          'log n, quicksort on the smaller side bounds it at log n, and recursion driven by input ' +
-          'structure has no bound at all until you impose one.',
+        detail: [
+          'Depth is the number of frames simultaneously alive, and multiplying it by the frame ' +
+            'size gives a real memory figure. Depth 10 000 at 96 bytes is roughly 1 MB.',
+          'The reason this deserves separate attention from heap use is that the stack was sized ' +
+            'once, when the thread was created, and cannot grow.',
+          'So the relevant question about a recursive algorithm is not whether it recurses, but ' +
+            'what bounds its depth.',
+          'A balanced tree bounds it at log n, and quicksort on the smaller side bounds it at ' +
+            'log n. Recursion driven by input structure has no bound at all until you impose one.'
+        ],
         example: 'Depth 10 000 at 96 bytes is roughly 1 MB of stack.'
       },
       {
         term: 'Stack overflow',
         plain: 'The stack hits its guard page and the process (or the engine) stops you.',
         formal: 'depth × frame size > stack limit',
-        detail: 'The stack is backed by a fixed region with an unmapped guard page below it, so ' +
-          'running past the end faults rather than corrupting whatever is next — in a native program ' +
-          'that is a crash, and in JavaScript the engine raises a RangeError instead. Two things ' +
-          'make this failure mode nasty: it depends on input shape rather than input size, so a ' +
-          'degenerate tree overflows where a balanced one of the same node count recurses twenty ' +
-          'deep, and the limit varies by engine, thread and platform, so it reproduces unreliably. ' +
-          'It is a structural bug, and the fixes are structural: bound the depth, or stop recursing.',
+        detail: [
+          'The stack is backed by a fixed region with an unmapped guard page below it, so running ' +
+            'past the end faults rather than corrupting whatever is next. In a native program ' +
+            'that is a crash; in JavaScript the engine raises a RangeError instead.',
+          'Two things make this failure mode nasty. It depends on input shape rather than input ' +
+            'size, so a degenerate tree overflows where a balanced one of the same node count ' +
+            'recurses twenty deep.',
+          'The limit also varies by engine, thread and platform, so it reproduces unreliably.',
+          'It is a structural bug, and the fixes are structural: bound the depth, or stop ' +
+            'recursing.'
+        ],
         example: 'A degenerate tree overflows where a balanced one recurses 20 deep.'
       },
       {
@@ -587,27 +598,34 @@
         },
         plain: 'Moving the frames to a heap array: same order, and a bound you control.',
         formal: 'push/pop on an array instead of calling',
-        detail: 'Any recursion can be rewritten as a loop over an explicit stack of pending work, and ' +
-          'the rewrite changes where the memory comes from: the heap, which is large and growable, ' +
-          'instead of the stack, which is neither. It also lets you store only what is genuinely ' +
-          'needed — an iterative in-order traversal keeps node indices, not whole frames with saved ' +
-          'registers — so the per-item cost drops by an order of magnitude. And because the stack is ' +
-          'now an ordinary data structure, its depth is inspectable and its limit is yours to ' +
-          'choose, which turns an engine-level crash into a condition you can handle.',
+        detail: [
+          'Any recursion can be rewritten as a loop over an explicit stack of pending work. The ' +
+            'rewrite changes where the memory comes from: the heap, which is large and growable, ' +
+            'instead of the stack, which is neither.',
+          'It also lets you store only what is genuinely needed. An iterative in-order traversal ' +
+            'keeps node indices, not whole frames with saved registers, so the per-item cost ' +
+            'drops by an order of magnitude.',
+          'And because the stack is now an ordinary data structure, its depth is inspectable and ' +
+            'its limit is yours to choose. That turns an engine-level crash into a condition you ' +
+            'can handle.'
+        ],
         example: 'An iterative in-order traversal holds only indices.'
       },
       {
         term: 'Tail call',
         plain: 'A call in return position can reuse the current frame, if the language guarantees it.',
         formal: 'return f(x) reuses the frame',
-        detail: 'When a call is the last thing a function does, the caller\'s frame has no remaining ' +
-          'use, so an implementation is free to reuse it and turn the call into a jump — recursion ' +
-          'in constant stack space. The catch is entirely about guarantees: Scheme and Lua require ' +
-          'it, so recursion is a legitimate looping construct there. ECMAScript specified it in ES6 ' +
-          'and, apart from JavaScriptCore, engines have not shipped it, so in practice a tail call ' +
-          'in JavaScript consumes a frame like any other. Writing code that depends on an ' +
-          'optimisation the runtime does not promise is how a deep recursion works in testing and ' +
-          'overflows in production.',
+        detail: [
+          'When a call is the last thing a function does, the caller\'s frame has no remaining ' +
+            'use. An implementation is then free to reuse it and turn the call into a jump: ' +
+            'recursion in constant stack space.',
+          'The catch is entirely about guarantees. Scheme and Lua require it, so recursion is a ' +
+            'legitimate looping construct there.',
+          'ECMAScript specified it in ES6 and, apart from JavaScriptCore, engines have not ' +
+            'shipped it. In practice a tail call in JavaScript consumes a frame like any other.',
+          'Writing code that depends on an optimisation the runtime does not promise is how a ' +
+            'deep recursion works in testing and overflows in production.'
+        ],
         example: 'Guaranteed in some languages; not in JavaScript engines in practice.'
       },
       {
@@ -616,40 +634,50 @@
         formal: '1 MiB / 96 B = 10 922 frames',
         readAs: 'A one-mebibyte stack divided by a 96-byte frame gives about eleven thousand nested calls ' +
           'before it overflows. A mebibyte is 1 048 576 bytes.',
-        detail: 'Dividing the stack you were given by the size of one frame turns a vague worry into ' +
-          'a number: 1 MiB at 96 bytes per frame is 10 922 frames, and that is the entire depth ' +
-          'budget for the thread. It is small compared with the data sizes people happily recurse ' +
-          'over, which is why a degenerate structure of 11 000 nodes overflows. The comparison that ' +
-          'makes the point is what the same traversal costs on the heap: 11 000 node indices is ' +
-          '88 kB, an eighth of the stack, on a region that can grow. Compute the budget before ' +
-          'choosing recursion, not after the crash report.',
+        detail: [
+          'Dividing the stack you were given by the size of one frame turns a vague worry into a ' +
+            'number. A 1 MiB stack at 96 bytes per frame gives 10 922 frames, and that is the ' +
+            'entire depth budget for the thread.',
+          'It is small compared with the data sizes people happily recurse over, which is why a ' +
+            'degenerate structure of 11 000 nodes overflows.',
+          'The comparison that makes the point is what the same traversal costs on the heap. ' +
+            'Holding 11 000 node indices is 88 kB, an eighth of the stack, on a region that can ' +
+            'grow.',
+          'Compute the budget before choosing recursion, not after the crash report.'
+        ],
         example: 'A degenerate tree of 11 000 nodes overflows; the same 11 000 nodes cost 88 kB on an explicit stack.'
       },
       {
         term: 'Guard depth',
         plain: 'A depth limit only protects you if it is below the engine’s real limit — above it, the engine throws first.',
         formal: 'maxDepth < engine limit',
-        detail: 'Adding a depth check is the standard defence against runaway recursion, and it is ' +
-          'worthless if the number is chosen by intuition. A guard of 20 000 in an engine that dies ' +
-          'at about 11 000 never fires: the engine throws first, which is precisely the outcome the ' +
-          'guard existed to prevent. The limit has to be derived from the frame budget and set ' +
-          'comfortably under it, and it has to be checked before the frame is consumed rather than ' +
-          'after. It is also worth measuring rather than assuming, since the real limit varies with ' +
-          'the engine, the platform and how much stack the current call chain has already used.',
+        detail: [
+          'Adding a depth check is the standard defence against runaway recursion, and it is ' +
+            'worthless if the number is chosen by intuition.',
+          'A guard of 20 000 in an engine that dies at about 11 000 never fires. The engine ' +
+            'throws first, which is precisely the outcome the guard existed to prevent.',
+          'The limit has to be derived from the frame budget and set comfortably under it, and it ' +
+            'has to be checked before the frame is consumed rather than after.',
+          'It is also worth measuring rather than assuming, since the real limit varies with the ' +
+            'engine, the platform and how much stack the current call chain has already used.'
+        ],
         example: 'A guard of 20 000 never fires in an engine that dies at about 11 000.'
       },
       {
         term: 'State machine instead of frames',
         plain: 'An explicit stack of what is left to do turns unbounded recursion into bounded heap.',
         formal: 'push the continuation, loop until empty',
-        detail: 'The general form of the explicit-stack rewrite is to store what remains to be done ' +
-          'rather than where to return to: push the pending work, loop until the stack is empty, and ' +
-          'the recursion becomes an ordinary data structure you can size, inspect, checkpoint or ' +
-          'resume. The saving can be dramatic when the recursion is lopsided, because a frame is ' +
-          'pushed per call while a work item is pushed only per genuinely pending branch — an ' +
-          'in-order walk down a right spine of 4 095 nodes needs 4 095 frames recursively and one ' +
-          'stack entry iteratively. This is the same transformation compilers apply to async ' +
-          'functions and generators.',
+        detail: [
+          'The general form of the explicit-stack rewrite is to store what remains to be done, ' +
+            'rather than where to return to.',
+          'Push the pending work and loop until the stack is empty. The recursion becomes an ' +
+            'ordinary data structure you can size, inspect, checkpoint or resume.',
+          'The saving can be dramatic when the recursion is lopsided, because a frame is pushed ' +
+            'per call while a work item is pushed only per genuinely pending branch.',
+          'An in-order walk down a right spine of 4 095 nodes needs 4 095 frames recursively, and ' +
+            'one stack entry iteratively.',
+          'This is the same transformation compilers apply to async functions and generators.'
+        ],
         example: 'In-order traversal of a right spine needs 4 095 frames recursively and one stack entry iteratively.'
       }
     ],

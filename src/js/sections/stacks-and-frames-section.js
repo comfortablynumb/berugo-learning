@@ -24,13 +24,13 @@
     root.jQuery('#' + SECTION_ID + '-content').html(app.shell.render({
       sectionId: SECTION_ID,
       orientation: [
-        'A stack is the simplest structure there is, and the most load-bearing: every function call ' +
-          'pushes a frame holding the return address, the saved registers and the locals, and every ' +
-          'return pops one. Recursion depth is therefore memory, allocated on a fixed-size region ' +
-          'you did not choose the size of.',
-        'A balanced tree recurses to depth log n and a degenerate one to depth n. The same traversal ' +
-          'code is fine on the first and overflows on the second, which is why "it worked on the test ' +
-          'data" is such a common preface to a stack overflow.',
+        'A stack is the simplest structure there is, and the most load-bearing. Every function ' +
+          'call pushes a frame holding the return address, the saved registers and the locals, ' +
+          'and every return pops one. Recursion depth is therefore memory, allocated on a ' +
+          'fixed-size region you did not choose the size of.',
+        'A balanced tree recurses to depth log n and a degenerate one to depth n. The same ' +
+          'traversal code is fine on the first and overflows on the second. That is why "it ' +
+          'worked on the test data" is such a common preface to a stack overflow.',
         'Converting recursion into an explicit stack moves the frames to the heap, where the bound is ' +
           'yours. The visit order must not change, and the demo checks that it does not.'
       ],
@@ -47,8 +47,8 @@
         ].join('\n')
       },
       insight: '"Recursion is elegant" ends where the frame budget does. The engine limit measured ' +
-        'here is a few tens of thousands of frames — fine for a balanced tree of a billion nodes, ' +
-        'and fatal for a linked list of a hundred thousand.'
+        'here is a few tens of thousands of frames. That is fine for a balanced tree of a billion ' +
+        'nodes, and fatal for a linked list of a hundred thousand.'
     }));
 
     app.shell.mount({ sectionId: SECTION_ID, app: app });
