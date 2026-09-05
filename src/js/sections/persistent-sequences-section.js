@@ -32,18 +32,21 @@
       orientation: [
         'A two-list queue is O(1) amortised: pushes go on the rear, pops come off the front, and when the front ' +
           'runs out the rear is reversed into it. The proof is a banker\'s argument — each push saves a credit, ' +
-          'the reversal spends them — and it is only valid if every version is used once. Reuse one version a ' +
-          'thousand times and the same expensive rotation is performed a thousand times: 510.00 steps per ' +
-          'reuse on a 512-element queue, against the 1.00 an honest O(1) would give.',
-        'Okasaki\'s repair is to make the rotation a lazy suspension and memoise it. The first version to force ' +
-          'it pays; every other version that reaches the same suspension finds the answer already there. The ' +
-          'same adversarial loop costs 1.50 steps per reuse — 340× less — and the amortised bound survives ' +
-          'persistence, because a memoised suspension can be paid for once rather than once per version.',
-        'That still leaves one spike: the version that does force the rotation pays 503 steps in a single ' +
-          'operation, which is fine for throughput and fatal for a deadline. The real-time queue removes it by ' +
-          'doing a constant slice of the rotation on every operation, so nothing is ever deferred and the worst ' +
-          'single operation is 1 step rather than 1 014. It is strictly more code and strictly more allocation ' +
-          'for a bound that most systems do not need.'
+          'the reversal spends them — and it is only valid if every version is used once. Reuse ' +
+          'one version a thousand times and the same expensive rotation is performed a thousand ' +
+          'times. That is 510.00 steps per reuse on a 512-element queue, against the 1.00 an ' +
+          'honest O(1) would give.',
+        'Okasaki\'s repair is to make the rotation a lazy suspension and memoise it. The first ' +
+          'version to force it pays; every other version that reaches the same suspension finds ' +
+          'the answer already there. The same adversarial loop costs 1.50 steps per reuse, 340× ' +
+          'less. The amortised bound survives persistence, because a memoised suspension can be ' +
+          'paid for once rather than once per version.',
+        'That still leaves one spike. The version that does force the rotation pays 503 steps in a ' +
+          'single operation, which is fine for throughput and fatal for a deadline. The real-time ' +
+          'queue removes it by doing a constant slice of the rotation on every operation, so ' +
+          'nothing is ever deferred. The worst single operation is 1 step rather than 1 014. It is ' +
+          'strictly more code and strictly more allocation for a bound that most systems do not ' +
+          'need.'
       ],
       demo: {
         title: 'Interactive demo — one version, reused until the amortised bound breaks',
@@ -66,10 +69,11 @@
       },
       insight: 'Amortised analysis assumes a single line of history. Persistence makes history a tree, and every ' +
         'branch may re-enter the same expensive operation, so the credits saved by one branch are spent by all ' +
-        'of them. The fix is not a better bound but a different execution model: a memoised suspension turns ' +
-        '"this will be paid for later" into "this will be paid for once", which is exactly the property the ' +
-        'banker\'s argument needed and strictness never had. Debug this by reusing an old version in a loop — ' +
-        'if the cost per call scales with the structure, the bound was never persistent.'
+        'of them. The fix is not a better bound but a different execution model. A memoised ' +
+        'suspension turns "this will be paid for later" into "this will be paid for once", which ' +
+        'is exactly the property the banker\'s argument needed and strictness never had. Debug ' +
+        'this by reusing an old version in a loop: if the cost per call scales with the structure, ' +
+        'the bound was never persistent.'
     };
   }
 

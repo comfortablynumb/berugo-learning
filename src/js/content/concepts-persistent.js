@@ -166,11 +166,15 @@
         term: 'Cons lists are persistent for free',
         plain: 'Prepending to a singly linked list creates one cell and shares the entire tail.',
         formal: 'cons is O(1) space and O(1) time, and every previous list is still intact',
-        detail: 'This is why functional languages default to them and why they are the wrong default for almost ' +
-          'everything else: the one operation that is free is the one at the front, and indexing, appending and ' +
-          'concatenating are all linear. The interesting question is not how to make a list persistent - it ' +
-          'already is - but how to get a *queue*, where the natural implementation needs both ends and the ' +
-          'cheap end is only one of them.',
+        detail: [
+          'This is why functional languages default to them, and why they are the wrong default ' +
+            'for almost everything else.',
+          'The one operation that is free is the one at the front, and indexing, appending and ' +
+            'concatenating are all linear.',
+          'The interesting question is not how to make a list persistent - it already is.',
+          'It is how to get a *queue*, where the natural implementation needs both ends and the ' +
+            'cheap end is only one of them.'
+        ],
         example: 'A queue built from two lists is the standard answer, and persistence is what breaks it.'
       },
       {
@@ -187,77 +191,103 @@
         },
         plain: 'An expensive operation can be paid for once and then re-triggered from the same old version forever.',
         formal: 'the credit argument assumes each version is used once; persistence removes that assumption',
-        detail: 'This is the most important idea in the section and it is not a subtlety. A two-list queue ' +
-          'amortises its O(n) reversal against the n cheap pushes that preceded it, which is a valid argument ' +
-          'exactly when each of those pushes happens once. Hold on to the version just before the reversal and ' +
-          'call `tail` on it a thousand times, and you pay the reversal a thousand times while earning its ' +
-          'savings once. The bound is not merely hard to prove; it is false.',
+        detail: [
+          'This is the most important idea in the section and it is not a subtlety.',
+          'A two-list queue amortises its O(n) reversal against the n cheap pushes that preceded ' +
+            'it, which is a valid argument exactly when each of those pushes happens once.',
+          'Hold on to the version just before the reversal and call `tail` on it a thousand times, ' +
+            'and you pay the reversal a thousand times while earning its savings once.',
+          'The bound is not merely hard to prove; it is false.'
+        ],
         example: 'One pre-rotation version reused 1 000 times: 510.00 steps per reuse against the banker\'s queue\'s 1.50.'
       },
       {
         term: 'A memoised suspension repairs it',
         plain: 'Make the expensive rotation a lazy value that remembers its result, and every version that forces it shares the answer.',
         formal: 'Okasaki\'s banker\'s queue: amortised O(1) even under arbitrary reuse',
-        detail: 'The repair is precise: the rotation becomes a thunk stored in the queue, so the thousand ' +
-          'reuses all point at the *same* suspension and the first one to force it pays for all of them. Note ' +
-          'what is doing the work - the memo, not the laziness. A lazy value without memoisation recomputes on ' +
-          'every force and behaves exactly like the strict queue, which is why "use lazy evaluation" is not the ' +
-          'lesson and "share the computation" is.',
+        detail: [
+          'The repair is precise. The rotation becomes a thunk stored in the queue, so the thousand ' +
+            'reuses all point at the *same* suspension. The first one to force it pays for all of ' +
+            'them.',
+          'Note what is doing the work: the memo, not the laziness.',
+          'A lazy value without memoisation recomputes on every force and behaves exactly like the ' +
+            'strict queue.',
+          'That is why "use lazy evaluation" is not the lesson and "share the computation" is.'
+        ],
         example: '1 000 reuses force the suspension 8 times and hit the memo 1 518 times: 1.50 steps per reuse.'
       },
       {
         term: 'Amortised is not worst case, and laziness does not fix that',
         plain: 'The banker\'s queue still has a single operation that pays for the whole rotation.',
         formal: 'measured worst operation: strict 511 steps, banker 1 014, real-time 2',
-        detail: 'This is the result that surprises people, and it is worth stating plainly: the banker\'s queue ' +
-          'has a *larger* worst-case operation than the strict queue on the same run, because deferring the ' +
-          'rotations lets two of them come due together. It fixes persistence and it does not fix latency. If ' +
-          'the requirement is a frame budget or a tail-latency SLO rather than a total, amortised O(1) is the ' +
-          'wrong promise however the credits are argued.',
+        detail: [
+          'This is the result that surprises people, and it is worth stating plainly.',
+          'The banker\'s queue has a *larger* worst-case operation than the strict queue on the ' +
+            'same run, because deferring the rotations lets two of them come due together.',
+          'It fixes persistence and it does not fix latency.',
+          'If the requirement is a frame budget or a tail-latency SLO rather than a total, ' +
+            'amortised O(1) is the wrong promise however the credits are argued.'
+        ],
         example: 'Both queues average 1.49 steps per operation; one spikes to 511 and the other to 1 014.'
       },
       {
         term: 'Real-time queues: do one step of the rotation per operation',
         plain: 'Split the rotation into n suspensions of constant work and keep a schedule that forces exactly one per operation.',
         formal: 'O(1) worst case per operation, not amortised',
-        detail: 'The schedule is the whole trick. Instead of one suspension that does n units of work, ' +
-          'incremental rotation builds a chain of n suspensions each doing one unit, and every queue operation ' +
-          'forces the next link. The rotation is therefore complete before the next one is due, so no operation ' +
-          'ever pays more than a constant and there is no spike to re-trigger. It is more code and it is the ' +
-          'only version of the three that can be put behind a latency budget.',
+        detail: [
+          'The schedule is the whole trick.',
+          'Instead of one suspension that does n units of work, incremental rotation builds a chain ' +
+            'of n suspensions each doing one unit, and every queue operation forces the next link.',
+          'The rotation is therefore complete before the next one is due, so no operation ever pays ' +
+            'more than a constant and there is no spike to re-trigger.',
+          'It is more code, and it is the only version of the three that can be put behind a ' +
+            'latency budget.'
+        ],
         example: 'Worst operation of 2 steps over a 1 024-operation run, at a mean of 1.00 against the others\' 1.49.'
       },
       {
         term: 'Scheduling generalises beyond queues',
         plain: 'Any amortised structure can be made worst-case by paying its debt in instalments.',
         formal: 'debt per suspension, discharged at a fixed rate per operation',
-        detail: 'Okasaki\'s framework turns "this operation is expensive but rare" into "this operation is ' +
-          'divided into pieces and one piece is paid per step", and the same technique gives real-time versions ' +
-          'of catenable lists, deques and heaps. The engineering value is not the specific structures but the ' +
-          'move itself: when a spike is unacceptable, look for a way to do a bounded slice of the expensive work ' +
-          'on every ordinary operation rather than all of it on one.',
+        detail: [
+          'Okasaki\'s framework turns "this operation is expensive but rare" into "this operation ' +
+            'is divided into pieces and one piece is paid per step".',
+          'The same technique gives real-time versions of catenable lists, deques and heaps.',
+          'The engineering value is not the specific structures but the move itself.',
+          'When a spike is unacceptable, look for a way to do a bounded slice of the expensive work ' +
+            'on every ordinary operation rather than all of it on one.'
+        ],
         example: 'The same idea appears as incremental rehashing in M03 and incremental compaction in an LSM tree.'
       },
       {
         term: 'The steps are counted, not timed',
         plain: 'Every measurement here is list cells forced or traversed, so it does not depend on the machine.',
         formal: 'one step = one suspension forced or one cell walked',
-        detail: 'Timing a lazy structure in a JIT-compiled runtime measures the runtime at least as much as the ' +
-          'structure: allocation, escape analysis and inline caches all move the numbers more than the ' +
-          'algorithmic difference does. Counting the operations the analysis is actually about gives a figure ' +
-          'that reproduces exactly and that can be compared against the bound on paper, which is the only ' +
-          'comparison worth making here.',
+        detail: [
+          'Timing a lazy structure in a JIT-compiled runtime measures the runtime at least as much ' +
+            'as the structure.',
+          'Allocation, escape analysis and inline caches all move the numbers more than the ' +
+            'algorithmic difference does.',
+          'Counting the operations the analysis is actually about gives a figure that reproduces ' +
+            'exactly.',
+          'It can also be compared against the bound on paper, which is the only comparison worth ' +
+            'making here.'
+        ],
         example: 'The 340× gap between the strict and banker\'s queues is a step count, and it is the same on every run.'
       },
       {
         term: 'Which one to reach for',
         plain: 'Ephemeral use: the strict queue. Persistent use: the banker\'s. A latency budget: real-time.',
         formal: 'the three columns are reuse safety, average cost and worst-case cost',
-        detail: 'The decision is not about elegance. If the queue is used linearly - each version once - the ' +
-          'strict two-list queue is the simplest correct thing and its amortised bound holds. If old versions ' +
-          'are retained or replayed, the memoised suspension is what keeps the bound true. If a single ' +
-          'operation must never exceed a constant, only the scheduled version delivers that, and it is worth ' +
-          'the extra code precisely and only then.',
+        detail: [
+          'The decision is not about elegance.',
+          'If the queue is used linearly - each version once - the strict two-list queue is the ' +
+            'simplest correct thing, and its amortised bound holds.',
+          'If old versions are retained or replayed, the memoised suspension is what keeps the ' +
+            'bound true.',
+          'If a single operation must never exceed a constant, only the scheduled version delivers ' +
+            'that, and it is worth the extra code precisely and only then.'
+        ],
         example: 'Same 512-element workload: mean 1.49, 1.49 and 1.00 steps; worst 511, 1 014 and 2.'
       }
     ],
