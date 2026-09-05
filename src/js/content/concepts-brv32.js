@@ -182,12 +182,15 @@
         },
         plain: 'R, I, S, B, U and J differ mainly in where the immediate bits live.',
         formal: 'opcode is always [6:0], rd always [11:7], rs1 always [19:15], rs2 always [24:20]',
-        detail: 'Because those four fields are at fixed positions regardless of format, a '
-          + 'decoder can pull all of them out — and start the register file read — before it '
-          + 'knows what kind of instruction it is holding. Any field it did not need is simply '
-          + 'discarded. That is why a regular fixed-width encoding decodes in roughly one gate '
-          + 'delay while a variable-width one needs a pipeline stage, and it is the clearest '
-          + 'case in the milestone of gates dictating a software-visible rule.',
+        detail: [
+          'Because those four fields are at fixed positions regardless of format, a decoder can '
+            + 'pull all of them out before it knows what kind of instruction it is holding.',
+          'It can start the register file read at the same time, and discard any field it did '
+            + 'not need.',
+          'That is why a regular fixed-width encoding decodes in roughly one gate delay while a '
+            + 'variable-width one needs a pipeline stage.',
+          'It is the clearest case in the milestone of gates dictating a software-visible rule.'
+        ],
         example: 'The datapath reads both register ports every cycle, for every instruction, '
           + 'including ones with no source registers at all. It costs nothing to be wrong.'
       },
@@ -195,12 +198,15 @@
         term: 'The immediates are scrambled, and every scramble saves a wire',
         plain: 'Immediate bits are placed to keep the sign extender and the muxes small.',
         formal: 'bit 31 is the sign of the immediate in every format that has one',
-        detail: 'The immediate fields look arbitrary until you ask what the hardware has to '
-          + 'build. Bit 31 is the sign bit in I, S, B and J, so the sign extender is wired once '
-          + 'to one wire rather than four times to four. The S and B formats differ only in '
-          + 'where the low bits land, so a store and a branch share nearly all of their '
-          + 'reassembly logic. The assembler pays for this in a few lines of shifting; the '
-          + 'decoder saves it in every implementation ever built.',
+        detail: [
+          'The immediate fields look arbitrary until you ask what the hardware has to build.',
+          'Bit 31 is the sign bit in I, S, B and J, so the sign extender is wired once to one '
+            + 'wire rather than four times to four.',
+          'The S and B formats differ only in where the low bits land, so a store and a branch '
+            + 'share nearly all of their reassembly logic.',
+          'The assembler pays for this in a few lines of shifting; the decoder saves it in every '
+            + 'implementation ever built.'
+        ],
         example: 'The sw encoding splits its 12-bit offset into word[31:25] and word[11:7] — '
           + 'exactly the bit positions the R format uses for funct7 and rd.'
       },
@@ -208,11 +214,15 @@
         term: 'Branch and jump offsets have no bit zero, which doubles their reach',
         plain: 'Targets are even, so the low bit is not stored.',
         formal: 'B carries 13 immediate bits in 12 bits of encoding; J carries 21 in 20',
-        detail: 'Every instruction is four bytes at a four-byte boundary, so a branch target is '
-          + 'always even and storing its low bit would waste it. Dropping it means the same '
-          + 'number of encoded bits reaches twice as far. This is a general trick — when a value '
-          + 'is known to be a multiple of something, encode the quotient — and it appears again '
-          + 'in page tables, in compressed pointers and in every file format with a block size.',
+        detail: [
+          'Every instruction is four bytes at a four-byte boundary, so a branch target is always '
+            + 'even and storing its low bit would waste it.',
+          'Dropping it means the same number of encoded bits reaches twice as far.',
+          'This is a general trick: when a value is known to be a multiple of something, encode '
+            + 'the quotient.',
+          'It appears again in page tables, in compressed pointers and in every file format with '
+            + 'a block size.'
+        ],
         example: 'The B format encodes 13 bits of immediate in 12 bits of the word, which is '
           + 'plus or minus 4 KiB of reach rather than 2.'
       },
@@ -220,13 +230,16 @@
         term: 'A format is defined as much by what it cannot say',
         plain: 'Each format gives up something to buy its immediate.',
         formal: 'S has no destination register; R has no immediate at all; U says nothing about the low 12 bits',
-        detail: 'The S format spends the rd field on immediate bits, so a store has no '
-          + 'destination — which is fine, because a store does not produce a value. The R format '
-          + 'spends 15 bits on three registers and has nothing left for a constant. U spends 20 '
-          + 'bits on the high half of a constant and cannot express the low twelve. Reading the '
-          + 'absences is how you understand an encoding: each one is a decision that bought bits '
-          + 'somewhere else, and it explains why lui exists and why it is always followed by an '
-          + 'addi.',
+        detail: [
+          'The S format spends the rd field on immediate bits, so a store has no destination. '
+            + 'That is fine, because a store does not produce a value.',
+          'The R format spends 15 bits on three registers and has nothing left for a constant.',
+          'The U format spends 20 bits on the high half of a constant and cannot express the low '
+            + 'twelve.',
+          'Reading the absences is how you understand an encoding. Each one is a decision that '
+            + 'bought bits somewhere else, and it explains why lui exists and why it is always '
+            + 'followed by an addi.'
+        ],
         example: 'Building a full 32-bit constant takes lui plus addi, because 12 bits is all an '
           + 'I-format immediate has.'
       },
@@ -234,12 +247,15 @@
         term: 'Pseudo-instructions are an assembler feature, not a machine feature',
         plain: 'mv, li, j, ret and beqz are spellings of real instructions.',
         formal: 'the assembler expands them; the hardware has never heard of them',
-        detail: 'mv rd, rs is addi rd, rs, 0. li of a small constant is addi rd, x0, n; of a '
-          + 'large one it is lui then addi, which is two instructions from one line. ret is jalr '
-          + 'x0, ra, 0. Knowing which lines in a listing were written by the programmer and '
-          + 'which by the assembler is a real skill when reading disassembly, because the '
-          + 'disassembler shows you the machine instructions and the source showed you the '
-          + 'pseudo ones, and the line counts do not match.',
+        detail: [
+          'The instruction mv rd, rs is addi rd, rs, 0, and ret is jalr x0, ra, 0.',
+          'The pseudo-instruction li of a small constant is addi rd, x0, n. Of a large one it is '
+            + 'lui then addi, which is two instructions from one line.',
+          'Knowing which lines in a listing were written by the programmer and which by the '
+            + 'assembler is a real skill when reading disassembly.',
+          'The disassembler shows you the machine instructions and the source showed you the '
+            + 'pseudo ones, so the line counts do not match.'
+        ],
         example: 'In the factorial listing, 13 of 27 lines came from pseudo-instruction '
           + 'expansion, including the two-instruction li that sets up the stack pointer.'
       },
@@ -247,13 +263,15 @@
         term: 'Alignment and endianness are part of the contract, not of the implementation',
         plain: 'Little-endian byte order, and naturally aligned accesses.',
         formal: 'a 4-byte load requires an address that is a multiple of 4, or it faults',
-        detail: 'Endianness decides which byte of a word lives at the lowest address, and the '
-          + 'moment a program writes a word and reads a byte the answer becomes visible — so it '
-          + 'has to be specified, not left to the implementation. Alignment is an efficiency '
-          + 'decision made visible: an aligned access never straddles two words, so the memory '
-          + 'interface stays one access wide. Requiring it means unaligned accesses fault '
-          + 'loudly, which is far better than the alternative of silently loading the wrong '
-          + 'bytes.',
+        detail: [
+          'Endianness decides which byte of a word lives at the lowest address.',
+          'The moment a program writes a word and reads a byte the answer becomes visible, so it '
+            + 'has to be specified rather than left to the implementation.',
+          'Alignment is an efficiency decision made visible. An aligned access never straddles '
+            + 'two words, so the memory interface stays one access wide.',
+          'Requiring it means unaligned accesses fault loudly, which is far better than the '
+            + 'alternative of silently loading the wrong bytes.'
+        ],
         example: 'The memory section drives every width against every alignment and shows which '
           + 'combinations fault rather than truncating.'
       },
@@ -261,12 +279,16 @@
         term: 'Loads choose their extension, and the choice is in the opcode',
         plain: 'lb sign-extends a byte; lbu zero-extends the same byte.',
         formal: 'funct3 selects width and signedness together, in three bits',
-        detail: 'A byte loaded into a 32-bit register has to become 32 bits somehow, and whether '
-          + 'the top 24 are copies of the sign bit or zeros depends entirely on what the byte '
-          + 'meant. The instruction set cannot infer it, so it is encoded: two instructions for '
-          + 'every sub-word width. This is the hardware root of a whole family of C bugs about '
-          + 'char signedness, and it is why a language that does not commit to one gets '
-          + 'different answers on different platforms.',
+        detail: [
+          'A byte loaded into a 32-bit register has to become 32 bits somehow.',
+          'Whether the top 24 are copies of the sign bit or zeros depends entirely on what the '
+            + 'byte meant.',
+          'The instruction set cannot infer it, so it is encoded: two instructions for every '
+            + 'sub-word width.',
+          'This is the hardware root of a whole family of C bugs about char signedness. It is '
+            + 'why a language that does not commit to one gets different answers on different '
+            + 'platforms.'
+        ],
         example: 'Loading 0xFF with lb gives -1; with lbu it gives 255. Same byte, same address, '
           + 'different opcode.'
       },
@@ -274,13 +296,16 @@
         term: 'A published specification is the only oracle worth having here',
         plain: 'Check the encodings against somebody else\'s numbers, not your own.',
         formal: '14 encodings from the RISC-V specification, compared byte for byte',
-        detail: 'An assembler and a disassembler written by the same person from the same '
-          + 'misunderstanding will round-trip perfectly and be wrong. Round-tripping proves '
-          + 'self-consistency and nothing else. The only test that catches a shared '
-          + 'misunderstanding is a set of encodings produced by somebody who was not in the '
-          + 'room — the published specification, or a real toolchain\'s output. This is the same '
-          + 'reason cryptographic implementations are checked against published test vectors and '
-          + 'never against themselves.',
+        detail: [
+          'An assembler and a disassembler written by the same person from the same '
+            + 'misunderstanding will round-trip perfectly and be wrong.',
+          'Round-tripping proves self-consistency and nothing else.',
+          'The only test that catches a shared misunderstanding is a set of encodings produced by '
+            + 'somebody who was not in the room: the published specification, or a real '
+            + 'toolchain\'s output.',
+          'This is the same reason cryptographic implementations are checked against published '
+            + 'test vectors and never against themselves.'
+        ],
         example: 'All 14 published words match, including 0xfeb51ee3 for bne a0, a1, -4, whose '
           + 'immediate is split across four separate bit ranges.'
       }

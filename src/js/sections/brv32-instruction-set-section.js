@@ -71,11 +71,11 @@
 
   function orientation() {
     return [
-      '**Thirty-two registers, one of which is always zero.** x0 reads as zero and discards '
-        + 'writes, which is not a special case in the register file so much as an absence: the '
-        + 'write enable for row zero is not wired. It buys a great deal — `mv` is `addi rd, rs, '
-        + '0`, `nop` is `addi x0, x0, 0`, a comparison against zero needs no constant, and '
-        + 'discarding a result needs no instruction.',
+      '**Thirty-two registers, one of which is always zero.** Register x0 reads as zero and '
+        + 'discards writes. That is not a special case in the register file so much as an '
+        + 'absence: the write enable for row zero is not wired. It buys a great deal. `mv` is '
+        + '`addi rd, rs, 0` and `nop` is `addi x0, x0, 0`, a comparison against zero needs no '
+        + 'constant, and discarding a result needs no instruction.',
       '**Six formats, and the fields that matter are in the same place in all of them.** The '
         + 'opcode, the destination register and both source registers occupy fixed bit '
         + 'positions, so the decoder reads them before it knows which instruction it has. That '
@@ -83,12 +83,12 @@
         + 'in parallel with decode.',
       '**The immediate scrambling is a wiring optimisation, visible in the software rules.** '
         + 'Bit 31 is the sign in every signed format, and the fields below move as little as '
-        + 'possible between formats, so the same wires carry the same immediate bits whatever '
+        + 'possible between formats. The same wires carry the same immediate bits whatever '
         + 'the instruction is. The assembler pays for it once; the decoder saves it in every '
         + 'instruction, forever.',
       '**A load and an immediate arithmetic instruction share a format, and that is deliberate.** '
         + 'Both are "one register, one twelve-bit constant", so `lw a0, 8(a1)` and `addi a0, '
-        + 'a1, 8` differ only in the opcode — and in the datapath they differ only in whether '
+        + 'a1, 8` differ only in the opcode. In the datapath they differ only in whether '
         + 'the ALU result is used as an address. One adder serves both.',
       '**Stores and branches split their immediates so the registers stay put.** An S-format '
         + 'instruction has two sources and no destination, so the bits that would be the '
@@ -125,19 +125,19 @@
   function insight() {
     return '**The immediate scrambling is the clearest example in this course of software being '
       + 'shaped by gates.** There is no reason, in software, for the bits of a branch offset to '
-      + 'be scattered across four fields in a strange order — it makes the assembler harder to '
+      + 'be scattered across four fields in a strange order. It makes the assembler harder to '
       + 'write and the encoding harder to read. The reason is that the alternative costs wires '
-      + 'in the decoder of every implementation forever: if each format put its immediate in a '
-      + 'different place, the sign extender would need a multiplexer in front of every bit, and '
-      + 'that multiplexer sits on the path between fetch and execute in every processor that '
+      + 'in the decoder of every implementation forever. If each format put its immediate in a '
+      + 'different place, the sign extender would need a multiplexer in front of every bit. '
+      + 'That multiplexer sits on the path between fetch and execute in every processor that '
       + 'ever implements the instruction set. Paying once in the assembler to save a level of '
       + 'logic in every chip is obviously the right trade, and it is invisible unless you know '
-      + 'to look. The general lesson is worth more than the example: when an interface has a '
-      + 'rule that seems gratuitously awkward, the reason is usually on the other side of it, '
-      + 'and the awkwardness is somebody having already made this exact trade. Alignment '
+      + 'to look. The general lesson is worth more than the example. When an interface has a '
+      + 'rule that seems gratuitously awkward, the reason is usually on the other side of it. '
+      + 'The awkwardness is somebody having already made this exact trade. Alignment '
       + 'requirements, the zero register, fixed instruction width, the absence of condition '
-      + 'codes — every one of those is a software-visible rule with a hardware argument behind '
-      + 'it, and knowing the argument is the difference between memorising an instruction set '
+      + 'codes: every one of those is a software-visible rule with a hardware argument behind '
+      + 'it. Knowing the argument is the difference between memorising an instruction set '
       + 'and understanding one.';
   }
 
