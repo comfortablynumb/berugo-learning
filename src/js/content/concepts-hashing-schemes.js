@@ -19,13 +19,16 @@
         formal: 'd(k) = (slot − home) mod m',
         readAs: 'A key\'s displacement is how far it sits from the slot it wanted, counted forward and ' +
           'wrapping round the end of the table. Zero means it got its first choice.',
-        detail: 'Probe distance is the per-key version of the load-factor arithmetic, and it is the ' +
-          'right thing to look at because the mean is not the interesting part. At a given load ' +
-          'factor the average distance is essentially fixed — the keys have to go somewhere — so ' +
-          'every scheme in this section has the same mean and they differ entirely in the shape of ' +
-          'the distribution. Two tables at α = 0.85 can share a mean of 3 and differ by a factor of ' +
-          'ten in the worst case, and the worst case is what a p99 latency measures. Plot the ' +
-          'histogram, not the average.',
+        detail: [
+          'Probe distance is the per-key version of the load-factor arithmetic, and it is the ' +
+            'right thing to look at, because the mean is not the interesting part.',
+          'At a given load factor the average distance is essentially fixed — the keys have to go ' +
+            'somewhere. So every scheme in this section has the same mean, and they differ ' +
+            'entirely in the shape of the distribution.',
+          'Two tables at α = 0.85 can share a mean of 3 and differ by a factor of ten in the worst ' +
+            'case. The worst case is what a p99 latency measures.',
+          'Plot the histogram, not the average.'
+        ],
         example: 'Two schemes at α = 0.85 can share a mean of 3 and differ 10× in the worst case.'
       },
       {
@@ -42,13 +45,17 @@
         },
         plain: 'On insertion, a key that has travelled further takes the slot from one that has travelled less.',
         formal: 'swap if d(carry) > d(resident)',
-        detail: 'Ordinary linear probing is first-come-first-served, so an unlucky key inserted late ' +
-          'can end up very far from home while a lucky early one sits in its home slot. Robin Hood ' +
-          'insertion evens this out: when the key being carried has travelled further than the ' +
-          'resident of the slot it is examining, the two swap and the resident continues the probe. ' +
+        detail: [
+          'Ordinary linear probing is first-come-first-served, so an unlucky key inserted late can ' +
+            'end up very far from home while a lucky early one sits in its home slot.',
+          'Robin Hood insertion evens this out. When the key being carried has travelled further ' +
+            'than the resident of the slot it is examining, the two swap and the resident ' +
+            'continues the probe.',
           'The rich give to the poor, the total displacement is unchanged, and the variance ' +
-          'collapses. Nothing about the average improves — this is a redistribution, and the whole ' +
-          'benefit is in the tail.',
+            'collapses.',
+          'Nothing about the average improves. This is a redistribution, and the whole benefit is ' +
+            'in the tail.'
+        ],
         example: 'Rich entries give to poor ones — hence the name.'
       },
       {
@@ -58,12 +65,16 @@
         readAs: 'Walking forward through a cluster, each slot\'s displacement can drop by at most one from ' +
           'the slot before it. That single guarantee is what lets a lookup stop early: once the ' +
           'displacement falls below yours, your key cannot be further along.',
-        detail: 'The swap rule has a consequence that is easy to miss and is the real payoff: entries ' +
-          'end up ordered by probe distance along the run. So a lookup that reaches a slot whose ' +
-          'resident is closer to home than the searched key has travelled can stop immediately — if ' +
-          'the key were present it would have displaced that resident on the way in. That turns an ' +
-          'unsuccessful lookup from a walk to the end of the run into an early exit, which is the ' +
-          'operation open addressing is otherwise worst at, and it costs nothing to check.',
+        detail: [
+          'The swap rule has a consequence that is easy to miss and is the real payoff: entries ' +
+            'end up ordered by probe distance along the run.',
+          'So a lookup that reaches a slot whose resident is closer to home than the searched key ' +
+            'has travelled can stop immediately. If the key were present it would have displaced ' +
+            'that resident on the way in.',
+          'That turns an unsuccessful lookup from a walk to the end of the run into an early exit. ' +
+            'It is the operation open addressing is otherwise worst at, and it costs nothing to ' +
+            'check.'
+        ],
         example: 'Meeting a closer-to-home entry proves the key is absent.'
       },
       {
@@ -73,13 +84,15 @@
         readAs: 'Every key is guaranteed to sit within H slots of its home, where H is a small fixed ' +
           'neighbourhood size. That bound is what makes a lookup a single cache line rather than an ' +
           'open-ended walk.',
-        detail: 'Hopscotch hashing enforces a hard bound rather than merely improving the ' +
-          'distribution: every key lives within H slots of its home, and insertion maintains that by ' +
-          'moving other keys — hopping a free slot backwards toward the home — until it holds. A ' +
-          'lookup then reads exactly one window of H slots, so with H chosen to make the window one ' +
-          'cache line, it is one fetch and a bitmask test. The cost is on the insert side, where ' +
-          'maintaining the bound can require a chain of relocations and, at high load, a resize when ' +
-          'no free slot can be hopped close enough.',
+        detail: [
+          'Hopscotch hashing enforces a hard bound rather than merely improving the distribution. ' +
+            'Every key lives within H slots of its home, and insertion maintains that by moving ' +
+            'other keys — hopping a free slot backwards toward the home — until it holds.',
+          'A lookup then reads exactly one window of H slots. With H chosen to make the window one ' +
+            'cache line, it is one fetch and a bitmask test.',
+          'The cost is on the insert side. Maintaining the bound can require a chain of ' +
+            'relocations and, at high load, a resize when no free slot can be hopped close enough.'
+        ],
         example: 'Choose H so the window is one cache line and a lookup is one fetch.'
       },
       {
@@ -99,12 +112,16 @@
         readAs: 'A key is in one of exactly two places: the slot its first hash names in the first table, or ' +
           'the slot its second hash names in the second. A lookup is therefore always two probes and ' +
           'never more.',
-        detail: 'Cuckoo hashing gives every key exactly two possible homes, one in each table, so a ' +
-          'lookup checks two slots and stops — a true worst-case O(1) guarantee, which no other ' +
-          'scheme in this section provides. The two probes are independent, so they can be issued in ' +
-          'parallel, and a negative lookup costs the same as a positive one. All of the difficulty ' +
-          'moves to insertion: if both slots are taken, the new key evicts one of the residents, ' +
-          'which must then move to its alternative slot, which may evict another.',
+        detail: [
+          'Cuckoo hashing gives every key exactly two possible homes, one in each table, so a ' +
+            'lookup checks two slots and stops. That is a true worst-case O(1) guarantee, which no ' +
+            'other scheme in this section provides.',
+          'The two probes are independent, so they can be issued in parallel, and a negative ' +
+            'lookup costs the same as a positive one.',
+          'All of the difficulty moves to insertion. If both slots are taken, the new key evicts ' +
+            'one of the residents, which must then move to its alternative slot, which may evict ' +
+            'another.'
+        ],
         example: 'Worst-case O(1) lookup — the only scheme here that guarantees it.'
       },
       {
@@ -113,39 +130,49 @@
         formal: 'kick limit ⇒ rehash with new seeds',
         readAs: 'When the eviction chain runs too long, there is no repair available — the table has to be ' +
           'rebuilt with different hash seeds. The ⇒ is "which means".',
-        detail: 'An eviction chain can close into a cycle in which every slot involved is occupied by ' +
-          'a key whose alternative is also in the cycle, and no amount of further kicking resolves ' +
-          'it. Implementations detect this with a kick limit and respond by rehashing the whole ' +
-          'table with new seeds. The probability of a cycle depends sharply on load: two tables ' +
-          'become unworkable above roughly 50% occupancy, while three or four hash functions push ' +
-          'the threshold past 90%. So cuckoo hashing buys its worst-case lookup with a worst-case ' +
-          'insert and a load ceiling.',
+        detail: [
+          'An eviction chain can close into a cycle, in which every slot involved is occupied by a ' +
+            'key whose alternative is also in the cycle. No amount of further kicking resolves it.',
+          'Implementations detect this with a kick limit, and respond by rehashing the whole table ' +
+            'with new seeds.',
+          'The probability of a cycle depends sharply on load. Two tables become unworkable above ' +
+            'roughly 50% occupancy, while three or four hash functions push the threshold past ' +
+            '90%.',
+          'So cuckoo hashing buys its worst-case lookup with a worst-case insert and a load ' +
+            'ceiling.'
+        ],
         example: 'Two tables stop working above about 50% load; d tables push it higher.'
       },
       {
         term: 'Write amplification',
         plain: 'Robin Hood makes exactly the same probes as linear probing and more writes. That is the price of the shorter tail.',
         formal: 'writes = 1 + displacements per insert',
-        detail: 'Robin Hood visits exactly the same slots as plain linear probing — the swap rule ' +
-          'changes who ends up where, not how far the insertion walks — so the probe count is ' +
-          'identical and the extra cost is entirely in writes: 1 740 inserts at α = 0.85 make the ' +
-          'same 6 757 probes and 2.46 writes each instead of 1. That is the honest accounting of ' +
-          'the trade. On a read-heavy workload it is an excellent bargain; on an insert-heavy one, ' +
-          'or where writes are expensive because of cache coherence traffic, it is a cost to weigh ' +
-          'rather than a free improvement.',
+        detail: [
+          'Robin Hood visits exactly the same slots as plain linear probing. The swap rule changes ' +
+            'who ends up where, not how far the insertion walks.',
+          'So the probe count is identical and the extra cost is entirely in writes. At α = 0.85, ' +
+            '1 740 inserts make the same 6 757 probes and 2.46 writes each instead of 1.',
+          'That is the honest accounting of the trade.',
+          'On a read-heavy workload it is an excellent bargain. On an insert-heavy one, or where ' +
+            'writes are expensive because of cache coherence traffic, it is a cost to weigh rather ' +
+            'than a free improvement.'
+        ],
         example: '1 740 inserts at α = 0.85: the same 6 757 probes, and 2.46 writes each instead of 1.'
       },
       {
         term: 'No tombstones allowed',
         plain: 'A tombstone would break the monotone-distance invariant, so deletion pulls the following displaced run back one slot instead.',
         formal: 'shift while distance(cursor) > 0',
-        detail: 'The early-exit rule depends on distances being non-decreasing along a run, and a ' +
-          'tombstone is a slot with no distance at all — it would break the ordering and silently ' +
-          'make lookups return "absent" for keys that are present. So Robin Hood deletion has to ' +
-          'repair the run: shift each following entry back one slot while its distance is greater ' +
-          'than zero, stopping at the first entry already at home. It is the same loop as ' +
-          'backward-shift deletion in the open-addressing section, justified by the same argument ' +
-          'about contiguous runs.',
+        detail: [
+          'The early-exit rule depends on distances being non-decreasing along a run, and a ' +
+            'tombstone is a slot with no distance at all.',
+          'It would break the ordering, and silently make lookups return "absent" for keys that ' +
+            'are present.',
+          'So Robin Hood deletion has to repair the run. Shift each following entry back one slot ' +
+            'while its distance is greater than zero, stopping at the first entry already at home.',
+          'It is the same loop as backward-shift deletion in the open-addressing section, ' +
+            'justified by the same argument about contiguous runs.'
+        ],
         example: 'It is the same loop as backward-shift deletion in 3.4, kept honest by the same argument.'
       }
     ],
