@@ -184,23 +184,30 @@
         },
         plain: 'Compare two roots; the loser becomes the winner\'s newest child. Everything else is built from that.',
         formal: 'insert = link; meld = link; decrease-key = cut then link',
-        detail: 'A pairing heap is a single multiway tree in heap order, and its whole structural ' +
-          'vocabulary is one operation. Insert links a new node with the root. Meld links two roots. ' +
-          'Decrease-key cuts the node out of its parent\'s child list and links it back at the top. ' +
-          'None of these needs a degree, a mark, a rank or a consolidation array — the node has a ' +
-          'key, a child pointer and two sibling pointers, and that is the entire representation.',
+        detail: [
+          'A pairing heap is a single multiway tree in heap order, and its whole structural ' +
+            'vocabulary is one operation.',
+          'Insert links a new node with the root. Meld links two roots. Decrease-key cuts the node ' +
+            'out of its parent\'s child list and links it back at the top.',
+          'None of these needs a degree, a mark, a rank or a consolidation array.',
+          'The node has a key, a child pointer and two sibling pointers, and that is the entire ' +
+            'representation.'
+        ],
         example: 'A pairing-heap node has four fields; a Fibonacci-heap node has six and a mark bit.'
       },
       {
         term: 'The two-pass merge',
         plain: 'Pop orphans the root\'s children. Pair them left to right, then fold the pairs right to left.',
         formal: 'pass one pairs adjacent siblings; pass two accumulates',
-        detail: 'This is the only operation that does more than one link, and its shape is the entire ' +
-          'design. The first pass walks the child list linking each adjacent pair, which halves the ' +
-          'list and — crucially — does so without building a chain. The second pass folds the ' +
-          'results from the right. Both passes together do the same number of links as the naive ' +
-          'fold, so the cost is not in the count: it is in the shape left behind, which the next pop ' +
-          'has to walk.',
+        detail: [
+          'This is the only operation that does more than one link, and its shape is the entire ' +
+            'design.',
+          'The first pass walks the child list linking each adjacent pair, which halves the list ' +
+            'and — crucially — does so without building a chain.',
+          'The second pass folds the results from the right.',
+          'Both passes together do the same number of links as the naive fold, so the cost is not ' +
+            'in the count. It is in the shape left behind, which the next pop has to walk.'
+        ],
         example: 'Eight children become four pairs, then one tree three levels deep rather than a spine seven deep.'
       },
       {
@@ -209,72 +216,93 @@
         formal: 'one-pass merge degrades to Θ(n) behaviour',
         readAs: 'Pairing heaps get their bound from merging siblings two at a time before folding them ' +
           'together. Skip that first pass and the structure degenerates into a list.',
-        detail: 'Folding the children left to right in one pass links each child under the ' +
-          'accumulated result, which produces a path rather than a tree — and the following pop has ' +
-          'to walk that path. The pairing pass breaks the list into independent pairs first, so the ' +
-          'result is bushy. Measured over 30 000 balanced operations the two-pass merge did 46 189 ' +
-          'comparisons against the one-pass version\'s 55 856, and the gap widens as the workload ' +
-          'leans on pop. The demo keeps the one-pass version as a control for exactly this reason.',
+        detail: [
+          'Folding the children left to right in one pass links each child under the accumulated ' +
+            'result, which produces a path rather than a tree. The following pop has to walk that ' +
+            'path.',
+          'The pairing pass breaks the list into independent pairs first, so the result is bushy.',
+          'Measured over 30 000 balanced operations the two-pass merge did 46 189 comparisons ' +
+            'against the one-pass version\'s 55 856, and the gap widens as the workload leans on ' +
+            'pop.',
+          'The demo keeps the one-pass version as a control for exactly this reason.'
+        ],
         example: 'Two-pass: 46 189 comparisons. One-pass, same operations: 55 856 — 17% more.'
       },
       {
         term: 'The open bounds',
         plain: 'O(log n) amortised is proved for everything. decrease-key sits between Ω(log log n) and O(log n), and nobody has closed it.',
         formal: 'Fredman et al. 1986; the lower bound is Fredman 1999',
-        detail: 'The pairing heap is the rare structure whose practical status is settled and whose ' +
-          'theory is not. Every operation is O(log n) amortised, which is enough for it to be a ' +
-          'sound choice. The precise cost of decrease-key has resisted analysis for forty years: it ' +
-          'is known not to be O(1), and it is not known to be worse than O(log log n) in practice. ' +
-          'Measurements consistently behave as if it were constant, which is why the structure wins ' +
-          'benchmarks that the analysis says it should lose.',
+        detail: [
+          'The pairing heap is the rare structure whose practical status is settled and whose ' +
+            'theory is not.',
+          'Every operation is O(log n) amortised, which is enough for it to be a sound choice.',
+          'The precise cost of decrease-key has resisted analysis for forty years. It is known not ' +
+            'to be O(1), and it is not known to be worse than O(log log n) in practice.',
+          'Measurements consistently behave as if it were constant, which is why the structure ' +
+            'wins benchmarks that the analysis says it should lose.'
+        ],
         example: 'Its decrease-key is provably not O(1) and measurably indistinguishable from it.'
       },
       {
         term: 'Against the Fibonacci heap',
         plain: 'Fewer fields, no consolidation, no marks, and it wins the measurements the Fibonacci heap was built for.',
         formal: 'four fields per node against six plus a mark',
-        detail: 'The pairing heap is what a Fibonacci heap becomes when the bookkeeping is replaced ' +
-          'by self-adjustment — the same relationship splay trees have to AVL trees. It gives up the ' +
-          'O(1) decrease-key bound and keeps the behaviour; it gives up the degree array and the ' +
-          'mark bit and keeps the performance. On the demo\'s Dijkstra run it did 278 257 comparisons ' +
-          'against the Fibonacci heap\'s 258 493 and finished faster, because the comparison count ' +
-          'was never the bottleneck.',
+        detail: [
+          'The pairing heap is what a Fibonacci heap becomes when the bookkeeping is replaced by ' +
+            'self-adjustment. It is the same relationship splay trees have to AVL trees.',
+          'It gives up the O(1) decrease-key bound and keeps the behaviour. It gives up the degree ' +
+            'array and the mark bit and keeps the performance.',
+          'On the demo\'s Dijkstra run it did 278 257 comparisons against the Fibonacci heap\'s ' +
+            '258 493, and finished faster.',
+          'The comparison count was never the bottleneck.'
+        ],
         example: 'boost::heap and LEDA both ship pairing heaps as the practical decrease-key structure.'
       },
       {
         term: 'Rank-pairing heaps',
         plain: 'Add a rank field and a repair rule, and the O(1) decrease-key bound comes back — with the simplicity mostly intact.',
         formal: 'Haeupler, Sen, Tarjan 2011',
-        detail: 'Rank-pairing heaps were designed to get the Fibonacci bounds out of a pairing-heap-' +
-          'shaped structure. Each node carries a rank, decrease-key cuts and then repairs ranks along ' +
-          'a path, and the analysis recovers O(1) amortised decrease-key with O(log n) extract-min. ' +
+        detail: [
+          'Rank-pairing heaps were designed to get the Fibonacci bounds out of a ' +
+            'pairing-heap-shaped structure.',
+          'Each node carries a rank, decrease-key cuts and then repairs ranks along a path, and ' +
+            'the analysis recovers O(1) amortised decrease-key with O(log n) extract-min.',
           'They are simpler than Fibonacci heaps and measurably competitive, and they are still ' +
-          'rarely used — which says something about how much of a structure\'s adoption is decided ' +
-          'by what is already in the standard library.',
+            'rarely used.',
+          'That says something about how much of a structure\'s adoption is decided by what is ' +
+            'already in the standard library.'
+        ],
         example: 'They achieve the Fibonacci bounds with one integer per node and no mark bit.'
       },
       {
         term: 'Cutting is cheap because nothing is repaired',
         plain: 'decrease-key unlinks the node and links it at the root. There is no cascade and no invariant to restore.',
         formal: 'two pointer updates and one comparison',
-        detail: 'A Fibonacci heap\'s decrease-key has to consider the mark, possibly cascade, and ' +
-          'possibly update the minimum — a handful of branches on a cold path. A pairing heap\'s ' +
-          'splices the subtree out of its sibling list and links it with the root, and that is all: ' +
-          'no mark to check, no parent to visit beyond the splice, no bound to preserve. Measured on ' +
-          'a decrease-key-heavy mix it did 93 946 comparisons against the Fibonacci heap\'s 106 945, ' +
-          'with 11 923 cuts against 7 029 cuts plus 1 569 cascades.',
+        detail: [
+          'A Fibonacci heap\'s decrease-key has to consider the mark, possibly cascade, and ' +
+            'possibly update the minimum — a handful of branches on a cold path.',
+          'A pairing heap\'s splices the subtree out of its sibling list and links it with the ' +
+            'root, and that is all. No mark to check, no parent to visit beyond the splice, no ' +
+            'bound to preserve.',
+          'Measured on a decrease-key-heavy mix it did 93 946 comparisons against the Fibonacci ' +
+            'heap\'s 106 945, with 11 923 cuts against 7 029 cuts plus 1 569 cascades.'
+        ],
         example: 'A pairing decrease-key touches the node, its two siblings and the root — five pointers, no branches on a mark.'
       },
       {
         term: 'When to reach for it',
         plain: 'When decrease-key matters and the structure is not an array heap. Otherwise use the array heap.',
         formal: 'the practical decrease-key queue',
-        detail: 'The decision tree is short. If the workload is pushes and pops, use a binary or ' +
-          '4-ary array heap — nothing beats one allocation and perfect locality. If it needs ' +
-          'decrease-key and the handle map of an indexed array heap is unwelcome, use a pairing ' +
-          'heap. If it needs constant-time meld in a loop, use a Fibonacci heap and accept the ' +
-          'constants. The case for a Fibonacci heap over a pairing heap on decrease-key alone is one ' +
-          'the measurements do not support.',
+        detail: [
+          'The decision tree is short.',
+          'If the workload is pushes and pops, use a binary or 4-ary array heap. Nothing beats one ' +
+            'allocation and perfect locality.',
+          'If it needs decrease-key and the handle map of an indexed array heap is unwelcome, use ' +
+            'a pairing heap. If it needs constant-time meld in a loop, use a Fibonacci heap and ' +
+            'accept the constants.',
+          'The case for a Fibonacci heap over a pairing heap on decrease-key alone is one the ' +
+            'measurements do not support.'
+        ],
         example: 'Most "we used a Fibonacci heap" codebases should have used a pairing heap, and the benchmarks agree.'
       }
     ],

@@ -29,9 +29,10 @@
           'a link, meld is a link, decrease-key is a cut and a link. There is no degree array, no ' +
           'mark bit and no consolidation.',
         'Only pop does anything more, and what it does is the design. The root\'s children are ' +
-          'orphaned and have to be folded back into one tree, and the fold is done in two passes: ' +
-          'left to right pairing adjacent siblings, then right to left folding the results. Pairing ' +
-          'first is not decoration — a single left-to-right fold builds a spine and degrades to O(n).',
+          'orphaned and have to be folded back into one tree. The fold is done in two passes: ' +
+          'left to right pairing adjacent siblings, then right to left folding the results. ' +
+          'Pairing first is not decoration — a single left-to-right fold builds a spine and ' +
+          'degrades to O(n).',
         'The bounds are famously unsettled. O(log n) amortised is proved for everything; decrease-key ' +
           'is known to be between Ω(log log n) and O(log n) and behaves like O(1) in measurement. ' +
           'What is settled is that it beats a Fibonacci heap on real workloads, which is why boost ' +
@@ -50,7 +51,7 @@
         ].join('\n')
       },
       insight: 'Pairing heaps are what most "we used a Fibonacci heap" codebases should have used, ' +
-        'and boost and LEDA agree. The empirical study to cite is Larkin, Sen and Tarjan: on the ' +
+        'and boost and LEDA agree. The empirical study to cite is Larkin, Sen and Tarjan. On the ' +
         'workloads people actually run, the simple structures win, and the pairing heap is the ' +
         'simplest one that still supports a cheap decrease-key.'
     };
