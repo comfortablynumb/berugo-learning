@@ -38,8 +38,9 @@
         'Which merge matters, and it depends on the shape of the query rather than on the algorithm. ' +
           'A linear merge walks both lists in step and costs the sum of their lengths. Skip pointers ' +
           'every √n entries let it jump over runs that cannot match. Galloping probes 1, 2, 4, 8 … ' +
-          'positions ahead and then binary-searches the bracket, which is O(m log(n/m)) — enormously ' +
-          'better when one list is rare and one is common, and worse when they are the same length.',
+          'positions ahead and then binary-searches the bracket. That is O(m log(n/m)) — ' +
+          'enormously better when one list is rare and one is common, and worse when they are the ' +
+          'same length.',
         'Postings are stored as gaps rather than ids, because gaps are small and small numbers ' +
           'compress. Variable-byte gets most gaps into one byte; Simple-9 packs several into a ' +
           '32-bit word. Positions, which phrase queries need, cost more than the postings they ' +
@@ -61,8 +62,8 @@
         ].join('\n')
       },
       insight: 'The ranking model gets the attention and the intersection loop gets the latency. ' +
-        'Before tuning a scorer, measure how much of the query budget is spent walking postings — ' +
-        'it is usually most of it, and the fix is a different merge or a smaller encoding rather ' +
+        'Before tuning a scorer, measure how much of the query budget is spent walking postings. ' +
+        'It is usually most of it, and the fix is a different merge or a smaller encoding rather ' +
         'than a better model.'
     };
   }

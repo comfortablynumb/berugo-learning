@@ -164,11 +164,14 @@
         formal: 'postings[t] = sorted [ d : t ∈ d ]',
         readAs: 'Every term maps to the sorted list of documents containing it. The colon reads "such that", ' +
           'and sorted is not a detail — it is what makes two lists intersectable in one pass.',
-        detail: 'The structure takes one sentence and the engineering takes a career, which is worth ' +
-          'saying plainly. Sorted order is not incidental: it makes an AND query a merge rather ' +
-          'than a set intersection, it makes gaps small enough to compress, and it lets a query ' +
-          'stop early. Every technique in the section depends on it, so an implementation that ' +
-          'appends postings unsorted has given up all of them at once for a build-time convenience.',
+        detail: [
+          'The structure takes one sentence and the engineering takes a career, which is worth ' +
+            'saying plainly.',
+          'Sorted order is not incidental. It makes an AND query a merge rather than a set ' +
+            'intersection, it makes gaps small enough to compress, and it lets a query stop early.',
+          'Every technique in the section depends on it. An implementation that appends postings ' +
+            'unsorted has given up all of them at once, for a build-time convenience.'
+        ],
         example: '5 000 documents over a 400-term vocabulary produce 50 995 postings.'
       },
       {
@@ -185,12 +188,16 @@
         },
         plain: 'Intersect the rarest term first, because the result can only shrink.',
         formal: 'order the lists by length before folding',
-        detail: 'It is free, it requires nothing from the data structure, and it is the single ' +
-          'largest win available in query processing. Each intersection produces a result no longer ' +
-          'than its shorter input, so starting small keeps every subsequent step small; starting ' +
-          'with two common terms does the most expensive merge first and then repeats the work. ' +
-          'Any effort spent on a cleverer merge before this reordering is in place is measuring the ' +
-          'wrong thing.',
+        detail: [
+          'It is free, it requires nothing from the data structure, and it is the single largest ' +
+            'win available in query processing.',
+          'Each intersection produces a result no longer than its shorter input, so starting small ' +
+            'keeps every subsequent step small.',
+          'Starting with two common terms does the most expensive merge first and then repeats the ' +
+            'work.',
+          'Any effort spent on a cleverer merge before this reordering is in place is measuring ' +
+            'the wrong thing.'
+        ],
         example: 'a query on the rarest and commonest terms costs 185 comparisons rearranged, 4 179 as written.'
       },
       {
@@ -203,30 +210,37 @@
             '    C --> D["binary-search inside that bracket"]',
             '    D --> E["cost depends on how far you jumped,<br/>not on how long the list is"]'
           ].join('\n'),
-          caption: 'It is the right search when the answer is probably close: a linear scan pays for the distance and a binary search pays for the whole list, while this pays for the log of the distance.'
+          caption: 'It is the right search when the answer is probably close. A linear scan pays for the distance and a binary search pays for the whole list, while this pays for the log of the distance.'
         },
         plain: 'Probe 1, 2, 4, 8 … positions ahead, then binary-search the bracket you overshot.',
         formal: 'O(m log(n/m)) for lists of length m ≪ n',
         readAs: 'Intersecting a short list of length m against a much longer one of length n costs about m ' +
           'galloping searches, each log of the ratio between the two. Far better than reading all n.',
-        detail: 'A linear merge costs the sum of the list lengths whatever their shapes, which is ' +
-          'wasteful when one list is rare and one is common — the common list is walked in full to ' +
-          'find a handful of matches. Galloping finds each target in the long list in logarithmic ' +
-          'time proportional to the *gap* rather than to the list, so a 10-against-100 000 query ' +
-          'costs 245 comparisons instead of 90 566. The bound degrades gracefully to O(n) as the ' +
-          'lists equalise, which is exactly when a plain merge is better anyway.',
+        detail: [
+          'A linear merge costs the sum of the list lengths whatever their shapes, which is ' +
+            'wasteful when one list is rare and one is common. The common list is walked in full ' +
+            'to find a handful of matches.',
+          'Galloping finds each target in the long list in logarithmic time proportional to the ' +
+            '*gap* rather than to the list. A 10-against-100 000 query costs 245 comparisons ' +
+            'instead of 90 566.',
+          'The bound degrades gracefully to O(n) as the lists equalise, which is exactly when a ' +
+            'plain merge is better anyway.'
+        ],
         example: '10 against 100 000: linear 90 566, skip 1 749, galloping 245.'
       },
       {
         term: 'Every strategy loses somewhere',
         plain: 'At equal list lengths, galloping and skip pointers both cost more than a linear merge.',
         formal: 'crossover near m ≈ n / 10 in the measured sweep',
-        detail: 'The advice "use galloping" is right on one side of a crossover and wrong on the ' +
-          'other, and the crossover is a property of the query rather than of the corpus. At 50 000 ' +
-          'against 100 000 the linear merge does 124 751 comparisons and galloping does 157 906, ' +
-          'because every probe is overhead when the next match is one step away. A system that ' +
-          'picks a strategy per query from the list lengths beats one that picks a strategy at ' +
-          'design time, and the numbers to make that decision are already in the index.',
+        detail: [
+          'The advice "use galloping" is right on one side of a crossover and wrong on the other. ' +
+            'The crossover is a property of the query rather than of the corpus.',
+          'At 50 000 against 100 000 the linear merge does 124 751 comparisons and galloping does ' +
+            '157 906. Every probe is overhead when the next match is one step away.',
+          'A system that picks a strategy per query from the list lengths beats one that picks a ' +
+            'strategy at design time.',
+          'The numbers to make that decision are already in the index.'
+        ],
         example: '50 000 against 100 000: linear 124 751, skip 182 123, galloping 157 906.'
       },
       {
@@ -235,48 +249,58 @@
         formal: 'gap[i] = id[i] − id[i − 1], with gap[0] = id[0]',
         readAs: 'Store the difference from the previous id rather than the id itself. Because the list is ' +
           'sorted the gaps are small positive numbers, and small numbers compress.',
-        detail: 'A raw document id needs 32 bits whatever the corpus. The gap between consecutive ' +
-          'postings of a common term is small — a term in half the documents has an average gap of ' +
-          '2 — and small numbers can be coded in far fewer bits. That makes the compression ratio a ' +
-          'property of each term\'s *density* rather than of the encoder: dense lists compress ' +
-          'enormously and the long tail of rare terms barely compresses at all, so a single ' +
-          '"bits per posting" figure is an average over a very wide spread.',
+        detail: [
+          'A raw document id needs 32 bits whatever the corpus.',
+          'The gap between consecutive postings of a common term is small. A term in half the ' +
+            'documents has an average gap of 2, and small numbers can be coded in far fewer bits.',
+          'That makes the compression ratio a property of each term\'s *density* rather than of ' +
+            'the encoder.',
+          'Dense lists compress enormously and the long tail of rare terms barely compresses at ' +
+            'all, so a single "bits per posting" figure is an average over a very wide spread.'
+        ],
         example: '50 995 postings: 32 bits raw, 8.65 with variable-byte, 6.69 with Simple-9.'
       },
       {
         term: 'Variable-byte and word-aligned coding',
         plain: 'Seven payload bits per byte with a continuation flag, or several values packed per word.',
         formal: 'varbyte: 1 byte for gaps ≤ 127; Simple-9: 28 one-bit values or 1 twenty-eight-bit value per word',
-        detail: 'Variable-byte is byte-aligned, trivially decodable and wastes one bit in eight. ' +
+        detail: [
+          'Variable-byte is byte-aligned, trivially decodable, and wastes one bit in eight.',
           'Simple-9 packs as many equal-width values as fit into a 32-bit word with a four-bit ' +
-          'selector, so a run of tiny gaps costs about a bit each — better compression and a ' +
-          'branchier decoder. Which one wins is a decoding-speed question rather than a size ' +
-          'question, and it is decided by how much of the query budget is spent decompressing ' +
-          'rather than by the ratio.',
+            'selector, so a run of tiny gaps costs about a bit each.',
+          'That is better compression and a branchier decoder.',
+          'Which one wins is a decoding-speed question rather than a size question. It is decided ' +
+            'by how much of the query budget is spent decompressing, rather than by the ratio.'
+        ],
         example: 'the same postings: 55 156 bytes with variable-byte, 42 644 with Simple-9.'
       },
       {
         term: 'Positions are a separate index',
         plain: 'Phrase queries need where-in-the-document, and that roughly doubles the index.',
         formal: 'positional index: one list per (term, document) pair',
-        detail: 'A boolean AND says the terms co-occur in a document; a phrase query says they are ' +
-          'adjacent, in order, and there is no way to answer that from document ids alone. The ' +
-          'positional lists come out larger than the compressed postings themselves — 60 000 bytes ' +
-          'against 55 156 here — and they are consulted only for phrase queries, which is why ' +
-          'phrase search is a feature you enable rather than one you always have, and why turning ' +
-          'it on changes the index size rather than the query code.',
+        detail: [
+          'A boolean AND says the terms co-occur in a document. A phrase query says they are ' +
+            'adjacent, in order, and there is no way to answer that from document ids alone.',
+          'The positional lists come out larger than the compressed postings themselves — 60 000 ' +
+            'bytes against 55 156 here — and they are consulted only for phrase queries.',
+          'That is why phrase search is a feature you enable rather than one you always have.',
+          'It is also why turning it on changes the index size rather than the query code.'
+        ],
         example: 'positions cost 60 000 bytes against 55 156 for the postings they annotate.'
       },
       {
         term: 'Construction is an external merge',
         plain: 'Sort each block that fits in memory, spill it, then k-way merge the runs.',
         formal: 'one pass over the input, one pass over each run',
-        detail: 'The index for a real corpus does not fit in memory during construction, which makes ' +
-          'building it a sorting problem rather than a data-structure problem. Emitting (term, ' +
-          'document) pairs, sorting each block, writing it out and merging the sorted runs is the ' +
-          'standard shape, and it is why index build time is dominated by I/O and why block size is ' +
-          'the tuning knob. The same shape appears in every log-structured store, which is not a ' +
-          'coincidence — both are appending sorted runs and merging them later.',
+        detail: [
+          'The index for a real corpus does not fit in memory during construction, which makes ' +
+            'building it a sorting problem rather than a data-structure problem.',
+          'Emitting (term, document) pairs, sorting each block, writing it out and merging the ' +
+            'sorted runs is the standard shape.',
+          'That is why index build time is dominated by I/O, and why block size is the tuning knob.',
+          'The same shape appears in every log-structured store, which is not a coincidence. Both ' +
+            'are appending sorted runs and merging them later.'
+        ],
         example: '5 000 documents in blocks of 500 produce 10 runs merged into 50 995 pairs.'
       }
     ],
