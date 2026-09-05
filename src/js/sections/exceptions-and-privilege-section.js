@@ -67,7 +67,7 @@
     return [
       '**A trap is the only way control leaves a program without the program asking.** The '
         + 'hardware saves where it was, records why, raises the privilege and jumps to a fixed '
-        + 'address. Four register writes and a jump — that is the entire mechanism, and every '
+        + 'address. Four register writes and a jump: that is the entire mechanism. Every '
         + 'system call, page fault, timer preemption and segmentation fault in M41 to M46 is '
         + 'this with policy on top.',
       '**Synchronous exceptions are caused by an instruction; asynchronous interrupts are '
@@ -88,7 +88,7 @@
       '**Precise means everything before is done and nothing after has happened.** When the '
         + 'handler runs, the machine state must look exactly as if execution stopped cleanly at '
         + 'mepc. On this single-cycle machine that is free, which is exactly why it is worth '
-        + 'naming here — the moment M35 pipelines this datapath, five instructions are in '
+        + 'naming here. The moment M35 pipelines this datapath, five instructions are in '
         + 'flight and keeping the promise costs real hardware.',
       '**A device that cannot be acknowledged raises the same interrupt forever.** The timer '
         + 'here is cleared by writing its compare register, and a handler that returns without '
@@ -98,11 +98,11 @@
         + 'A trap raises the mode and mret restores it; the mode decides which instructions and '
         + 'which control registers are reachable. There is nothing more to it at this level, '
         + 'and everything about kernels and system calls is built from exactly this.',
-      '**A system call is a deliberate exception, which is the whole trick.** ecall does not '
-        + 'jump anywhere the program chose: it traps, so the kernel decides where control '
-        + 'goes and at what privilege. That is why a system call is the only way into a kernel '
-        + 'and why its cost is a trap rather than a call — a fact M45 spends a lot of effort '
-        + 'working around.'
+      '**A system call is a deliberate exception, which is the whole trick.** The ecall '
+        + 'instruction does not jump anywhere the program chose. It traps, so the kernel '
+        + 'decides where control goes and at what privilege. That is why a system call is the '
+        + 'only way into a kernel, and why its cost is a trap rather than a call. M45 spends a '
+        + 'lot of effort working around that.'
     ];
   }
 
@@ -118,22 +118,22 @@
   }
 
   function insight() {
-    return '**The whole user/kernel boundary is four register writes and a jump, and the '
-      + 'reason it is trustworthy is that the program does not get to choose any of them.** A '
-      + 'call goes where the caller says; a trap goes where mtvec says, at a privilege the '
+    return '**The whole user/kernel boundary is four register writes and a jump.** The '
+      + 'reason it is trustworthy is that the program does not get to choose any of them. A '
+      + 'call goes where the caller says. A trap goes where mtvec says, at a privilege the '
       + 'hardware raises, with the return address in a register the unprivileged program cannot '
-      + 'write. That asymmetry is the entire security argument, and it is why a system call '
+      + 'write. That asymmetry is the entire security argument. It is why a system call '
       + 'costs a trap rather than a jump: you are not calling the kernel, you are stopping and '
-      + 'letting the kernel decide. Everything in M41 to M46 — preemptive scheduling, memory '
-      + 'protection, the system call interface, virtualisation — is policy layered on this '
+      + 'letting the kernel decide. Preemptive scheduling, memory protection, the system call '
+      + 'interface, virtualisation: everything in M41 to M46 is policy layered on this '
       + 'mechanism, and none of it is stronger than the mechanism. The transferable idea is '
       + 'about who chooses the entry point. Any boundary where the untrusted side picks the '
       + 'destination is not a boundary; it is a convention. That is the difference between a '
-      + 'callback registered by a plugin and a message posted to a queue the host owns, '
-      + 'between a URL a client supplies and a route table the server keeps, and between a '
-      + 'function pointer in writable memory and a jump table the hardware refuses to let you '
-      + 'change. The single-entry handler looks like a limitation until you notice it is the '
-      + 'feature.';
+      + 'callback registered by a plugin and a message posted to a queue the host owns. It is '
+      + 'the difference between a URL a client supplies and a route table the server keeps. It '
+      + 'is the difference between a function pointer in writable memory and a jump table the '
+      + 'hardware refuses to let you change. The single-entry handler looks like a limitation until you notice it '
+      + 'is the feature.';
   }
 
   function render(app) {

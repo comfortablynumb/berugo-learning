@@ -173,11 +173,14 @@
         },
         plain: 'Save where, save why, raise privilege, jump to a fixed address.',
         formal: 'mepc, mcause, mtval, mstatus, then pc = mtvec',
-        detail: 'The program does not choose any of it. A call goes where the caller says; a '
-          + 'trap goes where mtvec says, at a privilege the hardware raises, with the return '
-          + 'address in a register the unprivileged program cannot write. That asymmetry is the '
-          + 'entire security argument for the user/kernel boundary, and mret undoes exactly the '
-          + 'four writes rather than anything more elaborate.',
+        detail: [
+          'The program does not choose any of it.',
+          'A call goes where the caller says. A trap goes where mtvec says, at a privilege the '
+            + 'hardware raises, with the return address in a register the unprivileged program '
+            + 'cannot write.',
+          'That asymmetry is the entire security argument for the user/kernel boundary.',
+          'And mret undoes exactly the four writes rather than anything more elaborate.'
+        ],
         example: 'ecall at address 4 leaves mepc = 4, mcause = 11, and execution at 0x100 in '
           + 'machine mode.'
       },
@@ -185,12 +188,14 @@
         term: 'Synchronous exceptions are caused by an instruction; interrupts are not',
         plain: 'The sign bit of mcause says which kind you are looking at.',
         formal: 'mcause bit 31 set means asynchronous',
-        detail: 'An illegal instruction, a misaligned access and an ecall are all consequences '
-          + 'of the instruction at mepc, and re-running that instruction would raise them again. '
-          + 'A timer interrupt has nothing to do with the instruction it happened to land '
-          + 'between — it would have arrived whatever was executing. Because the handler has to '
-          + 'treat them differently, the distinction is encoded in the cause register rather '
-          + 'than left to be inferred.',
+        detail: [
+          'An illegal instruction, a misaligned access and an ecall are all consequences of the '
+            + 'instruction at mepc, and re-running that instruction would raise them again.',
+          'A timer interrupt has nothing to do with the instruction it happened to land between.',
+          'It would have arrived whatever was executing.',
+          'Because the handler has to treat them differently, the distinction is encoded in the '
+            + 'cause register rather than left to be inferred.'
+        ],
         example: 'Five of the six classes the demo raises are synchronous with mtval naming the '
           + 'offending value; the timer is the one with cause bit 31 set.'
       },
@@ -198,12 +203,15 @@
         term: 'The two kinds need opposite return addresses, and getting it wrong is silent',
         plain: 'Resume after an exception; resume at the interrupted instruction.',
         formal: 'an exception handler advances mepc by 4; an interrupt handler must not',
-        detail: 'An exception has already happened, so returning to the same instruction repeats '
-          + 'it forever unless the handler fixed the cause. An interrupt arrived between '
-          + 'instructions, so advancing mepc skips an instruction that never ran. Neither '
-          + 'mistake produces an error message: the first is an infinite loop and the second is '
-          + 'a program that quietly computes the wrong answer, one instruction at a time, at a '
-          + 'rate set by the interrupt frequency.',
+        detail: [
+          'An exception has already happened, so returning to the same instruction repeats it '
+            + 'forever unless the handler fixed the cause.',
+          'An interrupt arrived between instructions, so advancing mepc skips an instruction that '
+            + 'never ran.',
+          'Neither mistake produces an error message.',
+          'The first is an infinite loop. The second is a program that quietly computes the wrong '
+            + 'answer, one instruction at a time, at a rate set by the interrupt frequency.'
+        ],
         example: 'The same timer interrupt: the cause-aware handler takes 1 trap and the program '
           + 'ends with a3 = 4; the unconditional one takes 5 and a3 is still 0.'
       },
@@ -211,11 +219,14 @@
         term: 'mepc holds the offending instruction, not the one after it',
         plain: 'The handler adds four itself, when it should.',
         formal: 'the hardware saves the address of the instruction that trapped',
-        detail: 'A page-fault handler has to restart the access it could not complete, which it '
-          + 'cannot do if the address was lost — so the hardware saves the offending address and '
-          + 'leaves the adjustment to software. That makes an ecall handler responsible for '
-          + 'adding four, and an off-by-four in either direction is the classic way to make a '
-          + 'handler loop forever on the same instruction or skip a live one.',
+        detail: [
+          'A page-fault handler has to restart the access it could not complete, which it cannot '
+            + 'do if the address was lost.',
+          'So the hardware saves the offending address and leaves the adjustment to software.',
+          'That makes an ecall handler responsible for adding four.',
+          'An off-by-four in either direction is the classic way to make a handler loop forever '
+            + 'on the same instruction or skip a live one.'
+        ],
         example: 'The demo\'s CSR table reads four higher than the metric above it, because the '
           + 'handler has already advanced mepc itself.'
       },
@@ -223,12 +234,15 @@
         term: 'Precise means everything before is done and nothing after has happened',
         plain: 'The state must look as if execution stopped cleanly at mepc.',
         formal: 'instructions before mepc have completed; those after have had no effect',
-        detail: 'Without that guarantee a handler cannot know what to restart, what to report or '
-          + 'what to save, and a debugger cannot show a coherent state. On this single-cycle '
-          + 'machine it is free, because only one instruction exists at a time — which is '
-          + 'exactly why it is worth naming here. The moment M35 pipelines this datapath five '
-          + 'instructions are in flight, and keeping the promise costs a reorder buffer and a '
-          + 'commit point.',
+        detail: [
+          'Without that guarantee a handler cannot know what to restart, what to report or what '
+            + 'to save, and a debugger cannot show a coherent state.',
+          'On this single-cycle machine it is free, because only one instruction exists at a '
+            + 'time.',
+          'That is exactly why it is worth naming here.',
+          'The moment M35 pipelines this datapath five instructions are in flight, and keeping '
+            + 'the promise costs a reorder buffer and a commit point.'
+        ],
         example: 'M36 makes this the central problem: speculation means instructions execute '
           + 'that must be undone, and precision is what says when they can be committed.'
       },
@@ -236,12 +250,15 @@
         term: 'A device that cannot be acknowledged raises the same interrupt forever',
         plain: 'The handler must touch the device before returning.',
         formal: 'the timer here is cleared by writing its compare register',
-        detail: 'The interrupt condition is a level, not an event: while it holds, the machine '
-          + 'takes the trap again the instant the handler returns. That is a livelock rather '
-          + 'than a crash — the program makes no progress and nothing anywhere reports an error '
-          + '— and it is why every interrupt handler ever written ends by talking to the device. '
-          + 'The same shape appears in every edge-triggered versus level-triggered event API, '
-          + 'including epoll.',
+        detail: [
+          'The interrupt condition is a level, not an event. While it holds, the machine takes '
+            + 'the trap again the instant the handler returns.',
+          'That is a livelock rather than a crash: the program makes no progress and nothing '
+            + 'anywhere reports an error.',
+          'It is why every interrupt handler ever written ends by talking to the device.',
+          'The same shape appears in every edge-triggered versus level-triggered event API, '
+            + 'including epoll.'
+        ],
         example: 'The unconditional handler in the demo never re-arms the timer, so it is '
           + 'entered five times in thirty instructions.'
       },
@@ -249,12 +266,14 @@
         term: 'Privilege is a two-bit register plus the checks made against it',
         plain: 'A trap raises the mode; mret restores it.',
         formal: 'the mode decides which instructions and which CSRs are reachable',
-        detail: 'There is genuinely nothing more to it at this level. The mode register decides '
-          + 'whether mtvec can be written, whether mret is legal, and — once M43 adds address '
-          + 'translation — which pages are reachable. Everything about kernels, system calls, '
-          + 'containers and hypervisors is built from this two-bit register and the hardware '
-          + 'checks around it, which is worth knowing because it sets a floor on how much any '
-          + 'of those can protect.',
+        detail: [
+          'There is genuinely nothing more to it at this level.',
+          'The mode register decides whether mtvec can be written, whether mret is legal, and — '
+            + 'once M43 adds address translation — which pages are reachable.',
+          'Everything about kernels, system calls, containers and hypervisors is built from this '
+            + 'two-bit register and the hardware checks around it.',
+          'That is worth knowing, because it sets a floor on how much any of those can protect.'
+        ],
         example: 'A user-mode program cannot write mtvec, so it cannot redirect where its own '
           + 'traps go — which is the whole reason the boundary holds.'
       },
@@ -262,12 +281,15 @@
         term: 'A system call is a deliberate exception, and that is the trick',
         plain: 'ecall traps rather than jumping.',
         formal: 'cause 11, and the destination is mtvec rather than anything the program chose',
-        detail: 'The program cannot call the kernel, because calling means choosing a '
-          + 'destination and the whole point is that it may not. So it traps on purpose: the '
-          + 'hardware raises privilege and sends control to the one address the kernel '
-          + 'installed, and the kernel reads a register to find out what was wanted. That is why '
-          + 'a system call costs a trap rather than a jump, and why the cost has shaped every '
-          + 'high-performance I/O interface from batching to io_uring.',
+        detail: [
+          'The program cannot call the kernel, because calling means choosing a destination and '
+            + 'the whole point is that it may not.',
+          'So it traps on purpose. The hardware raises privilege and sends control to the one '
+            + 'address the kernel installed.',
+          'The kernel then reads a register to find out what was wanted.',
+          'That is why a system call costs a trap rather than a jump, and why the cost has shaped '
+            + 'every high-performance I/O interface from batching to io_uring.'
+        ],
         example: 'Every program in this milestone ends in ecall, which traps with cause 11 and '
           + 'is the reason the simulator can tell "finished" from "ran off the end".'
       }
