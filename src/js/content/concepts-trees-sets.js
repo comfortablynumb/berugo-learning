@@ -158,13 +158,16 @@
         term: 'The structure',
         plain: 'One array of parent pointers. Each set is a tree; the root is the set\'s name.',
         formal: 'parent[i] = i means i is a root',
-        detail: 'There is no ordering, no searching and no balance rule — the entire structure is an ' +
-          'array where each element points at another element, and following the pointers reaches a ' +
-          'root that names the set. Two elements are in the same set exactly when they reach the ' +
-          'same root. That is why it is so fast: the operations are pointer walks over an array, ' +
-          'with no allocation, no comparison of keys and no restructuring beyond changing one ' +
-          'parent. It also means it answers only one question, and any richer query needs a ' +
-          'different structure.',
+        detail: [
+          'There is no ordering, no searching and no balance rule. The entire structure is an ' +
+            'array where each element points at another element, and following the pointers ' +
+            'reaches a root that names the set.',
+          'Two elements are in the same set exactly when they reach the same root.',
+          'That is why it is so fast. The operations are pointer walks over an array, with no ' +
+            'allocation, no comparison of keys and no restructuring beyond changing one parent.',
+          'It also means it answers only one question, and any richer query needs a different ' +
+            'structure.'
+        ],
         example: 'find(x) walks to the root; union(x, y) points one root at the other. That is the whole API.'
       },
       {
@@ -181,12 +184,16 @@
         },
         plain: 'Attach the shorter tree under the taller one, so the height only grows when two equal trees meet.',
         formal: 'rank is an upper bound on height; it increments only on a tie',
-        detail: 'Left alone, unions can build a chain: attach each new element under the last and the ' +
-          'forest becomes a linked list. Union by rank prevents it by always hanging the shorter ' +
-          'tree under the taller, which leaves the height unchanged unless the two are equal — and ' +
-          'when they are, it increases by exactly one. A tree of rank r therefore contains at least ' +
-          '2^r elements, so the height is at most log₂ n. That alone, with no compression at all, ' +
-          'makes every operation O(log n).',
+        detail: [
+          'Left alone, unions can build a chain: attach each new element under the last and the ' +
+            'forest becomes a linked list.',
+          'Union by rank prevents it by always hanging the shorter tree under the taller. That ' +
+            'leaves the height unchanged unless the two are equal — and when they are, it ' +
+            'increases by exactly one.',
+          'A tree of rank r therefore contains at least 2^r elements, so the height is at most ' +
+            'log₂ n.',
+          'That alone, with no compression at all, makes every operation O(log n).'
+        ],
         example: 'Union by size is the same idea with the same bound, and is easier to combine with a size query.'
       },
       {
@@ -203,77 +210,97 @@
         },
         plain: 'A find rewrites every node on the path to point straight at the root.',
         formal: 'a second pass sets parent[node] = root',
-        detail: 'The insight is that a find already walked the path, so it knows the root and can ' +
-          'pay a constant per node to make every future find on that path a single hop. The forest ' +
-          'flattens as it is used, and the flattening is where the amortised bound comes from — with ' +
-          'compression alone and no union rule, operations are already O(log n) amortised. The ' +
-          'visible effect in the demo is stark: run a find on every element with compression on and ' +
-          'the deepest node drops to two or three hops; run it with compression off and nothing ' +
-          'moves.',
+        detail: [
+          'The insight is that a find already walked the path, so it knows the root. It can pay a ' +
+            'constant per node to make every future find on that path a single hop.',
+          'The forest flattens as it is used, and the flattening is where the amortised bound ' +
+            'comes from. With compression alone and no union rule, operations are already ' +
+            'O(log n) amortised.',
+          'The visible effect in the demo is stark. Run a find on every element with compression ' +
+            'on and the deepest node drops to two or three hops; run it with compression off and ' +
+            'nothing moves.'
+        ],
         example: 'After a find on every element: deepest node 8 hops without compression, 3 with it.'
       },
       {
         term: 'Splitting and halving',
         plain: 'One-pass variants: point each node at its grandparent, or every other node.',
         formal: 'parent[node] = parent[parent[node]] as the walk goes',
-        detail: 'Full compression needs two passes — one to find the root, one to rewrite. Path ' +
-          'splitting and path halving do the job in a single pass by pointing each node at its ' +
-          'grandparent as they go, which halves the path length per traversal rather than ' +
-          'collapsing it entirely. Both achieve the same asymptotic bound as full compression, and ' +
-          'the measured difference is small and goes both ways: halving does the fewest pointer ' +
-          'hops per find and the most pointer writes. Any of the three is a fine choice; none is a ' +
-          'mistake.',
+        detail: [
+          'Full compression needs two passes: one to find the root, one to rewrite.',
+          'Path splitting and path halving do the job in a single pass, by pointing each node at ' +
+            'its grandparent as they go. That halves the path length per traversal rather than ' +
+            'collapsing it entirely.',
+          'Both achieve the same asymptotic bound as full compression, and the measured difference ' +
+            'is small and goes both ways. Halving does the fewest pointer hops per find and the ' +
+            'most pointer writes.',
+          'Any of the three is a fine choice; none is a mistake.'
+        ],
         example: 'Measured over 100 000 elements: full compression 1.017 hops per find, splitting 1.042, halving 0.859.'
       },
       {
         term: 'The inverse Ackermann bound',
         plain: 'Both optimisations together give O(α(n)) amortised, and α(n) is below 5 for every n anyone will run.',
         formal: 'O(m · α(n)) for m operations',
-        readAs: 'The total for m operations is m multiplied by α(n), the inverse Ackermann function — a value ' +
-          'that stays below 5 for any n that could be stored on any machine. It is not constant in ' +
-          'theory and it is indistinguishable from constant in practice.',
-        detail: 'Tarjan proved that union by rank plus path compression gives an amortised bound of ' +
-          'α(n) per operation, where α is the inverse of the Ackermann function — a function that ' +
-          'grows so slowly it is 4 for every n up to 2^65536. That is why "effectively constant" is ' +
-          'the honest phrase and "constant" is not: the bound genuinely is not constant, and the ' +
-          'difference has never mattered to anyone. Tarjan also proved a matching lower bound, so no ' +
-          'pointer-based structure does better.',
+        readAs: 'The total for m operations is m multiplied by α(n), the inverse Ackermann ' +
+          'function. That value stays below 5 for any n that could be stored on any machine. It is ' +
+          'not constant in theory, and it is indistinguishable from constant in practice.',
+        detail: [
+          'Tarjan proved that union by rank plus path compression gives an amortised bound of α(n) ' +
+            'per operation, where α is the inverse of the Ackermann function.',
+          'That function grows so slowly it is 4 for every n up to 2^65536.',
+          'This is why "effectively constant" is the honest phrase and "constant" is not. The ' +
+            'bound genuinely is not constant, and the difference has never mattered to anyone.',
+          'Tarjan also proved a matching lower bound, so no pointer-based structure does better.'
+        ],
         example: 'α(n) = 4 for every n up to 2^65536, which is more atoms than the observable universe holds.'
       },
       {
         term: 'Rollback needs the union-only variant',
         plain: 'Path compression rewrites parents that no union recorded, so there is nothing bounded to undo.',
         formal: 'undo needs O(1) recorded changes per union',
-        detail: 'A union changes exactly one parent and one rank, so it can be journalled in constant ' +
-          'space and undone exactly. A compressing find changes an unbounded number of parents that ' +
-          'no union ever touched, and journalling those would cost more than the compression saves. ' +
-          'So a rollback-capable DSU must use union by rank alone, accepting O(log n) per operation ' +
-          'in exchange for an exact undo. This is the trap the section exists for, and the ' +
-          'implementation here refuses the combination rather than being quietly wrong.',
+        detail: [
+          'A union changes exactly one parent and one rank, so it can be journalled in constant ' +
+            'space and undone exactly.',
+          'A compressing find changes an unbounded number of parents that no union ever touched, ' +
+            'and journalling those would cost more than the compression saves.',
+          'So a rollback-capable DSU must use union by rank alone, accepting O(log n) per ' +
+            'operation in exchange for an exact undo.',
+          'This is the trap the section exists for, and the implementation here refuses the ' +
+            'combination rather than being quietly wrong.'
+        ],
         example: 'A union journals one parent and one rank; a compressing find rewrote four more that nothing recorded.'
       },
       {
         term: 'Offline dynamic connectivity',
         plain: 'Divide and conquer over time, using rollback to unwind each branch — which is what forces the union-only variant.',
         formal: 'segment tree over the timeline, DSU with undo at each node',
-        detail: 'The canonical use for a rollback DSU is answering connectivity queries over a graph ' +
-          'whose edges appear and disappear over time. Each edge is alive for an interval, the ' +
-          'intervals are hung on a segment tree over the timeline, and a depth-first walk of that ' +
-          'tree unions the edges on the way down and undoes them on the way up. The recursion needs ' +
-          'exact rollback at every level, which is precisely why the compression has to go — and why ' +
-          'people discover the incompatibility here rather than in the textbook.',
+        detail: [
+          'The canonical use for a rollback DSU is answering connectivity queries over a graph ' +
+            'whose edges appear and disappear over time.',
+          'Each edge is alive for an interval, and the intervals are hung on a segment tree over ' +
+            'the timeline. A depth-first walk of that tree unions the edges on the way down and ' +
+            'undoes them on the way up.',
+          'The recursion needs exact rollback at every level, which is precisely why the ' +
+            'compression has to go.',
+          'It is also why people discover the incompatibility here rather than in the textbook.'
+        ],
         example: 'Each edge is unioned once per segment-tree node it covers, and undone as the recursion returns.'
       },
       {
         term: 'Where it shows up',
         plain: 'Kruskal, image segmentation, type unification, and any "are these the same thing yet" question.',
         formal: 'dynamic equivalence relations',
-        detail: 'Anywhere a program maintains an equivalence relation that only ever coarsens, this ' +
-          'is the structure. Kruskal\'s algorithm uses it to reject edges inside a component. ' +
-          'Connected-component labelling in image processing merges pixel runs. Hindley-Milner type ' +
-          'inference unifies type variables with it. Compilers use it for value numbering and for ' +
-          'register coalescing. The common shape is that merges are permanent and the only question ' +
-          'is membership — which is exactly the API, and why nothing richer is needed.',
+        detail: [
+          'Anywhere a program maintains an equivalence relation that only ever coarsens, this is ' +
+            'the structure.',
+          'Kruskal\'s algorithm uses it to reject edges inside a component. Connected-component ' +
+            'labelling in image processing merges pixel runs.',
+          'Hindley-Milner type inference unifies type variables with it, and compilers use it for ' +
+            'value numbering and for register coalescing.',
+          'The common shape is that merges are permanent and the only question is membership. That ' +
+            'is exactly the API, and why nothing richer is needed.'
+        ],
         example: 'Kruskal sorts the edges and uses one find per endpoint to decide whether an edge closes a cycle.'
       }
     ]
