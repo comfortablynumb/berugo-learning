@@ -305,21 +305,29 @@
         },
         plain: 'Keep the subtree you are looking at, and a stack of crumbs recording how you got there.',
         formal: 'Zipper = (focus, [Crumb]) where a crumb holds the parent value and the siblings on each side',
-        detail: 'The crumb is what makes going back up possible without a parent pointer, which is the thing an ' +
-          'immutable tree cannot have - a parent pointer would have to be rewritten in the child whenever the ' +
-          'parent changed, which is a cycle. Storing the way back in the traversal rather than in the structure ' +
-          'breaks the cycle, and the result is a value you can pass around, store and compare like any other.',
+        detail: [
+          'The crumb is what makes going back up possible without a parent pointer, which is the ' +
+            'thing an immutable tree cannot have.',
+          'A parent pointer would have to be rewritten in the child whenever the parent changed, ' +
+            'which is a cycle.',
+          'Storing the way back in the traversal rather than in the structure breaks the cycle.',
+          'The result is a value you can pass around, store and compare like any other.'
+        ],
         example: 'Focusing two levels down records a path of [0, 0] and two crumbs holding the siblings at each level.'
       },
       {
         term: 'It is literally a derivative',
         plain: 'The type of one-hole contexts for a data type is its formal derivative.',
         formal: 'for T(x) = 1 + x·T(x)², the context type is T\'(x)',
-        detail: 'The observation is Huet\'s and McBride\'s, and it is more than a curiosity: it tells you what ' +
-          'the crumb type must be for *any* structure without having to invent it. Differentiate a product and ' +
-          'you get a sum of the ways to poke a hole in each factor - which is exactly "the parent value, the ' +
-          'siblings to the left, the siblings to the right". It is the reason zippers can be derived ' +
-          'mechanically rather than designed.',
+        detail: [
+          'The observation is Huet\'s and McBride\'s, and it is more than a curiosity.',
+          'It tells you what the crumb type must be for *any* structure, without having to invent ' +
+            'it.',
+          'Differentiate a product and you get a sum of the ways to poke a hole in each factor. ' +
+            'That is exactly "the parent value, the siblings to the left, the siblings to the ' +
+            'right".',
+          'It is the reason zippers can be derived mechanically rather than designed.'
+        ],
         example: 'A binary tree\'s crumb is "value plus the other child plus which side I came from" - the derivative, written out.'
       },
       {
@@ -328,10 +336,14 @@
         formal: 'k edits under one focus: O(k + depth) rather than O(k · depth)',
         readAs: 'Walk to the spot once and make all k edits there, instead of descending from the root for ' +
           'each one. The depth is paid once instead of k times.',
-        detail: 'This is the property the whole idea exists for. A naive persistent "update at this path" ' +
-          'rebuilds the path on every single edit, so a hundred edits under one subtree pay a hundred paths. A ' +
-          'zipper defers the rebuild until the focus leaves, so the same hundred edits pay one. That is the ' +
-          'difference between an editor that redraws smoothly and one that allocates a tree per keystroke.',
+        detail: [
+          'This is the property the whole idea exists for.',
+          'A naive persistent "update at this path" rebuilds the path on every single edit, so a ' +
+            'hundred edits under one subtree pay a hundred paths.',
+          'A zipper defers the rebuild until the focus leaves, so the same hundred edits pay one.',
+          'That is the difference between an editor that redraws smoothly and one that allocates a ' +
+            'tree per keystroke.'
+        ],
         example: '50 edits at depth 12: 12 nodes rebuilt with a zipper against 600 without - exactly 50×.'
       },
       {
@@ -340,55 +352,74 @@
         formal: 'toRoot(moves(focus(t))) = t',
         readAs: 'Focus somewhere, move about, walk back up, and you get the original tree back. That round ' +
           'trip is what makes a zipper a view of a structure rather than a copy of one.',
-        detail: 'This is the property to test first, because it catches every sibling-ordering mistake at once. ' +
-          'The left siblings are stored reversed so the nearest is at the head - that is what makes `left` an ' +
-          'O(1) move - and getting the reversal wrong on the way back out produces a tree with the same nodes ' +
-          'in the wrong order, which looks fine until somebody reads it. A random walk followed by a rebuild ' +
-          'finds it immediately.',
+        detail: [
+          'This is the property to test first, because it catches every sibling-ordering mistake at ' +
+            'once.',
+          'The left siblings are stored reversed so the nearest is at the head, which is what makes ' +
+            '`left` an O(1) move.',
+          'Getting the reversal wrong on the way back out produces a tree with the same nodes in ' +
+            'the wrong order, which looks fine until somebody reads it.',
+          'A random walk followed by a rebuild finds it immediately.'
+        ],
         example: '200 random moves through a tree of depth 6, then rebuild: identical to the source.'
       },
       {
         term: 'The immutable answer to "I need a mutable cursor"',
         plain: 'Editors, DOM diffing and traversals all want a movable position; a zipper is one that is also a value.',
         formal: 'the cursor is data, so it can be stored, compared, undone and sent',
-        detail: 'Because the zipper is an ordinary immutable value, keeping the previous one gives undo for ' +
-          'free, and two of them can be compared to see what moved. A mutable cursor into a mutable tree gives ' +
-          'none of that and additionally becomes invalid whenever the tree changes underneath it. The trade is ' +
-          'that a zipper is a *position in a specific version*, so it does not follow the structure forward - ' +
-          'which is usually what you wanted anyway.',
+        detail: [
+          'Because the zipper is an ordinary immutable value, keeping the previous one gives undo ' +
+            'for free, and two of them can be compared to see what moved.',
+          'A mutable cursor into a mutable tree gives none of that, and additionally becomes ' +
+            'invalid whenever the tree changes underneath it.',
+          'The trade is that a zipper is a *position in a specific version*, so it does not follow ' +
+            'the structure forward.',
+          'That is usually what you wanted anyway.'
+        ],
         example: 'A list zipper is `before` reversed, the focus, and `after` - which is a gap buffer with lists.'
       },
       {
         term: 'Lenses are the general case',
         plain: 'A zipper is a cursor for one structure; a lens is a composable getter/setter pair for any nesting.',
         formal: 'up and down are composition; a lens abstracts the pair over arbitrary shapes',
-        detail: 'Once the "focus plus context" pattern is visible it turns up everywhere in immutable code, ' +
-          'usually under the name of optics: a lens focuses a field, a prism focuses a case of a sum, and ' +
-          'composing them builds a path into a deeply nested value that can be read and written. The value of ' +
-          'seeing the zipper first is that it makes the composition concrete - moving down twice is exactly ' +
-          'composing two lenses.',
+        detail: [
+          'Once the "focus plus context" pattern is visible it turns up everywhere in immutable ' +
+            'code, usually under the name of optics.',
+          'A lens focuses a field, a prism focuses a case of a sum, and composing them builds a ' +
+            'path into a deeply nested value that can be read and written.',
+          'The value of seeing the zipper first is that it makes the composition concrete.',
+          'Moving down twice is exactly composing two lenses.'
+        ],
         example: 'React and Redux code that does `{...state, a: {...state.a, b: x}}` is hand-writing a two-level lens.'
       },
       {
         term: 'The rebuild is where the cost lands',
         plain: 'Every `up` reconstructs one parent, so leaving the focus costs the depth once.',
         formal: 'toRoot is O(depth) and is the only non-constant operation',
-        detail: 'It is worth being precise that the zipper does not remove work, it *batches* it: the path still ' +
-          'has to be rebuilt, once, when the focus finally leaves. The consequence for real code is that the ' +
-          'expensive thing is bouncing in and out of the root repeatedly, and the cheap thing is doing all the ' +
-          'work you need at a position before moving on. That is the same locality advice as everywhere else, ' +
-          'arrived at from an unusual direction.',
+        detail: [
+          'It is worth being precise that the zipper does not remove work, it *batches* it.',
+          'The path still has to be rebuilt, once, when the focus finally leaves.',
+          'The consequence for real code is that the expensive thing is bouncing in and out of the ' +
+            'root repeatedly. The cheap thing is doing all the work you need at a position before ' +
+            'moving on.',
+          'That is the same locality advice as everywhere else, arrived at from an unusual ' +
+            'direction.'
+        ],
         example: '50 edits and one rebuild: 12 nodes. 50 edits and 50 rebuilds: 600 nodes, for the same result.'
       },
       {
         term: 'A zipper is scoped to a version',
         plain: 'It refers to one immutable tree; later updates elsewhere do not move it.',
         formal: 'the focus and crumbs hold node references from the version it was created in',
-        detail: 'This is a feature and occasionally a surprise. Because a zipper holds actual nodes, it keeps ' +
-          'that version alive for as long as it exists - which is exactly the garbage-collection issue from ' +
-          '9.1, seen from the other side - and it will not observe edits made through a different zipper. If ' +
-          'two editors need to see each other\'s changes, the zipper is the wrong abstraction and a shared ' +
-          'mutable reference to the current version is the right one.',
+        detail: [
+          'This is a feature and occasionally a surprise.',
+          'Because a zipper holds actual nodes, it keeps that version alive for as long as it ' +
+            'exists. That is exactly the garbage-collection issue from 9.1, seen from the other ' +
+            'side.',
+          'It also will not observe edits made through a different zipper.',
+          'If two editors need to see each other\'s changes, the zipper is the wrong abstraction ' +
+            'and a shared mutable reference to the current version is the right one.'
+        ],
         example: 'Editing through a zipper leaves the source tree byte-for-byte identical, which is the test that proves it.'
       }
     ]

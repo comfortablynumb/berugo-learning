@@ -28,21 +28,22 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'A zipper is a structure turned inside out at one point: the node you are looking at, plus enough ' +
-          'context to put the rest back together. For a tree that context is a list of frames, one per level, ' +
-          'each holding the parent\'s value and the siblings on either side. Moving down pushes a frame, moving ' +
-          'up pops one and rebuilds that parent, and the focused node is reachable in O(1) rather than by a ' +
-          'search from the root.',
-        'The payoff is not the navigation, it is the deferral. Editing a node 12 levels deep by descending from ' +
-          'the root each time rebuilds 12 nodes per edit — 600 for 50 edits. The same 50 edits through a zipper ' +
-          'rebuild 12 nodes in total, because the path is reconstructed once, when the cursor finally walks ' +
-          'back out. That is 50× fewer nodes for identical results, and the factor is the number of edits ' +
-          'rather than the depth.',
-        'What a zipper does not do is make a single edit cheaper, and it does not help when consecutive edits ' +
-          'are in unrelated parts of the structure — the cursor then walks up and down between them and pays ' +
-          'the path each way. It is the right tool for a text buffer, an editor\'s selection, a tree rewriting ' +
-          'pass or a focus that moves locally; it is the wrong one for scattered random updates, where a plain ' +
-          'path-copying insert is both simpler and no worse.'
+        'A zipper is a structure turned inside out at one point: the node you are looking at, plus ' +
+          'enough context to put the rest back together. For a tree that context is a list of ' +
+          'frames, one per level, each holding the parent\'s value and the siblings on either ' +
+          'side. Moving down pushes a frame and moving up pops one and rebuilds that parent. The ' +
+          'focused node is reachable in O(1) rather than by a search from the root.',
+        'The payoff is not the navigation, it is the deferral. Editing a node 12 levels deep by ' +
+          'descending from the root each time rebuilds 12 nodes per edit — 600 for 50 edits. The ' +
+          'same 50 edits through a zipper rebuild 12 nodes in total, because the path is ' +
+          'reconstructed once, when the cursor finally walks back out. That is 50× fewer nodes for ' +
+          'identical results, and the factor is the number of edits rather than the depth.',
+        'What a zipper does not do is make a single edit cheaper. It also does not help when ' +
+          'consecutive edits are in unrelated parts of the structure. The cursor then walks up and ' +
+          'down between them and pays the path each way. It is the right tool for a ' +
+          'text buffer, an editor\'s selection, a tree rewriting pass or a focus that moves ' +
+          'locally. It is the wrong one for scattered random updates, where a plain path-copying ' +
+          'insert is both simpler and no worse.'
       ],
       demo: {
         title: 'Interactive demo — the same edits, with and without a cursor',
