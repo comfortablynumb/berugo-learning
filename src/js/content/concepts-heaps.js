@@ -315,11 +315,16 @@
         term: 'Selection sort with a heap',
         plain: 'Build a max-heap in place, then swap the root to the end and sift down over a shrinking heap.',
         formal: 'n − 1 rounds of swap-and-sift',
-        detail: 'Heapsort is what selection sort becomes when the "find the largest" step stops being ' +
-          'a scan. The array partitions itself as it goes: a heap on the left, a sorted suffix on the ' +
-          'right, and the boundary moves one slot per round. Because the largest element goes to the ' +
-          'end, a max-heap produces an ascending array with no reversal pass. The whole algorithm is ' +
-          'the build plus n − 1 sift-downs, and both halves are already written once the heap exists.',
+        detail: [
+          'Heapsort is what selection sort becomes when the "find the largest" step stops being a ' +
+            'scan.',
+          'The array partitions itself as it goes: a heap on the left, a sorted suffix on the ' +
+            'right, and the boundary moves one slot per round.',
+          'Because the largest element goes to the end, a max-heap produces an ascending array ' +
+            'with no reversal pass.',
+          'The whole algorithm is the build plus n − 1 sift-downs, and both halves are already ' +
+            'written once the heap exists.'
+        ],
         example: 'After k rounds the last k slots hold the k largest elements in their final positions.'
       },
       {
@@ -338,90 +343,114 @@
         },
         plain: 'O(n log n) worst case with O(1) extra space — the only common sort with both.',
         formal: 'no auxiliary array, no recursion',
-        detail: 'Merge sort gives the guarantee and needs O(n) scratch. Quicksort needs no scratch ' +
-          'and gives O(n²) in the worst case. Heapsort is the one that gives both, and it does it ' +
-          'with no recursion at all, so there is no stack to overflow either. That combination is ' +
-          'why it survives as the fallback branch of introsort: when quicksort\'s recursion goes ' +
-          'deeper than 2 log n, the implementation switches to heapsort precisely because the switch ' +
-          'converts a possible quadratic into a certainty.',
+        detail: [
+          'Merge sort gives the guarantee and needs O(n) scratch. Quicksort needs no scratch and ' +
+            'gives O(n²) in the worst case.',
+          'Heapsort is the one that gives both, and it does it with no recursion at all, so there ' +
+            'is no stack to overflow either.',
+          'That combination is why it survives as the fallback branch of introsort. When ' +
+            'quicksort\'s recursion goes deeper than 2 log n, the implementation switches to ' +
+            'heapsort precisely because the switch converts a possible quadratic into a certainty.'
+        ],
         example: 'std::sort is quicksort until the depth limit, then heapsort, then insertion sort at the bottom.'
       },
       {
         term: 'Why it is only the fallback',
         plain: 'Every sift-down jumps between positions that are powers of two apart, so it misses cache on nearly every step.',
         formal: 'access pattern is scattered by construction',
-        detail: 'Quicksort scans linearly and the prefetcher sees it coming; merge sort streams two ' +
-          'runs. Heapsort walks from index i to 2i + 1, which at any real size is a different cache ' +
-          'line every time — and it does that log n times per extracted element. The comparison count ' +
-          'does not show it: measured at n = 10 000 heapsort does 235 305 comparisons, about 1.77 × ' +
-          'n log₂ n, which is competitive. The clock does show it, and the gap widens with n as the ' +
-          'array leaves each cache level.',
+        detail: [
+          'Quicksort scans linearly and the prefetcher sees it coming; merge sort streams two runs.',
+          'Heapsort walks from index i to 2i + 1, which at any real size is a different cache line ' +
+            'every time. It does that log n times per extracted element.',
+          'The comparison count does not show it. Measured at n = 10 000 heapsort does 235 305 ' +
+            'comparisons, about 1.77 × n log₂ n, which is competitive.',
+          'The clock does show it, and the gap widens with n as the array leaves each cache level.'
+        ],
         example: 'At n = 10 000 heapsort does 1.77 × n·log₂ n comparisons and still loses to quicksort on time.'
       },
       {
         term: 'Not stable',
         plain: 'The sift moves equal keys past each other, and there is no cheap way to stop it.',
         formal: 'equal keys can be reordered by a swap',
-        detail: 'Stability means equal keys keep their input order, and heapsort breaks it in the ' +
-          'most basic way: the extract step swaps the root with the last element, which can move an ' +
-          'equal key across an arbitrary distance. Nothing local can repair that, and the standard ' +
-          'workaround — extending each key with its original index — costs the memory that heapsort ' +
-          'was chosen for. So if the sort has to be stable, this is not the algorithm, and merge ' +
-          'sort or Timsort is where to look instead.',
+        detail: [
+          'Stability means equal keys keep their input order, and heapsort breaks it in the most ' +
+            'basic way. The extract step swaps the root with the last element, which can move an ' +
+            'equal key across an arbitrary distance.',
+          'Nothing local can repair that, and the standard workaround — extending each key with ' +
+            'its original index — costs the memory that heapsort was chosen for.',
+          'So if the sort has to be stable, this is not the algorithm. Merge sort or Timsort is ' +
+            'where to look instead.'
+        ],
         example: 'Sorting records by one field with heapsort silently reorders records that tie on it.'
       },
       {
         term: 'Bottom-up heapsort',
         plain: 'Sift the hole all the way down first, then walk back up to place the element. It halves the comparisons.',
         formal: '≈ n log n rather than 2n log n comparisons',
-        readAs: 'Bottom-up heapsort sifts each element all the way down and then walks back up, which costs ' +
-          'about one comparison per level instead of two — halving the comparison count for the same ' +
-          'number of moves.',
-        detail: 'The classical sift-down does two comparisons per level: one to pick the better child ' +
-          'and one to decide whether to stop. The bottom-up variant observes that the element being ' +
-          'sifted is almost always going nearly all the way down — it came from the bottom of the ' +
-          'heap — so it descends to a leaf picking the better child at each step, then walks back up ' +
-          'to find where the element belongs. The second walk is short in expectation, and the total ' +
-          'drops from about 2n log₂ n comparisons to about n log₂ n.',
+        readAs: 'Bottom-up heapsort sifts each element all the way down and then walks back up. ' +
+          'That costs about one comparison per level instead of two, halving the comparison count ' +
+          'for the same number of moves.',
+        detail: [
+          'The classical sift-down does two comparisons per level: one to pick the better child and ' +
+            'one to decide whether to stop.',
+          'The bottom-up variant observes that the element being sifted is almost always going ' +
+            'nearly all the way down, because it came from the bottom of the heap.',
+          'So it descends to a leaf picking the better child at each step, then walks back up to ' +
+            'find where the element belongs.',
+          'The second walk is short in expectation, and the total drops from about 2n log₂ n ' +
+            'comparisons to about n log₂ n.'
+        ],
         example: 'The saving comes from not asking "should I stop here?" at every level of a descent that rarely stops early.'
       },
       {
         term: 'Top-k with a bounded heap',
         plain: 'Keep a heap of the k best seen so far. Peak memory is k, whatever the stream length is.',
         formal: 'O(n log k) time, O(k) space',
-        readAs: 'Keeping only the best k seen so far costs a log-k heap operation per element and holds only ' +
-          'k of them at once, so the stream can be far larger than memory.',
-        detail: 'This is the pattern that earns a heap its place in ordinary code, more often than ' +
-          'heapsort does. Hold a max-heap of size k; for each new element, compare it against the ' +
-          'root and discard it if it is worse. The comparison count is dominated by that single gate ' +
-          '— one per element — and only the survivors pay for a pop and a push. Measured over a ' +
-          'million-element stream with k = 20: 999 980 gate comparisons, 1 997 heap comparisons, and ' +
-          'just 246 elements ever admitted, against about 19.9 million comparisons and a million ' +
-          'slots to sort the stream.',
+        readAs: 'Keeping only the best k seen so far costs a log-k heap operation per element, and ' +
+          'holds only k of them at once. The stream can therefore be far larger than memory.',
+        detail: [
+          'This is the pattern that earns a heap its place in ordinary code, more often than ' +
+            'heapsort does.',
+          'Hold a max-heap of size k. For each new element, compare it against the root and ' +
+            'discard it if it is worse.',
+          'The comparison count is dominated by that single gate — one per element — and only the ' +
+            'survivors pay for a pop and a push.',
+          'Measured over a million-element stream with k = 20: 999 980 gate comparisons, 1 997 ' +
+            'heap comparisons, and just 246 elements ever admitted. Sorting the stream would cost ' +
+            'about 19.9 million comparisons and a million slots.'
+        ],
         example: 'Top-20 of a million elements: 1 001 977 comparisons and 20 slots, against 19.9 million and 1 000 000.'
       },
       {
         term: 'Streaming, not batching',
         plain: 'The bounded heap never needs the whole input in memory, so the stream can be longer than RAM.',
         formal: 'one pass, O(k) resident',
-        detail: 'The memory bound is what makes this pattern structural rather than a micro-' +
-          'optimisation: the input is consumed one element at a time and discarded, so a "top 100 ' +
-          'slowest queries today" over a hundred gigabytes of logs runs in a hundred slots. It is the ' +
-          'same streaming argument as M01.7, and it composes — several bounded heaps can run over one ' +
-          'pass, and a distributed version merges the per-shard top-k into a global one, because ' +
-          'the top k of the union is contained in the union of the top k.',
+        detail: [
+          'The memory bound is what makes this pattern structural rather than a ' +
+            'micro-optimisation.',
+          'The input is consumed one element at a time and discarded, so a "top 100 slowest ' +
+            'queries today" over a hundred gigabytes of logs runs in a hundred slots.',
+          'It is the same streaming argument as M01.7, and it composes. Several bounded heaps can ' +
+            'run over one pass.',
+          'A distributed version merges the per-shard top-k into a global one, because the top k ' +
+            'of the union is contained in the union of the top k.'
+        ],
         example: 'Merging per-shard top-100 lists gives the true global top-100, which is why this parallelises.'
       },
       {
         term: 'Selection against sorting',
         plain: 'If you only need the k best, sorting is doing n log n work to answer a question worth n log k.',
         formal: 'quickselect gives O(n) expected for the unordered case',
-        detail: 'Sorting to take a prefix is the most common accidental over-computation there is. ' +
-          'The bounded heap does it in O(n log k), and if the k results do not need to be ordered ' +
-          'among themselves, quickselect does it in O(n) expected time by partitioning around the ' +
-          'k-th element and stopping. The heap keeps its advantage when the input is a stream rather ' +
-          'than an array, when k is small and n is enormous, or when the answer has to be available ' +
-          'at every moment rather than at the end.',
+        detail: [
+          'Sorting to take a prefix is the most common accidental over-computation there is.',
+          'The bounded heap does it in O(n log k). If the k results do not need to be ordered ' +
+            'among themselves, quickselect does it in O(n) expected time, by partitioning around ' +
+            'the k-th element and stopping.',
+          'The heap keeps its advantage when the input is a stream rather than an array, or when k ' +
+            'is small and n is enormous.',
+          'It also keeps it when the answer has to be available at every moment rather than at the ' +
+            'end.'
+        ],
         example: 'ORDER BY x LIMIT 10 over a million rows is a top-10 heap in any competent query planner, not a sort.'
       }
     ],
