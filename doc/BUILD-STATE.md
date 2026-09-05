@@ -5182,27 +5182,34 @@ counts…`).
 `--strict` exits non-zero on any section over budget. It is deliberately not
 wired into `npm test` yet; that happens when the last section lands.
 
-### Where the pass stopped (2026-09-04)
+### Where the pass stopped (2026-09-05)
 
-**191 of 364 sections are inside the budget**, and the tree is green. Every
+**242 of 364 sections are inside the budget**, and the tree is green. Every
 section committed here printed `ok` from `node tools/readability.js <id>`, and
 the four content/notation unit tests plus `npm run lint:size` ran before each
 commit; the full `npm test`, render audit included, was run over each batch.
 
-Overall: mean sentence 20.5 -> **18.3** words, sentences over 30 words
-15.7% -> **7.8%**, single-block explanations 2 471 -> **1 397**.
+Overall: mean sentence 20.5 -> **17.6** words, sentences over 30 words
+15.7% -> **5.1%**, single-block explanations 2 471 -> **989**.
 
-Done this session, in curriculum order: the rest of `authenticated-encryption`,
-then `public-key-cryptography` … `applied-constructions` (finishing M23), the
-nine of M24 (`memory-layout` … `cache-layouts`), all nine of M25
-(`hash-functions` … `hash-in-practice`), the ten of M26 (`bst-rotations` …
-`disjoint-sets`), the seven of M27 (`binary-heaps` … `timers-and-events`), and
-the first four of M28 (`tries` … `suffix-trees`). Plus `beyond-np`, which the
-tooling fix below revealed had never actually been measured.
+Done since the last stop point, in curriculum order: the rest of M25's sketches
+(`bloom-filters` … `choosing-sketches`), all nine of M08 spatial
+(`uniform-grids` … `broad-phase`), the seven of M09 persistence
+(`persistence-basics` … `zippers`), the three succinct sections
+(`rank-and-select` … `compressed-bitmaps`), all nine of M33
+(`boolean-algebra-and-gates` … `hardware-description-and-verification`) and the
+nine of M34 (`instruction-set-design` … `assembler-linker-and-loading`).
 
-**Resume at `suffix-arrays`** — section 192 in `Curriculum.teachingSections()`
-order, and everything to 191 prints `ok`. Run `node tools/readability.js` and
-work down the curriculum order; anything not printing `ok` is outstanding.
+**Resume at `real-instruction-sets`** — section 243 in
+`Curriculum.teachingSections()` order, and everything to 242 prints `ok`. Run
+`node tools/readability.js` and work down the curriculum order; anything not
+printing `ok` is outstanding.
+
+Two splitter facts cost time this session and are worth keeping. A sentence
+that opens with a lowercase identifier (`x86`, `t-digest`, `ecall`, `is_occupied`)
+or with a digit, a brace or an open paren is read as a continuation of the
+previous one, so the "split" does not count — reword it to start with a word.
+And a semicolon or a colon is not a sentence boundary; only a full stop is.
 
 ### The scanner was not reading a third of the orientations
 
