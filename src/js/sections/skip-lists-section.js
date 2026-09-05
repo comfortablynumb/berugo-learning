@@ -29,10 +29,11 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'A skip list is a sorted linked list with express lanes. Each node is promoted to the next ' +
-          'level with probability p, so the towers are geometrically distributed: about half the ' +
-          'nodes stop at level one when p = 0.5, half of the rest reach level two, and so on. A ' +
-          'search walks the top lane until the next node would overshoot, drops a level, and repeats.',
+        'A skip list is a sorted linked list with express lanes. Each node is promoted to the ' +
+          'next level with probability p, so the towers are geometrically distributed. About half ' +
+          'the nodes stop at level one when p = 0.5, half of the rest reach level two, and so on. ' +
+          'A search walks the top lane until the next node would overshoot, drops a level, and ' +
+          'repeats.',
         'The expected number of levels is log_{1/p}(n) and the expected search cost is L/p + 1/(1 − p). ' +
           'Read those two together: a smaller p gives fewer levels and more steps along each, so the ' +
           'total is nearly flat. Measured at 100 000 keys, p = 0.5 costs 30.6 comparisons and ' +

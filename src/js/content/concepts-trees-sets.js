@@ -24,24 +24,30 @@
         readAs: 'The chance a node gets exactly k levels: it has to win the coin k−1 times running, at ' +
           'probability p each, and then lose once. That is the geometric distribution, and it is the ' +
           'whole of how a skip list decides its shape.',
-        detail: 'There is no balance rule and no restructuring: when a node is inserted it flips a ' +
-          'coin repeatedly, and the number of heads decides how many express lanes it joins. The ' +
-          'resulting height distribution is geometric, which is what makes the analysis work — about ' +
-          'half the nodes stop at level one when p = 0.5, half of the remainder reach level two, and ' +
-          'the counts fall by a factor of p per level. Measured over 100 000 keys at p = 0.5, the ' +
-          'levels hold 49 921, 25 176, 12 451 and 6 240 towers, which is that distribution to within ' +
-          'a fraction of a percent.',
+        detail: [
+          'There is no balance rule and no restructuring. When a node is inserted it flips a coin ' +
+            'repeatedly, and the number of heads decides how many express lanes it joins.',
+          'The resulting height distribution is geometric, which is what makes the analysis work. ' +
+            'About half the nodes stop at level one when p = 0.5, and half of the remainder reach ' +
+            'level two. The counts fall by a factor of p per level.',
+          'Measured over 100 000 keys at p = 0.5, the levels hold 49 921, 25 176, 12 451 and 6 240 ' +
+            'towers. That is the distribution to within a fraction of a percent.'
+        ],
         example: 'At p = 0.5 over 100 000 keys the level counts are 49 921, 25 176, 12 451, 6 240 — halving each time.'
       },
       {
         term: 'The search',
         plain: 'Walk forward while the next key is smaller, drop a level when it is not, and finish on the bottom lane.',
         formal: 'expected O(log n)',
-        detail: 'The search is a staircase. Start at the top-left, move right while the next node ' +
-          'still undershoots the target, and drop when it would overshoot; repeat until the bottom ' +
-          'lane, where the next node is either the target or proof that it is absent. The express ' +
-          'lanes cover the distance and the bottom lane finishes the job. Nothing is rebalanced and ' +
-          'nothing is rotated — the shape came from the coins at insertion time and never changes.',
+        detail: [
+          'The search is a staircase.',
+          'Start at the top-left, move right while the next node still undershoots the target, and ' +
+            'drop when it would overshoot. Repeat until the bottom lane, where the next node is ' +
+            'either the target or proof that it is absent.',
+          'The express lanes cover the distance and the bottom lane finishes the job.',
+          'Nothing is rebalanced and nothing is rotated. The shape came from the coins at ' +
+            'insertion time and never changes.'
+        ],
         example: 'The last node before the target on each level is the update vector, and it is exactly what insert and delete need.'
       },
       {
@@ -50,13 +56,17 @@
         formal: 'cost ≈ L/p + 1/(1 − p), L = log_{1/p}(n)',
         readAs: 'A search costs about the number of levels divided by p, plus a term for the walking done ' +
           'within each level. The level count L is log of n taken to base 1/p.',
-        detail: 'The intuitive reading of p is that a smaller value means fewer levels and therefore ' +
-          'a faster search, and the intuition is wrong because it only looks at one of the two ' +
-          'factors. Fewer levels means each level covers more ground, so more forward steps are ' +
-          'taken on each. Multiply them out and the total barely moves: measured at 100 000 keys, ' +
-          'p = 0.5 costs 30.9 comparisons per search and p = 0.25 costs 32.1. What does move is ' +
-          'memory — the expected tower height is exactly 1/(1 − p), so p = 0.25 stores a third fewer ' +
-          'pointers.',
+        detail: [
+          'The intuitive reading of p is that a smaller value means fewer levels and therefore a ' +
+            'faster search. The intuition is wrong, because it only looks at one of the two ' +
+            'factors.',
+          'Fewer levels means each level covers more ground, so more forward steps are taken on ' +
+            'each.',
+          'Multiply them out and the total barely moves. Measured at 100 000 keys, p = 0.5 costs ' +
+            '30.9 comparisons per search and p = 0.25 costs 32.1.',
+          'What does move is memory. The expected tower height is exactly 1/(1 − p), so p = 0.25 ' +
+            'stores a third fewer pointers.'
+        ],
         example: 'p = 0.5 costs 30.9 comparisons and 2.00 pointers per node; p = 0.25 costs 32.1 and 1.33.'
       },
       {
@@ -65,13 +75,16 @@
         formal: 'E[height] = Σ k·p^(k−1)(1 − p) = 1/(1 − p)',
         readAs: 'Average the height over the coin flips — each possible height k, weighted by how likely it ' +
           'is — and the sum collapses to 1/(1 − p). At p = 0.5 that is 2 levels per node on average.',
-        detail: 'The geometric distribution has a mean of 1/(1 − p), which is the number of forward ' +
-          'pointers an average node carries and therefore the memory overhead per key. Measured over ' +
-          '100 000 keys the figures land on the prediction to three decimals: 1.999 at p = 0.5 and ' +
-          '1.333 at p = 0.25. That is the number to compare against a balanced tree, which stores ' +
-          'two child pointers plus whatever balance metadata its family needs — so a skip list at ' +
-          'p = 0.25 is genuinely cheaper per key than a red-black tree, and at p = 0.5 it is about ' +
-          'the same.',
+        detail: [
+          'The geometric distribution has a mean of 1/(1 − p), which is the number of forward ' +
+            'pointers an average node carries, and therefore the memory overhead per key.',
+          'Measured over 100 000 keys the figures land on the prediction to three decimals: 1.999 ' +
+            'at p = 0.5 and 1.333 at p = 0.25.',
+          'That is the number to compare against a balanced tree, which stores two child pointers ' +
+            'plus whatever balance metadata its family needs.',
+          'So a skip list at p = 0.25 is genuinely cheaper per key than a red-black tree, and at ' +
+            'p = 0.5 it is about the same.'
+        ],
         example: 'Measured: 1.999 pointers per node at p = 0.5 and 1.333 at p = 0.25, against the predicted 2.000 and 1.333.'
       },
       {
@@ -81,48 +94,61 @@
         readAs: '"argmin" means the value of p that makes this smallest, not the smallest value itself. ' +
           'Minimising search cost gives p around 1/e, about 0.37 — and everyone uses 0.5 anyway, ' +
           'because halving is one bit test.',
-        detail: 'Differentiating the search cost gives an optimum at p = 1/e, and the curve around it ' +
-          'is so flat that the difference from p = 0.25 or p = 0.5 is a couple of percent — well ' +
-          'inside the noise of any real workload. Since the memory term is not flat at all, ' +
-          'implementations optimise the thing that varies: Redis and LevelDB both use 0.25. It is a ' +
-          'nice example of a theoretical optimum that is correct, uncontested and irrelevant to the ' +
-          'engineering decision.',
+        detail: [
+          'Differentiating the search cost gives an optimum at p = 1/e. The curve around it is so ' +
+            'flat that p = 0.25 and p = 0.5 differ from it by a couple of percent. That is well ' +
+            'inside the noise of any real workload.',
+          'Since the memory term is not flat at all, implementations optimise the thing that ' +
+            'varies. Redis and LevelDB both use 0.25.',
+          'It is a nice example of a theoretical optimum that is correct, uncontested and ' +
+            'irrelevant to the engineering decision.'
+        ],
         example: 'Redis and LevelDB use p = 0.25 rather than the search-optimal 1/e, because memory is what actually differs.'
       },
       {
         term: 'Deterministic skip lists',
         plain: 'Promote every 1/p-th insertion instead of flipping a coin. The variance disappears and so does the tall-tower risk.',
         formal: 'the 1-2-3 skip list, equivalent to a 2-3 tree',
-        detail: 'The randomness buys independence from the input, and it costs variance: an unlucky ' +
-          'run of coin flips can build a tower far taller than the level count needs, and the search ' +
-          'cost has a tail. The deterministic variant promotes on a fixed schedule instead, which ' +
-          'makes the structure exactly equivalent to a balanced 2-3 tree — worst-case O(log n) ' +
-          'rather than expected, and no seed at all. What it gives up is the property that made skip ' +
-          'lists attractive: with a fixed schedule the shape depends on insertion order again.',
+        detail: [
+          'The randomness buys independence from the input, and it costs variance. An unlucky run ' +
+            'of coin flips can build a tower far taller than the level count needs, and the search ' +
+            'cost has a tail.',
+          'The deterministic variant promotes on a fixed schedule instead, which makes the ' +
+            'structure exactly equivalent to a balanced 2-3 tree. That is worst-case O(log n) ' +
+            'rather than expected, and no seed at all.',
+          'What it gives up is the property that made skip lists attractive: with a fixed schedule ' +
+            'the shape depends on insertion order again.'
+        ],
         example: 'A 1-2-3 skip list is a 2-3 tree with the levels drawn horizontally instead of vertically.'
       },
       {
         term: 'Why concurrency, not speed',
         plain: 'An insert writes one pointer per level and restructures nothing, so it can be a compare-and-swap per level.',
         formal: 'lock-free insert = one CAS per level',
-        detail: 'This is the reason LevelDB and Redis chose skip lists, and it is not a performance ' +
-          'argument in the usual sense — a balanced tree is comparable or better single-threaded. It ' +
-          'is that a skip-list insertion only ever splices a node into a few linked lists, and a ' +
-          'splice is a single pointer write that a compare-and-swap can make atomic. A balanced tree ' +
-          'has to rotate, which moves several nodes at once and cannot be made atomic without ' +
-          'locking a subtree. Reads need no synchronisation at all.',
+        detail: [
+          'This is the reason LevelDB and Redis chose skip lists, and it is not a performance ' +
+            'argument in the usual sense. A balanced tree is comparable or better single-threaded.',
+          'A skip-list insertion only ever splices a node into a few linked lists. A splice is a ' +
+            'single pointer write, which a compare-and-swap can make atomic.',
+          'A balanced tree has to rotate, which moves several nodes at once and cannot be made ' +
+            'atomic without locking a subtree.',
+          'Reads need no synchronisation at all.'
+        ],
         example: 'A concurrent skip list needs no locks for readers and one CAS per level for a writer.'
       },
       {
         term: 'Against a balanced tree',
         plain: 'More comparisons, comparable memory, far simpler code, and no rebalancing to get wrong.',
         formal: 'expected O(log n) against worst-case O(log n)',
-        detail: 'On raw comparison count a skip list loses: 30.9 comparisons per search against 15.7 ' +
-          'for an AVL tree over the same 100 000 keys, because the express lanes are a coarser ' +
-          'index than a tree\'s branching. Against that it is a fraction of the code, has no ' +
-          'rotation cases to get wrong, gives range scans for free from the bottom lane, and ' +
-          'parallelises. The bound is expected rather than worst-case, which for a probabilistic ' +
-          'structure with independent coins is a distinction without a practical difference.',
+        detail: [
+          'On raw comparison count a skip list loses: 30.9 comparisons per search against 15.7 for ' +
+            'an AVL tree over the same 100 000 keys. The express lanes are a coarser index than a ' +
+            'tree\'s branching.',
+          'Against that it is a fraction of the code, has no rotation cases to get wrong, gives ' +
+            'range scans for free from the bottom lane, and parallelises.',
+          'The bound is expected rather than worst-case, which for a probabilistic structure with ' +
+            'independent coins is a distinction without a practical difference.'
+        ],
         example: 'The same 100 000 keys: 30.9 comparisons per skip-list search against 15.7 in an AVL tree.'
       }
     ],
