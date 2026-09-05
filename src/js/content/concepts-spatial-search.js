@@ -164,11 +164,16 @@
         },
         plain: 'Past about ten dimensions a k-d tree touches essentially every point, so it is a scan with pointer chasing added.',
         formal: 'vol(ball)/vol(cube) → 0, so almost every subtree intersects the search radius',
-        detail: 'This is not a gradual slope with a usable middle. On the same 4 000 points a k-d tree touches ' +
-          '0.3% of the data at two dimensions, 16.1% at eight, 99.5% at sixteen and 100% at thirty-two - and a ' +
-          'VP-tree, which needs only a metric and prunes by the triangle inequality, does no better. The rule ' +
-          'that follows is worth stating flatly: above roughly ten dimensions there is no exact index worth ' +
-          'building, and the question changes from "which tree" to "what recall do I need".',
+        detail: [
+          'This is not a gradual slope with a usable middle.',
+          'On the same 4 000 points a k-d tree touches 0.3% of the data at two dimensions, 16.1% at ' +
+            'eight, 99.5% at sixteen and 100% at thirty-two.',
+          'A VP-tree, which needs only a metric and prunes by the triangle inequality, does no ' +
+            'better.',
+          'The rule that follows is worth stating flatly. Above roughly ten dimensions there is no ' +
+            'exact index worth building, and the question changes from "which tree" to "what recall ' +
+            'do I need".'
+        ],
         example: '3 000 vectors in 48 dimensions: the VP-tree computes 2 992.67 distances per query of a possible 3 000.'
       },
       {
@@ -178,12 +183,15 @@
         readAs: 'Of the k nearest neighbours that genuinely exist, how many did you return? The ∩ is the ' +
           'overlap. Approximate search trades this number for speed, and it has to be measured rather ' +
           'than assumed.',
-        detail: 'An approximate index has no exact answer to be compared against, so "it works" is not a ' +
-          'statement anyone can check - and a recall of 0.8 is not "slightly slower", it is a different answer ' +
-          'three times in ten. Shipping without measuring it is how "the search got worse" bugs enter a product ' +
-          'silently: latency dashboards look better after the change, and nothing at all reports the quality that ' +
-          'was traded for it. Recall must be measured on the actual corpus; it does not transfer between ' +
-          'datasets.',
+        detail: [
+          'An approximate index has no exact answer to be compared against, so "it works" is not a ' +
+            'statement anyone can check.',
+          'A recall of 0.8 is not "slightly slower". It is a different answer two times in ten.',
+          'Shipping without measuring it is how "the search got worse" bugs enter a product ' +
+            'silently. Latency dashboards look better after the change, and nothing at all reports ' +
+            'the quality that was traded for it.',
+          'Recall must be measured on the actual corpus; it does not transfer between datasets.'
+        ],
         example: 'HNSW at M = 8: recall 58.8% at ef = 10, 83.0% at 32, 94.8% at 64 and 100% at 256. Same index, same data.'
       },
       {
@@ -193,21 +201,29 @@
         readAs: 'Each node draws its level from a random number, which gives exponentially fewer nodes at ' +
           'each level up. Searching starts at the sparse top for big jumps and descends into denser ' +
           'layers for fine detail — the same idea as a skip list, in many dimensions.',
-        detail: 'The upper layers are long-range links, and they do exactly what a skip list\'s upper levels do ' +
-          'over a sorted list: without them a greedy walk on a proximity graph takes O(n^(1/d)) hops to cross the ' +
-          'space, and with them it takes a logarithmic number. The layer assignment is the same exponential draw ' +
-          'as a skip list\'s coin flips, and the resulting layer sizes fall by roughly a factor of M each time, ' +
-          'so the top layers hold a handful of nodes and cost nothing.',
+        detail: [
+          'The upper layers are long-range links, and they do exactly what a skip list\'s upper ' +
+            'levels do over a sorted list.',
+          'Without them a greedy walk on a proximity graph takes O(n^(1/d)) hops to cross the ' +
+            'space. With them it takes a logarithmic number.',
+          'The layer assignment is the same exponential draw as a skip list\'s coin flips.',
+          'The resulting layer sizes fall by roughly a factor of M each time, so the top layers ' +
+            'hold a handful of nodes and cost nothing.'
+        ],
         example: '3 000 vectors at M = 8: 3 000 nodes at layer 0, 375 at layer 1, 60 at layer 2 and 8 at layer 3.'
       },
       {
         term: 'M is a build decision, ef is a query dial',
         plain: 'M fixes the connections per node and costs memory; ef sizes the search beam and can change per request.',
         formal: 'M and efConstruction are baked into the graph; ef is passed at query time',
-        detail: 'This split is what makes the structure deployable: one index serves a cheap autocomplete request ' +
-          'at ef = 16 and an accurate batch job at ef = 256, with no rebuild and no second copy. The corollary is ' +
-          'the trap - efConstruction is *not* recoverable at query time. A graph built with too narrow a beam has ' +
-          'the wrong edges, and no amount of query-time ef finds neighbours the graph does not link to.',
+        detail: [
+          'This split is what makes the structure deployable.',
+          'One index serves a cheap autocomplete request at ef = 16 and an accurate batch job at ' +
+            'ef = 256, with no rebuild and no second copy.',
+          'The corollary is the trap: efConstruction is *not* recoverable at query time.',
+          'A graph built with too narrow a beam has the wrong edges, and no amount of query-time ef ' +
+            'finds neighbours the graph does not link to.'
+        ],
         example: 'Same M and same query ef: efConstruction 48 reaches 91.4% recall where efConstruction 200 reaches 96.8%.'
       },
       {
@@ -217,11 +233,16 @@
         readAs: 'Keep a candidate only if it is closer to the new node than to anything already kept. That ' +
           'test spreads the neighbours out in different directions instead of clustering them all on ' +
           'one side.',
-        detail: 'Taking the M nearest instead builds a graph with exactly the same degree that a greedy walk gets ' +
-          'stuck in, because all M links point into the cluster the node is already in and none bridge to ' +
-          'anywhere else. The heuristic spends the same budget on links that reach somewhere new, which is what ' +
-          'keeps the walk from having to backtrack. It has to be paired with a fill-back rule, because a node ' +
-          'the heuristic leaves with one link is a dead end.',
+        detail: [
+          'Taking the M nearest instead builds a graph with exactly the same degree that a greedy ' +
+            'walk gets stuck in.',
+          'All M links point into the cluster the node is already in, and none bridge to anywhere ' +
+            'else.',
+          'The heuristic spends the same budget on links that reach somewhere new, which is what ' +
+            'keeps the walk from having to backtrack.',
+          'It has to be paired with a fill-back rule, because a node the heuristic leaves with one ' +
+            'link is a dead end.'
+        ],
         example: 'Same M, same efConstruction, same query ef: the heuristic reaches materially higher recall than nearest-M.'
       },
       {
@@ -231,33 +252,47 @@
         readAs: 'You pay to compare against every list centroid, then to scan the lists you chose. More lists ' +
           'makes the first term dearer and the second cheaper; probing more of them buys recall at a ' +
           'linear price.',
-        detail: 'The failure is structural rather than random: a true neighbour just over a cell boundary is ' +
-          'invisible no matter how many vectors the probed lists hold, which is why raising `probe` helps and ' +
-          'raising the list count alone does not. It is the easiest index here to reason about and to shard - ' +
-          'each list is an independent shard - and it is the base layer of nearly every production vector store, ' +
-          'usually with quantised codes inside each list.',
+        detail: [
+          'The failure is structural rather than random.',
+          'A true neighbour just over a cell boundary is invisible no matter how many vectors the ' +
+            'probed lists hold. That is why raising `probe` helps and raising the list count alone ' +
+            'does not.',
+          'It is the easiest index here to reason about and to shard, because each list is an ' +
+            'independent shard.',
+          'It is also the base layer of nearly every production vector store, usually with ' +
+            'quantised codes inside each list.'
+        ],
         example: '3 000 vectors, 64 lists: probe 1 gives 32.5% recall for 109.37 distances, probe 8 gives 95.0% for 442.83.'
       },
       {
         term: 'Product quantisation: one byte per subspace',
         plain: 'Split the vector into parts, cluster each part separately, and store the centroid index instead of the numbers.',
         formal: 'a d-dimensional float vector becomes `parts` bytes; distance is a table lookup per part',
-        detail: 'The distance is asymmetric on purpose - the query stays exact and only the stored side is ' +
-          'quantised - which costs one lookup table per query and is much more accurate than quantising both ' +
-          'sides. The memory result is dramatic: 48 floats is 384 bytes and eight codes is eight. The recall ' +
-          'result taken alone is dismal, and that is not a bug: on its own the structure is a shortlist ' +
-          'generator, not a search index.',
+        detail: [
+          'The distance is asymmetric on purpose: the query stays exact and only the stored side is ' +
+            'quantised.',
+          'That costs one lookup table per query and is much more accurate than quantising both ' +
+            'sides.',
+          'The memory result is dramatic: 48 floats is 384 bytes and eight codes is eight.',
+          'The recall result taken alone is dismal, and that is not a bug. On its own the structure ' +
+            'is a shortlist generator, not a search index.'
+        ],
         example: '3 000 vectors of 48 dimensions: 384 bytes each becomes 8, and recall@10 falls from 100% to 39.5%.'
       },
       {
         term: 'Re-ranking is what makes a quantised index usable',
         plain: 'Fetch a wide shortlist with the cheap codes, then rescore it with the exact vectors.',
         formal: 'retrieve k·R candidates approximately, compute R·k exact distances, keep the top k',
-        detail: 'This is not an optimisation bolted on afterwards; it is the design, and quoting a quantiser\'s ' +
-          'standalone recall describes a system nobody ships. The honest accounting has to include what ' +
-          're-ranking needs: the exact vectors, somewhere. In a real deployment they live on disk or on a ' +
-          'colder tier and the codes live in RAM, so the memory win is real - but it is a win in *fast* memory, ' +
-          'not in total bytes, and saying otherwise is the most common overclaim in this area.',
+        detail: [
+          'This is not an optimisation bolted on afterwards. It is the design, and quoting a ' +
+            'quantiser\'s standalone recall describes a system nobody ships.',
+          'The honest accounting has to include what re-ranking needs: the exact vectors, ' +
+            'somewhere.',
+          'In a real deployment they live on disk or on a colder tier and the codes live in RAM, so ' +
+            'the memory win is real.',
+          'But it is a win in *fast* memory, not in total bytes, and saying otherwise is the most ' +
+            'common overclaim in this area.'
+        ],
         example: 'The same 8-byte codes: 39.5% recall alone, 83.3% re-ranking 5×, 95.0% at 10× and 99.0% at 20×.'
       }
     ],

@@ -38,20 +38,21 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'Past about ten dimensions no exact index prunes. On 3 000 vectors of 48 dimensions a k-d tree computes ' +
-          'all 3 000 distances per query and a VP-tree — which prunes by the triangle inequality rather than by ' +
-          'axis-aligned planes — computes 2 992.67 of them. Both are a linear scan with pointer chasing added, ' +
-          'so the question stops being "which tree" and becomes "what recall do I need, and what will it cost".',
-        'Recall is the quantity, and it has to be measured against brute force on your own corpus. An index at ' +
-          '80% recall is not "slightly slower"; it is a different answer two times in ten, and nothing except a ' +
-          'recall measurement reports that — the latency dashboard looks better after the change. One HNSW ' +
-          'graph at M = 8 serves 58.8% recall at 20.4× faster than exact, or 94.8% at 7.9×, or 100% at 3.5×, ' +
-          'from the same index with no rebuild.',
-        'The asymmetry to remember is which parameter is recoverable. `ef` is a per-request argument, so one ' +
-          'index serves a cheap autocomplete and an accurate batch job at once. `efConstruction` is baked into ' +
-          'the edges: at the same M and the same query-time ef = 200, a graph built with a beam of 24 reaches ' +
-          '94.3% and one built with 100 reaches 99.8%, and no query-time dial finds neighbours the graph does ' +
-          'not link to.'
+        'Past about ten dimensions no exact index prunes. On 3 000 vectors of 48 dimensions a k-d ' +
+          'tree computes all 3 000 distances per query. A VP-tree, which prunes by the triangle ' +
+          'inequality rather than by axis-aligned planes, computes 2 992.67 of them. Both are a ' +
+          'linear scan with pointer chasing added, so the question stops being "which tree" and ' +
+          'becomes "what recall do I need, and what will it cost".',
+        'Recall is the quantity, and it has to be measured against brute force on your own corpus. ' +
+          'An index at 80% recall is not "slightly slower". It is a different answer two times in ' +
+          'ten, and nothing except a recall measurement reports that — the latency dashboard looks ' +
+          'better after the change. One HNSW graph at M = 8 serves 58.8% recall at 20.4× faster ' +
+          'than exact, or 94.8% at 7.9×, or 100% at 3.5×, from the same index with no rebuild.',
+        'The asymmetry to remember is which parameter is recoverable. `ef` is a per-request ' +
+          'argument, so one index serves a cheap autocomplete and an accurate batch job at once. ' +
+          '`efConstruction` is baked into the edges. At the same M and the same query-time ' +
+          'ef = 200, a graph built with a beam of 24 reaches 94.3% and one built with 100 reaches ' +
+          '99.8%. No query-time dial finds neighbours the graph does not link to.'
       ],
       demo: { title: 'Interactive demo — recall against work, on one corpus', markup: root.VectorSearchTemplate.render() },
       diagram: {
@@ -68,12 +69,13 @@
           '    N["M and efConstruction are in the graph<br/>ef is passed per request"] -.-> L0'
         ].join('\n')
       },
-      insight: 'Approximate search is a recall dial, and shipping it without measuring recall on your own data ' +
-        'is how "the search got worse" bugs enter a product silently — latency improves, nothing reports the ' +
-        'quality that was traded for it, and the complaints arrive months later from users. Two corollaries ' +
-        'follow. Recall does not transfer between datasets, so a number from a benchmark is not a number about ' +
-        'your corpus. And a quantised index has to be re-ranked: eight bytes a vector returns the true nearest ' +
-        'neighbour first one time in ten, and the same codes with an exact rescoring stage recall 95%.'
+      insight: 'Approximate search is a recall dial, and shipping it without measuring recall on ' +
+        'your own data is how "the search got worse" bugs enter a product silently. Latency ' +
+        'improves, nothing reports the quality that was traded for it, and the complaints arrive ' +
+        'months later from users. Two corollaries follow. Recall does not transfer between ' +
+        'datasets, so a number from a benchmark is not a number about your corpus. And a quantised ' +
+        'index has to be re-ranked. Eight bytes a vector returns the true nearest neighbour first ' +
+        'one time in ten; the same codes with an exact rescoring stage recall 95%.'
     };
   }
 
