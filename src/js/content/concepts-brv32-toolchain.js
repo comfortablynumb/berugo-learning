@@ -167,23 +167,30 @@
         },
         plain: 'One function, three instruction sets, and the counts are almost the same.',
         formal: '10 instructions and a 4-instruction loop on all three; 40, 40 and 23 bytes',
-        detail: 'The usual RISC-versus-CISC framing predicts that the complex instruction set '
-          + 'needs fewer instructions and the simple ones need more. On this function that does '
-          + 'not happen: all three take ten. What x86-64 actually wins is size, by a factor of '
-          + '1.74, entirely through variable-length encoding. Measuring a specific thing '
-          + 'produces a smaller and much more defensible claim than repeating a general one.',
+        detail: [
+          'The usual RISC-versus-CISC framing predicts that the complex instruction set needs '
+            + 'fewer instructions and the simple ones need more.',
+          'On this function that does not happen: all three take ten.',
+          'What x86-64 actually wins is size, by a factor of 1.74, entirely through '
+            + 'variable-length encoding.',
+          'Measuring a specific thing produces a smaller and much more defensible claim than '
+            + 'repeating a general one.'
+        ],
         example: 'The loop body is four instructions everywhere, and 16, 16 and 11 bytes.'
       },
       {
         term: 'ARM64 buys an instruction with addressing and gives it back to condition codes',
         plain: 'Post-increment saves one; the split compare and branch costs one.',
         formal: 'ldr w4, [x0], #4 folds the pointer advance; cmp then b.ne is two instructions',
-        detail: 'RISC-V needs an addi to advance the pointer and gets its loop test in a single '
-          + 'compare-and-branch. ARM64 folds the advance into the load and then spends two '
-          + 'instructions on the test, because the comparison writes a flags register that the '
-          + 'branch reads. The two effects cancel exactly on this loop, which is a much more '
-          + 'interesting result than either design winning: the differences are real and they '
-          + 'are not additive.',
+        detail: [
+          'RISC-V needs an addi to advance the pointer, and gets its loop test in a single '
+            + 'compare-and-branch.',
+          'ARM64 folds the advance into the load and then spends two instructions on the test, '
+            + 'because the comparison writes a flags register that the branch reads.',
+          'The two effects cancel exactly on this loop.',
+          'That is a much more interesting result than either design winning: the differences are '
+            + 'real and they are not additive.'
+        ],
         example: 'RISC-V: lw, addi, add, bne. ARM64: ldr post-increment, add, cmp, b.ne. Four '
           + 'each.'
       },
@@ -191,12 +198,15 @@
         term: 'Condition codes are a hidden dependency between instructions that look independent',
         plain: 'A compare writes flags; a branch reads them; nothing in the syntax says so.',
         formal: 'on x86 most arithmetic writes the flags as a side effect',
-        detail: 'Two instructions that read as unrelated share a register nobody wrote down, so '
-          + 'a compiler must model it in its scheduler and an out-of-order machine must rename '
-          + 'it exactly as it renames the general registers. RISC-V left condition codes out for '
-          + 'that reason and pays an instruction for every comparison that is not immediately '
-          + 'branched on. Whether that was right is arguable; that the cost was invisible in the '
-          + 'listing and enormous in the implementation is not.',
+        detail: [
+          'Two instructions that read as unrelated share a register nobody wrote down.',
+          'A compiler must model it in its scheduler, and an out-of-order machine must rename it '
+            + 'exactly as it renames the general registers.',
+          'RISC-V left condition codes out for that reason, and pays an instruction for every '
+            + 'comparison that is not immediately branched on.',
+          'Whether that was right is arguable. That the cost was invisible in the listing and '
+            + 'enormous in the implementation is not.'
+        ],
         example: 'The flags cost nothing in the four-instruction loop count here, and everything '
           + 'in the renamer that M36 has to build.'
       },
@@ -204,11 +214,14 @@
         term: 'Density is real, it is about 1.7x here, and it is paid for in the decoder',
         plain: 'A one-byte return and a two-byte zeroing against ten fixed four-byte words.',
         formal: 'x86-64: 23 bytes in lengths of 1, 2 and 3. RISC-V and ARM64: 40 bytes of 4',
-        detail: 'Smaller code means more instructions per cache line and fewer instruction-cache '
-          + 'misses, which is a genuine and sometimes decisive advantage on large programs. The '
-          + 'price is that instruction boundaries are unknown until each instruction is decoded, '
-          + 'so a wide front end needs length predictors, a micro-operation cache, or both — '
-          + 'real area and real power spent on a problem a fixed-width machine does not have.',
+        detail: [
+          'Smaller code means more instructions per cache line and fewer instruction-cache '
+            + 'misses, which is a genuine and sometimes decisive advantage on large programs.',
+          'The price is that instruction boundaries are unknown until each instruction is decoded.',
+          'A wide front end then needs length predictors, a micro-operation cache, or both.',
+          'That is real area and real power, spent on a problem a fixed-width machine does not '
+            + 'have.'
+        ],
         example: 'ret is one byte on x86-64 and four on both RISC machines; zeroing a register '
           + 'is two bytes against four.'
       },
@@ -216,11 +229,14 @@
         term: 'Variable-length decode is a serial dependency at the very front of the pipeline',
         plain: 'You cannot know where instruction two starts until instruction one is decoded.',
         formal: 'fixed width: next = pc + 4, always',
-        detail: 'A fixed-width machine can hand sixteen bytes to four decoders at once because '
-          + 'the boundaries are arithmetic. A variable-width machine has a chain: length one, '
-          + 'then start two, then length two. Every wide x86 implementation attacks this with '
-          + 'predictors and with a cache of already-decoded micro-operations that lets hot loops '
-          + 'skip decoding entirely — which is an elegant fix and a lot of silicon.',
+        detail: [
+          'A fixed-width machine can hand sixteen bytes to four decoders at once, because the '
+            + 'boundaries are arithmetic.',
+          'A variable-width machine has a chain: length one, then start two, then length two.',
+          'Every wide x86 implementation attacks this with predictors, and with a cache of '
+            + 'already-decoded micro-operations that lets hot loops skip decoding entirely.',
+          'That is an elegant fix and a lot of silicon.'
+        ],
         example: 'Our own control decoder is 103 gates precisely because the fields are at fixed '
           + 'positions and their meaning is known immediately.'
       },
@@ -228,13 +244,16 @@
         term: 'Register count is an encoding decision before it is a microarchitectural one',
         plain: '16 registers on x86-64, 32 on the others.',
         formal: 'a register field costs the logarithm of the count, once per operand',
-        detail: 'x86-64 has sixteen architectural registers because the encoding could not '
-          + 'afford more without another prefix byte, and RISC-V and ARM64 have thirty-two '
-          + 'because a fixed 32-bit word had room for three five-bit fields. The physical '
-          + 'register file is far larger in all three — hundreds of entries — and renaming is '
-          + 'what connects the small architectural number to the large physical one. So the '
-          + 'architectural count is about spill pressure and encoding, not about how much '
-          + 'storage the chip has.',
+        detail: [
+          'The x86-64 architecture has sixteen architectural registers, because the encoding '
+            + 'could not afford more without another prefix byte.',
+          'RISC-V and ARM64 have thirty-two, because a fixed 32-bit word had room for three '
+            + 'five-bit fields.',
+          'The physical register file is far larger in all three — hundreds of entries — and '
+            + 'renaming is what connects the small architectural number to the large physical one.',
+          'So the architectural count is about spill pressure and encoding, not about how much '
+            + 'storage the chip has.'
+        ],
         example: 'This is the field-packing arithmetic from 34.1, met in three shipped '
           + 'instruction sets.'
       },
@@ -242,12 +261,15 @@
         term: 'Every one of these differences shows up in compiler output',
         plain: 'Twenty lines of assembly tell you more than any summary.',
         formal: 'the listing is where an instruction set stops being a description',
-        detail: 'Whether the addressing mode was used, whether the compare was folded into the '
-          + 'branch, whether the constant needed two instructions, whether the loop was '
-          + 'unrolled — all visible, none inferable from the source or from a benchmark total. '
-          + 'It is also the only way to settle an argument about an instruction set without '
-          + 'appealing to authority, which is why every one of these sections ends with a '
-          + 'listing rather than a claim.',
+        detail: [
+          'Whether the addressing mode was used, whether the compare was folded into the branch, '
+            + 'whether the constant needed two instructions, whether the loop was unrolled. All '
+            + 'of that is visible in the listing.',
+          'None of it is inferable from the source or from a benchmark total.',
+          'It is also the only way to settle an argument about an instruction set without '
+            + 'appealing to authority.',
+          'That is why every one of these sections ends with a listing rather than a claim.'
+        ],
         example: 'The listings here are annotated per row with which design decision produced '
           + 'that instruction.'
       },
@@ -255,11 +277,15 @@
         term: 'A comparison is only as honest as what it says it held constant',
         plain: 'Same function, same optimisation intent, lengths stated per instruction.',
         formal: 'the listings are reference assembly checked against the encoding rules, not compiler output',
-        detail: 'There is no x86 assembler in this project, so the byte counts come from the '
-          + 'published encoding rules and are listed instruction by instruction with the bytes, '
-          + 'so any single row can be checked against the manual. Saying that plainly is worth '
-          + 'more than the numbers: a comparison that does not state its method is unfalsifiable, '
-          + 'and most published instruction-set comparisons do not state theirs.',
+        detail: [
+          'There is no x86 assembler in this project, so the byte counts come from the published '
+            + 'encoding rules.',
+          'They are listed instruction by instruction with the bytes, so any single row can be '
+            + 'checked against the manual.',
+          'Saying that plainly is worth more than the numbers.',
+          'A comparison that does not state its method is unfalsifiable, and most published '
+            + 'instruction-set comparisons do not state theirs.'
+        ],
         example: 'add eax, [rdi+rcx*4] is listed as 03 04 8f — three bytes, checkable against '
           + 'any x86 encoding reference.'
       }

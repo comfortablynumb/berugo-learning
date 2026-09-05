@@ -73,13 +73,14 @@
         + 'contains a scaled-index memory operand, and a one-byte ret — against ten fixed '
         + 'four-byte words. Density is real, it is 1.7x here, and it costs the decoder.',
       '**Condition codes are the hidden dependency.** A compare writes flags and a branch reads '
-        + 'them, so two instructions that look independent are not, and an out-of-order machine '
+        + 'them, so two instructions that look independent are not. An out-of-order machine '
         + 'must rename the flags register just as it renames the general ones. RISC-V left them '
         + 'out for exactly that reason, and pays an instruction for every compare that is not '
         + 'immediately branched on.',
-      '**Register count is an encoding decision as much as a microarchitectural one.** x86-64 '
-        + 'has 16 architectural registers because the encoding could not afford more without '
-        + 'another prefix; RISC-V and ARM64 have 32 because a fixed 32-bit word had room. The '
+      '**Register count is an encoding decision as much as a microarchitectural one.** The '
+        + 'x86-64 architecture has 16 architectural registers, because the encoding could not '
+        + 'afford more without another prefix. RISC-V and ARM64 have 32, because a fixed 32-bit '
+        + 'word had room. The '
         + 'physical register file is much larger in all three, and renaming is what connects '
         + 'the two numbers.',
       '**Variable-length decode is a serial dependency at the front of the pipeline.** The end '
@@ -107,20 +108,20 @@
   function insight() {
     return '**Condition codes are the clearest example in computing of an interface decision '
       + 'that looked free and was not.** A flags register saves an instruction whenever a '
-      + 'compare is followed by something other than a branch, and it costs a hidden dependency '
-      + 'on every instruction that touches it — which, on x86, is most arithmetic. Two '
-      + 'instructions that read as independent share a register nobody wrote down, so an '
+      + 'compare is followed by something other than a branch. It costs a hidden dependency '
+      + 'on every instruction that touches it, which on x86 is most arithmetic. Two '
+      + 'instructions that read as independent share a register nobody wrote down. So an '
       + 'out-of-order machine has to rename the flags exactly as it renames the general '
-      + 'registers, a compiler has to model them in its scheduler, and a reordering that would '
+      + 'registers, and a compiler has to model them in its scheduler. A reordering that would '
       + 'obviously be legal is not. RISC-V looked at that ledger and declined, paying an '
       + 'instruction for every compare that is not immediately branched on. Whether that was '
-      + 'the right call is genuinely arguable; what is not arguable is that the cost was '
+      + 'the right call is genuinely arguable. What is not arguable is that the cost was '
       + 'invisible in the instruction listing and enormous in the implementation. The '
       + 'transferable idea is to be suspicious of shared implicit state in any interface. A '
       + 'function that sets a global error variable, a request that mutates a session, a test '
-      + 'that leaves a fixture behind — each of them makes the common case shorter and makes '
-      + 'every question about independence unanswerable from the call site. The flags register '
-      + 'is that pattern, etched into silicon, kept for forty years by compatibility.';
+      + 'that leaves a fixture behind: each of them makes the common case shorter. Each also '
+      + 'makes every question about independence unanswerable from the call site. The flags '
+      + 'register is that pattern, etched into silicon, kept for forty years by compatibility.';
   }
 
   function render(app) {
