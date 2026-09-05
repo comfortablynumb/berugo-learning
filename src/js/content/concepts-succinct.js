@@ -294,11 +294,14 @@
         term: 'A bitmap index is a set per value',
         plain: 'For each distinct value, one bit per row saying whether that row has it.',
         formal: 'a query becomes a boolean expression over bit vectors',
-        detail: 'The appeal is that AND, OR and NOT over sets become machine words rather than iteration, which ' +
-          'is why analytical databases and search engines reach for them. The problem is the obvious one: a bit ' +
-          'per row per value is enormous when the values are many or the sets are sparse, and every compressed ' +
-          'bitmap scheme is an answer to that. Which answer is right depends entirely on what the sets look ' +
-          'like.',
+        detail: [
+          'The appeal is that AND, OR and NOT over sets become machine words rather than iteration, ' +
+            'which is why analytical databases and search engines reach for them.',
+          'The problem is the obvious one. A bit per row per value is enormous when the values are ' +
+            'many or the sets are sparse.',
+          'Every compressed bitmap scheme is an answer to that.',
+          'Which answer is right depends entirely on what the sets look like.'
+        ],
         example: '20 000 values spread over five million: 630 784 bytes as a plain bitmap, 41 232 as Roaring.'
       },
       {
@@ -315,22 +318,28 @@
         },
         plain: 'WAH and EWAH pack runs of identical words into fill words and leave the rest literal.',
         formal: 'a 32-bit word is either 31 data bits or a run length of identical words',
-        detail: 'On long uniform stretches this is close to optimal and beats everything else here. The ' +
-          'pathology is data that alternates: every word becomes a literal, and the encoding is *larger* than ' +
-          'the uncompressed bitmap because each literal carries a tag bit. The second problem is structural - ' +
-          'an operation has to walk both encodings in lockstep whatever their densities are, so a tiny set ' +
-          'intersected with a huge one costs the huge one.',
+        detail: [
+          'On long uniform stretches this is close to optimal and beats everything else here.',
+          'The pathology is data that alternates. Every word becomes a literal, and the encoding is ' +
+            '*larger* than the uncompressed bitmap because each literal carries a tag bit.',
+          'The second problem is structural.',
+          'An operation has to walk both encodings in lockstep whatever their densities are, so a ' +
+            'tiny set intersected with a huge one costs the huge one.'
+        ],
         example: 'The same sparse set: 141 972 bytes as WAH against 41 232 as Roaring, from 18 838 literal words.'
       },
       {
         term: 'Roaring: pick a container per chunk',
         plain: 'Cut the universe into blocks of 65 536 and store each block as an array, a bitmap or a run list.',
         formal: 'array below 4 096 values, bitmap above, runs when they are fewer than either',
-        detail: 'The crossover is arithmetic rather than a tuning constant: 4 096 sixteen-bit offsets is 8 KB, ' +
-          'which is exactly what a 65 536-bit bitmap costs, so above that the bitmap is smaller and has ' +
-          'constant-time membership as well. Because the decision is per chunk rather than global, one bitmap ' +
-          'can be sparse in one region and dense in another and pay the right price in each - which is what ' +
-          'real identifier distributions look like.',
+        detail: [
+          'The crossover is arithmetic rather than a tuning constant.',
+          '4 096 sixteen-bit offsets is 8 KB, which is exactly what a 65 536-bit bitmap costs, so ' +
+            'above that the bitmap is smaller and has constant-time membership as well.',
+          'Because the decision is per chunk rather than global, one bitmap can be sparse in one ' +
+            'region and dense in another and pay the right price in each.',
+          'That is what real identifier distributions look like.'
+        ],
         example: '77 array containers for a sparse set, one bitmap container for a dense one, one run container after optimisation.'
       },
       {
@@ -339,11 +348,14 @@
         formal: 'array ∩ bitmap probes the bitmap once per array element: O(|array|), not O(universe)',
         readAs: 'Intersecting a sparse container with a dense one costs one probe per sparse element, not one ' +
           'per possible value. Choosing the loop by container type is where Roaring gets its speed.',
-        detail: 'This is the part that distinguishes Roaring from a merely smaller encoding. Intersecting a ' +
-          'five-element array container with a full bitmap container touches five elements and zero bitmap ' +
-          'words; the same operation on two bitmap containers touches 2 048 words and is a straight AND. A ' +
-          'run-length format has no equivalent - the two encodings have to be walked together - which is why ' +
-          'Roaring beats WAH on speed even where WAH is smaller.',
+        detail: [
+          'This is the part that distinguishes Roaring from a merely smaller encoding.',
+          'Intersecting a five-element array container with a full bitmap container touches five ' +
+            'elements and zero bitmap words.',
+          'The same operation on two bitmap containers touches 2 048 words and is a straight AND.',
+          'A run-length format has no equivalent, because the two encodings have to be walked ' +
+            'together. That is why Roaring beats WAH on speed even where WAH is smaller.'
+        ],
         example: 'A 5-element set against a 20 000-element one: 3 elements touched, 0 bitmap words.'
       },
       {
@@ -353,46 +365,63 @@
         readAs: 'Runs cost 4 bytes each — a start and a length — so switch to a run encoding only when that ' +
           'beats both of the other two representations. The container type is a measurement, not a ' +
           'guess.',
-        detail: '`runOptimize` is a separate pass rather than something the insert path decides, because the ' +
-          'run count is only known once the chunk is complete. Sorted identifier sets - document ids, primary ' +
-          'keys, timestamps - are mostly long consecutive stretches, so it is usually a large win; on random ' +
-          'data it correctly changes nothing. Calling it is a decision about the data, and the numbers are ' +
-          'right there to make it with.',
+        detail: [
+          '`runOptimize` is a separate pass rather than something the insert path decides, because ' +
+            'the run count is only known once the chunk is complete.',
+          'Sorted identifier sets - document ids, primary keys, timestamps - are mostly long ' +
+            'consecutive stretches, so it is usually a large win.',
+          'On random data it correctly changes nothing.',
+          'Calling it is a decision about the data, and the numbers are right there to make it ' +
+            'with.'
+        ],
         example: 'A run-heavy set: 8 208 bytes as a bitmap container, 808 after run optimisation - 10× less.'
       },
       {
         term: 'Roaring is not always smallest, and the section says so',
         plain: 'On dense uniformly random data a plain bitmap and WAH both beat it.',
         formal: 'a bitmap container costs 8 KB plus a header, which a raw bitmap does not pay',
-        detail: 'Twenty thousand values in a forty-thousand-wide universe fill one chunk densely and randomly. ' +
-          'Roaring stores it as a bitmap container and pays 8 208 bytes; the raw bitmap is 8 192 and WAH gets ' +
-          'it to 5 164 by exploiting the fact that nothing is sparse enough to need a literal everywhere. ' +
-          'Reporting only the cases a structure wins is how benchmarks mislead, and the honest summary is that ' +
-          'Roaring wins on realistic identifier distributions and on operation cost, not on every input.',
+        detail: [
+          'Twenty thousand values in a forty-thousand-wide universe fill one chunk densely and ' +
+            'randomly.',
+          'Roaring stores it as a bitmap container and pays 8 208 bytes. The raw bitmap is 8 192, ' +
+            'and WAH gets it to 5 164 because nothing is sparse enough to need a literal ' +
+            'everywhere.',
+          'Reporting only the cases a structure wins is how benchmarks mislead.',
+          'The honest summary is that Roaring wins on realistic identifier distributions and on ' +
+            'operation cost, not on every input.'
+        ],
         example: 'Dense random: Roaring 8 208 bytes, raw bitmap 8 192, WAH 5 164.'
       },
       {
         term: 'Sorted arrays are the baseline worth beating',
         plain: 'A sorted list of 32-bit integers is simple, cache-friendly and often good enough.',
         formal: '4 bytes per value, intersection by merge in O(n + m)',
-        detail: 'Before reaching for any compressed bitmap it is worth writing down what the obvious thing ' +
-          'costs, because for small or very sparse sets it wins. 20 000 values as a sorted array is 80 000 ' +
-          'bytes, which beats a plain bitmap over a wide universe and loses to Roaring - and the merge-based ' +
-          'intersection is the algorithm M06 measured for posting lists. The compressed forms earn their ' +
-          'complexity at scale and not before.',
+        detail: [
+          'Before reaching for any compressed bitmap it is worth writing down what the obvious ' +
+            'thing costs, because for small or very sparse sets it wins.',
+          '20 000 values as a sorted array is 80 000 bytes, which beats a plain bitmap over a wide ' +
+            'universe and loses to Roaring.',
+          'The merge-based intersection is the algorithm M06 measured for posting lists.',
+          'The compressed forms earn their complexity at scale and not before.'
+        ],
         example: '80 000 bytes as a sorted array against 41 232 as Roaring and 630 784 as a raw bitmap.'
       },
       {
         term: 'Static indexes: a perfect hash plus a succinct payload',
         plain: 'When the key set never changes, drop the collision handling and store the values succinctly.',
         formal: 'minimal perfect hash at ~2.5 bits per key, plus a rank-indexed payload array',
-        readAs: 'About 2.5 bits per key buys a function that maps your keys onto 0 … n−1 with no collisions ' +
-          'and no gaps, so the values can sit in a plain array with no keys stored at all.',
-        detail: 'This is where 9.7, 9.8 and 9.9 meet. A read-only dictionary needs no probing, no tombstones ' +
-          'and no load factor: a minimal perfect hash maps each key to a distinct slot in [0, n), and the ' +
-          'payload lives in an array indexed by that slot, itself possibly a wavelet tree or an Elias-Fano ' +
-          'sequence. The result is close to the information-theoretic size with O(1) lookup - and it is what ' +
-          'ships inside spell checkers, IP routing tables and language models.',
+        readAs: 'About 2.5 bits per key buys a function that maps your keys onto 0 … n−1 with no ' +
+          'collisions and no gaps. The values can then sit in a plain array, with no keys stored ' +
+          'at all.',
+        detail: [
+          'This is where 9.7, 9.8 and 9.9 meet.',
+          'A read-only dictionary needs no probing, no tombstones and no load factor.',
+          'A minimal perfect hash maps each key to a distinct slot in [0, n). The payload lives in ' +
+            'an array indexed by that slot, itself possibly a wavelet tree or an Elias-Fano ' +
+            'sequence.',
+          'The result is close to the information-theoretic size with O(1) lookup, and it is what ' +
+            'ships inside spell checkers, IP routing tables and language models.'
+        ],
         example: 'M03.8 built the perfect hash; this milestone built the payload representations it points into.'
       }
     ]

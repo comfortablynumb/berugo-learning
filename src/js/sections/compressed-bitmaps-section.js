@@ -24,52 +24,60 @@
     });
   }
 
+  function diagram() {
+    return {
+      title: 'Diagram — one container per chunk',
+      caption: 'The high 16 bits pick a chunk; the chunk decides its own representation from its own ' +
+        'cardinality. Nothing about the rest of the set is consulted, which is why a set that is sparse in ' +
+        'one region and dense in another pays the right price in both.',
+      definition: [
+        'flowchart TD',
+        '    V["value 0x0002_ABCD"] --> H["high 16 bits: chunk 2"]',
+        '    V --> L["low 16 bits: 0xABCD"]',
+        '    H --> C{"cardinality of chunk 2"}',
+        '    C -- "≤ 4 096" --> A["sorted array of 16-bit values<br/>2 bytes each"]',
+        '    C -- "> 4 096" --> B["2 048-word bitmap<br/>8 192 bytes, flat"]',
+        '    C -- "consecutive" --> R["run list<br/>4 bytes per run"]'
+      ].join('\n')
+    };
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'Roaring splits the 32-bit universe into chunks of 65 536 and picks a representation per chunk: a ' +
-          'sorted array of 16-bit values while the chunk holds at most 4 096 of them, a 2 048-word bitmap once ' +
-          'it holds more, and a list of runs when the values are consecutive. The threshold is the point where ' +
-          'the two costs cross — 4 096 × 2 bytes is exactly 8 192 — so the choice is arithmetic rather than a ' +
-          'heuristic, and it is made per chunk rather than for the whole set.',
-        'On 20 000 values spread over 5 000 000 that is 77 array containers and 41 232 bytes, against 630 784 ' +
-          'for a flat bitmap, 80 000 for a sorted array and 141 972 for word-aligned run-length encoding, which ' +
-          'has no runs to find and pays a header per word. On a dense chunk the ranking inverts: Roaring stores ' +
-          '8 208 bytes where the flat bitmap stores 8 192 and WAH stores 5 164. Roaring is not the smallest ' +
-          'encoding; it is the one that is never much worse than the best.',
-        'The runs case is where run-length encoding earns its name: 8 208 bytes as a bitmap container becomes ' +
-          '808 after runOptimize, a 10.2× improvement from noticing that the values are consecutive. And the ' +
-          'container choice is not only about space — an intersection of a small array container with a bitmap ' +
-          'probes 3 elements and touches 0 words, while two bitmaps AND 2 048 words. Choosing the algorithm ' +
-          'per container pair is why Roaring is fast, not just small.'
+        'Roaring splits the 32-bit universe into chunks of 65 536 and picks a representation per ' +
+          'chunk. It is a sorted array of 16-bit values while the chunk holds at most 4 096 of ' +
+          'them, and a 2 048-word bitmap once it holds more. It is a list of runs when the values ' +
+          'are consecutive. The threshold is the point where the two costs cross — 4 096 × 2 bytes ' +
+          'is exactly 8 192 — so the choice is arithmetic rather than a heuristic. It is also ' +
+          'made per chunk rather than for the whole set.',
+        'On 20 000 values spread over 5 000 000 that is 77 array containers and 41 232 bytes. A ' +
+          'flat bitmap costs 630 784, a sorted array 80 000, and word-aligned run-length encoding ' +
+          '141 972, because it has no runs to find and pays a header per word. On a dense chunk ' +
+          'the ranking inverts: Roaring stores 8 208 bytes where the flat bitmap stores 8 192 and ' +
+          'WAH stores 5 164. Roaring is not the smallest encoding; it is the one that is never ' +
+          'much worse than the best.',
+        'The runs case is where run-length encoding earns its name. A chunk costing 8 208 bytes as ' +
+          'a bitmap container becomes 808 after runOptimize, a 10.2× improvement from noticing ' +
+          'that the values are consecutive. The container choice is not only about space. An ' +
+          'intersection of a small array container with a bitmap probes 3 elements and touches 0 ' +
+          'words, while two bitmaps AND 2 048 words. Choosing the algorithm per container pair is ' +
+          'why Roaring is fast, not just small.'
       ],
       demo: {
         title: 'Interactive demo — three distributions, five representations, two intersection paths',
         markup: root.CompressedBitmapsTemplate.render()
       },
-      diagram: {
-        title: 'Diagram — one container per chunk',
-        caption: 'The high 16 bits pick a chunk; the chunk decides its own representation from its own ' +
-          'cardinality. Nothing about the rest of the set is consulted, which is why a set that is sparse in ' +
-          'one region and dense in another pays the right price in both.',
-        definition: [
-          'flowchart TD',
-          '    V["value 0x0002_ABCD"] --> H["high 16 bits: chunk 2"]',
-          '    V --> L["low 16 bits: 0xABCD"]',
-          '    H --> C{"cardinality of chunk 2"}',
-          '    C -- "≤ 4 096" --> A["sorted array of 16-bit values<br/>2 bytes each"]',
-          '    C -- "> 4 096" --> B["2 048-word bitmap<br/>8 192 bytes, flat"]',
-          '    C -- "consecutive" --> R["run list<br/>4 bytes per run"]'
-        ].join('\n')
-      },
-      insight: 'The transferable idea is per-block representation choice with a cost-based threshold. Roaring ' +
-        'never picks a representation for the whole set; it picks one for every 65 536 values and switches ' +
-        'when the arithmetic says the other is smaller, which is why it degrades gracefully on data it was not ' +
-        'designed for. The same pattern shows up in column stores choosing an encoding per page and in ' +
-        'allocators choosing a size class per bucket. The failure mode to watch is a threshold that is checked ' +
-        'on insert and never on delete: a container that grew into a bitmap and shrank back to twelve values ' +
-        'stays 8 192 bytes until something converts it.'
+      diagram: diagram(),
+      insight: 'The transferable idea is per-block representation choice with a cost-based ' +
+        'threshold. Roaring never picks a representation for the whole set. It picks one for every ' +
+        '65 536 values and switches when the arithmetic says the other is smaller. That is why it ' +
+        'degrades gracefully on data it was not designed for. The same pattern shows up in column ' +
+        'stores choosing an encoding per page and in allocators choosing a size class per bucket. ' +
+        'The failure mode to watch is a threshold that is checked on insert and never on delete. A ' +
+        'container that grew into a bitmap and shrank back to twelve values stays 8 192 bytes ' +
+        'until something converts it.'
     };
   }
 
