@@ -23,12 +23,17 @@
         readAs: 'A node\'s balance is the height of its left subtree minus the height of its right, and AVL ' +
           'allows only three values: left-heavy by one, level, or right-heavy by one. Anything outside ' +
           'that set triggers a rotation.',
-        detail: 'This is the strictest rule any practical family imposes, and everything else about ' +
-          'AVL follows from it. Because it is a rule about heights rather than about sizes or ' +
-          'colours, it can be checked in constant time from the two children — which is why each ' +
-          'node stores its height. It is also the reason AVL gives the shallowest tree of the ' +
-          'families here and does the most rotation work to keep it: any operation that pushes a ' +
-          'balance factor to ±2 must be repaired immediately, before the next operation sees it.',
+        detail: [
+          'This is the strictest rule any practical family imposes, and everything else about AVL ' +
+            'follows from it.',
+          'Because it is a rule about heights rather than about sizes or colours, it can be ' +
+            'checked in constant time from the two children. That is why each node stores its ' +
+            'height.',
+          'It is also the reason AVL gives the shallowest tree of the families here, and does the ' +
+            'most rotation work to keep it.',
+          'Any operation that pushes a balance factor to ±2 must be repaired immediately, before ' +
+            'the next operation sees it.'
+        ],
         example: 'A node whose left subtree is height 5 and right subtree height 3 has balance +2 and must be rebalanced.'
       },
       {
@@ -38,13 +43,17 @@
         readAs: 'What is kept in the node is the subtree height; the balance is computed by subtracting the ' +
           'two children\'s heights when needed. Storing the difference directly saves a byte and costs ' +
           'you the ability to repair the tree after a bulk change.',
-        detail: 'Implementations store either the height or the balance factor itself; storing the ' +
-          'height costs a few more bits and makes the update trivial, which is why this platform ' +
-          'does it. Either way the field must be recomputed for every node whose children changed, ' +
-          'and the order matters: after a rotation the lower node must be updated before the upper ' +
-          'one, or the upper one reads a stale height. That single ordering mistake is the most ' +
-          'common AVL bug, and it produces a tree that looks balanced and is not — which is exactly ' +
-          'what the invariant checker in this section catches.',
+        detail: [
+          'Implementations store either the height or the balance factor itself. Storing the ' +
+            'height costs a few more bits and makes the update trivial, which is why this platform ' +
+            'does it.',
+          'Either way the field must be recomputed for every node whose children changed, and the ' +
+            'order matters. After a rotation the lower node must be updated before the upper one, ' +
+            'or the upper one reads a stale height.',
+          'That single ordering mistake is the most common AVL bug, and it produces a tree that ' +
+            'looks balanced and is not. It is exactly what the invariant checker in this section ' +
+            'catches.'
+        ],
         example: 'A stored height that disagrees with the children is an error even when the balance factor looks fine.'
       },
       {
@@ -61,37 +70,48 @@
         },
         plain: 'LL and RR need one rotation; LR and RL need an inner rotation first, so they cost two.',
         formal: 'LL; LR; RL; RR, keyed by the heavy side and its heavy side',
-        detail: 'When a node goes to ±2 the fix depends on where the extra height came from. If the ' +
-          'heavy subtree is heavy on the same side (LL or RR), a single rotation at the unbalanced ' +
-          'node fixes it. If it is heavy on the inside (LR or RL), a single rotation just moves the ' +
-          'problem across, so the inner child is rotated first to turn the case into the outer one. ' +
-          'Counting them separately is worth doing because they are not the same amount of work: a ' +
-          'double rotation is two rotations, six pointer writes rather than three. Sorted insertion ' +
-          'produces only single rotations, and random insertion produces about half of each.',
+        detail: [
+          'When a node goes to ±2 the fix depends on where the extra height came from.',
+          'If the heavy subtree is heavy on the same side (LL or RR), a single rotation at the ' +
+            'unbalanced node fixes it.',
+          'If it is heavy on the inside (LR or RL), a single rotation just moves the problem ' +
+            'across. The inner child is rotated first, to turn the case into the outer one.',
+          'Counting them separately is worth doing because they are not the same amount of work. A ' +
+            'double rotation is two rotations, six pointer writes rather than three.',
+          'Sorted insertion produces only single rotations, and random insertion produces about ' +
+            'half of each.'
+        ],
         example: 'At n = 10 000, sorted insertion measures 9 986 single rotations and no double ones; a shuffled build measures 2 331 single and 2 320 double.'
       },
       {
         term: 'One rotation on insert',
         plain: 'An insertion never needs more than one rebalance, however tall the tree is.',
         formal: 'rebalancing after an insert restores the subtree height',
-        detail: 'The reason is exact, not empirical. An insertion increases some subtree height by ' +
-          'one; rebalancing that subtree brings it back to the height it had before the insertion, ' +
-          'so every ancestor sees the same height it saw before and none of them can be out of ' +
-          'balance. The walk back up still has to fix heights, but it can stop rotating after the ' +
-          'first repair. Measured over 20 000 randomised insertions the worst single insertion ' +
-          'rebalances exactly once, which is the theorem showing up in the counter.',
+        detail: [
+          'The reason is exact, not empirical.',
+          'An insertion increases some subtree height by one, and rebalancing that subtree brings ' +
+            'it back to the height it had before the insertion. So every ancestor sees the same ' +
+            'height it saw before, and none of them can be out of balance.',
+          'The walk back up still has to fix heights, but it can stop rotating after the first ' +
+            'repair.',
+          'Measured over 20 000 randomised insertions the worst single insertion rebalances ' +
+            'exactly once, which is the theorem showing up in the counter.'
+        ],
         example: 'Over 20 000 inserts, the largest number of rebalances in any single call is 1.'
       },
       {
         term: 'Deletion is the expensive one',
         plain: 'A deletion can rebalance at every level, because it shortens a subtree rather than restoring it.',
         formal: 'up to O(log n) rotations per removal',
-        detail: 'Deletion breaks the argument above: rebalancing a subtree after a removal can leave ' +
-          'it one shorter than it was, which can unbalance its parent, which can unbalance its ' +
-          'parent, all the way to the root. So the fixup loop cannot stop at the first rotation the ' +
-          'way insertion can. In practice the average is well under one rotation per deletion — 0.384 ' +
-          'measured over 5 000 removals — but the worst single call in that same run rebalanced six ' +
-          'times. This asymmetry is precisely why libraries that delete a lot prefer red-black.',
+        detail: [
+          'Deletion breaks the argument above. Rebalancing a subtree after a removal can leave it ' +
+            'one shorter than it was. That can unbalance its parent, which can unbalance its ' +
+            'parent, all the way to the root.',
+          'So the fixup loop cannot stop at the first rotation the way insertion can.',
+          'In practice the average is well under one rotation per deletion — 0.384 measured over ' +
+            '5 000 removals. But the worst single call in that same run rebalanced six times.',
+          'This asymmetry is precisely why libraries that delete a lot prefer red-black.'
+        ],
         example: 'Deleting 5 000 keys from a 10 000-key tree costs 1 919 rotations, and the worst single deletion costs 6.'
       },
       {
@@ -101,24 +121,32 @@
         readAs: 'The fewest nodes an AVL tree of height h can hold is one root plus the smallest trees of ' +
           'height h−1 and h−2 hanging off it. That is the Fibonacci pattern, and it is what pins the ' +
           'height at about 1.44 log₂ n.',
-        detail: 'The bound comes from asking the opposite question: what is the fewest nodes an AVL ' +
-          'tree of height h can hold? The answer is a Fibonacci-shaped recurrence, because the ' +
-          'sparsest legal tree has one subtree of height h−1 and the other of h−2. That gives ' +
-          '1, 2, 4, 7, 12, 20, 33, 54, 88, 143 nodes for heights 1 to 10, and inverting it gives the ' +
-          'bound. At n = 10 000 the bound is 18.81 against a perfect tree at 14, and a real tree ' +
-          'measures 14 on sorted input and 16 on shuffled — comfortably inside.',
+        detail: [
+          'The bound comes from asking the opposite question: what is the fewest nodes an AVL tree ' +
+            'of height h can hold?',
+          'The answer is a Fibonacci-shaped recurrence, because the sparsest legal tree has one ' +
+            'subtree of height h−1 and the other of h−2.',
+          'That gives 1, 2, 4, 7, 12, 20, 33, 54, 88, 143 nodes for heights 1 to 10, and inverting ' +
+            'it gives the bound.',
+          'At n = 10 000 the bound is 18.81 against a perfect tree at 14. A real tree measures 14 ' +
+            'on sorted input and 16 on shuffled — comfortably inside.'
+        ],
         example: 'The sparsest AVL tree of height 10 holds just 143 nodes; a perfect one holds 1 023.'
       },
       {
         term: 'Read-heavy is a measurement, not a slogan',
         plain: 'AVL buys a shallower tree with more rotations. Whether that is a win depends on the operation mix.',
         formal: 'compare comparisons saved against rotations spent',
-        detail: 'The received wisdom is "AVL for reads, red-black for writes", and it is right in ' +
-          'direction and vague in size. On an identical 20 000-operation stream the two families ' +
-          'measure within a percent of each other on comparisons, while AVL does 20% more rotations. ' +
-          'So the real question is what a rotation costs relative to a comparison in your setting — ' +
-          'pointer writes are cheap in memory and expensive under a lock or across a page boundary. ' +
-          'Measure the mix; the difference is smaller than the folklore suggests.',
+        detail: [
+          'The received wisdom is "AVL for reads, red-black for writes", and it is right in ' +
+            'direction and vague in size.',
+          'On an identical 20 000-operation stream the two families measure within a percent of ' +
+            'each other on comparisons, while AVL does 20% more rotations.',
+          'So the real question is what a rotation costs relative to a comparison in your setting. ' +
+            'Pointer writes are cheap in memory and expensive under a lock or across a page ' +
+            'boundary.',
+          'Measure the mix; the difference is smaller than the folklore suggests.'
+        ],
         example: 'At a 45/30/25 insert/delete/find mix: AVL 214 913 comparisons and 4 434 rotations, red-black 216 761 and 3 613.'
       },
       {
@@ -127,12 +155,16 @@
         formal: 'monotone insertion ⇒ only RR (or only LL) cases',
         readAs: 'Insert keys in increasing order and every imbalance leans the same way, so only one of the ' +
           'four rotation cases ever fires. The ⇒ is "which means".',
-        detail: 'A sorted stream always inserts on the right spine, so the only imbalance that ever ' +
-          'appears is right-right, and the only fix ever needed is a single left rotation. That ' +
-          'makes it both the most frequent rebalancing (almost one per insert, 0.999 measured) and ' +
-          'the cheapest kind. Shuffled input produces fewer rebalances — 0.465 per insert — but half ' +
-          'of them are doubles. The pleasing consequence is that the input which turns an unbalanced ' +
-          'BST into a 10 000-node linked list produces a height-14 AVL tree instead.',
+        detail: [
+          'A sorted stream always inserts on the right spine, so the only imbalance that ever ' +
+            'appears is right-right, and the only fix ever needed is a single left rotation.',
+          'That makes it both the most frequent rebalancing — almost one per insert, 0.999 ' +
+            'measured — and the cheapest kind.',
+          'Shuffled input produces fewer rebalances, 0.465 per insert, but half of them are ' +
+            'doubles.',
+          'The pleasing consequence is that the input which turns an unbalanced BST into a ' +
+            '10 000-node linked list produces a height-14 AVL tree instead.'
+        ],
         example: 'Sorted insertion of 10 000 keys: height 14, 9 986 rotations, every one of them single.'
       }
     ],
