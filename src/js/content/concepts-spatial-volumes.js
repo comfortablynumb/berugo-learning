@@ -171,11 +171,15 @@
         },
         plain: 'A BVH splits the list of objects into two groups and bounds each; the boxes may overlap.',
         formal: 'every primitive appears in exactly one leaf, unlike a k-d tree over the same scene',
-        detail: 'A k-d tree splits space, so a triangle crossing the plane must be referenced from both sides and ' +
-          'the reference count is not known before the build finishes. A BVH splits the primitive list, so the ' +
-          'reference count is exactly n and the tree can be sized in advance. The consequence that matters for ' +
-          'animation is that the topology stays valid when the primitives move - only the boxes are wrong, and ' +
-          'boxes can be recomputed bottom-up in one pass.',
+        detail: [
+          'A k-d tree splits space, so a triangle crossing the plane must be referenced from both ' +
+            'sides, and the reference count is not known before the build finishes.',
+          'A BVH splits the primitive list, so the reference count is exactly n and the tree can be ' +
+            'sized in advance.',
+          'The consequence that matters for animation is that the topology stays valid when the ' +
+            'primitives move.',
+          'Only the boxes are wrong, and boxes can be recomputed bottom-up in one pass.'
+        ],
         example: '20 000 triangles build 13 273 nodes with 6 637 leaves and exactly 20 000 primitive references.'
       },
       {
@@ -183,13 +187,17 @@
         plain: 'Intersect the ray with each axis\'s pair of planes and keep the overlap of the intervals.',
         formal: 'tnear = max over axes of min(t₀,t₁); tfar = min over axes of max(t₀,t₁); hit iff tnear ≤ tfar',
         readAs: 'For each axis work out when the ray enters and leaves the slab. The ray is inside the box ' +
-          'only while it is inside every slab at once, so take the latest entry and the earliest exit — ' +
-          'and if the entry comes after the exit, it misses.',
-        detail: 'The classic bug is the axis-parallel ray. With a direction component of zero the reciprocal is ' +
-          'infinite, and if the origin sits exactly on a slab plane the numerator is zero, so the product is 0 × ' +
-          '∞ = NaN. Every comparison against NaN is false, the interval test silently reports a miss, and the box ' +
-          'vanishes - on precisely the axis-aligned scenes that make up most test content. Handling the ' +
-          'zero-direction case explicitly costs one branch per axis and removes the whole class.',
+          'only while it is inside every slab at once, so take the latest entry and the earliest ' +
+          'exit. If the entry comes after the exit, it misses.',
+        detail: [
+          'The classic bug is the axis-parallel ray.',
+          'With a direction component of zero the reciprocal is infinite. If the origin sits ' +
+            'exactly on a slab plane the numerator is zero, so the product is 0 × ∞ = NaN.',
+          'Every comparison against NaN is false, the interval test silently reports a miss, and ' +
+            'the box vanishes - on precisely the axis-aligned scenes that make up most test content.',
+          'Handling the zero-direction case explicitly costs one branch per axis and removes the ' +
+            'whole class.'
+        ],
         example: 'A ray along +x whose origin lies on the y = min plane must enter the box, and the naive form returns a miss.'
       },
       {
@@ -199,12 +207,16 @@
         readAs: 'The surface-area heuristic: the cost of a split is a fixed traversal cost, plus the ' +
           'intersection cost weighted by how likely a random ray is to enter each side. That likelihood ' +
           'is the child\'s surface area over the parent\'s.',
-        detail: 'The assumption underneath is precise and worth stating: for a uniformly distributed ray that ' +
-          'already hits the parent box, the probability of hitting a child is the ratio of their surface areas. ' +
-          'That turns "which split is better" into arithmetic instead of taste, which is what the word heuristic ' +
-          'obscures - this is an expected-cost estimate with a stated model, not a rule of thumb. Writing the ' +
-          'estimate down is also what makes it arguable: when the SAH picks badly you can point at which term was ' +
-          'wrong.',
+        detail: [
+          'The assumption underneath is precise and worth stating. For a uniformly distributed ray ' +
+            'that already hits the parent box, the probability of hitting a child is the ratio of ' +
+            'their surface areas.',
+          'That turns "which split is better" into arithmetic instead of taste, which is what the ' +
+            'word heuristic obscures.',
+          'This is an expected-cost estimate with a stated model, not a rule of thumb.',
+          'Writing the estimate down is also what makes it arguable: when the SAH picks badly you ' +
+            'can point at which term was wrong.'
+        ],
         example: 'The measured SAH cost of the median tree is 65.81 and of the SAH tree 49.44 - and the ray counts follow.'
       },
       {
@@ -214,36 +226,48 @@
         readAs: 'Stop splitting once the best available split costs at least as much as simply testing every ' +
           'primitive in the node. The heuristic decides where the leaves are, rather than a fixed depth ' +
           'or count.',
-        detail: 'A builder that always splits until a fixed leaf size produces a deeper tree whose extra levels ' +
-          'cost traversal and buy no pruning, because the children\'s boxes are nearly the parent\'s. Comparing ' +
-          'the best split cost against the cost of not splitting is one extra comparison, and it terminates the ' +
-          'recursion where the geometry says it should. How much that is worth depends entirely on the leaf ' +
-          'size it competes with, and the demo reports the count rather than assuming it: on this scene the ' +
-          'branch fires 69 times at a leaf size of 1 and never at a leaf size of 4, because four primitives are ' +
-          'already cheaper than any split of them. It is the rule that makes a small leaf size safe, not the ' +
-          'rule that makes the tree small.',
+        detail: [
+          'A builder that always splits until a fixed leaf size produces a deeper tree. The extra ' +
+            'levels cost traversal and buy no pruning, because the children\'s boxes are nearly the ' +
+            'parent\'s.',
+          'Comparing the best split cost against the cost of not splitting is one extra comparison, ' +
+            'and it terminates the recursion where the geometry says it should.',
+          'How much that is worth depends entirely on the leaf size it competes with, and the demo ' +
+            'reports the count rather than assuming it.',
+          'On this scene the branch fires 69 times at a leaf size of 1 and never at a leaf size ' +
+            'of 4. Four primitives are already cheaper than any split of them.',
+          'It is the rule that makes a small leaf size safe, not the rule that makes the tree small.'
+        ],
         example: 'Leaf size 1: the branch fires 69 times and the tree costs 36.28. Leaf size 4: it never fires.'
       },
       {
         term: 'Binning makes the SAH affordable',
         plain: 'Instead of evaluating every possible split, bucket the centroids and evaluate only the bin boundaries.',
         formal: 'two linear sweeps give every bin boundary\'s cost in O(bins) after O(n)',
-        detail: 'An exact SAH evaluates n−1 splits per axis and each needs the two child boxes, which is O(n²) ' +
-          'unless the sweep is done incrementally; sorting first makes it O(n log n) per axis per node and is ' +
-          'still the expensive part of a build. Binning replaces it with one pass to fill the bins and two ' +
-          'sweeps - prefix from the left, suffix from the right - so each candidate costs O(1). Twelve to sixteen ' +
-          'bins gives a tree within a couple of percent of the exact SAH.',
+        detail: [
+          'An exact SAH evaluates n−1 splits per axis, and each needs the two child boxes, which is ' +
+            'O(n²) unless the sweep is done incrementally.',
+          'Sorting first makes it O(n log n) per axis per node, and is still the expensive part of ' +
+            'a build.',
+          'Binning replaces it with one pass to fill the bins and two sweeps - prefix from the ' +
+            'left, suffix from the right - so each candidate costs O(1).',
+          'Twelve to sixteen bins gives a tree within a couple of percent of the exact SAH.'
+        ],
         example: '16 bins over 3 axes: 20 000 triangles build in about 70 ms against 42 ms for a median split.'
       },
       {
         term: 'Traverse with an explicit stack, nearest child first',
         plain: 'Push both children, visit the one the ray points at first, and re-test the other against the closest hit found.',
         formal: 'skip a node when its entry distance ≥ the current closest hit',
-        detail: 'Visiting the near child first is what makes the far child skippable: once a hit is found, ' +
-          'anything entering beyond it cannot matter. Re-testing at pop time rather than at push time is the ' +
-          'detail that makes this work - the bound has usually tightened in between. The stack is explicit ' +
-          'because a scene is traversed millions of times after being built once, so per-ray call overhead is the ' +
-          'entire budget, and because a degenerate scene builds a deep tree.',
+        detail: [
+          'Visiting the near child first is what makes the far child skippable: once a hit is ' +
+            'found, anything entering beyond it cannot matter.',
+          'Re-testing at pop time rather than at push time is the detail that makes this work, ' +
+            'because the bound has usually tightened in between.',
+          'The stack is explicit because a scene is traversed millions of times after being built ' +
+            'once, so per-ray call overhead is the entire budget.',
+          'It is also explicit because a degenerate scene builds a deep tree.'
+        ],
         example: 'Of 1 000 rays over 20 000 triangles, the SAH tree visits 25.71 nodes and tests 7.76 primitives each.'
       },
       {
@@ -252,22 +276,30 @@
         formal: 'box(node) = box(left) ∪ box(right), one post-order pass',
         readAs: 'Every node\'s box is just its two children\'s boxes merged, so refitting the whole tree ' +
           'after the geometry moves is a single bottom-up sweep — no rebuild required.',
-        detail: 'When neighbouring primitives move together the grouping is still the right grouping and refitting ' +
-          'is as good as rebuilding, at a fraction of the cost - which is why animated scenes refit per frame and ' +
-          'rebuild occasionally. When primitives move independently the grouping becomes nonsense: the boxes are ' +
-          'still correct, so nothing fails, and the tree quietly stops pruning. The way to know which regime you ' +
-          'are in is to track the tree\'s SAH cost across frames and rebuild when it drifts.',
+        detail: [
+          'When neighbouring primitives move together the grouping is still the right grouping, and ' +
+            'refitting is as good as rebuilding at a fraction of the cost.',
+          'That is why animated scenes refit per frame and rebuild occasionally.',
+          'When primitives move independently the grouping becomes nonsense. The boxes are still ' +
+            'correct, so nothing fails, and the tree quietly stops pruning.',
+          'The way to know which regime you are in is to track the tree\'s SAH cost across frames ' +
+            'and rebuild when it drifts.'
+        ],
         example: 'Coherent motion: refit cost 49.95 against a rebuild\'s 50.85. Scattered: 258.29 against 50.76, and 82.32 primitives per ray against 9.61.'
       },
       {
         term: 'BVH against k-d tree in ray tracing',
         plain: 'The BVH refits, bounds its memory and never duplicates a primitive; the k-d tree prunes empty space better.',
         formal: 'BVH: n references, overlapping boxes. k-d: unbounded references, disjoint cells',
-        detail: 'A k-d tree can cut away a genuinely empty region in one plane, which a BVH cannot do because its ' +
-          'boxes must contain their primitives; on static scenes with lots of empty space the k-d tree still ' +
-          'wins on ray throughput. Everything else favours the BVH: predictable memory, no duplication, a cheap ' +
-          'refit for animation, and a build that parallelises cleanly. Production renderers moved to BVHs for ' +
-          'those reasons rather than for raw traversal speed, which is the honest version of the story.',
+        detail: [
+          'A k-d tree can cut away a genuinely empty region in one plane, which a BVH cannot do ' +
+            'because its boxes must contain their primitives.',
+          'On static scenes with lots of empty space the k-d tree still wins on ray throughput.',
+          'Everything else favours the BVH: predictable memory, no duplication, a cheap refit for ' +
+            'animation, and a build that parallelises cleanly.',
+          'Production renderers moved to BVHs for those reasons rather than for raw traversal ' +
+            'speed, which is the honest version of the story.'
+        ],
         example: 'The refit path is the argument: 20 000 moving triangles keep their topology and are re-bounded in one pass.'
       }
     ],

@@ -29,54 +29,61 @@
     });
   }
 
+  function diagram() {
+    return {
+      title: 'Diagram — a BVH with box extents annotated',
+      caption: 'The children\'s boxes may overlap, which a space-partitioning tree\'s cells cannot. In ' +
+        'exchange, every primitive is referenced exactly once and the tree can be re-bounded in place when ' +
+        'the scene moves.',
+      definition: [
+        'flowchart TD',
+        '    R["root · 20 000 tris<br/>0,0,0 – 100,100,100<br/>area 60 000"] --> L["left · 11 240 tris<br/>0,0,0 – 62,100,100<br/>area 42 400"]',
+        '    R --> Rr["right · 8 760 tris<br/>48,0,0 – 100,100,100<br/>area 38 400"]',
+        '    L --> LL["6 100 tris"]',
+        '    L --> LR["5 140 tris"]',
+        '    Rr --> RL["4 380 tris"]',
+        '    Rr --> RR["4 380 tris"]',
+        '    LL --> Leaf["… leaf · ≤ 4 triangles"]',
+        '    N["the 48–62 slab is in both boxes:<br/>a ray there enters both subtrees"] -.-> L',
+        '    N -.-> Rr'
+      ].join('\n')
+    };
+  }
+
   function config() {
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'A BVH splits the *primitive list* rather than space, so every triangle appears in exactly one leaf and ' +
-          'the boxes are allowed to overlap instead. That is the difference from a k-d tree and it is why a BVH ' +
-          'survives animation: when the primitives move the topology is still valid and only the boxes are ' +
-          'wrong, and boxes recompute in one bottom-up pass.',
-        'The surface-area heuristic is a cost model, not a rule of thumb. For a uniformly random ray that ' +
-          'already hits a node, the chance of hitting a child is the ratio of their surface areas, so the ' +
-          'expected cost of a split is Ct + Ci·(A(L)·N(L) + A(R)·N(R))/A(P) — a number per candidate split. On ' +
-          '20 000 triangles the SAH build reaches a modelled cost of 49.44 against a median split\'s 65.81, and ' +
-          'the rays agree: 25.71 nodes visited each against 40.70, from a tree that is deeper (18 against 13) ' +
-          'and smaller (13 273 nodes against 15 423) because uneven splits let subtrees bottom out at ' +
-          'different rates. The model\'s other half is the decision *not* to split at all — and the demo counts ' +
-          'it rather than assuming it: at a leaf size of 4 that branch never fires, and at a leaf size of 1 it ' +
-          'fires 69 times.',
-        'Traversal is an explicit stack with the nearest child first, and the far child re-tested at pop time ' +
-          'against the closest hit found so far. The one trap is the slab test on an axis-parallel ray: with a ' +
-          'direction component of zero the reciprocal is infinite, and if the origin sits on a slab plane the ' +
-          'product is 0 × ∞ = NaN, every comparison against NaN is false, and the box silently vanishes — on ' +
-          'exactly the axis-aligned scenes that make up most test content.'
+        'A BVH splits the *primitive list* rather than space, so every triangle appears in exactly ' +
+          'one leaf and the boxes are allowed to overlap instead. That is the difference from a ' +
+          'k-d tree, and it is why a BVH survives animation. When the primitives move the topology ' +
+          'is still valid and only the boxes are wrong, and boxes recompute in one bottom-up pass.',
+        'The surface-area heuristic is a cost model, not a rule of thumb. For a uniformly random ' +
+          'ray that already hits a node, the chance of hitting a child is the ratio of their ' +
+          'surface areas. So the expected cost of a split is Ct + Ci·(A(L)·N(L) + A(R)·N(R))/A(P), ' +
+          'a number per candidate split. On 20 000 triangles the SAH build reaches a modelled cost ' +
+          'of 49.44 against a median split\'s 65.81, and the rays agree: 25.71 nodes visited each ' +
+          'against 40.70. The SAH tree is deeper (18 against 13) and smaller (13 273 nodes against ' +
+          '15 423), because uneven splits let subtrees bottom out at different rates. The model\'s ' +
+          'other half is the decision *not* to split at all, and the demo counts it rather than ' +
+          'assuming it. At a leaf size of 4 that branch never fires; at a leaf size of 1 it fires ' +
+          '69 times.',
+        'Traversal is an explicit stack with the nearest child first, and the far child re-tested ' +
+          'at pop time against the closest hit found so far. The one trap is the slab test on an ' +
+          'axis-parallel ray. With a direction component of zero the reciprocal is infinite, and ' +
+          'if the origin sits on a slab plane the product is 0 × ∞ = NaN. Every comparison against ' +
+          'NaN is false, so the box silently vanishes — on exactly the axis-aligned scenes that ' +
+          'make up most test content.'
       ],
       demo: { title: 'Interactive demo — two builds, one triangle soup, and a moving scene', markup: root.BoundingVolumesTemplate.render() },
-      diagram: {
-        title: 'Diagram — a BVH with box extents annotated',
-        caption: 'The children\'s boxes may overlap, which a space-partitioning tree\'s cells cannot. In ' +
-          'exchange, every primitive is referenced exactly once and the tree can be re-bounded in place when ' +
-          'the scene moves.',
-        definition: [
-          'flowchart TD',
-          '    R["root · 20 000 tris<br/>0,0,0 – 100,100,100<br/>area 60 000"] --> L["left · 11 240 tris<br/>0,0,0 – 62,100,100<br/>area 42 400"]',
-          '    R --> Rr["right · 8 760 tris<br/>48,0,0 – 100,100,100<br/>area 38 400"]',
-          '    L --> LL["6 100 tris"]',
-          '    L --> LR["5 140 tris"]',
-          '    Rr --> RL["4 380 tris"]',
-          '    Rr --> RR["4 380 tris"]',
-          '    LL --> Leaf["… leaf · ≤ 4 triangles"]',
-          '    N["the 48–62 slab is in both boxes:<br/>a ray there enters both subtrees"] -.-> L',
-          '    N -.-> Rr'
-        ].join('\n')
-      },
-      insight: 'The SAH is a cost model, not a heuristic in the vague sense: it estimates expected traversal ' +
-        'cost under a stated assumption, and writing that estimate down is what makes the build decision ' +
-        'arguable rather than tuned. The same number is also the health metric for an animated scene — refitting ' +
-        'is free and correct, and whether it is *good* depends entirely on whether the motion preserved the ' +
-        'grouping. Watch the tree\'s own SAH cost across frames; the root box grows only 16% while the cost ' +
-        'grows 5.2×, so the obvious metric detects nothing.'
+      diagram: diagram(),
+      insight: 'The SAH is a cost model, not a heuristic in the vague sense. It estimates expected ' +
+        'traversal cost under a stated assumption, and writing that estimate down is what makes ' +
+        'the build decision arguable rather than tuned. The same number is also the health metric ' +
+        'for an animated scene. Refitting is free and correct, and whether it is *good* depends ' +
+        'entirely on whether the motion preserved the grouping. Watch the tree\'s own SAH cost ' +
+        'across frames; the root box grows only 16% while the cost grows 5.2×, so the obvious ' +
+        'metric detects nothing.'
     };
   }
 
