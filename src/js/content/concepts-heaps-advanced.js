@@ -469,12 +469,15 @@
         },
         plain: 'A heap answers "what is the smallest key" exactly. A timeout only needs "what is due this tick".',
         formal: 'quantised time turns a search into an array index',
-        detail: 'The whole insight is that a timeout can afford to be imprecise. Once time is ' +
-          'quantised into ticks, a timer does not need to be found by comparison — it can be filed ' +
-          'in the bucket for the tick it is due, and expiry becomes "walk one bucket". Adding is an ' +
-          'array index, cancelling is a flag, and no comparison is performed anywhere. That is why ' +
-          'kernels file timeouts in wheels and why a heap, which answers a harder question, charges ' +
-          'for the difference.',
+        detail: [
+          'The whole insight is that a timeout can afford to be imprecise.',
+          'Once time is quantised into ticks, a timer does not need to be found by comparison. It ' +
+            'can be filed in the bucket for the tick it is due, and expiry becomes "walk one ' +
+            'bucket".',
+          'Adding is an array index, cancelling is a flag, and no comparison is performed anywhere.',
+          'That is why kernels file timeouts in wheels, and why a heap, which answers a harder ' +
+            'question, charges for the difference.'
+        ],
         example: 'Over 100 000 timers, the heap made 3 059 313 comparisons and the wheel made none.'
       },
       {
@@ -483,13 +486,16 @@
         formal: 'slot = due mod slots',
         readAs: 'A timer\'s bucket is its due time wrapped around the number of slots — the remainder after ' +
           'dividing. That turns "find the next timer" from a search into an array index.',
-        detail: 'A single wheel of s slots covers s ticks exactly. A timer due further out is filed in ' +
-          'the slot it will eventually land on and skipped on each earlier visit, so a long-dated ' +
-          'timer is touched once per revolution. That is fine when the delays are short and uniform ' +
-          'and wasteful when they are not — which is what the hierarchical version fixes. The ' +
-          'implementation trap is the revolution counter: a delay that is an exact multiple of the ' +
-          'wheel width lands in the slot it was filed from, so the first visit is the due tick, and ' +
-          'a naive counter is off by one revolution.',
+        detail: [
+          'A single wheel of s slots covers s ticks exactly.',
+          'A timer due further out is filed in the slot it will eventually land on and skipped on ' +
+            'each earlier visit, so a long-dated timer is touched once per revolution.',
+          'That is fine when the delays are short and uniform, and wasteful when they are not. The ' +
+            'hierarchical version is what fixes it.',
+          'The implementation trap is the revolution counter. A delay that is an exact multiple of ' +
+            'the wheel width lands in the slot it was filed from. The first visit is therefore the ' +
+            'due tick, and a naive counter is off by one revolution.'
+        ],
         example: 'A 4 096-slot wheel over 100 000 timers touched 20 entries per tick — one bucket\'s worth.'
       },
       {
@@ -506,79 +512,99 @@
         },
         plain: 'Several wheels, each covering the span of the one below times its width. Entries cascade down as time passes.',
         formal: 'level L spans slots^(L+1) ticks',
-        readAs: 'Each level of a hierarchical timer wheel covers the number of slots raised to one more ' +
-          'power, so a handful of levels covers an enormous range at one tick of resolution.',
-        detail: 'The hierarchy is the same idea as a clock face: seconds, minutes, hours. A timer due ' +
-          'a long time out is filed on a coarse wheel, and when the finer wheels wrap past it, the ' +
-          'coarse bucket is emptied and its entries refiled where they now belong. Each timer ' +
-          'cascades at most once per level, so the cost is O(levels) rather than O(revolutions), and ' +
-          'the total span is slots^levels — five levels of 64 covers a billion ticks. Linux uses ' +
-          'exactly this shape.',
+        readAs: 'Each level of a hierarchical timer wheel covers the number of slots raised to one ' +
+          'more power. A handful of levels therefore covers an enormous range at one tick of ' +
+          'resolution.',
+        detail: [
+          'The hierarchy is the same idea as a clock face: seconds, minutes, hours.',
+          'A timer due a long time out is filed on a coarse wheel. When the finer wheels wrap past ' +
+            'it, the coarse bucket is emptied and its entries refiled where they now belong.',
+          'Each timer cascades at most once per level, so the cost is O(levels) rather than ' +
+            'O(revolutions).',
+          'The total span is slots^levels: five levels of 64 covers a billion ticks. Linux uses ' +
+            'exactly this shape.'
+        ],
         example: 'A 2 × 64 wheel touched 12.23 entries per tick against the flat wheel\'s 20.00, at the cost of cascades.'
       },
       {
         term: 'Cancellation is the common case',
         plain: 'Most timeouts are cancelled before they fire, so cancel has to be cheap and expiry has to tolerate corpses.',
         formal: 'flag it, and drop it when the bucket is next walked',
-        detail: 'A timeout is usually set in the hope that it will not fire — the request arrives, ' +
-          'the timer is cancelled, and the entry becomes a corpse. Removing it from the middle of a ' +
-          'bucket costs the bucket length, so real implementations mark it instead and let the next ' +
-          'walk drop it for free. A heap has the same choice and a worse version of it: a cancelled ' +
-          'entry cannot be removed cheaply either, so it is carried until it surfaces at the root, ' +
-          'which is a longer wait and more memory.',
+        detail: [
+          'A timeout is usually set in the hope that it will not fire. The request arrives, the ' +
+            'timer is cancelled, and the entry becomes a corpse.',
+          'Removing it from the middle of a bucket costs the bucket length, so real ' +
+            'implementations mark it instead and let the next walk drop it for free.',
+          'A heap has the same choice and a worse version of it. A cancelled entry cannot be ' +
+            'removed cheaply either, so it is carried until it surfaces at the root, which is a ' +
+            'longer wait and more memory.'
+        ],
         example: 'With half the timers cancelled, the wheel drops corpses during a bucket walk it was doing anyway.'
       },
       {
         term: 'Bounded precision as a feature',
         plain: 'A wheel cannot distinguish two timers in the same tick. That is exactly what a timeout does not need.',
         formal: 'resolution = one tick, chosen by the caller',
-        detail: 'The trade is explicit and it is the right one for the workload. A network timeout of ' +
-          '30 seconds does not care about a millisecond, and a keepalive does not care about ten. ' +
+        detail: [
+          'The trade is explicit and it is the right one for the workload.',
+          'A network timeout of 30 seconds does not care about a millisecond, and a keepalive does ' +
+            'not care about ten.',
           'Choosing the tick sets the precision, the memory (slots × levels) and the per-tick cost ' +
-          'all at once, and a system with a known deadline distribution can size it exactly. Where ' +
-          'precision genuinely matters — a discrete-event simulation, a real-time scheduler — the ' +
-          'heap comes back, because there is nothing legitimate to quantise.',
+            'all at once, and a system with a known deadline distribution can size it exactly.',
+          'Where precision genuinely matters — a discrete-event simulation, a real-time ' +
+            'scheduler — the heap comes back, because there is nothing legitimate to quantise.'
+        ],
         example: 'Linux uses a 1 ms tick for its timer wheels and a separate hrtimer red-black tree for anything finer.'
       },
       {
         term: 'The event-simulation clock',
         plain: 'Simulated time jumps to the next event, so the cost is the number of events rather than the length of the interval.',
         formal: 'the priority queue is the clock',
-        detail: 'A discrete-event simulation never advances time in steps. It pops the earliest ' +
-          'scheduled event, sets the clock to that timestamp, runs the handler — which typically ' +
-          'schedules more events — and repeats. Nothing is computed for the gaps, so simulating an ' +
-          'hour of a quiet system costs almost nothing and simulating a busy millisecond costs a ' +
-          'lot. This is the case where a heap is the right structure, because event times are ' +
-          'arbitrary reals and there is nothing to bucket them into.',
+        detail: [
+          'A discrete-event simulation never advances time in steps.',
+          'It pops the earliest scheduled event, sets the clock to that timestamp, runs the ' +
+            'handler — which typically schedules more events — and repeats.',
+          'Nothing is computed for the gaps, so simulating an hour of a quiet system costs almost ' +
+            'nothing and simulating a busy millisecond costs a lot.',
+          'This is the case where a heap is the right structure, because event times are arbitrary ' +
+            'reals and there is nothing to bucket them into.'
+        ],
         example: 'The M/M/1 demo simulates 200 000 time units in about 320 000 events.'
       },
       {
         term: 'Tie-breaking and reproducibility',
         plain: 'Two events at the same instant must be ordered by something, or the simulation depends on heap internals.',
         formal: 'key = (time, sequence number)',
-        detail: 'A heap makes no promise about equal keys, so two events scheduled for the same ' +
-          'timestamp can come out in either order — and if the handlers interact, the whole ' +
-          'simulation becomes irreproducible for reasons that have nothing to do with the model. The ' +
-          'fix is to extend the key with a monotonically increasing sequence number, which makes the ' +
-          'order deterministic and documents that it is insertion order. Any simulation that cannot ' +
-          'be replayed exactly is a simulation whose bugs cannot be found.',
+        detail: [
+          'A heap makes no promise about equal keys, so two events scheduled for the same ' +
+            'timestamp can come out in either order.',
+          'If the handlers interact, the whole simulation becomes irreproducible for reasons that ' +
+            'have nothing to do with the model.',
+          'The fix is to extend the key with a monotonically increasing sequence number, which ' +
+            'makes the order deterministic and documents that it is insertion order.',
+          'Any simulation that cannot be replayed exactly is a simulation whose bugs cannot be ' +
+            'found.'
+        ],
         example: 'This kernel keys events by time × 10⁶ + sequence, so a replay is exact.'
       },
       {
         term: 'Little\'s law, from the other side',
         plain: 'The simulation reproduces L = λ·W to four decimal places, which is what makes it trustworthy.',
         formal: 'L = λ·W; L = ρ/(1 − ρ); W = 1/(μ − λ)',
-        readAs: 'Three queueing results: the number in the system equals arrival rate times time spent (true ' +
-          'of any queue at all); for this particular model that number is utilisation over one minus ' +
-          'utilisation; and the wait is one over the slack between service and arrival rates. The 1 − ρ ' +
-          'in the denominator is why a queue at 99% utilisation is a hundred times worse than one at ' +
-          '90%.',
-        detail: 'M02.5 introduced Little\'s law as a measurement tool that needs no assumptions. Here ' +
-          'it is a check on the simulator: measure the time-average number in the system, the ' +
-          'per-customer average time in the system, and the arrival rate, and the three must satisfy ' +
-          'L = λ·W exactly. They do, to four decimals, at every utilisation — and the measured L and ' +
-          'W also match the closed forms ρ/(1 − ρ) and 1/(μ − λ) to about one percent. A simulator ' +
-          'that reproduces a known result is one you can point at an unknown one.',
+        readAs: 'Three queueing results. The number in the system equals arrival rate times time ' +
+          'spent, which is true of any queue at all. For this particular model that number is ' +
+          'utilisation over one minus utilisation, and the wait is one over the slack between ' +
+          'service and arrival rates. The 1 − ρ in the denominator is why a queue at 99% ' +
+          'utilisation is a hundred times worse than one at 90%.',
+        detail: [
+          'M02.5 introduced Little\'s law as a measurement tool that needs no assumptions. Here it ' +
+            'is a check on the simulator.',
+          'Measure the time-average number in the system, the per-customer average time in the ' +
+            'system, and the arrival rate. The three must satisfy L = λ·W exactly.',
+          'They do, to four decimals, at every utilisation. The measured L and W also match the ' +
+            'closed forms ρ/(1 − ρ) and 1/(μ − λ) to about one percent.',
+          'A simulator that reproduces a known result is one you can point at an unknown one.'
+        ],
         example: 'At ρ = 0.9 the simulation measured L = 8.871 against a predicted 9.000, and L ÷ (λ·W) = 1.0000.'
       }
     ]

@@ -28,11 +28,11 @@
         'A priority queue is load-bearing in three places in a real system: the timer subsystem, the ' +
           'run queue of a scheduler, and the clock of any discrete-event simulation. Only one of ' +
           'those three actually uses a heap.',
-        'Timers do not, and the reason is that a heap answers a harder question than a timeout needs. ' +
-          'A timing wheel quantises time into ticks and files each timer in the bucket for the tick ' +
-          'it is due, so adding is an array index, cancelling is a flag, and expiry is "walk one ' +
-          'bucket". No comparisons at all. What it gives up is precision below one tick, which is ' +
-          'exactly what a timeout can afford.',
+        'Timers do not, and the reason is that a heap answers a harder question than a timeout ' +
+          'needs. A timing wheel quantises time into ticks and files each timer in the bucket for ' +
+          'the tick it is due. Adding is an array index, cancelling is a flag, and expiry is ' +
+          '"walk one bucket". No comparisons at all. What it gives up is precision below one ' +
+          'tick, which is exactly what a timeout can afford.',
         'A discrete-event simulation is the case where the heap is right, because there is nothing to ' +
           'quantise: the clock jumps to the timestamp of the next event, whatever it is. The M/M/1 ' +
           'simulation below is driven by one, and it reproduces the closed-form queue length and ' +
@@ -53,9 +53,9 @@
       },
       insight: 'O(1) add and cancel with O(1) amortised expiry is why timing wheels beat heaps for ' +
         'timers; the trade is bounded precision, which is exactly what a timeout can afford. The ' +
-        'deeper point is that "which data structure" is the wrong question until you have asked what ' +
-        'precision the caller actually needs — a heap answers a harder question than a timeout asks, ' +
-        'and charges for it.'
+        'deeper point is that "which data structure" is the wrong question until you have asked ' +
+        'what precision the caller actually needs. A heap answers a harder question than a ' +
+        'timeout asks, and charges for it.'
     };
   }
 
