@@ -29,13 +29,16 @@
         },
         plain: 'The control unit chooses operands, result source and next address; the rest is fixed.',
         formal: 'five multiplexers: ALU operand A, ALU operand B, write-back source, next PC, ALU function',
-        detail: 'The first mux decides whether the ALU\'s first operand is a register or the '
-          + 'program counter, which is how auipc works. The second decides register or '
-          + 'immediate. The third decides what is written back — the ALU result, a loaded word, '
-          + 'the return address or the immediate. The fourth decides the next program counter. '
-          + 'The fifth, inside the ALU, decides which function to apply. Once you see the '
-          + 'datapath as those five choices, a new instruction stops being mysterious: it is a '
-          + 'new row in a table of mux settings.',
+        detail: [
+          'The first mux decides whether the ALU\'s first operand is a register or the program '
+            + 'counter, which is how auipc works. The second decides register or immediate.',
+          'The third decides what is written back: the ALU result, a loaded word, the return '
+            + 'address or the immediate.',
+          'The fourth decides the next program counter, and the fifth, inside the ALU, decides '
+            + 'which function to apply.',
+          'Once you see the datapath as those five choices, a new instruction stops being '
+            + 'mysterious. It is a new row in a table of mux settings.'
+        ],
         example: 'For sw, only 2 of the 10 control signals are asserted, and the write-back path '
           + 'is idle for the whole cycle.'
       },
@@ -43,12 +46,16 @@
         term: 'Single-cycle means every instruction pays for the slowest one',
         plain: 'One clock period per instruction, sized for the longest path in the machine.',
         formal: 'period = the longest register-to-register path, which is the load instruction',
-        detail: 'A load needs the register file, then the ALU to compute the address, then the '
-          + 'data memory, then the write-back path — all in series, all inside one clock period. '
-          + 'Every other instruction finishes earlier and then waits, because the clock is the '
-          + 'same for all of them. That waste is not a defect of this design; it is the design. '
-          + 'It is also exactly what pipelining removes, which is why building this machine '
-          + 'first makes M35 a fix for a measured problem rather than a technique to memorise.',
+        detail: [
+          'A load needs the register file, then the ALU to compute the address, then the data '
+            + 'memory, then the write-back path.',
+          'All of that is in series, and all of it is inside one clock period.',
+          'Every other instruction finishes earlier and then waits, because the clock is the same '
+            + 'for all of them.',
+          'That waste is not a defect of this design; it is the design.',
+          'It is also exactly what pipelining removes, which is why building this machine first '
+            + 'makes M35 a fix for a measured problem rather than a technique to memorise.'
+        ],
         example: 'The clock period is 178 gate delays — 175 of logic plus 3 of flip-flop '
           + 'overhead — set by the load path.'
       },
@@ -56,13 +63,16 @@
         term: 'The biggest block and the slowest block are not the same block',
         plain: 'Storage dominates area; arithmetic dominates delay.',
         formal: 'register file: 4 271 gates at depth 16. ALU: 869 gates at depth 148',
-        detail: 'The register file is 72% of the gates and only 16 gate delays deep, because it '
-          + 'is 1 024 flip-flops and two wide multiplexer trees — enormous, and shallow. The ALU '
-          + 'is 15% of the gates and 148 delays, because a 32-bit ripple carry has to propagate '
-          + 'end to end. So "make it smaller" and "make it faster" are different projects that '
-          + 'touch different blocks, and a plan that confuses them optimises the wrong thing. '
-          + 'The same split shows up in software constantly: the biggest allocation and the '
-          + 'slowest function are rarely the same line.',
+        detail: [
+          'The register file is 72% of the gates and only 16 gate delays deep, because it is '
+            + '1 024 flip-flops and two wide multiplexer trees: enormous, and shallow.',
+          'The ALU is 15% of the gates and 148 delays, because a 32-bit ripple carry has to '
+            + 'propagate end to end.',
+          'So "make it smaller" and "make it faster" are different projects that touch different '
+            + 'blocks, and a plan that confuses them optimises the wrong thing.',
+          'The same split shows up in software constantly. The biggest allocation and the slowest '
+            + 'function are rarely the same line.'
+        ],
         example: 'The ALU\'s 148 gate delays are 85% of the 175 the clock period charges for; '
           + 'the register file\'s 4 271 gates are 72% of the area and contribute 16 delays.'
       },
@@ -70,12 +80,15 @@
         term: 'Every block runs every cycle, and most of them are wasted',
         plain: 'Nothing is switched off, so the idle blocks still cost power and area.',
         formal: 'an instruction class uses a subset of the datapath; the rest is powered and unused',
-        detail: 'A store reads two registers and writes memory, so the write-back path does '
-          + 'nothing. A branch uses neither the data memory nor the write port. An arithmetic '
-          + 'instruction never touches the data memory. In this design those blocks are still '
-          + 'driven, still switching and still charged for in the clock period. Naming which '
-          + 'ones are idle per instruction class is the clearest way to see where the '
-          + 'inefficiency is, and it is the argument for both pipelining and clock gating.',
+        detail: [
+          'A store reads two registers and writes memory, so the write-back path does nothing.',
+          'A branch uses neither the data memory nor the write port, and an arithmetic '
+            + 'instruction never touches the data memory.',
+          'In this design those blocks are still driven, still switching and still charged for in '
+            + 'the clock period.',
+          'Naming which ones are idle per instruction class is the clearest way to see where the '
+            + 'inefficiency is, and it is the argument for both pipelining and clock gating.'
+        ],
         example: 'Only the load class uses the register file, the ALU, the data memory and the '
           + 'write-back path in series — which is why it sets the clock.'
       },
@@ -83,13 +96,15 @@
         term: 'A flip-flop captures what is already at its input',
         plain: 'The value must be settled before the clock edge, not after it.',
         formal: 'setup time: the data input must be stable for some interval before the edge',
-        detail: 'This is the single most common mistake when driving a gate-level machine by '
-          + 'hand. Applying a load\'s result and then clocking captures nothing, because the '
-          + 'loaded word has to have propagated all the way onto the write-back path before the '
-          + 'edge rises. It is a perfect miniature of a setup-time violation, and the symptom is '
-          + 'the worst kind: every load writes zero, silently, while everything else works. In '
-          + 'the simulator it means settling the combinational phase before advancing the clock, '
-          + 'in that order, every time.',
+        detail: [
+          'This is the single most common mistake when driving a gate-level machine by hand.',
+          'Applying a load\'s result and then clocking captures nothing, because the loaded word '
+            + 'has to have propagated all the way onto the write-back path before the edge rises.',
+          'It is a perfect miniature of a setup-time violation, and the symptom is the worst '
+            + 'kind: every load writes zero, silently, while everything else works.',
+          'In the simulator it means settling the combinational phase before advancing the clock, '
+            + 'in that order, every time.'
+        ],
         example: 'Skipping that settling made every load in the gate machine write zero, with no '
           + 'error and no warning anywhere.'
       },
@@ -97,13 +112,16 @@
         term: 'A differential test against an independent implementation is the only real check',
         plain: 'Two machines, one program, the same architectural state after every instruction.',
         formal: 'compare 32 registers and the program counter after each retire',
-        detail: 'The gate machine propagates values through 5 945 gates; the behavioural machine '
-          + 'calls a JavaScript function per instruction. They share the instruction table and '
-          + 'nothing else, so agreement is evidence rather than a tautology. Comparing after '
-          + 'every instruction rather than at the end is what makes a failure diagnosable: the '
-          + 'first disagreement names the instruction, and you are looking at one instruction '
-          + 'instead of a wrong final answer. Bisecting a divergence is far more expensive than '
-          + 'recording it.',
+        detail: [
+          'The gate machine propagates values through 5 945 gates; the behavioural machine calls '
+            + 'a JavaScript function per instruction.',
+          'They share the instruction table and nothing else, so agreement is evidence rather '
+            + 'than a tautology.',
+          'Comparing after every instruction rather than at the end is what makes a failure '
+            + 'diagnosable. The first disagreement names the instruction, so you are looking at '
+            + 'one instruction instead of a wrong final answer.',
+          'Bisecting a divergence is far more expensive than recording it.'
+        ],
         example: 'Over programs covering lui, addi, sw, lw, branches taken and not taken, jal, '
           + 'jalr, auipc, lbu, sh and lh: 16 of 16 and 11 of 11 instructions agree.'
       },
@@ -111,12 +129,15 @@
         term: 'A gate-level step is expensive, so anything that walks the machine must be bounded',
         plain: 'Settling 5 945 gates costs real time, and the cost multiplies.',
         formal: 'about 220 ms per instruction, so a differential run is capped and says so',
-        detail: 'Reading all 32 registers through the read port would mean 32 settlings for one '
-          + 'display refresh, so the viewer reads the flip-flops directly instead. The '
-          + 'differential run defaults to 24 instructions rather than to completion. Both limits '
-          + 'are stated rather than hidden, because a silently truncated check looks exactly '
-          + 'like a passing one. That habit — say what you did not do — is what separates a '
-          + 'measurement from a reassurance.',
+        detail: [
+          'Reading all 32 registers through the read port would mean 32 settlings for one display '
+            + 'refresh, so the viewer reads the flip-flops directly instead.',
+          'The differential run defaults to 24 instructions rather than to completion.',
+          'Both limits are stated rather than hidden, because a silently truncated check looks '
+            + 'exactly like a passing one.',
+          'That habit of saying what you did not do is what separates a measurement from a '
+            + 'reassurance.'
+        ],
         example: 'The event-driven simulator\'s default horizon is 5 000 events and this '
           + 'datapath needs 5 277; a run that hits the horizon returns partial results that look '
           + 'like wrong answers.'
@@ -125,13 +146,16 @@
         term: 'The instruction memory and the data memory are separate here, and that is a lie',
         plain: 'Two memories means two accesses in one cycle without arbitration.',
         formal: 'a Harvard split at the top of the hierarchy; one memory below it',
-        detail: 'A single-cycle machine has to fetch an instruction and access data in the same '
-          + 'cycle, which a single-ported memory cannot do. Splitting them makes the design '
-          + 'possible and does not match how memory actually works. Real machines resolve it '
-          + 'with split first-level caches over a unified memory — the same trick, one level '
-          + 'down, where it is cheap. Knowing that the split is a modelling convenience rather '
-          + 'than a fact is what keeps you from being surprised by self-modifying code, '
-          + 'instruction cache flushes and the fence instructions that go with them.',
+        detail: [
+          'A single-cycle machine has to fetch an instruction and access data in the same cycle, '
+            + 'which a single-ported memory cannot do.',
+          'Splitting them makes the design possible and does not match how memory actually works.',
+          'Real machines resolve it with split first-level caches over a unified memory: the same '
+            + 'trick, one level down, where it is cheap.',
+          'The split is a modelling convenience rather than a fact. Knowing that keeps you from '
+            + 'being surprised by self-modifying code, instruction cache flushes and the fence '
+            + 'instructions that go with them.'
+        ],
         example: 'M37 builds the cache that makes this split real, and M30\'s JIT is the case '
           + 'where writing data and then executing it forces the issue.'
       }

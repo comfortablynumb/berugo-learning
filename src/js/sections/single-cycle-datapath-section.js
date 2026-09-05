@@ -103,9 +103,9 @@
         + 'The ALU result for arithmetic, the loaded word for a load, PC + 4 for a jump-and-'
         + 'link, and the immediate for `lui`. Two control bits choose, and those two bits are '
         + 'most of what distinguishes the classes from the register file\'s point of view.',
-      '**The branch decision is three gates on top of the ALU flags.** funct3 bit 2 chooses '
+      '**The branch decision is three gates on top of the ALU flags.** Bit 2 of funct3 chooses '
         + 'equality or magnitude, bit 1 chooses signed or unsigned, and bit 0 inverts the '
-        + 'answer. That regularity in the encoding is why the branch unit is this small — a '
+        + 'answer. That regularity in the encoding is why the branch unit is this small. A '
         + 'less tidy encoding would need a decoder here.',
       '**The clock period is a register-to-register path, and the ALU holds most of it.** The '
         + 'measured path runs from a flip-flop in the register file, through the read '
@@ -133,17 +133,17 @@
     return '**A processor is not a new kind of object; it is the blocks of the previous '
       + 'milestone wired into a loop, and the loop is what makes it a computer.** Take the '
       + 'register file, the ALU, some multiplexers and an adder — all of which were built and '
-      + 'measured separately — and feed the output of the last one back into the first. That '
+      + 'measured separately. Feed the output of the last one back into the first. That '
       + 'feedback is the entire difference between a calculator and a machine that can run a '
       + 'program: the next instruction\'s address comes from the current instruction\'s '
       + 'execution. Everything else in computer architecture is an optimisation of that loop. '
       + 'The second thing worth taking is what the idle-block column shows. This machine is '
-      + 'correct and it wastes most of itself on every instruction: the data memory sits unused '
-      + 'during arithmetic, the register write port during a store, the ALU is barely stretched '
-      + 'by a branch. The clock period is set by the one path that needs everything, so every '
-      + 'instruction pays the maximum. Once that is visible, the two classical answers become '
-      + 'obvious rather than arbitrary — cut the path into stages so each cycle is shorter '
-      + '(multi-cycle, next section) or keep the stages and overlap instructions in them '
+      + 'correct and it wastes most of itself on every instruction. The data memory sits unused '
+      + 'during arithmetic, the register write port during a store, and the ALU is barely '
+      + 'stretched by a branch. The clock period is set by the one path that needs everything, '
+      + 'so every instruction pays the maximum. Once that is visible, the two classical answers '
+      + 'become obvious rather than arbitrary. Cut the path into stages so each cycle is shorter '
+      + '(multi-cycle, next section), or keep the stages and overlap instructions in them '
       + '(pipelining, next milestone). Both are attacking the same measured waste.';
   }
 
