@@ -23,16 +23,16 @@
     root.jQuery('#' + SECTION_ID + '-content').html(app.shell.render({
       sectionId: SECTION_ID,
       orientation: [
-        'If the key set is known when you build the binary — language keywords, HTTP header names, ' +
-          'opcode tables, a routing table, an on-disk index — then collisions are not a runtime ' +
-          'problem to manage. They are a build-time problem to eliminate.',
-        'FKS is the classic result: two levels, a bucket of b keys gets a table of b² slots, and the ' +
-          'birthday bound says a collision-free seed appears after a few tries. Worst-case O(1) ' +
-          'lookup, expected O(n) space — the demo reports the ratio it actually achieved.',
-        'CHD-style hash-and-displace goes further and produces a *minimal* perfect hash: n keys map ' +
-          'onto exactly [0, n) with no holes. What gets stored is a displacement per bucket, a few ' +
-          'bits each, and the keys themselves need not be stored at all if every lookup is known to ' +
-          'be for a member.'
+        'If the key set is known when you build the binary, collisions are not a runtime problem ' +
+          'to manage. Think of language keywords, HTTP header names, opcode tables, a routing ' +
+          'table, an on-disk index. They are a build-time problem to eliminate.',
+        'FKS is the classic result. Two levels: a bucket of b keys gets a table of b² slots, and ' +
+          'the birthday bound says a collision-free seed appears after a few tries. Worst-case ' +
+          'O(1) lookup, expected O(n) space — the demo reports the ratio it actually achieved.',
+        'CHD-style hash-and-displace goes further and produces a *minimal* perfect hash: n keys ' +
+          'map onto exactly [0, n) with no holes. What gets stored is a displacement per bucket, ' +
+          'a few bits each. The keys themselves need not be stored at all if every lookup is ' +
+          'known to be for a member.'
       ],
       demo: { title: 'Interactive demo — build both, and count the space',
         markup: root.PerfectHashingTemplate.render() },

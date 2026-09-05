@@ -508,15 +508,18 @@
         },
         plain: 'For a fixed key set, a function with no collisions at all — so a lookup is one probe.',
         formal: 'h injective on S',
-        readAs: '"Injective" means no two different keys in S get the same output — the function never ' +
-          'collides on the set you actually have, though it may collide on keys outside it.',
-        detail: 'When the key set is known in advance and never changes, the collision problem can be ' +
-          'solved once at build time instead of handled at every lookup: search for a function that ' +
-          'is injective on exactly those keys. The result needs no probing, no chains and no load ' +
-          'factor — a lookup is one hash and one array read, with a single comparison if you also ' +
-          'need to reject non-keys. The requirement is severe and more common than it sounds: ' +
-          'compiler keywords, opcode dispatch tables, HTTP header names, protocol enums and ' +
-          'anything else generated at build time.',
+        readAs: '"Injective" means no two different keys in S get the same output. The function ' +
+          'never collides on the set you actually have, though it may collide on keys outside it.',
+        detail: [
+          'When the key set is known in advance and never changes, the collision problem can be ' +
+            'solved once at build time instead of handled at every lookup. Search for a function ' +
+            'that is injective on exactly those keys.',
+          'The result needs no probing, no chains and no load factor. A lookup is one hash and one ' +
+            'array read, with a single comparison if you also need to reject non-keys.',
+          'The requirement is severe and more common than it sounds: compiler keywords, opcode ' +
+            'dispatch tables, HTTP header names, protocol enums and anything else generated at ' +
+            'build time.'
+        ],
         example: 'Compiler keyword tables, opcode dispatch, HTTP header names.'
       },
       {
@@ -526,12 +529,15 @@
         readAs: 'The function maps the set S onto the whole numbers from 0 up to but not including n, hitting ' +
           'every one of them exactly once. "Bijective" is that perfect pairing: no gaps and no ' +
           'collisions, so n keys occupy exactly n slots.',
-        detail: 'A perfect hash into a larger range is easy; making it minimal — a bijection onto ' +
-          '[0, n) with no gaps — is what makes the table exactly as large as the data. Compare an ' +
-          'ordinary hash table, which must run below its maximum load factor and therefore wastes a ' +
-          'quarter to a half of its slots. The search is harder and the payoff is the densest ' +
-          'possible layout, which matters when the table is large or when it must fit in a cache. ' +
-          'The function itself still needs storage, and that cost is measured in bits per key.',
+        detail: [
+          'A perfect hash into a larger range is easy. Making it minimal — a bijection onto ' +
+            '[0, n) with no gaps — is what makes the table exactly as large as the data.',
+          'Compare an ordinary hash table, which must run below its maximum load factor and ' +
+            'therefore wastes a quarter to a half of its slots.',
+          'The search is harder and the payoff is the densest possible layout, which matters when ' +
+            'the table is large or when it must fit in a cache.',
+          'The function itself still needs storage, and that cost is measured in bits per key.'
+        ],
         example: 'No wasted slots, unlike a hash table which needs α < 1.'
       },
       {
@@ -541,12 +547,15 @@
         readAs: 'Add up the square of each bucket\'s size, and on average that total stays under twice the ' +
           'number of keys. It matters because the squares are exactly the space the second-level tables ' +
           'need.',
-        detail: 'Fredman, Komlós and Szemerédi\'s 1984 construction is the classic result: hash into ' +
-          'n buckets, then give each bucket its own second-level table of size b² and search for a ' +
-          'seed that is collision-free within it. Quadratic space per bucket sounds ruinous until ' +
-          'you sum it — the expectation of Σ b² is below 2n for a universal first-level hash, so the ' +
-          'whole structure is linear. A lookup is two hashes and one comparison, worst case, always. ' +
-          'It is the proof that worst-case O(1) lookup with O(n) space is achievable.',
+        detail: [
+          'Fredman, Komlós and Szemerédi\'s 1984 construction is the classic result. Hash into n ' +
+            'buckets, then give each bucket its own second-level table of size b² and search for a ' +
+            'seed that is collision-free within it.',
+          'Quadratic space per bucket sounds ruinous until you sum it. The expectation of Σ b² is ' +
+            'below 2n for a universal first-level hash, so the whole structure is linear.',
+          'A lookup is two hashes and one comparison, worst case, always. It is the proof that ' +
+            'worst-case O(1) lookup with O(n) space is achievable.'
+        ],
         example: 'Worst-case O(1) lookup with expected O(n) space, from 1984.'
       },
       {
@@ -556,41 +565,54 @@
         readAs: 'Hash the key again, this time seeded with the displacement value stored for its bucket, and ' +
           'take the remainder to land in the table. Choosing that displacement per bucket is what ' +
           'removes the collisions.',
-        detail: 'Hash-and-displace keeps FKS\'s two levels but stores far less: instead of a ' +
-          'second-level table per bucket, it stores a single displacement value per bucket, chosen ' +
-          'so that re-hashing that bucket\'s keys with it lands them all on currently free slots. ' +
-          'Lookup is one hash to find the bucket, one lookup of its displacement, and one more hash ' +
-          'to reach the slot. Because only the displacement array is stored, the structure costs a ' +
-          'few bits per key rather than a word — which is the whole reason CHD-style constructions ' +
-          'are what people actually ship.',
+        detail: [
+          'Hash-and-displace keeps FKS\'s two levels but stores far less. Instead of a ' +
+            'second-level table per bucket, it stores a single displacement value per bucket.',
+          'That displacement is chosen so that re-hashing the bucket\'s keys with it lands them ' +
+            'all on currently free slots.',
+          'Lookup is one hash to find the bucket, one lookup of its displacement, and one more ' +
+            'hash to reach the slot.',
+          'Because only the displacement array is stored, the structure costs a few bits per key ' +
+            'rather than a word. That is the whole reason CHD-style constructions are what people ' +
+            'actually ship.'
+        ],
         example: 'Only the displacement array is stored — a few bits per key.'
       },
       {
         term: 'Largest bucket first',
         plain: 'Placing crowded buckets while the table is empty is what makes the displacement search converge.',
         formal: 'sort buckets by descending size',
-        detail: 'The order buckets are placed in decides whether the search terminates in reasonable ' +
-          'time. A bucket with several keys needs a displacement that finds several free slots at ' +
-          'once, and the probability of that collapses as the table fills — so crowded buckets are ' +
-          'placed first, while space is plentiful, and singleton buckets last, when almost any ' +
-          'displacement works. Reverse the order and the search stalls on the final large buckets, ' +
-          'sometimes for so long that the build appears to hang. It is a greedy heuristic and it is ' +
-          'the difference between seconds and never.',
+        detail: [
+          'The order buckets are placed in decides whether the search terminates in reasonable ' +
+            'time.',
+          'A bucket with several keys needs a displacement that finds several free slots at once, ' +
+            'and the probability of that collapses as the table fills.',
+          'So crowded buckets are placed first, while space is plentiful, and singleton buckets ' +
+            'last, when almost any displacement works.',
+          'Reverse the order and the search stalls on the final large buckets, sometimes for so ' +
+            'long that the build appears to hang. It is a greedy heuristic, and it is the ' +
+            'difference between seconds and never.'
+        ],
         example: 'Reverse the order and the search stalls on the last few buckets.'
       },
       {
         term: 'Bits per key',
         plain: 'The space measure for a minimal perfect hash, since it stores no keys.',
         formal: 'r · ⌈log₂(max d)⌉ / n',
-        readAs: 'The space cost per key: the number of displacement entries, times the bits each one needs ' +
-          '(log base 2 of the largest displacement, rounded up), divided by the number of keys.',
-        detail: 'A minimal perfect hash stores no keys and no values of its own — only the ' +
-          'displacement array — so the meaningful space measure is bits per key: the number of ' +
-          'displacement entries times the bits each needs, divided by the key count. That makes the ' +
-          'structures comparable across key types and sizes, and it puts the achievement in ' +
-          'perspective: published CHD implementations reach about 2.1 bits per key, against the ' +
-          'information-theoretic lower bound of roughly 1.44. The straightforward version in this ' +
-          'section lands near 3, which is the price of a simple search.',
+        readAs: 'The space cost per key. Take the number of displacement entries, times the bits ' +
+          'each one needs — log base 2 of the largest displacement, rounded up — and divide by the ' +
+          'number of keys.',
+        detail: [
+          'A minimal perfect hash stores no keys and no values of its own, only the displacement ' +
+            'array.',
+          'So the meaningful space measure is bits per key: the number of displacement entries ' +
+            'times the bits each needs, divided by the key count.',
+          'That makes the structures comparable across key types and sizes, and it puts the ' +
+            'achievement in perspective. Published CHD implementations reach about 2.1 bits per ' +
+            'key, against the information-theoretic lower bound of roughly 1.44.',
+          'The straightforward version in this section lands near 3, which is the price of a ' +
+            'simple search.'
+        ],
         example: 'Published CHD reaches ~2.1 bits/key; the simple version here lands near 3.'
       },
       {
@@ -599,13 +621,16 @@
         formal: 'r = ⌈n/λ⌉ displacement entries',
         readAs: 'How many buckets there are: the key count divided by the average keys per bucket, rounded ' +
           'up. Fewer buckets means a smaller table and a harder search.',
-        detail: 'λ is the average number of keys per bucket, and it trades build time against space ' +
-          'along a brutally non-linear curve. Larger buckets mean fewer of them and so fewer ' +
-          'displacements to store, but each displacement must place all of its bucket\'s keys ' +
-          'simultaneously, and the probability of that falls exponentially in the bucket size. On ' +
-          '500 keys, λ = 2 costs 4.50 bits per key after 3 809 trials, while λ = 6 costs 2.52 bits ' +
-          'after 227 969 — a 44% space saving for 60 times the build work. Since the build happens ' +
-          'once, that is often the right trade.',
+        detail: [
+          'λ is the average number of keys per bucket, and it trades build time against space ' +
+            'along a brutally non-linear curve.',
+          'Larger buckets mean fewer of them, and so fewer displacements to store. But each ' +
+            'displacement must place all of its bucket\'s keys simultaneously, and the probability ' +
+            'of that falls exponentially in the bucket size.',
+          'On 500 keys, λ = 2 costs 4.50 bits per key after 3 809 trials, while λ = 6 costs 2.52 ' +
+            'bits after 227 969. That is a 44% space saving for 60 times the build work.',
+          'Since the build happens once, that is often the right trade.'
+        ],
         example: '500 keys: λ = 2 gives 4.50 bits/key after 3 809 trials; λ = 6 gives 2.52 bits after 227 969.'
       },
       {
@@ -615,13 +640,17 @@
         readAs: 'The function returns a slot in range for any input at all, including keys that were never ' +
           'stored. It cannot tell you whether the key belongs — that is what makes it minimal perfect ' +
           'hashing rather than a set.',
-        detail: 'The function is defined on the whole universe, and it is injective only on the set ' +
-          'it was built for — so a key that was never in the set still hashes to some slot in ' +
-          '[0, n) and returns whatever lives there, confidently and wrongly. If the input is ' +
-          'guaranteed to be a member, that is fine and is why the keys need not be stored. If it is ' +
-          'not, you must store something to check against: the full keys, or a fingerprint per slot. ' +
-          'One byte of fingerprint drops false positives to 1/256 and costs 8 bits per key against ' +
-          'the structure\'s own 3.',
+        detail: [
+          'The function is defined on the whole universe, and it is injective only on the set it ' +
+            'was built for.',
+          'So a key that was never in the set still hashes to some slot in [0, n), and returns ' +
+            'whatever lives there — confidently and wrongly.',
+          'If the input is guaranteed to be a member, that is fine, and it is why the keys need ' +
+            'not be stored.',
+          'If it is not, you must store something to check against: the full keys, or a ' +
+            'fingerprint per slot. One byte of fingerprint drops false positives to 1/256 and ' +
+            'costs 8 bits per key, against the structure\'s own 3.'
+        ],
         example: 'One byte of fingerprint per key drops false positives to 1/256, at 8 bits per key against the structure\'s 3.'
       }
     ],
