@@ -172,11 +172,14 @@
         formal: 'children of i are d·i + 1 … d·i + d',
         readAs: 'In a d-ary heap each node has d children, sitting in a contiguous run starting at d times ' +
           'the index plus one. Contiguous is the point: all d of them arrive in the same cache line.',
-        detail: 'The index arithmetic generalises without any change to the algorithm: the parent of ' +
-          'i is ⌊(i − 1)/d⌋ and the children are contiguous. Raising d makes the tree shallower, ' +
-          'which shortens every sift-up, and widens each node, which lengthens every sift-down. So d ' +
-          'is a genuine dial rather than a detail, and the right setting depends on which of the two ' +
-          'walks your workload does more of — which is exactly what the demo sweeps.',
+        detail: [
+          'The index arithmetic generalises without any change to the algorithm: the parent of i ' +
+            'is ⌊(i − 1)/d⌋ and the children are contiguous.',
+          'Raising d makes the tree shallower, which shortens every sift-up, and widens each node, ' +
+            'which lengthens every sift-down.',
+          'So d is a genuine dial rather than a detail. The right setting depends on which of the ' +
+            'two walks your workload does more of, which is exactly what the demo sweeps.'
+        ],
         example: 'A million elements are 20 levels deep at d = 2 and 10 at d = 4.'
       },
       {
@@ -195,15 +198,18 @@
         },
         plain: 'Comparisons form a shallow U with its minimum near d = 3; swaps fall monotonically as d rises.',
         formal: 'sift-up: log_d n comparisons; sift-down: d·log_d n',
-        readAs: 'Raising the branching factor d makes the tree shallower, so sifting up gets cheaper — but ' +
-          'sifting down has to compare all d children at each level, so it gets dearer. The best d is ' +
-          'wherever those two curves cross for your workload.',
-        detail: 'The sift-down cost is d·log_d n = d·ln n / ln d, which is minimised at d = 3 and ' +
-          'rises slowly after — and the sift-up cost is log_d n, which falls monotonically. Since a ' +
-          'mix contains both, the total comparison count is a shallow U: measured over 50 000 ' +
-          'balanced operations it runs 366 125 at d = 2, 338 230 at d = 3, 355 873 at d = 4 and ' +
-          '602 679 at d = 16. Data movement is a different story entirely — swaps fall from 225 089 ' +
-          'to 60 050 over the same range, because a shallower tree means shorter sift paths.',
+        readAs: 'Raising the branching factor d makes the tree shallower, so sifting up gets ' +
+          'cheaper. But sifting down has to compare all d children at each level, so it gets ' +
+          'dearer. The best d is wherever those two curves cross for your workload.',
+        detail: [
+          'The sift-down cost is d·log_d n = d·ln n / ln d, which is minimised at d = 3 and rises ' +
+            'slowly after. The sift-up cost is log_d n, which falls monotonically.',
+          'Since a mix contains both, the total comparison count is a shallow U. Measured over ' +
+            '50 000 balanced operations it runs 366 125 at d = 2 and 338 230 at d = 3.',
+          'It then climbs to 355 873 at d = 4 and 602 679 at d = 16.',
+          'Data movement is a different story entirely. Swaps fall from 225 089 to 60 050 over the ' +
+            'same range, because a shallower tree means shorter sift paths.'
+        ],
         example: 'Over 50 000 balanced operations: comparisons bottom out at d = 3, swaps keep falling to d = 16.'
       },
       {
@@ -212,48 +218,62 @@
         formal: '64-byte line ÷ 4-byte key = 16 children',
         readAs: 'A cache line holds sixteen 32-bit keys, so a 16-ary heap can examine a whole sibling group ' +
           'for the price of one memory fetch.',
-        detail: 'This is the argument the comparison count cannot see, and the one that decides real ' +
-          'implementations. A binary heap fetches two children — eight bytes of a sixty-four-byte ' +
-          'line — and throws the rest away, and does that at every level. A 4-ary heap uses sixteen ' +
-          'bytes of the line and needs half as many levels, so it touches roughly a quarter as many ' +
-          'lines per operation. Since a miss is worth about eighty comparisons, the extra ' +
-          'comparisons d = 4 does are bought back many times over.',
+        detail: [
+          'This is the argument the comparison count cannot see, and the one that decides real ' +
+            'implementations.',
+          'A binary heap fetches two children — eight bytes of a sixty-four-byte line — and throws ' +
+            'the rest away, and does that at every level.',
+          'A 4-ary heap uses sixteen bytes of the line and needs half as many levels, so it ' +
+            'touches roughly a quarter as many lines per operation.',
+          'Since a miss is worth about eighty comparisons, the extra comparisons d = 4 does are ' +
+            'bought back many times over.'
+        ],
         example: 'A 4-ary heap of a million elements walks 10 levels rather than 20, and uses four keys per line rather than two.'
       },
       {
         term: 'Alignment matters',
         plain: 'The children only share a line if the array is aligned so that they do not straddle one.',
         formal: 'pad the root so each child group starts on a line boundary',
-        detail: 'The cache argument assumes the d children fall inside one line, and with the ' +
-          'ordinary layout they usually straddle two — the group starting at d·i + 1 is not aligned ' +
-          'to anything in particular. Real implementations waste a few slots at the front so that ' +
-          'every child group begins on a line boundary, which turns "usually two lines" into "always ' +
-          'one". It is a two-line change that recovers most of the benefit the arity was chosen for, ' +
-          'and it is the sort of detail that never appears in the pseudocode.',
+        detail: [
+          'The cache argument assumes the d children fall inside one line, and with the ordinary ' +
+            'layout they usually straddle two. The group starting at d·i + 1 is not aligned to ' +
+            'anything in particular.',
+          'Real implementations waste a few slots at the front so that every child group begins on ' +
+            'a line boundary, which turns "usually two lines" into "always one".',
+          'It is a two-line change that recovers most of the benefit the arity was chosen for, and ' +
+            'it is the sort of detail that never appears in the pseudocode.'
+        ],
         example: 'Offsetting the array so child groups start at a multiple of d turns two line fetches per level into one.'
       },
       {
         term: 'Decrease-key is a sift-up',
         plain: 'Lowering a key only ever walks upward, so it gets strictly cheaper as d rises.',
         formal: 'decreaseKey = write the key, then siftUp',
-        detail: 'This is why d-ary heaps are the standard answer for Dijkstra and its relatives. A ' +
-          'decrease-key never sifts down, so it pays only the shallower tree and none of the wider ' +
-          'node. Measured on a decrease-key-heavy mix, the comparison count falls from 385 548 at ' +
-          'd = 2 to 366 740 at d = 4 — the U-curve minimum moves right when the workload leans on ' +
-          'the upward walk. On a graph algorithm dominated by edge relaxations, d = 4 or d = 8 is ' +
-          'the usual choice for exactly this reason.',
+        detail: [
+          'This is why d-ary heaps are the standard answer for Dijkstra and its relatives.',
+          'A decrease-key never sifts down, so it pays only the shallower tree and none of the ' +
+            'wider node.',
+          'Measured on a decrease-key-heavy mix, the comparison count falls from 385 548 at d = 2 ' +
+            'to 366 740 at d = 4. The U-curve minimum moves right when the workload leans on the ' +
+            'upward walk.',
+          'On a graph algorithm dominated by edge relaxations, d = 4 or d = 8 is the usual choice ' +
+            'for exactly this reason.'
+        ],
         example: 'On a decrease-key-heavy mix the comparison minimum moves from d = 3 to d = 4.'
       },
       {
         term: 'Choosing d from the workload',
         plain: 'Push-heavy and decrease-key-heavy favour larger d; pop-heavy favours smaller.',
         formal: 'the optimum shifts with the ratio of sift-ups to sift-downs',
-        detail: 'The rule is mechanical once the two costs are separated. Count how many of your ' +
-          'operations sift up (pushes and decrease-keys) against how many sift down (pops), and the ' +
-          'optimum moves toward larger d as the first group grows. A Dijkstra run is almost all ' +
-          'relaxations, so it wants a wide heap; a scheduler that pops far more than it pushes wants ' +
-          'a narrow one. Since the curve is shallow near its minimum, getting within a factor of two ' +
-          'of the right d is enough — which is why 4 is a defensible default for everything.',
+        detail: [
+          'The rule is mechanical once the two costs are separated.',
+          'Count how many of your operations sift up (pushes and decrease-keys) against how many ' +
+            'sift down (pops). The optimum moves toward larger d as the first group grows.',
+          'A Dijkstra run is almost all relaxations, so it wants a wide heap. A scheduler that ' +
+            'pops far more than it pushes wants a narrow one.',
+          'Since the curve is shallow near its minimum, getting within a factor of two of the ' +
+            'right d is enough. That is why 4 is a defensible default for everything.'
+        ],
         example: 'Dijkstra on a dense graph does one pop per node and one sift-up per improved edge, which is why d = 4 wins.'
       },
       {
@@ -262,24 +282,30 @@
         formal: 'Σ h·n/d^(h+1) still converges',
         readAs: 'The same level-by-level sum as before, with d children instead of 2. It still adds up to a ' +
           'multiple of n rather than n log n, so a d-ary heap builds in linear time too.',
-        detail: 'None of the analysis breaks. The sum-of-heights argument still converges — to ' +
-          'n·d/(d − 1)² rather than n, which is smaller for larger d — so the build stays linear and ' +
-          'gets cheaper. The height bound is log_d n, the invariant is unchanged, and an ' +
-          'implementation that parameterises the arity is the binary one with `2` replaced by `d` in ' +
-          'two places. That is unusually clean for a tuning knob, and it is why the arity is worth ' +
-          'exposing rather than hard-coding.',
+        detail: [
+          'None of the analysis breaks.',
+          'The sum-of-heights argument still converges — to n·d/(d − 1)² rather than n, which is ' +
+            'smaller for larger d — so the build stays linear and gets cheaper.',
+          'The height bound is log_d n, the invariant is unchanged, and an implementation that ' +
+            'parameterises the arity is the binary one with `2` replaced by `d` in two places.',
+          'That is unusually clean for a tuning knob, and it is why the arity is worth exposing ' +
+            'rather than hard-coding.'
+        ],
         example: 'Tabulated build work at n = 100 000: 100 058 units at d = 2 and 11 130 at d = 4.'
       },
       {
         term: 'Where the model runs out',
         plain: 'Counting comparisons and swaps cannot see prefetching, branch prediction or SIMD — and those decide the winner.',
         formal: 'measure time as well, and say which is which',
-        detail: 'The demo reports comparisons and swaps because those are exact and portable, and ' +
-          'they are not what makes a 4-ary heap faster than a binary one on real hardware. Finding ' +
-          'the best of four contiguous children is a branchless minimum a compiler can vectorise; ' +
-          'finding the best of two is a branch the predictor gets wrong half the time. Neither effect ' +
-          'appears in a counter. The honest presentation is to give the counts, give a measured time, ' +
-          'and say plainly which one the theory was about.',
+        detail: [
+          'The demo reports comparisons and swaps because those are exact and portable. They are ' +
+            'not what makes a 4-ary heap faster than a binary one on real hardware.',
+          'Finding the best of four contiguous children is a branchless minimum a compiler can ' +
+            'vectorise. Finding the best of two is a branch the predictor gets wrong half the time.',
+          'Neither effect appears in a counter.',
+          'The honest presentation is to give the counts, give a measured time, and say plainly ' +
+            'which one the theory was about.'
+        ],
         example: 'The comparison count says d = 3; every production implementation uses 4 or 8.'
       }
     ],

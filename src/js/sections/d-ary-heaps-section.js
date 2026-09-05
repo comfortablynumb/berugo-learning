@@ -29,16 +29,16 @@
       sectionId: SECTION_ID,
       orientation: [
         'Nothing about a heap requires two children. Give each node d of them and the tree gets ' +
-          'shallower — log_d n instead of log₂ n — which makes every sift-up shorter, and every ' +
+          'shallower: log_d n instead of log₂ n. That makes every sift-up shorter, and every ' +
           'sift-down does d comparisons per level instead of two.',
         'So the two costs move in opposite directions and the answer depends on the mix. A push ' +
           'sifts up and only compares against one parent per level, so it gets cheaper as d rises. A ' +
           'pop sifts down and must find the best of d children at each level, so it gets more ' +
           'expensive. Decrease-key is a sift-up, which is why d-ary heaps are the standard answer ' +
           'when decrease-key dominates.',
-        'The argument that settles it is not in the comparison count at all: d children sit ' +
-          'contiguously in the array, so a 4-ary or 8-ary node fetches all its children in one cache ' +
-          'line. That is why real implementations use 4 rather than the comparison-optimal 3.'
+        'The argument that settles it is not in the comparison count at all. The d children sit ' +
+          'contiguously in the array, so a 4-ary or 8-ary node fetches all its children in one ' +
+          'cache line. That is why real implementations use 4 rather than the comparison-optimal 3.'
       ],
       demo: { title: 'Interactive demo — sweep the arity', markup: root.DaryHeapsTemplate.render() },
       diagram: {
@@ -55,9 +55,9 @@
         ].join('\n')
       },
       insight: 'd-ary heaps are the standard answer when decrease-key dominates, which is exactly ' +
-        'the Dijkstra case in M13 — a sift-up compares against one parent per level, so the shallower ' +
-        'tree is pure gain there. The comparison-optimal arity is 3; the practical answer is 4, and ' +
-        'the difference between those two numbers is the cache line.'
+        'the Dijkstra case in M13. A sift-up compares against one parent per level, so the ' +
+        'shallower tree is pure gain there. The comparison-optimal arity is 3; the practical ' +
+        'answer is 4, and the difference between those two numbers is the cache line.'
     };
   }
 
