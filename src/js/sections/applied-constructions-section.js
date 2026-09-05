@@ -63,7 +63,7 @@
         'polynomial through them, so the shares eliminate no possibilities at all. No amount of ' +
         'computation helps, which is what information-theoretic security means.',
       '**A commitment is "I have decided and cannot change my mind".** Hash a message with a ' +
-        'random opening value: the commitment hides the message because the opening is unknown, ' +
+        'random opening value. The commitment hides the message because the opening is unknown, ' +
         'and binds it because opening it two ways would be a hash collision. Sealed bids, ' +
         'coin flips and fair random beacons are all this.',
       '**A Merkle tree turns "trust the list" into "verify one path".** Hash the leaves, hash the ' +
@@ -76,11 +76,11 @@
         'carrying it up lets two different trees produce the same root, which was Bitcoin\'s ' +
         'CVE-2012-2459. This implementation carries the node, and the demo lets you prove the ' +
         'odd leaf so the shorter path is visible.',
-      '**The wider family runs from here.** Hash chains are Merkle trees with one branch; ' +
-        'verifiable random functions add a proof that a random-looking output was computed ' +
-        'correctly; zero-knowledge proofs generalise "convince me without telling me"; and ' +
-        'post-quantum hybrids ship a classical and a lattice key exchange together so a break in ' +
-        'either leaves the other standing.'
+      '**The wider family runs from here.** Hash chains are Merkle trees with one branch. ' +
+        'Verifiable random functions add a proof that a random-looking output was computed ' +
+        'correctly. Zero-knowledge proofs generalise "convince me without telling me". ' +
+        'Post-quantum hybrids ship a classical and a lattice key exchange together, so a break ' +
+        'in either leaves the other standing.'
     ];
   }
 
@@ -93,14 +93,14 @@
         markup: root.AppliedTemplate.render()
       },
       diagram: diagram(),
-      insight: '**Merkle proofs are the most reusable idea in this milestone: they turn "trust ' +
+      insight: '**Merkle proofs are the most reusable idea in this milestone.** They turn "trust ' +
         'the server" into "verify one path", and they appear in Git, Certificate Transparency, ' +
-        'blockchains, backups and replication protocols.** What makes the idea travel is that it ' +
-        'solves a systems problem, not a cryptographic one. A client that cannot hold the data, ' +
-        'cannot re-download it and does not trust the party serving it can still check that one ' +
-        'answer belongs to a commitment it already has, for log n hashes. Once you recognise the ' +
-        'shape you start seeing it as the answer to "how would this component verify what it is ' +
-        'being told?" — which is a question that comes up far more often than "which cipher ' +
+        'blockchains, backups and replication protocols. What makes the idea travel is that it ' +
+        'solves a systems problem, not a cryptographic one. A client may be unable to hold the ' +
+        'data, unable to re-download it, and unwilling to trust the party serving it. It can ' +
+        'still check one answer against a commitment it already holds, for log n hashes. Once ' +
+        'you recognise the shape, you start seeing it as the answer to "how would this component ' +
+        'verify what it is being told?" That question comes up far more often than "which cipher ' +
         'should I use".'
     };
   }

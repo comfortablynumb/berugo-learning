@@ -148,14 +148,17 @@
         term: 'Shamir sharing is a fact about polynomials',
         plain: 'A degree k−1 polynomial is determined by any k points and by no fewer.',
         formal: 'put the secret in the constant term, hand out points; Lagrange interpolation at zero recovers it from any k',
-        readAs: 'Choose a polynomial whose value at zero is the secret and whose other ' +
-          'coefficients are random, give each holder the value at a different input, and any k of ' +
-          'those values reconstruct the value at zero exactly.',
-        detail: 'The shares are interchangeable, which is the operational value: a key can be ' +
-          'split across five people or five regions and any k of them can act, with no single ' +
-          'holder able to act alone and no single holder indispensable. Losing up to n − k shares ' +
-          'is survivable, so it is an availability mechanism as much as a confidentiality one — ' +
-          'which is how it is usually deployed, for root keys and recovery procedures.',
+        readAs: 'Choose a polynomial whose value at zero is the secret, and make the other ' +
+          'coefficients random. Give each holder the value at a different input. Any k of those ' +
+          'values reconstruct the value at zero exactly.',
+        detail: [
+          'The shares are interchangeable, which is the operational value. A key can be split ' +
+            'across five people or five regions, and any k of them can act.',
+          'No single holder can act alone, and no single holder is indispensable.',
+          'Losing up to n − k shares is survivable, so it is an availability mechanism as much as ' +
+            'a confidentiality one. That is how it is usually deployed, for root keys and ' +
+            'recovery procedures.'
+        ],
         example: 'The demo splits one secret into 5 shares at threshold 3 and all 10 three-share ' +
           'subsets reconstruct it exactly.'
       },
@@ -173,12 +176,14 @@
         },
         plain: 'Every candidate secret is still consistent with what the attacker holds.',
         formal: 'for each candidate constant term there is exactly one polynomial of degree k−1 through the held shares',
-        detail: 'This is information-theoretic rather than computational: the shares eliminate no ' +
-          'possibilities, so no amount of computation helps and no future algorithm changes it. ' +
+        detail: [
+          'This is information-theoretic rather than computational. The shares eliminate no ' +
+            'possibilities, so no amount of computation helps and no future algorithm changes it.',
           'That is a stronger guarantee than anything else in the milestone, all of which rests ' +
-          'on some problem being hard. The cost is that the shares are as large as the secret and ' +
-          'the scheme provides no integrity — a holder who submits a wrong share corrupts the ' +
-          'reconstruction silently.',
+            'on some problem being hard.',
+          'The cost is that the shares are as large as the secret and the scheme provides no ' +
+            'integrity. A holder who submits a wrong share corrupts the reconstruction silently.'
+        ],
         example: 'The demo tests 8 candidate secrets against 2 held shares and every one is ' +
           'consistent, each implying a different value for a share nobody holds.'
       },
@@ -186,11 +191,15 @@
         term: 'Too few shares fails silently, which is the trap',
         plain: 'The arithmetic does not error; it returns a wrong number.',
         formal: 'interpolating k−1 points fits a lower-degree polynomial and reports its constant term',
-        detail: 'Nothing signals the shortfall. Lagrange interpolation through fewer points is a ' +
-          'perfectly well-defined operation that returns a value with no relationship to the ' +
-          'secret, so a system that does not check the share count will happily decrypt with the ' +
-          'wrong key and report a decryption failure somewhere further downstream — or, worse, ' +
-          'succeed at something. Counting shares before reconstructing is a required step.',
+        detail: [
+          'Nothing signals the shortfall. Lagrange interpolation through fewer points is a ' +
+            'perfectly well-defined operation, and it returns a value with no relationship to the ' +
+            'secret.',
+          'A system that does not check the share count will happily decrypt with the wrong key. ' +
+            'The decryption failure then surfaces somewhere further downstream — or, worse, ' +
+            'something succeeds.',
+          'Counting shares before reconstructing is a required step.'
+        ],
         example: 'With 2 of 5 shares at threshold 3 the demo reconstructs 446 296 622 against a ' +
           'true secret of 1 234 567.'
       },
@@ -198,11 +207,14 @@
         term: 'A commitment is "I have decided and cannot change my mind"',
         plain: 'Hash the message with a random opening value.',
         formal: 'hiding: the commitment reveals nothing without the opening; binding: opening it two ways needs a hash collision',
-        detail: 'The random opening is what provides hiding — without it, an attacker who can ' +
-          'guess a short message simply hashes every candidate and compares. Binding comes free ' +
-          'from collision resistance, so the two properties come from different places and both ' +
-          'are needed. Sealed bids, fair coin flips and random beacons that nobody can bias are ' +
-          'all this construction, and it is one of the cheapest useful things in cryptography.',
+        detail: [
+          'The random opening is what provides hiding. Without it, an attacker who can guess a ' +
+            'short message simply hashes every candidate and compares.',
+          'Binding comes free from collision resistance, so the two properties come from ' +
+            'different places and both are needed.',
+          'Sealed bids, fair coin flips and random beacons that nobody can bias are all this ' +
+            'construction. It is one of the cheapest useful things in cryptography.'
+        ],
         example: 'The demo opens a commitment correctly and then fails to open the same ' +
           'commitment to a different message.'
       },
@@ -211,13 +223,15 @@
         plain: 'Hash the leaves, hash the pairs, and the root commits to everything.',
         formal: 'an inclusion proof is the sibling hash at each level: ⌈log₂ n⌉ hashes, verified against a root the client already holds',
         readAs: 'To prove one entry belongs to a list of n entries, send the sibling hash at each ' +
-          'level of the tree — about log-base-two of n of them — and the verifier recomputes the ' +
-          'path upward and compares with the root they already trust.',
-        detail: 'The verifier needs nothing else: not the other entries, not the tree, only the ' +
-          'root. That is what makes the construction a systems tool rather than a cryptographic ' +
-          'one — a client that cannot hold the data, cannot re-download it and does not trust the ' +
-          'party serving it can still check any single answer. Changing any byte anywhere changes ' +
-          'the root, so the commitment covers the whole list.',
+          'level of the tree — about log-base-two of n of them. The verifier recomputes the path ' +
+          'upward and compares it with the root they already trust.',
+        detail: [
+          'The verifier needs nothing else: not the other entries, not the tree, only the root.',
+          'That is what makes the construction a systems tool rather than a cryptographic one. A ' +
+            'client that cannot hold the data, cannot re-download it and does not trust the party ' +
+            'serving it can still check any single answer.',
+          'Changing any byte anywhere changes the root, so the commitment covers the whole list.'
+        ],
         example: 'The demo proves one entry out of 7 with 3 sibling hashes and rejects the same ' +
           'proof against an edited leaf.'
       },
@@ -226,13 +240,16 @@
         plain: 'Thirty hashes to prove one entry in a billion.',
         formal: 'a proof is ⌈log₂ n⌉ × 32 bytes against n × 32 for the list: 960 bytes against 34 GB at a billion entries',
         readAs: 'The proof holds about log-base-two of n hashes of thirty-two bytes each, while ' +
-          'the full list holds n of them, so at a billion entries the proof is under a kilobyte ' +
-          'and the list is tens of gigabytes.',
-        detail: 'That ratio is what makes light clients, transparency logs and incremental backup ' +
-          'verification possible at all. It also sets the shape of systems built on it: the ' +
-          'server holds everything and is untrusted, the client holds a root and is offline most ' +
-          'of the time, and each answer arrives with its own proof. Recognising when a design has ' +
-          'that shape is more valuable than the construction itself.',
+          'the full list holds n of them. At a billion entries the proof is under a kilobyte and ' +
+          'the list is tens of gigabytes.',
+        detail: [
+          'That ratio is what makes light clients, transparency logs and incremental backup ' +
+            'verification possible at all.',
+          'It also sets the shape of systems built on it. The server holds everything and is ' +
+            'untrusted, the client holds a root and is offline most of the time, and each answer ' +
+            'arrives with its own proof.',
+          'Recognising when a design has that shape is more valuable than the construction itself.'
+        ],
         example: 'The demo tabulates four sizes; at 1 073 741 824 entries the proof is 30 hashes ' +
           'and the saving is about 35 million times.'
       },
@@ -240,11 +257,14 @@
         term: 'The odd-leaf case is a real bug, not a detail',
         plain: 'Duplicating a lone node lets two different lists give the same root.',
         formal: 'carrying an unpaired node up is correct; hashing it with itself creates a second preimage of the root',
-        detail: 'Bitcoin shipped the duplicating version and had to fix it as CVE-2012-2459, ' +
-          'because a list with a duplicated final entry produced the same root as the list ' +
-          'without it — which breaks the whole point of a commitment. The general lesson is that ' +
-          'the tree\'s shape is part of the commitment, so anything that makes two different ' +
-          'inputs build the same tree is a break even when the hash is perfect.',
+        detail: [
+          'Bitcoin shipped the duplicating version and had to fix it as CVE-2012-2459. A list ' +
+            'with a duplicated final entry produced the same root as the list without it, which ' +
+            'breaks the whole point of a commitment.',
+          'The general lesson is that the tree\'s shape is part of the commitment.',
+          'Anything that makes two different inputs build the same tree is a break, even when the ' +
+            'hash is perfect.'
+        ],
         example: 'The demo lets you prove the odd leaf, whose path is 2 hashes rather than 3, ' +
           'because the lone node is carried rather than duplicated.'
       },
@@ -252,12 +272,15 @@
         term: 'The wider family runs from here',
         plain: 'Hash chains, VRFs, zero-knowledge proofs and post-quantum hybrids.',
         formal: 'a hash chain is a Merkle tree with one branch; a VRF adds a proof that a pseudorandom output was computed correctly',
-        detail: 'Zero-knowledge proofs generalise "convince me without telling me", of which ' +
-          'Schnorr identification and the graph three-colouring protocol are the readable ' +
-          'introductions. Post-quantum practice currently ships hybrids — a classical key ' +
-          'exchange and a lattice one together, with the shared secret derived from both — so ' +
-          'that a break in either leaves the other standing, which is the same defensive ' +
-          'reasoning as everything else in the milestone.',
+        detail: [
+          'Zero-knowledge proofs generalise "convince me without telling me". Schnorr ' +
+            'identification and the graph three-colouring protocol are the readable ' +
+            'introductions.',
+          'Post-quantum practice currently ships hybrids: a classical key exchange and a lattice ' +
+            'one together, with the shared secret derived from both.',
+          'A break in either leaves the other standing, which is the same defensive reasoning as ' +
+            'everything else in the milestone.'
+        ],
         example: 'The demo’s uses table lists six systems built on Merkle proofs, from Git to ' +
           'package registries.'
       }
