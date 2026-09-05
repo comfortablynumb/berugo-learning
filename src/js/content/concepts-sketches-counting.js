@@ -11,14 +11,17 @@
         plain: 'A hash with ρ leading zeros turns up about once in every 2^ρ distinct values.',
         formal: 'P[ρ(h(x)) ≥ j] = 2^(−j+1) for a uniform hash',
         readAs: 'The chance a hash begins with j−1 zero bits is one in 2 to that power. Seeing a long run of ' +
-          'leading zeros is therefore evidence that you have hashed many distinct things — which is the ' +
+          'leading zeros is therefore evidence that you have hashed many distinct things. That is the ' +
           'entire idea behind counting distinct items in a few kilobytes.',
-        detail: 'The observation is that rare patterns are evidence of many draws. Seeing a hash that ' +
-          'begins with fifteen zeros suggests roughly 2^15 distinct values have gone past, because ' +
-          'that is how often such a hash appears. Used alone it is a terrible estimator — it is a ' +
-          'single observation of a geometric variable, so it is off by a factor of two about as often ' +
-          'as not — but it costs one small register and it is completely insensitive to duplicates, ' +
-          'which is the property a distinct count needs.',
+        detail: [
+          'The observation is that rare patterns are evidence of many draws.',
+          'Seeing a hash that begins with fifteen zeros suggests roughly 2^15 distinct values have ' +
+            'gone past, because that is how often such a hash appears.',
+          'Used alone it is a terrible estimator. It is a single observation of a geometric ' +
+            'variable, so it is off by a factor of two about as often as not.',
+          'But it costs one small register and it is completely insensitive to duplicates, which is ' +
+            'the property a distinct count needs.'
+        ],
         example: 'The register histogram is a fixed shape that slides one step right per doubling.'
       },
       {
@@ -36,12 +39,16 @@
         },
         plain: 'The first p bits of the hash choose one of m = 2^p registers; each keeps its own maximum.',
         formal: 'm independent estimators over n/m elements each',
-        detail: 'Splitting the stream by the leading bits of the hash turns one high-variance estimator ' +
-          'into m of them, each watching its own share of the keys, and averaging cuts the variance by ' +
-          '√m. The split is by hash rather than by arrival, so the same key always lands in the same ' +
-          'register — which is exactly what makes the sketch insensitive to duplicates and what makes ' +
-          'two sketches of overlapping streams mergeable. It also fixes the memory: m one-byte ' +
-          'registers, whatever the answer turns out to be.',
+        detail: [
+          'Splitting the stream by the leading bits of the hash turns one high-variance estimator ' +
+            'into m of them, each watching its own share of the keys. Averaging cuts the variance ' +
+            'by √m.',
+          'The split is by hash rather than by arrival, so the same key always lands in the same ' +
+            'register.',
+          'That is exactly what makes the sketch insensitive to duplicates, and what makes two ' +
+            'sketches of overlapping streams mergeable.',
+          'It also fixes the memory: m one-byte registers, whatever the answer turns out to be.'
+        ],
         example: 'p = 12 gives 4 096 registers in 3 072 bytes packed at six bits each.'
       },
       {
@@ -51,12 +58,15 @@
         readAs: 'The estimate is a correction constant times the number of registers squared, divided by the ' +
           'total of 2 to the minus each register. That division is a harmonic mean, which is what stops ' +
           'one unlucky large register from dominating the answer.',
-        detail: 'Register values are maxima of geometric variables, so their distribution has a long ' +
-          'right tail: one register that happens to see a hash with twenty leading zeros would drag ' +
-          'an arithmetic mean of 2^M far above the truth. The harmonic mean is dominated by the ' +
-          '*small* values instead, which are the well-behaved ones, and that single change is what ' +
-          'takes LogLog\'s 1.30/√m to HyperLogLog\'s 1.04/√m. The α_m constant removes the remaining ' +
-          'multiplicative bias.',
+        detail: [
+          'Register values are maxima of geometric variables, so their distribution has a long ' +
+            'right tail. One register that happens to see a hash with twenty leading zeros would ' +
+            'drag an arithmetic mean of 2^M far above the truth.',
+          'The harmonic mean is dominated by the *small* values instead, which are the well-behaved ' +
+            'ones.',
+          'That single change is what takes LogLog\'s 1.30/√m to HyperLogLog\'s 1.04/√m.',
+          'The α_m constant removes the remaining multiplicative bias.'
+        ],
         example: 'α_m = 0.7213/(1 + 1.079/m), which is 0.7213 for any practical m.'
       },
       {
@@ -66,12 +76,16 @@
         readAs: 'The relative error is about 1.04 divided by the square root of the register count. ' +
           'Quadrupling the memory halves the error — the usual square-root law, and the reason 16 KB ' +
           'gets you around 1%.',
-        detail: 'This is the property that makes the structure usable: the cost model has no ' +
-          'cardinality in it at all. Halving the error costs four times the memory and nothing else ' +
-          'changes — p = 10 gives 3.25% from 768 bytes, p = 12 gives 1.63% from 3 072 and p = 14 ' +
-          'gives 0.81% from 12 288. A sketch sized once is correct for every stream it will ever see, ' +
-          'which is the opposite of a Bloom filter, whose whole difficulty is that its sizing needs a ' +
-          'number nobody knows.',
+        detail: [
+          'This is the property that makes the structure usable: the cost model has no cardinality ' +
+            'in it at all.',
+          'Halving the error costs four times the memory and nothing else changes. At p = 10 the ' +
+            'error is 3.25% from 768 bytes. At p = 12 it is 1.63% from 3 072, and at p = 14 it is ' +
+            '0.81% from 12 288.',
+          'A sketch sized once is correct for every stream it will ever see.',
+          'That is the opposite of a Bloom filter, whose whole difficulty is that its sizing needs ' +
+            'a number nobody knows.'
+        ],
         example: 'p = 8 measured −2.30%, p = 14 measured +0.19%, on the same 21 619-key stream.'
       },
       {
@@ -81,12 +95,15 @@
         readAs: 'Merging two sketches is taking the larger value in each register, and the result is exactly ' +
           'the sketch you would have built from both streams together. Not an approximation of the ' +
           'merge — the merge itself.',
-        detail: 'A register holds a maximum, and the maximum of two maxima is the maximum over the ' +
-          'union — so the merged register array is identical, entry for entry, to the array the ' +
-          'concatenated stream would have built. That is an equality and not a tolerance, which is ' +
-          'why the test for it should assert register equality rather than closeness: a merge that ' +
-          'silently dropped a shard would still produce a plausible-looking estimate, and only the ' +
-          'exact comparison catches it.',
+        detail: [
+          'A register holds a maximum, and the maximum of two maxima is the maximum over the union.',
+          'So the merged register array is identical, entry for entry, to the array the ' +
+            'concatenated stream would have built.',
+          'That is an equality and not a tolerance, which is why the test for it should assert ' +
+            'register equality rather than closeness.',
+          'A merge that silently dropped a shard would still produce a plausible-looking estimate, ' +
+            'and only the exact comparison catches it.'
+        ],
         example: 'Four shards merged: registers identical to the whole-stream sketch, for every seed.'
       },
       {
@@ -96,24 +113,29 @@
         readAs: 'Adding up the distinct counts of each shard does not give the distinct count of the whole, ' +
           'because anything appearing in two shards is counted twice. Merging the sketches does give ' +
           'it.',
-        detail: 'This is the mistake the mergeability property exists to prevent and it is made ' +
-          'constantly, because the per-shard numbers are the ones a dashboard already has. On a ' +
-          'stream split four ways, the four estimates sum to 36 702 against a true distinct count of ' +
-          '21 619 — a 70% over-count — and every one of the four is individually accurate to a ' +
-          'fraction of a per cent. The error is not in the sketches; it is in the arithmetic applied ' +
-          'to them afterwards.',
+        detail: [
+          'This is the mistake the mergeability property exists to prevent, and it is made ' +
+            'constantly, because the per-shard numbers are the ones a dashboard already has.',
+          'On a stream split four ways, the four estimates sum to 36 702 against a true distinct ' +
+            'count of 21 619 — a 70% over-count.',
+          'Every one of the four is individually accurate to a fraction of a per cent.',
+          'The error is not in the sketches; it is in the arithmetic applied to them afterwards.'
+        ],
         example: 'Four shards: 36 702 by addition, 21 607 by merging, 21 619 exactly.'
       },
       {
         term: 'Sparse and dense representations',
         plain: 'Keep a map of (index, ρ) pairs while the set is small; switch to a byte per register when it is not.',
         formal: 'HLL++ promotes when the sparse form stops being the cheaper one',
-        detail: 'A sketch that has seen 500 keys has 3 600 of its 4 096 registers still at zero, and ' +
-          'storing them costs 3 072 bytes to say nothing. The sparse form keeps only the non-zero ' +
-          'entries and is therefore both smaller *and* more accurate at low cardinality, because it ' +
-          'is effectively counting distinct indices rather than estimating. The promotion is ' +
-          'one-way and invisible from outside: the same `estimate()` answers throughout, which is ' +
-          'what makes it safe to do at all.',
+        detail: [
+          'A sketch that has seen 500 keys has 3 600 of its 4 096 registers still at zero, and ' +
+            'storing them costs 3 072 bytes to say nothing.',
+          'The sparse form keeps only the non-zero entries. It is therefore both smaller *and* more ' +
+            'accurate at low cardinality, because it is effectively counting distinct indices ' +
+            'rather than estimating.',
+          'The promotion is one-way and invisible from outside: the same `estimate()` answers ' +
+            'throughout, which is what makes it safe to do at all.'
+        ],
         example: 'At 500 keys the sketch is sparse, 472 entries, and estimates 501.'
       },
       {
@@ -123,12 +145,15 @@
         readAs: 'At small cardinalities the main estimator is biased, so switch to counting empty registers ' +
           'instead: the number of registers times the natural log of the fraction still empty. It is ' +
           'the same argument as the coupon collector.',
-        detail: 'Below the register count the raw harmonic estimator is not merely inaccurate but ' +
-          'useless — 1 388% high at n = 0.05m — because almost every register is still zero and the ' +
-          'sum it divides by is dominated by them. Counting the zero registers instead is exact ' +
-          'enough to bring that to −1.00%. The awkward region is just above: at n = 2.5m both rules ' +
-          'read 4.99% high, which is three standard deviations, and closing it is precisely what ' +
-          'HLL++\'s empirical bias tables are for.',
+        detail: [
+          'Below the register count the raw harmonic estimator is not merely inaccurate but ' +
+            'useless — 1 388% high at n = 0.05m.',
+          'Almost every register is still zero, and the sum it divides by is dominated by them.',
+          'Counting the zero registers instead is exact enough to bring that to −1.00%.',
+          'The awkward region is just above. At n = 2.5m both rules read 4.99% high, which is three ' +
+            'standard deviations, and closing it is precisely what HLL++\'s empirical bias tables ' +
+            'are for.'
+        ],
         example: 'At n = 0.05m: raw +1 388%, corrected −1.00%. At n = 2.5m: both +4.99%.'
       }
     ],

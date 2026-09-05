@@ -30,22 +30,23 @@
     return {
       sectionId: SECTION_ID,
       orientation: [
-        'Hash a key and count the leading zeros. Under a uniform hash, a value with ρ leading zeros ' +
-          'turns up about once every 2^ρ distinct values, so the longest such run seen so far is a ' +
-          'rough estimate of the count — and a terrible one, because it is one observation. ' +
-          'HyperLogLog fixes the variance by using the first p bits of the hash to choose one of ' +
-          'm = 2^p registers and averaging their 2^M[j] harmonically, which is the mean a single ' +
-          'overlarge register cannot drag around.',
-        'The standard error is 1.04/√m and it does not depend on the cardinality. At p = 12 that is ' +
-          '4 096 registers, 1.63% error and 3 072 bytes packed at six bits each — for a count that may ' +
-          'run to billions. The exact answer for 21 619 distinct keys needs a hash set holding every ' +
-          'one of them; the sketch is the same 3 072 bytes whether the answer is a thousand or a ' +
-          'trillion.',
+        'Hash a key and count the leading zeros. Under a uniform hash, a value with ρ leading ' +
+          'zeros turns up about once every 2^ρ distinct values. So the longest such run seen so ' +
+          'far is a rough estimate of the count — and a terrible one, because it is one ' +
+          'observation. HyperLogLog fixes the variance by using the first p bits of the hash to ' +
+          'choose one of m = 2^p registers. It then averages their 2^M[j] harmonically, which is ' +
+          'the mean a single overlarge register cannot drag around.',
+        'The standard error is 1.04/√m and it does not depend on the cardinality. At p = 12 that ' +
+          'is 4 096 registers, 1.63% error and 3 072 bytes packed at six bits each — for a count ' +
+          'that may run to billions. The exact answer for 21 619 distinct keys needs a hash set ' +
+          'holding every one of them. The sketch is the same 3 072 bytes whether the answer is a ' +
+          'thousand or a trillion.',
         'The property that matters in production is the merge. Two sketches combine by taking the ' +
-          'register-wise maximum, and the result is not an approximation of the union — it *is* the ' +
-          'sketch the whole stream would have produced, register for register. So per-shard sketches ' +
-          'roll up into a global count with no re-scan and no coordination, which is why every ' +
-          'analytics system ships one and why adding shard estimates together instead is off by 70%.'
+          'register-wise maximum. The result is not an approximation of the union — it *is* the ' +
+          'sketch the whole stream would have produced, register for register. So per-shard ' +
+          'sketches roll up into a global count with no re-scan and no coordination. That is why ' +
+          'every analytics system ships one, and why adding shard estimates together instead is ' +
+          'off by 70%.'
       ],
       demo: { title: 'Interactive demo — tracking, merging and correcting', markup: root.HyperloglogTemplate.render() },
       diagram: {
@@ -66,11 +67,11 @@
           '    C -->|no| E'
         ].join('\n')
       },
-      insight: 'Mergeability is the property that matters in production: per-shard sketches combine ' +
-        'into a global count with no re-scan, which is why every analytics system ships one. The ' +
-        'corollary is the mistake — adding the per-shard *estimates* together counts every key that ' +
-        'appears in two shards twice, and on a stream split four ways that is a 70% over-count. The ' +
-        'sketches merge; the numbers do not.'
+      insight: 'Mergeability is the property that matters in production. Per-shard sketches ' +
+        'combine into a global count with no re-scan, which is why every analytics system ships ' +
+        'one. The corollary is the mistake. Adding the per-shard *estimates* together counts every ' +
+        'key that appears in two shards twice, and on a stream split four ways that is a 70% ' +
+        'over-count. The sketches merge; the numbers do not.'
     };
   }
 
