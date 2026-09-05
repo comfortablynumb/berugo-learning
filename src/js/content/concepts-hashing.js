@@ -379,13 +379,16 @@
         formal: 'α = n / m',
         readAs: 'The load factor is the number of entries divided by the number of slots. At 0.75 the table ' +
           'is three-quarters full.',
-        detail: 'For a chained table the load factor is literally the average chain length, so it can ' +
-          'exceed 1 without anything breaking — at α = 2 the average bucket holds two entries and ' +
-          'lookups get proportionally slower, gracefully. That is the structural difference from ' +
-          'open addressing, where α is bounded by 1 and the cost blows up as it approaches. The cost ' +
-          'model is linear in α rather than hyperbolic: a successful lookup averages about 1 + α/2 ' +
-          'comparisons, so 1.4 at α = 0.75. Chaining trades memory and locality for that ' +
-          'predictability.',
+        detail: [
+          'For a chained table the load factor is literally the average chain length, so it can ' +
+            'exceed 1 without anything breaking. At α = 2 the average bucket holds two entries and ' +
+            'lookups get proportionally slower, gracefully.',
+          'That is the structural difference from open addressing, where α is bounded by 1 and the ' +
+            'cost blows up as it approaches.',
+          'The cost model is linear in α rather than hyperbolic. A successful lookup averages ' +
+            'about 1 + α/2 comparisons, so 1.4 at α = 0.75.',
+          'Chaining trades memory and locality for that predictability.'
+        ],
         example: 'At α = 0.75 a successful lookup averages about 1.4 comparisons.'
       },
       {
@@ -396,13 +399,15 @@
           'slots. Read it as: e (2.718…) to the power of minus the load, times the load to the power k, ' +
           'divided by k factorial. This is the Poisson distribution, and it is what makes the longest ' +
           'chain predictable.',
-        detail: 'Throwing n keys into m buckets independently and uniformly makes each bucket\'s ' +
-          'count binomial, and for large m that is Poisson with mean α. That single fact predicts ' +
-          'the whole occupancy distribution without simulation: at α = 1 with 1 000 buckets, about ' +
-          '368 are empty, 368 hold one key and 184 hold two. It is also the null hypothesis worth ' +
-          'testing against — if your measured distribution has a much heavier tail than Poisson ' +
-          'predicts, the hash is not mixing your keys, and you have found a hash problem rather than ' +
-          'a table problem.',
+        detail: [
+          'Throwing n keys into m buckets independently and uniformly makes each bucket\'s count ' +
+            'binomial, and for large m that is Poisson with mean α.',
+          'That single fact predicts the whole occupancy distribution without simulation. At α = 1 ' +
+            'with 1 000 buckets, about 368 are empty, 368 hold one key and 184 hold two.',
+          'It is also the null hypothesis worth testing against. If your measured distribution has ' +
+            'a much heavier tail than Poisson predicts, the hash is not mixing your keys. You have ' +
+            'found a hash problem rather than a table problem.'
+        ],
         example: 'At α = 1 with 1 000 buckets, expect about 368 empty ones.'
       },
       {
@@ -412,13 +417,16 @@
         readAs: 'With as many keys as slots, the longest chain is about the natural log of m divided by the ' +
           'natural log of that — a number that grows extremely slowly. At a million slots it is roughly ' +
           '5.',
-        detail: 'A user does not experience the average bucket, they experience the one their key ' +
-          'landed in, and the maximum over m buckets grows with m even at a fixed load factor. The ' +
-          'asymptotic form ln m / ln ln m drops constants that matter at real sizes: at m = 1 000 ' +
-          'the expected maximum is about 6, not the 1 the mean suggests. So a table can have an ' +
-          'excellent average and a tail six times worse, which is what shows up in p99 latency. It ' +
-          'is also the reason "the average chain is short" is not an answer to a hash-flooding ' +
-          'concern.',
+        detail: [
+          'A user does not experience the average bucket, they experience the one their key landed ' +
+            'in. The maximum over m buckets grows with m even at a fixed load factor.',
+          'The asymptotic form ln m / ln ln m drops constants that matter at real sizes. At ' +
+            'm = 1 000 the expected maximum is about 6, not the 1 the mean suggests.',
+          'So a table can have an excellent average and a tail six times worse, which is what ' +
+            'shows up in p99 latency.',
+          'It is also the reason "the average chain is short" is not an answer to a hash-flooding ' +
+            'concern.'
+        ],
         example: 'About 6 for a thousand buckets, not 1.'
       },
       {
@@ -434,25 +442,33 @@
         },
         plain: 'Convert a bucket to a search structure once it gets long, bounding the damage at O(log k).',
         formal: 'list → tree at k ≥ 8',
-        detail: 'Once a bucket exceeds a threshold, the JDK replaces its linked list with a red-black ' +
-          'tree, so the worst case inside one bucket falls from O(k) to O(log k). The purpose is ' +
-          'containment rather than speed: on well-mixed keys the threshold essentially never fires, ' +
-          'so it buys nothing in normal operation and costs a comparison in the insert path. It is ' +
-          'insurance against the adversarial case, and its value is measured in what it prevents — ' +
-          'which is why it was added as a security response rather than as a performance change.',
+        detail: [
+          'Once a bucket exceeds a threshold, the JDK replaces its linked list with a red-black ' +
+            'tree, so the worst case inside one bucket falls from O(k) to O(log k).',
+          'The purpose is containment rather than speed. On well-mixed keys the threshold ' +
+            'essentially never fires, so it buys nothing in normal operation and costs a ' +
+            'comparison in the insert path.',
+          'It is insurance against the adversarial case, and its value is measured in what it ' +
+            'prevents. That is why it was added as a security response rather than as a ' +
+            'performance change.'
+        ],
         example: 'The JDK does this; it is a hash-flooding mitigation, not an optimisation.'
       },
       {
         term: 'Node overhead',
         plain: 'Chaining allocates per entry: a key, a value, a next pointer and an allocator header.',
         formal: 'bytes ≈ m·8 + n·32',
-        detail: 'Every entry in a chained table is a separately allocated node carrying a next ' +
-          'pointer and an allocator header on top of the key and value, so the table costs roughly ' +
-          'm pointers for the bucket array plus about 32 bytes per entry. Open addressing stores ' +
-          'entries directly in the slot array and allocates nothing per entry, which is both less ' +
-          'memory and better locality — the entries are contiguous instead of scattered. This ' +
-          'memory difference, not the probe counts, is usually what decides between the two schemes ' +
-          'in practice.',
+        detail: [
+          'Every entry in a chained table is a separately allocated node, carrying a next pointer ' +
+            'and an allocator header on top of the key and value.',
+          'The table therefore costs roughly m pointers for the bucket array, plus about 32 bytes ' +
+            'per entry.',
+          'Open addressing stores entries directly in the slot array and allocates nothing per ' +
+            'entry, which is both less memory and better locality: the entries are contiguous ' +
+            'instead of scattered.',
+          'This memory difference, not the probe counts, is usually what decides between the two ' +
+            'schemes in practice.'
+        ],
         example: 'Open addressing stores the entry in the slot array and allocates nothing.'
       },
       {
@@ -461,41 +477,51 @@
         formal: 'Θ(m + n)',
         readAs: 'Iterating a chained table costs a step per slot as well as per entry, so a mostly-empty ' +
           'table is dominated by the empty slots you walk past.',
-        detail: 'Iteration has to visit every bucket to find the non-empty ones, so it costs Θ(m + n) ' +
-          'rather than Θ(n). For a table that grew large and was then mostly emptied, that is ' +
-          'dominated by m: iterating a million-bucket table holding ten entries reads a million ' +
-          'pointers. Nothing shrinks the bucket array unless the implementation explicitly does so, ' +
-          'which is why a long-lived cache that is iterated regularly can pay a cost proportional to ' +
-          'its historical peak forever. Structures that keep a dense entries array alongside the ' +
-          'index — like JavaScript\'s Map — do not have this problem.',
+        detail: [
+          'Iteration has to visit every bucket to find the non-empty ones, so it costs Θ(m + n) ' +
+            'rather than Θ(n).',
+          'For a table that grew large and was then mostly emptied, that is dominated by m. ' +
+            'Iterating a million-bucket table holding ten entries reads a million pointers.',
+          'Nothing shrinks the bucket array unless the implementation explicitly does so. A ' +
+            'long-lived cache that is iterated regularly can therefore pay a cost proportional to ' +
+            'its historical peak forever.',
+          'Structures that keep a dense entries array alongside the index — like JavaScript\'s ' +
+            'Map — do not have this problem.'
+        ],
         example: 'A table that grew and then emptied still costs Θ(m) to iterate.'
       },
       {
         term: 'The threshold rarely fires',
         plain: 'Treeification is insurance, not an optimisation: at α = 1 a bucket reaches 8 entries with probability 10⁻⁵.',
         formal: 'P(X ≥ 8) = 1 − Σ_{k≤7} e^−α α^k/k!',
-        readAs: 'The chance a bucket reaches eight or more is one minus the chance it holds seven or fewer, ' +
-          'and that second part is just the Poisson probabilities for 0 through 7 added up. Subtract ' +
-          'from 1 because it is easier to total the small cases than the unbounded tail.',
-        detail: 'The Poisson tail makes the treeify threshold almost unreachable by chance: at α = 1 ' +
-          'the probability a given bucket reaches 8 entries is about 1.0 × 10⁻⁵, so in a table of a ' +
-          'thousand buckets it fires roughly once in a hundred tables. The measured consequence is ' +
-          'that a well-mixed workload costs exactly the same with the threshold and without it — ' +
-          '1 537 insert comparisons either way, identical to the probe. That is the correct result ' +
-          'for a mitigation, and it is worth knowing before attributing any performance improvement ' +
-          'to it.',
+        readAs: 'The chance a bucket reaches eight or more is one minus the chance it holds seven ' +
+          'or fewer. That second part is just the Poisson probabilities for 0 through 7 added up. ' +
+          'Subtract from 1 because it is easier to total the small cases than the unbounded tail.',
+        detail: [
+          'The Poisson tail makes the treeify threshold almost unreachable by chance. At α = 1 the ' +
+            'probability a given bucket reaches 8 entries is about 1.0 × 10⁻⁵. In a table of a ' +
+            'thousand buckets it therefore fires roughly once in a hundred tables.',
+          'The measured consequence is that a well-mixed workload costs exactly the same with the ' +
+            'threshold and without it: 1 537 insert comparisons either way, identical to the ' +
+            'probe.',
+          'That is the correct result for a mitigation, and it is worth knowing before attributing ' +
+            'any performance improvement to it.'
+        ],
         example: 'On well-mixed keys the same table costs 1 537 insert comparisons with the threshold and without it — identical, to the probe.'
       },
       {
         term: 'Bounded, not defeated',
         plain: 'Treeifying does not shorten the flooded bucket. It shortens the walk through it, which is all that was needed.',
         formal: 'O(k) → O(log k) inside one bucket',
-        detail: 'It is easy to misread treeification as fixing the collision, and it does not: after ' +
-          'the mitigation the crafted bucket still holds every one of the 1 024 attacker keys, and ' +
-          'the memory is still consumed. What changes is the cost of traversing it — 9.01 probes per ' +
-          'lookup instead of 512.5 — which converts a quadratic denial of service into an ordinary ' +
-          'slowdown. That is the right goal for a mitigation, and stating it precisely matters, ' +
-          'because a defence that bounds damage is often mistaken for one that prevents the attack.',
+        detail: [
+          'It is easy to misread treeification as fixing the collision, and it does not. After the ' +
+            'mitigation the crafted bucket still holds every one of the 1 024 attacker keys, and ' +
+            'the memory is still consumed.',
+          'What changes is the cost of traversing it: 9.01 probes per lookup instead of 512.5. ' +
+            'That converts a quadratic denial of service into an ordinary slowdown.',
+          'That is the right goal for a mitigation, and stating it precisely matters, because a ' +
+            'defence that bounds damage is often mistaken for one that prevents the attack.'
+        ],
         example: 'After the mitigation the crafted bucket still holds all 1 024 keys, at 9.01 probes per lookup instead of 512.5.'
       }
     ],

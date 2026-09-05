@@ -27,9 +27,9 @@
         'Chaining is the scheme you can reason about on paper: a bucket array, a list per bucket, and ' +
           'an expected chain length of α = n/m. Lookup is 1 + α/2 comparisons on average, insertion is ' +
           'O(1), and the table keeps working at α far above 1.',
-        'The average is not the interesting number. Bucket occupancy under a good hash is Poisson, so ' +
-          'the longest chain in a table of m buckets at α = 1 is about ln m / ln ln m — around 6 for ' +
-          'a thousand buckets, not 1. Your tail latency lives in that bucket.',
+        'The average is not the interesting number. Bucket occupancy under a good hash is ' +
+          'Poisson, so the longest chain is about ln m / ln ln m. At α = 1 with a thousand ' +
+          'buckets that is around 6, not 1. Your tail latency lives in that bucket.',
         'And under adversarial keys the longest chain is n. That is why the JDK converts a bucket to ' +
           'a tree at 8 entries: it bounds the damage at O(log k) without changing the hash. Set the ' +
           'threshold to 0 below and pick the adversarial key stream to see what it is protecting you ' +
