@@ -51,17 +51,17 @@
           'endpos class — and the state\'s `len` is the longest of them. The suffix links point at ' +
           'the state holding the next shorter class, and they form a tree whose parent-child ' +
           'relation is set containment.',
-        'Construction is online and takes two branches. The easy one appends a state and walks the ' +
-          'links adding transitions. The hard one is the clone: a state reached by the new ' +
+        'Construction is online and takes two branches. The easy one appends a state and walks ' +
+          'the links adding transitions. The hard one is the clone. A state reached by the new ' +
           'character already exists but is *too long*, meaning it mixes substrings the new ' +
-          'character has just split into different endpos classes. A copy is made with the shorter ' +
-          'length, the transitions that should now reach the shorter class are repointed at it, and ' +
-          'both the old state and the new one link to it.',
-        'Skip the clone and the automaton still accepts every substring — it just also accepts ' +
+          'character has just split into different endpos classes. A copy is made with the ' +
+          'shorter length, and the transitions that should now reach the shorter class are ' +
+          'repointed at it. Both the old state and the new one link to it.',
+        'Skip the clone and the automaton still accepts every substring. It just also accepts ' +
           'strings that never occurred, which no amount of spot-checking will reveal. The factor ' +
-          'oracle is exactly that structure, kept deliberately, and the invariant that catches the ' +
-          'difference is the endpos identity: a state\'s occurrence count must equal the sum of its ' +
-          'link children\'s, plus one if it is a prefix state.'
+          'oracle is exactly that structure, kept deliberately. The invariant that catches the ' +
+          'difference is the endpos identity: a state\'s occurrence count must equal the sum of ' +
+          'its link children\'s, plus one if it is a prefix state.'
       ],
       demo: {
         title: 'Interactive demo — clones, growth and the oracle that skips them',
@@ -70,7 +70,7 @@
       diagram: diagram(),
       insight: 'The endpos identity is the invariant to assert in a test, not "does it accept the ' +
         'substrings". Accepting all of them is the easy half; accepting *only* them is what the ' +
-        'clone case buys, and only a check against brute force or against the link-children sum ' +
+        'clone case buys. Only a check against brute force, or against the link-children sum, ' +
         'will tell you whether you have it.'
     };
   }

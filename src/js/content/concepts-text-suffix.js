@@ -330,12 +330,16 @@
         formal: 'L(A) = { P : P occurs in T }',
         readAs: 'The language the automaton accepts is the set of strings that appear somewhere in the text. ' +
           'L(A) is standard notation for "everything this machine says yes to".',
-        detail: 'A trie of all substrings is quadratic; the minimal deterministic automaton for the ' +
-          'same language is linear — at most 2n − 1 states and 3n − 4 transitions, both tight. That ' +
-          'is remarkable enough on its own, and it is buildable online in one left-to-right pass, ' +
-          'which is more remarkable. Membership is one transition per pattern character with no ' +
-          'edge labels to compare and no binary search, so it is the fastest of the substring ' +
-          'indexes to query and the hardest of them to write.',
+        detail: [
+          'A trie of all substrings is quadratic. The minimal deterministic automaton for the same ' +
+            'language is linear: at most 2n − 1 states and 3n − 4 transitions, both tight.',
+          'That is remarkable enough on its own, and it is buildable online in one left-to-right ' +
+            'pass, which is more remarkable.',
+          'Membership is one transition per pattern character, with no edge labels to compare and ' +
+            'no binary search.',
+          'So it is the fastest of the substring indexes to query, and the hardest of them to ' +
+            'write.'
+        ],
         example: 'abbbaab: 10 states, 13 transitions, 21 distinct substrings.'
       },
       {
@@ -354,68 +358,84 @@
         formal: 'endpos(P) = { i : T[i − |P| … i) = P }',
         readAs: 'The end-position set of a pattern is every index where an occurrence finishes. Two patterns ' +
           'with the same set are the same state, which is what keeps the automaton linear in size.',
-        detail: 'Two substrings that always co-occur — always end together — cannot be distinguished ' +
-          'by anything that follows them, so a minimal automaton must merge them. That is the whole ' +
-          'reason the state count is linear rather than quadratic: the number of distinct endpos ' +
-          'sets is bounded even though the number of substrings is not. Each state stores `len`, ' +
-          'the longest string in its class; the shortest is one more than its suffix link\'s len, ' +
-          'so a state represents a contiguous range of lengths.',
+        detail: [
+          'Two substrings that always co-occur — always end together — cannot be distinguished by ' +
+            'anything that follows them, so a minimal automaton must merge them.',
+          'That is the whole reason the state count is linear rather than quadratic. The number of ' +
+            'distinct endpos sets is bounded even though the number of substrings is not.',
+          'Each state stores `len`, the longest string in its class. The shortest is one more than ' +
+            'its suffix link\'s len, so a state represents a contiguous range of lengths.'
+        ],
         example: 'in abbbaab the substrings "b", "bb" and "abb" do not share an endpos set.'
       },
       {
         term: 'The link tree is containment',
         plain: 'A state\'s suffix link points at the state holding the next shorter class.',
         formal: 'endpos(v) ⊊ endpos(link(v)), and the links form a tree',
-        readAs: 'A state\'s end positions are a strict subset of its suffix link\'s — strictly fewer, never ' +
-          'equal — so following links always widens the set, and the links can never form a cycle.',
-        detail: 'Removing characters from the front of a substring can only ever add end positions, ' +
-          'never remove them, so the endpos sets nest — and the suffix links, which walk to the ' +
-          'next shorter class, therefore form a tree ordered by set containment. That tree is where ' +
-          'most of the automaton\'s applications live: occurrence counting propagates up it, the ' +
-          'longest common substring of two texts is found in it, and the check that catches a ' +
-          'broken construction is stated on it.',
+        readAs: 'A state\'s end positions are a strict subset of its suffix link\'s — strictly ' +
+          'fewer, never equal. So following links always widens the set, and the links can never ' +
+          'form a cycle.',
+        detail: [
+          'Removing characters from the front of a substring can only ever add end positions, ' +
+            'never remove them, so the endpos sets nest.',
+          'The suffix links walk to the next shorter class, and therefore form a tree ordered by ' +
+            'set containment.',
+          'That tree is where most of the automaton\'s applications live. Occurrence counting ' +
+            'propagates up it, the longest common substring of two texts is found in it, and the ' +
+            'check that catches a broken construction is stated on it.'
+        ],
         example: 'a state\'s occurrence count is the sum of its link children\'s, plus one if it is a prefix.'
       },
       {
         term: 'The clone',
         plain: 'When a state reached by the new character is too long, split it in two.',
         formal: 'if len(q) > len(p) + 1: copy q with len = len(p) + 1 and repoint',
-        detail: 'This is the entire difficulty of the construction. The situation is that a state ' +
-          'currently mixes substrings which the new character has just separated into different ' +
-          'endpos classes — some of them now also end at the new position and some do not. The fix ' +
-          'is to make a copy with the shorter length and the same outgoing transitions, repoint the ' +
-          'transitions that should now reach the shorter class at the copy, and link both the ' +
-          'original and the new state to it. Every part of that sentence is load-bearing, and ' +
-          'implementations from memory drop one of them.',
+        detail: [
+          'This is the entire difficulty of the construction.',
+          'The situation is that a state currently mixes substrings which the new character has ' +
+            'just separated into different endpos classes. Some of them now also end at the new ' +
+            'position and some do not.',
+          'The fix is to make a copy with the shorter length and the same outgoing transitions, ' +
+            'and repoint the transitions that should now reach the shorter class at the copy.',
+          'Both the original and the new state then link to it. Every part of that is ' +
+            'load-bearing, and implementations from memory drop one of them.'
+        ],
         example: 'abbbaab needs 2 clones; mississippi needs 6; a string of one letter needs none.'
       },
       {
         term: 'Skipping the clone accepts a superset',
         plain: 'The broken automaton still accepts every substring — plus strings that never occurred.',
         formal: 'L(oracle) ⊇ L(automaton), with the inclusion strict in general',
-        readAs: 'The factor oracle accepts everything the exact automaton does and usually more besides: it ' +
-          'never misses a real substring, but it does say yes to some strings that are not there. That ' +
-          'is the trade for its smaller, simpler construction.',
-        detail: 'This is why the clone case is dangerous rather than merely hard. An automaton built ' +
-          'without it passes every test of the form "insert the text, check that each of its ' +
-          'substrings is accepted", because accepting more is not detected by such a test. What it ' +
-          'does is accept strings that do not occur, and the only ways to notice are a check ' +
-          'against brute force over non-substrings, or the endpos identity on the link tree. A ' +
-          'spot check is not a test here.',
+        readAs: 'The factor oracle accepts everything the exact automaton does and usually more ' +
+          'besides. It never misses a real substring, but it does say yes to some strings that are ' +
+          'not there. That is the trade for its smaller, simpler construction.',
+        detail: [
+          'This is why the clone case is dangerous rather than merely hard.',
+          'An automaton built without it passes every test of the form "insert the text, check ' +
+            'that each of its substrings is accepted". Accepting more is not detected by such a ' +
+            'test.',
+          'What it does is accept strings that do not occur. The only ways to notice are a check ' +
+            'against brute force over non-substrings, or the endpos identity on the link tree.',
+          'A spot check is not a test here.'
+        ],
         example: 'the oracle for abbbaab accepts "aba", "abaa" and "abba" — none of which occur.'
       },
       {
         term: 'The factor oracle is that structure, kept on purpose',
         plain: 'Exactly n + 1 states, no clones, and a known false-accept rate.',
         formal: 'states = n + 1 always; L(oracle) ⊇ substrings(T)',
-        readAs: 'The oracle has exactly one state per character plus one, whatever the text — a hard ' +
-          'guarantee the exact automaton cannot give — and it accepts at least every real substring.',
-        detail: 'It is the same left-to-right construction with the clone step removed, and it is ' +
-          'used deliberately in string-matching algorithms where a false accept costs a ' +
-          'verification step and nothing else — BOM and its descendants search with one. Keeping it ' +
-          'beside the real automaton is the cheapest way to make the clone\'s value concrete: two ' +
-          'structures, one obviously smaller, and a table of the strings the smaller one gets ' +
-          'wrong. Using it where correctness matters is a real bug that looks like an optimisation.',
+        readAs: 'The oracle has exactly one state per character plus one, whatever the text. That ' +
+          'is a hard guarantee the exact automaton cannot give, and it accepts at least every real ' +
+          'substring.',
+        detail: [
+          'It is the same left-to-right construction with the clone step removed.',
+          'It is used deliberately in string-matching algorithms where a false accept costs a ' +
+            'verification step and nothing else. BOM and its descendants search with one.',
+          'Keeping it beside the real automaton is the cheapest way to make the clone\'s value ' +
+            'concrete. Two structures, one obviously smaller, and a table of the strings the ' +
+            'smaller one gets wrong.',
+          'Using it where correctness matters is a real bug that looks like an optimisation.'
+        ],
         example: 'abbbaab: 8 oracle states against 10 automaton states, and 3 false accepts.'
       },
       {
@@ -425,25 +445,31 @@
         readAs: 'A state\'s occurrence count is one if it is itself the end of a prefix, plus everything its ' +
           'children in the suffix-link tree contribute. The square brackets are 1 when the condition ' +
           'holds and 0 when it does not.',
-        detail: 'A state\'s occurrence count is the size of its endpos set, and endpos sets are ' +
-          'unions of their link children\'s plus the state\'s own end position when it is a prefix ' +
-          'of the text. So one pass down the text to mark the prefix states and one pass over the ' +
-          'states in decreasing length order computes every count. Giving a clone an initial 1 is ' +
-          'the second classic bug — a clone is not itself a prefix — and it inflates counts in a ' +
-          'way that only shows up on repeated texts.',
+        detail: [
+          'A state\'s occurrence count is the size of its endpos set. Endpos sets are unions of ' +
+            'their link children\'s, plus the state\'s own end position when it is a prefix of the ' +
+            'text.',
+          'So one pass down the text to mark the prefix states, and one pass over the states in ' +
+            'decreasing length order, computes every count.',
+          'Giving a clone an initial 1 is the second classic bug, because a clone is not itself a ' +
+            'prefix. It inflates counts in a way that only shows up on repeated texts.'
+        ],
         example: 'process states in decreasing len order; a clone starts at 0, not 1.'
       },
       {
         term: 'Two computations of one quantity',
         plain: 'Σ (len(v) − len(link(v))) must equal n(n+1)/2 − Σ lcp.',
         formal: 'automaton and suffix array count distinct substrings independently',
-        detail: 'Each state is the longest representative of a contiguous range of lengths, so ' +
-          'summing len(v) − len(link(v)) over every state but the initial one counts each distinct ' +
-          'substring exactly once. The suffix array reaches the same number by an entirely ' +
-          'different route. Asserting they agree, on repetitive and random and one-letter inputs, ' +
-          'is the strongest cheap check available for either structure — far stronger than any ' +
-          'membership spot check, because it depends on the whole structure rather than on one ' +
-          'path through it.',
+        detail: [
+          'Each state is the longest representative of a contiguous range of lengths, so summing ' +
+            'len(v) − len(link(v)) over every state but the initial one counts each distinct ' +
+            'substring exactly once.',
+          'The suffix array reaches the same number by an entirely different route.',
+          'Asserting they agree, on repetitive and random and one-letter inputs, is the strongest ' +
+            'cheap check available for either structure.',
+          'It is far stronger than any membership spot check, because it depends on the whole ' +
+            'structure rather than on one path through it.'
+        ],
         example: 'DNA 2 000: both routes give 1 978 348 distinct substrings.'
       }
     ]
