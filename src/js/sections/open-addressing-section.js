@@ -25,18 +25,18 @@
     root.jQuery('#' + SECTION_ID + '-content').html(app.shell.render({
       sectionId: SECTION_ID,
       orientation: [
-        'Open addressing keeps every entry in the slot array itself. No nodes, no pointer chasing, ' +
-          'and a linear probe walks memory the prefetcher already fetched — which is why it beats ' +
-          'chaining on modern hardware despite worse asymptotics near a full table.',
+        'Open addressing keeps every entry in the slot array itself. No nodes, no pointer ' +
+          'chasing, and a linear probe walks memory the prefetcher already fetched. That is why ' +
+          'it beats chaining on modern hardware despite worse asymptotics near a full table.',
         'The cost is that deletion has no obvious answer. You cannot just empty a slot: doing so ' +
           'breaks every probe sequence that passed through it. The usual fix is a tombstone — a ' +
           'marker meaning "keep going" — and tombstones never leave on their own.',
         'So a delete-heavy table degrades until something rehashes it, and nothing in its size or ' +
           'load factor says so. Backward-shift deletion fixes it properly for linear probing: walk ' +
           'forward and pull back anything whose home slot is at or before the hole.',
-        'Turn the churn slider up with tombstones selected. The live count never changes and the load ' +
-          'factor never moves, but once tombstones fill the last empty slot, a lookup for a key that ' +
-          'is not there has nothing to stop it and scans the entire table.'
+        'Turn the churn slider up with tombstones selected. The live count never changes and the ' +
+          'load factor never moves. But once tombstones fill the last empty slot, a lookup for a ' +
+          'key that is not there has nothing to stop it, and scans the entire table.'
       ],
       demo: { title: 'Interactive demo — probing, clustering and the tombstone trap',
         markup: root.OpenAddressingTemplate.render() },
@@ -58,7 +58,7 @@
         ].join('\n')
       },
       insight: 'Tombstones turn a delete-heavy table into a slow one that never recovers until it ' +
-        'rehashes — and since a tombstone is not a live entry, the load factor you monitor keeps ' +
+        'rehashes. And since a tombstone is not a live entry, the load factor you monitor keeps ' +
         'reporting that everything is fine.'
     }));
 

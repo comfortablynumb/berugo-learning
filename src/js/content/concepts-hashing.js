@@ -534,13 +534,16 @@
         readAs: 'The i-th slot a probe tries is the home slot plus some offset f(i), wrapped around the ' +
           'table. Choosing f is what separates linear probing (f(i) = i) from quadratic and double ' +
           'hashing.',
-        detail: 'With no chains, a key that finds its home slot taken must have a deterministic order ' +
-          'of alternatives, and that order is the design decision the whole scheme turns on. The ' +
-          'requirement is that it be a permutation of the table — if the sequence cycles before ' +
-          'visiting every slot, an insert can fail while the table still has room, which is a ' +
-          'correctness bug rather than a performance one. Quadratic probing with triangular numbers ' +
-          'is a permutation on power-of-two tables; double hashing needs its second hash to be odd. ' +
-          'Both details are easy to get wrong and produce failures only under load.',
+        detail: [
+          'With no chains, a key that finds its home slot taken must have a deterministic order of ' +
+            'alternatives, and that order is the design decision the whole scheme turns on.',
+          'The requirement is that it be a permutation of the table. If the sequence cycles before ' +
+            'visiting every slot, an insert can fail while the table still has room — a ' +
+            'correctness bug rather than a performance one.',
+          'Quadratic probing with triangular numbers is a permutation on power-of-two tables, and ' +
+            'double hashing needs its second hash to be odd.',
+          'Both details are easy to get wrong and produce failures only under load.'
+        ],
         example: 'The sequence must visit every slot, or an insert can fail in a table with room.'
       },
       {
@@ -560,13 +563,17 @@
         readAs: 'Occupied stretches do not lengthen in step with the load — they lengthen faster, because a ' +
           'longer run is a bigger target for the next insertion. That feedback is what makes linear ' +
           'probing collapse near a full table.',
-        detail: 'Linear probing has a positive feedback loop: any key hashing anywhere into an ' +
-          'occupied run is appended to its end, so long runs capture more keys and grow faster than ' +
-          'short ones. The result is that cost rises superlinearly with load, much worse than the ' +
-          'independent-probe idealisation predicts. The compensation is that the run is contiguous ' +
-          'memory, so walking it is nearly free in cache terms — which is why linear probing remains ' +
-          'the fastest choice at moderate load despite having the worst clustering behaviour of the ' +
-          'three sequences.',
+        detail: [
+          'Linear probing has a positive feedback loop. Any key hashing anywhere into an occupied ' +
+            'run is appended to its end, so long runs capture more keys and grow faster than short ' +
+            'ones.',
+          'The result is that cost rises superlinearly with load, much worse than the ' +
+            'independent-probe idealisation predicts.',
+          'The compensation is that the run is contiguous memory, so walking it is nearly free in ' +
+            'cache terms.',
+          'That is why linear probing remains the fastest choice at moderate load, despite having ' +
+            'the worst clustering behaviour of the three sequences.'
+        ],
         example: 'It is also why linear probing is fast: the run is contiguous memory.'
       },
       {
@@ -576,13 +583,16 @@
         readAs: 'The expected probes for a successful linear-probing lookup: one half of (1 plus 1 divided by ' +
           'the space left). At α = 0.5 that is 1.5 probes; at α = 0.9 it is 5.5, and the 1/(1−α) is ' +
           'what makes it explode as the table fills.',
-        detail: 'The cost of open addressing is hyperbolic in the load factor, not linear, so the ' +
-          'behaviour near full is qualitatively different from the behaviour at moderate load: a ' +
-          'successful lookup averages 5.5 probes at α = 0.9 and 10.5 at α = 0.95. Five percentage ' +
-          'points of load doubles the cost. This is why every implementation resizes well before the ' +
-          'table is full, and why the growth threshold is one of the most consequential constants in ' +
-          'a hash table — and also why a table whose load creeps up in production degrades suddenly ' +
-          'rather than gradually.',
+        detail: [
+          'The cost of open addressing is hyperbolic in the load factor, not linear, so the ' +
+            'behaviour near full is qualitatively different from the behaviour at moderate load.',
+          'A successful lookup averages 5.5 probes at α = 0.9 and 10.5 at α = 0.95. Five ' +
+            'percentage points of load doubles the cost.',
+          'This is why every implementation resizes well before the table is full, and why the ' +
+            'growth threshold is one of the most consequential constants in a hash table.',
+          'It is also why a table whose load creeps up in production degrades suddenly rather than ' +
+            'gradually.'
+        ],
         example: 'α = 0.9 costs 5.5 probes; α = 0.95 costs 10.5.'
       },
       {
@@ -602,52 +612,63 @@
         readAs: 'Every slot is in exactly one of three states — the ∈ means "is one of". Two states are not ' +
           'enough: a deleted slot has to stop a lookup from concluding early without stopping it from ' +
           'continuing.',
-        detail: 'A probe stops at the first empty slot, so simply emptying a slot on delete would cut ' +
-          'every probe chain running through it and lose keys that are still in the table. The ' +
-          'tombstone is a third state that says "keep going": probes pass through it, and inserts ' +
-          'may reuse it. The cost is that a tombstone occupies a slot for probing purposes while ' +
-          'counting as absent for size purposes, so a delete-heavy workload fills the table with ' +
-          'markers and probe lengths rise even though the live count is falling. Growth decisions ' +
-          'therefore have to count tombstones.',
+        detail: [
+          'A probe stops at the first empty slot. Simply emptying a slot on delete would cut every ' +
+            'probe chain running through it, and lose keys that are still in the table.',
+          'The tombstone is a third state that says "keep going": probes pass through it, and ' +
+            'inserts may reuse it.',
+          'The cost is that a tombstone occupies a slot for probing purposes while counting as ' +
+            'absent for size purposes. A delete-heavy workload therefore fills the table with ' +
+            'markers, and probe lengths rise even though the live count is falling.',
+          'Growth decisions therefore have to count tombstones.'
+        ],
         example: 'A tombstone counts against the load factor for probing and not for size.'
       },
       {
         term: 'Backward-shift deletion',
         plain: 'For linear probing: walk forward and pull back any entry whose home is at or before the hole.',
         formal: 'move if dist(gap, home) < dist(cursor, home)',
-        detail: 'Instead of leaving a marker, backward-shift deletion repairs the run: walk forward ' +
-          'from the hole and move back any entry that would still be findable from its home slot ' +
-          'through the new gap, then repeat with the new hole. The table is left in exactly the ' +
-          'state it would have been in had the key never been inserted, so there is no accumulating ' +
-          'debt and no rehash-to-clean. It costs a loop per delete rather than a constant, and it ' +
-          'relies on runs being contiguous — which is why it belongs to linear probing and not to ' +
-          'the other sequences.',
+        detail: [
+          'Instead of leaving a marker, backward-shift deletion repairs the run. Walk forward from ' +
+            'the hole and move back any entry that would still be findable from its home slot ' +
+            'through the new gap, then repeat with the new hole.',
+          'The table is left in exactly the state it would have been in had the key never been ' +
+            'inserted, so there is no accumulating debt and no rehash-to-clean.',
+          'It costs a loop per delete rather than a constant, and it relies on runs being ' +
+            'contiguous. That is why it belongs to linear probing and not to the other sequences.'
+        ],
         example: 'No tombstones at all, at the cost of a loop per delete.'
       },
       {
         term: 'Cache locality',
         plain: 'A probe run is consecutive memory, so the prefetcher has already fetched the next slot.',
         formal: 'sequential access, one line per 4-8 slots',
-        detail: 'Probe counts systematically overstate the cost of linear probing, because the probes ' +
-          'after the first are usually free: the run is contiguous, a 64-byte line holds four to ' +
-          'eight slots, and the prefetcher has the next line in flight. A chained table with a lower ' +
-          'probe count pays a dependent pointer dereference for each step, and those are the ' +
-          'expensive kind. This is the concrete reason open addressing outperforms chaining in ' +
-          'practice at moderate load despite worse asymptotic behaviour near full, and why the ' +
-          'metric worth reporting is misses rather than probes.',
+        detail: [
+          'Probe counts systematically overstate the cost of linear probing, because the probes ' +
+            'after the first are usually free. The run is contiguous, a 64-byte line holds four to ' +
+            'eight slots, and the prefetcher has the next line in flight.',
+          'A chained table with a lower probe count pays a dependent pointer dereference for each ' +
+            'step, and those are the expensive kind.',
+          'This is the concrete reason open addressing outperforms chaining in practice at ' +
+            'moderate load, despite worse asymptotic behaviour near full.',
+          'It is also why the metric worth reporting is misses rather than probes.'
+        ],
         example: 'This is why open addressing beats chaining despite worse asymptotics near full.'
       },
       {
         term: 'Secondary clustering',
         plain: 'Quadratic probing removes the runs but keeps one flaw: two keys with the same home follow the same sequence forever.',
         formal: 'the step depends on i, not on the key',
-        detail: 'Quadratic probing breaks up the contiguous runs of linear probing, and at α = 0.9 it ' +
-          'roughly halves the cost of a successful lookup. What it does not fix is that the step ' +
-          'pattern depends only on the probe index, so all keys sharing a home slot walk the same ' +
-          'path and collide with each other at every step. That is secondary clustering, and it is ' +
-          'why the improvement is a constant factor rather than a change of behaviour — the ' +
-          'measured table still contains a 97-slot run at that load. Double hashing removes it by ' +
-          'making the step itself key-dependent.',
+        detail: [
+          'Quadratic probing breaks up the contiguous runs of linear probing, and at α = 0.9 it ' +
+            'roughly halves the cost of a successful lookup.',
+          'What it does not fix is that the step pattern depends only on the probe index. All keys ' +
+            'sharing a home slot walk the same path, and collide with each other at every step.',
+          'That is secondary clustering, and it is why the improvement is a constant factor rather ' +
+            'than a change of behaviour. The measured table still contains a 97-slot run at that ' +
+            'load.',
+          'Double hashing removes it by making the step itself key-dependent.'
+        ],
         example: 'At α = 0.9 quadratic probing halves the hit cost against linear and still leaves a 97-slot run.'
       },
       {
@@ -656,13 +677,18 @@
         formal: 'contiguous runs ⇒ shiftable; scattered steps ⇒ tombstones',
         readAs: 'If a probe sequence walks consecutive slots you can close a gap by shifting elements back. ' +
           'If it jumps around you cannot, so a deleted slot has to be marked rather than cleared.',
-        detail: 'The choice of probe sequence and the choice of deletion strategy are not ' +
-          'independent, which is the point most treatments leave out. Backward shift works because ' +
-          'linear probing visits consecutive slots, so every key that could be affected by the hole ' +
-          'lies in the contiguous run after it and can be found by walking forward. Quadratic ' +
-          'probing and double hashing scatter their steps across the table, so the keys whose chains ' +
-          'pass through a given slot cannot be enumerated without scanning everything — leaving ' +
-          'tombstones as the only practical option, with all the maintenance they imply.',
+        detail: [
+          'The choice of probe sequence and the choice of deletion strategy are not independent, ' +
+            'which is the point most treatments leave out.',
+          'Backward shift works because linear probing visits consecutive slots. Every key that ' +
+            'could be affected by the hole lies in the contiguous run after it, and can be found ' +
+            'by walking forward.',
+          'Quadratic probing and double hashing scatter their steps across the table, so the keys ' +
+            'whose chains pass through a given slot cannot be enumerated without scanning ' +
+            'everything.',
+          'That leaves tombstones as the only practical option, with all the maintenance they ' +
+            'imply.'
+        ],
         example: 'Quadratic and double hashing cannot delete without tombstones; linear probing can.'
       }
     ]
