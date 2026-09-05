@@ -64,10 +64,10 @@
         'wire. From there the key falls out of four modular operations, and the demo performs ' +
         'them.',
       '**This is not a theoretical failure.** The PlayStation 3 firmware signing key fell to it ' +
-        'in 2010 because Sony used a constant nonce, and Bitcoin wallets on Android lost funds in ' +
-        '2013 because a broken `SecureRandom` repeated values. Same bug, different decade.',
+        'in 2010, because Sony used a constant nonce. Bitcoin wallets on Android lost funds in ' +
+        '2013, because a broken `SecureRandom` repeated values. Same bug, different decade.',
       '**Deterministic nonces (RFC 6979) remove the requirement rather than restating it.** ' +
-        'Derive k by HMAC over the private key and the message hash: it is unpredictable to ' +
+        'Derive k by HMAC over the private key and the message hash. It is unpredictable to ' +
         'anyone without the key, it never repeats across different messages, and it needs no ' +
         'entropy at signing time. EdDSA builds the same idea into the scheme.',
       '**A certificate is a signed statement that a name owns a key, and validation is a list of ' +
@@ -94,14 +94,14 @@
       },
       diagram: diagram(),
       insight: '**The PlayStation 3 and several Bitcoin wallet compromises were the same ECDSA ' +
-        'nonce bug. Deterministic nonces exist because "generate a good random number every ' +
-        'time" is a requirement systems fail at.** That is worth stating as a design principle ' +
-        'rather than a war story: a scheme whose security depends on the caller doing something ' +
-        'correctly every single time will eventually meet a caller who does not, and the failure ' +
-        'here is total and retroactive — every signature ever made with that key is now forgeable. ' +
-        'The fix was not better documentation about nonces. It was changing the scheme so there ' +
-        'is no nonce to get wrong, which is the same move that produced AEAD, X25519 and ' +
-        'Argon2\'s single-call interface.'
+        'nonce bug.** Deterministic nonces exist because "generate a good random number every ' +
+        'time" is a requirement systems fail at. That is worth stating as a design principle ' +
+        'rather than a war story. A scheme whose security depends on the caller doing something ' +
+        'correctly every single time will eventually meet a caller who does not. Here the ' +
+        'failure is total and retroactive: every signature ever made with that key is now ' +
+        'forgeable. The fix was not better documentation about nonces. It was changing the ' +
+        'scheme so there is no nonce to get wrong, which is the same move that produced AEAD, ' +
+        'X25519 and Argon2\'s single-call interface.'
     };
   }
 

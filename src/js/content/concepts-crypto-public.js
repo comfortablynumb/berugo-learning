@@ -165,11 +165,14 @@
         },
         plain: 'A MAC key is shared, so the verifier could have produced the tag.',
         formal: 'signing uses a private key and verification a public one, so a valid signature identifies the key holder to anyone',
-        detail: 'That difference decides where each belongs. Per-packet authentication between ' +
-          'two ends that already share a key should use a MAC, which costs one or two hash passes ' +
-          'instead of an elliptic-curve operation. Anything a third party must be able to check ' +
-          'later — a certificate, a signed release, an audit log entry — needs a signature, ' +
-          'because a MAC over it proves nothing to anyone who was not already holding the key.',
+        detail: [
+          'That difference decides where each belongs. Per-packet authentication between two ends ' +
+            'that already share a key should use a MAC, which costs one or two hash passes ' +
+            'instead of an elliptic-curve operation.',
+          'Anything a third party must be able to check later needs a signature: a certificate, a ' +
+            'signed release, an audit log entry.',
+          'A MAC over any of those proves nothing to anyone who was not already holding the key.'
+        ],
         example: 'The demo’s comparison table gives six properties and marks non-repudiation as ' +
           'the row only signatures answer.'
       },
@@ -177,14 +180,18 @@
         term: 'ECDSA needs a fresh secret nonce every time',
         plain: 'Reusing one hands over the private key.',
         formal: 'from two signatures sharing r: k = (z₁ − z₂)·(s₁ − s₂)⁻¹ and d = (s₁·k − z₁)·r⁻¹, all mod n',
-        readAs: 'Subtract the two message hashes, divide by the difference of the two signature ' +
-          'values, and that is the nonce; substitute it back into either signature equation and ' +
-          'the private key falls out. Everything is arithmetic modulo the group order.',
-        detail: 'Two subtractions and two modular inverses, and the symptom is public: signatures ' +
-          'sharing a nonce share the value r, which sits in the signature itself where anyone ' +
-          'scanning a blockchain or a firmware archive can find it. No weakness in the curve is ' +
-          'needed, no side channel, no access to the signer. The failure is total and ' +
-          'retroactive: every signature that key ever made becomes forgeable.',
+        readAs: 'Subtract the two message hashes and divide by the difference of the two ' +
+          'signature values. That is the nonce. Substitute it back into either signature ' +
+          'equation and the private key falls out. Everything is arithmetic modulo the group ' +
+          'order.',
+        detail: [
+          'Two subtractions and two modular inverses, and the key is out. The symptom is public: ' +
+            'signatures sharing a nonce share the value r, which sits in the signature itself.',
+          'Anyone scanning a blockchain or a firmware archive can spot it. No weakness in the ' +
+            'curve is needed, no side channel, no access to the signer.',
+          'The failure is total and retroactive: every signature that key ever made becomes ' +
+            'forgeable.'
+        ],
         example: 'The demo recovers the private key 1234 from two signatures sharing r = 1854 on ' +
           'a curve of order 3 359.'
       },
@@ -192,23 +199,27 @@
         term: 'This is not theoretical: PS3 and Bitcoin wallets',
         plain: 'Same bug, different decade.',
         formal: 'Sony used a constant nonce in 2010; Android’s SecureRandom repeated values in 2013',
-        detail: 'The PlayStation 3 firmware signing key was extracted because the signer used a ' +
-          'fixed k rather than a random one, and Bitcoin wallets on Android lost funds because a ' +
-          'broken SecureRandom repeated values across signatures. Both are the same arithmetic as ' +
-          'the demo, on real keys, in shipped software. A scheme whose security depends on the ' +
-          'caller doing something correctly every single time will eventually meet a caller who ' +
-          'does not.',
+        detail: [
+          'The PlayStation 3 firmware signing key was extracted because the signer used a fixed k ' +
+            'rather than a random one. Bitcoin wallets on Android lost funds because a broken ' +
+            'SecureRandom repeated values across signatures.',
+          'Both are the same arithmetic as the demo, on real keys, in shipped software.',
+          'A scheme whose security depends on the caller doing something correctly every single ' +
+            'time will eventually meet a caller who does not.'
+        ],
         example: 'The section’s insight names both incidents as instances of one bug.'
       },
       {
         term: 'Deterministic nonces remove the requirement',
         plain: 'Derive k from the private key and the message hash.',
         formal: 'RFC 6979 sets k = HMAC(private key, hash(message)), which never repeats across different messages and needs no entropy',
-        detail: 'The derived nonce is unpredictable to anyone without the key, differs whenever ' +
-          'the message differs, and is stable across runs — so signing the same message twice ' +
-          'gives the same signature, which is useful for testing and reproducible builds. No ' +
-          'entropy is consumed at signing time, so there is no random number generator to fail. ' +
-          'EdDSA builds the same idea into the scheme rather than offering it as an option.',
+        detail: [
+          'The derived nonce is unpredictable to anyone without the key, and it differs whenever ' +
+            'the message differs. It is also stable across runs: signing the same message twice ' +
+            'gives the same signature, which is useful for testing and reproducible builds.',
+          'No entropy is consumed at signing time, so there is no random number generator to fail.',
+          'EdDSA builds the same idea into the scheme rather than offering it as an option.'
+        ],
         example: 'The demo’s deterministic mode produces nonces 1 683 and 460 for its two ' +
           'messages, and the recovery finds nothing.'
       },
@@ -216,12 +227,15 @@
         term: 'Validation is a list, and every item has been skipped by somebody',
         plain: 'Signature, validity window, basic constraints, key usage, issuer linkage, name.',
         formal: 'a chain is valid only if every check passes at every link, up to a trusted anchor',
-        detail: 'Each item is a separate way a chain can be wrong, and a client that omits any ' +
-          'one accepts certificates it should not — while every other check still passes, which ' +
-          'is exactly why the omission is invisible. The basic-constraints check is the ' +
-          'historically important one: without it, anyone holding any valid leaf certificate ' +
-          'could issue a certificate for any site. Real validation adds more still: extended key ' +
-          'usage, name constraints, path length, algorithm policy.',
+        detail: [
+          'Each item is a separate way a chain can be wrong. A client that omits any one accepts ' +
+            'certificates it should not, while every other check still passes — which is exactly ' +
+            'why the omission is invisible.',
+          'The basic-constraints check is the historically important one. Without it, anyone ' +
+            'holding any valid leaf certificate could issue a certificate for any site.',
+          'Real validation adds more still: extended key usage, name constraints, path length, ' +
+            'algorithm policy.'
+        ],
         example: 'The demo runs 9 checks on a well-formed chain and 14 on the leaf-signs-leaf ' +
           'case, naming the failing one.'
       },
@@ -229,12 +243,14 @@
         term: 'Wildcard matching is narrower than people assume',
         plain: '*.example.com matches shop.example.com and nothing deeper.',
         formal: 'a wildcard covers exactly one label, and never the bare domain',
-        detail: 'So `*.example.com` does NOT match `a.b.example.com` and does NOT match ' +
-          '`example.com`. Implementing that comparison loosely is a certificate-validation bug of ' +
-          'the same class as skipping a check, and it has shipped repeatedly — as has accepting a ' +
-          'wildcard in the middle of a name, or treating an embedded null byte as a terminator. ' +
+        detail: [
+          'So `*.example.com` does NOT match `a.b.example.com` and does NOT match `example.com`.',
+          'Implementing that comparison loosely is a certificate-validation bug of the same class ' +
+            'as skipping a check, and it has shipped repeatedly. So has accepting a wildcard in ' +
+            'the middle of a name, or treating an embedded null byte as a terminator.',
           'Name matching is string handling, which is why it fails in ways the cryptography never ' +
-          'does.',
+            'does.'
+        ],
         example: 'The demo’s wrong-host chain fails exactly one check: the host-name match against ' +
           'the leaf.'
       },
@@ -242,11 +258,14 @@
         term: 'Revocation barely works, so certificates got short',
         plain: 'CRLs went stale and OCSP fails open.',
         formal: 'an attacker able to use a stolen certificate can generally also block the query that would report it stolen',
-        detail: 'Certificate revocation lists grew large and cached, so browsers largely stopped ' +
-          'fetching them; OCSP added a third-party round trip on every connection, leaked ' +
-          'browsing to the CA, and failed open when unreachable. Stapling helps only where the ' +
-          'server cooperates. The practical answer became short-lived certificates, where expiry ' +
-          'does the work of revocation, plus automation reliable enough to renew them.',
+        detail: [
+          'Certificate revocation lists grew large and cached, so browsers largely stopped ' +
+            'fetching them.',
+          'OCSP added a third-party round trip on every connection, leaked browsing to the CA, ' +
+            'and failed open when unreachable. Stapling helps only where the server cooperates.',
+          'The practical answer became short-lived certificates, where expiry does the work of ' +
+            'revocation, plus automation reliable enough to renew them.'
+        ],
         example: 'The demo’s revocation table gives five mechanisms and marks two as effectively ' +
           'abandoned.'
       },
@@ -254,11 +273,15 @@
         term: 'Certificate Transparency detects rather than prevents',
         plain: 'Every issued certificate is logged publicly and monitored.',
         formal: 'a browser requires proof of inclusion in public logs, so misissuance cannot be done quietly',
-        detail: 'It is a different kind of answer from revocation and has proved more useful: it ' +
-          'does not stop a CA issuing a certificate it should not, but it makes doing so visible ' +
-          'to the domain owner and to anyone watching the logs, which has caught real ' +
-          'misissuance. The underlying mechanism is a Merkle tree with inclusion and consistency ' +
-          'proofs, which the applied-constructions section builds.',
+        detail: [
+          'It is a different kind of answer from revocation, and it has proved more useful. It ' +
+            'does not stop a CA issuing a certificate it should not, but it makes doing so ' +
+            'visible.',
+          'The domain owner sees it, and so does anyone watching the logs. That has caught real ' +
+            'misissuance.',
+          'The underlying mechanism is a Merkle tree with inclusion and consistency proofs, which ' +
+            'the applied-constructions section builds.'
+        ],
         example: 'The demo’s revocation table lists it as required by browsers and notes it ' +
           'detects rather than prevents.'
       }
